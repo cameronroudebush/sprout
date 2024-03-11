@@ -1,0 +1,19 @@
+{
+  "name": "solv-stream-backend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "The backend for the SolvStream financial app",
+  "main": "index.ts",
+  "dependencies": {
+    "chalk": "^4.1.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
+  },
+  "scripts": {
+    "start": "ts-node ./src/main.ts"
+  },
+  "author": "Cameron Roudebush",
+  "license": "ISC"
+}
