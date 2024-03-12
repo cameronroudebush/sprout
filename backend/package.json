@@ -4,16 +4,24 @@
   "version": "1.0.0",
   "description": "The backend for the SolvStream financial app",
   "main": "index.ts",
+  "author": "Cameron Roudebush",
+  "license": "ISC",
   "dependencies": {
-    "chalk": "^4.1.0"
+    "chalk": "^4.1.0",
+    "lodash": "^4.17.21",
+    "plaid": "^21.0.0",
+    "reflect-metadata": "^0.2.1",
+    "yaml": "^2.4.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2"
   },
   "scripts": {
     "start": "ts-node ./src/main.ts"
   },
-  "author": "Cameron Roudebush",
-  "license": "ISC"
+  "prettier": {
+    "printWidth": 160
+  }
 }
