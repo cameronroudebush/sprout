@@ -5,7 +5,7 @@ import { ConfigurationMetadata } from "./configuration.metadata";
 export class PlaidConfiguration {
   /** The Client ID for your login. DO NOT SHARE THIS. */
   @ConfigurationMetadata.assign({})
-  clientID: string = "PLEASE_REPLACE";
+  clientId: string = "PLEASE_REPLACE";
 
   /** The Secret key ID for your plaid login. DO NOT SHARE THIS. */
   @ConfigurationMetadata.assign({})
@@ -16,9 +16,8 @@ export class PlaidConfiguration {
       basePath: PlaidEnvironments["sandbox"],
       baseOptions: {
         headers: {
-          // TODO: These are very secret!
-          "PLAID-CLIENT-ID": this.clientID, //"65ee47e732a829001cdf17cd",
-          "PLAID-SECRET": this.secret, //"c11eeaa2759e3b0d153c59eaab1b61",
+          "PLAID-CLIENT-ID": this.clientId,
+          "PLAID-SECRET": this.secret,
         },
       },
     });

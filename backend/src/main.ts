@@ -8,8 +8,8 @@ import { Logger } from "./logger";
 async function main() {
   // Log what program is starting up
   Logger.log(`Starting ${name} v${version}`, chalk.green, false);
-  // Initial config
-  new ConfigurationController();
+  // Initialize config
+  new ConfigurationController().load();
 }
 
 // Execute main so long as this file is not being imported

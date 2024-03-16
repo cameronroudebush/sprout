@@ -6,6 +6,6 @@ import { PlaidConfiguration } from "./plaid.config";
  */
 export class Configuration {
   /** Plaid specific configuration for financial loading */
-  @ConfigurationMetadata.assign({})
+  @ConfigurationMetadata.assign({ comment: "Plaid specific configuration for financial loading" })
   static plaid = new PlaidConfiguration();
 }

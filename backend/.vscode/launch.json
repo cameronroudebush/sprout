@@ -10,16 +10,8 @@
       "runtimeArgs": ["start"],
       "runtimeExecutable": "npm",
       "skipFiles": ["<node_internals>/**"],
+      "envFile": "${workspaceFolder}/.vscode/dev.env",
       "type": "node"
     }
-
-    // {
-    //   "type": "node",
-    //   "request": "launch",
-    //   "name": "Launch Backend",
-    //   "skipFiles": ["<node_internals>/**"],
-    //   "program": "npm run start",
-    //   "outFiles": ["${workspaceFolder}/**/*.js"]
-    // }
   ]
 }

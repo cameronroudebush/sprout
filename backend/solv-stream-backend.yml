@@ -1,6 +1,0 @@
-# solv-stream-backend Configuration File 1.0.0
-# Any changes to this file will require a restart of the backend!
-
-plaid:
-  clientID: PLEASE_REPLACE
-  secret: PLEASE_REPLACE

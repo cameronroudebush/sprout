@@ -1,5 +1,5 @@
 {
-  "name": "solv-stream-backend",
+  "name": "solv_stream_backend",
   "private": true,
   "version": "1.0.0",
   "description": "The backend for the SolvStream financial app",
