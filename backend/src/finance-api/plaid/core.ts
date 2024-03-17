@@ -1,44 +1,35 @@
+import { PlaidInstitutionHandler } from "@backend/financeAPI/plaid/institution";
+import { PlaidTokenHandler } from "@backend/financeAPI/plaid/token";
 import { User } from "@common";
-import { PlaidApi, Products } from "plaid";
+import { PlaidApi } from "plaid";
 import { Configuration } from "../../config/core";
 import { FinanceAPIBase } from "../base/core";
 
 /** Core API handling for talking to plaid services */
 export class PlaidCore extends FinanceAPIBase {
   constructor(
-    private configuration = Configuration.plaid,
+    configuration = Configuration.plaid,
     /** The plaid configuration that should already be loaded. */
     plaidClientConfig = configuration.config,
     /** The client for talking with plaid. */
-    private client = new PlaidApi(plaidClientConfig)
+    private client = new PlaidApi(plaidClientConfig),
+    /** Handler for looking up institution information */
+    institutionHandler = new PlaidInstitutionHandler(client, configuration),
+    /** Handler for getting the keys necessary for Plaid API lookups */
+    private keyHandler = new PlaidTokenHandler(client, institutionHandler)
   ) {
     super();
   }
 
-  /**
-   * Returns supported institution list
-   * @param count How many to get
-   * @param offset What "page" of the institutions to get based on count
-   */
-  async getInstitutions(count = 10, offset = 0) {
-    return (await this.client.institutionsGet({ count, offset, country_codes: this.configuration.supportedCountryCodes })).data.institutions;
-  }
-
-  async getPublicToken(initialProducts: Products[] = [Products.Transactions]) {
-    // TODO: This is never going to work outside of sandbox
-    const institutions = await this.getInstitutions();
-    return (await this.client.sandboxPublicTokenCreate({ institution_id: institutions[3]!.institution_id, initial_products: initialProducts })).data
-      .public_token;
-  }
-
-  async getAccessToken(publicToken: string) {
-    return (await this.client.itemPublicTokenExchange({ public_token: publicToken })).data.access_token;
-  }
-
   async getTransactions(_user: User) {
-    const accessToken = await this.getAccessToken(await this.getPublicToken());
+    const accessToken = await this.keyHandler.getAccessToken(await this.keyHandler.getPublicToken());
     return (await this.client.transactionsGet({ access_token: accessToken, start_date: "2024-01-01", end_date: "2024-03-06" })).data.transactions;
     // return (await this.client.transactionsSync({ access_token: accessToken }));
+  }
+
+  async getAccounts(_user: User): Promise<any> {
+    const accessToken = await this.keyHandler.getAccessToken(await this.keyHandler.getPublicToken());
+    return (await this.client.accountsGet({ access_token: accessToken })).data.accounts;
   }
 
   // // TODO Break apart

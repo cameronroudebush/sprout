@@ -11,7 +11,8 @@
       "runtimeExecutable": "npm",
       "skipFiles": ["<node_internals>/**"],
       "envFile": "${workspaceFolder}/.vscode/dev.env",
-      "type": "node"
+      "type": "node",
+      "console": "internalConsole"
     }
   ]
 }

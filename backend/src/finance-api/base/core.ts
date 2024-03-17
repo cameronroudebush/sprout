@@ -9,4 +9,7 @@ export abstract class FinanceAPIBase {
    * Returns the transactions associated to the given user.
    */
   abstract getTransactions(user: User): Promise<any>;
+
+  /** Returns accounts associated to the given user */
+  abstract getAccounts(user: User): Promise<any>;
 }

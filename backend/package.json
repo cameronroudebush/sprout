@@ -8,13 +8,21 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.0",
+    "class-transformer": "^0.5.1",
+    "express": "^4.18.3",
+    "glob": "^10.3.10",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "plaid": "^21.0.0",
     "reflect-metadata": "^0.2.1",
+    "uuid": "^9.0.1",
     "yaml": "^2.4.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash": "^4.14.202",
+    "@types/uuid": "^9.0.8",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.4.2"

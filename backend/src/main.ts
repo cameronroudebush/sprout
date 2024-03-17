@@ -1,10 +1,10 @@
-import { User } from "@common";
 import chalk from "chalk";
 import "reflect-metadata";
+import { CentralServer } from "./central.server";
 import { ConfigurationController } from "./config/controller";
 import { Configuration } from "./config/core";
-import { PlaidCore } from "./finance-api/plaid/core";
 import { Logger } from "./logger";
+import { RestAPIServer } from "./web-api/server";
 
 /** Main function for kicking off the application */
 async function main() {
@@ -12,7 +12,10 @@ async function main() {
   Logger.log(`Starting ${Configuration.appName} v${Configuration.version}`, chalk.green, false);
   // Initialize config
   new ConfigurationController().load();
-  console.log(await new PlaidCore().getTransactions(new User()));
+  // Initialize server
+  const centralServer = new CentralServer();
+  await new RestAPIServer(centralServer.server).initialize();
+  // console.log(await new PlaidCore().getAccounts(new User()));
 }
 
 // Execute main so long as this file is not being imported

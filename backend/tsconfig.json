@@ -1,9 +1,10 @@
 {
   "extends": "../common/tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "../",
     "paths": {
-      "@common": ["./common/model/index"]
+      "@common": ["../common/model/index"],
+      "@backend/financeAPI/*": ["./src/finance-api/*"],
+      "@backend/config/*": ["./src/config/*"]
     }
   },
   "include": ["./src/**/*"]
