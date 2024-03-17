@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import fs from "fs";
-import { name } from "../package.json";
+import { Configuration } from "./config/core";
 
 // Clear console when Logger is created
 console.clear();
@@ -11,7 +11,7 @@ export class Logger {
   /**
    * The output stream to have a separate log file
    */
-  private static logFileStream = fs.createWriteStream(`./${name}.log`, {
+  private static logFileStream = fs.createWriteStream(`./${Configuration.appName}.log`, {
     flags: "w",
     autoClose: true,
   });

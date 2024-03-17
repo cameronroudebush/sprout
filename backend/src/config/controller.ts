@@ -1,7 +1,7 @@
 import fs from "fs";
+import { set } from "lodash";
 import path from "path";
 import * as YAML from "yaml";
-import { name, version } from "../../package.json";
 import { Logger } from "../logger";
 import { ConfigurationMetadata } from "./configuration.metadata";
 import { Configuration } from "./core";
@@ -14,13 +14,13 @@ export class ConfigurationController {
   /** Returns the header to display at the top of the config file */
   private get configHeader() {
     return (
-      `# ${name} Configuration File ${version}\n` +
+      `# ${Configuration.appName} Configuration File ${Configuration.version}\n` +
       `# Any changes to this file will require a restart of the backend!\n` +
       `#\n` +
       `#\n` +
       `# You can also configure this application using environment variables. To do this, you can use the separator: '${ConfigurationController.ENV_VARIABLE_SEPARATOR}'\n` +
       `#  after the name of the application followed by the tree of the variable. So if you would want to change the plaid secret key, you would do something\n` +
-      `#  like: '${name}${ConfigurationController.ENV_VARIABLE_SEPARATOR}plaid${ConfigurationController.ENV_VARIABLE_SEPARATOR}secret=foobar'\n` +
+      `#  like: '${Configuration.appName}${ConfigurationController.ENV_VARIABLE_SEPARATOR}plaid${ConfigurationController.ENV_VARIABLE_SEPARATOR}secret=foobar'\n` +
       `# Anything added to the environment variables will not cause any changes in the config file but will be loaded into memory.\n` +
       `\n\n`
     );
@@ -28,7 +28,27 @@ export class ConfigurationController {
 
   /** Returns the where we should place the config file. */
   private get configFileLocation() {
-    return path.join(process.cwd(), `${name}.config.yml`);
+    return path.join(process.cwd(), `${Configuration.appName}.config.yml`);
+  }
+
+  /** Updates the given object with the object to update from. Allows recursive handling */
+  private updateObjectWithObject(objToUpdate: any, objectToUpdateFrom: any) {
+    for (let key of Object.keys(objectToUpdateFrom)) {
+      const value = objectToUpdateFrom[key];
+      // Find metadata from parent
+      const metadata = Reflect.getMetadata(ConfigurationMetadata.METADATA_KEY, objToUpdate, key) as ConfigurationMetadata | undefined;
+      // Ignore non enabled keys
+      if (metadata == null || metadata?.externalControlDisabled) continue;
+      else if (objToUpdate[key] == null) continue; // All fields should have values
+      // Ignore non restricted values
+      else if (metadata.restrictedValues != null && !metadata.restrictedValues.includes(value)) continue;
+      // Ignore non matching types
+      else if (typeof value !== typeof objToUpdate[key]) continue;
+      // Recursively call the update
+      else if (typeof value === "object") this.updateObjectWithObject(objToUpdate[key], objectToUpdateFrom[key]);
+      // Handle normal fields
+      else objToUpdate[key] = value;
+    }
   }
 
   /** Updates the static {@link Configuration} via the configuration file. */
@@ -37,44 +57,21 @@ export class ConfigurationController {
     if (!fs.existsSync(path)) return;
     // Load yaml as JSON from config location
     const yamlObject = YAML.parse(fs.readFileSync(path).toString());
-    // Callback function to recursively perform the update
-    const update = (objToUpdate: any, objectToUpdateFrom: any) => {
-      for (let key of Object.keys(objectToUpdateFrom)) {
-        const value = objectToUpdateFrom[key];
-        // Find metadata from parent
-        const metadata = Reflect.getMetadata(ConfigurationMetadata.METADATA_KEY, objToUpdate, key) as ConfigurationMetadata | undefined;
-        // Ignore non enabled keys
-        if (metadata == null || metadata?.externalControlDisabled) continue;
-        // Ignore non matching types
-        else if (typeof value !== typeof objToUpdate[key]) continue;
-        // Recursively call the update
-        else if (typeof value === "object") update(objToUpdate[key], objectToUpdateFrom[key]);
-        // Handle normal fields
-        else objToUpdate[key] = value;
-      }
-    };
-    update(Configuration, yamlObject);
+    this.updateObjectWithObject(Configuration, yamlObject);
   }
 
   /** Loads environment variables and overrides the {@link Configuration} object. Will not write these out to the file. */
   private loadEnvVariables() {
-    const matchingAppKeys = Object.keys(process.env).filter((key) => key.includes(name));
-    // Take the matching keys and assign them to the config object
-    for (let key of matchingAppKeys) {
-      const value = process.env[key as keyof Object];
-      const adjustedKey = key.replace(name, "").replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "");
-      const splitKeys = adjustedKey.split(ConfigurationController.ENV_VARIABLE_SEPARATOR);
-      // Reduce the object down to find what needs updated
-      let currentObj: Object = Configuration;
-      for (let i = 0; i < splitKeys.length; i++) {
-        const keyPart = splitKeys[i];
-        if (i === splitKeys.length - 1) {
-          // Null values aren't possible. All configuration values should have a value
-          if (currentObj[keyPart as keyof Object] == null) break;
-          else currentObj[keyPart as keyof Object] = value as any;
-        } else currentObj = currentObj[keyPart as keyof Object];
-      }
-    }
+    const matchingAppKeys = Object.keys(process.env).filter((key) => key.includes(Configuration.appName));
+    // Flatten the object based on the path they've given in the env for each key
+    const reducedObject = matchingAppKeys.reduce((obj, envKey) => {
+      const value = process.env[envKey as keyof Object];
+      const keyPath = envKey.replace(Configuration.appName, "").replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "");
+      // const splitKeys = adjustedKey.split(ConfigurationController.ENV_VARIABLE_SEPARATOR);
+      set(obj, keyPath.replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "."), value)
+      return obj
+    }, {})
+    this.updateObjectWithObject(Configuration, reducedObject)
   }
 
   /** Converts the given object to a YAML string and returns it */

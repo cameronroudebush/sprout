@@ -2,8 +2,9 @@
 export class ConfigurationMetadata {
   /** If this value should be hidden from the config file */
   externalControlDisabled = false;
-  // /** Values that we must */
-  // restrictedValues: Array<any> | undefined;
+
+  /** Values that we must restrict to. If the given value is not one of these, the default will be used */
+  restrictedValues: Array<any> | undefined;
 
   /** A comment that can be written before the configuration value */
   comment: string | undefined;

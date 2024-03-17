@@ -9,6 +9,10 @@
       "name": "Frontend"
     },
     {
+      "path": "../common",
+      "name": "Common"
+    },
+    {
       "path": "..",
       "name": "Workspace"
     }
@@ -18,6 +22,8 @@
       "node_modules": true,
       "backend": true,
       "frontend": true
-    }
+    },
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifier": "non-relative"
   }
 }
