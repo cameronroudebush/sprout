@@ -39,7 +39,8 @@ export class ConfigurationController {
       const metadata = Reflect.getMetadata(ConfigurationMetadata.METADATA_KEY, objToUpdate, key) as ConfigurationMetadata | undefined;
       // Ignore non enabled keys
       if (metadata == null || metadata?.externalControlDisabled) continue;
-      else if (objToUpdate[key] == null) continue; // All fields should have values
+      else if (objToUpdate[key] == null)
+        continue; // All fields should have values
       // Ignore non restricted values
       else if (metadata.restrictedValues != null && !metadata.restrictedValues.includes(value)) continue;
       // Ignore non matching types
@@ -68,10 +69,10 @@ export class ConfigurationController {
       const value = process.env[envKey as keyof Object];
       const keyPath = envKey.replace(Configuration.appName, "").replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "");
       // const splitKeys = adjustedKey.split(ConfigurationController.ENV_VARIABLE_SEPARATOR);
-      set(obj, keyPath.replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "."), value)
-      return obj
-    }, {})
-    this.updateObjectWithObject(Configuration, reducedObject)
+      set(obj, keyPath.replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "."), value);
+      return obj;
+    }, {});
+    this.updateObjectWithObject(Configuration, reducedObject);
   }
 
   /** Converts the given object to a YAML string and returns it */

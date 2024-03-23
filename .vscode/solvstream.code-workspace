@@ -2,33 +2,33 @@
   "folders": [
     {
       "path": "../backend",
-      "name": "Backend"
+      "name": "Backend",
     },
     {
       "path": "../frontend",
-      "name": "Frontend"
+      "name": "Frontend",
     },
     {
       "path": "../common",
-      "name": "Common"
+      "name": "Common",
     },
     {
       "path": "..",
-      "name": "Workspace"
-    }
+      "name": "Workspace",
+    },
   ],
   "extensions": {
-    "recommendations": ["ionic.ionic"]
+    "recommendations": ["ionic.ionic"],
   },
   "settings": {
     "files.exclude": {
       "node_modules": true,
       "backend": true,
       "frontend": true,
-      "common": true
+      "common": true,
     },
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifier": "non-relative",
-    "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular/standalone"]
-  }
+    "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular/standalone"],
+  },
 }

@@ -3,7 +3,10 @@ import { PlaidApi, Products } from "plaid";
 
 /** This class handles acquiring tokens necessary for plaid data lookups */
 export class PlaidTokenHandler {
-  constructor(private client: PlaidApi, private institutionHandler: PlaidInstitutionHandler) {}
+  constructor(
+    private client: PlaidApi,
+    private institutionHandler: PlaidInstitutionHandler,
+  ) {}
 
   async getPublicToken(initialProducts: Products[] = [Products.Transactions]) {
     // TODO: This is never going to work outside of sandbox

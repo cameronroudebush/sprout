@@ -3,7 +3,7 @@ import { RestRequest, SupportedPayloadTypes } from "@common";
 export type supportedRestTypes = "GET" | "POST";
 
 export type RestMetadataFunctionTypes<PayloadType extends SupportedPayloadTypes, ReturnType extends void | RestRequest<PayloadType> = void> = (
-  request: RestRequest<PayloadType>
+  request: RestRequest<PayloadType>,
 ) => Promise<ReturnType>;
 
 /** Class used to decorate functions to automatically listen to rest requests and handle them */

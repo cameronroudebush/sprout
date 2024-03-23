@@ -3,7 +3,10 @@ import { PlaidApi } from "plaid";
 
 /** Handles looking up information about Plaid institutions */
 export class PlaidInstitutionHandler {
-  constructor(private client: PlaidApi, private configuration: PlaidConfiguration) {}
+  constructor(
+    private client: PlaidApi,
+    private configuration: PlaidConfiguration,
+  ) {}
 
   /**
    * Returns supported institution list

@@ -16,7 +16,7 @@ export class PlaidCore extends FinanceAPIBase {
     /** Handler for looking up institution information */
     institutionHandler = new PlaidInstitutionHandler(client, configuration),
     /** Handler for getting the keys necessary for Plaid API lookups */
-    private keyHandler = new PlaidTokenHandler(client, institutionHandler)
+    private keyHandler = new PlaidTokenHandler(client, institutionHandler),
   ) {
     super();
   }

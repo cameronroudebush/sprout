@@ -5,9 +5,7 @@ import { Base } from "./base";
 export type SupportedPayloadTypes = Base | string | number;
 
 /** This class specifies the format of every rest request */
-export class RestRequest<
-  PayloadType extends SupportedPayloadTypes
-> extends Base {
+export class RestRequest<PayloadType extends SupportedPayloadTypes> extends Base {
   queue: string;
   payload: PayloadType;
   requestId = v4();

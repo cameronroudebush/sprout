@@ -38,7 +38,7 @@ export class RestAPIServer {
     return await Promise.all(
       endpoints.map(async (endpointFile) => {
         await import(path.join(root, endpointFile));
-      })
+      }),
     );
   }
 
@@ -60,8 +60,10 @@ export class RestAPIServer {
               } catch {
                 throw new EndpointError("", 403);
               }
-          } else if (req.method !== endpoint.metadata.type) throw new EndpointError("Bad Request Type"); // Make sure request types match
-          else if (!req.body) throw new EndpointError("Empty body"); // Ignore empty requests
+          } else if (req.method !== endpoint.metadata.type)
+            throw new EndpointError("Bad Request Type"); // Make sure request types match
+          else if (!req.body)
+            throw new EndpointError("Empty body"); // Ignore empty requests
           else {
             const data = req.body;
             // Try to parse as type
