@@ -1,0 +1,11 @@
+<ion-tabs class="tabs-container">
+  <ion-tab-bar slot="bottom">
+    <!-- Dynamically render tabs based on config -->
+    <ng-container *ngFor="let tab of tabs">
+      <ion-tab-button class="tab-button" *ngIf="tab.tabOptions != null" [tab]="tab.tabOptions.label" [routerLink]="tab.path" [routerLinkActive]="'active'">
+        <ion-icon class="icon" [name]="tab.tabOptions.icon"></ion-icon>
+        <ion-label class="name">{{tab.tabOptions.label}}</ion-label>
+      </ion-tab-button>
+    </ng-container>
+  </ion-tab-bar>
+</ion-tabs>

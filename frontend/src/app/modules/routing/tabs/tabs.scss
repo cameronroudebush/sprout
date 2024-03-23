@@ -1,0 +1,9 @@
+.tabs-container {
+  .tab-button {
+    &.active {
+      .icon {
+        color: var(--ion-color-secondary);
+      }
+    }
+  }
+}

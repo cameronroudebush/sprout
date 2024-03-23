@@ -5,14 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch",
+      "name": "Launch w/Chrome",
       "request": "launch",
-      "runtimeArgs": ["start"],
-      "runtimeExecutable": "npm",
-      "skipFiles": ["<node_internals>/**"],
-      "envFile": "${workspaceFolder}/.vscode/dev.env",
-      "type": "node",
-      "console": "internalConsole"
+      "type": "chrome",
+      "url": "http://localhost:8000",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "start:frontend",
+      "postDebugTask": "terminate:all:tasks"
     }
   ]
 }

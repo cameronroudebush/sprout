@@ -17,13 +17,18 @@
       "name": "Workspace"
     }
   ],
+  "extensions": {
+    "recommendations": ["ionic.ionic"]
+  },
   "settings": {
     "files.exclude": {
       "node_modules": true,
       "backend": true,
-      "frontend": true
+      "frontend": true,
+      "common": true
     },
     "typescript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.importModuleSpecifier": "non-relative"
+    "javascript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular/standalone"]
   }
 }

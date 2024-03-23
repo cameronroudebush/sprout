@@ -1,0 +1,13 @@
+{
+  "compounds": [
+    {
+      "name": "Start Debugging",
+      "configurations": ["Launch w/Chrome", "Launch"],
+      "presentation": {
+        "hidden": false,
+        "group": "Debug",
+        "order": 1
+      }
+    }
+  ]
+}

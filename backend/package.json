@@ -29,8 +29,5 @@
   },
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register ./src/main.ts"
-  },
-  "prettier": {
-    "printWidth": 160
   }
 }

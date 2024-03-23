@@ -55,6 +55,7 @@ export class RestAPIServer {
             if (authorization == null) throw new EndpointError("", 403);
             else
               try {
+                // TODO: Users need a way to authenticate. That means we need a user model in the backend to generate JWT's. Make sure to use ts-mixer.
                 jwt.verify(Configuration.server.secretKey, "shhhhh");
               } catch {
                 throw new EndpointError("", 403);
@@ -66,6 +67,7 @@ export class RestAPIServer {
             // Try to parse as type
             const typedData = RestRequest.fromPlain(data);
             const result = await (endpoint.fnc.call(this, typedData) as Promise<void | RestRequest<any>>);
+            res.setHeader("content-type", "application/json");
             if (endpoint.metadata.type === "POST")
               if (!result) throw new EndpointError("Post call didn't return any data.");
               else res.status(200).end(result.toJSONString());
