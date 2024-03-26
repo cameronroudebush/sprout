@@ -16,6 +16,7 @@ async function main() {
   const centralServer = new CentralServer();
   await new RestAPIServer(centralServer.server).initialize();
   // console.log(await new PlaidCore().getAccounts(new User()));
+  Logger.log("Server ready!");
 }
 
 // Execute main so long as this file is not being imported

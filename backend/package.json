@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "The backend for the SolvStream financial app",
-  "main": "index.ts",
+  "main": "src/main.ts",
   "author": "Cameron Roudebush",
   "license": "ISC",
   "dependencies": {
@@ -13,6 +13,7 @@
     "glob": "^10.3.10",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "nodemon": "^3.1.0",
     "plaid": "^21.0.0",
     "reflect-metadata": "^0.2.1",
     "uuid": "^9.0.1",
@@ -28,6 +29,6 @@
     "typescript": "^5.4.2"
   },
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register ./src/main.ts"
+    "start": "nodemon --watch \"src/**\" --ext \"ts,json,yml\" --exec \"ts-node -r tsconfig-paths/register  src/main.ts\""
   }
 }
