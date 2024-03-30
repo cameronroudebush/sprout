@@ -1,5 +1,4 @@
-SolvStream
-
-Combines "solvency" (financial stability) with "stream" for smooth management.
+Sprout
+Grow your financial Future
 
 Financial Management app specializing in automatic transaction tracking.

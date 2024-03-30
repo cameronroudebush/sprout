@@ -1,10 +1,5 @@
 {
-  "name": "solv-stream-workspace",
-  "version": "0.0.0",
-  "description": "Overarching capability for solvstream",
   "private": true,
-  "author": "Cameron Roudebush",
-  "license": "ISC",
   "scripts": {
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write"

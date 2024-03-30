@@ -1,8 +1,8 @@
 {
-  "name": "solv_stream_backend",
+  "name": "sprout_backend",
   "private": true,
   "version": "0.0.1",
-  "description": "The backend for the SolvStream financial app",
+  "description": "The backend for the Sprout financial app",
   "main": "src/main.ts",
   "author": "Cameron Roudebush",
   "license": "ISC",
