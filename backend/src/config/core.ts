@@ -20,4 +20,8 @@ export class Configuration {
   static get appName() {
     return name;
   }
+
+  static get devMode() {
+    return true; // TODO
+  }
 }

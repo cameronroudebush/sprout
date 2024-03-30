@@ -4,7 +4,8 @@
     "paths": {
       "@common": ["../common/model/index"],
       "@backend/financeAPI/*": ["./src/finance-api/*"],
-      "@backend/config/*": ["./src/config/*"]
+      "@backend/config/*": ["./src/config/*"],
+      "@backend/model/*": ["./src/model/*"]
     }
   },
   "include": ["./src/**/*"]

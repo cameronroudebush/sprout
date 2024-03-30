@@ -1,7 +1,7 @@
 {
   "name": "solv_stream_backend",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "The backend for the SolvStream financial app",
   "main": "src/main.ts",
   "author": "Cameron Roudebush",
@@ -29,6 +29,6 @@
     "typescript": "^5.4.2"
   },
   "scripts": {
-    "start": "nodemon --watch \"src/**\" --ext \"ts,json,yml\" --exec \"ts-node -r tsconfig-paths/register  src/main.ts\""
+    "start": "nodemon --watch \"src/**\" --watch \"../common/**\" --ext \"ts,json,yml\" --exec \"ts-node -r tsconfig-paths/register  src/main.ts\""
   }
 }

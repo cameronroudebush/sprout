@@ -11,5 +11,14 @@ export module CustomTypes {
   }[keyof ObjectType] &
     string;
 
+  /**
+   * Defines a type that can deep cycle through a type and return the nested properties prefixed with their path.
+   *
+   * @see https://stackoverflow.com/questions/58434389/typescript-deep-keyof-of-a-nested-object
+   */
+  export type PropertyPaths<T> = T extends object
+    ? { [K in keyof T]: `${Exclude<K, symbol>}${PropertyPaths<T[K]> extends never ? "" : `.${PropertyPaths<T[K]>}`}` }[keyof Omit<T, "prototype">]
+    : never;
+
   export type Constructor<T> = new (...args: any[]) => T;
 }

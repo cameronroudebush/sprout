@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "solv_stream_frontend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": "Cameron Roudebush",
   "license": "ISC",
   "scripts": {
@@ -57,6 +57,5 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.2.2"
-  },
-  "description": "An Ionic project"
+  }
 }

@@ -9,7 +9,7 @@ export class PlaidConfiguration {
   @ConfigurationMetadata.assign({ comment: "The Secret key ID for your plaid login. DO NOT SHARE THIS." })
   secret: string = "PLEASE_REPLACE";
 
-  @ConfigurationMetadata.assign({ comment: "The Secret key ID for your plaid login. DO NOT SHARE THIS.", restrictedValues: ["sandbox"] })
+  @ConfigurationMetadata.assign({ comment: "The environment we should connect to plaid as.", restrictedValues: ["sandbox"] })
   environment: string = "sandbox";
 
   get supportedCountryCodes() {

@@ -1,8 +1,8 @@
 import { Configuration } from "@backend/config/core";
-import { RestRequest } from "@common";
-import { Express } from "express";
+import { User } from "@backend/model/user";
+import { RestBody } from "@common";
+import { Express, Response } from "express";
 import { globSync } from "glob";
-import jwt from "jsonwebtoken";
 import path from "path";
 import { Logger } from "../logger";
 import { RestMetadata } from "./metadata";
@@ -27,8 +27,8 @@ export class RestAPIServer {
 
   /** Handles loading all endpoints and adding handlers for those callbacks */
   async initialize() {
-    await this.registerEndpoints();
-    await this.registerEndpointsToServer();
+    await this.registerEndpoints(); // Check all files for endpoints
+    await this.addListener(); // Add the overarching listener
   }
 
   /** Registers all endpoints dynamically from the endpoints folder */
@@ -42,42 +42,62 @@ export class RestAPIServer {
     );
   }
 
-  /** Registers all endpoints from our endpoint files so we can track when messages come in */
-  private async registerEndpointsToServer() {
-    for (let endpoint of RestMetadata.loadedEndpoints)
-      this.server.all(path.join(RestAPIServer.ENDPOINT_HEADER, ...endpoint.metadata.queue.split("/")).replaceAll("\\", "/"), async (req, res) => {
-        // Re useable functions
-        const badRequest = (error: Error | EndpointError) => res.status((error as any).code || 400).end(error.message || undefined);
-        try {
-          // Validate authentication if required
-          if (endpoint.metadata.requiresAuth) {
-            const authorization = req.headers.authorization;
-            if (authorization == null) throw new EndpointError("", 403);
-            else
-              try {
-                // TODO: Users need a way to authenticate. That means we need a user model in the backend to generate JWT's. Make sure to use ts-mixer.
-                jwt.verify(Configuration.server.secretKey, "shhhhh");
-              } catch {
-                throw new EndpointError("", 403);
-              }
-          } else if (req.method !== endpoint.metadata.type)
-            throw new EndpointError("Bad Request Type"); // Make sure request types match
-          else if (!req.body)
-            throw new EndpointError("Empty body"); // Ignore empty requests
+  /** Adds the overarching listener to handle REST requests */
+  private async addListener() {
+    this.server.all("*", async (req, res) => {
+      this.setCORSHeaders(res);
+      // Handle options requests
+      if (req.method === "OPTIONS") return res.status(200).end();
+      // Re useable functions
+      const badRequest = (error: Error | EndpointError) => res.status((error as any).code || 400).end(error.message || undefined);
+      try {
+        const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === req.url);
+        if (endpoint == null) throw new EndpointError("No matching endpoint", 400);
+        // Validate authentication if required
+        if (endpoint.metadata.requiresAuth) {
+          const authorization = req.headers.authorization;
+          if (authorization == null) throw new EndpointError("", 403);
+          else if (!authorization.includes("Bearer")) throw new EndpointError("Malformed Bearer", 403);
+          else
+            try {
+              const cleanJWT = authorization.replace("Bearer ", "");
+              // While sessions aren't really RESTful, I don't care and need a way to authenticate users.
+              User.verifyJWT(cleanJWT);
+            } catch (e) {
+              throw new EndpointError("", 403);
+            }
+        } else if (req.method !== endpoint.metadata.type)
+          throw new EndpointError("Bad Request Type"); // Make sure request types match
+        else if (!req.body) throw new EndpointError("Empty body"); // Ignore empty requests
+        // Grab data from body
+        const data = req.body;
+        // Try to parse as type
+        const typedData = RestBody.fromPlain(data);
+        const result = await (endpoint.fnc.call(this, typedData) as Promise<void | RestBody<any>>);
+        // Make sure response know's it's JSON
+        res.setHeader("Content-Type", "application/json");
+        if (endpoint.metadata.type === "POST" || endpoint.metadata.type === "GET")
+          if (!result) throw new EndpointError("Call didn't return any data.");
           else {
-            const data = req.body;
-            // Try to parse as type
-            const typedData = RestRequest.fromPlain(data);
-            const result = await (endpoint.fnc.call(this, typedData) as Promise<void | RestRequest<any>>);
-            res.setHeader("content-type", "application/json");
-            if (endpoint.metadata.type === "POST")
-              if (!result) throw new EndpointError("Post call didn't return any data.");
-              else res.status(200).end(result.toJSONString());
-            else res.status(200).end();
+            // Create the rest request response message
+            const resultMessage = RestBody.fromPlain({
+              requestId: typedData.requestId, // Get the request id from the original so we can respond with it
+              payload: result,
+            });
+            return res.status(200).end(resultMessage.toJSONString());
           }
-        } catch (e) {
-          badRequest(e as any);
-        }
-      });
+        return res.status(200).end();
+      } catch (e) {
+        return badRequest(e as any);
+      }
+    });
+  }
+
+  /** Sets CORS headers for the given response */
+  private setCORSHeaders(res: Response) {
+    // TODO
+    if (Configuration.devMode) res.header(`Access-Control-Allow-Origin`, `*`);
+    res.header(`Access-Control-Allow-Methods`, `GET,PUT,POST,DELETE,OPTIONS`);
+    res.header(`Access-Control-Allow-Headers`, `Content-Type,Authorization`);
   }
 }

@@ -2,7 +2,7 @@
   "compounds": [
     {
       "name": "Start Debugging",
-      "configurations": ["Launch w/Chrome", "Launch"],
+      "configurations": ["Launch w/Chrome", "Debug"],
       "presentation": {
         "hidden": false,
         "group": "Debug",

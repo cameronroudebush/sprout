@@ -1,9 +1,13 @@
-import { RestEndpoints, RestRequest, User } from "@common";
+import { User } from "@backend/model/user";
+import { RestBody, RestEndpoints, UserLoginRequest, UserLoginResponse } from "@common";
 import { RestMetadata } from "../metadata";
 
-export class UserRestAPI {
-  @RestMetadata.register(new RestMetadata(RestEndpoints.User.login, "POST"))
-  async login(request: RestRequest<User>) {
-    console.log(request);
+export class UserAPI {
+  @RestMetadata.register(new RestMetadata(RestEndpoints.user.login, "POST", false))
+  async login(request: RestBody) {
+    const userRequest = UserLoginRequest.fromPlain(request.payload);
+    const user = User.fromPlain({ username: userRequest.username });
+    // TODO actual authentication
+    return UserLoginResponse.fromPlain({ username: user.username, jwt: user.JWT });
   }
 }

@@ -1,10 +1,13 @@
-import { RestRequest, SupportedPayloadTypes } from "@common";
+import { Base, RestBody } from "@common";
 
-export type supportedRestTypes = "GET" | "POST";
+/** Supported RESTful API req types we currently use */
+export type SupportedRestTypes = "GET" | "POST";
 
-export type RestMetadataFunctionTypes<PayloadType extends SupportedPayloadTypes, ReturnType extends void | RestRequest<PayloadType> = void> = (
-  request: RestRequest<PayloadType>,
-) => Promise<ReturnType>;
+/// Define our different styles of returns
+type FunctionStandard<ReturnType extends void | Base = void> = (request: RestBody) => Promise<ReturnType>;
+type FunctionNoParam<ReturnType extends void | Base = void> = () => Promise<ReturnType>;
+/** Defines the function styling for RESTful API functions */
+export type RestMetadataFunctionTypes<ReturnType extends void | Base = void> = FunctionStandard<ReturnType> | FunctionNoParam<ReturnType>;
 
 /** Class used to decorate functions to automatically listen to rest requests and handle them */
 export class RestMetadata {
@@ -12,24 +15,29 @@ export class RestMetadata {
   static readonly METADATA_KEY = "rest:api:metadata";
 
   /** All loaded endpoints from anything using this file */
-  static loadedEndpoints: { metadata: RestMetadata; fnc: RestMetadataFunctionTypes<any> }[] = []; // TODO: This is inefficient
+  static loadedEndpoints: { metadata: RestMetadata; fnc: RestMetadataFunctionTypes }[] = []; // TODO: This is inefficient
 
   /** Queue to listen on */
   queue: string;
   /** The type we expect for this rest request to know how to respond */
-  type: supportedRestTypes;
+  type: SupportedRestTypes;
   /** If this endpoint should require authentication */
   requiresAuth: boolean;
 
-  constructor(queue: string, type: supportedRestTypes = "GET", requiresAuth = true) {
+  constructor(queue: string, type: SupportedRestTypes = "GET", requiresAuth = true) {
     this.queue = queue;
     this.type = type;
     this.requiresAuth = requiresAuth;
   }
 
   /** Assigns the given metadata to the property this value decorates. */
-  static register<PayloadType extends SupportedPayloadTypes>(data: RestMetadata) {
-    return function (target: any, key: string, _descriptor: TypedPropertyDescriptor<RestMetadataFunctionTypes<PayloadType>>) {
+  static register(data: RestMetadata) {
+    return function <ReturnType extends Base | void>(
+      target: any,
+      key: string,
+      _descriptor: TypedPropertyDescriptor<FunctionStandard<ReturnType>> | TypedPropertyDescriptor<FunctionNoParam<ReturnType>>,
+    ) {
+      if (RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === data.queue)) throw new Error("Cannot have two functions for the same REST endpoints");
       RestMetadata.loadedEndpoints.push({ metadata: data, fnc: target[key] });
       Reflect.defineMetadata(RestMetadata.METADATA_KEY, data, target, key);
     };
