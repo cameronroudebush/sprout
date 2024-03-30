@@ -2,6 +2,6 @@
 export enum RouteURLs {
   dashboard = "dashboard",
   login = "login",
-  /** Default route should always end back up here */
+  /** Default route where we should go on logins */
   default_route = "dashboard",
 }

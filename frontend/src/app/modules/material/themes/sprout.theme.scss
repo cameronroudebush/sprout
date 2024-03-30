@@ -5,6 +5,7 @@
 */
 
 @use "@angular/material" as mat;
+mat.$theme-ignore-duplication-warnings: true;
 
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
@@ -13,20 +14,19 @@
 @import "https://fonts.googleapis.com/icon?family=Material+Icons";
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
 
-$fontConfig: (
-  display-4: mat.define-typography-level(112px, 112px, 300, "Roboto", -0.0134em),
-  display-3: mat.define-typography-level(56px, 56px, 400, "Roboto", -0.0089em),
-  display-2: mat.define-typography-level(45px, 48px, 400, "Roboto", 0em),
-  display-1: mat.define-typography-level(34px, 40px, 400, "Roboto", 0.0074em),
-  headline: mat.define-typography-level(24px, 32px, 400, "Roboto", 0em),
-  title: mat.define-typography-level(20px, 32px, 500, "Roboto", 0.0075em),
-  subheading-2: mat.define-typography-level(16px, 28px, 400, "Roboto", 0.0094em),
-  subheading-1: mat.define-typography-level(15px, 24px, 500, "Roboto", 0.0067em),
-  body-2: mat.define-typography-level(14px, 24px, 500, "Roboto", 0.0179em),
-  body-1: mat.define-typography-level(14px, 20px, 400, "Roboto", 0.0179em),
-  button: mat.define-typography-level(14px, 14px, 500, "Roboto", 0.0893em),
-  caption: mat.define-typography-level(12px, 20px, 400, "Roboto", 0.0333em),
-  input: mat.define-typography-level(inherit, 1.125, 400, "Roboto", 1.5px),
+$fontConfig: mat.define-typography-config(
+  $headline-1: mat.define-typography-level(34px, 40px, 400, "Roboto", 0.0074em),
+  $headline-2: mat.define-typography-level(45px, 48px, 400, "Roboto", 0em),
+  $headline-3: mat.define-typography-level(56px, 56px, 400, "Roboto", -0.0089em),
+  $headline-4: mat.define-typography-level(112px, 112px, 300, "Roboto", -0.0134em),
+  $headline-5: mat.define-typography-level(24px, 32px, 400, "Roboto", 0em),
+  $headline-6: mat.define-typography-level(20px, 32px, 500, "Roboto", 0.0075em),
+  $subtitle-1: mat.define-typography-level(15px, 24px, 500, "Roboto", 0.0067em),
+  $subtitle-2: mat.define-typography-level(16px, 28px, 400, "Roboto", 0.0094em),
+  $body-1: mat.define-typography-level(14px, 20px, 400, "Roboto", 0.0179em),
+  $body-2: mat.define-typography-level(14px, 24px, 500, "Roboto", 0.0179em),
+  $button: mat.define-typography-level(14px, 14px, 500, "Roboto", 0.0893em),
+  $caption: mat.define-typography-level(12px, 20px, 400, "Roboto", 0.0333em),
 );
 
 // Foreground Elements
@@ -239,11 +239,13 @@ $altTheme: mat.define-dark-theme(
 );
 
 // Theme Init
-@include mat.all-component-themes($theme);
+.light-theme {
+  @include mat.all-component-themes($theme);
+}
 
-// .theme-alternate {
-//   @include mat.all-component-themes($altTheme);
-// }
+// Dark is default
+@include mat.all-component-themes($altTheme);
+@include mat.all-component-typographies($fontConfig);
 
 // Specific component overrides, pieces that are not in line with the general theming
 
