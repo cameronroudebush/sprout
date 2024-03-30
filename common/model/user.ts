@@ -1,12 +1,12 @@
-import { Base } from "./base";
+import { Base, DBBase } from "./base";
 
 /** This class defines shared user information available to the clients */
-export class User extends Base {
+export class User extends DBBase {
   /** The current username for this user */
   username: string;
 
-  constructor(username: string) {
-    super();
+  constructor(id: number, username: string) {
+    super(id);
     this.username = username;
   }
 }

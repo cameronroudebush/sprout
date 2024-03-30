@@ -13,3 +13,13 @@ export class Base {
     return JSON.stringify(this);
   }
 }
+
+/** A class with a slight extension upon Base so we can provide fields we know will exist from the database. */
+export class DBBase extends Base {
+  id: number;
+
+  constructor(id: number) {
+    super();
+    this.id = id;
+  }
+}

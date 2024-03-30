@@ -3,6 +3,7 @@ import { RouterModule } from "@angular/router";
 import { AccountsModule } from "@frontend/modules/accounts/accounts.module";
 import { MaterialModule } from "@frontend/modules/material/material.module";
 import { APP_ROUTES } from "./models/config";
+import { RedirectService } from "./service/redirect.service";
 import { RoutingTabs } from "./tabs/tabs";
 
 const COMPONENTS = [RoutingTabs];
@@ -11,6 +12,7 @@ const COMPONENTS = [RoutingTabs];
 @NgModule({
   declarations: COMPONENTS,
   imports: [RouterModule.forRoot(APP_ROUTES), MaterialModule, AccountsModule],
+  providers: [RedirectService],
   exports: COMPONENTS,
 })
 export class RoutingModule {}

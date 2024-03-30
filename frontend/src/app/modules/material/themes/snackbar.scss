@@ -1,0 +1,29 @@
+.norm-snackbar {
+  .mdc-snackbar__surface {
+    background-color: var(--accent-color) !important;
+
+    .mat-mdc-snack-bar-label {
+      color: var(--text-accent-color) !important;
+    }
+  }
+
+  button {
+    color: var(--text-accent-color) !important;
+  }
+}
+
+.error-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #f44336 !important;
+
+    .mat-mdc-snack-bar-label {
+      color: white !important;
+    }
+  }
+
+  button {
+    background-color: #f44336;
+    color: white !important;
+    border: none;
+  }
+}
