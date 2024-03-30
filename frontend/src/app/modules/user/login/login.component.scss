@@ -1,0 +1,18 @@
+.login-container {
+  display: flex;
+  flex-flow: row;
+
+  .login-left {
+    padding: 2rem;
+    background-color: var(--primary-color);
+    flex: 1;
+
+    img {
+      width: 28rem;
+    }
+  }
+
+  .login-right {
+    flex: 9;
+  }
+}

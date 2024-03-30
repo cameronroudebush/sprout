@@ -25,12 +25,12 @@ export class UserLoginRequest extends Base {
 
 /** Content that will be responded when the login request occurs */
 export class UserLoginResponse extends Base {
-  username: string;
+  user: User;
   jwt: string;
 
-  constructor(username: string, jwt: string) {
+  constructor(user: User, jwt: string) {
     super();
-    this.username = username;
+    this.user = user;
     this.jwt = jwt;
   }
 }

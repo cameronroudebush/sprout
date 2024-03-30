@@ -1,4 +1,5 @@
-import { AccountsDashboardComponent } from "../../accounts/dashboard/dashboard.component";
+import { AccountsDashboardComponent } from "@frontend/modules/accounts/dashboard/dashboard.component";
+import { LoginComponent } from "@frontend/modules/user/login/login.component";
 import { RouteMetadata } from "./route.metadata";
 import { RouteURLs } from "./url";
 
@@ -11,6 +12,10 @@ export const APP_ROUTES: RouteMetadata[] = [
       label: "Dashboard",
       icon: "grid",
     },
+  },
+  {
+    path: RouteURLs.login,
+    component: LoginComponent,
   },
   { path: "**", redirectTo: RouteURLs.default_route },
 ];

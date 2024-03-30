@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Base, RestBody, RestEndpoints, UserLoginRequest, UserLoginResponse } from "@common";
+import { Base, RestBody, RestEndpoints } from "@common";
 import { firstValueFrom } from "rxjs";
 import { environment } from "src/environments/environment";
 
@@ -10,21 +10,7 @@ import { environment } from "src/environments/environment";
 export class RestService {
   /** The endpoint string that should prefix every request */
   static readonly ENDPOINT_HEADER = "/api";
-
-  currentJWT: string | undefined;
-  constructor(private httpClient: HttpClient) {
-    this.runTest();
-  }
-
-  // TODO: Remove
-  async runTest() {
-    const loginResult = await this.post<UserLoginResponse>(
-      "user.login",
-      RestBody.fromPlain({ payload: UserLoginRequest.fromPlain({ username: "foo", password: "bar" }) }),
-    );
-    this.currentJWT = loginResult.payload.jwt;
-    console.log(await this.get("conf.get"));
-  }
+  constructor(private httpClient: HttpClient) {}
 
   /** Attempts to guess the backend URL based on our current connection address since they normally live in the same server */
   private guessBackendURL() {
@@ -60,7 +46,7 @@ export class RestService {
   get messageHeaders() {
     return new HttpHeaders({
       "Content-Type": "application/json", // Let the backend know our messages are JSON format
-      Authorization: `Bearer ${this.currentJWT}`,
+      Authorization: `Bearer ${""}`, // TODO: JWT
     });
   }
 }

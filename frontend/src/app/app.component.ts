@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { RestService } from "@frontend/modules/communication/services/rest.service";
+import { RestService } from "@frontend/modules/communication/service/rest.service";
 
 @Component({
   selector: "app-root",
@@ -8,6 +8,5 @@ import { RestService } from "@frontend/modules/communication/services/rest.servi
 })
 export class AppComponent {
   // TODO: Remove
-  constructor(public restService: RestService) {
-  }
+  constructor(public restService: RestService) {}
 }

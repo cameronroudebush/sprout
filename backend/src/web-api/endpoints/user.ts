@@ -8,6 +8,6 @@ export class UserAPI {
     const userRequest = UserLoginRequest.fromPlain(request.payload);
     const user = User.fromPlain({ username: userRequest.username });
     // TODO actual authentication
-    return UserLoginResponse.fromPlain({ username: user.username, jwt: user.JWT });
+    return UserLoginResponse.fromPlain({ user: user, jwt: user.JWT });
   }
 }
