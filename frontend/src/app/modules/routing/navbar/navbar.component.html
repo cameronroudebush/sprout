@@ -1,0 +1,26 @@
+<div class="navbar" *ngIf="shouldRenderNavbar">
+  <div class="content" [ngClass]="{ horizontal: isHorizontal }">
+    <!-- Render logo -->
+    <img *ngIf="!isHorizontal" class="logo" src="../../../../assets/logo/color-transparent.svg" />
+    <div *ngIf="!isHorizontal" class="separator"></div>
+    <!-- Render each specific route -->
+    <div class="buttons" [ngClass]="{ horizontal: isHorizontal }">
+      <ng-container *ngFor="let route of routes">
+        <button
+          mat-flat-button
+          *ngIf="route.tabOptions"
+          class="route-button"
+          [ngClass]="{ horizontal: isHorizontal }"
+          [routerLink]="route.path"
+          routerLinkActive="active-route"
+        >
+          <div class="button-content" [ngClass]="{ horizontal: isHorizontal }">
+            <mat-icon>{{ route.tabOptions.icon }}</mat-icon>
+            <span>{{ route.tabOptions.label }}</span>
+            <div><!-- Flex Placeholder --></div>
+          </div>
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
-import { RestService } from "@frontend/modules/communication/service/rest.service";
+import { RouteURLs } from "@frontend/modules/routing/models/url";
+import { RouterService } from "@frontend/modules/routing/service/router.service";
 
 @Component({
   selector: "app-root",
@@ -7,6 +8,10 @@ import { RestService } from "@frontend/modules/communication/service/rest.servic
   styleUrls: ["app.component.scss"],
 })
 export class AppComponent {
-  // TODO: Remove
-  constructor(public restService: RestService) {}
+  constructor(private routerService: RouterService) {}
+
+  /** Returns if the navbar should be rendered */
+  get shouldRenderNavbar() {
+    return !this.routerService.isCurrentRoute(RouteURLs.login);
+  }
 }

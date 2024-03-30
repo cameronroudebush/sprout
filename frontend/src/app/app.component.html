@@ -1,4 +1,6 @@
-<!-- <ion-app>
-  <ion-router-outlet></ion-router-outlet>
-</ion-app> -->
-<router-outlet></router-outlet>
+<div class="core-wrapper">
+  <shared-navbar class="nav" *ngIf="shouldRenderNavbar"></shared-navbar>
+  <div class="content">
+    <router-outlet class="outlet"></router-outlet>
+  </div>
+</div>

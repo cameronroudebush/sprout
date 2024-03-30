@@ -1,0 +1,15 @@
+.core-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-flow: row;
+
+  /* On screens that are 768px or less, set navbar to horizontal */
+  @media screen and (max-width: 768px) {
+    flex-flow: column-reverse;
+  }
+
+  .content {
+    flex: 9;
+  }
+}

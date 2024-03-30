@@ -1,5 +1,4 @@
 import { Route } from "@angular/router";
-import * as ionIcons from "ionicons/icons";
 
 /** The metadata that each route can support to improve dynamic rendering */
 export interface RouteMetadata extends Route {
@@ -8,6 +7,6 @@ export interface RouteMetadata extends Route {
     /** What to call this route on the tabs */
     label: string;
     /** The icon to use for this tab */
-    icon: keyof typeof ionIcons;
+    icon: string;
   };
 }

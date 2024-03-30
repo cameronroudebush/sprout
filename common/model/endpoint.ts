@@ -17,6 +17,7 @@ export module RestEndpoints {
   /** Endpoints supported for the user */
   export class user {
     static login = "/user/login";
+    static loginJWT = "/user/login/jwt";
   }
 
   /** Configuration endpoints */

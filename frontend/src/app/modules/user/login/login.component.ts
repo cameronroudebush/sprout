@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { User } from "@common";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
-import { RedirectService } from "@frontend/modules/routing/service/redirect.service";
+import { RouterService } from "@frontend/modules/routing/service/router.service";
 import { UserService } from "@frontend/modules/user/service/user.service";
 
 @Component({
@@ -23,13 +23,36 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private redirectService: RedirectService,
-  ) {}
+    private routerService: RouterService,
+  ) {
+    this.tryJWTLogin();
+  }
 
   ngOnInit() {}
 
+  /** Checks with the user service for a JWT and tries to use it to login */
+  async tryJWTLogin() {
+    this.processing = true;
+    if (this.userService.cachedJWT) {
+      const result = await this.userService.loginWithJWT(this.userService.cachedJWT);
+      // Wipe JWT on errors
+      if (!(result instanceof User) && result.isError) {
+        this.userService.cachedJWT = null;
+        this.loginStatus = { type: "error", message: "Session expired" };
+      } else {
+        this.loginStatus = { type: "success", message: "Restoring Session" };
+        // Give a timeout so they aren't so abruptly changed pages
+        setTimeout(() => {
+          this.routerService.redirectTo(RouteURLs.default_route);
+          this.processing = false;
+        }, 800);
+      }
+    } else this.processing = false;
+  }
+
   /** Submits the login request */
   async submit() {
+    if (this.processing) return;
     this.processing = true;
     this.loginStatus = undefined;
     if (this.form.valid) {
@@ -37,7 +60,7 @@ export class LoginComponent implements OnInit {
       if (!(result instanceof User)) this.loginStatus = { type: "error", message: result.message };
       else {
         this.loginStatus = { type: "success", message: "Login Successful" };
-        this.redirectService.redirectTo(RouteURLs.default_route);
+        this.routerService.redirectTo(RouteURLs.default_route);
       }
     }
     this.processing = false;
