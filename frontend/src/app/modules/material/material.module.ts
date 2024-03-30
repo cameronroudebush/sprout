@@ -3,10 +3,23 @@ import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { IonicModule } from "@ionic/angular";
 
-const MODULES = [FormsModule, IonicModule, CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule];
+const MODULES = [
+  FormsModule,
+  IonicModule,
+  CommonModule,
+  FormsModule,
+  ReactiveFormsModule,
+  MatFormFieldModule,
+  MatInputModule,
+  MatButtonModule,
+  MatProgressSpinnerModule,
+  MatIconModule,
+];
 
 /** A module that provides the necessary material components we use across this app */
 @NgModule({

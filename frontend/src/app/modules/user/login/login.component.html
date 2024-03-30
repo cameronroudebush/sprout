@@ -26,8 +26,9 @@
         <input matInput type="password" formControlName="password" />
         <mat-error>{{ form.controls.password.hasError("required") ? "Password is required" : "" }}</mat-error>
       </mat-form-field>
-
-      <button type="submit" mat-flat-button color="accent">Login</button>
+      <shared-progress [ready]="!processing" class="progress">
+        <button type="submit" mat-flat-button color="accent">Login</button>
+      </shared-progress>
       <!-- TODO: Create account -->
       <!-- TODO: Forgot password -->
     </form>

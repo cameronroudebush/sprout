@@ -81,8 +81,13 @@
         width: 100%;
       }
 
-      button {
+      .progress {
         width: 80%;
+        border-radius: var(--mdc-filled-button-container-shape);
+      }
+
+      button {
+        width: 100%;
       }
     }
 

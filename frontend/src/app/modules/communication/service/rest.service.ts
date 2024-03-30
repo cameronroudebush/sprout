@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, Injector } from "@angular/core";
 import { Base, RestBody, RestEndpoints } from "@common";
+import { UserService } from "@frontend/modules/user/service/user.service";
 import { firstValueFrom } from "rxjs";
 import { environment } from "src/environments/environment";
 
@@ -10,7 +11,10 @@ import { environment } from "src/environments/environment";
 export class RestService {
   /** The endpoint string that should prefix every request */
   static readonly ENDPOINT_HEADER = "/api";
-  constructor(private httpClient: HttpClient) {}
+  constructor(
+    private httpClient: HttpClient,
+    private injector: Injector,
+  ) {}
 
   /** Attempts to guess the backend URL based on our current connection address since they normally live in the same server */
   private guessBackendURL() {
@@ -44,9 +48,12 @@ export class RestService {
 
   /** Returns headers to add to every message */
   get messageHeaders() {
-    return new HttpHeaders({
+    const headers = new HttpHeaders({
       "Content-Type": "application/json", // Let the backend know our messages are JSON format
-      Authorization: `Bearer ${""}`, // TODO: JWT
     });
+    // Get JWT of logged in user
+    const authToken = this.injector.get(UserService).cachedJWT;
+    if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+    return headers;
   }
 }

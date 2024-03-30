@@ -11,15 +11,17 @@ export class User extends DBBase {
   }
 }
 
-/** Required content to be sent when a user tries to login */
+/** Required content to be sent when a user tries to login. Can use username/password or JWT */
 export class UserLoginRequest extends Base {
   username: string;
   password: string;
+  jwt?: string;
 
-  constructor(username: string, password: string) {
+  constructor(username: string, password: string, jwt?: string) {
     super();
     this.username = username;
     this.password = password;
+    this.jwt = jwt;
   }
 }
 

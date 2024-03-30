@@ -12,7 +12,7 @@ export const APP_ROUTES: RouteMetadata[] = [
     canActivate: [AuthGuard],
     tabOptions: {
       label: "Dashboard",
-      icon: "grid",
+      icon: "dashboard",
     },
   },
   {
