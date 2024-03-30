@@ -1,6 +1,6 @@
-<div style="display: flex; justify-content: center;">
-<img width="50%" src="./frontend/src/assets/logo/color-transparent.svg">
-</div>
+<p align="center">
+  <img width="50%" src="./frontend/src/assets/logo/color-transparent.svg">
+</p>
 
 # What is Sprout?
 
