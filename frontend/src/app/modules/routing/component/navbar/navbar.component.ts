@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { APP_ROUTES } from "@frontend/modules/routing/models/config";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
 import { RouterService } from "@frontend/modules/routing/service/router.service";
-import { SubscribingComponent } from "@frontend/modules/shared/subscribing-component/subscribing.component";
+import { SubscribingComponent } from "@frontend/modules/shared/component/subscribing-component/subscribing.component";
 import { UserService } from "@frontend/modules/user/service/user.service";
 import { fromEvent, map, startWith } from "rxjs";
 

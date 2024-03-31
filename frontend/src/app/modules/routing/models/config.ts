@@ -1,6 +1,6 @@
-import { AccountsDashboardComponent } from "@frontend/modules/finance/dashboard/dashboard.component";
+import { AccountsDashboardComponent } from "@frontend/modules/finance/component/dashboard/dashboard.component";
+import { LoginComponent } from "@frontend/modules/user/component/login/login.component";
 import { AuthGuard } from "@frontend/modules/user/guard/auth.guard";
-import { LoginComponent } from "@frontend/modules/user/login/login.component";
 import { RouteMetadata } from "./route.metadata";
 import { RouteURLs } from "./url";
 
