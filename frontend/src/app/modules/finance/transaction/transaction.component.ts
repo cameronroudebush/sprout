@@ -24,7 +24,7 @@ export class TransactionComponent extends SubscribingComponent implements OnInit
     super();
     this.addSubscription(this.store.select(selectFinanceState).subscribe((state) => (this.availableTransactions = state.transactions)));
     // Grab our initial transaction set
-    setTimeout(() => this.transactionService.requestTransactions(), 3000);
+    this.transactionService.requestTransactions();
   }
 
   ngOnInit() {}

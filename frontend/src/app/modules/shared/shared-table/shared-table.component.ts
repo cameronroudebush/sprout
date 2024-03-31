@@ -40,5 +40,3 @@ export class SharedTableComponent<T extends Base> implements OnInit, OnChanges {
     this.displayColumns = columns.map((x) => x.propertyName);
   }
 }
-
-// TODO: NgOnChanges

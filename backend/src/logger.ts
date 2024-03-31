@@ -63,7 +63,12 @@ export class Logger {
     const stack = err.stack;
     Error.prepareStackTrace = undefined;
     const filePath: string = (stack as any)[3].getFileName();
-    const splitContent = filePath.split(path.sep);
-    return `[${splitContent[splitContent.length - 2]}][${splitContent[splitContent.length - 1]?.replace(".ts", "")}]`;
+    // Adjusted file path up until the source directory
+    const filePathToSrcIndex = filePath.indexOf("src");
+    const filePathToSrc = filePath.substring(filePathToSrcIndex, filePath.length);
+    const splitContent = filePathToSrc.split(path.sep);
+    splitContent.shift(); // Remove the first one as it's just going to be src
+    // Loop over total directories and return that
+    return splitContent.reduce((a, b) => (a += `[${b.replace(".ts", "")}]`), "");
   }
 }
