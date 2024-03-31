@@ -24,4 +24,9 @@ export module RestEndpoints {
   export class conf {
     static get = "/conf/get";
   }
+
+  /** Transaction endpoints for finance data */
+  export class transaction {
+    static get = "/transaction/get";
+  }
 }

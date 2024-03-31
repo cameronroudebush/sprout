@@ -15,6 +15,6 @@ export const userReducer = createReducer(
     return UserAdapter.addOne(user, state);
   }),
   on(UserActions.setCurrentUser, (state, { user }) => {
-    return { ...state, selectedUserId: user.id };
+    return { ...state, selectedUserId: user?.id };
   }),
 );

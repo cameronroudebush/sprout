@@ -30,7 +30,7 @@ export class RestService {
    * Given some parameters, returns the get results from the given queue
    * @param queue The queue to request data from
    */
-  get<ReturnType extends Base>(queue: RestEndpoints.supportedEndpoints) {
+  get<ReturnType extends Base | Base[]>(queue: RestEndpoints.supportedEndpoints) {
     const realQueue = RestEndpoints.typeToActualQueue(queue);
     const combinedURL = `${this.guessBackendURL()}${realQueue}`;
     return firstValueFrom(this.httpClient.get(combinedURL, { headers: this.messageHeaders })) as Promise<RestBody<ReturnType>>;
@@ -40,10 +40,11 @@ export class RestService {
    * Given some parameters, returns the get results from the given queue
    * @param queue The queue to request data from
    */
-  post<ReturnType extends Base>(queue: RestEndpoints.supportedEndpoints, body: RestBody<any>) {
+  post<ReturnType extends Base | Base[]>(queue: RestEndpoints.supportedEndpoints, body: Base) {
     const realQueue = RestEndpoints.typeToActualQueue(queue);
     const combinedURL = `${this.guessBackendURL()}${realQueue}`;
-    return firstValueFrom(this.httpClient.post(combinedURL, body.toJSONString(), { headers: this.messageHeaders })) as Promise<RestBody<ReturnType>>;
+    const adjustedBody = RestBody.fromPlain({ payload: body });
+    return firstValueFrom(this.httpClient.post(combinedURL, adjustedBody.toJSONString(), { headers: this.messageHeaders })) as Promise<RestBody<ReturnType>>;
   }
 
   /** Returns headers to add to every message */

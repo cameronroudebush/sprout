@@ -39,6 +39,7 @@ export class LoginComponent implements OnInit {
       if (!(result instanceof User) && result.isError) {
         this.userService.cachedJWT = null;
         this.loginStatus = { type: "error", message: "Session expired" };
+        this.processing = false;
       } else {
         this.loginStatus = { type: "success", message: "Restoring Session" };
         // Give a timeout so they aren't so abruptly changed pages

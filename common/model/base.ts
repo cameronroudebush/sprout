@@ -8,6 +8,11 @@ export class Base {
     return plainToInstance(this, obj);
   }
 
+  /** Given an array of plain objects, conforms them to the type of `this` and returns that array */
+  static fromPlainArray<T>(this: CustomTypes.Constructor<T>, obj: T[]) {
+    return plainToInstance(this, obj);
+  }
+
   /** Returns `this` as a JSON string */
   toJSONString() {
     return JSON.stringify(this);
