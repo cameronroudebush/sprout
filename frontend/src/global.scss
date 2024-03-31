@@ -29,12 +29,13 @@
 // @import "./app/modules/material/themes/ionic.scss";
 @import "./app/modules/material/themes/sprout.theme.scss";
 @import "./app/modules/material/themes/snackbar.scss";
-
-// Default styling
+@import "./app/modules/material/themes/base.scss";
 
 :root,
 body {
+  // Default styling
   height: 100%;
   width: 100%;
   margin: 0;
+  background-color: var(--mat-app-background-color);
 }

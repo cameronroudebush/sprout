@@ -106,7 +106,7 @@ export class ConfigurationController {
 
   /** Loads the configuration file from {@link configFileLocation} */
   load(path = this.configFileLocation) {
-    Logger.log(`Loading config file from ${path}`);
+    Logger.info(`Loading config file from ${path}`);
     this.updateConfigFromFile();
     // Save the changes so config file is kept up to date with changes.
     this.save();
@@ -117,7 +117,7 @@ export class ConfigurationController {
 
   /** Saves the configuration from {@link Configuration} to the file */
   save(path = this.configFileLocation) {
-    Logger.log(`Writing config file to ${path}`);
+    Logger.info(`Writing config file to ${path}`);
     const configObject = this.objectToYaml(Configuration);
     const output = this.configHeader + configObject + "\n";
     fs.writeFileSync(path, output);

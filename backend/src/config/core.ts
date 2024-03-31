@@ -22,6 +22,6 @@ export class Configuration {
   }
 
   static get devMode() {
-    return true; // TODO
+    return process.env["NODE_ENV"] === "dev";
   }
 }

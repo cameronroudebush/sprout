@@ -3,6 +3,7 @@ import { APP_ROUTES } from "@frontend/modules/routing/models/config";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
 import { RouterService } from "@frontend/modules/routing/service/router.service";
 import { SubscribingComponent } from "@frontend/modules/shared/subscribing-component/subscribing.component";
+import { UserService } from "@frontend/modules/user/service/user.service";
 import { fromEvent, map, startWith } from "rxjs";
 
 /** Navbar to render based on our application sizing */
@@ -15,7 +16,10 @@ export class NavbarComponent extends SubscribingComponent implements OnInit {
   /** Tracks if the navbar should be rendered horizontally (for small screens) */
   isHorizontal: boolean = false;
 
-  constructor(private routerService: RouterService) {
+  constructor(
+    private routerService: RouterService,
+    public userService: UserService,
+  ) {
     super();
     this.addSubscription(this.listenForHorizontalMedia().subscribe((x) => (this.isHorizontal = x)));
   }

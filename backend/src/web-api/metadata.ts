@@ -4,10 +4,10 @@ import { Base, RestBody } from "@common";
 export type SupportedRestTypes = "GET" | "POST";
 
 /// Define our different styles of returns
-type FunctionStandard<ReturnType extends void | Base = void> = (request: RestBody) => Promise<ReturnType>;
-type FunctionNoParam<ReturnType extends void | Base = void> = () => Promise<ReturnType>;
+type FunctionStandard<ReturnType extends void | Base | Base[] = void> = (request: RestBody) => Promise<ReturnType>;
+type FunctionNoParam<ReturnType extends void | Base | Base[] = void> = () => Promise<ReturnType>;
 /** Defines the function styling for RESTful API functions */
-export type RestMetadataFunctionTypes<ReturnType extends void | Base = void> = FunctionStandard<ReturnType> | FunctionNoParam<ReturnType>;
+export type RestMetadataFunctionTypes<ReturnType extends void | Base | Base[] = void> = FunctionStandard<ReturnType> | FunctionNoParam<ReturnType>;
 
 /** Class used to decorate functions to automatically listen to rest requests and handle them */
 export class RestMetadata {
@@ -32,7 +32,7 @@ export class RestMetadata {
 
   /** Assigns the given metadata to the property this value decorates. */
   static register(data: RestMetadata) {
-    return function <ReturnType extends Base | void>(
+    return function <ReturnType extends Base | Base[] | void>(
       target: any,
       key: string,
       _descriptor: TypedPropertyDescriptor<FunctionStandard<ReturnType>> | TypedPropertyDescriptor<FunctionNoParam<ReturnType>>,

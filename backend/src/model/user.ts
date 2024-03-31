@@ -12,7 +12,8 @@ export class User extends CommonUser {
   }
 
   /** Verifies the given JWT. Throws an error if it is not valid */
-  static verifyJWT(jwtString: string) {
+  static verifyJWT(jwtString?: string) {
+    if (!jwtString) throw new Error("Invalid JWT");
     return jwt.verify(jwtString, Configuration.server.secretKey);
   }
 }

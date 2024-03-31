@@ -1,5 +1,6 @@
 import { User } from "@backend/model/user";
 import { RestBody, RestEndpoints, UserLoginRequest, UserLoginResponse } from "@common";
+import { EndpointError } from "../error";
 import { RestMetadata } from "../metadata";
 
 export class UserAPI {
@@ -16,6 +17,11 @@ export class UserAPI {
   async loginWithJWT(request: RestBody) {
     const userRequest = UserLoginRequest.fromPlain(request.payload);
     const user = User.fromPlain({ id: 1, username: userRequest.username });
+    try {
+      User.verifyJWT(userRequest.jwt!);
+    } catch {
+      throw new EndpointError("Session Expired", 403);
+    }
     // TODO actual authentication
     return UserLoginResponse.fromPlain({ user: user, jwt: user.JWT });
   }

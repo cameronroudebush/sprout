@@ -5,6 +5,6 @@ export const UserActions = createActionGroup({
   source: "User",
   events: {
     AddUser: props<{ user: User }>(),
-    SetCurrentUser: props<{ user: User }>(),
+    SetCurrentUser: props<{ user: User | undefined }>(),
   },
 });

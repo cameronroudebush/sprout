@@ -5,18 +5,8 @@ import { Express, Response } from "express";
 import { globSync } from "glob";
 import path from "path";
 import { Logger } from "../logger";
+import { EndpointError } from "./error";
 import { RestMetadata } from "./metadata";
-
-/** Extension upon the error class so we can add codes */
-class EndpointError extends Error {
-  /** Error code that occurred to help the developer find out what they did wrong. */
-  code: number;
-
-  constructor(message: string, code: number = 400) {
-    super(message);
-    this.code = code;
-  }
-}
 
 /** This class specifies a REST API handling based on incoming messages */
 export class RestAPIServer {
@@ -33,7 +23,7 @@ export class RestAPIServer {
 
   /** Registers all endpoints dynamically from the endpoints folder */
   private async registerEndpoints(root = path.join(__dirname, "endpoints")) {
-    Logger.log("Registering REST endpoints...");
+    Logger.info("Registering REST endpoints...");
     const endpoints = globSync("*.ts", { cwd: root });
     return await Promise.all(
       endpoints.map(async (endpointFile) => {

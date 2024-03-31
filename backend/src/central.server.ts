@@ -7,7 +7,7 @@ import { Logger } from "./logger";
  */
 export class CentralServer {
   constructor(public readonly server = express()) {
-    Logger.log(`Spinning up Central Server on port ${Configuration.server.port}...`);
+    Logger.info(`Spinning up Central Server on port ${Configuration.server.port}...`);
     server.listen(Configuration.server.port);
     server.use(express.json());
   }

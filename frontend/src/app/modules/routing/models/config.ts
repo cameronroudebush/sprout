@@ -1,4 +1,4 @@
-import { AccountsDashboardComponent } from "@frontend/modules/accounts/dashboard/dashboard.component";
+import { AccountsDashboardComponent } from "@frontend/modules/finance/dashboard/dashboard.component";
 import { AuthGuard } from "@frontend/modules/user/guard/auth.guard";
 import { LoginComponent } from "@frontend/modules/user/login/login.component";
 import { RouteMetadata } from "./route.metadata";
@@ -20,6 +20,5 @@ export const APP_ROUTES: RouteMetadata[] = [
     component: LoginComponent,
   },
   // Always default to login if no users available
-  // { path: "", pathMatch: "full", redirectTo: RouteURLs.login },
   { path: "**", redirectTo: RouteURLs.login },
 ];
