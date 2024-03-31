@@ -3,7 +3,7 @@ import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { MaterialModule } from "@frontend/modules/material/material.module";
 import { SharedModule } from "@frontend/modules/shared/shared.module";
-import { LoginComponent } from "@frontend/modules/user/login/login.component";
+import { LoginComponent } from "@frontend/modules/user/component/login/login.component";
 import { StoreModule } from "@ngrx/store";
 import { UserService } from "./service/user.service";
 import { userReducer } from "./store/user.reducer";

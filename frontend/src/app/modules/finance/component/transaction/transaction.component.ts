@@ -1,11 +1,11 @@
 import { Component, OnInit } from "@angular/core";
 import { Transaction } from "@common";
 import { TransactionService } from "@frontend/modules/finance/service/transaction.service";
+import { selectFinanceState } from "@frontend/modules/finance/store/finance.selector";
 import { FinanceState } from "@frontend/modules/finance/store/finance.state";
-import { Column } from "@frontend/modules/shared/shared-table/shared-table.component";
-import { SubscribingComponent } from "@frontend/modules/shared/subscribing-component/subscribing.component";
+import { Column } from "@frontend/modules/shared/component/shared-table/shared-table.component";
+import { SubscribingComponent } from "@frontend/modules/shared/component/subscribing-component/subscribing.component";
 import { Store } from "@ngrx/store";
-import { selectFinanceState } from "../store/finance.selector";
 
 @Component({
   selector: "finance-transaction",

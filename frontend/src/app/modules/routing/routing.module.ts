@@ -1,8 +1,8 @@
 import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { MaterialModule } from "@frontend/modules/material/material.module";
+import { NavbarComponent } from "./component/navbar/navbar.component";
 import { APP_ROUTES } from "./models/config";
-import { NavbarComponent } from "./navbar/navbar.component";
 import { RouterService } from "./service/router.service";
 
 const COMPONENTS = [NavbarComponent];
