@@ -7,7 +7,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ionic serve --port 8000 --no-open --host 0.0.0.0",
-    "build": "ng build",
+    "build": "ng build --configuration production",
+    "build:android": "npx cap copy && npx cap sync",
     "watch": "ng build --watch --configuration development"
   },
   "dependencies": {
