@@ -32,7 +32,7 @@ export class UserService {
       this.cachedJWT = response.payload.jwt;
       return user;
     } catch (e) {
-      return { isError: true, message: (e as HttpErrorResponse).error };
+      return { isError: true, message: (e as HttpErrorResponse).statusText };
     }
   }
 

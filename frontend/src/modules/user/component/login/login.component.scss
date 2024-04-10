@@ -21,6 +21,7 @@
     background-color: var(--primary-color);
     width: 20vw;
     min-width: 300px;
+    max-width: 450px;
     gap: 1rem 0;
     border-radius: 1rem;
     z-index: 1;
@@ -34,7 +35,7 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      padding: 0.25rem 0;
+      padding: 0.25rem;
 
       &.error {
         background-color: var(--warn-color);
