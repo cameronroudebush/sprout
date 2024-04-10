@@ -16,7 +16,7 @@ export class UserAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.user.loginJWT, "POST", false))
   async loginWithJWT(request: RestBody) {
     const userRequest = UserLoginRequest.fromPlain(request.payload);
-    const user = User.fromPlain({ id: 1, username: userRequest.username });
+    const user = User.fromPlain({ id: 1, username: "DEMO" });
     try {
       User.verifyJWT(userRequest.jwt!);
     } catch {

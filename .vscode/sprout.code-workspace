@@ -27,6 +27,7 @@
       "frontend": true,
       "common": true,
     },
+    "typescript.tsdk": "Backend\\node_modules\\typescript\\lib",
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifier": "non-relative",
     "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular/standalone"],
