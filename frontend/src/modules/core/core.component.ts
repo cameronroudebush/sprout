@@ -4,8 +4,8 @@ import { RouterService } from "@frontend/modules/routing/service/router.service"
 
 @Component({
   selector: "app-root",
-  templateUrl: "app.component.html",
-  styleUrls: ["app.component.scss"],
+  templateUrl: "core.component.html",
+  styleUrls: ["core.component.scss"],
 })
 export class AppComponent {
   constructor(private routerService: RouterService) {}
