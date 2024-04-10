@@ -1,6 +1,53 @@
-<div class="core-wrapper">
-  <shared-navbar class="nav" *ngIf="shouldRenderNavbar"></shared-navbar>
-  <div class="content">
+<div class="core-container">
+  <div class="navbar" *ngIf="shouldRenderNavbar">
+    <!-- Normal content -->
+    <div class="content" [ngClass]="{ horizontal: isHorizontal }">
+      <!-- Render logo -->
+      <img *ngIf="!isHorizontal" class="logo" src="../../../../assets/logo/color-transparent-no-tag.svg" />
+      <div *ngIf="!isHorizontal" class="separator"></div>
+      <!-- Render each specific route -->
+      <div class="button-group" [ngClass]="{ horizontal: isHorizontal }">
+        <!-- Route buttons -->
+        <ng-container *ngFor="let route of routes">
+          <button
+            mat-flat-button
+            *ngIf="route.tabOptions"
+            class="route-button navbar-button"
+            [ngClass]="{ horizontal: isHorizontal }"
+            [routerLink]="route.path"
+            routerLinkActive="active-route"
+          >
+            <div class="button-content" [ngClass]="{ horizontal: isHorizontal }">
+              <mat-icon>{{ route.tabOptions.icon }}</mat-icon>
+              <span>{{ route.tabOptions.label }}</span>
+              <div><!-- Flex Placeholder --></div>
+            </div>
+          </button>
+        </ng-container>
+        <div *ngIf="!isHorizontal" class="button-footer-separator"></div>
+        <!-- Footer -->
+        <button mat-flat-button [matMenuTriggerFor]="menu" class="footer-button navbar-button" [ngClass]="{ horizontal: isHorizontal }">
+          <div class="button-content" [ngClass]="{ horizontal: isHorizontal }">
+            <mat-icon>account_circle</mat-icon>
+            <span>{{ currentUser?.username }}</span>
+            <div><!-- Flex Placeholder --></div>
+          </div>
+        </button>
+        <mat-menu class="footer-menu" #menu="matMenu" color="accent" xPosition="after">
+          <button mat-menu-item (click)="userService.logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+  <!-- Render outlet -->
+  <div class="outlet-wrapper">
     <router-outlet class="outlet"></router-outlet>
+  </div>
+  <!-- Top navbar during horizontal rendering. Things are rendered in reverse -->
+  <div class="top-content" *ngIf="isHorizontal && shouldRenderNavbar">
+    <img class="logo" src="../../../../assets/logo/color-transparent-no-tag.svg" />
   </div>
 </div>

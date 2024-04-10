@@ -8,7 +8,7 @@
     "lib": ["ESNext", "dom"],
     "paths": {
       "@common": ["../common/model/index"],
-      "@frontend/modules/*": ["./src/app/modules/*"]
+      "@frontend/modules/*": ["src/modules/*"]
     }
   },
   "include": ["./src/main.ts", "./src/polyfills.ts"],
