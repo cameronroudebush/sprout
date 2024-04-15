@@ -1,7 +1,6 @@
 {
   "private": true,
   "name": "sprout_frontend",
-  "version": "0.0.1",
   "author": "Cameron Roudebush",
   "license": "ISC",
   "scripts": {

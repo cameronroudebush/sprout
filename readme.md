@@ -13,3 +13,11 @@ TODO
 # How do I contribute to Sprout?
 
 TODO
+
+# Building Sprout for releases
+
+We highly recommend using docker to deploy sprout as everything is easily contained. To build sprout execute:
+
+`npm run build:docker`
+
+This script will automatically handle tagging docker containers and doing any other required capabilities.

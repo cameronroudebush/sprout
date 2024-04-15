@@ -1,11 +1,14 @@
 {
   "private": true,
   "scripts": {
+    "install:all": "npm i && npm i --prefix ./backend && npm i --prefix ./common && npm i --prefix ./frontend --verbose",
+    "build:docker": "cls && ts-node ./scripts/build.docker.ts",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write"
   },
   "devDependencies": {
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2"
   },
   "prettier": {
     "printWidth": 160

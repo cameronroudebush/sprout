@@ -1,5 +1,5 @@
 import { ServerConfig } from "@backend/config/server";
-import { name, version } from "../../package.json";
+import { name } from "../../package.json";
 import { ConfigurationMetadata } from "./configuration.metadata";
 import { PlaidConfiguration } from "./plaid.config";
 
@@ -14,7 +14,8 @@ export class Configuration {
   static server = new ServerConfig();
 
   static get version() {
-    return version;
+    // TODO
+    return "TODO-VERSION";
   }
 
   static get appName() {
