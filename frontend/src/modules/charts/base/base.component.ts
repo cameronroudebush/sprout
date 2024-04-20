@@ -1,14 +1,15 @@
 import { Component, OnInit } from "@angular/core";
-import Chart from "chart.js/auto";
+import Chart, { ChartDataset, ChartOptions, ChartType, ChartTypeRegistry, CoreChartOptions, DefaultDataPoint } from "chart.js/auto";
 
 @Component({
   selector: "chart-base",
   templateUrl: "./base.component.html",
   styleUrls: ["./base.component.scss"],
 })
-export class ChartBaseComponent implements OnInit {
+export abstract class ChartBaseComponent<InternalChartType extends ChartType, DataType = DefaultDataPoint<InternalChartType>> implements OnInit {
   /** The overarching chart element we are currently rendering */
-  chart: Chart | undefined;
+  chart: Chart<InternalChartType> | undefined;
+  abstract chartType: keyof ChartTypeRegistry;
 
   constructor() {}
 
@@ -21,29 +22,26 @@ export class ChartBaseComponent implements OnInit {
     return document.getElementById("chart") as HTMLCanvasElement | undefined;
   }
 
-  /** Initializes our chart with information given */
-  initialize() {
-    this.chart = new Chart(this.chartElement!, {
-      type: "bar",
+  /** Returns the string array of labels for our data sets */
+  abstract get labels(): string[];
 
+  /** Returns the data we intend to use to populate our chart */
+  abstract get data(): ChartDataset<InternalChartType, DataType>[];
+
+  /** Returns the default chart options we are applying */
+  get options() {
+    return { responsive: true, maintainAspectRatio: false } as CoreChartOptions<InternalChartType> as ChartOptions<InternalChartType>;
+  }
+
+  /** Initializes our chart with information given */
+  private initialize() {
+    this.chart = new Chart<InternalChartType>(this.chartElement!, {
+      type: this.chartType as any,
       data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [
-          {
-            label: "# of Votes",
-            data: [12, 19, 3, 5, 2, 3],
-            borderWidth: 1,
-          },
-        ],
+        labels: this.labels,
+        datasets: this.data as any,
       },
-      options: {
-        responsive: true,
-        // scales: {
-        //   y: {
-        //     beginAtZero: true,
-        //   },
-        // },
-      },
+      options: this.options,
     });
   }
 }

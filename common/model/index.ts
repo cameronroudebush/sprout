@@ -6,3 +6,4 @@ export * from "./endpoint";
 export * from "./rest.request";
 export * from "./transaction";
 export * from "./user";
+export * from "./utility";
