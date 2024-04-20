@@ -1,5 +1,17 @@
+:host {
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  flex-flow: column;
+}
+
 .card {
   margin: 0.5rem;
+
+  mat-card-content {
+    height: 100%;
+  }
 
   &.welcome-card {
     text-align: center;

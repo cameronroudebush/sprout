@@ -1,8 +1,8 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
-import { ChartBaseComponent } from "./base/base.component";
+import { LineChartComponent } from "./types/line";
 
-const COMPONENTS = [ChartBaseComponent];
+const COMPONENTS = [LineChartComponent];
 
 @NgModule({
   declarations: COMPONENTS,
