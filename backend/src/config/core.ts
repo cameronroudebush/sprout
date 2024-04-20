@@ -14,8 +14,7 @@ export class Configuration {
   static server = new ServerConfig();
 
   static get version() {
-    // TODO
-    return "TODO-VERSION";
+    return process.env["APP_VERSION"];
   }
 
   static get appName() {

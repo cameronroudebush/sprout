@@ -1,3 +1,4 @@
+import { Configuration } from "@backend/config/core";
 import { Base, RestBody } from "@common";
 
 /** Supported RESTful API req types we currently use */
@@ -25,7 +26,7 @@ export class RestMetadata {
   requiresAuth: boolean;
 
   constructor(queue: string, type: SupportedRestTypes = "GET", requiresAuth = true) {
-    this.queue = queue;
+    this.queue = Configuration.server.apiBasePath + queue;
     this.type = type;
     this.requiresAuth = requiresAuth;
   }

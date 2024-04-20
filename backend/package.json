@@ -9,10 +9,10 @@
     "chalk": "^4.1.0",
     "class-transformer": "^0.5.1",
     "express": "^4.18.3",
+    "express-rate-limit": "^7.2.0",
     "glob": "^10.3.10",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "nodemon": "^3.1.0",
     "plaid": "^22.0.1",
     "reflect-metadata": "^0.2.1",
     "ts-mixer": "^6.0.4",
@@ -25,8 +25,9 @@
     "@types/lodash": "^4.14.202",
     "@types/uuid": "^9.0.8",
     "cross-env": "^7.0.3",
+    "git-describe": "^4.1.1",
     "pkg": "^5.8.1",
-    "rimraf": "^5.0.5",
+    "replace-in-file": "^7.1.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.8",
@@ -35,12 +36,13 @@
     "typescript": "^5.4.2"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=dev nodemon --watch \"src/**\" --watch \"../common/**\" --ext \"ts,json,yml\" --exec \"ts-node -r tsconfig-paths/register  src/main.ts\"",
-    "build": "rimraf dist && npm run build:tsc && pkg package.json",
-    "build:tsc": "tsc && tsc-alias"
+    "start": "ts-node ./build.ts -m dev",
+    "build": "ts-node ./build.ts -m prod"
   },
   "pkg": {
     "assets": [
+      "dist/backend/src/web-api/endpoints/*",
+      "node_modules/axios/**/*",
       "node_modules/plaid/node_modules/axios/**/*"
     ],
     "targets": [

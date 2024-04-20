@@ -1,4 +1,3 @@
-import { Configuration } from "@backend/config/core";
 import { User } from "@backend/model/user";
 import { RestBody } from "@common";
 import { Express, Response } from "express";
@@ -24,7 +23,7 @@ export class RestAPIServer {
   /** Registers all endpoints dynamically from the endpoints folder */
   private async registerEndpoints(root = path.join(__dirname, "endpoints")) {
     Logger.info("Registering REST endpoints...");
-    const endpoints = globSync("*.ts", { cwd: root });
+    const endpoints = globSync("+(*.ts|*.js)", { cwd: root });
     return await Promise.all(
       endpoints.map(async (endpointFile) => {
         await import(path.join(root, endpointFile));
@@ -42,7 +41,7 @@ export class RestAPIServer {
       const badRequest = (error: Error | EndpointError) => res.status((error as any).code || 400).end(error.message || undefined);
       try {
         const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === req.url);
-        if (endpoint == null) throw new EndpointError("No matching endpoint", 400);
+        if (endpoint == null) throw new EndpointError(`No matching endpoint: ${req.url}`, 400);
         // Validate authentication if required
         if (endpoint.metadata.requiresAuth) {
           const authorization = req.headers.authorization;
@@ -86,7 +85,7 @@ export class RestAPIServer {
   /** Sets CORS headers for the given response */
   private setCORSHeaders(res: Response) {
     // TODO
-    if (Configuration.devMode) res.header(`Access-Control-Allow-Origin`, `*`);
+    res.header(`Access-Control-Allow-Origin`, `*`);
     res.header(`Access-Control-Allow-Methods`, `GET,PUT,POST,DELETE,OPTIONS`);
     res.header(`Access-Control-Allow-Headers`, `Content-Type,Authorization`);
   }

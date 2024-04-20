@@ -1,5 +1,6 @@
 import { Configuration } from "@backend/config/core";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { Logger } from "./logger";
 
 /**
@@ -9,6 +10,17 @@ export class CentralServer {
   constructor(public readonly server = express()) {
     Logger.info(`Spinning up Central Server on port ${Configuration.server.port}...`);
     server.listen(Configuration.server.port);
+    server.use(this.rateLimiter);
     server.use(express.json());
+  }
+
+  /** Returns the rate limiter for the express server to attempt to not overwhelm any endpoints */
+  get rateLimiter() {
+    return rateLimit({
+      windowMs: 5 * 60000, // 5 minutes
+      limit: 100, // 100 requests per 5 minutes
+      standardHeaders: "draft-7",
+      legacyHeaders: false,
+    });
   }
 }
