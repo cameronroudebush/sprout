@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "install:all": "npm i && npm i --prefix ./backend && npm i --prefix ./common && npm i --prefix ./frontend --verbose",
-    "build:docker": "cls && ts-node ./scripts/build.docker.ts",
+    "build:docker": "cls && ts-node --project ./common/tsconfig.base.json ./scripts/build.docker.ts",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write"
   },

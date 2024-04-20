@@ -8,7 +8,7 @@ import { RestAPIServer } from "./web-api/server";
 /** Main function for kicking off the application */
 async function main() {
   // Log what program is starting up
-  Logger.success(`Starting ${Configuration.appName} v${Configuration.version} in ${Configuration.devMode ? "development" : "production"} mode`);
+  Logger.success(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.devMode ? "development" : "production"} mode`);
   // Initialize config
   new ConfigurationController().load();
   // Initialize server

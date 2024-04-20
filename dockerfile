@@ -1,4 +1,8 @@
 FROM node:lts-alpine3.19 as base
+
+# Install git
+RUN apk add git
+
 WORKDIR /app
 # Copy and install packages so they can cache
 COPY ./package.json ./package.json
@@ -16,7 +20,20 @@ RUN npm run build --prefix ./frontend
 FROM base as backend-base
 RUN npm run build --prefix ./backend
 
-# FROM nginx:alpine
-# EXPOSE 8000
-# COPY nginx.conf /etc/nginx/nginx.conf
-# COPY --from=builder /build/build /app
+FROM nginx:alpine as prod
+# Using port 80 like normal
+EXPOSE 80
+
+# Set some default env variables
+ENV sprout_server_port=8001
+ENV sprout_server_apiBasePath=/api
+
+# Grab the files we need
+COPY ./frontend/nginx.conf /etc/nginx/nginx.conf
+# Frontend
+COPY --from=frontend-base /app/frontend/www /usr/share/nginx/html
+# Backend
+COPY --from=backend-base --chmod=0755 /app/backend/sprout_backend /sprout_backend
+
+# Start nginx along side backend. Frontend is hosted via nginx, backend runs it's own internal API
+ENTRYPOINT ["/bin/sh", "-c" , "nginx & ./sprout_backend"]

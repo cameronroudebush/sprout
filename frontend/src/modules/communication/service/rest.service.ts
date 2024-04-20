@@ -18,12 +18,11 @@ export class RestService {
 
   /** Attempts to guess the backend URL based on our current connection address since they normally live in the same server */
   private guessBackendURL() {
-    // TODO: Base URL?
     const windowLoc = window.location;
     // Dev mode? These are ran on different ports.
     if (!environment.production) return `${windowLoc.protocol}//${windowLoc.hostname}:8001`;
-    // Https is probably on the same server
-    else return window.location.origin;
+    // Https is probably on the same server with API
+    else return window.location.origin + "/api";
   }
 
   /**
