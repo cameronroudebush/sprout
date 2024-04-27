@@ -8,12 +8,12 @@ type JWTContent = { username: string };
 export class User extends CommonUser {
   /** Returns a fresh JWT for the current user */
   get JWT() {
-    return jwt.sign({ username: this.username } as JWTContent, Configuration.server.secretKey, { expiresIn: Configuration.server.jwtExpirationTime });
+    return jwt.sign({ username: this.username } as JWTContent, Configuration.secretKey, { expiresIn: Configuration.server.jwtExpirationTime });
   }
 
   /** Verifies the given JWT. Throws an error if it is not valid */
   static verifyJWT(jwtString?: string) {
     if (!jwtString) throw new Error("Invalid JWT");
-    return jwt.verify(jwtString, Configuration.server.secretKey);
+    return jwt.verify(jwtString, Configuration.secretKey);
   }
 }

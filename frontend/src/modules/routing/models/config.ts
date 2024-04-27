@@ -16,6 +16,15 @@ export const APP_ROUTES: RouteMetadata[] = [
     },
   },
   {
+    path: RouteURLs.accounts,
+    component: DashboardComponent, // TODO
+    canActivate: [AuthGuard],
+    tabOptions: {
+      label: "Accounts",
+      icon: "list_alt",
+    },
+  },
+  {
     path: RouteURLs.login,
     component: LoginComponent,
   },

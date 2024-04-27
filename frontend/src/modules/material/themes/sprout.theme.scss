@@ -1,7 +1,7 @@
 /**
 * Generated theme by Material Theme Generator
 * https://materialtheme.arcsine.dev
-* Fork at: https://materialtheme.arcsine.dev/?c=YHBhbGV0dGU$YHByaW1hcnk$YF48IzEwMmU0NCIsIj9lcjwjYjdjMGM3IiwiO2VyPCMwOTFkMmR$LCIlPmBePCNiMmZjZmIiLCI~ZXI8I2U4ZmVmZSIsIjtlcjwjOTlmYmY5fiwid2Fybj5gXjwjZmYwMDAwIiwiP2VyPCNmZmIzYjMiLCI7ZXI8I2ZmMDAwMH4sIj9UZXh0PCMwMDAwMDAiLCI~PTwjZmZmZmZmIiwiO1RleHQ8I2ZmZmZmZiIsIjs9PCMxMDJlNDR$LCJmb250cz5bYEA8KC00fixgQDwoLTN$LGBAPCgtMn4sYEA8KC0xfixgQDxoZWFkbGluZX4sYEA8dGl0bGV$LGBAPHN1YiktMn4sYEA8c3ViKS0xfixgQDxib2R5LTJ$LGBAPGJvZHktMX4sYEA8YnV0dG9ufixgQDxjYXB0aW9ufixgQDxpbnB1dCIsInNpemU$bnVsbH1dLCJpY29uczxGaWxsZWQiLCI~bmVzcz5mYWxzZSwidmVyc2lvbj4xM30=
+* Fork at: https://materialtheme.arcsine.dev/?c=YHBhbGV0dGU$YHByaW1hcnk$YF48IzFkMjgzMyIsIj9lcjwjYmJiZmMyIiwiO2VyPCMxMTE4MjB$LCIlPmBePCMxMTYzODMiLCI~ZXI8I2I4ZDBkYSIsIjtlcjwjMGE0NzY2fiwid2Fybj5gXjwjZmYwMDAwIiwiP2VyPCNmZmIzYjMiLCI7ZXI8I2ZmMDAwMH4sIj9UZXh0PCMwMDAwMDAiLCI~PTwjZmZmZmZmIiwiO1RleHQ8I2ZmZmZmZiIsIjs9PCMyNjMxM2N$LCJmb250cz5bYEA8KC00fixgQDwoLTN$LGBAPCgtMn4sYEA8KC0xfixgQDxoZWFkbGluZX4sYEA8dGl0bGV$LGBAPHN1YiktMn4sYEA8c3ViKS0xfixgQDxib2R5LTJ$LGBAPGJvZHktMX4sYEA8YnV0dG9ufixgQDxjYXB0aW9ufixgQDxpbnB1dCIsInNpemU$bnVsbH1dLCJpY29uczxGaWxsZWQiLCI~bmVzcz5mYWxzZSwidmVyc2lvbj4xM30=
 */
 
 @use "@angular/material" as mat;
@@ -93,9 +93,9 @@ $light-bg-darker-10: darken($light-background, 10%);
 $light-bg-darker-20: darken($light-background, 20%);
 $light-bg-darker-30: darken($light-background, 30%);
 $light-bg-lighter-5: lighten($light-background, 5%);
-$dark-bg-tooltip: lighten(#102e44, 20%);
-$dark-bg-alpha-4: rgba(#102e44, 0.04);
-$dark-bg-alpha-12: rgba(#102e44, 0.12);
+$dark-bg-tooltip: lighten(#26313c, 20%);
+$dark-bg-alpha-4: rgba(#26313c, 0.04);
+$dark-bg-alpha-12: rgba(#26313c, 0.12);
 
 $mat-light-theme-background: (
   background: $light-background,
@@ -116,7 +116,7 @@ $mat-light-theme-background: (
 );
 
 // Dark bg
-$dark-background: #2c2c2c;
+$dark-background: #141a1f;
 $dark-bg-lighter-5: lighten($dark-background, 5%);
 $dark-bg-lighter-10: lighten($dark-background, 10%);
 $dark-bg-lighter-20: lighten($dark-background, 20%);
@@ -149,18 +149,18 @@ $mat-dark-theme-background: (
 // Theme Config
 
 body {
-  --primary-color: #102e44;
-  --primary-lighter-color: #5581a3;
-  --primary-darker-color: #091d2d;
+  --primary-color: #1d2833;
+  --primary-lighter-color: #3f5770;
+  --primary-darker-color: #111820;
   --text-primary-color: #{$light-primary-text};
   --text-primary-lighter-color: #{$dark-primary-text};
   --text-primary-darker-color: #{$light-primary-text};
 }
 $mat-primary: (
-  main: #102e44,
-  lighter: #5581a3,
-  darker: #091d2d,
-  200: #102e44,
+  main: #1d2833,
+  lighter: #bbbfc2,
+  darker: #111820,
+  200: #1d2833,
   // For slide toggle,
   contrast:
     (
@@ -172,24 +172,24 @@ $mat-primary: (
 $theme-primary: mat.define-palette($mat-primary, main, lighter, darker);
 
 body {
-  --accent-color: #b2fcfb;
-  --accent-lighter-color: #e8fefe;
-  --accent-darker-color: #99fbf9;
-  --text-accent-color: #{$dark-primary-text};
+  --accent-color: #116383;
+  --accent-lighter-color: #b8d0da;
+  --accent-darker-color: #0a4766;
+  --text-accent-color: #{$light-primary-text};
   --text-accent-lighter-color: #{$dark-primary-text};
-  --text-accent-darker-color: #{$dark-primary-text};
+  --text-accent-darker-color: #{$light-primary-text};
 }
 $mat-accent: (
-  main: #b2fcfb,
-  lighter: #e8fefe,
-  darker: #99fbf9,
-  200: #b2fcfb,
+  main: #116383,
+  lighter: #b8d0da,
+  darker: #0a4766,
+  200: #116383,
   // For slide toggle,
   contrast:
     (
-      main: $dark-primary-text,
-      lighter: $dark-primary-text,
-      darker: $dark-primary-text,
+      main: $light-primary-text,
+      lighter: $light-primary-text,
+      darker: $light-primary-text,
     ),
 );
 $theme-accent: mat.define-palette($mat-accent, main, lighter, darker);
@@ -270,4 +270,9 @@ $altTheme: mat.define-dark-theme(
   .mat-badge-content {
     font-family: "Roboto";
   }
+}
+
+// Extra variables set by us, not auto generated
+body {
+  --app-background: #{$dark-background};
 }

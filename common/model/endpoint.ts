@@ -28,5 +28,6 @@ export module RestEndpoints {
   /** Transaction endpoints for finance data */
   export class transaction {
     static get = "/transaction/get";
+    static getNetWorth = "/transaction/net-worth/get";
   }
 }

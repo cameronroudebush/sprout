@@ -10,7 +10,4 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "How long JWT's should stay valid for users" })
   jwtExpirationTime = "30m";
-
-  /** The App's secret key to create things like JWT's from. This will regenerate on every reboot and can not be overridden. */
-  secretKey = "DEV-KEY"; //  v4(); // TODO: Turn into a real key
 }
