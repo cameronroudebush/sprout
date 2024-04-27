@@ -1,22 +1,38 @@
+import { spawn } from "child_process";
+import fs from "fs";
+import { gitDescribeSync } from "git-describe";
+import nodemon from "nodemon";
+import path from "path";
+import { replaceInFileSync } from "replace-in-file";
+import { replaceTscAliasPaths } from "tsc-alias";
+import { compilerOptions } from "./tsconfig.json";
+
+/** This type helps provide metadata for variables we want to replace */
+type VariableReplace = {
+  /** The path to the file in dist, not including the backend directory within the distribution folder. You also should exclude extensions */
+  path: string;
+  /** Regex of what to replace */
+  from: RegExp;
+  /** A value to replace to */
+  to: string;
+};
+
 /**
  * This file is used to help the build process of the backend by implementing some basic
- *  options and replacing args as needed.
+ *  options and replacing args as needed. This works by compiling the typescript to javascript into a distribution
+ *  directory, replacing some content in it, then either building it with pkg or running it with nodemon.
  *
  * You can pass `-m prod` or `-m dev` to switch between building prod or running a dev env. Not passing a `-m` value
  *  will cause this file to not execute.
  */
-
-import { spawn } from "child_process";
-import fs from "fs";
-import { gitDescribeSync } from "git-describe";
-import path from "path";
-import replace from "replace-in-file";
-import { replaceTscAliasPaths } from "tsc-alias";
-import { compilerOptions } from "./tsconfig.json";
-
 export module BackendBuilder {
+  /** The secret key for development to replace the standard randomly generated secret key. */
+  const developmentSecret = "DEV-KEY";
+  /** The path to the src folder of the backend within the build output */
+  const backendDistributionDir = path.join(__dirname, compilerOptions.outDir, "backend", "src");
+
   function log(...message: any[]) {
-    console.log("[Sprout Backend Builder]", ...message);
+    console.log("[Backend Builder]", ...message);
   }
 
   /** Simple centralized spawn process function for a command so we can implement default capabilities */
@@ -31,44 +47,75 @@ export module BackendBuilder {
   /** Returns our version number based on git describe */
   export function getGitVersion() {
     const gitInfo = gitDescribeSync();
-    let versionNumber = gitInfo.tag!;
-    // Add hash if not clean
-    if (gitInfo.dirty) versionNumber += `-${gitInfo.hash}`;
-    return versionNumber;
+    return gitInfo.distance! > 0 ? gitInfo.raw.replace("-dirty", "") : gitInfo.tag!;
   }
 
   async function main() {
-    // Determine if this is a prod build
-    const isProd = process.argv[2] === "-m" && process.argv[3] === "prod";
-    log(`Starting for ${process.argv[3]} mode...`);
-    const versionNumber = getGitVersion();
-    log(`App version ${versionNumber}`);
-    // Handle prod capabilities
+    const mode = process.argv[3];
+    const isProd = mode === "prod";
+    log(`Starting for ${mode} mode...`);
+
     if (isProd) {
-      process.env["NODE_ENV"] = "prod";
-      // Remove tsconfig output directory
-      fs.rmSync(compilerOptions.outDir, { recursive: true, force: true });
-      // Use TSC to build
-      log(`Building code...`);
-      await spawnProcess("tsc");
-      // Update alias paths
-      log(`Updating TSC Paths...`);
-      await replaceTscAliasPaths();
-      // Update version in config file for distribution
-      log(`Applying Version Number...`);
-      replace({ files: "./dist/backend/src/config/core.js", from: /process.env\["APP_VERSION"\]/g, to: `\"${versionNumber}\"` });
-      // Build executable with pkg
+      await buildDist(isProd);
       log(`Building executable...`);
       await spawnProcess("pkg package.json");
+      log(`Build complete!`);
     } else {
-      // Handle dev capabilities
-      process.env["NODE_ENV"] = "dev";
-      process.env["APP_VERSION"] = versionNumber;
-      // Start the app
-      const extraFilesToWatch = "--watch=" + ["../common/*.ts", "../common/*.json"].join(",");
-      await spawnProcess(`ts-node-dev -r tsconfig-paths/register --respawn --rs ${extraFilesToWatch} ./src/main.ts`);
+      await buildDist(isProd);
+      spawnNodemon();
     }
-    log(`Process Complete!`);
+  }
+
+  /** Spins up the nodemon handler to auto restart on file changes. */
+  function spawnNodemon(
+    isProd = false,
+    config: nodemon.Settings = {
+      exec: `node -r source-map-support/register "${path.join(backendDistributionDir, "main.js")}"`,
+      ext: "ts",
+      watch: ["../common/src", "./src"],
+    },
+  ) {
+    // Monkey patch restart within nodemon so we can rebuild before we restart
+    const runner = require("nodemon/lib/monitor/run");
+    const killRef = runner.kill;
+    runner.kill = async (...args: any[]) => {
+      const shouldRebuild = args[0] == null;
+      if (shouldRebuild) {
+        log("Rebuilding due to changes...");
+        await buildDist(isProd);
+      }
+      killRef(...args); // Call original to restart
+    };
+    nodemon(config);
+  }
+
+  /** Centralized function that builds the distribution to the output directory and handles other required functionality for the dist. */
+  async function buildDist(isProd: boolean, version = getGitVersion()) {
+    log(`App version ${version}`);
+
+    // Build app to distribution
+    log(`Removing existing distribution directory at: ${compilerOptions.outDir}...`);
+    fs.rmSync(compilerOptions.outDir, { recursive: true, force: true });
+    log(`Compiling typescript to javascript...`);
+    await spawnProcess("tsc --project tsconfig.build.json");
+    log("Updating tsconfig paths...");
+    await replaceTscAliasPaths();
+
+    // Apply env variables we wish to replace
+    const replace: VariableReplace[] = [
+      { path: "config/core", from: /APP-VERSION/g, to: version },
+      { path: "config/core", from: /isDevBuild\s=\s\w+;/g, to: `isDevBuild = ${!isProd};` },
+    ];
+    // Replace specifics during development mode
+    if (!isProd) replace.push({ path: "config/core", from: /secretKey\s=\s(uuid.v4\(\));/g, to: `secretKey = "${developmentSecret}";` });
+
+    replaceVars(replace);
+  }
+
+  /** Replaces variables in the built distribution with the given configurations */
+  function replaceVars(varsToReplace: VariableReplace[]) {
+    log(`Applying dynamic variables...`);
+    for (let opt of varsToReplace) replaceInFileSync({ ...opt, files: path.join(backendDistributionDir, opt.path + ".js"), disableGlobs: true });
   }
 
   // Only execute main if this is ran with a -m command.
