@@ -29,6 +29,7 @@
 // @import "./app/modules/material/themes/ionic.scss";
 @import "./modules/material/themes/sprout.theme.scss";
 @import "./modules/material/themes/snackbar.scss";
+@import "./modules/material/themes/card.scss";
 @import "./modules/material/themes/base.scss";
 
 :root,
@@ -37,5 +38,5 @@ body {
   height: 100%;
   width: 100%;
   margin: 0;
-  background-color: var(--mat-app-background-color);
+  background-color: var(--app-background);
 }

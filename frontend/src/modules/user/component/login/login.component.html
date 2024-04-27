@@ -16,7 +16,7 @@
       <!-- Username -->
       <mat-form-field>
         <mat-label>Username</mat-label>
-        <input matInput type="username" formControlName="username" />
+        <input matInput type="username" formControlName="username" autocapitalize="none" />
         <mat-error>{{ form.controls.username.hasError("required") ? "Username is required" : "" }}</mat-error>
       </mat-form-field>
 

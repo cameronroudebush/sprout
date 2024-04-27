@@ -4,11 +4,12 @@
   overflow: hidden;
   width: 100%;
   flex-flow: column;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  gap: 0.25rem;
 }
 
 .card {
-  margin: 0.5rem;
-
   mat-card-content {
     height: 100%;
   }

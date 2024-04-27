@@ -2,129 +2,78 @@
   height: 100%;
   width: 100%;
   display: flex;
+  flex-flow: column;
 
-  /* On screens that are 768px or less, set navbar to horizontal */
-  @media screen and (max-width: 768px) {
-    flex-flow: column-reverse;
+  // Styling for both navbars
+  .nav {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background-color: var(--primary-color);
+    height: 3.5rem;
+    align-items: center;
   }
 
-  .top-content {
-    background-color: var(--primary-darker-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0.25rem;
+  .top-navbar {
+    justify-content: space-between;
+    border-bottom: 0.25rem solid var(--accent-color);
 
-    img {
-      width: 25%;
+    .user-button {
+      height: 100%;
+      display: flex;
+      border-radius: 0;
+      width: fit-content;
+
+      .button-content {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+
+        .name {
+          padding-left: 1rem;
+        }
+      }
+    }
+
+    .logo {
+      max-height: 80%;
+      padding-right: 1rem;
     }
   }
 
   .outlet-wrapper {
-    height: 100%;
-    width: 100%;
-    flex: 10;
+    flex: 8;
   }
-}
 
-.navbar {
-  display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
-  background-color: var(--primary-darker-color);
-  width: fit-content;
-  width: 100%;
-  height: 100%;
-  flex: 0;
+  .bottom-navbar {
+    border-top: 0.25rem solid var(--accent-color);
+    padding: 0;
 
-  .content {
-    width: 20vw;
-    min-width: 220px;
-    max-width: 300px;
-    height: 100%;
-    padding: 1rem 2rem;
-    gap: 1rem 0;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-flow: column;
-
-    &.horizontal {
-      width: 100%;
-      min-width: 100%;
-      padding: 0;
-    }
-
-    img {
-      width: 100%;
-    }
-
-    .separator {
-      background-color: var(--accent-color);
-      height: 0.25rem;
-      border-radius: 0.5rem;
-      width: 100%;
-    }
-
-    .button-group {
-      width: 100%;
+    .route-button {
       height: 100%;
-      display: flex;
-      flex-flow: column;
+      flex: 1;
+      border-radius: 0;
+      background-color: var(--primary-color);
 
-      .button-footer-separator {
-        flex: 9;
-      }
-
-      &.horizontal {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-flow: row;
-      }
-
-      .navbar-button {
-        width: 100%;
+      &.active-route {
         background-color: var(--accent-color);
-        color: var(--text-accent-color);
+      }
 
-        &.horizontal {
-          width: fit-content;
-          border-radius: 0;
-          height: fit-content;
-          flex: 1;
-        }
-
-        &.active-route {
-          background-color: var(--accent-darker-color);
-          color: var(--text-accent-darker-color);
-        }
-
-        .mdc-button__label {
-          width: 100%;
-        }
-
-        .button-content {
-          display: flex;
-          justify-content: space-between;
-          flex-flow: row;
-          box-sizing: border-box;
-
-          &.horizontal {
-            justify-content: center;
-            align-items: center;
-            flex-flow: column;
-            padding: 0;
-            gap: 0;
-          }
-        }
+      .button-content {
+        display: flex;
+        flex-flow: column;
+        align-items: center;
       }
     }
   }
 }
 
-::ng-deep .navbar-button .mdc-button__label {
+::ng-deep .core-container .nav .mdc-button__label {
   width: 100%;
+}
+
+::ng-deep .core-container .user-button .mdc-icon-button__ripple {
+  border-radius: 0;
 }
