@@ -5,9 +5,11 @@
     "sourceMap": true,
     "paths": {
       "@common": ["../common/model/index"],
+      "@backend/logger": ["./src/logger"],
       "@backend/financeAPI/*": ["./src/finance-api/*"],
       "@backend/config/*": ["./src/config/*"],
-      "@backend/model/*": ["./src/model/*"]
+      "@backend/model/*": ["./src/model/*"],
+      "@backend/database/*": ["./src/database/*"]
     }
   },
   "include": ["./src/**/*", "../common/src/**/*"]

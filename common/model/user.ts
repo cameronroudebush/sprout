@@ -2,12 +2,20 @@ import { Base, DBBase } from "./base";
 
 /** This class defines shared user information available to the clients */
 export class User extends DBBase {
+  firstName: string;
+  lastName: string;
   /** The current username for this user */
   username: string;
 
-  constructor(id: number, username: string) {
+  get prettyName() {
+    return this.firstName + " " + this.lastName;
+  }
+
+  constructor(id: number, username: string, firstName: string, lastName: string) {
     super(id);
     this.username = username;
+    this.firstName = firstName;
+    this.lastName = lastName;
   }
 }
 

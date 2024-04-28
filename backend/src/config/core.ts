@@ -1,3 +1,4 @@
+import { DatabaseConfig } from "@backend/config/db.config";
 import { ServerConfig } from "@backend/config/server";
 import * as uuid from "uuid";
 import { name } from "../../package.json";
@@ -13,6 +14,9 @@ export class Configuration {
 
   @ConfigurationMetadata.assign({ comment: "Core server config options" })
   static server = new ServerConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Database specific optioons" })
+  static database = new DatabaseConfig();
 
   /** This variable contains the application version of this build. This will be replaced by {@link build.ts}. */
   static version = "APP-VERSION";
