@@ -5,7 +5,7 @@
     <button mat-icon-button class="user-button" [matMenuTriggerFor]="userMenu">
       <div class="button-content">
         <mat-icon>account_circle</mat-icon>
-        <span class="name">{{ currentUser?.username }}</span>
+        <span class="name">{{ currentUser?.prettyName }}</span>
       </div>
     </button>
     <mat-menu class="user-menu" #userMenu="matMenu">

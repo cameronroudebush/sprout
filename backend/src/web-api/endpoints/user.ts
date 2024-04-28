@@ -7,7 +7,7 @@ export class UserAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.user.login, "POST", false))
   async login(request: RestBody) {
     const userRequest = UserLoginRequest.fromPlain(request.payload);
-    const user = User.fromPlain({ id: 1, username: userRequest.username });
+    const user = User.fromPlain({ id: 1, username: userRequest.username, firstName: "John", lastName: "Demo" });
     // throw new Error("Login Failed");
     // TODO actual authentication
     return UserLoginResponse.fromPlain({ user: user, jwt: user.JWT });

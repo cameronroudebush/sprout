@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import { gitDescribeSync } from "git-describe";
+import { debounce } from "lodash";
 import nodemon from "nodemon";
 import path from "path";
 import { replaceInFileSync } from "replace-in-file";
@@ -26,6 +27,8 @@ type VariableReplace = {
  *  will cause this file to not execute.
  */
 export module BackendBuilder {
+  /** Tracks whenever the builder is currently running */
+  let isBuilding = false;
   /** The secret key for development to replace the standard randomly generated secret key. */
   const developmentSecret = "DEV-KEY";
   /** The path to the src folder of the backend within the build output */
@@ -41,6 +44,9 @@ export module BackendBuilder {
       const proc = spawn(command, { cwd, stdio: "inherit", shell: true });
       proc.on("close", res);
       proc.on("error", rej);
+      proc.on("exit", (code) => {
+        if (code !== 0) rej(code);
+      });
     });
   }
 
@@ -60,14 +66,11 @@ export module BackendBuilder {
       log(`Building executable...`);
       await spawnProcess("pkg package.json");
       log(`Build complete!`);
-    } else {
-      await buildDist(isProd);
-      spawnNodemon();
-    }
+    } else await spawnNodemon();
   }
 
   /** Spins up the nodemon handler to auto restart on file changes. */
-  function spawnNodemon(
+  async function spawnNodemon(
     isProd = false,
     config: nodemon.Settings = {
       exec: `node -r source-map-support/register "${path.join(backendDistributionDir, "main.js")}"`,
@@ -75,22 +78,35 @@ export module BackendBuilder {
       watch: ["../common/src", "./src"],
     },
   ) {
+    const buildDebounce = debounce(buildDist, 100, { leading: true });
     // Monkey patch restart within nodemon so we can rebuild before we restart
     const runner = require("nodemon/lib/monitor/run");
     const killRef = runner.kill;
     runner.kill = async (...args: any[]) => {
-      const shouldRebuild = args[0] == null;
-      if (shouldRebuild) {
-        log("Rebuilding due to changes...");
-        await buildDist(isProd);
-      }
-      killRef(...args); // Call original to restart
+      try {
+        const shouldRebuild = args[0] == null;
+        if (shouldRebuild) {
+          if (isBuilding) {
+            log("Cancelling previous builds...");
+            buildDebounce.cancel();
+          }
+          log("Rebuilding due to changes...");
+          const called = buildDebounce(isProd);
+          if (!called) return;
+          else {
+            await called;
+            killRef(...args); // Call original to restart
+          }
+        }
+      } catch {}
     };
+    await buildDebounce(isProd);
     nodemon(config);
   }
 
   /** Centralized function that builds the distribution to the output directory and handles other required functionality for the dist. */
   async function buildDist(isProd: boolean, version = getGitVersion()) {
+    isBuilding = true;
     log(`App version ${version}`);
 
     // Build app to distribution
@@ -110,6 +126,7 @@ export module BackendBuilder {
     if (!isProd) replace.push({ path: "config/core", from: /secretKey\s=\s(uuid.v4\(\));/g, to: `secretKey = "${developmentSecret}";` });
 
     replaceVars(replace);
+    isBuilding = false;
   }
 
   /** Replaces variables in the built distribution with the given configurations */

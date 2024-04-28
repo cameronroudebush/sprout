@@ -1,3 +1,5 @@
+import { Database } from "@backend/database/source";
+import { User } from "@backend/model/user";
 import "reflect-metadata";
 import { CentralServer } from "./central.server";
 import { ConfigurationController } from "./config/controller";
@@ -11,6 +13,9 @@ async function main() {
   Logger.success(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
   // Initialize config
   new ConfigurationController().load();
+  // Initialize database
+  await Database.init();
+  User.find({ where: { username: "foobar" } });
   // Initialize server
   const centralServer = new CentralServer();
   await new RestAPIServer(centralServer.server).initialize();

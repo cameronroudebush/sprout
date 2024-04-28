@@ -1,12 +1,21 @@
+import { Configuration } from "@backend/config/core";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
-import { Configuration } from "./config/core";
 
-type LogConfig = { header?: string };
+/** Logger configuration options for our console */
+export type LogConfig = {
+  /** Header to display after the date of the log */
+  header?: string;
+  /**
+   * If we should prepend the information of who logged this content
+   * @default true
+   */
+  shouldPrependLoggerFile?: boolean;
+};
 
 // Clear console when Logger is created
-console.clear();
+// console.clear();
 /**
  * This class is used to log our data to the console and wherever else we determine
  */
@@ -31,7 +40,7 @@ export class Logger {
    */
   private static log(info: string, config: LogConfig & { color: chalk.Chalk }) {
     // Set a default log header
-    if (!config.header) config.header = this.getLoggerFile();
+    if (config.shouldPrependLoggerFile ?? true) config.header = this.getLoggerFile() + (config.header || "");
     // Show header if wanted
     let text = `[${this.getConsoleLogHeader()}]${config.header}: ${info}`;
     // Show coloring if given
@@ -69,6 +78,6 @@ export class Logger {
     const splitContent = filePathToSrc.split(path.sep);
     splitContent.shift(); // Remove the first one as it's just going to be src
     // Loop over total directories and return that
-    return splitContent.reduce((a, b) => (a += `[${b.replace(".ts", "")}]`), "");
+    return splitContent.reduce((a, b) => (a += `[${b.replace(".ts", "").replace(".js", "")}]`), "");
   }
 }
