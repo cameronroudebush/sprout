@@ -7,7 +7,7 @@ const fakeData = Array.from({ length: 10 }).map(() =>
 );
 
 export class TransactionAPI {
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.get, "POST", false))
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.get, "POST"))
   async getTransactions(request: RestBody) {
     const parsedRequest = TransactionRequest.fromPlain(request.payload);
     console.log(parsedRequest);
@@ -17,7 +17,7 @@ export class TransactionAPI {
   /**
    * Returns the last year of net worth data
    */
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getNetWorth, "GET", false))
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getNetWorth, "GET"))
   async getNetWorth(request: RestBody) {
     const parsedRequest = TransactionRequest.fromPlain(request.payload);
     console.log(parsedRequest);

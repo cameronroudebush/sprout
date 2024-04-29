@@ -12,6 +12,7 @@ import { UserModule } from "@frontend/modules/user/user.module";
 import { StoreModule } from "@ngrx/store";
 import { DashboardComponent } from "./component/dashboard/dashboard.component";
 import { AppComponent } from "./core.component";
+import { ConfigService } from "./service/config.service";
 
 const COMPONENTS = [AppComponent, DashboardComponent];
 
@@ -31,7 +32,7 @@ const COMPONENTS = [AppComponent, DashboardComponent];
     FinanceModule,
     ChartsModule,
   ],
-  providers: [],
+  providers: [ConfigService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

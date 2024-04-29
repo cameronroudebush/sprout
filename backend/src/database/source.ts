@@ -13,13 +13,13 @@ class InternalDatabase {
   /** Initializes the database based on the backend configuration */
   async init() {
     this.source = new DataSource(Configuration.database.dbConfig);
-    Logger.info(`Attempting SQLite connection at ${this.source.options.database}`, this.logOptions);
+    Logger.info(`Attempting SQLite connection at: ${this.source.options.database}`, this.logOptions);
     await this.source.initialize();
     Logger.info(`Connection successful`, this.logOptions);
     if (!(await this.databaseExists())) {
       Logger.info("Initializing a new database", this.logOptions);
     }
-    await this.checkForMigrations();
+    await this.runAutoMigrations();
     Logger.success("Database initialized! Ready for queries.", this.logOptions);
   }
 
@@ -35,17 +35,31 @@ class InternalDatabase {
     if (source == null) throw new Error("Database not initialized. Did you forget to call `init`?");
   }
 
-  /** Using the current data source, checks if any migrations are required and throws an error if they are. */
-  private async checkForMigrations(source = this.source) {
-    Logger.info("Checking for migrations...", this.logOptions);
+  /** Generates migrations automatically and runs them against the database. */
+  private async runAutoMigrations(source = this.source) {
+    // TODO: Replace this with real migrations for production
     this.validateSource(source);
-    const sqlInMemory = await source.driver.createSchemaBuilder().log();
-    const migrationsRequired = sqlInMemory.upQueries.length !== 0;
-    if (migrationsRequired)
-      if (Configuration.isDevBuild) throw new Error(`Database migrations are required. Did you forget to run the migration generation command?`);
-      else throw new Error(`Database migrations are required. Refusing to continue.`);
-    else Logger.info("No migration required!", this.logOptions);
+    const upQueries = (await source.driver.createSchemaBuilder().log()).upQueries;
+    if (upQueries.length > 0) {
+      Logger.warn(`Running auto migrations for ${upQueries.length} queries.`, this.logOptions);
+      const queries = upQueries.map((x) => x.query);
+      await source.transaction(async (manager) => {
+        for (let query of queries) await manager.query(query);
+      });
+    } else Logger.info("No migration required!", this.logOptions);
   }
+
+  // /** Using the current data source, checks if any migrations are required and throws an error if they are. */
+  // private async checkForMigrations(source = this.source) {
+  //   Logger.info("Checking for migrations...", this.logOptions);
+  //   this.validateSource(source);
+  //   const sqlInMemory = await source.driver.createSchemaBuilder().log();
+  //   const migrationsRequired = sqlInMemory.upQueries.length !== 0;
+  //   if (migrationsRequired)
+  //     if (Configuration.isDevBuild) throw new Error(`Database migrations are required. Did you forget to run the migration generation command?`);
+  //     else throw new Error(`Database migrations are required. Refusing to continue.`);
+  //   else Logger.info("No migration required!", this.logOptions);
+  // }
 
   //   /** Executes any available migrations */
   //   private async executeMigrations(source = this.source) {

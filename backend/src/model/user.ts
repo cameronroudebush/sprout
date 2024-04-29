@@ -21,6 +21,9 @@ export class User extends Mixin(CommonUser, DatabaseBase) {
   @DatabaseDecorators.column()
   declare username: string;
 
+  @DatabaseDecorators.column()
+  declare admin: boolean;
+
   /** Hashed password in the database to compare against */
   @DatabaseDecorators.column()
   @Exclude({ toClassOnly: true })

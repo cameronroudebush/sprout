@@ -15,7 +15,7 @@ export type LogConfig = {
 };
 
 // Clear console when Logger is created
-// console.clear();
+console.clear();
 /**
  * This class is used to log our data to the console and wherever else we determine
  */

@@ -16,8 +16,8 @@ export class Column<T extends Base> {
 
 @Component({
   selector: "shared-table[data][columns]",
-  templateUrl: "./shared-table.component.html",
-  styleUrls: ["./shared-table.component.scss"],
+  templateUrl: "./table.component.html",
+  styleUrls: ["./table.component.scss"],
 })
 export class SharedTableComponent<T extends Base> implements OnInit, OnChanges {
   /** The header columns we want to display in this table */
@@ -28,6 +28,8 @@ export class SharedTableComponent<T extends Base> implements OnInit, OnChanges {
   @Input() data!: T[];
 
   constructor() {}
+  // TODO: Guess table size
+  // TODO: Paginator
 
   ngOnChanges(changes: AngularCustomTypes.ImprovedChanges<SharedTableComponent<T>>): void {
     if (changes.columns) this.updateDisplayColumns(changes.columns.currentValue);

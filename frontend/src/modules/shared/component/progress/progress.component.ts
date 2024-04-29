@@ -6,8 +6,8 @@ import { Component, Input, OnInit } from "@angular/core";
  */
 @Component({
   selector: "shared-progress",
-  templateUrl: "./shared-progress.component.html",
-  styleUrls: ["./shared-progress.component.scss"],
+  templateUrl: "./progress.component.html",
+  styleUrls: ["./progress.component.scss"],
 })
 export class SharedProgressComponent implements OnInit {
   /** If given false, we should display the spinner to show the component is not rendered */
