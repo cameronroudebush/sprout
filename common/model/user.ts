@@ -6,16 +6,18 @@ export class User extends DBBase {
   lastName: string;
   /** The current username for this user */
   username: string;
+  admin: boolean = false;
 
   get prettyName() {
     return this.firstName + " " + this.lastName;
   }
 
-  constructor(id: number, username: string, firstName: string, lastName: string) {
+  constructor(id: number, username: string, firstName: string, lastName: string, admin = false) {
     super(id);
     this.username = username;
     this.firstName = firstName;
     this.lastName = lastName;
+    this.admin = admin;
   }
 }
 

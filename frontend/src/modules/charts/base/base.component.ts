@@ -1,25 +1,30 @@
-import { Component, OnInit } from "@angular/core";
+import { AfterViewInit, Component, OnInit } from "@angular/core";
 import Chart, { ChartDataset, ChartOptions, ChartType, ChartTypeRegistry, CoreChartOptions, DefaultDataPoint } from "chart.js/auto";
+import { v4 } from "uuid";
 
 @Component({
   selector: "chart-base",
   templateUrl: "./base.component.html",
   styleUrls: ["./base.component.scss"],
 })
-export abstract class ChartBaseComponent<InternalChartType extends ChartType, DataType = DefaultDataPoint<InternalChartType>> implements OnInit {
+export abstract class ChartBaseComponent<InternalChartType extends ChartType, DataType = DefaultDataPoint<InternalChartType>> implements OnInit, AfterViewInit {
+  /** Canvas ID for the chart */
+  chartId = v4();
   /** The overarching chart element we are currently rendering */
   chart: Chart<InternalChartType> | undefined;
   abstract chartType: keyof ChartTypeRegistry;
 
   constructor() {}
 
-  ngOnInit() {
+  ngAfterViewInit(): void {
     this.initialize();
   }
 
+  ngOnInit() {}
+
   /** Returns the chart element from the DOM */
   get chartElement() {
-    return document.getElementById("chart") as HTMLCanvasElement | undefined;
+    return document.getElementById(this.chartId) as HTMLCanvasElement | undefined;
   }
 
   /** Returns the string array of labels for our data sets */

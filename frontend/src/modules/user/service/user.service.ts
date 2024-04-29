@@ -4,6 +4,7 @@ import { RestBody, User, UserLoginRequest, UserLoginResponse } from "@common";
 import { RestService } from "@frontend/modules/communication/service/rest.service";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
 import { RouterService } from "@frontend/modules/routing/service/router.service";
+import { ServiceBase } from "@frontend/modules/shared/service/base";
 import { SnackbarService } from "@frontend/modules/shared/service/snackbar.service";
 import { UserState } from "@frontend/modules/user/store/user.state";
 import { Store } from "@ngrx/store";
@@ -12,7 +13,7 @@ import { UserActions } from "../store/user.actions";
 @Injectable({
   providedIn: "root",
 })
-export class UserService {
+export class UserService extends ServiceBase {
   /** Key for local storage for the cached JWT */
   static readonly CACHED_JWT_KEY = "jwt";
   constructor(
@@ -20,7 +21,13 @@ export class UserService {
     private restService: RestService,
     private routerService: RouterService,
     private snackbarService: SnackbarService,
-  ) {}
+  ) {
+    super();
+  }
+
+  override async initialize() {
+    console.log("Initialize");
+  }
 
   /** Centralized function to handle login request and responses */
   private async handleLoginReq(request: { (): Promise<RestBody<UserLoginResponse>> }) {

@@ -48,12 +48,11 @@ export class RestService {
 
   /** Returns headers to add to every message */
   get messageHeaders() {
-    const headers = new HttpHeaders({
+    let headers = new HttpHeaders({
       "Content-Type": "application/json", // Let the backend know our messages are JSON format
     });
-    // Get JWT of logged in user
-    const authToken = this.injector.get(UserService).cachedJWT;
-    if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+    const authToken = this.injector.get(UserService).cachedJWT; // Prevents circular dependency
+    if (authToken) headers = headers.set("Authorization", `Bearer ${authToken}`);
     return headers;
   }
 }
