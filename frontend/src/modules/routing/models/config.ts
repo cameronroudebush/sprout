@@ -1,4 +1,5 @@
 import { DashboardComponent } from "@frontend/modules/core/component/dashboard/dashboard.component";
+import { HomeSetupComponent } from "@frontend/modules/setup/component/home/home.component";
 import { LoginComponent } from "@frontend/modules/user/component/login/login.component";
 import { AuthGuard } from "@frontend/modules/user/guard/auth.guard";
 import { RouteMetadata } from "./route.metadata";
@@ -24,9 +25,17 @@ export const APP_ROUTES: RouteMetadata[] = [
       icon: "list_alt",
     },
   },
+  //// ------------ Setup Module ------------
+  {
+    path: RouteURLs.setup,
+    component: HomeSetupComponent,
+    shouldRenderNav: false,
+  },
+  //// ------------ Base Capability ------------
   {
     path: RouteURLs.login,
     component: LoginComponent,
+    shouldRenderNav: false,
   },
   // Always default to login if no users available
   { path: "**", redirectTo: RouteURLs.login },

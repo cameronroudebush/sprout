@@ -1,11 +1,11 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import { gitDescribeSync } from "git-describe";
-import { debounce } from "lodash";
 import nodemon from "nodemon";
 import path from "path";
 import { replaceInFileSync } from "replace-in-file";
 import { replaceTscAliasPaths } from "tsc-alias";
+import { CancellablePromise, Utility } from "../common/model/utility";
 import { compilerOptions } from "./tsconfig.json";
 
 /** This type helps provide metadata for variables we want to replace */
@@ -27,8 +27,8 @@ type VariableReplace = {
  *  will cause this file to not execute.
  */
 export module BackendBuilder {
-  /** Tracks whenever the builder is currently running */
-  let isBuilding = false;
+  /** Tracks running build tasks. */
+  const builds: CancellablePromise<void>[] = [];
   /** The secret key for development to replace the standard randomly generated secret key. */
   const developmentSecret = "DEV-KEY";
   /** The path to the src folder of the backend within the build output */
@@ -73,60 +73,83 @@ export module BackendBuilder {
   async function spawnNodemon(
     isProd = false,
     config: nodemon.Settings = {
-      exec: `node -r source-map-support/register "${path.join(backendDistributionDir, "main.js")}"`,
+      exec: `node "${path.join(backendDistributionDir, "main.js")}"`,
       ext: "ts",
-      watch: ["../common/src", "./src"],
+      watch: ["../common/model", "./src"],
     },
   ) {
-    const buildDebounce = debounce(buildDist, 100, { leading: true });
     // Monkey patch restart within nodemon so we can rebuild before we restart
     const runner = require("nodemon/lib/monitor/run");
     const killRef = runner.kill;
+    const bus = require("nodemon/lib/utils/bus");
     runner.kill = async (...args: any[]) => {
       try {
         const shouldRebuild = args[0] == null;
         if (shouldRebuild) {
-          if (isBuilding) {
+          // Kill execution before rebuilding so the backend actually stops. Nodemon internal call.
+          killRef(true);
+          // Cancel any running builds
+          if (builds.length > 0) {
             log("Cancelling previous builds...");
-            buildDebounce.cancel();
-          }
-          log("Rebuilding due to changes...");
-          const called = buildDebounce(isProd);
+            for (let build of builds) build.cancel();
+          } else log("Rebuilding due to changes...");
+          // Fire the actual build
+          const called = buildDist(isProd);
           if (!called) return;
           else {
             await called;
-            killRef(...args); // Call original to restart
+            // Once the call is complete for the rebuild, start the process again using more nodemon internal calls.
+            bus.once("start", () => {});
+            runner.restart();
           }
         }
       } catch {}
     };
-    await buildDebounce(isProd);
+    await buildDist(isProd);
     nodemon(config);
   }
 
   /** Centralized function that builds the distribution to the output directory and handles other required functionality for the dist. */
   async function buildDist(isProd: boolean, version = getGitVersion()) {
-    isBuilding = true;
-    log(`App version ${version}`);
+    const promise = new CancellablePromise<void>(async function (this: CancellablePromise<void>, res, rej) {
+      try {
+        await Utility.delay(50); // Artificial wait for large number file changes. This allows multiple files being saved at once to not even start building as we'll get multiple build calls.
+        this.check();
+        log(`App version ${version}`);
 
-    // Build app to distribution
-    log(`Removing existing distribution directory at: ${compilerOptions.outDir}...`);
-    fs.rmSync(compilerOptions.outDir, { recursive: true, force: true });
-    log(`Compiling typescript to javascript...`);
-    await spawnProcess("tsc --project tsconfig.build.json");
-    log("Updating tsconfig paths...");
-    await replaceTscAliasPaths();
+        // Build app to distribution
+        log(`Removing existing distribution directory at: ${compilerOptions.outDir}...`);
+        fs.rmSync(compilerOptions.outDir, { recursive: true, force: true });
+        this.check();
+        log(`Compiling typescript to javascript...`);
+        await spawnProcess("tsc --project tsconfig.build.json");
+        this.check();
+        log("Updating tsconfig paths...");
+        await replaceTscAliasPaths();
+        this.check();
 
-    // Apply env variables we wish to replace
-    const replace: VariableReplace[] = [
-      { path: "config/core", from: /APP-VERSION/g, to: version },
-      { path: "config/core", from: /isDevBuild\s=\s\w+;/g, to: `isDevBuild = ${!isProd};` },
-    ];
-    // Replace specifics during development mode
-    if (!isProd) replace.push({ path: "config/core", from: /secretKey\s=\s(uuid.v4\(\));/g, to: `secretKey = "${developmentSecret}";` });
+        // Apply env variables we wish to replace
+        const replace: VariableReplace[] = [
+          { path: "config/core", from: /APP-VERSION/g, to: version },
+          { path: "config/core", from: /isDevBuild\s=\s\w+;/g, to: `isDevBuild = ${!isProd};` },
+        ];
+        // Replace specifics during development mode
+        if (!isProd) replace.push({ path: "config/core", from: /secretKey\s=\s(uuid.v4\(\));/g, to: `secretKey = "${developmentSecret}";` });
 
-    replaceVars(replace);
-    isBuilding = false;
+        replaceVars(replace);
+        this.check();
+        res();
+      } catch (e) {
+        rej(e);
+      } finally {
+        // Remove our tracked build
+        const index = builds.findIndex((x) => x === promise);
+        if (index !== -1) builds.splice(index, 1);
+      }
+    });
+    // Push current build
+    builds.push(promise);
+    return promise;
   }
 
   /** Replaces variables in the built distribution with the given configurations */

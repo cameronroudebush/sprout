@@ -15,14 +15,14 @@ mat.$theme-ignore-duplication-warnings: true;
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
 
 $fontConfig: mat.define-typography-config(
-  $headline-1: mat.define-typography-level(34px, 40px, 400, "Roboto", 0.0074em),
-  $headline-2: mat.define-typography-level(45px, 48px, 400, "Roboto", 0em),
-  $headline-3: mat.define-typography-level(56px, 56px, 400, "Roboto", -0.0089em),
-  $headline-4: mat.define-typography-level(112px, 112px, 300, "Roboto", -0.0134em),
-  $headline-5: mat.define-typography-level(24px, 32px, 400, "Roboto", 0em),
-  $headline-6: mat.define-typography-level(20px, 32px, 500, "Roboto", 0.0075em),
-  $subtitle-1: mat.define-typography-level(15px, 24px, 500, "Roboto", 0.0067em),
-  $subtitle-2: mat.define-typography-level(16px, 28px, 400, "Roboto", 0.0094em),
+  $headline-1: mat.define-typography-level(34px, 1, 400, "Roboto", 0.0074em),
+  $headline-2: mat.define-typography-level(45px, 1, 400, "Roboto", 0em),
+  $headline-3: mat.define-typography-level(56px, 1, 400, "Roboto", -0.0089em),
+  $headline-4: mat.define-typography-level(112px, 1, 300, "Roboto", -0.0134em),
+  $headline-5: mat.define-typography-level(24px, 1, 400, "Roboto", 0em),
+  $headline-6: mat.define-typography-level(20px, 1, 500, "Roboto", 0.0075em),
+  $subtitle-1: mat.define-typography-level(15px, 1, 500, "Roboto", 0.0067em),
+  $subtitle-2: mat.define-typography-level(16px, 1, 400, "Roboto", 0.0094em),
   $body-1: mat.define-typography-level(14px, 20px, 400, "Roboto", 0.0179em),
   $body-2: mat.define-typography-level(14px, 24px, 500, "Roboto", 0.0179em),
   $button: mat.define-typography-level(14px, 14px, 500, "Roboto", 0.0893em),

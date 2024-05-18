@@ -1,0 +1,9 @@
+<div class="overarching">
+  <img class="logo" src="../../../../assets/logo/icon/favicon-color.svg" />
+  <!-- Render each specific step -->
+  <ng-container *ngFor="let step of steps; let i = index">
+    <ng-container *ngIf="step.step === currentStep">
+      <ng-container *ngComponentOutlet="step.component; inputs: { click: setCurrentStep.bind(this, steps[i + 1]?.step) }" />
+    </ng-container>
+  </ng-container>
+</div>
