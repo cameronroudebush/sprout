@@ -8,6 +8,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatStepperModule } from "@angular/material/stepper";
 import { MatTableModule } from "@angular/material/table";
 import { IonicModule } from "@ionic/angular";
 
@@ -25,6 +26,7 @@ const MODULES = [
   MatMenuModule,
   MatTableModule,
   MatCardModule,
+  MatStepperModule,
 ];
 
 /** A module that provides the necessary material components we use across this app */

@@ -1,27 +1,36 @@
 import { Injectable } from "@angular/core";
-import { Configuration, User } from "@common";
+import { CombinedExternalConfig, UnsecureAppConfiguration, User } from "@common";
 import { RestService } from "@frontend/modules/communication/service/rest.service";
 import { ServiceBase } from "@frontend/modules/shared/service/base";
+import { merge } from "lodash";
 
 @Injectable({
   providedIn: "root",
 })
 export class ConfigService extends ServiceBase {
   /** Currently loaded application configuration given from the backend */
-  config: Configuration | undefined;
+  config: CombinedExternalConfig | undefined;
   constructor(private restService: RestService) {
     super();
   }
 
-  override async onUserAuthenticated(_user: User) {
-    // This won't change
-    if (this.config == null) await this.getBackendConfig();
+  override async initialize() {
+    await this.getUnsecuredConfig();
   }
 
-  /** Gets backend configuration information from the backend */
-  async getBackendConfig() {
-    const result = await this.restService.get<Configuration>("conf.get");
-    this.config = result.payload;
-    console.log(this.config);
+  override async onUserAuthenticated(_user: User) {
+    await this.getSecuredConfig();
+  }
+
+  /** Retrieves unsecured backend config information */
+  async getUnsecuredConfig() {
+    const result = await this.restService.get<UnsecureAppConfiguration>("conf.getUnsecure");
+    this.config = merge(this.config, result.payload);
+  }
+
+  /** Retrieves additional configuration information that is secured by user authentication */
+  async getSecuredConfig() {
+    const result = await this.restService.get<UnsecureAppConfiguration>("conf.getUnsecure");
+    this.config = merge(this.config, result.payload);
   }
 }

@@ -1,5 +1,6 @@
 import { Database } from "@backend/database/source";
 import "reflect-metadata";
+import "source-map-support/register";
 import { CentralServer } from "./central.server";
 import { ConfigurationController } from "./config/controller";
 import { Configuration } from "./config/core";

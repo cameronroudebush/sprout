@@ -7,6 +7,7 @@ import { CommunicationModule } from "@frontend/modules/communication/communicati
 import { FinanceModule } from "@frontend/modules/finance/finance.module";
 import { MaterialModule } from "@frontend/modules/material/material.module";
 import { RoutingModule } from "@frontend/modules/routing/routing.module";
+import { SetupModule } from "@frontend/modules/setup/setup.module";
 import { SharedModule } from "@frontend/modules/shared/shared.module";
 import { UserModule } from "@frontend/modules/user/user.module";
 import { StoreModule } from "@ngrx/store";
@@ -31,6 +32,7 @@ const COMPONENTS = [AppComponent, DashboardComponent];
     SharedModule,
     FinanceModule,
     ChartsModule,
+    SetupModule,
   ],
   providers: [ConfigService],
   bootstrap: [AppComponent],

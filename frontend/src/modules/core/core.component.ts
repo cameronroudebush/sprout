@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
 import { User } from "@common";
 import { APP_ROUTES } from "@frontend/modules/routing/models/config";
-import { RouteURLs } from "@frontend/modules/routing/models/url";
 import { RouterService } from "@frontend/modules/routing/service/router.service";
 import { SubscribingComponent } from "@frontend/modules/shared/component/subscribing-component/subscribing.component";
 import { UserService } from "@frontend/modules/user/service/user.service";
@@ -34,6 +33,6 @@ export class AppComponent extends SubscribingComponent {
 
   /** Returns if the navbar should be rendered */
   get shouldRenderNavbar() {
-    return !this.routerService.isCurrentRoute(RouteURLs.login);
+    return this.routerService.getCurrentRouteConfig()?.shouldRenderNav ?? true;
   }
 }

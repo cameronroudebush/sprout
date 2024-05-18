@@ -23,6 +23,8 @@ export module RestEndpoints {
   /** Configuration endpoints */
   export class conf {
     static get = "/conf/get";
+    /** Additional configuration information that will be given even without authentication */
+    static getUnsecure = "/conf/get/unsecure";
   }
 
   /** Transaction endpoints for finance data */
