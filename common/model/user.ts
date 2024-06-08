@@ -9,6 +9,7 @@ export class User extends DBBase {
   admin: boolean = false;
 
   get prettyName() {
+    if (this.firstName == null && this.lastName == null) return this.username;
     return this.firstName + " " + this.lastName;
   }
 

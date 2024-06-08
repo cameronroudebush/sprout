@@ -25,9 +25,7 @@ export class UserService extends ServiceBase {
     super();
   }
 
-  override async initialize() {
-    console.log("Initialize");
-  }
+  override async initialize() {}
 
   /** Centralized function to handle login request and responses */
   private async handleLoginReq(request: { (): Promise<RestBody<UserLoginResponse>> }) {
