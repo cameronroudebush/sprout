@@ -53,6 +53,7 @@ export class LoginComponent implements OnInit {
 
   /** Submits the login request */
   async submit() {
+    this.form.markAllAsTouched();
     if (this.processing) return;
     this.processing = true;
     this.loginStatus = undefined;

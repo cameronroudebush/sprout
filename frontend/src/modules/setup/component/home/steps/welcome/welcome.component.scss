@@ -11,13 +11,12 @@
   gap: 1rem;
   text-align: center;
 
-  .welcome {
-    font-size: 3rem;
-    padding-bottom: 2rem;
-  }
-
   .description {
     padding: 1rem;
     font-size: 1.15rem;
+  }
+
+  button {
+    width: 80%;
   }
 }

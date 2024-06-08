@@ -38,7 +38,7 @@ export class Logger {
   /**
    * Console logs the given info with a header
    */
-  private static log(info: string, config: LogConfig & { color: chalk.Chalk }) {
+  private static log(info: string | Error, config: LogConfig & { color: chalk.Chalk }) {
     // Set a default log header
     if (config.shouldPrependLoggerFile ?? true) config.header = this.getLoggerFile() + (config.header || "");
     // Show header if wanted
@@ -61,7 +61,7 @@ export class Logger {
     this.log(message, { ...config, color: chalk.yellow });
   }
 
-  static error(message: string, config?: LogConfig) {
+  static error(message: string | Error, config?: LogConfig) {
     this.log(message, { ...config, color: chalk.red });
   }
 

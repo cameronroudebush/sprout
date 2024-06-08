@@ -6,8 +6,7 @@ export type CombinedExternalConfig = UnsecureAppConfiguration & Configuration;
 /** This class provides additional information to those who request but it is **note secured behind authentication requirements** */
 export class UnsecureAppConfiguration extends Base {
   /** If this is the first time someone has connected to this interface */
-  isFirstTimeSetup: boolean = false; // TODO: Maintain state incase the user disconnects during first time setup
-  // firstTimeSetupPosition: "welcome" | "admin" | "complete" = "complete"
+  firstTimeSetupPosition: "welcome" | "admin" | "complete" = "complete";
   /** Version of the backend */
   version!: string;
 }

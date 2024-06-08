@@ -32,4 +32,9 @@ export module RestEndpoints {
     static get = "/transaction/get";
     static getNetWorth = "/transaction/net-worth/get";
   }
+
+  /** Endpoints for setup of application */
+  export class setup {
+    static createUser = "/setup/user";
+  }
 }

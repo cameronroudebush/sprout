@@ -16,14 +16,14 @@
       <!-- Username -->
       <mat-form-field>
         <mat-label>Username</mat-label>
-        <input matInput type="username" formControlName="username" autocapitalize="none" />
+        <input matInput type="username" formControlName="username" autocapitalize="none" (keyup.enter)="submit()" />
         <mat-error>{{ form.controls.username.hasError("required") ? "Username is required" : "" }}</mat-error>
       </mat-form-field>
 
       <!-- Password -->
       <mat-form-field>
         <mat-label>Password</mat-label>
-        <input matInput type="password" formControlName="password" />
+        <input matInput type="password" formControlName="password" (keyup.enter)="submit()" />
         <mat-error>{{ form.controls.password.hasError("required") ? "Password is required" : "" }}</mat-error>
       </mat-form-field>
       <shared-progress [ready]="!processing" class="progress">
