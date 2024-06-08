@@ -23,7 +23,6 @@ export class UserAPI {
     } catch {
       throw new EndpointError("Session Expired", 403);
     }
-    console.log(User.decodeJWT(jwt));
     const usernameToCheck = User.decodeJWT(jwt).username;
     const matchingUser = await User.findOne({ where: { username: usernameToCheck } });
     if (matchingUser == null) throw new EndpointError("Login failed", 403);
