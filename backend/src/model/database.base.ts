@@ -29,4 +29,9 @@ export class DatabaseBase extends DBBase {
   static async findOne<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, opts: FindOneOptions<T>) {
     return await new this().getRepository().findOne(opts);
   }
+
+  /** Inserts the element from `this` into the database */
+  async insert() {
+    return await this.getRepository().save(this);
+  }
 }

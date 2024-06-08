@@ -16,7 +16,7 @@ export class SetupService extends ServiceBase {
   }
 
   override async initialize() {
-    if (this.configService.config?.isFirstTimeSetup) this.handleFirstTimeSetup();
+    if (this.configService.config && this.configService.config.firstTimeSetupPosition !== "complete") this.handleFirstTimeSetup();
   }
 
   /** Begins the process of checking first time setup if available */

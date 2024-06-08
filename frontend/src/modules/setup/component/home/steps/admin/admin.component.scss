@@ -11,13 +11,20 @@
   gap: 1rem;
   text-align: center;
 
-  .welcome {
-    font-size: 3rem;
-    padding-bottom: 2rem;
-  }
-
   .description {
     padding: 1rem;
     font-size: 1.15rem;
+  }
+
+  .input-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+    width: 100%;
+
+    mat-form-field {
+      width: 90%;
+    }
   }
 }

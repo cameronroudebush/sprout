@@ -1,7 +1,7 @@
 import { Configuration } from "@backend/config/core";
 import { Configuration as CommonConfiguration, RestEndpoints, UnsecureAppConfiguration as UnsecureCommonConfiguration } from "@common";
-import { FirstTimeSetup } from "../../setup";
 import { RestMetadata } from "../metadata";
+import { SetupAPI } from "./setup";
 
 export class ConfigAPI {
   /** Returns the app configuration for the frontend to be able to reference */
@@ -14,7 +14,7 @@ export class ConfigAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.conf.getUnsecure, "GET", false))
   async getUnsecureAppConfig() {
     return UnsecureCommonConfiguration.fromPlain({
-      isFirstTimeSetup: await FirstTimeSetup.isFirstTimeSetup(),
+      firstTimeSetupPosition: await SetupAPI.firstTimeSetupDetermination(),
       version: Configuration.version,
     });
   }

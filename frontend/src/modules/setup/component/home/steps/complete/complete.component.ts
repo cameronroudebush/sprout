@@ -5,7 +5,7 @@ import { Component, Input, OnInit } from "@angular/core";
   templateUrl: "./complete.component.html",
   styleUrls: ["./complete.component.scss"],
 })
-export class CompleteComponent implements OnInit {
+export class CompleteSetupComponent implements OnInit {
   /** The on click to fire when to go to the next page */
   @Input() click!: Function;
 

@@ -77,6 +77,7 @@ export class RestAPIServer {
           }
         return res.status(200).end();
       } catch (e) {
+        Logger.error(e as Error);
         return badRequest(e as any);
       }
     });

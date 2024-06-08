@@ -1,5 +1,6 @@
 <div class="overarching">
   <img class="logo" src="../../../../assets/logo/icon/favicon-color.svg" />
+  <h1 class="header">{{ getStepContentByStep()?.header }}</h1>
   <!-- Render each specific step -->
   <ng-container *ngFor="let step of steps; let i = index">
     <ng-container *ngIf="step.step === currentStep">

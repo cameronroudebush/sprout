@@ -16,6 +16,9 @@ export class SharedProgressComponent implements OnInit {
   /** How big in pixels to display the spinner */
   @Input() diameter = 20;
 
+  /** A message to display when not ready. */
+  @Input() message: string | undefined;
+
   constructor() {}
 
   ngOnInit() {}
