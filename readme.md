@@ -2,15 +2,17 @@
   <img width="50%" src="./frontend/src/assets/logo/color-transparent.svg">
 </p>
 
+# WARNING
+
+This application is in **_active_** development. We do not make any guarantees about capability, database retention, or security. Note that while this will improve with time, we are not to our 1.0 release yet.
+
+**_Use at your own risk_**
+
 # What is Sprout?
 
 Sprout is a financial management app specializing in automatic transaction tracking using various financial API's.
 
 # How do I use Sprout?
-
-TODO
-
-# How do I contribute to Sprout?
 
 TODO
 
@@ -21,3 +23,7 @@ We highly recommend using docker to deploy sprout as everything is easily contai
 `npm run build:docker`
 
 This script will automatically handle tagging docker containers and doing any other required capabilities.
+
+# How do I contribute to Sprout?
+
+TODO

@@ -1,4 +1,21 @@
-<table mat-table [dataSource]="data" class="mat-elevation-z8 generic-table">
+<div class="search-container" *ngIf="shouldAllowSearch">
+  <mat-form-field color="accent">
+    <mat-label>Search On</mat-label>
+    <mat-select [(value)]="searchOption" (selectionChange)="searchOption = $event.value; updatePagedData()">
+      @for (column of columns; track column) {
+        <mat-option [value]="column">{{ column.displayName }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field color="accent" class="search-term">
+    <mat-label>Search Term</mat-label>
+    <input matInput type="text" autocapitalize="none" [(ngModel)]="searchTerm" (keyup)="updatePagedData()" />
+    <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="searchTerm = ''; updatePagedData()"><mat-icon>close</mat-icon></button>
+  </mat-form-field>
+</div>
+
+<table mat-table [dataSource]="currentPageData" class="mat-elevation-z8 generic-table" [ngClass]="{ paginate: paginate }">
   @for (column of columns; track column) {
     <ng-container [matColumnDef]="column.propertyName">
       <th mat-header-cell *matHeaderCellDef>{{ column.displayName }}</th>
@@ -6,6 +23,18 @@
     </ng-container>
   }
 
+  <tr *matNoDataRow>
+    <td class="no-data-available" colspan="100000">No data available</td>
+  </tr>
+
   <tr mat-header-row *matHeaderRowDef="displayColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayColumns"></tr>
 </table>
+<mat-paginator
+  class="generic-table-paginator"
+  *ngIf="paginate"
+  [length]="data.length"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="pageSizeOptions"
+  (page)="handlePaginatorUpdate($event)"
+></mat-paginator>

@@ -14,6 +14,10 @@
     height: 100%;
   }
 
+  &.transactions {
+    flex: 1;
+  }
+
   &.welcome-card {
     text-align: center;
   }
