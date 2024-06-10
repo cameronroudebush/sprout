@@ -2,7 +2,7 @@ import { RestBody, RestEndpoints, Transaction, TransactionRequest } from "@commo
 import { RestMetadata } from "../metadata";
 
 // TODO: Remove
-const fakeData = Array.from({ length: 10 }).map(() =>
+const fakeData = Array.from({ length: 20 }).map(() =>
   Transaction.fromPlain({ account: "foobar", date: new Date(), amount: Math.floor(Math.random() * (1000 - 100) + 100) / 100 }),
 );
 
