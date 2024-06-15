@@ -1,5 +1,6 @@
 {
   "private": true,
+  "version": "0.0.1",
   "name": "sprout_frontend",
   "author": "Cameron Roudebush",
   "license": "ISC",
@@ -11,24 +12,24 @@
     "watch": "ng build --watch --configuration development"
   },
   "dependencies": {
-    "@angular/animations": "^17.0.2",
-    "@angular/common": "^17.0.2",
-    "@angular/compiler": "^17.0.2",
-    "@angular/core": "^17.0.2",
-    "@angular/forms": "^17.0.2",
-    "@angular/material": "^17.3.6",
-    "@angular/platform-browser": "^17.0.2",
-    "@angular/platform-browser-dynamic": "^17.0.2",
-    "@angular/pwa": "^17.0.2",
-    "@angular/router": "^17.0.2",
+    "@angular/animations": "^18.0.3",
+    "@angular/common": "^18.0.3",
+    "@angular/compiler": "^18.0.3",
+    "@angular/core": "^18.0.3",
+    "@angular/forms": "^18.0.3",
+    "@angular/material": "^18.0.3",
+    "@angular/platform-browser": "^18.0.3",
+    "@angular/platform-browser-dynamic": "^18.0.3",
+    "@angular/pwa": "^18.0.3",
+    "@angular/router": "^18.0.3",
     "@capacitor/app": "5.0.7",
     "@capacitor/core": "5.7.4",
     "@capacitor/haptics": "5.0.7",
     "@capacitor/keyboard": "5.0.8",
     "@capacitor/status-bar": "5.0.7",
     "@ionic/angular": "^7.0.0",
-    "@ngrx/entity": "^17.1.1",
-    "@ngrx/store": "^17.1.1",
+    "@ngrx/entity": "^18.0.0",
+    "@ngrx/store": "^18.0.0",
     "chart.js": "^4.4.2",
     "ionicons": "^7.0.0",
     "lodash": "^4.17.21",
@@ -38,14 +39,14 @@
     "zone.js": "~0.14.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.0.0",
-    "@angular/cli": "^17.0.0",
-    "@angular/compiler-cli": "^17.0.2",
-    "@angular/language-service": "^17.0.2",
+    "@angular-devkit/build-angular": "^18.0.3",
+    "@angular/cli": "^18.0.3",
+    "@angular/compiler-cli": "^18.0.3",
+    "@angular/language-service": "^18.0.3",
     "@capacitor/cli": "5.7.4",
     "@ionic/angular-toolkit": "^9.0.0",
     "@types/lodash": "^4.17.0",
     "@types/uuid": "^9.0.8",
-    "typescript": "~5.2.2"
+    "typescript": "^5.4.2"
   }
 }

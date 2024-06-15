@@ -1,29 +1,28 @@
 .norm-snackbar {
   .mdc-snackbar__surface {
-    background-color: var(--accent-color) !important;
+    background-color: var(--sys-primary) !important;
 
     .mat-mdc-snack-bar-label {
-      color: var(--text-accent-color) !important;
+      color: var(--sys-on-primary) !important;
     }
   }
 
   button {
-    color: var(--text-accent-color) !important;
+    color: var(--sys-on-primary) !important;
   }
 }
 
 .error-snackbar {
   .mdc-snackbar__surface {
-    background-color: #f44336 !important;
+    background-color: var(--sys-error) !important;
 
     .mat-mdc-snack-bar-label {
-      color: white !important;
+      color: var(--sys-on-error) !important;
     }
   }
 
   button {
-    background-color: #f44336;
-    color: white !important;
+    color: var(--sys-on-error) !important;
     border: none;
   }
 }

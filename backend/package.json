@@ -1,5 +1,6 @@
 {
   "name": "sprout_backend",
+  "version": "0.0.1",
   "private": true,
   "description": "The backend for the Sprout financial app",
   "bin": "./dist/backend/src/main.js",
