@@ -1,41 +1,43 @@
 <div class="login-container">
   <img class="background" src="../../../../assets/login.jpg" />
-  <div class="card">
-    <div class="logo">
-      <img src="../../../../assets/logo/color-transparent.svg" />
-    </div>
-    <div class="header-container">
-      <h1 class="header">Welcome Back!</h1>
-    </div>
-    <!-- Login status -->
-    <div *ngIf="loginStatus" class="login-status" [ngClass]="{ error: loginStatus.type === 'error', success: loginStatus.type === 'success' }">
-      {{ loginStatus.message }}
-    </div>
-    <!-- Login form -->
-    <form class="input-form" [formGroup]="form" (submit)="submit()">
-      <!-- Username -->
-      <mat-form-field color="accent">
-        <mat-label>Username</mat-label>
-        <input matInput type="username" formControlName="username" autocapitalize="none" (keyup.enter)="submit()" />
-        <mat-error>{{ form.controls.username.hasError("required") ? "Username is required" : "" }}</mat-error>
-      </mat-form-field>
+  <mat-card class="card">
+    <mat-card-content>
+      <div class="logo">
+        <img src="../../../../assets/logo/color-transparent.svg" />
+      </div>
+      <div class="header-container">
+        <h1 class="header">Welcome Back!</h1>
+      </div>
+      <!-- Login status -->
+      <div *ngIf="loginStatus" class="login-status" [ngClass]="{ error: loginStatus.type === 'error', success: loginStatus.type === 'success' }">
+        {{ loginStatus.message }}
+      </div>
+      <!-- Login form -->
+      <form class="input-form" [formGroup]="form" (submit)="submit()">
+        <!-- Username -->
+        <mat-form-field color="accent">
+          <mat-label>Username</mat-label>
+          <input matInput type="username" formControlName="username" autocapitalize="none" (keyup.enter)="submit()" />
+          <mat-error>{{ form.controls.username.hasError("required") ? "Username is required" : "" }}</mat-error>
+        </mat-form-field>
 
-      <!-- Password -->
-      <mat-form-field color="accent">
-        <mat-label>Password</mat-label>
-        <input matInput type="password" formControlName="password" (keyup.enter)="submit()" />
-        <mat-error>{{ form.controls.password.hasError("required") ? "Password is required" : "" }}</mat-error>
-      </mat-form-field>
-      <shared-progress [ready]="!processing" class="progress">
-        <button type="submit" mat-flat-button color="accent">Login</button>
-      </shared-progress>
-      <!-- TODO: Create account -->
-      <!-- TODO: Forgot password -->
-    </form>
+        <!-- Password -->
+        <mat-form-field color="accent">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" (keyup.enter)="submit()" />
+          <mat-error>{{ form.controls.password.hasError("required") ? "Password is required" : "" }}</mat-error>
+        </mat-form-field>
+        <shared-progress [ready]="!processing" class="progress">
+          <button type="submit" mat-flat-button color="accent">Login</button>
+        </shared-progress>
+        <!-- TODO: Create account -->
+        <!-- TODO: Forgot password -->
+      </form>
 
-    <!-- Footer -->
-    <div class="footer">
-      <a class="images" target="_blank" href="https://www.vecteezy.com/">Images provided by Vecteezy</a>
-    </div>
-  </div>
+      <!-- Footer -->
+      <div class="footer">
+        <a class="images" target="_blank" href="https://www.vecteezy.com/">Images provided by Vecteezy</a>
+      </div></mat-card-content
+    >
+  </mat-card>
 </div>

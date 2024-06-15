@@ -16,19 +16,19 @@ export class SnackbarService {
   constructor(private snackbar: MatSnackBar) {}
 
   /** Opens a standard snackbar */
-  open(message: string) {
+  open(message: string, time = SnackbarService.DEFAULT_OPEN_TIME) {
     this.snackbar.open(message, "close", {
-      duration: SnackbarService.DEFAULT_OPEN_TIME,
+      duration: time,
       panelClass: ["norm-snackbar"],
     });
   }
 
   /** Opens an error snackbar */
-  openError(message: string | Error | HttpErrorResponse) {
+  openError(message: string | Error | HttpErrorResponse, time = SnackbarService.DEFAULT_OPEN_TIME) {
     if (message instanceof Error) message = message.message;
     else if (message instanceof HttpErrorResponse) message = message.error;
     this.snackbar.open(message as string, "close", {
-      duration: SnackbarService.DEFAULT_OPEN_TIME,
+      duration: time,
       panelClass: ["error-snackbar"],
     });
   }

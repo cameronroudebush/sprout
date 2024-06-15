@@ -10,7 +10,6 @@
 
 .search-container {
   width: 100%;
-  background-color: var(--primary-darker-color);
   border-radius: 1rem 1rem 0 0;
   border-bottom: 0.15rem solid var(--mat-table-row-item-outline-color, rgba(0, 0, 0, 0.12));
   display: flex;
@@ -30,7 +29,6 @@
 }
 
 .generic-table {
-  background-color: var(--primary-darker-color);
   border-radius: 0;
   overflow: hidden;
 
@@ -46,7 +44,6 @@
 
 .generic-table-paginator {
   width: 100%;
-  background-color: var(--primary-darker-color);
   border-radius: 0 0 1rem 1rem;
   border-top: 0.15rem solid var(--mat-table-row-item-outline-color, rgba(0, 0, 0, 0.12));
 }

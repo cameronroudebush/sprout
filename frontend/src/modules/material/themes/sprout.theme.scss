@@ -1,40 +1,17 @@
 @use "@angular/material" as mat;
+@use "./sprout.theme.m3.scss" as sprout-theme;
+
+@import "https://fonts.googleapis.com/icon?family=Material+Icons";
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
 
 @include mat.core();
 
-$my-primary: mat.define-palette(mat.$indigo-palette, 500);
-$my-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+// Apply theme from m3 file
+html {
+  @include mat.core-theme(sprout-theme.$dark-theme);
+  @include mat.all-component-themes(sprout-theme.$dark-theme);
+  @include mat.system-level-colors(sprout-theme.$dark-theme);
 
-$my-theme: mat.define-light-theme(
-  (
-    color: (
-      primary: $my-primary,
-      accent: $my-accent,
-    ),
-    typography: mat.define-typography-config(),
-    density: 0,
-  )
-);
-
-@include mat.all-component-themes($my-theme);
-
-body {
-  --primary-color: #1d2833;
-  --primary-lighter-color: #3f5770;
-  --primary-darker-color: #111820;
-  // --text-primary-color: #{$light-primary-text};
-  // --text-primary-lighter-color: #{$dark-primary-text};
-  // --text-primary-darker-color: #{$light-primary-text};
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  height: 100%;
 }
-
-.body {
-  --accent-color: #116383;
-  --accent-lighter-color: #b8d0da;
-  --accent-darker-color: #0a4766;
-  // --text-accent-color: #{$light-primary-text};
-  // --text-accent-lighter-color: #{$dark-primary-text};
-  // --text-accent-darker-color: #{$light-primary-text};
-}
-
-// TODO Man I don't fucking know
-// https://v17.material.angular.io/guide/theming#custom-themes-with-sass
