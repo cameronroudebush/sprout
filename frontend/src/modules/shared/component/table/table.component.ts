@@ -107,4 +107,4 @@ export class SharedTableComponent<T extends Base> implements OnInit, OnChanges {
   }
 }
 
-// TODO: Paginator, github actions to push to dockerhub, transcation work, improved charts
+// TODO: github actions to push to dockerhub, transcation work, improved charts

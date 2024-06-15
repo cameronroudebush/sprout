@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import { gitDescribeSync } from "git-describe";
-import nodemon from "nodemon";
+import nodemon, { NodemonSettings } from "nodemon";
 import path from "path";
 import { replaceInFileSync } from "replace-in-file";
 import { replaceTscAliasPaths } from "tsc-alias";
@@ -72,7 +72,7 @@ export module BackendBuilder {
   /** Spins up the nodemon handler to auto restart on file changes. */
   async function spawnNodemon(
     isProd = false,
-    config: nodemon.Settings = {
+    config: Partial<NodemonSettings> = {
       exec: `node "${path.join(backendDistributionDir, "main.js")}"`,
       ext: "ts",
       watch: ["../common/model", "./src"],
@@ -106,7 +106,7 @@ export module BackendBuilder {
       } catch {}
     };
     await buildDist(isProd);
-    nodemon(config);
+    nodemon(config as NodemonSettings);
   }
 
   /** Centralized function that builds the distribution to the output directory and handles other required functionality for the dist. */
