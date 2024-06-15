@@ -14,14 +14,14 @@
     <!-- Login form -->
     <form class="input-form" [formGroup]="form" (submit)="submit()">
       <!-- Username -->
-      <mat-form-field>
+      <mat-form-field color="accent">
         <mat-label>Username</mat-label>
         <input matInput type="username" formControlName="username" autocapitalize="none" (keyup.enter)="submit()" />
         <mat-error>{{ form.controls.username.hasError("required") ? "Username is required" : "" }}</mat-error>
       </mat-form-field>
 
       <!-- Password -->
-      <mat-form-field>
+      <mat-form-field color="accent">
         <mat-label>Password</mat-label>
         <input matInput type="password" formControlName="password" (keyup.enter)="submit()" />
         <mat-error>{{ form.controls.password.hasError("required") ? "Password is required" : "" }}</mat-error>
