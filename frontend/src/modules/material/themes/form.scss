@@ -1,0 +1,17 @@
+.mat-accent {
+  /// Input
+  --mdc-filled-text-field-input-text-color: var(--text-accent-color);
+  /// Label
+  --mdc-filled-text-field-label-text-color: var(--text-accent-color);
+  --mdc-filled-text-field-focus-label-text-color: var(--text-accent-color);
+
+  --mat-select-panel-background-color: var(--accent-darker-color);
+
+  //   .mdc-text-field--filled {
+  //     background-color: var(--accent-darker-color) !important;
+  //   }
+  //   .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-floating-label,
+  //   .mdc-text-field--filled {
+  //     color: var(--text-accent-color);
+  //   }
+}
