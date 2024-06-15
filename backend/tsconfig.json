@@ -10,7 +10,8 @@
       "@backend/config/*": ["./src/config/*"],
       "@backend/model/*": ["./src/model/*"],
       "@backend/database/*": ["./src/database/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types"]
   },
   "include": ["./src/**/*", "../common/src/**/*"]
 }
