@@ -2,11 +2,10 @@ name: Build Docker
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -15,8 +14,8 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
-    - name: NPM Install
-      run: npm i --include=dev && npm i nodemon && npm i --prefix ./backend --include=dev
-    - name: Build Docker with npm script
-      run: npm run build:docker
+      - uses: actions/checkout@v4
+      - name: NPM Install
+        run: npm i --include=dev && npm i --prefix ./backend --include=dev
+      - name: Build Docker with npm script
+        run: npm run build:docker
