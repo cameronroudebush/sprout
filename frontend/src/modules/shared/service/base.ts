@@ -10,4 +10,9 @@ export abstract class ServiceBase {
    * @param user The User that has been authenticated to this app
    */
   async onUserAuthenticated(_user: User): Promise<void> {}
+
+  /**
+   * This function will be called when the user logs out causing no logged in user to exist
+   */
+  async onUserUnAuthenticated(): Promise<void> {}
 }

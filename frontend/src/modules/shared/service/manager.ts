@@ -30,13 +30,14 @@ export class ServiceManager {
     // Subscribe to relevant events
     this.store.select(selectCurrentUser).subscribe((x) => {
       if (x) this.callFnc("onUserAuthenticated", x);
+      else this.callFnc("onUserUnAuthenticated");
     });
   }
 
   /**
    * Calls the internal function given with an arguments as required in the order defined by the constructor
    */
-  async callFnc<T extends { (...args: any[]): Promise<any> }>(fncName: CustomTypes.PropertyNames<ServiceBase, T>, ...args: any[]) {
-    for (let service of this.serviceExecutionOrder) await (service[fncName] as T)?.call(service, ...args);
+  async callFnc<T extends Function>(fncName: CustomTypes.PropertyNames<ServiceBase, T>, ...args: Parameters<ServiceBase[typeof fncName]>) {
+    for (let service of this.serviceExecutionOrder) await (service[fncName] as any)?.call(service, ...args);
   }
 }

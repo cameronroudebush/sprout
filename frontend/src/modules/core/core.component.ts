@@ -33,6 +33,7 @@ export class AppComponent extends SubscribingComponent {
 
   /** Returns if the navbar should be rendered */
   get shouldRenderNavbar() {
-    return this.routerService.getCurrentRouteConfig()?.shouldRenderNav ?? true;
+    const currentRoute = this.routerService.getCurrentRouteConfig();
+    return currentRoute == null ? false : currentRoute.shouldRenderNav ?? true;
   }
 }

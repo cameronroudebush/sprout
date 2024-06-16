@@ -7,4 +7,7 @@ export const accountReducer = createReducer(
   on(AccountActions.add, (state, { data }) => {
     return { ...state, accounts: state.accounts.concat(data) };
   }),
+  on(AccountActions.clear, (state) => {
+    return { ...state, accounts: [] };
+  }),
 );
