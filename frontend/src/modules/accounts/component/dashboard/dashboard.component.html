@@ -5,4 +5,20 @@
       <button mat-flat-button color="accent" disabled>Register New Account</button>
     </mat-card-content>
   </mat-card>
+
+  <!-- Accounts -->
+  <mat-card>
+    <mat-card-content>
+      <mat-accordion class="example-headers-align" multi>
+        @for (account of accounts; track account) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ account.name }}</mat-panel-title>
+              <mat-panel-description> </mat-panel-description>
+            </mat-expansion-panel-header>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </mat-card-content>
+  </mat-card>
 </div>

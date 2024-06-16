@@ -13,6 +13,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatStepperModule } from "@angular/material/stepper";
 import { MatTableModule } from "@angular/material/table";
 import { IonicModule } from "@ionic/angular";
+import {MatExpansionModule} from '@angular/material/expansion'; 
 
 const MODULES = [
   FormsModule,
@@ -31,6 +32,7 @@ const MODULES = [
   MatStepperModule,
   MatPaginatorModule,
   MatSelectModule,
+  MatExpansionModule
 ];
 
 /** A module that provides the necessary material components we use across this app */

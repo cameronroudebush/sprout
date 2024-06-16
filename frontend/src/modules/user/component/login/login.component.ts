@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { User } from "@common";
+import { Params } from "@frontend/modules/routing/models/param";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
 import { RouterService } from "@frontend/modules/routing/service/router.service";
 import { UserService } from "@frontend/modules/user/service/user.service";
@@ -44,7 +45,9 @@ export class LoginComponent implements OnInit {
         this.loginStatus = { type: "success", message: "Restoring Session" };
         // Give a timeout so they aren't so abruptly changed pages
         setTimeout(() => {
-          this.routerService.redirectTo(RouteURLs.default_route);
+          const lastRoute = this.routerService.isValidGetDefault(this.routerService.getParam(Params.lastUrl));
+          console.log(lastRoute);
+          this.routerService.redirectTo(lastRoute, { [Params.lastUrl]: undefined });
           this.processing = false;
         }, 800);
       }
