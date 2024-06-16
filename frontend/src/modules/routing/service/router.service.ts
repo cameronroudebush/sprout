@@ -4,6 +4,7 @@ import { APP_ROUTES } from "@frontend/modules/routing/models/config";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
 import { ServiceBase } from "@frontend/modules/shared/service/base";
 import { flattenDeep } from "lodash";
+import { Params } from "../models/param";
 
 @Injectable({
   providedIn: "root",
@@ -11,13 +12,12 @@ import { flattenDeep } from "lodash";
 export class RouterService extends ServiceBase {
   constructor(private router: Router) {
     super();
-
-    console.log(window.location);
   }
 
-  /** Redirect to the given path */
-  redirectTo(path: RouteURLs) {
-    this.router.navigate([path]);
+  /** Redirect to the given path. By default maintains params. */
+  async redirectTo(path: RouteURLs, params?: { [val: string]: string | undefined }) {
+    const currentParams = this.currentParams;
+    await this.router.navigate([path], { queryParams: { ...currentParams, ...params } });
   }
 
   /** Given a route, returns true if it is the current route and false if not */
@@ -33,7 +33,30 @@ export class RouterService extends ServiceBase {
     return routes.find((x) => x.path === currentRoute);
   }
 
+  /** If the given string is a valid route, returns it. If it is not, returns the default */
+  isValidGetDefault(route: string | undefined) {
+    route = route?.replace("/", "");
+    const match = Object.values(RouteURLs).find((x) => x === route);
+    return match ?? RouteURLs.default_route;
+  }
+
+  get currentParams() {
+    const params: { [val: string]: string } = {};
+    new URLSearchParams(window.location.search).forEach((val, key) => (params[key] = val));
+    return params;
+  }
+
   get currentRoute() {
     return this.router.url;
+  }
+
+  /** Returns the current param if set or undefined if not */
+  getParam(param: Params): string | undefined {
+    return this.currentParams[param];
+  }
+
+  /** Sets the given query param without redirecting */
+  async setParam(param: Params, value: string) {
+    await this.router.navigate([this.currentRoute], { queryParams: { [param]: value } });
   }
 }
