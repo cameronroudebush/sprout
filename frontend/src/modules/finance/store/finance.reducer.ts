@@ -7,4 +7,7 @@ export const financeReducer = createReducer(
   on(FinanceActions.addTransactions, (state, { transactions }) => {
     return { ...state, transactions: state.transactions.concat(transactions) };
   }),
+  on(FinanceActions.clearTransactions, (state) => {
+    return { ...state, transactions: [] };
+  }),
 );
