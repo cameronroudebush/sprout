@@ -1,10 +1,12 @@
-<div class="overarching">
-  <img class="logo" src="../../../../assets/logo/icon/favicon-color.svg" />
-  <h1 class="header">{{ getStepContentByStep()?.header }}</h1>
-  <!-- Render each specific step -->
-  <ng-container *ngFor="let step of steps; let i = index">
-    <ng-container *ngIf="step.step === currentStep">
-      <ng-container *ngComponentOutlet="step.component; inputs: { click: setCurrentStep.bind(this, steps[i + 1]?.step) }" />
+<mat-card class="overarching">
+  <mat-card-content class="content">
+    <img class="logo" src="../../../../assets/logo/icon/favicon-color.svg" />
+    <h1 class="header">{{ getStepContentByStep()?.header }}</h1>
+    <!-- Render each specific step -->
+    <ng-container *ngFor="let step of steps; let i = index">
+      <ng-container *ngIf="step.step === currentStep">
+        <ng-container *ngComponentOutlet="step.component; inputs: { click: setCurrentStep.bind(this, steps[i + 1]?.step) }" />
+      </ng-container>
     </ng-container>
-  </ng-container>
-</div>
+  </mat-card-content>
+</mat-card>
