@@ -31,7 +31,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # Tag as dev image
       # Publish
       - name: Publish to dockerhub
         run: docker push croudebush/sprout:dev
