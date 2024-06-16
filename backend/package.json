@@ -51,7 +51,8 @@
       "dist/backend/src/web-api/endpoints/*",
       "node_modules/axios/**/*",
       "node_modules/plaid/node_modules/axios/**/*",
-      "node_modules/bcrypt/lib/binding/**/*"
+      "node_modules/bcrypt/lib/binding/**/*",
+      "node_modules/sqlite3/**/*"
     ],
     "targets": [
       "latest"
