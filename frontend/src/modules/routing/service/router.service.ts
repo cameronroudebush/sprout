@@ -47,7 +47,10 @@ export class RouterService extends ServiceBase {
   }
 
   get currentRoute() {
-    return this.router.url;
+    let url = this.router.url;
+    const queryIndex = url.indexOf("?");
+    if (queryIndex !== -1) url = url.slice(0, queryIndex);
+    return url;
   }
 
   /** Returns the current param if set or undefined if not */

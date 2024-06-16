@@ -9,20 +9,24 @@
 .overarching {
   height: 90%;
   width: 90%;
-  max-width: 640px;
-  display: flex;
-  flex-flow: column;
-  background-color: var(--sys-primary);
-  border-radius: 1rem;
 
-  .logo {
-    width: 20rem;
-    align-self: center;
-  }
+  .content {
+    height: 100%;
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-flow: column;
+    border-radius: 1rem;
 
-  .header {
-    font-size: 3rem;
-    font-weight: bold;
-    text-align: center;
+    .logo {
+      width: 20rem;
+      align-self: center;
+    }
+
+    .header {
+      font-size: 3rem;
+      font-weight: bold;
+      text-align: center;
+    }
   }
 }

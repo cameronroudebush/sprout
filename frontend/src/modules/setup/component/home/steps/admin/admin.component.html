@@ -18,5 +18,5 @@
       <mat-error>{{ form.controls.password.hasError("required") ? "Password is required" : "" }}</mat-error>
     </mat-form-field>
   </form>
-  <button mat-raised-button color="accent" [disabled]="!form.valid" (click)="submitAdminAccount()">Submit</button>
+  <button mat-flat-button color="accent" [disabled]="!form.valid" (click)="submitAdminAccount()">Submit</button>
 </div>
