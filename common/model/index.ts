@@ -1,4 +1,5 @@
 import "reflect-metadata";
+export * from "./account";
 export * from "./base";
 export * from "./config";
 export * from "./custom.types";

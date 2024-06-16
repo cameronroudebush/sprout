@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RouterModule } from "@angular/router";
+import { AccountsModule } from "@frontend/modules/accounts/accounts.module";
 import { ChartsModule } from "@frontend/modules/charts/charts.module";
 import { CommunicationModule } from "@frontend/modules/communication/communication.module";
 import { FinanceModule } from "@frontend/modules/finance/finance.module";
@@ -33,6 +34,7 @@ const COMPONENTS = [AppComponent, DashboardComponent];
     FinanceModule,
     ChartsModule,
     SetupModule,
+    AccountsModule,
   ],
   providers: [ConfigService],
   bootstrap: [AppComponent],

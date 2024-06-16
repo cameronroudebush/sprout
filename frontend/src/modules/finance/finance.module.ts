@@ -5,13 +5,12 @@ import { SharedModule } from "@frontend/modules/shared/shared.module";
 import { StoreModule } from "@ngrx/store";
 import { MaterialModule } from "../material/material.module";
 import { NetWorthChartComponent } from "./component/charts/net-worth/net-worth.component";
-import { AccountsDashboardComponent } from "./component/dashboard/dashboard.component";
 import { TransactionComponent } from "./component/transaction/transaction.component";
 import { TransactionService } from "./service/transaction.service";
 import { financeReducer } from "./store/finance.reducer";
 import { FINANCE_NGRX_KEY } from "./store/finance.state";
 
-const COMPONENTS = [AccountsDashboardComponent, TransactionComponent, NetWorthChartComponent];
+const COMPONENTS = [TransactionComponent, NetWorthChartComponent];
 
 @NgModule({
   declarations: COMPONENTS,
