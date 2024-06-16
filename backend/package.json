@@ -50,7 +50,8 @@
     "assets": [
       "dist/backend/src/web-api/endpoints/*",
       "node_modules/axios/**/*",
-      "node_modules/plaid/node_modules/axios/**/*"
+      "node_modules/plaid/node_modules/axios/**/*",
+      "node_modules/bcrypt/lib/binding/**/*"
     ],
     "targets": [
       "latest"

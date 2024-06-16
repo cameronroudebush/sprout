@@ -106,5 +106,3 @@ export class SharedTableComponent<T extends Base> implements OnInit, OnChanges {
     this.displayColumns = columns.map((x) => x.propertyName);
   }
 }
-
-// TODO: github actions to push to dockerhub, transcation work, improved charts
