@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { CustomTypes } from "@common";
 import { AccountsService } from "@frontend/modules/accounts/service/accounts.service";
+import { RouterService } from "@frontend/modules/routing/service/router.service";
 import { SetupService } from "@frontend/modules/setup/service/setup.service";
 import { ServiceBase } from "@frontend/modules/shared/service/base";
 import { UserService } from "@frontend/modules/user/service/user.service";
@@ -19,12 +20,13 @@ export class ServiceManager {
 
   constructor(
     private store: Store<UserState>,
+    routerService: RouterService,
     userService: UserService,
     configService: ConfigService,
     setupService: SetupService,
     accountsService: AccountsService,
   ) {
-    this.serviceExecutionOrder = [userService, configService, setupService, accountsService];
+    this.serviceExecutionOrder = [routerService, userService, configService, setupService, accountsService];
     // Subscribe to relevant events
     this.store.select(selectCurrentUser).subscribe((x) => {
       if (x) this.callFnc("onUserAuthenticated", x);

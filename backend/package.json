@@ -1,5 +1,5 @@
 {
-  "name": "sprout_backend",
+  "name": "sprout",
   "version": "0.0.1",
   "private": true,
   "description": "The backend for the Sprout financial app",

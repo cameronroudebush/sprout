@@ -7,5 +7,5 @@ package-lock.json
 www
 dist
 
-sprout_backend.exe
+sprout.exe
 sprout.sqlite
