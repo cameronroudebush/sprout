@@ -2,13 +2,18 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { APP_ROUTES } from "@frontend/modules/routing/models/config";
 import { RouteURLs } from "@frontend/modules/routing/models/url";
+import { ServiceBase } from "@frontend/modules/shared/service/base";
 import { flattenDeep } from "lodash";
 
 @Injectable({
   providedIn: "root",
 })
-export class RouterService {
-  constructor(private router: Router) {}
+export class RouterService extends ServiceBase {
+  constructor(private router: Router) {
+    super();
+
+    console.log(window.location);
+  }
 
   /** Redirect to the given path */
   redirectTo(path: RouteURLs) {
