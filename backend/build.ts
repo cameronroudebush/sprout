@@ -159,5 +159,5 @@ export module BackendBuilder {
   }
 
   // Only execute main if this is ran with a -m command.
-  if (process.argv[2] != null) main();
+  if (process.argv[2] === "-m") main();
 }
