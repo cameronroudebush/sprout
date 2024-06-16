@@ -1,3 +1,4 @@
+import { AccountsDashboardComponent } from "@frontend/modules/accounts/component/dashboard/dashboard.component";
 import { DashboardComponent } from "@frontend/modules/core/component/dashboard/dashboard.component";
 import { HomeSetupComponent } from "@frontend/modules/setup/component/home/home.component";
 import { LoginComponent } from "@frontend/modules/user/component/login/login.component";
@@ -18,7 +19,7 @@ export const APP_ROUTES: RouteMetadata[] = [
   },
   {
     path: RouteURLs.accounts,
-    component: DashboardComponent, // TODO
+    component: AccountsDashboardComponent,
     canActivate: [AuthGuard],
     tabOptions: {
       label: "Accounts",

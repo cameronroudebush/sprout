@@ -33,6 +33,11 @@ export module RestEndpoints {
     static getNetWorth = "/transaction/net-worth/get";
   }
 
+  /** Account endpoints for for the users supported banks */
+  export class account {
+    static get = "/account/get";
+  }
+
   /** Endpoints for setup of application */
   export class setup {
     static createUser = "/setup/user";

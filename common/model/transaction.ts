@@ -1,15 +1,20 @@
 import { Type } from "class-transformer";
 import { decorate } from "ts-mixer";
+import { Account } from "./account";
 import { Base, DBBase } from "./base";
 
 export class Transaction extends DBBase {
   /** In USD */
   amount: number;
+
+  /** The date this transaction occurred */
   @decorate(Type(() => Date))
   date: Date;
-  account: string; // TODO
 
-  constructor(id: number, amount: number, date: Date, account: string) {
+  /** The account this transaction belongs to */
+  account: Account;
+
+  constructor(id: number, amount: number, date: Date, account: Account) {
     super(id);
     this.amount = amount;
     this.date = date;
