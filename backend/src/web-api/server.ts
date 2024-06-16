@@ -1,3 +1,4 @@
+import { Configuration } from "@backend/config/core";
 import { User } from "@backend/model/user";
 import { RestBody } from "@common";
 import { Express, Response } from "express";
@@ -40,6 +41,8 @@ export class RestAPIServer {
       // Re useable functions
       const badRequest = (error: Error | EndpointError) => res.status((error as any).code || 400).end(error.message || undefined);
       try {
+        // If we have an API base, strip it because the endpoints will not know of it.
+        if (Configuration.server.apiBasePath) req.url = req.url.replace(Configuration.server.apiBasePath, "");
         const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === req.url);
         if (endpoint == null) throw new EndpointError(`No matching endpoint: ${req.url}`, 400);
         // Validate authentication if required
