@@ -37,5 +37,8 @@ COPY --from=backend-base --chmod=0755 /app/backend/sprout_backend /sprout_backen
 # Grab required bcrypt file
 COPY --from=backend-base /app/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node .
 
+# Install some required packages
+RUN apk update && apk add libstdc++
+
 # Start nginx along side backend. Frontend is hosted via nginx, backend runs it's own internal API
 ENTRYPOINT ["/bin/sh", "-c" , "nginx & ./sprout_backend"]
