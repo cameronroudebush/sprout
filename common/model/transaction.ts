@@ -14,7 +14,7 @@ export class Transaction extends DBBase {
   /** The account this transaction belongs to */
   account: Account;
 
-  constructor(id: number, amount: number, date: Date, account: Account) {
+  constructor(id: string, amount: number, date: Date, account: Account) {
     super(id);
     this.amount = amount;
     this.date = date;

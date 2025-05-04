@@ -14,6 +14,7 @@ export class DatabaseDecorators {
       return Entity(options)(target);
     };
   }
+
   /**
    * Decorates this property with the given options
    */

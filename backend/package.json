@@ -10,13 +10,16 @@
     "bcrypt": "^5.1.1",
     "chalk": "^4.1.0",
     "class-transformer": "^0.5.1",
+    "cron-parser": "^5.1.1",
+    "date-fns": "^4.1.0",
     "express": "^4.18.3",
     "express-rate-limit": "^7.2.0",
     "glob": "^10.3.10",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "plaid": "^22.0.1",
+    "plaid": "^33.0.0",
     "reflect-metadata": "^0.2.1",
+    "source-map-support": "^0.5.21",
     "sqlite3": "^5.1.7",
     "ts-mixer": "^6.0.4",
     "typeorm": "^0.3.20",
@@ -35,7 +38,6 @@
     "nodemon": "^3.1.0",
     "pkg": "^5.8.1",
     "replace-in-file": "^7.1.0",
-    "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
     "tsconfig-paths": "^4.2.0",
@@ -43,7 +45,7 @@
     "typescript": "^5.4.2"
   },
   "scripts": {
-    "start": "ts-node ./build.ts -m dev",
+    "start": "ts-node -r source-map-support/register ./build.ts -m dev",
     "build": "ts-node ./build.ts -m prod"
   },
   "pkg": {

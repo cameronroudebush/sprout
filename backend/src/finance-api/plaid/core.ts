@@ -1,7 +1,9 @@
+import { PlaidConfiguration } from "@backend/config/plaid.config";
 import { PlaidInstitutionHandler } from "@backend/financeAPI/plaid/institution";
 import { PlaidTokenHandler } from "@backend/financeAPI/plaid/token";
-import { User } from "@common";
-import { PlaidApi } from "plaid";
+import { Transaction } from "@backend/model/transaction";
+import { Account, User, Utility } from "@common";
+import { PlaidApi, TransactionsUpdateStatus } from "plaid";
 import { Configuration } from "../../config/core";
 import { FinanceAPIBase } from "../base/core";
 
@@ -17,75 +19,52 @@ export class PlaidCore extends FinanceAPIBase {
     institutionHandler = new PlaidInstitutionHandler(client, configuration),
     /** Handler for getting the keys necessary for Plaid API lookups */
     private keyHandler = new PlaidTokenHandler(client, institutionHandler),
+    private token?: string, // TODO: Probably need to change how this works
   ) {
     super();
+    if (configuration.secret === new PlaidConfiguration().secret) throw new Error("You must update the Plaid credentials for this to work.");
   }
 
-  async getTransactions(_user: User) {
-    const accessToken = await this.keyHandler.getAccessToken(await this.keyHandler.getPublicToken());
-    return (await this.client.transactionsGet({ access_token: accessToken, start_date: "2024-01-01", end_date: "2024-03-06" })).data.transactions;
-    // return (await this.client.transactionsSync({ access_token: accessToken }));
+  async getAccessToken() {
+    if (this.token == null) this.token = await this.keyHandler.getAccessToken(await this.keyHandler.getPublicToken());
+    return this.token;
   }
 
-  async getAccounts(_user: User): Promise<any> {
-    const accessToken = await this.keyHandler.getAccessToken(await this.keyHandler.getPublicToken());
-    return (await this.client.accountsGet({ access_token: accessToken })).data.accounts;
+  async getTransactions(user: User) {
+    const token = await this.getAccessToken();
+    const accounts = await this.getAccounts(user);
+    let transactions: Transaction[] = [];
+    let hasMoreTransactions = true;
+    let cursor: string | undefined = undefined;
+
+    // Keep fetching transactions until we get them all
+    while (hasMoreTransactions) {
+      const response = await this.client.transactionsSync({
+        access_token: token,
+        cursor,
+        count: 500,
+        options: {
+          include_original_description: true,
+        },
+      });
+      // Wait incase it's still updating
+      if (response.data.transactions_update_status === TransactionsUpdateStatus.NotReady) {
+        await Utility.delay(5000);
+        continue;
+      }
+      // Filter transactions for this account
+      const addedTransactions = response.data.added.map((x) =>
+        Transaction.fromPlain({ amount: x.amount, date: x.date, id: x.transaction_id, user, account: accounts.find((z) => z.apiId === x.account_id) }),
+      );
+      transactions = [...transactions, ...addedTransactions];
+      hasMoreTransactions = response.data.has_more;
+    }
+    return transactions;
   }
 
-  // // TODO Break apart
-  // async test() {
-  //   try {
-  //     console.log(this.configuration);
-
-  //     // Account filtering isn't required here, but sometimes
-  //     // it's helpful to see an example.
-
-  //     //   const request: LinkTokenCreateRequest = {
-  //     //     user: {
-  //     //       client_user_id: "user-id",
-  //     //       phone_number: "+1 415 5550123",
-  //     //     },
-  //     //     client_name: "Personal Finance App",
-  //     //     products: [Products.Transactions],
-  //     //     transactions: {
-  //     //       days_requested: 10,
-  //     //     },
-  //     //     country_codes: [CountryCode.Us],
-  //     //     language: "en",
-  //     //     webhook: "https://sample-web-hook.com",
-  //     //     account_filters: {
-  //     //       depository: {
-  //     //         account_subtypes: [DepositoryAccountSubtype.Checking, DepositoryAccountSubtype.Savings],
-  //     //       },
-  //     //       credit: {
-  //     //         account_subtypes: [CreditAccountSubtype.CreditCard],
-  //     //       },
-  //     //     },
-  //     //   };
-  //     //   const response = await plaidClient.linkTokenCreate(request);
-  //     //   const linkToken = response.data.link_token;
-  //     const institutions = (await plaidClient.institutionsGet({ count: 10, offset: 0, country_codes: [CountryCode.Us] })).data.institutions;
-  //     const public_token = (
-  //       await plaidClient.sandboxPublicTokenCreate({ institution_id: institutions[1]!.institution_id, initial_products: [Products.Transactions] })
-  //     ).data.public_token;
-  //     //   const public_token = (
-  //     //     await plaidClient.linkTokenCreate({
-  //     //       client_name: Configuration.appName,
-  //     //       language: "en",
-  //     //       country_codes: [CountryCode.Us],
-  //     //       user: { client_user_id: "foobar" },
-  //     //     })
-  //     //   ).data.link_token;
-
-  //     const access_token = (await plaidClient.itemPublicTokenExchange({ public_token })).data.access_token;
-  //     //   const access_token = response.data.access_token;
-  //     const accounts = await plaidClient.accountsGet({ access_token: access_token });
-  //     console.log(accounts.data.accounts);
-  //     //   const accounts = accounts_response.data.accounts;
-  //     // const result = await plaidClient.transactionsSync();
-  //     //   console.log(accounts);
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }
+  async getAccounts(_user: User) {
+    const token = await this.getAccessToken();
+    const accounts = (await this.client.accountsGet({ access_token: token })).data.accounts;
+    return accounts.map((x) => Account.fromPlain({ name: x.name, source: "plaid", apiId: x.account_id }));
+  }
 }

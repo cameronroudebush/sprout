@@ -5,8 +5,8 @@ import { FindManyOptions, FindOneOptions, PrimaryGeneratedColumn, Repository } f
 
 /** This class implements a bunch of common functionality that can be reused for other models that utilize the database */
 export class DatabaseBase extends DBBase {
-  @decorate(PrimaryGeneratedColumn())
-  declare id: number;
+  @decorate(PrimaryGeneratedColumn("uuid"))
+  declare id: string;
 
   /** Returns the repository from the data source to execute content against */
   private getRepository() {
@@ -33,5 +33,10 @@ export class DatabaseBase extends DBBase {
   /** Inserts the element from `this` into the database */
   async insert() {
     return await this.getRepository().save(this);
+  }
+
+  /** Inserts the elements given */
+  static async insertMany<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, elements: Array<T>) {
+    return await new this().getRepository().save(elements, { chunk: 999 });
   }
 }

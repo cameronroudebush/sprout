@@ -4,8 +4,16 @@ import { DBBase } from "./base";
 export class Account extends DBBase {
   name: string;
 
-  constructor(id: number, name: string) {
+  /** Where this account came from */
+  source: "plaid";
+
+  /** The ID from the API that resolved this account */
+  apiId: string;
+
+  constructor(id: string, name: string, source: Account["source"], apiId: string) {
     super(id);
     this.name = name;
+    this.source = source;
+    this.apiId = apiId;
   }
 }
