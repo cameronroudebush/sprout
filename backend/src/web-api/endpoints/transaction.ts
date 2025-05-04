@@ -1,17 +1,14 @@
-import { RestBody, RestEndpoints, Transaction, TransactionRequest } from "@common";
+import { Transaction } from "@backend/model/transaction";
+import { RestBody, RestEndpoints, TransactionRequest, User } from "@common";
 import { RestMetadata } from "../metadata";
-
-// TODO: Remove
-const fakeData = Array.from({ length: 20 }).map(() =>
-  Transaction.fromPlain({ account: "foobar", date: new Date(), amount: Math.floor(Math.random() * (1000 - 100) + 100) / 100 }),
-);
 
 export class TransactionAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.get, "POST"))
-  async getTransactions(request: RestBody) {
+  async getTransactions(request: RestBody, user: User) {
     const parsedRequest = TransactionRequest.fromPlain(request.payload);
+    // TODO: What to do with the request?
     console.log(parsedRequest);
-    return fakeData;
+    return await Transaction.find({ where: { user: { username: user.username } } });
   }
 
   /**
@@ -21,6 +18,6 @@ export class TransactionAPI {
   async getNetWorth(request: RestBody) {
     const parsedRequest = TransactionRequest.fromPlain(request.payload);
     console.log(parsedRequest);
-    return fakeData;
+    return 0;
   }
 }

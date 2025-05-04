@@ -52,7 +52,7 @@ export class User extends Mixin(CommonUser, DatabaseBase) {
   /** Verifies the given JWT. Throws an error if it is not valid */
   static verifyJWT(jwtString?: string) {
     if (!jwtString) throw new Error("Invalid JWT");
-    return jwt.verify(jwtString, Configuration.secretKey);
+    return jwt.verify(jwtString, Configuration.secretKey) as JWTContent;
   }
 
   /** Checks the database to see if the username is in use and throws an error if so. */

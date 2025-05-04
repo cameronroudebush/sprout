@@ -43,7 +43,8 @@ export class RestAPIServer {
         // If we have an API base, strip it because the endpoints will not know of it.
         const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === req.url);
         if (endpoint == null) throw new EndpointError(`No matching endpoint: ${req.url}`, 400);
-        // Validate authentication if required
+        // Validate authentication if required;
+        let user: User | null;
         if (endpoint.metadata.requiresAuth) {
           const authorization = req.headers.authorization;
           if (authorization == null) throw new EndpointError("", 403);
@@ -52,7 +53,9 @@ export class RestAPIServer {
             try {
               const cleanJWT = authorization.replace("Bearer ", "");
               // While sessions aren't really RESTful, I don't care and need a way to authenticate users.
-              User.verifyJWT(cleanJWT);
+              const jwtResult = User.verifyJWT(cleanJWT);
+              user = await User.findOne({ where: { username: jwtResult.username } });
+              if (user == null) throw new Error("User could not be found");
             } catch (e) {
               throw new EndpointError("", 403);
             }
@@ -63,7 +66,7 @@ export class RestAPIServer {
         const data = req.body;
         // Try to parse as type
         const typedData = RestBody.fromPlain(data);
-        const result = await (endpoint.fnc.call(this, typedData) as Promise<void | RestBody<any>>);
+        const result = await (endpoint.fnc.call(this, typedData, user!) as Promise<void | RestBody<any>>);
         // Make sure response know's it's JSON
         res.setHeader("Content-Type", "application/json");
         if (endpoint.metadata.type === "POST" || endpoint.metadata.type === "GET")

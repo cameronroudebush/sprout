@@ -97,7 +97,8 @@ export class ConfigurationController {
         }
         const paddingDepth = Array(tabLevel + 1).join("  ");
         const commentData = metadata.comment ? `${metadata.comment ? `${paddingDepth}# ${metadata.comment}` : ""} ` : "";
-        const actualValue = `${paddingDepth}${key}:${shouldNewlineWrap ? "\n" : " "}${outputString}`;
+        const needsQuoted = outputString.startsWith("*"); // TODO: This is kind of a band-aid
+        const actualValue = `${paddingDepth}${key}:${shouldNewlineWrap ? "\n" : " "}${needsQuoted ? '"' : ""}${outputString}${needsQuoted ? '"' : ""}`;
         return `${commentData ? commentData + "\n" : ""}${actualValue}`;
       })
       .filter((x) => x != null)

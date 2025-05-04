@@ -1,12 +1,10 @@
-import { Account, RestEndpoints } from "@common";
+import { API_CORE } from "@backend/financeAPI/core";
+import { RestBody, RestEndpoints, User } from "@common";
 import { RestMetadata } from "../metadata";
 
-// TODO: Remove
-const fakeData = Array.from({ length: 10 }).map((_, i) => Account.fromPlain({ id: i, name: "foobar " + i }));
-
 export class AccountAPI {
-  @RestMetadata.register(new RestMetadata(RestEndpoints.account.get, "GET"))
-  async getAccounts() {
-    return fakeData;
+  @RestMetadata.register(new RestMetadata(RestEndpoints.account.getAll, "GET"))
+  async getAccounts(_data: RestBody, user: User) {
+    return await API_CORE.App.getAccounts(user);
   }
 }

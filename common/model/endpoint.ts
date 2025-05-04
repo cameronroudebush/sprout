@@ -36,6 +36,7 @@ export module RestEndpoints {
   /** Account endpoints for for the users supported banks */
   export class account {
     static get = "/account/get";
+    static getAll = "/account/get/all";
   }
 
   /** Endpoints for setup of application */

@@ -73,7 +73,7 @@ export module BackendBuilder {
   async function spawnNodemon(
     isProd = false,
     config: Partial<NodemonSettings> = {
-      exec: `node "${path.join(backendDistributionDir, "main.js")}"`,
+      exec: `node -r source-map-support/register "${path.join(backendDistributionDir, "main.js")}"`,
       ext: "ts",
       watch: ["../common/model", "./src"],
     },
