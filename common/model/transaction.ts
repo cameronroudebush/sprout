@@ -4,20 +4,25 @@ import { Account } from "./account";
 import { Base, DBBase } from "./base";
 
 export class Transaction extends DBBase {
-  /** In USD */
+  /** In the currency of the account */
   amount: number;
+  description: string;
+  pending = false;
+  category: string;
 
-  /** The date this transaction occurred */
+  /** The date this transaction posted */
   @decorate(Type(() => Date))
-  date: Date;
+  posted: Date;
 
   /** The account this transaction belongs to */
   account: Account;
 
-  constructor(amount: number, date: Date, account: Account) {
+  constructor(amount: number, posted: Date, description: string, category: string, account: Account) {
     super();
     this.amount = amount;
-    this.date = date;
+    this.posted = posted;
+    this.description = description;
+    this.category = category;
     this.account = account;
   }
 }

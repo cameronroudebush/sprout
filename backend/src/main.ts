@@ -32,7 +32,7 @@ async function main() {
   // TODO: Cleanup
   const adminUser = (await User.findOne({ where: { admin: true } }))!;
   console.log(`DEV JWT: ${adminUser.JWT}`);
-  providers.simpleFin.fetchData();
+  providers.simpleFin.get();
 }
 
 // Execute main so long as this file is not being imported
