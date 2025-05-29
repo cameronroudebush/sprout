@@ -96,10 +96,14 @@ export class ConfigurationController {
           outputString = stringVal.replace(/\n(?!\s)/gm, "\n").trimEnd();
         }
         const paddingDepth = Array(tabLevel + 1).join("  ");
-        const commentData = metadata.comment ? `${metadata.comment ? `${paddingDepth}# ${metadata.comment}` : ""} ` : "";
+        let commentString = "";
+        if (metadata.comment) {
+          if (Array.isArray(metadata.comment)) commentString = metadata.comment.map((x) => `${paddingDepth}# ${x}`).join("\n") + "\n";
+          else commentString = `${paddingDepth}# ${metadata.comment}\n`;
+        }
         const needsQuoted = outputString.startsWith("*"); // TODO: This is kind of a band-aid
         const actualValue = `${paddingDepth}${key}:${shouldNewlineWrap ? "\n" : " "}${needsQuoted ? '"' : ""}${outputString}${needsQuoted ? '"' : ""}`;
-        return `${commentData ? commentData + "\n" : ""}${actualValue}`;
+        return `${commentString}${actualValue}`;
       })
       .filter((x) => x != null)
       .join(tabLevel === 0 ? "\n\n" : "\n");

@@ -41,7 +41,7 @@ export class User extends Mixin(CommonUser, DatabaseBase) {
 
   /** Returns a fresh JWT for the current user */
   get JWT() {
-    return jwt.sign({ username: this.username } as JWTContent, Configuration.secretKey, { expiresIn: Configuration.server.jwtExpirationTime });
+    return jwt.sign({ username: this.username } as JWTContent, Configuration.secretKey, { expiresIn: Configuration.server.jwtExpirationTime as any });
   }
 
   /** Decodes the given JWT to get relevant content from it */

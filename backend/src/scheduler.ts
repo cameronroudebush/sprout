@@ -1,13 +1,15 @@
 import { Configuration } from "@backend/config/core";
-import { API_CORE } from "@backend/financeAPI/core";
 import { Logger } from "@backend/logger";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import CronExpressionParser, { CronExpression } from "cron-parser";
+import { ProviderBase } from "./providers/base/core";
 
 /** This class is used to schedule updates to query for data at routine intervals from the Plaid API */
 export class Scheduler {
   interval!: CronExpression;
+
+  constructor(private provider: ProviderBase) {}
 
   /** Starts the scheduler to perform updates based on the next result */
   async start() {
@@ -37,7 +39,7 @@ export class Scheduler {
         try {
           Logger.info(`Updating information for: ${user.username}`);
           // Sync transactions
-          const transactions = await API_CORE.App.getTransactions(user);
+          const transactions = await this.provider.getTransactions(user);
           // Insert updated data
           await Transaction.insertMany<Transaction>(transactions);
           Logger.success(`Information updated successfully for: ${user.username}`);

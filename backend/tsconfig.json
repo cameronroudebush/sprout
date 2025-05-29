@@ -6,7 +6,7 @@
     "paths": {
       "@common": ["../common/model/index"],
       "@backend/logger": ["./src/logger"],
-      "@backend/financeAPI/*": ["./src/finance-api/*"],
+      "@backend/providers/*": ["./src/providers/*"],
       "@backend/config/*": ["./src/config/*"],
       "@backend/model/*": ["./src/model/*"],
       "@backend/database/*": ["./src/database/*"]

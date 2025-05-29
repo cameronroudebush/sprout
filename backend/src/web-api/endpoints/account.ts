@@ -1,10 +1,6 @@
-import { API_CORE } from "@backend/financeAPI/core";
-import { RestBody, RestEndpoints, User } from "@common";
-import { RestMetadata } from "../metadata";
-
 export class AccountAPI {
-  @RestMetadata.register(new RestMetadata(RestEndpoints.account.getAll, "GET"))
-  async getAccounts(_data: RestBody, user: User) {
-    return await API_CORE.App.getAccounts(user);
-  }
+  // @RestMetadata.register(new RestMetadata(RestEndpoints.account.getAll, "GET"))
+  // async getAccounts(_data: RestBody, user: User) {
+  //   return await API_CORE.App.getAccounts(user);
+  // }
 }
