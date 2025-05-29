@@ -68,9 +68,10 @@ export class Logger {
   /** Returns a default header string for a log that considers the location of the previous file call */
   private static getLoggerFile() {
     const err = new Error();
+    const originalPrepare = Error.prepareStackTrace;
     Error.prepareStackTrace = (_, stack) => stack;
     const stack = err.stack;
-    Error.prepareStackTrace = undefined;
+    Error.prepareStackTrace = originalPrepare;
     const filePath: string = (stack as any)[3].getFileName();
     // Adjusted file path up until the source directory
     const filePathToSrcIndex = filePath.indexOf("src");

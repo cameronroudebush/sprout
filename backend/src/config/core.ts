@@ -3,14 +3,15 @@ import { ServerConfig } from "@backend/config/server";
 import * as uuid from "uuid";
 import { name } from "../../package.json";
 import { ConfigurationMetadata } from "./configuration.metadata";
-import { PlaidConfiguration } from "./plaid.config";
+import { ProvidersConfig } from "./providers";
 
 /**
- * The Configuration class that the entire backend utilizes for it's config capabilities. You can call any Configuration value statically and these will be loaded from the file on startup.
+ * The Configuration class that the entire backend utilizes for it's config capabilities. You can
+ *  call any Configuration value statically and these will be loaded from the file on startup.
  */
 export class Configuration {
-  @ConfigurationMetadata.assign({ comment: "Plaid specific configuration for financial loading." })
-  static plaid = new PlaidConfiguration();
+  @ConfigurationMetadata.assign({ comment: "Configuration for the various providers" })
+  static providers = new ProvidersConfig();
 
   @ConfigurationMetadata.assign({ comment: "Core server config options" })
   static server = new ServerConfig();

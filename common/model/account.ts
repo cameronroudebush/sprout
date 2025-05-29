@@ -10,8 +10,8 @@ export class Account extends DBBase {
   /** The ID from the API that resolved this account */
   apiId: string;
 
-  constructor(id: string, name: string, source: Account["source"], apiId: string) {
-    super(id);
+  constructor(name: string, source: Account["source"], apiId: string) {
+    super();
     this.name = name;
     this.source = source;
     this.apiId = apiId;

@@ -7,7 +7,7 @@ export class ConfigurationMetadata {
   restrictedValues: Array<any> | undefined;
 
   /** A comment that can be written before the configuration value */
-  comment: string | undefined;
+  comment: string | Array<string> | undefined;
 
   /** Metadata key for this information */
   static readonly METADATA_KEY = "config:metadata";

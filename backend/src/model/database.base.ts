@@ -20,6 +20,13 @@ export class DatabaseBase extends DBBase {
   //     return new this().getRepository();
   //   }
 
+  /** Returns this current element with {@link id} from the database */
+  async get(): Promise<this> {
+    const element = this.getRepository().findOne({ where: { id: this.id as any } });
+    if (element == null) throw new Error(`Failed to locate matching element in db for id: ${this.id}`);
+    return element as any;
+  }
+
   /** Given some options of what to find, looks up the content in the database */
   static async find<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, opts: FindManyOptions<T>) {
     return await new this().getRepository().find(opts);

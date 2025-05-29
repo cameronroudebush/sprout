@@ -2,11 +2,10 @@
   <img width="50%" src="./frontend/src/assets/logo/color-transparent.svg">
 </p>
 
-# WARNING
-
-This application is in **_active_** development. We do not make any guarantees about capability, database retention, or security. Note that while this will improve with time, we are not to our 1.0 release yet.
-
-**_Use at your own risk_**
+> [!caution]
+> This application is in **_active_** development. We do not make any guarantees about capability, database retention, or security. Note that while this will improve with time, we are not to our 1.0 release yet.
+>
+> **_Use at your own risk_**
 
 # What is Sprout?
 

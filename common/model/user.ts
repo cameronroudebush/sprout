@@ -13,8 +13,8 @@ export class User extends DBBase {
     return this.firstName + " " + this.lastName;
   }
 
-  constructor(id: string, username: string, firstName: string, lastName: string, admin = false) {
-    super(id);
+  constructor(username: string, firstName: string, lastName: string, admin = false) {
+    super();
     this.username = username;
     this.firstName = firstName;
     this.lastName = lastName;

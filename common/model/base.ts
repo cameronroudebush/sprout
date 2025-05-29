@@ -21,10 +21,5 @@ export class Base {
 
 /** A class with a slight extension upon Base so we can provide fields we know will exist from the database. */
 export class DBBase extends Base {
-  id: string;
-
-  constructor(id: string) {
-    super();
-    this.id = id;
-  }
+  id!: string;
 }
