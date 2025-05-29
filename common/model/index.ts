@@ -4,6 +4,8 @@ export * from "./base";
 export * from "./config";
 export * from "./custom.types";
 export * from "./endpoint";
+export * from "./holding";
+export * from "./institution";
 export * from "./rest.request";
 export * from "./transaction";
 export * from "./user";

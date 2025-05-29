@@ -1,6 +1,5 @@
 import { Configuration } from "@backend/config/core";
 import { Logger } from "@backend/logger";
-import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import CronExpressionParser, { CronExpression } from "cron-parser";
 import { ProviderBase } from "./providers/base/core";
@@ -9,7 +8,7 @@ import { ProviderBase } from "./providers/base/core";
 export class Scheduler {
   interval!: CronExpression;
 
-  constructor(private provider: ProviderBase) {}
+  constructor(public provider: ProviderBase) {}
 
   /** Starts the scheduler to perform updates based on the next result */
   async start() {
@@ -38,10 +37,11 @@ export class Scheduler {
       users.map(async (user) => {
         try {
           Logger.info(`Updating information for: ${user.username}`);
+          // TODO
           // Sync transactions
-          const transactions = await this.provider.getTransactions(user);
-          // Insert updated data
-          await Transaction.insertMany<Transaction>(transactions);
+          // const transactions = await this.provider.get();
+          // // Insert updated data
+          // await Transaction.insertMany<Transaction>(transactions);
           Logger.success(`Information updated successfully for: ${user.username}`);
         } catch (e) {
           Logger.error(e as Error);

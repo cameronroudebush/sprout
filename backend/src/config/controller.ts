@@ -38,12 +38,10 @@ export class ConfigurationController {
       const metadata = Reflect.getMetadata(ConfigurationMetadata.METADATA_KEY, objToUpdate, key) as ConfigurationMetadata | undefined;
       // Ignore non enabled keys
       if (metadata == null || metadata?.externalControlDisabled) continue;
-      else if (objToUpdate[key] == null)
-        continue; // All fields should have values
       // Ignore non restricted values
       else if (metadata.restrictedValues != null && !metadata.restrictedValues.includes(value)) continue;
       // Ignore non matching types
-      else if (typeof value !== typeof objToUpdate[key]) continue;
+      else if (objToUpdate[key] != null && typeof value !== typeof objToUpdate[key]) continue;
       // Recursively call the update
       else if (typeof value === "object") this.updateObjectWithObject(objToUpdate[key], objectToUpdateFrom[key]);
       // Handle normal fields
@@ -82,7 +80,6 @@ export class ConfigurationController {
         // Ignore disabled configuration values
         if (metadata == null || metadata?.externalControlDisabled) return;
         const value = obj[key as keyof Object];
-        if (value == null) return; // Ignore bad values
         let shouldNewlineWrap = typeof value === "object" && !Array.isArray(value) && value != null; // If we should wrap our current content to a new line
         // The output value
         let outputString: string;
@@ -93,16 +90,18 @@ export class ConfigurationController {
         // Everything else
         else {
           const stringVal = typeof value === "string" ? value : YAML.stringify(value);
-          outputString = stringVal.replace(/\n(?!\s)/gm, "\n").trimEnd();
+          outputString = stringVal?.replace(/\n(?!\s)/gm, "\n")?.trimEnd();
         }
         const paddingDepth = Array(tabLevel + 1).join("  ");
         let commentString = "";
         if (metadata.comment) {
-          if (Array.isArray(metadata.comment)) commentString = metadata.comment.map((x) => `${paddingDepth}# ${x}`).join("\n") + "\n";
-          else commentString = `${paddingDepth}# ${metadata.comment}\n`;
+          const commentAsArray = Array.isArray(metadata.comment) ? metadata.comment : [metadata.comment];
+          // Add required values if specified
+          if (metadata.restrictedValues) commentAsArray.push(`Must be one of: [${metadata.restrictedValues.join(", ")}]`);
+          commentString = commentAsArray.map((x) => `${paddingDepth}# ${x}`).join("\n") + "\n";
         }
-        const needsQuoted = outputString.startsWith("*"); // TODO: This is kind of a band-aid
-        const actualValue = `${paddingDepth}${key}:${shouldNewlineWrap ? "\n" : " "}${needsQuoted ? '"' : ""}${outputString}${needsQuoted ? '"' : ""}`;
+        const needsQuoted = outputString?.startsWith("*"); // TODO: This is kind of a band-aid
+        const actualValue = `${paddingDepth}${key}:${shouldNewlineWrap ? "\n" : " "}${needsQuoted ? '"' : ""}${outputString == null ? "" : outputString}${needsQuoted ? '"' : ""}`;
         return `${commentString}${actualValue}`;
       })
       .filter((x) => x != null)

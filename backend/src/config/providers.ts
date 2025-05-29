@@ -3,5 +3,5 @@ import { ConfigurationMetadata } from "./configuration.metadata";
 
 export class ProvidersConfig {
   @ConfigurationMetadata.assign({ comment: "SimpleFIN configuration: https://www.simplefin.org/" })
-  static simpleFIN = new SimpleFINConfig();
+  simpleFIN = new SimpleFINConfig();
 }

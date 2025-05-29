@@ -1,19 +1,34 @@
 import { DBBase } from "./base";
+import { Institution } from "./institution";
 
 /** This class defines an account that can provide transactional data */
 export class Account extends DBBase {
   name: string;
 
   /** Where this account came from */
-  source: "plaid";
+  provider: "simple-fin";
 
-  /** The ID from the API that resolved this account */
-  apiId: string;
+  /** The institution associated to this account */
+  institution: Institution;
 
-  constructor(name: string, source: Account["source"], apiId: string) {
+  /** The currency this account uses */
+  currency: string = "USD";
+
+  /** The current balance of the account */
+  balance: number;
+  /** The available balance to this account */
+  availableBalance: number;
+
+  /** the type of this account to better separate it from the others. */
+  type: "depository" | "credit" | "loan" | "investment";
+
+  constructor(name: string, provider: Account["provider"], institution: Institution, balance: number, availableBalance: number, type: Account["type"]) {
     super();
     this.name = name;
-    this.source = source;
-    this.apiId = apiId;
+    this.provider = provider;
+    this.institution = institution;
+    this.balance = balance;
+    this.availableBalance = availableBalance;
+    this.type = type;
   }
 }
