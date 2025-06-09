@@ -30,9 +30,15 @@ export class ProviderRateLimit extends DatabaseBase {
 
   /** Either increments the current count and last updated date or throws an error if there will be too many calls. */
   async incrementOrError() {
-    const inDb = await this.get();
+    const inDb = (await this.get()) as this | undefined;
     const today = new Date();
-    if (inDb.count >= this.MAX_CALLS_PER_DAY && inDb.lastUpdated.toDateString() === today.toDateString()) {
+    // No limit tracked in the db? Create one.
+    if (inDb == null) {
+      this.count++;
+      await this.insert();
+    }
+    // Else handle like normally
+    else if (inDb.count >= this.MAX_CALLS_PER_DAY && inDb.lastUpdated.toDateString() === today.toDateString()) {
       throw new Error(`Rate limit exceeded for provider ${this.name}. Max calls per day: ${this.MAX_CALLS_PER_DAY}`);
     } else if (inDb.lastUpdated.toDateString() !== today.toDateString()) {
       this.count = 1;

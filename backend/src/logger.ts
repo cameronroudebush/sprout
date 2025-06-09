@@ -41,8 +41,12 @@ export class Logger {
   private static log(info: string | Error, config: LogConfig & { color: chalk.Chalk }) {
     // Set a default log header
     if (config.shouldPrependLoggerFile ?? true) config.header = this.getLoggerFile() + (config.header || "");
-    // Show header if wanted
-    let text = `[${this.getConsoleLogHeader()}]${config.header}: ${info}`;
+    const leadingText = `[${this.getConsoleLogHeader()}]${config.header}`;
+    let text: string;
+    // Log error stack if available
+    if (info instanceof Error) {
+      text = `${leadingText}: ${info.stack || info.message}`;
+    } else text = `${leadingText}: ${info}`;
     // Show coloring if given
     console.log(config.color(text));
     // Write to log file without coloring

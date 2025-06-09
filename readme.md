@@ -26,3 +26,11 @@ This script will automatically handle tagging docker containers and doing any ot
 # How do I contribute to Sprout?
 
 TODO
+
+## Configuration
+
+TODO - Config file and env variables
+
+## Environment Variables
+
+TZ

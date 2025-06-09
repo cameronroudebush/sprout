@@ -14,8 +14,8 @@ RUN npm run install:all
 # Copy all content
 COPY . .
 
-FROM base as frontend-base
-RUN npm run build --prefix ./frontend
+# FROM base as frontend-base
+# RUN npm run build --prefix ./frontend
 
 FROM base as backend-base
 RUN npm run build --prefix ./backend
@@ -30,8 +30,8 @@ ENV sprout_server_apiBasePath=/api
 
 # Grab the files we need
 COPY ./frontend/nginx.conf /etc/nginx/nginx.conf
-# Frontend
-COPY --from=frontend-base /app/frontend/www /usr/share/nginx/html
+# # Frontend
+# COPY --from=frontend-base /app/frontend/www /usr/share/nginx/html
 # Backend
 COPY --from=backend-base --chmod=0755 /app/backend/sprout /sprout
 # Grab required bcrypt file

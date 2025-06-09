@@ -4,13 +4,13 @@ import { DBBase } from "./base";
 /** This holding class keeps track of an investment holding value */
 export class Holding extends DBBase {
   currency: string;
-  costBasis: string;
+  costBasis: number;
   /** A description of what this holding is */
   description: string;
   /** The current market value */
-  marketValue: string;
+  marketValue: number;
   /** The current purchase price */
-  purchasePrice: string;
+  purchasePrice: number;
   /** Total number of shares, including fractional */
   shares: number;
   /** The symbol for this holding */
@@ -21,10 +21,10 @@ export class Holding extends DBBase {
 
   constructor(
     currency: string,
-    costBasis: string,
+    costBasis: number,
     description: string,
-    marketValue: string,
-    purchasePrice: string,
+    marketValue: number,
+    purchasePrice: number,
     shares: number,
     symbol: string,
     account: Account,

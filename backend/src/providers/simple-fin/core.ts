@@ -15,6 +15,7 @@ export class SimpleFINProvider extends ProviderBase {
   override rateLimit: ProviderRateLimit = new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit);
 
   override async get() {
+    // TODO: This needs to consider what accounts are linked, not just all accounts
     return this.convertData(await this.fetchData());
   }
 
@@ -38,11 +39,11 @@ export class SimpleFINProvider extends ProviderBase {
         Holding.fromPlain({
           id: hold.id,
           currency: hold.currency,
-          costBasis: hold.cost_basis,
+          costBasis: parseFloat(hold.cost_basis),
           description: hold.description,
-          marketValue: hold.market_value,
-          purchasePrice: hold.purchase_price,
-          shares: hold.shares,
+          marketValue: parseFloat(hold.market_value),
+          purchasePrice: parseFloat(hold.purchase_price),
+          shares: parseFloat(hold.shares),
           symbol: hold.symbol,
           account,
         }),
@@ -78,6 +79,7 @@ export class SimpleFINProvider extends ProviderBase {
       pending: true,
     },
   ) {
+    await this.rateLimit.incrementOrError();
     if (Configuration.providers.simpleFIN.accessToken == null) throw new Error("SimpleFIN access token is not properly configured within your configuration.");
     const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${params.transactionStartDate.getTime()}&end-date=${params.transactionEndDate.getTime()}`;
     // Pull out the authorization header

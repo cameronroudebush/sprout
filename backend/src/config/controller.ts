@@ -18,8 +18,8 @@ export class ConfigurationController {
       `# Any changes to this file will require a restart of the backend!\n` +
       `#\n` +
       `# You can also configure this application using environment variables. To do this, you can use the separator: '${ConfigurationController.ENV_VARIABLE_SEPARATOR}'\n` +
-      `#  after the name of the application followed by the tree of the variable. So if you would want to change the plaid secret key, you would do something\n` +
-      `#  like: '${Configuration.appName}${ConfigurationController.ENV_VARIABLE_SEPARATOR}plaid${ConfigurationController.ENV_VARIABLE_SEPARATOR}secret=foobar'\n` +
+      `#  after the name of the application followed by the tree of the variable. So if you would want to change the server port, you would do something\n` +
+      `#  like: '${Configuration.appName}${ConfigurationController.ENV_VARIABLE_SEPARATOR}server${ConfigurationController.ENV_VARIABLE_SEPARATOR}port=9000'\n` +
       `# Anything added to the environment variables will not cause any changes in the config file but will be loaded into memory.\n` +
       `\n`
     );
