@@ -19,7 +19,7 @@ export class Account extends DBBase {
   /** The available balance to this account */
   availableBalance: number;
 
-  /** the type of this account to better separate it from the others. */
+  /** The type of this account to better separate it from the others. */
   type: "depository" | "credit" | "loan" | "investment";
 
   constructor(name: string, provider: Account["provider"], institution: Institution, balance: number, availableBalance: number, type: Account["type"]) {

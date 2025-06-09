@@ -46,4 +46,10 @@ export class DatabaseBase extends DBBase {
   static async insertMany<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, elements: Array<T>) {
     return await new this().getRepository().save(elements, { chunk: 999 });
   }
+
+  /** Updates this element in the database */
+  async update() {
+    if (!this.id) throw new Error("Failed to update, no ID provided");
+    else return await this.getRepository().save(this);
+  }
 }
