@@ -1,11 +1,14 @@
 import { Configuration } from "@backend/config/core";
 import { Transaction } from "@backend/model/transaction";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
-import { Account, Holding, Institution } from "@common";
+import { Holding, Institution } from "@common";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
 
+import { Logger } from "@backend/logger";
+import { Account } from "@backend/model/account";
+import { User } from "@backend/model/user";
 import * as fakeData from "./fake-data.json";
 
 /**
@@ -14,9 +17,11 @@ import * as fakeData from "./fake-data.json";
 export class SimpleFINProvider extends ProviderBase {
   override rateLimit: ProviderRateLimit = new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit);
 
-  override async get() {
-    // TODO: This needs to consider what accounts are linked, not just all accounts
-    return this.convertData(await this.fetchData());
+  override async get(user: User, accountsOnly: boolean) {
+    const accounts = this.convertData(await this.fetchData(undefined, undefined, accountsOnly));
+    // Filter accounts out that the user doesn't have linked
+    const userAccounts = await Account.getForUser(user);
+    return accounts.filter((x) => userAccounts.find((z) => z.id === x.account.id) != null);
   }
 
   /** Converts the given SimpleFIN typed data to our own local models */
@@ -67,7 +72,11 @@ export class SimpleFINProvider extends ProviderBase {
     });
   }
 
-  /** Fetches data from SimpleFIN via rest requests */
+  /**
+   * Fetches data from SimpleFIN via rest requests
+   *
+   * @param balancesOnly If we don't want transactional data. Default is false so we do want transactional data.
+   */
   async fetchData(
     endpoint = "/accounts",
     params = {
@@ -78,17 +87,20 @@ export class SimpleFINProvider extends ProviderBase {
       /** If we want pending transactions */
       pending: true,
     },
+    balancesOnly: boolean,
   ) {
     await this.rateLimit.incrementOrError();
     if (Configuration.providers.simpleFIN.accessToken == null) throw new Error("SimpleFIN access token is not properly configured within your configuration.");
-    const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${params.transactionStartDate.getTime()}&end-date=${params.transactionEndDate.getTime()}`;
+    const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${params.transactionStartDate.getTime()}&end-date=${params.transactionEndDate.getTime()}&balances-only=${balancesOnly ? 1 : 0}`;
     // Pull out the authorization header
     const [user, pass] = url.replace("https://", "").split("@")[0]!.split(":");
     const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
-    console.log(cleanURL);
-    // TODO: Add back in actual query
-    return fakeData as SimpleFINReturn.FinancialData;
-    // const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${user}:${pass}`) } });
-    // return await result.json() as SimpleFINReturn.FinancialData
+    if (Configuration.isDevBuild) {
+      Logger.warn(`Dev build detected. SimpleFIN will return fake data.`);
+      return fakeData as SimpleFINReturn.FinancialData;
+    } else {
+      const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${user}:${pass}`) } });
+      return (await result.json()) as SimpleFINReturn.FinancialData;
+    }
   }
 }

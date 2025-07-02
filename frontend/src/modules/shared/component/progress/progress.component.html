@@ -1,8 +1,0 @@
-<div class="shared-progress-container">
-  <mat-spinner *ngIf="!ready" class="spinner" color="accent" [diameter]="diameter"></mat-spinner>
-  <div *ngIf="!ready" class="message" [ngStyle]="{ paddingTop: diameter + diameter / 2 + 'px' }">{{ message }}</div>
-  <div class="content" [ngStyle]="{ ready: ready }">
-    <div *ngIf="!ready" class="not-ready-blocker"></div>
-    <ng-content></ng-content>
-  </div>
-</div>

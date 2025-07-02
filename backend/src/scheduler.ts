@@ -20,8 +20,10 @@ export class Scheduler {
     Logger.info(`Initializing scheduler with job of: ${Configuration.updateTime}`);
     // Validate the cronjob
     this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: process.env["TZ"] ?? "America/New_York" });
-    // Perform update now
-    await this.update();
+    // Perform update, if one wasn't ran today. Else schedule the next update
+    const lastSchedule = (await Schedule.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
+    if (lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString()) await this.update();
+    else this.scheduleNextUpdate();
   }
 
   private scheduleNextUpdate() {
@@ -45,7 +47,7 @@ export class Scheduler {
       for (const user of users) {
         Logger.info(`Updating information for: ${user.username}`);
         // Sync transactions and account balances
-        const accounts = await this.provider.get();
+        const accounts = await this.provider.get(user, false);
         for (const data of accounts) {
           try {
             const accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;

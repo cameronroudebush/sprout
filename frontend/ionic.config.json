@@ -1,7 +1,0 @@
-{
-  "name": "Sprout",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular"
-}
