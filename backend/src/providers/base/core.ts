@@ -1,4 +1,5 @@
 import { Transaction } from "@backend/model/transaction";
+import { User } from "@backend/model/user";
 import { Account, Holding } from "@common";
 import { ProviderRateLimit } from "./rate-limit";
 
@@ -10,6 +11,11 @@ export abstract class ProviderBase {
   /** The rate limit class for this provider */
   abstract readonly rateLimit: ProviderRateLimit;
 
-  /** Returns data from the provider to satisfy updated transaction, holdings, and accounts */
-  abstract get(): Promise<Array<{ account: Account; transactions: Transaction[]; holdings: Holding[] }>>;
+  /**
+   * Returns data from the provider to satisfy updated transaction, holdings, and accounts
+   *
+   * @param user The user we want accounts for.
+   * @param accountsOnly If we only want accounts and not included holdings or transactions.
+   */
+  abstract get(user: User, accountsOnly: boolean): Promise<Array<{ account: Account; transactions: Transaction[]; holdings: Holding[] }>>;
 }
