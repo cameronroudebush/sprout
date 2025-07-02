@@ -9,10 +9,6 @@
       "name": "Frontend",
     },
     {
-      "path": "../common",
-      "name": "Common",
-    },
-    {
       "path": "..",
       "name": "Workspace",
     },

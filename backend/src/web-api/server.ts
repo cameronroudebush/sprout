@@ -1,5 +1,5 @@
+import { RestBody } from "@backend/model/api/rest.request";
 import { User } from "@backend/model/user";
-import { RestBody } from "@common";
 import { Express, Response } from "express";
 import { globSync } from "glob";
 import path from "path";

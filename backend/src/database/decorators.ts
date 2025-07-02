@@ -1,5 +1,5 @@
 import { DatabaseBase } from "@backend/model/database.base";
-import { CustomTypes } from "@common";
+import { CustomTypes } from "@backend/model/utility/custom.types";
 import { Column, ColumnOptions, Entity, EntityOptions } from "typeorm";
 
 /** Currently registered entities to the database */

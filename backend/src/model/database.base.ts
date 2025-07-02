@@ -1,5 +1,6 @@
 import { Database } from "@backend/database/source";
-import { CustomTypes, DBBase } from "@common";
+import { DBBase } from "@backend/model/base";
+import { CustomTypes } from "@backend/model/utility/custom.types";
 import { decorate } from "ts-mixer";
 import { FindManyOptions, FindOneOptions, PrimaryGeneratedColumn, Repository } from "typeorm";
 

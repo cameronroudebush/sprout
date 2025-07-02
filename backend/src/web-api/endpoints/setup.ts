@@ -1,6 +1,9 @@
 import { Logger } from "@backend/logger";
+import { UnsecureAppConfiguration } from "@backend/model/api/config";
+import { RestEndpoints } from "@backend/model/api/endpoint";
+import { RestBody } from "@backend/model/api/rest.request";
+import { UserCreationRequest, UserCreationResponse } from "@backend/model/api/user";
 import { User } from "@backend/model/user";
-import { RestBody, RestEndpoints, UnsecureAppConfiguration, UserCreationRequest, UserCreationResponse } from "@common";
 import { EndpointError } from "../error";
 import { RestMetadata } from "../metadata";
 

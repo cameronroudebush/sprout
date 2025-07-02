@@ -1,5 +1,5 @@
+import { Base } from "@backend/model/base";
 import { v4 } from "uuid";
-import { Base } from "./base";
 
 /** Types of data supported by the request messages */
 export type SupportedPayloadTypes = Base | Base[] | string | number;

@@ -1,13 +1,14 @@
 import { Configuration } from "@backend/config/core";
 import { Transaction } from "@backend/model/transaction";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
-import { Holding, Institution } from "@common";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
 
 import { Logger } from "@backend/logger";
 import { Account } from "@backend/model/account";
+import { Holding } from "@backend/model/holding";
+import { Institution } from "@backend/model/institution";
 import { User } from "@backend/model/user";
 import * as fakeData from "./fake-data.json";
 
