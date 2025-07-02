@@ -65,8 +65,7 @@ export class ConfigurationController {
     const reducedObject = matchingAppKeys.reduce((obj, envKey) => {
       const value = process.env[envKey as keyof Object];
       const keyPath = envKey.replace(Configuration.appName, "").replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "");
-      // const splitKeys = adjustedKey.split(ConfigurationController.ENV_VARIABLE_SEPARATOR);
-      set(obj, keyPath.replace(ConfigurationController.ENV_VARIABLE_SEPARATOR, "."), value);
+      set(obj, keyPath.replaceAll(ConfigurationController.ENV_VARIABLE_SEPARATOR, "."), value);
       return obj;
     }, {});
     this.updateObjectWithObject(Configuration, reducedObject);
