@@ -32,6 +32,7 @@ export class ConfigurationController {
 
   /** Updates the given object with the object to update from. Allows recursive handling */
   private updateObjectWithObject(objToUpdate: any, objectToUpdateFrom: any) {
+    if (objectToUpdateFrom == null) return;
     for (let key of Object.keys(objectToUpdateFrom)) {
       const value = objectToUpdateFrom[key];
       // Find metadata from parent
