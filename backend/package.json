@@ -50,7 +50,7 @@
   },
   "pkg": {
     "assets": [
-      "dist/backend/src/web-api/endpoints/*",
+      "dist/**/*",
       "node_modules/axios/**/*",
       "node_modules/plaid/node_modules/axios/**/*",
       "node_modules/bcrypt/lib/binding/**/*",
