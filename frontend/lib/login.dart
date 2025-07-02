@@ -1,0 +1,145 @@
+// lib/main.dart
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:sprout/api/client.dart';
+import 'package:sprout/home.dart';
+
+/// A stateful widget for the login page.
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  // Controllers for username and password input fields.
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // TODO: This needs to be configurable somehow
+  final JwtApiClient _apiClient = JwtApiClient(
+    kDebugMode ? 'http://localhost:8001' : 'https://sprout.croudebush.net/api',
+  );
+
+  // Message to display login status or errors.
+  String _message = '';
+
+  /// Handles the login process when the login button is pressed.
+  Future<void> _login() async {
+    setState(() {
+      _message = 'Logging in...';
+    });
+
+    final success = await _apiClient.login(
+      _usernameController.text,
+      _passwordController.text,
+    );
+
+    if (success) {
+      setState(() {
+        _message = 'Login successful!';
+      });
+      // Navigate to the ProfilePage on successful login, replacing the current route.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(apiClient: _apiClient),
+        ),
+      );
+    } else {
+      setState(() {
+        _message = 'Login failed. Please check credentials.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset(
+                'assets/logo/color-transparent-no-tag.png',
+                width: MediaQuery.of(context).size.height * .4,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 24),
+                child: Text(
+                  'Welcome Back!',
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.height * .025,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40.0),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 640),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * .7,
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _usernameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Username',
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      TextField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock),
+                        ),
+                        obscureText: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30.0),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 640),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * .5,
+                  child: ElevatedButton(
+                    onPressed: _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(
+                        double.infinity,
+                        50,
+                      ), // Make button full width
+                      elevation: 5,
+                    ),
+                    child: const Text('Login', style: TextStyle(fontSize: 18)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              Text(
+                _message,
+                style: TextStyle(
+                  color: Colors.red[700],
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

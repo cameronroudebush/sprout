@@ -19,9 +19,11 @@ export class SimpleFINProvider extends ProviderBase {
   override rateLimit: ProviderRateLimit = new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit);
 
   override async get(user: User, accountsOnly: boolean) {
+    const userAccounts = await Account.getForUser(user);
+    // If we don't have any user accounts, don't bother querying because we'll have nothing to update
+    if (userAccounts.length === 0) return [];
     const accounts = this.convertData(await this.fetchData(undefined, undefined, accountsOnly));
     // Filter accounts out that the user doesn't have linked
-    const userAccounts = await Account.getForUser(user);
     return accounts.filter((x) => userAccounts.find((z) => z.id === x.account.id) != null);
   }
 

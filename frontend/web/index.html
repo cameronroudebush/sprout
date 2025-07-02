@@ -31,7 +31,43 @@
     <title>Sprout</title>
     <link rel="manifest" href="manifest.json" />
   </head>
+  <style>
+    html {
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #111418;
+    }
+    #loading_indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 25% !important;
+    }
+    #loading_indicator img {
+      width: 300%;
+      height: auto;
+    }
+  </style>
   <body>
+    <div id="loading_indicator">
+      <img src="assets/logo/icon/favicon-color.svg" alt="Your Logo" />
+    </div>
     <script src="flutter_bootstrap.js" async></script>
+    <script>
+      // Ensure the loading indicator is removed when Flutter is ready
+      window.addEventListener("flutter-first-frame", function () {
+        var loadingIndicator = document.getElementById("loading_indicator");
+        if (loadingIndicator) loadingIndicator.remove();
+      });
+    </script>
   </body>
 </html>
