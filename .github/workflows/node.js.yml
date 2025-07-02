@@ -17,8 +17,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # This fetches the entire git history, including all branches and tags.
-      - name: Describe
-        run: git describe
       # Grab tags for version numbers
       - name: Get tags
         run: git fetch --tags origin

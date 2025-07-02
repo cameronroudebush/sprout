@@ -7,18 +7,17 @@ class NetWorthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Dummy net worth data
-    const double currentNetWorth = 12534535435.67;
+    const double currentNetWorth = 123456789.67;
 
     return Center(
       child: FractionallySizedBox(
-        widthFactor: .7,
         child: Card(
           elevation: 4.0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
