@@ -1,34 +1,59 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { Account } from "@backend/model/account";
 import { DatabaseBase } from "@backend/model/database.base";
-import { Holding as CommonHolding } from "@common";
-import { Mixin } from "ts-mixer";
 import { ManyToOne } from "typeorm";
 
 /** This class provides historical tracking to accounts. Used for things like balance over time. */
 @DatabaseDecorators.entity()
-export class Holding extends Mixin(DatabaseBase, CommonHolding) {
+export class Holding extends DatabaseBase {
+  /** The account this holding is associated to */
   @ManyToOne(() => Account, (i) => i.id)
-  declare account: Account;
+  account: Account;
 
   @DatabaseDecorators.column({ nullable: false })
-  declare currency: string;
+  currency: string;
 
   @DatabaseDecorators.column({ nullable: false })
-  declare costBasis: number;
+  costBasis: number;
 
+  /** A description of what this holding is */
   @DatabaseDecorators.column({ nullable: false })
-  declare description: string;
+  description: string;
 
+  /** The current market value */
   @DatabaseDecorators.column({ nullable: false })
-  declare marketValue: number;
+  marketValue: number;
 
+  /** The current purchase price */
   @DatabaseDecorators.column({ nullable: false })
-  declare purchasePrice: number;
+  purchasePrice: number;
 
+  /** Total number of shares, including fractional */
   @DatabaseDecorators.column({ nullable: false })
-  declare shares: number;
+  shares: number;
 
+  /** The symbol for this holding */
   @DatabaseDecorators.column({ nullable: false })
-  declare symbol: string;
+  symbol: string;
+
+  constructor(
+    currency: string,
+    costBasis: number,
+    description: string,
+    marketValue: number,
+    purchasePrice: number,
+    shares: number,
+    symbol: string,
+    account: Account,
+  ) {
+    super();
+    this.currency = currency;
+    this.costBasis = costBasis;
+    this.description = description;
+    this.marketValue = marketValue;
+    this.purchasePrice = purchasePrice;
+    this.shares = shares;
+    this.symbol = symbol;
+    this.account = account;
+  }
 }

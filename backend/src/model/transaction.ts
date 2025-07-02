@@ -1,18 +1,36 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
+import { Account } from "@backend/model/account";
 import { DatabaseBase } from "@backend/model/database.base";
-import { User } from "@backend/model/user";
-import { Transaction as CommonTransaction } from "@common";
-import { Mixin } from "ts-mixer";
-import { ManyToOne, Relation } from "typeorm";
+import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
-export class Transaction extends Mixin(DatabaseBase, CommonTransaction) {
-  @ManyToOne(() => User, (user) => user.username)
-  declare user: Relation<User>;
+export class Transaction extends DatabaseBase {
+  /** In the currency of the account */
+  @DatabaseDecorators.column({ nullable: false })
+  amount: number;
 
   @DatabaseDecorators.column({ nullable: false })
-  declare amount: number;
-
+  description: string;
+  @DatabaseDecorators.column()
+  pending: boolean;
   @DatabaseDecorators.column({ nullable: false })
-  declare date: Date;
+  category: string;
+
+  /** The date this transaction posted */
+  @DatabaseDecorators.column({ nullable: false })
+  posted: Date;
+
+  /** The account this transaction belongs to */
+  @ManyToOne(() => Account, (a) => a.id)
+  account: Account;
+
+  constructor(amount: number, posted: Date, description: string, category: string, pending: boolean, account: Account) {
+    super();
+    this.amount = amount;
+    this.posted = posted;
+    this.description = description;
+    this.category = category;
+    this.pending = pending;
+    this.account = account;
+  }
 }

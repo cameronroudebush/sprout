@@ -1,33 +1,44 @@
 import { Configuration } from "@backend/config/core";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/model/database.base";
-import { User as CommonUser } from "@common";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
 import jwt from "jsonwebtoken";
-import { Mixin } from "ts-mixer";
 
 /** JWT object content that will be included */
 type JWTContent = { username: string };
 
 @DatabaseDecorators.entity()
-export class User extends Mixin(CommonUser, DatabaseBase) {
+export class User extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
-  declare firstName: string;
+  firstName: string;
 
   @DatabaseDecorators.column({ nullable: true })
-  declare lastName: string;
+  lastName: string;
 
   @DatabaseDecorators.column()
-  declare username: string;
+  username: string;
 
   @DatabaseDecorators.column({ default: false })
-  declare admin: boolean;
+  admin: boolean;
 
   /** Hashed password in the database to compare against */
   @DatabaseDecorators.column()
   @Exclude({ toPlainOnly: true })
-  declare password: string;
+  password!: string;
+
+  get prettyName() {
+    if (this.firstName == null && this.lastName == null) return this.username;
+    return this.firstName + " " + this.lastName;
+  }
+
+  constructor(username: string, firstName: string, lastName: string, admin = false) {
+    super();
+    this.username = username;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.admin = admin;
+  }
 
   /** Given a password, hashes it and returns it */
   static hashPassword(pass: string, saltRounds = 10) {

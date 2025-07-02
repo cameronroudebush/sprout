@@ -1,5 +1,7 @@
+import { RestEndpoints } from "@backend/model/api/endpoint";
+import { RestBody } from "@backend/model/api/rest.request";
+import { UserLoginRequest, UserLoginResponse } from "@backend/model/api/user";
 import { User } from "@backend/model/user";
-import { RestBody, RestEndpoints, UserLoginRequest, UserLoginResponse } from "@common";
 import { EndpointError } from "../error";
 import { RestMetadata } from "../metadata";
 

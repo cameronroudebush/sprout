@@ -1,4 +1,4 @@
-import { CustomTypes } from "./custom.types";
+import { CustomTypes } from "../utility/custom.types";
 
 /** Container class for different rest requests */
 export module RestEndpoints {

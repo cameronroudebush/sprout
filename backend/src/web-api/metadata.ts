@@ -1,5 +1,7 @@
 import { Configuration } from "@backend/config/core";
-import { Base, RestBody, User } from "@common";
+import { RestBody } from "@backend/model/api/rest.request";
+import { Base } from "@backend/model/base";
+import { User } from "@backend/model/user";
 
 /** Supported RESTful API req types we currently use */
 export type SupportedRestTypes = "GET" | "POST";

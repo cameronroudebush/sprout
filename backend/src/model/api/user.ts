@@ -1,26 +1,5 @@
-import { Base, DBBase } from "./base";
-
-/** This class defines shared user information available to the clients */
-export class User extends DBBase {
-  firstName: string;
-  lastName: string;
-  /** The current username for this user */
-  username: string;
-  admin: boolean = false;
-
-  get prettyName() {
-    if (this.firstName == null && this.lastName == null) return this.username;
-    return this.firstName + " " + this.lastName;
-  }
-
-  constructor(username: string, firstName: string, lastName: string, admin = false) {
-    super();
-    this.username = username;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.admin = admin;
-  }
-}
+import { Base } from "@backend/model/base";
+import { User } from "@backend/model/user";
 
 export class UserCreationResponse extends Base {
   username: string;

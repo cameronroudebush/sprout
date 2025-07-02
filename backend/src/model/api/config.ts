@@ -1,4 +1,4 @@
-import { Base } from "./base";
+import { Base } from "../base";
 
 /** A type that includes both unsecure and standard configuration for those who request it via the API */
 export type CombinedExternalConfig = UnsecureAppConfiguration & Configuration;

@@ -5,7 +5,8 @@ import nodemon, { NodemonSettings } from "nodemon";
 import path from "path";
 import { replaceInFileSync } from "replace-in-file";
 import { replaceTscAliasPaths } from "tsc-alias";
-import { CancellablePromise, Utility } from "../common/model/utility";
+import { CancellablePromise } from "./src/model/utility/cancellable.promise";
+import { Utility } from "./src/model/utility/utility";
 import { compilerOptions } from "./tsconfig.json";
 
 /** This type helps provide metadata for variables we want to replace */
@@ -32,7 +33,7 @@ export module BackendBuilder {
   /** The secret key for development to replace the standard randomly generated secret key. */
   const developmentSecret = "DEV-KEY";
   /** The path to the src folder of the backend within the build output */
-  const backendDistributionDir = path.join(__dirname, compilerOptions.outDir, "backend", "src");
+  const backendDistributionDir = path.join(__dirname, compilerOptions.outDir, "src");
 
   function log(...message: any[]) {
     console.log("[Backend Builder]", ...message);

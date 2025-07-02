@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "install:all": "npm i && npm i --prefix ./backend && npm i --prefix ./common && npm i --prefix ./frontend --verbose",
+    "install:all": "npm i && npm i --prefix ./backend",
     "build:docker": "ts-node --project ./backend/tsconfig.build.json ./scripts/build.docker.ts",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write"

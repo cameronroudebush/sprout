@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { CustomTypes } from "./custom.types";
+import { CustomTypes } from "./utility/custom.types";
 
 /** The base class to every model of this application that provides generic capabilities */
 export class Base {
