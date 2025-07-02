@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
+      "name": "Debug Backend",
       "request": "launch",
       "runtimeArgs": ["start"],
       "runtimeExecutable": "npm",
