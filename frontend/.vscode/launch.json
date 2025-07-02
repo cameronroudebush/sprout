@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "Debug Frontend",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "console": "debugConsole",
+      "flutterMode": "debug"
+    }
+  ]
+}
