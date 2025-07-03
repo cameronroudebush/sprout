@@ -22,7 +22,7 @@ export class SetupAPI {
   async createAdminAccount(data: RestBody<UserCreationRequest>) {
     try {
       const firstTimeSetupStatus = await SetupAPI.firstTimeSetupDetermination();
-      if (firstTimeSetupStatus === "welcome" || firstTimeSetupStatus === "admin") {
+      if (firstTimeSetupStatus === "welcome") {
         const user = await User.createUser(data.payload.username, data.payload.password, true);
         Logger.info("Admin account created");
         return UserCreationResponse.fromPlain({ username: user.username });
