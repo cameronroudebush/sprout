@@ -1,7 +1,7 @@
 // lib/main.dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:sprout/api/client.dart';
+import 'package:provider/provider.dart';
+import 'package:sprout/api/user.dart';
 import 'package:sprout/home.dart';
 
 /// A stateful widget for the login page.
@@ -17,24 +17,23 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // TODO: This needs to be configurable somehow
-  final JwtApiClient _apiClient = JwtApiClient(
-    kDebugMode ? 'http://localhost:8001' : 'https://sprout.croudebush.net/api',
-  );
-
   // Message to display login status or errors.
   String _message = '';
 
   /// Handles the login process when the login button is pressed.
   Future<void> _login() async {
+    if (_usernameController.text == "" || _passwordController.text == "") {
+      return;
+    }
+
     setState(() {
       _message = 'Logging in...';
     });
 
-    final success = await _apiClient.login(
-      _usernameController.text,
-      _passwordController.text,
-    );
+    final success = await Provider.of<UserAPI>(
+      context,
+      listen: false,
+    ).loginWithPassword(_usernameController.text, _passwordController.text);
 
     if (success) {
       setState(() {
@@ -43,9 +42,7 @@ class _LoginPageState extends State<LoginPage> {
       // Navigate to the ProfilePage on successful login, replacing the current route.
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(apiClient: _apiClient),
-        ),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     } else {
       setState(() {
@@ -101,6 +98,10 @@ class _LoginPageState extends State<LoginPage> {
                           prefixIcon: Icon(Icons.lock),
                         ),
                         obscureText: true,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (String value) {
+                          _login();
+                        },
                       ),
                     ],
                   ),
@@ -114,8 +115,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: _login,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
                       minimumSize: const Size(
                         double.infinity,
                         50,
@@ -130,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
               Text(
                 _message,
                 style: TextStyle(
-                  color: Colors.red[700],
+                  color: Theme.of(context).colorScheme.error,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
