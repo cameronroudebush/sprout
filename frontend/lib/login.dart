@@ -52,6 +52,24 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkJWTLogin();
+  }
+
+  /// Checks if we can login with the JWT and if so moves on to the next page.
+  Future<void> _checkJWTLogin() async {
+    final configAPI = Provider.of<UserAPI>(context, listen: false);
+    bool successLogin = await configAPI.loginWithJWT(null);
+    if (successLogin) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(

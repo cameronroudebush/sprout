@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:sprout/api/storage.dart';
+import 'package:sprout/api/user.dart';
 import 'package:uuid/uuid.dart';
 
 /// A client for interacting with a REST API that uses JWT for authentication.
@@ -20,7 +21,7 @@ class RESTClient {
   /// Posts the requested body content to the given endpoint
   /// [payload] The content to stringify and send as a payload
   /// [endpoint] The endpoint to post to. Must start with a /
-  Future<Object> post(Object payload, String endpoint) async {
+  Future<Object> post(dynamic payload, String endpoint) async {
     final url = Uri.parse('$baseUrl$endpoint');
     // We must create body that follows the backend structure
     final Object body = {
@@ -28,16 +29,21 @@ class RESTClient {
       'requestId': Uuid().v4(),
       'timeStamp': DateTime.timestamp().toIso8601String(),
     };
+    String? jwt = await this.secureStorage.getValue(UserAPI.jwtKey);
+    final headers = {'Content-Type': 'application/json'};
+    if (jwt != null && jwt.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $jwt';
+    }
 
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: headers,
       body: json.encode(body),
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data;
+      return data["payload"];
     } else {
       throw Exception(
         'Failed to post to $endpoint: ${response.statusCode} - ${response.body}',
