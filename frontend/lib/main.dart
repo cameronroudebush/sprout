@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_theme/json_theme.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/api/account.dart';
 import 'package:sprout/api/client.dart';
 import 'package:sprout/api/config.dart';
 import 'package:sprout/api/setup.dart';
@@ -44,6 +45,9 @@ class MyApp extends StatelessWidget {
         ),
         ProxyProvider<RESTClient, ConfigAPI>(
           update: (_, apiClient, __) => ConfigAPI(apiClient),
+        ),
+        ProxyProvider<RESTClient, AccountAPI>(
+          update: (_, apiClient, __) => AccountAPI(apiClient),
         ),
       ],
       child: MaterialApp(

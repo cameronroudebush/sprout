@@ -6,7 +6,7 @@ class SecureStorage {
   final _storage = const FlutterSecureStorage();
 
   /// Saves the given value to the given key
-  Future<void> saveValue(String key, String value) async {
+  Future<void> saveValue(String key, String? value) async {
     await _storage.write(key: key, value: value);
   }
 

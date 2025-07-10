@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
                   NetWorthCard(),
                   SizedBox(height: 24.0), // Spacing between sections
                   // Accounts Section
-                  AccountsSection(),
+                  AccountsPage(),
                   SizedBox(height: 24.0), // Spacing between sections
                   // Transactions Section
                   // TransactionsSection(),

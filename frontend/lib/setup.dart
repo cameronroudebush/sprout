@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:sprout/api/config.dart';
 import 'package:sprout/api/setup.dart';
 import 'package:sprout/api/user.dart';
-import 'package:sprout/home.dart';
+import 'package:sprout/login.dart';
 import 'package:sprout/widgets/app_bar.dart';
+import 'package:sprout/widgets/text.dart';
 
 /// This page contains the process for when the application is first started
 class SetupPage extends StatefulWidget {
@@ -133,7 +134,7 @@ class _SetupPageState extends State<SetupPage> {
   void _finishSetup() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 
@@ -179,25 +180,20 @@ class _SetupPageState extends State<SetupPage> {
   /// Builds the Welcome page of the setup flow.
   Widget _buildWelcomePage() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            'Welcome to Sprout!',
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.height * .05,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
+          TextWidget(
+            referenceSize: 4,
+            text: 'Welcome to Sprout!',
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20.0),
-          Text(
-            "Get ready to take control of your financial future. Sprout is your personal, self-hostable finance tracker designed to give you a crystal-clear view of your net worth, account balances, and transaction history over time. Let's get started on setting up your financial journey.",
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.height * .015,
-            ),
-            textAlign: TextAlign.center,
+          TextWidget(
+            referenceSize: 1.5,
+            text:
+                "Get ready to take control of your financial future. Sprout is your personal, self-hostable finance tracker designed to give you a crystal-clear view of your net worth, account balances, and transaction history over time. Let's get started on setting up your financial journey.",
           ),
           const SizedBox(height: 60.0),
           ElevatedButton(
@@ -220,15 +216,16 @@ class _SetupPageState extends State<SetupPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text(
-            'Create Your Admin Account',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          TextWidget(
+            referenceSize: 3,
+            text: 'Create Your Admin Account',
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20.0),
-          const Text(
-            'This will be your primary account to manage the app. Please choose a secure username and password.',
-            style: TextStyle(fontSize: 16),
+          TextWidget(
+            referenceSize: 1.25,
+            text:
+                'This will be your primary account to manage the app. Please choose a secure username and password.',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40.0),
@@ -295,16 +292,16 @@ class _SetupPageState extends State<SetupPage> {
             size: MediaQuery.of(context).size.height * .25,
           ),
           const SizedBox(height: 20.0),
-          const Text(
-            'Setup Complete!',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          TextWidget(
+            referenceSize: 3,
+            text: 'Setup Complete!',
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20.0),
-          const Text(
-            'Your admin account has been successfully created. You\'re all set to explore the app!',
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
+          TextWidget(
+            referenceSize: 1.25,
+            text:
+                'Your admin account has been successfully created. You\'re all set to explore the app!',
           ),
           const SizedBox(height: 60.0),
           ElevatedButton(

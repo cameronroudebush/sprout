@@ -24,7 +24,7 @@ export class User extends DatabaseBase {
 
   /** Hashed password in the database to compare against */
   @DatabaseDecorators.column()
-  @Exclude({ toPlainOnly: true })
+  @Exclude({ toClassOnly: true })
   password!: string;
 
   get prettyName() {

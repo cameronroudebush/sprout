@@ -6,10 +6,15 @@ class UserAPI {
   RESTClient client;
 
   // Key used to store the JWT token in secure storage.
-  static const String _jwtKey = 'jwt_token';
+  static const String jwtKey = 'jwt_token';
 
   /// Constructor for UserAPI
   UserAPI(this.client);
+
+  /// Returns the current JWT as saved in storage
+  Future<String?> getJWT() async {
+    return await client.secureStorage.getValue(jwtKey);
+  }
 
   /// Authenticates a user with the backend API.
   /// Sends username and password to the login endpoint and stores the received JWT.
@@ -26,10 +31,38 @@ class UserAPI {
       String? jwt = result["jwt"];
 
       if (jwt != null) {
-        this.client.secureStorage.saveValue(_jwtKey, jwt);
+        await this.client.secureStorage.saveValue(jwtKey, jwt);
       }
 
       return success == null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Authenticates a user with the backend API via JWT.
+  /// [jwt] The JWT to login with
+  /// Returns true if login is successful, false otherwise.
+  Future<bool> loginWithJWT(String? jwt) async {
+    jwt ??= await getJWT();
+    final endpoint = "/user/login/jwt";
+    final body = {'jwt': jwt};
+
+    if (jwt == null || jwt.isEmpty) {
+      return false;
+    }
+
+    try {
+      dynamic result = await client.post(body, endpoint);
+      String? success = result["success"];
+
+      // If login fails, clear the jwt
+      if (success != null) {
+        await client.secureStorage.saveValue(jwtKey, null);
+        return false;
+      } else {
+        return true;
+      }
     } catch (e) {
       return false;
     }
