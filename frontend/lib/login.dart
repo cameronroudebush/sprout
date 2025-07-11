@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/user.dart';
 import 'package:sprout/home.dart';
+import 'package:sprout/widgets/button.dart';
 
 /// A stateful widget for the login page.
 class LoginPage extends StatefulWidget {
@@ -130,17 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                 constraints: BoxConstraints(maxWidth: 640),
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * .5,
-                  child: ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(
-                        double.infinity,
-                        50,
-                      ), // Make button full width
-                      elevation: 5,
-                    ),
-                    child: const Text('Login', style: TextStyle(fontSize: 18)),
-                  ),
+                  child: ButtonWidget(text: "Login"),
                 ),
               ),
               const SizedBox(height: 20.0),

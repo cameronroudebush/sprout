@@ -46,7 +46,10 @@ export class Scheduler {
       // Handle each users accounts
       for (const user of users) {
         Logger.info(`Updating information for: ${user.username}`);
-        // Sync transactions and account balances
+        // Sync transactions and account balances. Only do it for existing accounts.
+        const userAccounts = await Account.getForUser(user);
+        // If we don't have any user accounts, don't bother querying because we'll have nothing to update
+        if (userAccounts.length === 0) continue;
         const accounts = await this.provider.get(user, false);
         for (const data of accounts) {
           try {

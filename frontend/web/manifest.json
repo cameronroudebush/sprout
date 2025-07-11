@@ -9,7 +9,7 @@
     "start_url": "./",
     "icons": [
         {
-            "src": "logo/icon/favicon-bg-mask.svg",
+            "src": "icon/favicon-bg-mask.svg",
             "sizes": "any",
             "type": "image/svg+xml",
             "purpose": "maskable"

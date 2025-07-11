@@ -18,13 +18,8 @@ import * as fakeData from "./fake-data.json";
 export class SimpleFINProvider extends ProviderBase {
   override rateLimit: ProviderRateLimit = new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit);
 
-  override async get(user: User, accountsOnly: boolean) {
-    const userAccounts = await Account.getForUser(user);
-    // If we don't have any user accounts, don't bother querying because we'll have nothing to update
-    if (userAccounts.length === 0) return [];
-    const accounts = this.convertData(await this.fetchData(undefined, undefined, accountsOnly));
-    // Filter accounts out that the user doesn't have linked
-    return accounts.filter((x) => userAccounts.find((z) => z.id === x.account.id) != null);
+  override async get(_user: User, accountsOnly: boolean) {
+    return this.convertData(await this.fetchData(undefined, undefined, accountsOnly));
   }
 
   /** Converts the given SimpleFIN typed data to our own local models */
@@ -92,7 +87,6 @@ export class SimpleFINProvider extends ProviderBase {
     },
     balancesOnly: boolean,
   ) {
-    await this.rateLimit.incrementOrError();
     if (Configuration.providers.simpleFIN.accessToken == null) throw new Error("SimpleFIN access token is not properly configured within your configuration.");
     const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${params.transactionStartDate.getTime()}&end-date=${params.transactionEndDate.getTime()}&balances-only=${balancesOnly ? 1 : 0}`;
     // Pull out the authorization header
@@ -102,6 +96,7 @@ export class SimpleFINProvider extends ProviderBase {
       Logger.warn(`Dev build detected. SimpleFIN will return fake data.`);
       return fakeData as SimpleFINReturn.FinancialData;
     } else {
+      await this.rateLimit.incrementOrError();
       const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${user}:${pass}`) } });
       return (await result.json()) as SimpleFINReturn.FinancialData;
     }

@@ -82,7 +82,8 @@ export class User extends DatabaseBase {
     await User.checkIfUsernameIsInUser(username);
     await User.validatePassword(password);
     const hashedPassword = User.hashPassword(password);
-    const user = User.fromPlain({ username, password: hashedPassword, admin });
+    const user = User.fromPlain({ username, admin });
+    user.password = hashedPassword;
     return await user.insert();
   }
 }
