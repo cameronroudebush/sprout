@@ -18,6 +18,15 @@ class RESTClient {
   /// [baseUrl] The base URL of the backend API.
   RESTClient(this.baseUrl);
 
+  Future<Map<String, String>> _getSendHeaders() async {
+    String? jwt = await this.secureStorage.getValue(UserAPI.jwtKey);
+    final headers = {'Content-Type': 'application/json'};
+    if (jwt != null && jwt.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $jwt';
+    }
+    return headers;
+  }
+
   /// Posts the requested body content to the given endpoint
   /// [payload] The content to stringify and send as a payload
   /// [endpoint] The endpoint to post to. Must start with a /
@@ -29,15 +38,10 @@ class RESTClient {
       'requestId': Uuid().v4(),
       'timeStamp': DateTime.timestamp().toIso8601String(),
     };
-    String? jwt = await this.secureStorage.getValue(UserAPI.jwtKey);
-    final headers = {'Content-Type': 'application/json'};
-    if (jwt != null && jwt.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $jwt';
-    }
 
     final response = await http.post(
       url,
-      headers: headers,
+      headers: await _getSendHeaders(),
       body: json.encode(body),
     );
 
@@ -56,14 +60,11 @@ class RESTClient {
   Future<Object> get(String endpoint) async {
     final url = Uri.parse('$baseUrl$endpoint');
 
-    final response = await http.get(
-      url,
-      headers: {'Content-Type': 'application/json'},
-    );
+    final response = await http.get(url, headers: await _getSendHeaders());
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data;
+      return data["payload"];
     } else {
       throw Exception(
         'Failed to post to $endpoint: ${response.statusCode} - ${response.body}',

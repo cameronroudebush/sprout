@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   // Net Worth Section
-                  NetWorthCard(),
+                  NetWorthWidget(),
                   SizedBox(height: 24.0), // Spacing between sections
                   // Accounts Section
                   AccountsPage(),

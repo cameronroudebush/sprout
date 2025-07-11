@@ -1,11 +1,11 @@
 // lib/pages/setup_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/config.dart';
 import 'package:sprout/api/setup.dart';
 import 'package:sprout/api/user.dart';
 import 'package:sprout/login.dart';
 import 'package:sprout/widgets/app_bar.dart';
+import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart';
 
 /// This page contains the process for when the application is first started
@@ -22,9 +22,6 @@ class _SetupPageState extends State<SetupPage> {
   // Current step in the setup process.
   int _currentPageIndex = 0;
 
-  /// Tracks if we are loading for the first time
-  bool _isInitialLoad = true;
-
   // Controllers for username and password input fields, now managed by the state.
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -40,6 +37,18 @@ class _SetupPageState extends State<SetupPage> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.addListener(_updateButtonState);
+    _passwordController.addListener(_updateButtonState);
+  }
+
+  /// Forces a rerender
+  void _updateButtonState() {
+    setState(() {});
+  }
+
   /// Navigates to the next page in the setup flow.
   void _nextPage() {
     if (_currentPageIndex < 2) {
@@ -52,29 +61,6 @@ class _SetupPageState extends State<SetupPage> {
         _currentPageIndex++;
       });
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // This is the correct place to access Provider when the context is fully ready
-    if (_isInitialLoad) {
-      // Only call this once initially
-      _checkIfSetupNeeded();
-    }
-  }
-
-  /// Checks if the setup process is needed.
-  Future<void> _checkIfSetupNeeded() async {
-    final configAPI = Provider.of<ConfigAPI>(context, listen: false);
-    dynamic unsecureConfig = await configAPI.getUnsecure();
-    String position = unsecureConfig["firstTimeSetupPosition"];
-    if (position == "complete") {
-      _finishSetup();
-    }
-    setState(() {
-      _isInitialLoad = false;
-    });
   }
 
   /// Handles the account creation and login process.
@@ -140,41 +126,37 @@ class _SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isInitialLoad) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      return Scaffold(
-        appBar: SproutAppBar(
-          toolbarHeight: MediaQuery.of(context).size.height * .075,
-        ),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth:
-                  MediaQuery.of(context).size.width *
-                  (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
-            ),
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(), // Disable swiping
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPageIndex = index;
-                });
-              },
-              children: [
-                // Step 1: Welcome Page
-                _buildWelcomePage(),
-                // Step 2: Admin User Creation Page
-                _buildAdminUserCreationPage(),
-                // Step 3: Complete Page
-                _buildCompletePage(),
-              ],
-            ),
+    return Scaffold(
+      appBar: SproutAppBar(
+        toolbarHeight: MediaQuery.of(context).size.height * .075,
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth:
+                MediaQuery.of(context).size.width *
+                (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
+          ),
+          child: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(), // Disable swiping
+            onPageChanged: (index) {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
+            children: [
+              // Step 1: Welcome Page
+              _buildWelcomePage(),
+              // Step 2: Admin User Creation Page
+              _buildAdminUserCreationPage(),
+              // Step 3: Complete Page
+              _buildCompletePage(),
+            ],
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
   /// Builds the Welcome page of the setup flow.
@@ -196,14 +178,7 @@ class _SetupPageState extends State<SetupPage> {
                 "Get ready to take control of your financial future. Sprout is your personal, self-hostable finance tracker designed to give you a crystal-clear view of your net worth, account balances, and transaction history over time. Let's get started on setting up your financial journey.",
           ),
           const SizedBox(height: 60.0),
-          ElevatedButton(
-            onPressed: _nextPage,
-            style: ElevatedButton.styleFrom(
-              minimumSize: Size(MediaQuery.of(context).size.width * .55, 50),
-              elevation: 5,
-            ),
-            child: const Text('Get Started', style: TextStyle(fontSize: 18)),
-          ),
+          ButtonWidget(text: "Get Started", onPressed: _nextPage),
         ],
       ),
     );
@@ -251,16 +226,13 @@ class _SetupPageState extends State<SetupPage> {
           const SizedBox(height: 30.0),
           _isLoading
               ? const CircularProgressIndicator()
-              : ElevatedButton(
-                  onPressed: _createAccountAndLogin,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    elevation: 5,
-                  ),
-                  child: const Text(
-                    'Create Account',
-                    style: TextStyle(fontSize: 18),
-                  ),
+              : ButtonWidget(
+                  text: "Create Account",
+                  onPressed:
+                      _passwordController.text == "" ||
+                          _usernameController.text == ""
+                      ? null
+                      : _createAccountAndLogin,
                 ),
           const SizedBox(height: 20.0),
           Text(
@@ -304,14 +276,7 @@ class _SetupPageState extends State<SetupPage> {
                 'Your admin account has been successfully created. You\'re all set to explore the app!',
           ),
           const SizedBox(height: 60.0),
-          ElevatedButton(
-            onPressed: _finishSetup,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-              elevation: 5,
-            ),
-            child: const Text('Go to App', style: TextStyle(fontSize: 18)),
-          ),
+          ButtonWidget(text: "Go to App", onPressed: _finishSetup),
         ],
       ),
     );

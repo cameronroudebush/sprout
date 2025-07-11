@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/model/institution.dart';
 
 /// This account defines what an account should look like from the API
 class Account {
@@ -10,6 +11,8 @@ class Account {
   final double balance;
   final double availableBalance;
 
+  final Institution institution;
+
   final IconData icon;
 
   Account({
@@ -20,9 +23,9 @@ class Account {
     required this.availableBalance,
     required this.currency,
     required this.type,
+    required this.institution,
   });
 
-  /// Convert the
   factory Account.fromJson(Map<String, dynamic> json) {
     IconData defaultIcon = Icons.account_balance;
     if (json['type'] == 'depository') {
@@ -43,6 +46,19 @@ class Account {
       balance: (json['balance'] as num).toDouble(),
       availableBalance: (json['availableBalance'] as num).toDouble(),
       icon: defaultIcon,
+      institution: Institution.fromJson(json["institution"]),
     );
+  }
+
+  /// Converts this object to JSON object
+  dynamic toJson() {
+    return {
+      'name': name,
+      'provider': provider,
+      'currency': currency,
+      'type': type,
+      'balance': balance,
+      'availableBalance': availableBalance,
+    };
   }
 }

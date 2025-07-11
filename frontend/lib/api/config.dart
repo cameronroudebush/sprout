@@ -11,6 +11,6 @@ class ConfigAPI {
   Future<Object> getUnsecure() async {
     final endpoint = "/conf/get/unsecure";
     dynamic result = await this.client.get(endpoint);
-    return result['payload'];
+    return result;
   }
 }

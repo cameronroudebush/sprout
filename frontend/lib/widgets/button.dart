@@ -7,6 +7,7 @@ class ButtonWidget extends StatelessWidget {
   final VoidCallback? onPressed;
   final double fontSize;
   final double minSize;
+  final Color? color;
 
   const ButtonWidget({
     super.key,
@@ -15,6 +16,7 @@ class ButtonWidget extends StatelessWidget {
     this.onPressed,
     this.fontSize = 18,
     this.minSize = double.infinity,
+    this.color,
   });
 
   @override
@@ -26,6 +28,8 @@ class ButtonWidget extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         minimumSize: Size(minSize, 50),
         elevation: 5,
+        backgroundColor:
+            color ?? Theme.of(context).buttonTheme.colorScheme!.onPrimary,
       ),
     );
   }

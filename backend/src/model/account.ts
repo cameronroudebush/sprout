@@ -14,7 +14,7 @@ export class Account extends DatabaseBase {
   provider: "simple-fin";
 
   /** The institution associated to this account */
-  @ManyToOne(() => Institution, (i) => i.id)
+  @ManyToOne(() => Institution, (i) => i.id, { eager: true, cascade: true })
   institution: Institution;
 
   /** The user this account belongs to */

@@ -1,6 +1,7 @@
 import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
+import { Institution } from "@backend/model/institution";
 import { User } from "@backend/model/user";
 import { Providers } from "../../providers";
 import { RestMetadata } from "../metadata";
@@ -17,5 +18,31 @@ export class AccountAPI {
     const providerAccounts = (await Providers.getCurrentProvider().get(user, true)).map((x) => x.account);
     const existingAccounts = await Account.find({ where: { user: user } });
     return providerAccounts.filter((providerAccount) => !existingAccounts.some((existingAccount) => existingAccount.id === providerAccount.id));
+  }
+
+  /** Links the provider accounts to the given user */
+  @RestMetadata.register(new RestMetadata(RestEndpoints.account.link, "POST"))
+  async linkProviderAccounts(data: RestBody<Array<Account>>, user: User) {
+    const accountsToLink = data.payload;
+    // We need to grab all the provider accounts again because we want to make sure we have correct data
+    const providerAccounts = (await Providers.getCurrentProvider().get(user, true)).map((x) => x.account);
+    // Add these new accounts to the database
+    const addedAccounts = (
+      await Promise.all(
+        accountsToLink.map(async (x) => {
+          const matchingAccount = providerAccounts.find((z) => z.name === x.name);
+          if (matchingAccount) {
+            matchingAccount.user = user;
+            // Try to find a matching institution first if it exists
+            const matchingInstitution = await Institution.findOne({ where: { id: matchingAccount.institution.id } });
+            if (matchingInstitution) matchingAccount.institution = matchingInstitution;
+            await matchingAccount.insert();
+            return matchingAccount;
+          }
+          return undefined;
+        }),
+      )
+    ).filter((x) => x);
+    return addedAccounts as Account[];
   }
 }
