@@ -1,19 +1,13 @@
 import { Database } from "@backend/database/source";
-import { ProviderBase } from "@backend/providers/base/core";
-import { SimpleFINProvider } from "@backend/providers/simple-fin/core";
 import "reflect-metadata";
 import "source-map-support/register";
 import { CentralServer } from "./central.server";
 import { ConfigurationController } from "./config/controller";
 import { Configuration } from "./config/core";
 import { Logger } from "./logger";
+import { Providers } from "./providers";
 import { Scheduler } from "./scheduler";
 import { RestAPIServer } from "./web-api/server";
-
-/** The various providers as loaded by our current application */
-const providers = {
-  simpleFin: new SimpleFINProvider(),
-};
 
 /** Main function for kicking off the application */
 async function main() {
@@ -28,8 +22,9 @@ async function main() {
   const centralServer = new CentralServer();
   await new RestAPIServer(centralServer.server).initialize();
   Logger.success("Server ready!");
-  // Schedule our providers to run
-  for (const providerName of Object.keys(providers)) await new Scheduler(providers[providerName as keyof typeof providers] as ProviderBase).start();
+  // Schedule our provider to run
+  const provider = Providers.getCurrentProvider();
+  await new Scheduler(provider).start();
 }
 
 // Execute main so long as this file is not being imported
