@@ -29,8 +29,19 @@ TODO
 
 ## Configuration
 
+The configuration file is generated dynamically and placed directly next to the executable under `sprout.config.yml`. You can see in this .yml file that most of the features are commented and you can use them how you see fit.
+
 TODO - Config file and env variables
 
-## Environment Variables
+### Environment Variables
+
+Environment variables are supported within the docker build and even in the executable. The top of the `sprout.config.yml` tells you how to modify each specific config field listed in [configuration](#configuration). Below are some common examples:
+
+```env
+TZ=America/New_York
+sprout_server_port=9000
+sprout_providers_simpleFIN_accessToken=MY_ACCESS_TOKEN
+
+```
 
 TZ
