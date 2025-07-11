@@ -38,7 +38,11 @@ export class RestAPIServer {
       // Handle options requests
       if (req.method === "OPTIONS") return res.status(200).end();
       // Re useable functions
-      const badRequest = (error: Error | EndpointError) => res.status((error as any).code || 400).end(error.message || undefined);
+      const badRequest = (error: Error | EndpointError) => {
+        let code = (error as EndpointError).code;
+        if (typeof code === "string") code = 500;
+        res.status(code ?? 400).end(error.message || undefined);
+      };
       try {
         // If we have an API base, strip it because the endpoints will not know of it.
         const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === req.url);
@@ -70,7 +74,7 @@ export class RestAPIServer {
         // Make sure response know's it's JSON
         res.setHeader("Content-Type", "application/json");
         if (endpoint.metadata.type === "POST" || endpoint.metadata.type === "GET")
-          if (!result) throw new EndpointError("Call didn't return any data.");
+          if (result == null) throw new EndpointError("Call didn't return any data.");
           else {
             // Create the rest request response message
             const resultMessage = RestBody.fromPlain({

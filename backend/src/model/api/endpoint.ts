@@ -38,6 +38,7 @@ export module RestEndpoints {
     static get = "/account/get";
     static getAll = "/account/get/all";
     static getAllFromProvider = "/account/provider/get/all";
+    static link = "/account/provider/link";
   }
 
   /** Endpoints for setup of application */
