@@ -217,19 +217,17 @@ class _SetupPageState extends State<SetupPage> {
             ),
           ),
           const SizedBox(height: 20.0),
-          AutofillGroup(
-            child: TextField(
-              controller: _passwordController,
-              autofillHints: [AutofillHints.newPassword],
-              decoration: const InputDecoration(
-                labelText: 'Choose Password',
-                prefixIcon: Icon(Icons.lock_open),
-              ),
-              onSubmitted: (String value) {
-                _createAccountAndLogin();
-              },
-              obscureText: true,
+          TextField(
+            controller: _passwordController,
+            autofillHints: [AutofillHints.newPassword],
+            decoration: const InputDecoration(
+              labelText: 'Choose Password',
+              prefixIcon: Icon(Icons.lock_open),
             ),
+            onSubmitted: (String value) {
+              _createAccountAndLogin();
+            },
+            obscureText: true,
           ),
           const SizedBox(height: 30.0),
           _isLoading

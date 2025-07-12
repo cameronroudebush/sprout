@@ -110,10 +110,10 @@ class _LoginPageState extends State<LoginPage> {
                     constraints: BoxConstraints(maxWidth: 640),
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * .7,
-                      child: Column(
-                        children: [
-                          AutofillGroup(
-                            child: TextField(
+                      child: AutofillGroup(
+                        child: Column(
+                          children: [
+                            TextField(
                               controller: _usernameController,
                               autofillHints: [
                                 AutofillHints.newUsername,
@@ -124,10 +124,8 @@ class _LoginPageState extends State<LoginPage> {
                                 prefixIcon: Icon(Icons.person),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          AutofillGroup(
-                            child: TextField(
+                            const SizedBox(height: 20.0),
+                            TextField(
                               controller: _passwordController,
                               autofillHints: [AutofillHints.password],
                               decoration: const InputDecoration(
@@ -140,8 +138,8 @@ class _LoginPageState extends State<LoginPage> {
                                 _login();
                               },
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
