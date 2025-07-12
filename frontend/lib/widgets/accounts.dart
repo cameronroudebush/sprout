@@ -35,63 +35,65 @@ class _AccountsWidgetState extends State<AccountsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        ...widget.accounts.map((account) {
-          final isSelected = _selectedAccounts.contains(account);
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 6.0),
-            elevation: isSelected
-                ? 4.0
-                : 2.0, // Slightly more elevation for selected
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              side: isSelected
-                  ? const BorderSide(color: Colors.blueAccent, width: 2.0)
-                  : BorderSide.none, // Blue border for selected
-            ),
-            child: ListTile(
-              leading: Icon(account.icon, color: Colors.blueGrey),
+    return SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          ...widget.accounts.map((account) {
+            final isSelected = _selectedAccounts.contains(account);
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 6.0),
+              elevation: isSelected
+                  ? 4.0
+                  : 2.0, // Slightly more elevation for selected
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
+                side: isSelected
+                    ? const BorderSide(color: Colors.blueAccent, width: 2.0)
+                    : BorderSide.none, // Blue border for selected
               ),
-              title: Text(
-                account.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    currencyFormatter.format(account.balance),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: account.balance >= 0
-                          ? Colors.green[700]
-                          : Colors.red[700],
-                    ),
-                  ),
-                  if (account.institution.hasError)
-                    Tooltip(
-                      message:
-                          'There was an error syncing with ${account.institution.name}. This may need updated in your provider.',
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: Icon(Icons.warning, color: Colors.red),
+              child: ListTile(
+                leading: Icon(account.icon, color: Colors.blueGrey),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                title: Text(
+                  account.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      currencyFormatter.format(account.balance),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: account.balance >= 0
+                            ? Colors.green[700]
+                            : Colors.red[700],
                       ),
                     ),
-                  if (isSelected)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: Icon(Icons.check_circle, color: Colors.blue),
-                    ),
-                ],
+                    if (account.institution.hasError)
+                      Tooltip(
+                        message:
+                            'There was an error syncing with ${account.institution.name}. This may need updated in your provider.',
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.warning, color: Colors.red),
+                        ),
+                      ),
+                    if (isSelected)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Icon(Icons.check_circle, color: Colors.blue),
+                      ),
+                  ],
+                ),
+                onTap: () => _toggleSelection(account),
               ),
-              onTap: () => _toggleSelection(account),
-            ),
-          );
-        }),
-      ],
+            );
+          }),
+        ],
+      ),
     );
   }
 }
