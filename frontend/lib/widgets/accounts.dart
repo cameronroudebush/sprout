@@ -88,7 +88,9 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                       ),
                   ],
                 ),
-                onTap: () => _toggleSelection(account),
+                onTap: widget.onSelectionChanged == null
+                    ? null
+                    : () => _toggleSelection(account),
               ),
             );
           }),
