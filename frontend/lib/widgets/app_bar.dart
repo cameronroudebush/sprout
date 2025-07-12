@@ -26,6 +26,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: toolbarHeight,
+      scrolledUnderElevation: 0,
       title: Image.asset(
         'assets/logo/color-transparent-no-tag.png',
         width: MediaQuery.of(context).size.height * .2,
