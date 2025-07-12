@@ -40,8 +40,8 @@ Environment variables are supported within the docker build and even in the exec
 ```env
 TZ=America/New_York
 sprout_server_port=9000
+sprout_server_jwtExpirationTime=30m
 sprout_providers_simpleFIN_accessToken=MY_ACCESS_TOKEN
-
 ```
 
 TZ
