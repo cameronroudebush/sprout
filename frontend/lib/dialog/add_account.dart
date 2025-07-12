@@ -17,6 +17,7 @@ class AddAccountDialog extends StatefulWidget {
 class _AddAccountDialogState extends State<AddAccountDialog> {
   List<Account> _accounts = [];
   List<Account> _selectedAccounts = [];
+  bool _gettingAccounts = false;
 
   @override
   void initState() {
@@ -25,9 +26,13 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   }
 
   Future<void> setAccounts() async {
+    setState(() {
+      _gettingAccounts = true;
+    });
     final accountAPI = Provider.of<AccountAPI>(context, listen: false);
     final accounts = await accountAPI.getProviderAccounts() as List<Account>;
     setState(() {
+      _gettingAccounts = false;
       _accounts = accounts;
     });
   }
@@ -40,32 +45,36 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
         child: TextWidget(referenceSize: 2, text: 'Select Accounts to Add'),
       ),
       content: _accounts.isEmpty
-          ? SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.1,
-              child: const Center(
-                child: TextWidget(
-                  referenceSize: 1,
-                  text: 'No accounts found. Did you add them in the provider?',
-                ),
-              ),
-            )
-          : SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.6,
-              child: Center(
-                child: Column(
-                  children: [
-                    AccountsWidget(
-                      accounts: _accounts,
-                      onSelectionChanged: (value) {
-                        setState(() {
-                          _selectedAccounts = value;
-                        });
-                      },
+          ? _gettingAccounts
+                ? SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.1,
+                    child: const Center(child: CircularProgressIndicator()),
+                  )
+                : SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.1,
+                    child: const Center(
+                      child: TextWidget(
+                        referenceSize: 1,
+                        text:
+                            'No accounts found. Did you add them in the provider?',
+                      ),
                     ),
-                  ],
-                ),
+                  )
+          : SizedBox(
+              width:
+                  MediaQuery.of(context).size.width * 0.8, // Set a fixed width
+              height:
+                  MediaQuery.of(context).size.height *
+                  0.6, // Set a fixed height
+              child: AccountsWidget(
+                accounts: _accounts,
+                onSelectionChanged: (value) {
+                  setState(() {
+                    _selectedAccounts = value;
+                  });
+                },
               ),
             ),
       actions: <Widget>[
