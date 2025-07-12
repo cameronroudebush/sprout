@@ -1,5 +1,6 @@
 // lib/pages/setup_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/setup.dart';
 import 'package:sprout/api/user.dart';
@@ -65,6 +66,7 @@ class _SetupPageState extends State<SetupPage> {
 
   /// Handles the account creation and login process.
   Future<void> _createAccountAndLogin() async {
+    TextInput.finishAutofillContext();
     setState(() {
       _isLoading = true;
       _message = 'Creating account...';
@@ -204,24 +206,30 @@ class _SetupPageState extends State<SetupPage> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40.0),
-          TextField(
-            controller: _usernameController,
-            decoration: const InputDecoration(
-              labelText: 'Choose Username',
-              prefixIcon: Icon(Icons.person_add),
+          AutofillGroup(
+            child: TextField(
+              controller: _usernameController,
+              autofillHints: [AutofillHints.newUsername],
+              decoration: const InputDecoration(
+                labelText: 'Choose Username',
+                prefixIcon: Icon(Icons.person_add),
+              ),
             ),
           ),
           const SizedBox(height: 20.0),
-          TextField(
-            controller: _passwordController,
-            decoration: const InputDecoration(
-              labelText: 'Choose Password',
-              prefixIcon: Icon(Icons.lock_open),
+          AutofillGroup(
+            child: TextField(
+              controller: _passwordController,
+              autofillHints: [AutofillHints.newPassword],
+              decoration: const InputDecoration(
+                labelText: 'Choose Password',
+                prefixIcon: Icon(Icons.lock_open),
+              ),
+              onSubmitted: (String value) {
+                _createAccountAndLogin();
+              },
+              obscureText: true,
             ),
-            onSubmitted: (String value) {
-              _createAccountAndLogin();
-            },
-            obscureText: true,
           ),
           const SizedBox(height: 30.0),
           _isLoading

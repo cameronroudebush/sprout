@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/user.dart';
 import 'package:sprout/home.dart';
@@ -35,6 +36,7 @@ class _LoginPageState extends State<LoginPage> {
 
   /// Handles the login process when the login button is pressed.
   Future<void> _login() async {
+    TextInput.finishAutofillContext();
     if (_usernameController.text == "" || _passwordController.text == "") {
       return;
     }
@@ -110,25 +112,34 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width * .7,
                       child: Column(
                         children: [
-                          TextField(
-                            controller: _usernameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Username',
-                              prefixIcon: Icon(Icons.person),
+                          AutofillGroup(
+                            child: TextField(
+                              controller: _usernameController,
+                              autofillHints: [
+                                AutofillHints.newUsername,
+                                AutofillHints.username,
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Username',
+                                prefixIcon: Icon(Icons.person),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          TextField(
-                            controller: _passwordController,
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                              prefixIcon: Icon(Icons.lock),
+                          AutofillGroup(
+                            child: TextField(
+                              controller: _passwordController,
+                              autofillHints: [AutofillHints.password],
+                              decoration: const InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: Icon(Icons.lock),
+                              ),
+                              obscureText: true,
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (String value) {
+                                _login();
+                              },
                             ),
-                            obscureText: true,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (String value) {
-                              _login();
-                            },
                           ),
                         ],
                       ),
