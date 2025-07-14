@@ -51,7 +51,7 @@ export class RestAPIServer {
         let user: User | null;
         if (endpoint.metadata.requiresAuth) {
           const authorization = req.headers.authorization;
-          if (authorization == null) throw new EndpointError("", 403);
+          if (authorization == null) throw new EndpointError("Unauthorized", 403);
           else if (!authorization.includes("Bearer")) throw new EndpointError("Malformed Bearer", 403);
           else
             try {

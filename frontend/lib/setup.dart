@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/setup.dart';
 import 'package:sprout/api/user.dart';
-import 'package:sprout/login.dart';
-import 'package:sprout/widgets/app_bar.dart';
+import 'package:sprout/provider/auth.dart';
 import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart';
 
 /// This page contains the process for when the application is first started
 class SetupPage extends StatefulWidget {
-  const SetupPage({super.key});
+  final VoidCallback onSetupSuccess;
+  const SetupPage({super.key, required this.onSetupSuccess});
 
   @override
   State<SetupPage> createState() => _SetupPageState();
@@ -74,6 +74,7 @@ class _SetupPageState extends State<SetupPage> {
 
     final setupAPI = Provider.of<SetupAPI>(context, listen: false);
     final userAPI = Provider.of<UserAPI>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final username = _usernameController.text;
     final password = _passwordController.text;
 
@@ -94,9 +95,9 @@ class _SetupPageState extends State<SetupPage> {
         _message = 'Account created successfully! Logging in...';
       });
       // If registration is successful, automatically log in the user
-      final loggedIn = await userAPI.loginWithPassword(username, password);
+      final loggedIn = await authProvider.login(username, password);
 
-      if (loggedIn) {
+      if (loggedIn != null) {
         setState(() {
           _message = 'Login successful!';
           _isLoading = false;
@@ -118,44 +119,31 @@ class _SetupPageState extends State<SetupPage> {
     }
   }
 
-  /// Navigates to the main application (ProfilePage) after setup is complete.
-  void _finishSetup() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: SproutAppBar(
-        toolbarHeight: MediaQuery.of(context).size.height * .075,
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth:
-                MediaQuery.of(context).size.width *
-                (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
-          ),
-          child: PageView(
-            controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(), // Disable swiping
-            onPageChanged: (index) {
-              setState(() {
-                _currentPageIndex = index;
-              });
-            },
-            children: [
-              // Step 1: Welcome Page
-              _buildWelcomePage(),
-              // Step 2: Admin User Creation Page
-              _buildAdminUserCreationPage(),
-              // Step 3: Complete Page
-              _buildCompletePage(),
-            ],
-          ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth:
+              MediaQuery.of(context).size.width *
+              (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
+        ),
+        child: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(), // Disable swiping
+          onPageChanged: (index) {
+            setState(() {
+              _currentPageIndex = index;
+            });
+          },
+          children: [
+            // Step 1: Welcome Page
+            _buildWelcomePage(),
+            // Step 2: Admin User Creation Page
+            _buildAdminUserCreationPage(),
+            // Step 3: Complete Page
+            _buildCompletePage(),
+          ],
         ),
       ),
     );
@@ -282,7 +270,7 @@ class _SetupPageState extends State<SetupPage> {
                 'Your admin account has been successfully created. You\'re all set to explore the app!',
           ),
           const SizedBox(height: 60.0),
-          ButtonWidget(text: "Go to App", onPressed: _finishSetup),
+          ButtonWidget(text: "Go to App", onPressed: widget.onSetupSuccess),
         ],
       ),
     );

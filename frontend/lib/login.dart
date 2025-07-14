@@ -2,9 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/user.dart';
-import 'package:sprout/home.dart';
+import 'package:sprout/api/config.dart';
+import 'package:sprout/model/user.dart';
+import 'package:sprout/provider/auth.dart';
 import 'package:sprout/widgets/button.dart';
+import 'package:sprout/widgets/text.dart';
 
 /// A stateful widget for the login page.
 class LoginPage extends StatefulWidget {
@@ -40,19 +42,12 @@ class _LoginPageState extends State<LoginPage> {
     if (_usernameController.text == "" || _passwordController.text == "") {
       return;
     }
-
-    final success = await Provider.of<UserAPI>(
+    User? user = await Provider.of<AuthProvider>(
       context,
       listen: false,
-    ).loginWithPassword(_usernameController.text, _passwordController.text);
+    ).login(_usernameController.text, _passwordController.text);
 
-    if (success) {
-      // Navigate to the ProfilePage on successful login, replacing the current route.
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    } else {
+    if (user == null) {
       setState(() {
         _message = 'Login failed. Please check credentials.';
       });
@@ -60,25 +55,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkJWTLogin();
-  }
-
-  /// Checks if we can login with the JWT and if so moves on to the next page.
-  Future<void> _checkJWTLogin() async {
-    final configAPI = Provider.of<UserAPI>(context, listen: false);
-    bool successLogin = await configAPI.loginWithJWT(null);
-    if (successLogin) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final configAPI = Provider.of<ConfigAPI>(context, listen: false);
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -97,12 +75,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 24),
-                    child: Text(
-                      'Welcome Back!',
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.height * .025,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: TextWidget(
+                      referenceSize: 2,
+                      text: 'Welcome Back!',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(height: 40.0),
@@ -162,14 +138,18 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 20.0),
-                  Text(
-                    _message,
+                  TextWidget(
+                    referenceSize: 1.2,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
-                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    textAlign: TextAlign.center,
+                    text: _message,
+                  ),
+                  const SizedBox(height: 20.0),
+                  TextWidget(
+                    referenceSize: .8,
+                    text: configAPI.unsecureConfig!.version,
                   ),
                 ],
               ),

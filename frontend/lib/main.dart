@@ -12,7 +12,8 @@ import 'package:sprout/api/setup.dart';
 import 'package:sprout/api/transaction.dart';
 import 'package:sprout/api/user.dart';
 import 'package:sprout/login.dart';
-import 'package:sprout/setup.dart';
+import 'package:sprout/provider/auth.dart';
+import 'package:sprout/shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,8 +64,8 @@ class MainState extends State<Main> {
 
   /// Checks if the setup process is needed.
   Future<void> _checkIfSetupNeeded() async {
-    dynamic unsecureConfig = await configAPI.getUnsecure();
-    String position = unsecureConfig["firstTimeSetupPosition"];
+    await configAPI.populateUnsecureConfig();
+    String position = configAPI.unsecureConfig!.firstTimeSetupPosition;
     setState(() {
       setupPosition = position;
     });
@@ -77,16 +78,6 @@ class MainState extends State<Main> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine page to show
-    dynamic page;
-    if (setupPosition == "complete") {
-      page = LoginPage();
-    } else {
-      page = SetupPage();
-    }
-
-    dynamic app = MaterialApp(home: page, theme: theme, title: "Sprout");
-
     return MultiProvider(
       providers: [
         // Build the various API providers
@@ -96,10 +87,43 @@ class MainState extends State<Main> {
         Provider<ConfigAPI>(create: (_) => configAPI),
         Provider<AccountAPI>(create: (_) => accountAPI),
         Provider<TransactionAPI>(create: (_) => transactionAPI),
+        // Change Notifiers
+        ChangeNotifierProvider(
+          create: (context) {
+            return AuthProvider(userAPI);
+          },
+        ),
       ],
-      child: setupPosition == null
-          ? Center(child: CircularProgressIndicator())
-          : app,
+      child: Consumer<AuthProvider>(
+        // Use Consumer to listen to AuthProvider
+        builder: (context, authProvider, child) {
+          Widget page;
+
+          if (setupPosition == null) {
+            page = const Center(child: CircularProgressIndicator());
+          } else if (setupPosition == "complete") {
+            if (authProvider.isLoggedIn) {
+              // If setup is complete AND logged in
+              page = const SproutAppShell();
+            } else {
+              // If setup is complete but NOT logged in
+              page = const LoginPage();
+            }
+          } else {
+            // If setup is not complete
+            page = SproutAppShell(
+              isSetup: true,
+              onSetupSuccess: () {
+                setState(() {
+                  setupPosition = "complete";
+                });
+              },
+            );
+          }
+
+          return MaterialApp(home: page, theme: theme, title: "Sprout");
+        },
+      ),
     );
   }
 }
