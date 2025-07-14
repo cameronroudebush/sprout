@@ -67,7 +67,7 @@ class RESTClient {
       return data["payload"];
     } else {
       throw Exception(
-        'Failed to post to $endpoint: ${response.statusCode} - ${response.body}',
+        'Failed to get to $endpoint: ${response.statusCode} - ${response.body}',
       );
     }
   }

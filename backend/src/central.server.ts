@@ -11,6 +11,7 @@ export class CentralServer {
     Logger.info(`Spinning up Central Server on port ${Configuration.server.port}...`);
     server.listen(Configuration.server.port);
     server.use(this.rateLimiter);
+    server.set("trust proxy", 1);
     server.use(express.json());
   }
 

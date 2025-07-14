@@ -115,10 +115,10 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             TextField(
                               controller: _usernameController,
-                              autofillHints: [
-                                AutofillHints.newUsername,
-                                AutofillHints.username,
-                              ],
+                              autofillHints: const [AutofillHints.username],
+                              keyboardType: TextInputType.text,
+                              autocorrect: false,
+                              enableSuggestions: false,
                               decoration: const InputDecoration(
                                 labelText: 'Username',
                                 prefixIcon: Icon(Icons.person),
@@ -127,7 +127,10 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 20.0),
                             TextField(
                               controller: _passwordController,
-                              autofillHints: [AutofillHints.password],
+                              autofillHints: const [AutofillHints.password],
+                              keyboardType: TextInputType.text,
+                              autocorrect: false,
+                              enableSuggestions: false,
                               decoration: const InputDecoration(
                                 labelText: 'Password',
                                 prefixIcon: Icon(Icons.lock),
