@@ -32,11 +32,6 @@ export class Configuration {
     return name;
   }
 
-  /** Returns the timezone configured by the env variables. Defaults to UTC. */
-  static get timeZone() {
-    return process.env["TZ"] ?? "America/New_York";
-  }
-
   /** Boolean that states if this is a development build or not. This will be replaced by {@link build.ts}. */
   static isDevBuild = false;
 }
