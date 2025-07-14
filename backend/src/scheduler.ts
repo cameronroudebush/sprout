@@ -6,6 +6,7 @@ import { Holding } from "@backend/model/holding";
 import { Schedule } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
+import { Utility } from "@backend/model/utility/utility";
 import CronExpressionParser, { CronExpression } from "cron-parser";
 import { ProviderBase } from "./providers/base/core";
 
@@ -19,7 +20,7 @@ export class Scheduler {
   async start() {
     Logger.info(`Initializing scheduler with job of: ${Configuration.updateTime}`);
     // Validate the cronjob
-    this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: process.env["TZ"] ?? "America/New_York" });
+    this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: Configuration.timeZone });
     // Perform update, if one wasn't ran today. Else schedule the next update
     const lastSchedule = (await Schedule.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
     if (lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString()) await this.update();
@@ -29,7 +30,7 @@ export class Scheduler {
   private scheduleNextUpdate() {
     const nextExecutionDate = this.interval.next().toDate();
     const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
-    Logger.info(`Next update time: ${nextExecutionDate.toLocaleString()} (${timeUntilNextExecution}ms)`);
+    Logger.info(`Next update time: ${Utility.timeZonedDate(nextExecutionDate)}`);
     setTimeout(async () => {
       await this.update();
     }, timeUntilNextExecution);
@@ -52,9 +53,11 @@ export class Scheduler {
         if (userAccounts.length === 0) continue;
         const accounts = await this.provider.get(user, false);
         for (const data of accounts) {
+          Logger.info(`Updating account from provider: ${data.account.name}`);
           let accountInDB: Account;
           try {
             accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
+            if (accountInDB == null) throw new Error("Missing account");
           } catch (e) {
             // Ignore missing accounts
             continue;

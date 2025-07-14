@@ -1,4 +1,5 @@
 import { Configuration } from "@backend/config/core";
+import { Utility } from "@backend/model/utility/utility";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
@@ -32,7 +33,7 @@ export class Logger {
    * Gets header data to display with every console log
    */
   static getConsoleLogHeader() {
-    return new Date().toISOString();
+    return Utility.timeZonedDate(new Date());
   }
 
   /**
