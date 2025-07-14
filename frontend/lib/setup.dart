@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/setup.dart';
-import 'package:sprout/api/user.dart';
 import 'package:sprout/provider/auth.dart';
 import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart';
@@ -73,7 +72,6 @@ class _SetupPageState extends State<SetupPage> {
     });
 
     final setupAPI = Provider.of<SetupAPI>(context, listen: false);
-    final userAPI = Provider.of<UserAPI>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final username = _usernameController.text;
     final password = _passwordController.text;

@@ -1,4 +1,5 @@
 import 'package:sprout/api/client.dart';
+import 'package:sprout/model/net.worth.dart';
 
 /// Class that provides callable endpoints for the transaction information
 class TransactionAPI {
@@ -7,7 +8,7 @@ class TransactionAPI {
 
   TransactionAPI(this.client);
 
-  /// Returns the accounts
+  /// Returns the net worth data for all current accounts
   Future<double> getNetWorth() async {
     final endpoint = "/transaction/net-worth/get";
 
@@ -17,5 +18,12 @@ class TransactionAPI {
     } catch (e) {
       return 0;
     }
+  }
+
+  /// Returns net worth over time
+  Future<NetWorthOverTime> getNetWorthOT() async {
+    final endpoint = "/transaction/net-worth/get/ot";
+    dynamic result = await client.get(endpoint);
+    return NetWorthOverTime.fromJson(result);
   }
 }

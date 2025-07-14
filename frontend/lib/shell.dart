@@ -44,9 +44,11 @@ class _SproutAppShellState extends State<SproutAppShell> {
           ),
         ),
       ),
-      body: widget.isSetup
-          ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
-          : _pages[_currentIndex]['page'],
+      body: SingleChildScrollView(
+        child: widget.isSetup
+            ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
+            : _pages[_currentIndex]['page'],
+      ),
       bottomNavigationBar: widget.isSetup
           ? null
           : BottomNavigationBar(
