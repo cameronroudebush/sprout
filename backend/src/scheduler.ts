@@ -28,8 +28,8 @@ export class Scheduler {
 
   private scheduleNextUpdate() {
     const nextExecutionDate = this.interval.next().toDate();
-    Logger.info(`Next update time: ${nextExecutionDate.toLocaleString()}`);
     const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
+    Logger.info(`Next update time: ${nextExecutionDate.toLocaleString()} (${timeUntilNextExecution}ms)`);
     setTimeout(async () => {
       await this.start();
     }, timeUntilNextExecution);
@@ -65,6 +65,10 @@ export class Scheduler {
             accountInDB.balance = data.account.balance;
             accountInDB.availableBalance = data.account.availableBalance;
             await accountInDB.update();
+            // Update current institution if in database
+            const institution = accountInDB.institution;
+            institution.hasError = data.account.institution.hasError;
+            await institution.update();
             // Sync transactions
             await Transaction.insertMany<Transaction>(data.transactions);
             // Sync holdings if investment
