@@ -31,7 +31,7 @@ export class Scheduler {
     const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
     Logger.info(`Next update time: ${nextExecutionDate.toLocaleString()} (${timeUntilNextExecution}ms)`);
     setTimeout(async () => {
-      await this.start();
+      await this.update();
     }, timeUntilNextExecution);
   }
 
@@ -52,44 +52,46 @@ export class Scheduler {
         if (userAccounts.length === 0) continue;
         const accounts = await this.provider.get(user, false);
         for (const data of accounts) {
+          let accountInDB: Account;
           try {
-            const accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
-            // Set old account history
-            await AccountHistory.fromPlain({
-              account: accountInDB,
-              balance: accountInDB.balance,
-              availableBalance: accountInDB.availableBalance,
-              time: new Date(),
-            }).insert();
-            // Update current account
-            accountInDB.balance = data.account.balance;
-            accountInDB.availableBalance = data.account.availableBalance;
-            await accountInDB.update();
-            // Update current institution if in database
-            const institution = accountInDB.institution;
-            institution.hasError = data.account.institution.hasError;
-            await institution.update();
-            // Sync transactions
-            await Transaction.insertMany<Transaction>(data.transactions);
-            // Sync holdings if investment
-            if (accountInDB.type === "investment" && data.holdings.length !== 0)
-              for (const holding of data.holdings) {
-                let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol } }))[0];
-                // If we aren't tracking this holding yet, start tracking it
-                if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();
-                else {
-                  // Else, update values
-                  holdingInDB.costBasis = holding.costBasis;
-                  holdingInDB.marketValue = holding.marketValue;
-                  holdingInDB.purchasePrice = holding.purchasePrice;
-                  holdingInDB.shares = holding.shares;
-                  await holdingInDB.update();
-                }
-              }
+            accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
           } catch (e) {
             // Ignore missing accounts
             continue;
           }
+
+          // Set old account history
+          await AccountHistory.fromPlain({
+            account: accountInDB,
+            balance: accountInDB.balance,
+            availableBalance: accountInDB.availableBalance,
+            time: new Date(),
+          }).insert();
+          // Update current account
+          accountInDB.balance = data.account.balance;
+          accountInDB.availableBalance = data.account.availableBalance;
+          await accountInDB.update();
+          // Update current institution if in database
+          const institution = accountInDB.institution;
+          institution.hasError = data.account.institution.hasError;
+          await institution.update();
+          // Sync transactions
+          await Transaction.insertMany<Transaction>(data.transactions);
+          // Sync holdings if investment
+          if (accountInDB.type === "investment" && data.holdings.length !== 0)
+            for (const holding of data.holdings) {
+              let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol } }))[0];
+              // If we aren't tracking this holding yet, start tracking it
+              if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();
+              else {
+                // Else, update values
+                holdingInDB.costBasis = holding.costBasis;
+                holdingInDB.marketValue = holding.marketValue;
+                holdingInDB.purchasePrice = holding.purchasePrice;
+                holdingInDB.shares = holding.shares;
+                await holdingInDB.update();
+              }
+            }
         }
         Logger.success(`Information updated successfully for: ${user.username}`);
       }
