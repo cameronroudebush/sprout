@@ -14,6 +14,7 @@ import 'package:sprout/api/user.dart';
 import 'package:sprout/login.dart';
 import 'package:sprout/provider/auth.dart';
 import 'package:sprout/shell.dart';
+import 'package:sprout/widgets/text.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   final ThemeData theme;
   String? setupPosition = null;
+  bool _failedToConnect = false;
 
   // API References
   late final RESTClient client;
@@ -64,11 +66,18 @@ class MainState extends State<Main> {
 
   /// Checks if the setup process is needed.
   Future<void> _checkIfSetupNeeded() async {
-    await configAPI.populateUnsecureConfig();
-    String position = configAPI.unsecureConfig!.firstTimeSetupPosition;
-    setState(() {
-      setupPosition = position;
-    });
+    try {
+      await configAPI.populateUnsecureConfig();
+      String position = configAPI.unsecureConfig!.firstTimeSetupPosition;
+      setState(() {
+        setupPosition = position;
+      });
+    } catch (e) {
+      // This normally means we failed to connect to the backend.
+      setState(() {
+        _failedToConnect = true;
+      });
+    }
   }
 
   String getBaseURL() {
@@ -99,8 +108,41 @@ class MainState extends State<Main> {
         builder: (context, authProvider, child) {
           Widget page;
 
-          if (setupPosition == null) {
-            page = const Center(child: CircularProgressIndicator());
+          if (_failedToConnect) {
+            page = Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image(
+                      image: AssetImage(
+                        'assets/logo/color-transparent-no-tag.png',
+                      ),
+                      width: MediaQuery.of(context).size.height * .6,
+                    ),
+                    SizedBox(height: 12),
+                    TextWidget(
+                      referenceSize: 1.5,
+                      text:
+                          "Failed to connect to the backend. Please ensure the backend is running and accessible.",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else if (setupPosition == null) {
+            page = Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.height * .3,
+                height: MediaQuery.of(context).size.height * .3,
+                child: CircularProgressIndicator(
+                  strokeWidth: MediaQuery.of(context).size.height * .01,
+                ),
+              ),
+            );
           } else if (setupPosition == "complete") {
             if (authProvider.isLoggedIn) {
               configAPI.populateConfig();

@@ -1,4 +1,5 @@
 import { Configuration } from "@backend/config/core";
+import { TimeZone } from "@backend/config/tz";
 import { Logger } from "@backend/logger";
 import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
@@ -6,7 +7,6 @@ import { Holding } from "@backend/model/holding";
 import { Schedule } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { Utility } from "@backend/model/utility/utility";
 import CronExpressionParser, { CronExpression } from "cron-parser";
 import { ProviderBase } from "./providers/base/core";
 
@@ -20,7 +20,7 @@ export class Scheduler {
   async start() {
     Logger.info(`Initializing scheduler with job of: ${Configuration.updateTime}`);
     // Validate the cronjob
-    this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: Configuration.timeZone });
+    this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: TimeZone.timeZone });
     // Perform update, if one wasn't ran today. Else schedule the next update
     const lastSchedule = (await Schedule.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
     if (lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString()) await this.update();
@@ -30,7 +30,7 @@ export class Scheduler {
   private scheduleNextUpdate() {
     const nextExecutionDate = this.interval.next().toDate();
     const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
-    Logger.info(`Next update time: ${Utility.timeZonedDate(nextExecutionDate)}`);
+    Logger.info(`Next update time: ${TimeZone.formatDate(nextExecutionDate)}`);
     setTimeout(async () => {
       await this.update();
     }, timeUntilNextExecution);
