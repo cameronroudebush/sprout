@@ -18,6 +18,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   List<Account> _accounts = [];
   List<Account> _selectedAccounts = [];
   bool _gettingAccounts = false;
+  bool _isAddingAccounts = false;
 
   @override
   void initState() {
@@ -45,7 +46,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
         child: TextWidget(referenceSize: 2, text: 'Select Accounts to Add'),
       ),
       content: _accounts.isEmpty
-          ? _gettingAccounts
+          ? _gettingAccounts || _isAddingAccounts
                 ? SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
                     height: MediaQuery.of(context).size.height * 0.1,
@@ -93,16 +94,23 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
             text: "Cancel",
             minSize: MediaQuery.of(context).size.width * .4,
             color: Theme.of(context).colorScheme.onError,
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: _isAddingAccounts
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                  },
           ),
           ButtonWidget(
             text: "Add selected",
             minSize: MediaQuery.of(context).size.width * .4,
-            onPressed: _selectedAccounts.isEmpty
+            onPressed: _isAddingAccounts
+                ? null
+                : _selectedAccounts.isEmpty
                 ? null
                 : () async {
+                    setState(() {
+                      _isAddingAccounts = true;
+                    });
                     await accountAPI.linkProviderAccounts(_selectedAccounts);
                     accountAPI.accountsUpdated.fire(true);
                     // Close dialog
