@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * .8,
+          maxWidth: MediaQuery.of(context).size.width * .9,
         ),
         child: Padding(
           padding: EdgeInsets.only(top: 24),
