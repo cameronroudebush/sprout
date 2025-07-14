@@ -241,6 +241,14 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
       xLabelFontSize = 10.0;
     }
 
+    // Determine the Y axis text size
+    double yReservedSize = 40;
+    if (maxY > 100000) {
+      yReservedSize = 80;
+    } else if (maxY > 100000000) {
+      yReservedSize = 120;
+    }
+
     return LineChartData(
       gridData: FlGridData(
         show: true,
@@ -301,7 +309,9 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 60,
+            reservedSize: yReservedSize,
+            minIncluded: false,
+            maxIncluded: false,
             getTitlesWidget: (value, metaTitle) {
               return SideTitleWidget(
                 fitInside: SideTitleFitInsideData.fromTitleMeta(metaTitle),
@@ -329,7 +339,7 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
       lineBarsData: [
         LineChartBarData(
           spots: spots,
-          isCurved: true,
+          isCurved: false,
           color: colorScheme.primary,
           barWidth: 3,
           isStrokeCapRound: true,
@@ -400,11 +410,20 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
   }
 
   double _getChartValueInterval(double minY, double maxY) {
-    final diff = (maxY - minY).abs();
+    final double diff = (maxY - minY).abs();
+    if (diff <= 10) return 2;
+    if (diff <= 50) return 10;
     if (diff <= 100) return 20;
     if (diff <= 500) return 100;
     if (diff <= 1000) return 200;
     if (diff <= 5000) return 1000;
-    return 5000;
+    if (diff <= 10000) return 2000;
+    if (diff <= 25000) return 5000;
+    if (diff <= 50000) return 10000;
+    if (diff <= 100000) return 20000;
+    if (diff <= 250000) return 50000;
+    if (diff <= 500000) return 100000;
+    if (diff <= 1000000) return 200000;
+    return 500000;
   }
 }

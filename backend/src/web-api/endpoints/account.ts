@@ -27,22 +27,18 @@ export class AccountAPI {
     // We need to grab all the provider accounts again because we want to make sure we have correct data
     const providerAccounts = (await Providers.getCurrentProvider().get(user, true)).map((x) => x.account);
     // Add these new accounts to the database
-    const addedAccounts = (
-      await Promise.all(
-        accountsToLink.map(async (x) => {
-          const matchingAccount = providerAccounts.find((z) => z.name === x.name);
-          if (matchingAccount) {
-            matchingAccount.user = user;
-            // Try to find a matching institution first if it exists
-            const matchingInstitution = await Institution.findOne({ where: { id: matchingAccount.institution.id } });
-            if (matchingInstitution) matchingAccount.institution = matchingInstitution;
-            await matchingAccount.insert();
-            return matchingAccount;
-          }
-          return undefined;
-        }),
-      )
-    ).filter((x) => x);
-    return addedAccounts as Account[];
+    const addedAccounts: Account[] = [];
+    for (const account of accountsToLink) {
+      const matchingAccount = providerAccounts.find((z) => z.name === account.name);
+      if (matchingAccount) {
+        matchingAccount.user = user;
+        // Try to find a matching institution first if it exists
+        const matchingInstitution = await Institution.findOne({ where: { id: matchingAccount.institution.id } });
+        if (matchingInstitution) matchingAccount.institution = matchingInstitution;
+        await matchingAccount.insert();
+        addedAccounts.push(matchingAccount);
+      }
+    }
+    return addedAccounts;
   }
 }

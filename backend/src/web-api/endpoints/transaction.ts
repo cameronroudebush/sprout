@@ -35,34 +35,47 @@ export class TransactionAPI {
     const thirtyDaysAgo = subDays(today, 30);
     const oneYearAgo = subYears(today, 1);
 
-    const calculateNetWorthForDate = async (date: Date): Promise<number> => {
-      const accountBalancesAtDate = await AccountHistory.find({ where: { account: { user: { id: user.id } }, time: LessThan(date) }, order: { time: "DESC" } });
+    const calculateNetWorthForDate = async (targetDate: Date): Promise<number> => {
+      const relevantAccountHistories = await AccountHistory.find({
+        where: {
+          account: { user: { id: user.id } },
+          time: LessThan(targetDate),
+        },
+        order: { time: "DESC" },
+      });
 
-      return accountBalancesAtDate.reduce((acc, history) => {
-        return acc + history.balance;
-      }, 0);
+      const latestBalancesPerAccount: { [accountId: string]: number } = {};
+      const processedAccountIds: Set<string> = new Set();
+
+      for (const history of relevantAccountHistories) {
+        const accountId = history.account.id;
+
+        if (!processedAccountIds.has(accountId)) {
+          latestBalancesPerAccount[accountId] = history.balance;
+          processedAccountIds.add(accountId);
+        }
+      }
+
+      return Object.values(latestBalancesPerAccount).reduce((acc, balance) => acc + balance, 0);
     };
 
-    // --- Calculate individual period changes ---
     const netWorthSevenDaysAgo = await calculateNetWorthForDate(sevenDaysAgo);
     const netWorthThirtyDaysAgo = await calculateNetWorthForDate(thirtyDaysAgo);
     const netWorthOneYearAgo = await calculateNetWorthForDate(oneYearAgo);
 
-    const currentNetWorth = await calculateNetWorthForDate(today); // Get current net worth
+    const currentNetWorth = await calculateNetWorthForDate(today);
 
     const historicalData: Dictionary<number> = {};
-    let currentDatePointer = oneYearAgo; // Start from one year ago
+    let currentDatePointer = startOfDay(oneYearAgo);
+
     while (isBefore(currentDatePointer, today) || currentDatePointer.getTime() === today.getTime()) {
-      const formattedDate = format(currentDatePointer, "yyyy-MM-dd"); // Use a consistent date format
+      const formattedDate = format(currentDatePointer, "yyyy-MM-dd");
       historicalData[formattedDate] = await calculateNetWorthForDate(currentDatePointer);
-      currentDatePointer = subDays(currentDatePointer, -1); // Move to the next day
+      currentDatePointer = subDays(currentDatePointer, -1);
     }
 
-    // Ensure current day's net worth is included if not already
     const todayFormatted = format(today, "yyyy-MM-dd");
-    if (!historicalData[todayFormatted]) {
-      historicalData[todayFormatted] = currentNetWorth;
-    }
+    historicalData[todayFormatted] = currentNetWorth;
 
     return NetWorthOverTime.fromPlain({
       last7Days: currentNetWorth - netWorthSevenDaysAgo,
