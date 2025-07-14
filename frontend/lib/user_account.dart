@@ -40,6 +40,25 @@ class _UserPageState extends State<UserPage> {
                 value: configAPI.unsecureConfig!.version,
                 icon: Icons.info_outline,
               ),
+              SizedBox(height: 12),
+              _buildInfoRow(
+                context,
+                label: "Last Schedule Run",
+                value:
+                    configAPI.config?.lastSchedulerRun.time
+                        .toLocal()
+                        .toString() ??
+                    "N/A",
+                icon: Icons.schedule,
+              ),
+              SizedBox(height: 12),
+              _buildInfoRow(
+                context,
+                label: "Last Schedule Status",
+                value:
+                    "${configAPI.config?.lastSchedulerRun.status}${configAPI.config?.lastSchedulerRun.status == "failed" ? "- ${configAPI.config?.lastSchedulerRun.failureReason}" : ""}",
+                icon: Icons.safety_check_rounded,
+              ),
             ]),
 
             // User Information Card

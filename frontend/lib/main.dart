@@ -103,6 +103,7 @@ class MainState extends State<Main> {
             page = const Center(child: CircularProgressIndicator());
           } else if (setupPosition == "complete") {
             if (authProvider.isLoggedIn) {
+              configAPI.populateConfig();
               // If setup is complete AND logged in
               page = const SproutAppShell();
             } else {
