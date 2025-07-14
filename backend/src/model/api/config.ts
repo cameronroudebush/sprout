@@ -1,3 +1,4 @@
+import { Schedule } from "@backend/model/schedule";
 import { Base } from "../base";
 
 /** A type that includes both unsecure and standard configuration for those who request it via the API */
@@ -12,4 +13,6 @@ export class UnsecureAppConfiguration extends Base {
 }
 
 /** This class helps correlate configuration content from the backend to the frontend */
-export class Configuration extends Base {}
+export class Configuration extends Base {
+  lastSchedulerRun!: Schedule;
+}
