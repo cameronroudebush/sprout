@@ -18,8 +18,8 @@ export class CentralServer {
   /** Returns the rate limiter for the express server to attempt to not overwhelm any endpoints */
   get rateLimiter() {
     return rateLimit({
-      windowMs: 5 * 60000, // 5 minutes
-      limit: 100, // 100 requests per 5 minutes
+      windowMs: 1 * 60000, // 1 minute
+      limit: Configuration.isDevBuild ? Infinity : 1000, // 1000 requests per minute
       standardHeaders: "draft-7",
       legacyHeaders: false,
     });

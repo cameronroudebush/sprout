@@ -1,4 +1,5 @@
 import 'package:sprout/api/client.dart';
+import 'package:sprout/model/user.dart';
 
 /// Class that provides callable endpoints for the user
 class UserAPI {
@@ -21,7 +22,7 @@ class UserAPI {
   /// [username] The user's username.
   /// [password] The user's password.
   /// Returns true if login is successful and token is stored, false otherwise.
-  Future<bool> loginWithPassword(String username, String password) async {
+  Future<User?> loginWithPassword(String username, String password) async {
     final endpoint = "/user/login";
     final body = {'username': username, 'password': password};
 
@@ -34,22 +35,26 @@ class UserAPI {
         await this.client.secureStorage.saveValue(jwtKey, jwt);
       }
 
-      return success == null;
+      if (success == null) {
+        return User.fromJson(result["user"]);
+      } else {
+        return null;
+      }
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
   /// Authenticates a user with the backend API via JWT.
   /// [jwt] The JWT to login with
   /// Returns true if login is successful, false otherwise.
-  Future<bool> loginWithJWT(String? jwt) async {
+  Future<User?> loginWithJWT(String? jwt) async {
     jwt ??= await getJWT();
     final endpoint = "/user/login/jwt";
     final body = {'jwt': jwt};
 
     if (jwt == null || jwt.isEmpty) {
-      return false;
+      return null;
     }
 
     try {
@@ -59,12 +64,19 @@ class UserAPI {
       // If login fails, clear the jwt
       if (success != null) {
         await client.secureStorage.saveValue(jwtKey, null);
-        return false;
+        return null;
       } else {
-        return true;
+        return User.fromJson(result["user"]);
       }
     } catch (e) {
-      return false;
+      return null;
     }
+  }
+
+  /// Logs out the current user and wipes the JWT so auto logins are not performed.
+  ///   Returns true if the logout was successful, false if not.
+  Future<bool> logout() async {
+    await client.secureStorage.saveValue(jwtKey, null);
+    return true;
   }
 }
