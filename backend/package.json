@@ -38,6 +38,7 @@
     "git-describe": "^4.1.1",
     "nodemon": "^3.1.0",
     "pkg": "^5.8.1",
+    "prettier": "^3.6.2",
     "replace-in-file": "^7.1.0",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",

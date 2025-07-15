@@ -2,8 +2,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:sprout/api/storage.dart';
-import 'package:sprout/api/user.dart';
+import 'package:sprout/auth/api.dart';
+import 'package:sprout/core/api/storage.dart';
 import 'package:uuid/uuid.dart';
 
 /// A client for interacting with a REST API that uses JWT for authentication.
@@ -19,7 +19,7 @@ class RESTClient {
   RESTClient(this.baseUrl);
 
   Future<Map<String, String>> _getSendHeaders() async {
-    String? jwt = await this.secureStorage.getValue(UserAPI.jwtKey);
+    String? jwt = await this.secureStorage.getValue(AuthAPI.jwtKey);
     final headers = {'Content-Type': 'application/json'};
     if (jwt != null && jwt.isNotEmpty) {
       headers['Authorization'] = 'Bearer $jwt';
@@ -39,19 +39,13 @@ class RESTClient {
       'timeStamp': DateTime.timestamp().toIso8601String(),
     };
 
-    final response = await http.post(
-      url,
-      headers: await _getSendHeaders(),
-      body: json.encode(body),
-    );
+    final response = await http.post(url, headers: await _getSendHeaders(), body: json.encode(body));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data["payload"];
     } else {
-      throw Exception(
-        'Failed to post to $endpoint: ${response.statusCode} - ${response.body}',
-      );
+      throw Exception('Failed to post to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }
 
@@ -66,9 +60,7 @@ class RESTClient {
       final data = json.decode(response.body);
       return data["payload"];
     } else {
-      throw Exception(
-        'Failed to get to $endpoint: ${response.statusCode} - ${response.body}',
-      );
+      throw Exception('Failed to get to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }
 

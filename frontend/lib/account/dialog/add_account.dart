@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/api.dart';
+import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/accounts_display.dart';
-import 'package:sprout/model/account.dart';
-import 'package:sprout/widgets/button.dart';
-import 'package:sprout/widgets/text.dart';
+import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/text.dart';
 
 /// A dialog that allows selection of accounts from providers
 class AddAccountDialog extends StatefulWidget {
