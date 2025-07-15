@@ -95,9 +95,8 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
         ),
-        margin: const EdgeInsets.all(16.0),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.only(top: 12),
           child: _isLoading
               ? const SizedBox(
                   height: 350,
@@ -120,19 +119,17 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
                   children: <Widget>[
                     TextWidget(referenceSize: 1, text: 'Current Net Worth'),
                     const SizedBox(height: 10.0),
-                    Text(
-                      currencyFormatter.format(_currentNetWorth),
-                      style: textTheme.displaySmall?.copyWith(
+                    TextWidget(
+                      referenceSize: 2.5,
+                      text: currencyFormatter.format(_currentNetWorth),
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _currentNetWorth >= 0
-                            ? colorScheme.primary
+                            ? Colors.green
                             : colorScheme.error,
                       ),
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
                     ),
-                    const SizedBox(height: 24.0),
+                    const SizedBox(height: 12.0),
                     TextWidget(referenceSize: 1, text: 'Net Worth Trend'),
                     const SizedBox(height: 16.0),
                     _buildChartRangeSelector(theme, colorScheme),
@@ -194,9 +191,12 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
         children: ChartRange.values
             .map(
               (range) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  range.name
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * .025,
+                ),
+                child: TextWidget(
+                  referenceSize: 1,
+                  text: range.name
                       .replaceAll('sevenDays', '7 Days')
                       .replaceAll('thirtyDays', '30 Days')
                       .replaceAll('oneYear', '1 Year'),

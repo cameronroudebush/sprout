@@ -4,7 +4,7 @@
 FROM ghcr.io/cirruslabs/flutter:3.32.5 as frontend-build
 WORKDIR /app
 COPY ./frontend ./
-RUN flutter build web --release --no-tree-shake-icons
+RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describe --tags --always)
 
 # -------------------------------
 #       Build Backend
