@@ -25,7 +25,7 @@ class _AccountsPageState extends State<AccountsPage> {
             children: <Widget>[
               Center(
                 child: TextWidget(
-                  referenceSize: 3,
+                  referenceSize: 2,
                   text: 'Accounts',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),

@@ -17,6 +17,7 @@ import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
 import 'package:sprout/transaction/api.dart';
+import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/user/login.dart';
 
 void main() async {
@@ -112,6 +113,11 @@ class MainState extends State<Main> {
           update: (context, auth, accountProvider, previousMessages) =>
               NetWorthProvider(netWorthAPI, auth, accountProvider),
           create: (BuildContext context) => NetWorthProvider(netWorthAPI, null, null),
+        ),
+        ChangeNotifierProxyProvider2<AuthProvider, AccountProvider, TransactionProvider>(
+          update: (context, auth, accountProvider, previousMessages) =>
+              TransactionProvider(transactionAPI, auth, accountProvider),
+          create: (BuildContext context) => TransactionProvider(transactionAPI, null, null),
         ),
       ],
       child: Consumer2<AuthProvider, AccountProvider>(

@@ -6,6 +6,7 @@ import 'package:sprout/net-worth/models/net.worth.ot.dart';
 
 /// Class that provides the store of current net worth information
 class NetWorthProvider with ChangeNotifier {
+  bool _disposed = false;
   final NetWorthAPI _netWorthAPI;
   final AuthProvider? _authProvider;
   final AccountProvider? _accountProvider;
@@ -18,11 +19,21 @@ class NetWorthProvider with ChangeNotifier {
   double? get netWorth => _netWorth;
   HistoricalNetWorth? get historicalNetWorth => _historicalNetWorth;
 
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
   NetWorthProvider(this._netWorthAPI, this._authProvider, this._accountProvider) {
-    if (_authProvider != null &&
-        _authProvider.isLoggedIn &&
-        _accountProvider != null &&
-        _accountProvider.linkedAccounts.isNotEmpty) {
+    if (_authProvider != null && _authProvider.isLoggedIn && _accountProvider != null) {
       populateNetWorth();
       populateHistoricalNetWorth();
     }

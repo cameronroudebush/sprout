@@ -1,75 +1,128 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/transaction/models/transaction.dart'; // Make sure to import your Transaction model
+import 'package:sprout/transaction/provider.dart';
 
-class TransactionsSection extends StatelessWidget {
-  const TransactionsSection({super.key});
+class TransactionsPage extends StatefulWidget {
+  const TransactionsPage({super.key});
 
-  // Dummy data for transactions
-  final List<Map<String, dynamic>> transactions = const [
-    {'description': 'Groceries', 'amount': -75.20, 'date': '2025-07-01', 'category': 'Food'},
-    {'description': 'Salary', 'amount': 3500.00, 'date': '2025-06-28', 'category': 'Income'},
-    {'description': 'Online Subscription', 'amount': -12.99, 'date': '2025-06-27', 'category': 'Entertainment'},
-    {'description': 'Coffee Shop', 'amount': -5.50, 'date': '2025-06-27', 'category': 'Food'},
-    {'description': 'Utility Bill', 'amount': -120.00, 'date': '2025-06-26', 'category': 'Bills'},
-    {'description': 'Dinner Out', 'amount': -45.00, 'date': '2025-06-25', 'category': 'Food'},
-  ];
+  @override
+  State<TransactionsPage> createState() => _TransactionsPageState();
+}
+
+class _TransactionsPageState extends State<TransactionsPage> {
+  int _currentPage = 0;
+
+  void _fetchDataForPage(int page) {
+    // Access the provider without listening to rebuild the whole widget on data change
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    final rowsPerPage = provider.rowsPerPage;
+    provider.populateTransactions(page * rowsPerPage, (page + 1) * rowsPerPage);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text('Recent Transactions', style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12.0),
-        // Using ListView.builder for potentially long lists of transactions
-        // Ensure it's wrapped in a Container with a fixed height or use shrinkWrap/NeverScrollableScrollPhysics
-        // Here, we use Column with children for simplicity, similar to AccountsSection.
-        // For a very long list, consider a custom scroll view or a dedicated page.
-        ...transactions.map((transaction) {
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 6.0),
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-            child: ListTile(
-              leading: Icon(
-                transaction['amount'] >= 0 ? Icons.arrow_downward : Icons.arrow_upward,
-                color: transaction['amount'] >= 0 ? Colors.green[700] : Colors.red[700],
-              ),
-              title: Text(transaction['description'], style: const TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: Text(
-                '${transaction['date']} - ${transaction['category']}',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              trailing: Text(
-                currencyFormatter.format(transaction["amount"].abs()), // Show absolute value
+    return Consumer<TransactionProvider>(
+      builder: (context, provider, child) {
+        return Card(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          clipBehavior: Clip.antiAlias,
+          margin: const EdgeInsets.all(16.0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(
+                width: double.infinity,
+                child: PaginatedDataTable(
+                  header: TextWidget(
+                    referenceSize: 2,
+                    text: 'Recent Transactions',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  columns: const [
+                    DataColumn(label: Text('Date')),
+                    DataColumn(label: Text('Description')),
+                    DataColumn(label: Text('Category')),
+                    DataColumn(label: Text('Amount'), numeric: true),
+                  ],
+                  // The source is where the magic happens
+                  source: _TransactionDataSource(
+                    transactions: provider.transactions,
+                    totalRows: provider.totalTransactionCount,
+                  ),
+                  rowsPerPage: provider.rowsPerPage,
+                  onPageChanged: (int pageIndex) {
+                    // The page index from the widget is byte-based, so we calculate page number
+                    final newPage = pageIndex ~/ provider.rowsPerPage;
+                    if (newPage != _currentPage) {
+                      setState(() {
+                        _currentPage = newPage;
+                      });
+                      _fetchDataForPage(newPage);
+                    }
+                  },
+                  // Show a loading indicator when fetching data
+                  // showProgress: provider.isLoading,
+                  // Make table horizontally scrollable on small screens
+                  horizontalMargin: 20,
+                  columnSpacing: constraints.maxWidth * 0.1, // Responsive column spacing
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A custom data source for the PaginatedDataTable.
+/// This class handles how to build rows from your transaction data.
+class _TransactionDataSource extends DataTableSource {
+  final List<Transaction> transactions;
+  final int totalRows;
+
+  _TransactionDataSource({required this.transactions, required this.totalRows});
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= transactions.length) {
+      return null; // This can happen if the last page has fewer items than rowsPerPage
+    }
+    final transaction = transactions[index];
+
+    return DataRow.byIndex(
+      index: index,
+      cells: [
+        DataCell(Text(transaction.posted.toLocal().toString())),
+        DataCell(Text(transaction.description)),
+        DataCell(Text(transaction.category)),
+        DataCell(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                currencyFormatter.format(transaction.amount),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: transaction['amount'] >= 0 ? Colors.green[700] : Colors.red[700],
+                  color: transaction.amount >= 0 ? Colors.green[700] : Colors.red[700],
                 ),
               ),
-              onTap: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('${transaction['description']} transaction tapped!')));
-              },
-            ),
-          );
-        }).toList(),
-        const SizedBox(height: 12.0),
-        Center(
-          child: TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('View all transactions tapped!')));
-            },
-            child: const Text(
-              'View All Transactions',
-              style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.bold),
-            ),
+            ],
           ),
         ),
       ],
     );
   }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => totalRows;
+
+  @override
+  int get selectedRowCount => 0;
 }
