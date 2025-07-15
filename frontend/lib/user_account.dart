@@ -4,6 +4,7 @@ import 'package:sprout/api/config.dart';
 import 'package:sprout/provider/auth.dart';
 import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart'; // Assuming this is your custom TextWidget
+import 'package:timeago/timeago.dart' as timeago;
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -44,11 +45,11 @@ class _UserPageState extends State<UserPage> {
               _buildInfoRow(
                 context,
                 label: "Last Schedule Run",
-                value:
-                    configAPI.config?.lastSchedulerRun.time
-                        .toLocal()
-                        .toString() ??
-                    "N/A",
+                value: configAPI.config?.lastSchedulerRun.time != null
+                    ? timeago.format(
+                        configAPI.config!.lastSchedulerRun.time.toLocal(),
+                      )
+                    : "N/A",
                 icon: Icons.schedule,
               ),
               SizedBox(height: 12),
@@ -56,7 +57,7 @@ class _UserPageState extends State<UserPage> {
                 context,
                 label: "Last Schedule Status",
                 value:
-                    "${configAPI.config?.lastSchedulerRun.status}${configAPI.config?.lastSchedulerRun.status == "failed" ? "- ${configAPI.config?.lastSchedulerRun.failureReason}" : ""}",
+                    "${configAPI.config?.lastSchedulerRun.status}${configAPI.config?.lastSchedulerRun.status == "failed" ? " - ${configAPI.config?.lastSchedulerRun.failureReason}" : ""}",
                 icon: Icons.safety_check_rounded,
               ),
             ]),

@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_theme/json_theme.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/account.dart';
+import 'package:sprout/account/api.dart';
+import 'package:sprout/account/provider.dart';
 import 'package:sprout/api/client.dart';
 import 'package:sprout/api/config.dart';
 import 'package:sprout/api/setup.dart';
@@ -97,15 +98,14 @@ class MainState extends State<Main> {
         Provider<AccountAPI>(create: (_) => accountAPI),
         Provider<TransactionAPI>(create: (_) => transactionAPI),
         // Change Notifiers
-        ChangeNotifierProvider(
-          create: (context) {
-            return AuthProvider(userAPI);
-          },
+        ChangeNotifierProvider(create: (context) => AuthProvider(userAPI)),
+        ChangeNotifierProxyProvider<AuthProvider, AccountProvider>(
+          update: (context, auth, previousMessages) => AccountProvider(accountAPI, auth),
+          create: (BuildContext context) => AccountProvider(accountAPI, null),
         ),
       ],
-      child: Consumer<AuthProvider>(
-        // Use Consumer to listen to AuthProvider
-        builder: (context, authProvider, child) {
+      child: Consumer2<AuthProvider, AccountProvider>(
+        builder: (context, authProvider, accountProvider, child) {
           Widget page;
 
           if (_failedToConnect) {
@@ -115,19 +115,14 @@ class MainState extends State<Main> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image(
-                      image: AssetImage(
-                        'assets/logo/color-transparent-no-tag.png',
-                      ),
+                      image: AssetImage('assets/logo/color-transparent-no-tag.png'),
                       width: MediaQuery.of(context).size.height * .6,
                     ),
                     SizedBox(height: 12),
                     TextWidget(
                       referenceSize: 1.5,
-                      text:
-                          "Failed to connect to the backend. Please ensure the backend is running and accessible.",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ],
                 ),
@@ -138,9 +133,7 @@ class MainState extends State<Main> {
               child: SizedBox(
                 width: MediaQuery.of(context).size.height * .3,
                 height: MediaQuery.of(context).size.height * .3,
-                child: CircularProgressIndicator(
-                  strokeWidth: MediaQuery.of(context).size.height * .01,
-                ),
+                child: CircularProgressIndicator(strokeWidth: MediaQuery.of(context).size.height * .01),
               ),
             );
           } else if (setupPosition == "complete") {

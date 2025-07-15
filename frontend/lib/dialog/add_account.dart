@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/account.dart';
+import 'package:sprout/account/api.dart';
+import 'package:sprout/account/widgets/accounts_display.dart';
 import 'package:sprout/model/account.dart';
-import 'package:sprout/widgets/accounts.dart';
 import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart';
 
@@ -42,9 +42,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   Widget build(BuildContext context) {
     AccountAPI accountAPI = Provider.of<AccountAPI>(context, listen: false);
     return AlertDialog(
-      title: Center(
-        child: TextWidget(referenceSize: 2, text: 'Select Accounts to Add'),
-      ),
+      title: Center(child: TextWidget(referenceSize: 2, text: 'Select Accounts to Add')),
       content: _accounts.isEmpty
           ? _gettingAccounts || _isAddingAccounts
                 ? SizedBox(
@@ -56,19 +54,12 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     height: MediaQuery.of(context).size.height * 0.1,
                     child: const Center(
-                      child: TextWidget(
-                        referenceSize: 1,
-                        text:
-                            'No accounts found. Did you add them in the provider?',
-                      ),
+                      child: TextWidget(referenceSize: 1, text: 'No accounts found. Did you add them in the provider?'),
                     ),
                   )
           : SizedBox(
-              width:
-                  MediaQuery.of(context).size.width * 0.8, // Set a fixed width
-              height:
-                  MediaQuery.of(context).size.height *
-                  0.6, // Set a fixed height
+              width: MediaQuery.of(context).size.width * 0.8, // Set a fixed width
+              height: MediaQuery.of(context).size.height * 0.6, // Set a fixed height
               child: AccountsWidget(
                 accounts: _accounts,
                 onSelectionChanged: (value) {
@@ -112,7 +103,6 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                       _isAddingAccounts = true;
                     });
                     await accountAPI.linkProviderAccounts(_selectedAccounts);
-                    accountAPI.accountsUpdated.fire(true);
                     // Close dialog
                     Navigator.of(context).pop();
                   },
