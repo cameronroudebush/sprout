@@ -10,11 +10,9 @@ class AccountProvider with ChangeNotifier {
 
   // Data store
   List<Account> _linkedAccounts = [];
-  List<Account> _providerAccounts = [];
 
   // Getters to not allow editing the internal store
   List<Account> get linkedAccounts => _linkedAccounts;
-  List<Account> get providerAccounts => _providerAccounts;
 
   AccountProvider(this._accountAPI, this._authProvider) {
     if (_authProvider != null && _authProvider.isLoggedIn) {
@@ -27,12 +25,5 @@ class AccountProvider with ChangeNotifier {
     _linkedAccounts = result;
     notifyListeners();
     return _linkedAccounts;
-  }
-
-  Future<List<Account>> populateProviderAccounts() async {
-    final result = await _accountAPI.getProviderAccounts();
-    _providerAccounts = result;
-    notifyListeners();
-    return _providerAccounts;
   }
 }

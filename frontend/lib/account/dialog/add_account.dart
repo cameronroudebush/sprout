@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/api.dart';
+import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/accounts_display.dart';
 import 'package:sprout/model/account.dart';
 import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart';
 
+/// A dialog that allows selection of accounts from providers
 class AddAccountDialog extends StatefulWidget {
   const AddAccountDialog({super.key});
 
@@ -13,11 +15,11 @@ class AddAccountDialog extends StatefulWidget {
   State<AddAccountDialog> createState() => _AddAccountDialogState();
 }
 
-/// A dialog that display an add account capability
 class _AddAccountDialogState extends State<AddAccountDialog> {
   List<Account> _accounts = [];
   List<Account> _selectedAccounts = [];
   bool _gettingAccounts = false;
+  String? _gettingAccountsError;
   bool _isAddingAccounts = false;
 
   @override
@@ -30,12 +32,21 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
     setState(() {
       _gettingAccounts = true;
     });
-    final accountAPI = Provider.of<AccountAPI>(context, listen: false);
-    final accounts = await accountAPI.getProviderAccounts() as List<Account>;
-    setState(() {
-      _gettingAccounts = false;
-      _accounts = accounts;
-    });
+    try {
+      final accountAPI = Provider.of<AccountAPI>(context, listen: false);
+      final accounts = await accountAPI.getProviderAccounts();
+      setState(() {
+        _accounts = accounts;
+      });
+    } catch (e) {
+      setState(() {
+        _gettingAccountsError = "$e";
+      });
+    } finally {
+      setState(() {
+        _gettingAccounts = false;
+      });
+    }
   }
 
   @override
@@ -53,8 +64,11 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                 : SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
                     height: MediaQuery.of(context).size.height * 0.1,
-                    child: const Center(
-                      child: TextWidget(referenceSize: 1, text: 'No accounts found. Did you add them in the provider?'),
+                    child: Center(
+                      child: TextWidget(
+                        referenceSize: 1,
+                        text: _gettingAccountsError ?? 'No accounts found. Did you add them in the provider?',
+                      ),
                     ),
                   )
           : SizedBox(
@@ -103,6 +117,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                       _isAddingAccounts = true;
                     });
                     await accountAPI.linkProviderAccounts(_selectedAccounts);
+                    await Provider.of<AccountProvider>(context, listen: false).populateLinkedAccounts();
                     // Close dialog
                     Navigator.of(context).pop();
                   },

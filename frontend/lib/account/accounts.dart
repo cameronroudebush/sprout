@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/dialog/add_account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/accounts_display.dart';
-import 'package:sprout/dialog/add_account.dart';
 import 'package:sprout/widgets/button.dart';
 import 'package:sprout/widgets/text.dart';
 

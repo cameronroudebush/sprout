@@ -38,17 +38,12 @@ class _SproutAppShellState extends State<SproutAppShell> {
         backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(8.0),
-          child: Container(
-            color: Theme.of(context).colorScheme.secondary.withAlpha(100),
-            height: 8.0,
-          ),
+          child: Container(color: Theme.of(context).colorScheme.secondary.withAlpha(100), height: 8.0),
         ),
       ),
-      body: SingleChildScrollView(
-        child: widget.isSetup
-            ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
-            : _pages[_currentIndex]['page'],
-      ),
+      body: widget.isSetup
+          ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
+          : SingleChildScrollView(child: _pages[_currentIndex]['page']),
       bottomNavigationBar: widget.isSetup
           ? null
           : BottomNavigationBar(
@@ -58,20 +53,13 @@ class _SproutAppShellState extends State<SproutAppShell> {
                   _currentIndex = index; // Update the index
                 });
               },
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.onSecondaryContainer,
+              backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Theme.of(context).colorScheme.onSurface,
               type: BottomNavigationBarType.fixed,
               enableFeedback: true,
               items: _pages
-                  .map(
-                    (pageData) => BottomNavigationBarItem(
-                      icon: Icon(pageData['icon']),
-                      label: pageData['label'],
-                    ),
-                  )
+                  .map((pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']))
                   .toList(),
             ),
     );
