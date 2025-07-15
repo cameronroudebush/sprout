@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/home.dart';
-import 'package:sprout/setup.dart';
-import 'package:sprout/user_account.dart';
+import 'package:sprout/core/home.dart';
+import 'package:sprout/setup/setup.dart';
+import 'package:sprout/user/user.dart';
 
 /// This class defines the shell that wraps all pages that are displayed for sprout
 class SproutAppShell extends StatefulWidget {

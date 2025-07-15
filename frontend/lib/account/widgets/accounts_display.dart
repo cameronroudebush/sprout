@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/model/account.dart'; // Assuming you have this model
-import 'package:sprout/utils/formatters.dart';
-import 'package:sprout/widgets/text.dart'; // Assuming you have this formatter
+import 'package:sprout/account/models/account.dart'; // Assuming you have this model
+import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/text.dart'; // Assuming you have this formatter
 
 /// A widget used to display given accounts with selection capability
 class AccountsWidget extends StatefulWidget {

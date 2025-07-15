@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/setup.dart';
-import 'package:sprout/provider/auth.dart';
-import 'package:sprout/widgets/button.dart';
-import 'package:sprout/widgets/text.dart';
+import 'package:sprout/auth/provider.dart';
+import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/setup/api.dart';
 
 /// This page contains the process for when the application is first started
 class SetupPage extends StatefulWidget {

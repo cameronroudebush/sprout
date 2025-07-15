@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/api.dart';
-import 'package:sprout/model/account.dart';
-import 'package:sprout/provider/auth.dart';
+import 'package:sprout/account/models/account.dart';
+import 'package:sprout/auth/provider.dart';
 
 /// Class that provides the store of current account information
 class AccountProvider with ChangeNotifier {

@@ -1,5 +1,5 @@
-import 'package:sprout/api/client.dart';
-import 'package:sprout/model/account.dart';
+import 'package:sprout/account/models/account.dart';
+import 'package:sprout/core/api/client.dart';
 
 /// Class that provides callable endpoints for the accounts
 class AccountAPI {

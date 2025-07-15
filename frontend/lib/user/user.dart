@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/config.dart';
-import 'package:sprout/provider/auth.dart';
-import 'package:sprout/widgets/button.dart';
-import 'package:sprout/widgets/text.dart'; // Assuming this is your custom TextWidget
+import 'package:sprout/auth/provider.dart';
+import 'package:sprout/config/api.dart';
+import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/text.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+/// A page that display user account information along with other useful info
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
 
@@ -29,10 +30,7 @@ class _UserPageState extends State<UserPage> {
               TextWidget(
                 referenceSize: 1.6,
                 text: "App Details",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
               ),
               const Divider(height: 32.0, thickness: 1.0),
               _buildInfoRow(
@@ -46,9 +44,7 @@ class _UserPageState extends State<UserPage> {
                 context,
                 label: "Last Schedule Run",
                 value: configAPI.config?.lastSchedulerRun.time != null
-                    ? timeago.format(
-                        configAPI.config!.lastSchedulerRun.time.toLocal(),
-                      )
+                    ? timeago.format(configAPI.config!.lastSchedulerRun.time.toLocal())
                     : "N/A",
                 icon: Icons.schedule,
               ),
@@ -67,10 +63,7 @@ class _UserPageState extends State<UserPage> {
               TextWidget(
                 referenceSize: 1.6,
                 text: "User Information",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
               ),
               const Divider(height: 32.0, thickness: 1.0),
               Consumer<AuthProvider>(
@@ -93,10 +86,7 @@ class _UserPageState extends State<UserPage> {
                 minSize: MediaQuery.of(context).size.width * .5,
                 text: "Logout",
                 onPressed: () async {
-                  final authProvider = Provider.of<AuthProvider>(
-                    context,
-                    listen: false,
-                  );
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
                   await authProvider.logout();
                 },
               ),
@@ -114,30 +104,18 @@ class _UserPageState extends State<UserPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: children,
-        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: children),
       ),
     );
   }
 
   // Helper method to build consistent info rows
-  Widget _buildInfoRow(
-    BuildContext context, {
-    required String label,
-    required String value,
-    IconData? icon,
-  }) {
+  Widget _buildInfoRow(BuildContext context, {required String label, required String value, IconData? icon}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (icon != null) ...[
-          Icon(
-            icon,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 12.0),
         ],
         Expanded(
@@ -147,19 +125,13 @@ class _UserPageState extends State<UserPage> {
               TextWidget(
                 referenceSize: 1.2,
                 text: label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 4.0),
               TextWidget(
                 referenceSize: 1,
                 text: value,
-                style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                style: TextStyle(fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.onSurface),
               ),
             ],
           ),

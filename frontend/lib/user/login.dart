@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/api/config.dart';
+import 'package:sprout/auth/provider.dart';
+import 'package:sprout/config/api.dart';
+import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/model/user.dart';
-import 'package:sprout/provider/auth.dart';
-import 'package:sprout/widgets/button.dart';
-import 'package:sprout/widgets/text.dart';
 
 /// A stateful widget for the login page.
 class LoginPage extends StatefulWidget {
@@ -95,10 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                               keyboardType: TextInputType.text,
                               autocorrect: false,
                               enableSuggestions: false,
-                              decoration: const InputDecoration(
-                                labelText: 'Username',
-                                prefixIcon: Icon(Icons.person),
-                              ),
+                              decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
                             ),
                             const SizedBox(height: 20.0),
                             TextField(
@@ -107,10 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                               keyboardType: TextInputType.text,
                               autocorrect: false,
                               enableSuggestions: false,
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock),
-                              ),
+                              decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
                               obscureText: true,
                               textInputAction: TextInputAction.done,
                               onSubmitted: (String value) {
@@ -129,28 +123,18 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width * .5,
                       child: ButtonWidget(
                         text: "Login",
-                        onPressed:
-                            _passwordController.text == "" ||
-                                _usernameController.text == ""
-                            ? null
-                            : _login,
+                        onPressed: _passwordController.text == "" || _usernameController.text == "" ? null : _login,
                       ),
                     ),
                   ),
                   const SizedBox(height: 20.0),
                   TextWidget(
                     referenceSize: 1.2,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.bold),
                     text: _message,
                   ),
                   const SizedBox(height: 20.0),
-                  TextWidget(
-                    referenceSize: .9,
-                    text: configAPI.unsecureConfig!.version,
-                  ),
+                  TextWidget(referenceSize: .9, text: configAPI.unsecureConfig!.version),
                 ],
               ),
             ),

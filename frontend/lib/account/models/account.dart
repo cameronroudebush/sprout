@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/model/institution.dart';
+import 'package:sprout/account/models/institution.dart';
 
 /// This account defines what an account should look like from the API
 class Account {

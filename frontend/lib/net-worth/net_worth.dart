@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/api/transaction.dart';
-import 'package:sprout/model/net.worth.dart';
-import 'package:sprout/utils/formatters.dart';
-import 'package:sprout/widgets/text.dart';
+import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/net-worth/provider.dart';
 
 enum ChartRange { sevenDays, thirtyDays, oneYear }
 
@@ -18,134 +17,102 @@ class NetWorthWidget extends StatefulWidget {
 }
 
 class _NetWorthWidgetState extends State<NetWorthWidget> {
-  double _currentNetWorth = 0;
-  NetWorthOverTime? _netWorthOT;
-  bool _isLoading = true;
-  String? _errorMessage;
   ChartRange _selectedChartRange = ChartRange.sevenDays;
 
   @override
-  void initState() {
-    super.initState();
-    _setNetWorth();
-  }
-
-  Future<void> _setNetWorth() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    try {
-      final transactionAPI = Provider.of<TransactionAPI>(context, listen: false);
-      _currentNetWorth = await transactionAPI.getNetWorth();
-      _netWorthOT = await transactionAPI.getNetWorthOT();
-    } catch (e) {
-      _errorMessage = 'Failed to load net worth: $e';
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
+    return Consumer<NetWorthProvider>(
+      builder: (context, netWorthProvider, child) {
+        final historicalNetWorth = netWorthProvider.historicalNetWorth;
+        final currentNetWorth = netWorthProvider.netWorth ?? 0;
 
-    final Map<DateTime, double> filteredHistoricalData =
-        _netWorthOT?.historicalData.entries
-            .where((entry) {
-              final cutoffDate = DateTime.now().subtract(_getDurationForRange(_selectedChartRange));
-              return entry.key.isAfter(cutoffDate) || entry.key.isAtSameMomentAs(cutoffDate);
-            })
-            .map((entry) => MapEntry(entry.key, entry.value))
-            .toList()
-            .cast<MapEntry<DateTime, double>>()
-            .fold<Map<DateTime, double>>({}, (map, entry) {
-              map[entry.key] = entry.value;
-              return map;
-            }) ??
-        {};
+        final theme = Theme.of(context);
+        final textTheme = theme.textTheme;
+        final colorScheme = theme.colorScheme;
+        final screenWidth = MediaQuery.of(context).size.width;
 
-    final sortedChartEntries = filteredHistoricalData.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
-    final chartSpots = sortedChartEntries
-        .asMap()
-        .entries
-        .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value))
-        .toList();
+        final Map<DateTime, double> filteredHistoricalData =
+            historicalNetWorth?.historicalData.entries
+                .where((entry) {
+                  final cutoffDate = DateTime.now().subtract(_getDurationForRange(_selectedChartRange));
+                  return entry.key.isAfter(cutoffDate) || entry.key.isAtSameMomentAs(cutoffDate);
+                })
+                .map((entry) => MapEntry(entry.key, entry.value))
+                .toList()
+                .cast<MapEntry<DateTime, double>>()
+                .fold<Map<DateTime, double>>({}, (map, entry) {
+                  map[entry.key] = entry.value;
+                  return map;
+                }) ??
+            {};
 
-    return Consumer<AccountProvider>(
-      builder: (context, authProvider, child) {
-        return Center(
-          child: Card(
-            elevation: 6.0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: _isLoading
-                  ? const SizedBox(height: 350, child: Center(child: CircularProgressIndicator()))
-                  : _errorMessage != null
-                  ? SizedBox(
-                      height: 350,
-                      child: Center(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: colorScheme.error),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        TextWidget(referenceSize: 1, text: 'Current Net Worth'),
-                        const SizedBox(height: 10.0),
-                        TextWidget(
-                          referenceSize: 2.5,
-                          text: currencyFormatter.format(_currentNetWorth),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _currentNetWorth >= 0 ? Colors.green : colorScheme.error,
-                          ),
-                        ),
-                        const SizedBox(height: 12.0),
-                        TextWidget(referenceSize: 1, text: 'Net Worth Trend'),
-                        const SizedBox(height: 16.0),
-                        _buildChartRangeSelector(theme, colorScheme),
-                        _netWorthOT != null && sortedChartEntries.isNotEmpty
-                            ? SizedBox(
-                                height: 200,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 18.0, left: 12.0, top: 24, bottom: 12),
-                                  child: LineChart(
-                                    _buildNetWorthChartData(
-                                      chartSpots,
-                                      sortedChartEntries,
-                                      theme,
-                                      colorScheme,
-                                      screenWidth,
-                                    ),
-                                    duration: Duration(milliseconds: 0),
-                                  ),
-                                ),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  'No historical data available for this period.',
-                                  textAlign: TextAlign.center,
-                                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                                ),
+        final sortedChartEntries = filteredHistoricalData.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+        final chartSpots = sortedChartEntries
+            .asMap()
+            .entries
+            .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value))
+            .toList();
+
+        return Consumer<AccountProvider>(
+          builder: (context, authProvider, child) {
+            return Center(
+              child: Card(
+                elevation: 6.0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: historicalNetWorth == null
+                      ? const SizedBox(height: 350, child: Center(child: CircularProgressIndicator()))
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            TextWidget(referenceSize: 1, text: 'Current Net Worth'),
+                            const SizedBox(height: 10.0),
+                            TextWidget(
+                              referenceSize: 2.5,
+                              text: currencyFormatter.format(currentNetWorth),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: currentNetWorth >= 0 ? Colors.green : colorScheme.error,
                               ),
-                        const SizedBox(height: 16.0),
-                      ],
-                    ),
-            ),
-          ),
+                            ),
+                            const SizedBox(height: 12.0),
+                            TextWidget(referenceSize: 1, text: 'Net Worth Trend'),
+                            const SizedBox(height: 16.0),
+                            _buildChartRangeSelector(theme, colorScheme),
+                            sortedChartEntries.isNotEmpty
+                                ? SizedBox(
+                                    height: 200,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 18.0, left: 12.0, top: 24, bottom: 12),
+                                      child: LineChart(
+                                        _buildNetWorthChartData(
+                                          chartSpots,
+                                          sortedChartEntries,
+                                          theme,
+                                          colorScheme,
+                                          screenWidth,
+                                        ),
+                                        duration: Duration(milliseconds: 0),
+                                      ),
+                                    ),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'No historical data available for this period.',
+                                      textAlign: TextAlign.center,
+                                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                                    ),
+                                  ),
+                            const SizedBox(height: 16.0),
+                          ],
+                        ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -215,9 +182,11 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
     }
 
     // Determine the Y axis text size
-    double yReservedSize = 40;
-    if (maxY > 100000) {
+    double yReservedSize = 60;
+    if (maxY > 10000) {
       yReservedSize = 80;
+    } else if (maxY > 100000) {
+      yReservedSize = 100;
     } else if (maxY > 100000000) {
       yReservedSize = 120;
     }

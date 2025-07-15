@@ -1,4 +1,4 @@
-import 'package:sprout/api/client.dart';
+import 'package:sprout/core/api/client.dart';
 import 'package:sprout/model/config.dart';
 
 /// Class that provides callable endpoints for the configuration

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/accounts.dart';
-import 'package:sprout/net.dart';
+import 'package:sprout/net-worth/net_worth.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

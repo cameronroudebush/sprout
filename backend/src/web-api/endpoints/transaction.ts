@@ -6,7 +6,7 @@ import { RestBody } from "@backend/model/api/rest.request";
 import { TransactionRequest } from "@backend/model/api/transaction";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { format, isBefore, startOfDay, subDays, subYears } from "date-fns";
+import { format, isBefore, isSameDay, startOfDay, subDays, subYears } from "date-fns";
 import { Dictionary } from "lodash";
 import { LessThan } from "typeorm";
 import { RestMetadata } from "../metadata";
@@ -36,19 +36,26 @@ export class TransactionAPI {
     const oneYearAgo = subYears(today, 1);
 
     const calculateNetWorthForDate = async (targetDate: Date): Promise<number> => {
-      const relevantAccountHistories = await AccountHistory.find({
-        where: {
-          account: { user: { id: user.id } },
-          time: LessThan(targetDate),
-        },
-        order: { time: "DESC" },
-      });
+      // If today is the day, we want current values, not account history
+      let relevantAccountHistories: { accountId: string; balance: number }[];
+      if (isSameDay(targetDate, new Date()))
+        relevantAccountHistories = (await Account.find({ where: { user: { id: user.id } } })).map((x) => ({ accountId: x.id, balance: x.balance }));
+      else
+        relevantAccountHistories = (
+          await AccountHistory.find({
+            where: {
+              account: { user: { id: user.id } },
+              time: LessThan(targetDate),
+            },
+            order: { time: "DESC" },
+          })
+        ).map((x) => ({ accountId: x.account.id, balance: x.account.balance }));
 
       const latestBalancesPerAccount: { [accountId: string]: number } = {};
       const processedAccountIds: Set<string> = new Set();
 
       for (const history of relevantAccountHistories) {
-        const accountId = history.account.id;
+        const accountId = history.accountId;
 
         if (!processedAccountIds.has(accountId)) {
           latestBalancesPerAccount[accountId] = history.balance;

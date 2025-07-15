@@ -1,4 +1,4 @@
-import 'package:sprout/api/client.dart';
+import 'package:sprout/core/api/client.dart';
 
 /// Class that provides endpoints to call for initial setup of the app
 class SetupAPI {
