@@ -53,10 +53,7 @@ class _SetupPageState extends State<SetupPage> {
   void _nextPage() {
     if (_currentPageIndex < 2) {
       // Assuming 3 pages (0, 1, 2)
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
+      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
       setState(() {
         _currentPageIndex++;
       });
@@ -73,8 +70,8 @@ class _SetupPageState extends State<SetupPage> {
 
     final setupAPI = Provider.of<SetupAPI>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final username = _usernameController.text;
-    final password = _passwordController.text;
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
 
     // Basic validation
     if (username.isEmpty || password.isEmpty) {
@@ -103,15 +100,13 @@ class _SetupPageState extends State<SetupPage> {
         _nextPage(); // Move to the "Complete" page
       } else {
         setState(() {
-          _message =
-              'Account created but failed to log in. Please try logging in manually.';
+          _message = 'Account created but failed to log in. Please try logging in manually.';
           _isLoading = false;
         });
       }
     } else {
       setState(() {
-        _message =
-            'Failed to create account. Username might be taken or server error.';
+        _message = 'Failed to create account. Username might be taken or server error.';
         _isLoading = false;
       });
     }
@@ -122,9 +117,7 @@ class _SetupPageState extends State<SetupPage> {
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth:
-              MediaQuery.of(context).size.width *
-              (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
+          maxWidth: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
         ),
         child: PageView(
           controller: _pageController,
@@ -187,8 +180,7 @@ class _SetupPageState extends State<SetupPage> {
           const SizedBox(height: 20.0),
           TextWidget(
             referenceSize: 1.25,
-            text:
-                'This will be your primary account to manage the app. Please choose a secure username and password.',
+            text: 'This will be your primary account to manage the app. Please choose a secure username and password.',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40.0),
@@ -196,20 +188,14 @@ class _SetupPageState extends State<SetupPage> {
             child: TextField(
               controller: _usernameController,
               autofillHints: [AutofillHints.newUsername],
-              decoration: const InputDecoration(
-                labelText: 'Choose Username',
-                prefixIcon: Icon(Icons.person_add),
-              ),
+              decoration: const InputDecoration(labelText: 'Choose Username', prefixIcon: Icon(Icons.person_add)),
             ),
           ),
           const SizedBox(height: 20.0),
           TextField(
             controller: _passwordController,
             autofillHints: [AutofillHints.newPassword],
-            decoration: const InputDecoration(
-              labelText: 'Choose Password',
-              prefixIcon: Icon(Icons.lock_open),
-            ),
+            decoration: const InputDecoration(labelText: 'Choose Password', prefixIcon: Icon(Icons.lock_open)),
             onSubmitted: (String value) {
               _createAccountAndLogin();
             },
@@ -220,9 +206,7 @@ class _SetupPageState extends State<SetupPage> {
               ? const CircularProgressIndicator()
               : ButtonWidget(
                   text: "Create Account",
-                  onPressed:
-                      _passwordController.text == "" ||
-                          _usernameController.text == ""
+                  onPressed: _passwordController.text == "" || _usernameController.text == ""
                       ? null
                       : _createAccountAndLogin,
                 ),
@@ -230,9 +214,7 @@ class _SetupPageState extends State<SetupPage> {
           Text(
             _message,
             style: TextStyle(
-              color: _message.contains('Failed')
-                  ? Colors.red[700]
-                  : Colors.green[700],
+              color: _message.contains('Failed') ? Colors.red[700] : Colors.green[700],
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -250,11 +232,7 @@ class _SetupPageState extends State<SetupPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(
-            Icons.check_circle_outline,
-            color: Colors.green,
-            size: MediaQuery.of(context).size.height * .25,
-          ),
+          Icon(Icons.check_circle_outline, color: Colors.green, size: MediaQuery.of(context).size.height * .25),
           const SizedBox(height: 20.0),
           TextWidget(
             referenceSize: 3,
@@ -264,8 +242,7 @@ class _SetupPageState extends State<SetupPage> {
           const SizedBox(height: 20.0),
           TextWidget(
             referenceSize: 1.25,
-            text:
-                'Your admin account has been successfully created. You\'re all set to explore the app!',
+            text: 'Your admin account has been successfully created. You\'re all set to explore the app!',
           ),
           const SizedBox(height: 60.0),
           ButtonWidget(text: "Go to App", onPressed: widget.onSetupSuccess),

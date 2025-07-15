@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/accounts.dart';
+import 'package:sprout/account/accounts.dart';
 import 'package:sprout/net.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,9 +14,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * .9,
-        ),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * .9),
         child: Padding(
           padding: EdgeInsets.only(top: 24),
           child: Column(
