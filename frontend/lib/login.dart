@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     User? user = await Provider.of<AuthProvider>(
       context,
       listen: false,
-    ).login(_usernameController.text, _passwordController.text);
+    ).login(_usernameController.text.trim(), _passwordController.text.trim());
 
     if (user == null) {
       setState(() {
@@ -148,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20.0),
                   TextWidget(
-                    referenceSize: .8,
+                    referenceSize: .9,
                     text: configAPI.unsecureConfig!.version,
                   ),
                 ],
