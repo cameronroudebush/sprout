@@ -18,6 +18,11 @@ export class TransactionAPI {
     return await Transaction.find({ skip: parsedRequest.startIndex, take: parsedRequest.endIndex, where: { account: { user: { username: user.username } } } });
   }
 
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.count, "GET"))
+  async getTotalTransactions(_request: RestBody, user: User) {
+    return Transaction.count({ where: { account: { user: { id: user.id } } } });
+  }
+
   /** Returns the net-worth of all accounts  */
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getNetWorth, "GET"))
   async getNetWorth(_request: RestBody, user: User) {

@@ -21,7 +21,7 @@ export class Transaction extends DatabaseBase {
   posted: Date;
 
   /** The account this transaction belongs to */
-  @ManyToOne(() => Account, (a) => a.id)
+  @ManyToOne(() => Account, (a) => a.id, { eager: true, onDelete: "CASCADE" })
   account: Account;
 
   constructor(amount: number, posted: Date, description: string, category: string, pending: boolean, account: Account) {

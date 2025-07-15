@@ -52,13 +52,15 @@ class _AccountsWidgetState extends State<AccountsWidget> {
               Padding(
                 padding: const EdgeInsets.symmetric(),
                 child: TextWidget(
-                  referenceSize: 1.5,
+                  referenceSize: 1.15,
                   text: '${accountType[0].toUpperCase()}${accountType.substring(1)} Accounts',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               ...accounts.map((account) {
                 final isSelected = _selectedAccounts.contains(account);
+                final synthLogoURL =
+                    "https://logo.synthfinance.com/${account.institution.id.replaceAll("https://www.", "")}";
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
                   elevation: isSelected ? 6.0 : 3.0,
@@ -85,7 +87,16 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                                 size: 24.0,
                               ),
                             ),
-                          Icon(account.icon, size: 30.0),
+                          Image.network(
+                            width: 30,
+                            height: 30,
+                            synthLogoURL,
+                            webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+                            errorBuilder: (context, error, stackTrace) {
+                              // Fallback icon
+                              return Icon(account.fallbackIcon, size: 30.0);
+                            },
+                          ),
                           const SizedBox(width: 16.0),
                           Expanded(
                             child: Column(

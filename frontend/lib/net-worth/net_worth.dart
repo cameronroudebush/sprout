@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -167,10 +169,6 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
     double minY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
     double maxY = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
 
-    // Adjust min/max Y to prevent line from touching border
-    minY = minY > 0 ? minY * 0.95 : minY * 1.05;
-    maxY = maxY < 0 ? maxY * 0.95 : maxY * 1.05;
-
     // Dynamically adjust font size for X-axis labels
     double xLabelFontSize;
     if (_selectedChartRange == ChartRange.oneYear) {
@@ -182,13 +180,12 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
     }
 
     // Determine the Y axis text size
-    double yReservedSize = 60;
-    if (maxY > 10000) {
-      yReservedSize = 80;
-    } else if (maxY > 100000) {
-      yReservedSize = 100;
-    } else if (maxY > 100000000) {
-      yReservedSize = 120;
+    double yReservedSize = 60; // Default size
+    if (maxY == 0 && minY == 0) {
+      yReservedSize = 0;
+    } else {
+      int numDigits = max(maxY.abs().toInt().toString().length, minY.abs().toInt().toString().length);
+      yReservedSize = 60 + (numDigits - 3).clamp(0, 4) * 10;
     }
 
     return LineChartData(

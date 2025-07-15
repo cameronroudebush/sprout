@@ -3,6 +3,7 @@ import 'package:sprout/account/models/institution.dart';
 
 /// This account defines what an account should look like from the API
 class Account {
+  final String id;
   final String name;
   final String provider;
   final String currency;
@@ -13,12 +14,14 @@ class Account {
 
   final Institution institution;
 
-  final IconData icon;
+  /// An icon to use in the event the institution url's logo can't be found
+  final IconData fallbackIcon;
 
   Account({
+    required this.id,
     required this.name,
     required this.balance,
-    required this.icon,
+    required this.fallbackIcon,
     required this.provider,
     required this.availableBalance,
     required this.currency,
@@ -39,13 +42,14 @@ class Account {
     }
 
     return Account(
+      id: json['id'] as String,
       name: json['name'] as String,
       provider: json['provider'] as String,
       currency: json['currency'] as String,
       type: json['type'] as String,
       balance: (json['balance'] as num).toDouble(),
       availableBalance: (json['availableBalance'] as num).toDouble(),
-      icon: defaultIcon,
+      fallbackIcon: defaultIcon,
       institution: Institution.fromJson(json["institution"]),
     );
   }

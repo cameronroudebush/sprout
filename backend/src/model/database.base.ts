@@ -53,4 +53,9 @@ export class DatabaseBase extends DBBase {
     if (!this.id) throw new Error("Failed to update, no ID provided");
     else return await this.getRepository().save(this);
   }
+
+  /** Counts the total amount of fields that match the given query options */
+  static async count<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, options?: FindManyOptions<T>) {
+    return await new this().getRepository().count(options);
+  }
 }

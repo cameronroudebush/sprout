@@ -55,7 +55,7 @@ export class SimpleFINProvider extends ProviderBase {
       const transactions = x.transactions.map((t) =>
         Transaction.fromPlain({
           id: t.id,
-          posted: new Date(t.posted),
+          posted: new Date(t.posted * 1000),
           amount: t.amount,
           description: t.description,
           pending: t.pending ?? false,
