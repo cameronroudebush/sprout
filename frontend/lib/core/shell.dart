@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/setup/setup.dart';
-import 'package:sprout/transaction/transactions.dart';
+import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
 
 /// This class defines the shell that wraps all pages that are displayed for sprout
@@ -19,7 +19,7 @@ class _SproutAppShellState extends State<SproutAppShell> {
 
   final List<Map<String, dynamic>> _pages = const <Map<String, dynamic>>[
     {'page': HomePage(), 'icon': Icons.home, 'label': 'Home'},
-    {'page': TransactionsPage(), 'icon': Icons.receipt, 'label': 'Transactions'},
+    {'page': TransactionsOverviewPage(), 'icon': Icons.receipt, 'label': 'Transactions'},
     {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'Account'},
   ];
 

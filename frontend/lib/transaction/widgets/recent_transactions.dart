@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/transaction/models/transaction.dart'; // Make sure to import your Transaction model
+import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/provider.dart';
 
-class TransactionsPage extends StatefulWidget {
-  const TransactionsPage({super.key});
+class RecentTransactionsCard extends StatefulWidget {
+  const RecentTransactionsCard({super.key});
 
   @override
-  State<TransactionsPage> createState() => _TransactionsPageState();
+  State<RecentTransactionsCard> createState() => _RecentTransactionsCardState();
 }
 
-class _TransactionsPageState extends State<TransactionsPage> {
+class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
   int _currentPage = 0;
 
   void _fetchDataForPage(int page) {
-    // Access the provider without listening to rebuild the whole widget on data change
     final provider = Provider.of<TransactionProvider>(context, listen: false);
     final rowsPerPage = provider.rowsPerPage;
+    // Assuming populateTransactions can handle fetching data for a specific page
     provider.populateTransactions(page * rowsPerPage, (page + 1) * rowsPerPage);
   }
 
@@ -30,13 +30,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
           elevation: 2.0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           clipBehavior: Clip.antiAlias,
-          margin: const EdgeInsets.all(16.0),
+          margin: EdgeInsets.zero,
           child: LayoutBuilder(
             builder: (context, constraints) {
               return SizedBox(
                 width: double.infinity,
                 child: PaginatedDataTable(
-                  header: TextWidget(
+                  header: const TextWidget(
                     referenceSize: 2,
                     text: 'Recent Transactions',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -47,14 +47,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     DataColumn(label: Text('Category')),
                     DataColumn(label: Text('Amount'), numeric: true),
                   ],
-                  // The source is where the magic happens
                   source: _TransactionDataSource(
                     transactions: provider.transactions,
                     totalRows: provider.totalTransactionCount,
+                    rowsPerPage: provider.rowsPerPage,
                   ),
                   rowsPerPage: provider.rowsPerPage,
                   onPageChanged: (int pageIndex) {
-                    // The page index from the widget is byte-based, so we calculate page number
                     final newPage = pageIndex ~/ provider.rowsPerPage;
                     if (newPage != _currentPage) {
                       setState(() {
@@ -63,11 +62,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       _fetchDataForPage(newPage);
                     }
                   },
-                  // Show a loading indicator when fetching data
-                  // showProgress: provider.isLoading,
-                  // Make table horizontally scrollable on small screens
                   horizontalMargin: 20,
-                  columnSpacing: constraints.maxWidth * 0.1, // Responsive column spacing
+                  columnSpacing: constraints.maxWidth * 0.05,
                 ),
               );
             },
@@ -79,24 +75,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
 }
 
 /// A custom data source for the PaginatedDataTable.
-/// This class handles how to build rows from your transaction data.
 class _TransactionDataSource extends DataTableSource {
   final List<Transaction> transactions;
   final int totalRows;
+  final int rowsPerPage;
 
-  _TransactionDataSource({required this.transactions, required this.totalRows});
-
+  _TransactionDataSource({required this.transactions, required this.totalRows, required this.rowsPerPage});
   @override
   DataRow? getRow(int index) {
     if (index >= transactions.length) {
-      return null; // This can happen if the last page has fewer items than rowsPerPage
+      return null;
     }
     final transaction = transactions[index];
 
     return DataRow.byIndex(
       index: index,
       cells: [
-        DataCell(Text(transaction.posted.toLocal().toString())),
+        DataCell(Text(formatDate(transaction.posted))), // Using formatter
         DataCell(Text(transaction.description)),
         DataCell(Text(transaction.category)),
         DataCell(
@@ -118,7 +113,7 @@ class _TransactionDataSource extends DataTableSource {
   }
 
   @override
-  bool get isRowCountApproximate => false;
+  bool get isRowCountApproximate => transactions.length < totalRows;
 
   @override
   int get rowCount => totalRows;

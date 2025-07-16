@@ -1,5 +1,6 @@
 import 'package:sprout/core/api/client.dart';
 import 'package:sprout/transaction/models/transaction.dart';
+import 'package:sprout/transaction/models/transaction.stats.dart';
 
 /// Class that provides callable endpoints for the transaction information
 class TransactionAPI {
@@ -19,5 +20,12 @@ class TransactionAPI {
     final body = {'startIndex': startIndex, 'endIndex': endIndex};
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Transaction.fromJson(e)).toList();
+  }
+
+  /// Gets transaction stats for the last N days
+  Future<TransactionStats> getStats({int days = 30}) async {
+    final endpoint = "/transaction/stats";
+    final body = {'days': days};
+    return TransactionStats.fromJson(await client.post(body, endpoint) as dynamic);
   }
 }

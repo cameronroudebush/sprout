@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/api.dart';
+import 'package:sprout/core/widgets/attribution.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -18,6 +19,7 @@ class _UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     final configAPI = Provider.of<ConfigAPI>(context, listen: false);
+    final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -27,11 +29,7 @@ class _UserPageState extends State<UserPage> {
           children: <Widget>[
             // App Information Card
             _buildCard([
-              TextWidget(
-                referenceSize: 1.6,
-                text: "App Details",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-              ),
+              TextWidget(referenceSize: 1.6, text: "App Details", style: headerStyling),
               const Divider(height: 32.0, thickness: 1.0),
               _buildInfoRow(
                 context,
@@ -60,11 +58,7 @@ class _UserPageState extends State<UserPage> {
 
             // User Information Card
             _buildCard([
-              TextWidget(
-                referenceSize: 1.6,
-                text: "User Information",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-              ),
+              TextWidget(referenceSize: 1.6, text: "User Information", style: headerStyling),
               const Divider(height: 32.0, thickness: 1.0),
               Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
@@ -90,6 +84,12 @@ class _UserPageState extends State<UserPage> {
                   await authProvider.logout();
                 },
               ),
+            ]),
+
+            _buildCard([
+              TextWidget(referenceSize: 1.6, text: "Supporters", style: headerStyling),
+              const Divider(height: 32.0, thickness: 1.0),
+              AttributionWidget(text: "Logos provided by Synth", url: "https://synthfinance.com"),
             ]),
           ],
         ),
