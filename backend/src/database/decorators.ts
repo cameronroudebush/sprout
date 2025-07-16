@@ -23,4 +23,11 @@ export class DatabaseDecorators {
       return Column({ ...options })(target, key);
     };
   }
+
+  /** Decorates this column with the options and sets a numeric transformer */
+  static numericColumn(options?: ColumnOptions) {
+    return function (target: any, key: string) {
+      return Column({ ...options, type: "double" })(target, key);
+    };
+  }
 }

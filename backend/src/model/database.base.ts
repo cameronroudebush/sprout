@@ -2,7 +2,7 @@ import { Database } from "@backend/database/source";
 import { DBBase } from "@backend/model/base";
 import { CustomTypes } from "@backend/model/utility/custom.types";
 import { decorate } from "ts-mixer";
-import { FindManyOptions, FindOneOptions, PrimaryGeneratedColumn, Repository } from "typeorm";
+import { FindManyOptions, FindOneOptions, FindOptionsWhere, PrimaryGeneratedColumn, Repository } from "typeorm";
 
 /** This class implements a bunch of common functionality that can be reused for other models that utilize the database */
 export class DatabaseBase extends DBBase {
@@ -57,5 +57,20 @@ export class DatabaseBase extends DBBase {
   /** Counts the total amount of fields that match the given query options */
   static async count<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, options?: FindManyOptions<T>) {
     return await new this().getRepository().count(options);
+  }
+
+  /** Given a column name, returns the maximum value */
+  static async max<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, columnName: CustomTypes.PropertyNames<T, number>, options?: FindOptionsWhere<T>) {
+    return await new this().getRepository().maximum(columnName as any, options);
+  }
+
+  /** Given a column name, returns the minimum value */
+  static async min<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, columnName: CustomTypes.PropertyNames<T, number>, options?: FindOptionsWhere<T>) {
+    return await new this().getRepository().minimum(columnName as any, options);
+  }
+
+  /** Given a column name, returns the sum of all values matching the where clause */
+  static async sum<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, columnName: CustomTypes.PropertyNames<T, number>, options: FindOptionsWhere<T>) {
+    return await new this().getRepository().sum(columnName as any, options);
   }
 }

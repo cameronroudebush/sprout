@@ -79,10 +79,12 @@ export class Scheduler {
           institution.hasError = data.account.institution.hasError;
           await institution.update();
           // Sync transactions
+          data.transactions.map((x) => (x.account = accountInDB));
           await Transaction.insertMany<Transaction>(data.transactions);
           // Sync holdings if investment
           if (accountInDB.type === "investment" && data.holdings.length !== 0)
             for (const holding of data.holdings) {
+              holding.account = accountInDB;
               let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol } }))[0];
               // If we aren't tracking this holding yet, start tracking it
               if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();

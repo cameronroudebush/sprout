@@ -6,7 +6,7 @@ import { ManyToOne } from "typeorm";
 @DatabaseDecorators.entity()
 export class Transaction extends DatabaseBase {
   /** In the currency of the account */
-  @DatabaseDecorators.column({ nullable: false })
+  @DatabaseDecorators.numericColumn({ nullable: false })
   amount: number;
 
   @DatabaseDecorators.column({ nullable: false })

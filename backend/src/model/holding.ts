@@ -7,7 +7,7 @@ import { ManyToOne } from "typeorm";
 @DatabaseDecorators.entity()
 export class Holding extends DatabaseBase {
   /** The account this holding is associated to */
-  @ManyToOne(() => Account, (i) => i.id)
+  @ManyToOne(() => Account, (i) => i.id, { eager: true, onDelete: "CASCADE" })
   account: Account;
 
   @DatabaseDecorators.column({ nullable: false })

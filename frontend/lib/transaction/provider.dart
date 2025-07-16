@@ -3,6 +3,7 @@ import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/models/transaction.dart';
+import 'package:sprout/transaction/models/transaction.stats.dart';
 
 /// Class that provides the store of current transactions
 class TransactionProvider with ChangeNotifier {
@@ -12,6 +13,7 @@ class TransactionProvider with ChangeNotifier {
 
   // Data store
   int _totalTransactionCount = 0;
+  TransactionStats? _transactionStats;
   List<Transaction> _transactions = [];
 
   // Getters to not allow editing the internal store
@@ -19,6 +21,7 @@ class TransactionProvider with ChangeNotifier {
   int get totalTransactionCount => _totalTransactionCount;
   bool get isLoading => _transactions.isEmpty;
   int get rowsPerPage => 5;
+  TransactionStats? get transactionStats => _transactionStats;
 
   TransactionProvider(this._transactionAPI, this._authProvider, this._accountProvider) {
     if (_authProvider != null &&
@@ -26,6 +29,7 @@ class TransactionProvider with ChangeNotifier {
         _accountProvider != null &&
         _accountProvider.linkedAccounts.isNotEmpty) {
       populateTotalTransactionCount();
+      populateStats();
       // Grab our most recent 20
       populateTransactions(0, rowsPerPage);
     }
@@ -40,7 +44,6 @@ class TransactionProvider with ChangeNotifier {
 
   Future<List<Transaction>> populateTransactions(int startIndex, int endIndex) async {
     final newTransactions = await _transactionAPI.getTransactions(startIndex, endIndex);
-
     // Combine new transactions with existing ones, removing duplicates
     final Set<String> existingTransactionIds = _transactions.map((t) => t.id).toSet();
     for (var newTransaction in newTransactions) {
@@ -48,8 +51,14 @@ class TransactionProvider with ChangeNotifier {
         _transactions.add(newTransaction);
       }
     }
-
     notifyListeners();
     return _transactions;
+  }
+
+  Future<TransactionStats?> populateStats() async {
+    final total = await _transactionAPI.getStats();
+    _transactionStats = total;
+    notifyListeners();
+    return _transactionStats;
   }
 }

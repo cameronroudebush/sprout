@@ -32,9 +32,9 @@ export class SimpleFINProvider extends ProviderBase {
       const availableBalance = parseFloat(x["available-balance"]);
       // Try to determine our account type
       let type: Account["type"];
-      if (availableBalance !== 0) type = "depository";
+      if (balance <= 0 && (name.toLowerCase().includes("credit") || name.toLowerCase().includes("card"))) type = "credit";
       else if (x.holdings.length !== 0) type = "investment";
-      else if (balance <= 0 && (name.toLowerCase().includes("credit") || name.toLowerCase().includes("card"))) type = "credit";
+      else if (availableBalance !== 0) type = "depository";
       else type = "loan";
       const account = Account.fromPlain({ name, id: x.id, type, currency: x.currency, provider: "simple-fin", balance, availableBalance, institution });
       // Try to parse any holdings

@@ -26,10 +26,10 @@ export class Account extends DatabaseBase {
   currency: string;
 
   /** The current balance of the account */
-  @DatabaseDecorators.column({ nullable: false })
+  @DatabaseDecorators.numericColumn({ nullable: false })
   balance: number;
   /** The available balance to this account */
-  @DatabaseDecorators.column({ nullable: false })
+  @DatabaseDecorators.numericColumn({ nullable: false })
   availableBalance: number;
 
   /** The type of this account to better separate it from the others. */

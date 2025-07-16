@@ -4,11 +4,12 @@ import { RestEndpoints } from "@backend/model/api/endpoint";
 import { NetWorthOverTime } from "@backend/model/api/net.worth";
 import { RestBody } from "@backend/model/api/rest.request";
 import { TransactionRequest } from "@backend/model/api/transaction";
+import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import { format, isBefore, isSameDay, startOfDay, subDays, subYears } from "date-fns";
 import { Dictionary } from "lodash";
-import { LessThan } from "typeorm";
+import { FindOptionsWhere, LessThan, MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
 
 export class TransactionAPI {
@@ -21,6 +22,28 @@ export class TransactionAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.count, "GET"))
   async getTotalTransactions(_request: RestBody, user: User) {
     return Transaction.count({ where: { account: { user: { id: user.id } } } });
+  }
+
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.stats, "GET"))
+  async getStats(request: RestBody, user: User) {
+    const parsedRequest = TransactionStatsRequest.fromPlain(request.payload);
+    const startDate = subDays(new Date(), parsedRequest.days);
+    const where = { account: { user: { id: user.id } }, posted: LessThan(startDate) } as FindOptionsWhere<Transaction>;
+    const totalSpendResult = await Transaction.sum("amount", { ...where, ...{ amount: LessThan(0) } });
+    const totalIncome = await Transaction.sum("amount", { ...where, ...{ amount: MoreThan(0) } });
+    const transactionCount = await Transaction.count({ where: where });
+    const largestExpenseResult = await Transaction.min("amount", where);
+
+    const totalSpend = totalSpendResult || 0;
+    const averageTransactionCost = transactionCount > 0 ? totalSpend / transactionCount : 0;
+    const largestExpense = largestExpenseResult || 0;
+
+    return TransactionStats.fromPlain({
+      totalSpend,
+      totalIncome,
+      averageTransactionCost: averageTransactionCost,
+      largestExpense: largestExpense,
+    });
   }
 
   /** Returns the net-worth of all accounts  */

@@ -6,13 +6,13 @@ import { ManyToOne } from "typeorm";
 /** This class provides historical tracking to accounts. Used for things like balance over time. */
 @DatabaseDecorators.entity()
 export class AccountHistory extends DatabaseBase {
-  @ManyToOne(() => Account, (i) => i.id, { eager: true })
+  @ManyToOne(() => Account, (i) => i.id, { eager: true, onDelete: "CASCADE" })
   declare account: Account;
 
   @DatabaseDecorators.column({ nullable: false })
   declare time: Date;
-  @DatabaseDecorators.column({ nullable: false })
+  @DatabaseDecorators.numericColumn({ nullable: false })
   declare balance: number;
-  @DatabaseDecorators.column({ nullable: false })
+  @DatabaseDecorators.numericColumn({ nullable: false })
   declare availableBalance: number;
 }

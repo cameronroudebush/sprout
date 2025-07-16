@@ -37,6 +37,10 @@ class _AccountsWidgetState extends State<AccountsWidget> {
     for (var account in widget.accounts) {
       accountsByType.putIfAbsent(account.type, () => []).add(account);
     }
+    // Order accounts by balance
+    accountsByType.forEach((key, value) {
+      value.sort((a, b) => b.balance.abs().compareTo(a.balance.abs()));
+    });
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8.0),
