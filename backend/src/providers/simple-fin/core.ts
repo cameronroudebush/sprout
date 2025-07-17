@@ -1,15 +1,14 @@
 import { Configuration } from "@backend/config/core";
-import { Transaction } from "@backend/model/transaction";
-import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
-import { subDays } from "date-fns";
-import { ProviderBase } from "../base/core";
-import { ProviderRateLimit } from "../base/rate-limit";
-
 import { Logger } from "@backend/logger";
 import { Account } from "@backend/model/account";
 import { Holding } from "@backend/model/holding";
 import { Institution } from "@backend/model/institution";
+import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
+import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
+import { subDays } from "date-fns";
+import { ProviderBase } from "../base/core";
+import { ProviderRateLimit } from "../base/rate-limit";
 import * as fakeData from "./fake-data.json";
 
 /**
@@ -79,16 +78,15 @@ export class SimpleFINProvider extends ProviderBase {
     endpoint = "/accounts",
     params = {
       /** The start date to look for transactions of */
-      transactionStartDate: new Date(),
-      /** The end date to look for transactions of */
-      transactionEndDate: subDays(new Date(), Configuration.providers.simpleFIN.lookBackDays),
+      transactionStartDate: subDays(new Date(), Configuration.providers.simpleFIN.lookBackDays),
       /** If we want pending transactions */
       pending: true,
     },
     balancesOnly: boolean,
   ) {
     if (Configuration.providers.simpleFIN.accessToken == null) throw new Error("SimpleFIN access token is not properly configured within your configuration.");
-    const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${params.transactionStartDate.getTime()}&end-date=${params.transactionEndDate.getTime()}&balances-only=${balancesOnly ? 1 : 0}`;
+    const startDateEpoch = Math.round(params.transactionStartDate.getTime() / 1000);
+    const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${startDateEpoch}&balances-only=${balancesOnly ? 1 : 0}`;
     // Pull out the authorization header
     const [user, pass] = url.replace("https://", "").split("@")[0]!.split(":");
     const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
