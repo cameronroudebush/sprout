@@ -18,6 +18,7 @@ TODO:
   - OIDC?
 - Add Coinbase & Zillow providers
   - Maybe move how you config the simpleFin provider
+- Lots and lots of docs...
 
 Unrelated:
 
