@@ -4,25 +4,25 @@ import { Logger } from "@backend/logger";
 import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
 import { Holding } from "@backend/model/holding";
-import { Schedule } from "@backend/model/schedule";
+import { Sync } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import CronExpressionParser, { CronExpression } from "cron-parser";
 import { ProviderBase } from "./providers/base/core";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
-export class Scheduler {
+export class BackgroundSync {
   interval!: CronExpression;
 
   constructor(public provider: ProviderBase) {}
 
-  /** Starts the scheduler to perform updates based on the next result */
+  /** Starts the scheduler to perform updates of accounts on a certain time frame */
   async start() {
-    Logger.info(`Initializing scheduler with job of: ${Configuration.updateTime}`);
+    Logger.info(`Initializing background sync with job of: ${Configuration.updateTime}`);
     // Validate the cronjob
     this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: TimeZone.timeZone });
     // Perform update, if one wasn't ran today. Else schedule the next update
-    const lastSchedule = (await Schedule.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
+    const lastSchedule = (await Sync.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
     if (lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString()) await this.update();
     else this.scheduleNextUpdate();
   }
@@ -36,10 +36,15 @@ export class Scheduler {
     }, timeUntilNextExecution);
   }
 
+  /** Manually runs a sync out of the current process */
+  async runManual() {
+    return await this.update();
+  }
+
   /** Performs an update for our API */
   private async update() {
     Logger.info("Performing background update");
-    const schedule = await Schedule.fromPlain({ time: new Date(), status: "in-progress" }).insert();
+    const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
     // Handle each user
     const users = await User.find({});
 
@@ -111,5 +116,6 @@ export class Scheduler {
 
     // Schedule next update
     this.scheduleNextUpdate();
+    return schedule;
   }
 }

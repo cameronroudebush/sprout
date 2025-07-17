@@ -48,4 +48,9 @@ export module RestEndpoints {
   export class setup {
     static createUser = "/setup/user";
   }
+
+  /** Endpoints for the background sync */
+  export class sync {
+    static runManual = "/sync/manual";
+  }
 }

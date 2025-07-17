@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
-import 'package:sprout/config/api.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/attribution.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/user/api.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// A page that display user account information along with other useful info
@@ -16,84 +17,101 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+  /// Tells the API to manually run an account refresh
+  Future<void> _manualSyncRefresh() async {
+    final userAPI = Provider.of<UserAPI>(context, listen: false);
+    userAPI.runManualSync();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final configAPI = Provider.of<ConfigAPI>(context, listen: false);
-    final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
+    return Consumer<ConfigProvider>(
+      builder: (context, configProvider, child) {
+        final config = configProvider.config;
+        final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            // App Information Card
-            _buildCard([
-              TextWidget(referenceSize: 1.6, text: "App Details", style: headerStyling),
-              const Divider(height: 32.0, thickness: 1.0),
-              _buildInfoRow(
-                context,
-                label: "App Version",
-                value: configAPI.unsecureConfig!.version,
-                icon: Icons.info_outline,
-              ),
-              SizedBox(height: 12),
-              _buildInfoRow(
-                context,
-                label: "Last Schedule Run",
-                value: configAPI.config?.lastSchedulerRun.time != null
-                    ? timeago.format(configAPI.config!.lastSchedulerRun.time.toLocal())
-                    : "N/A",
-                icon: Icons.schedule,
-              ),
-              SizedBox(height: 12),
-              _buildInfoRow(
-                context,
-                label: "Last Schedule Status",
-                value:
-                    "${configAPI.config?.lastSchedulerRun.status}${configAPI.config?.lastSchedulerRun.status == "failed" ? " - ${configAPI.config?.lastSchedulerRun.failureReason}" : ""}",
-                icon: Icons.safety_check_rounded,
-              ),
-            ]),
+        final lastScheduleTime = config.lastSchedulerRun.time != null
+            ? timeago.format(config.lastSchedulerRun.time!.toLocal())
+            : "N/A";
+        String? lastScheduleStatus = "success";
+        if (config.lastSchedulerRun.status == "failed") {
+          if (config.lastSchedulerRun.failureReason == null) {
+            lastScheduleStatus = "failed - unknown reason";
+          } else {
+            lastScheduleStatus = config.lastSchedulerRun.failureReason;
+          }
+        }
+        final combinedScheduleDisplay =
+            "$lastScheduleTime${lastScheduleStatus == null ? "" : " - $lastScheduleStatus"}";
+        final minButtonSize = MediaQuery.of(context).size.width * .5;
 
-            // User Information Card
-            _buildCard([
-              TextWidget(referenceSize: 1.6, text: "User Information", style: headerStyling),
-              const Divider(height: 32.0, thickness: 1.0),
-              Consumer<AuthProvider>(
-                builder: (context, authProvider, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInfoRow(
-                        context,
-                        label: "Username",
-                        value: authProvider.currentUser?.username ?? "N/A",
-                        icon: Icons.person,
-                      ),
-                    ],
-                  );
-                },
-              ),
-              SizedBox(height: 24),
-              ButtonWidget(
-                minSize: MediaQuery.of(context).size.width * .5,
-                text: "Logout",
-                onPressed: () async {
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                  await authProvider.logout();
-                },
-              ),
-            ]),
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // App Information Card
+                _buildCard([
+                  TextWidget(referenceSize: 1.6, text: "App Details", style: headerStyling),
+                  const Divider(height: 32.0, thickness: 1.0),
+                  _buildInfoRow(
+                    context,
+                    label: "App Version",
+                    value: configProvider.unsecureConfig.version,
+                    icon: Icons.info_outline,
+                  ),
+                  SizedBox(height: 12),
+                  _buildInfoRow(
+                    context,
+                    label: "Last Background Sync Status",
+                    value: combinedScheduleDisplay,
+                    icon: Icons.schedule,
+                  ),
+                  SizedBox(height: 12),
+                  ButtonWidget(text: "Manual Refresh", minSize: minButtonSize, onPressed: _manualSyncRefresh),
+                ]),
 
-            _buildCard([
-              TextWidget(referenceSize: 1.6, text: "Supporters", style: headerStyling),
-              const Divider(height: 32.0, thickness: 1.0),
-              AttributionWidget(text: "Logos provided by Synth", url: "https://synthfinance.com"),
-            ]),
-          ],
-        ),
-      ),
+                // User Information Card
+                _buildCard([
+                  TextWidget(referenceSize: 1.6, text: "User Information", style: headerStyling),
+                  const Divider(height: 32.0, thickness: 1.0),
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow(
+                            context,
+                            label: "Username",
+                            value: authProvider.currentUser?.username ?? "N/A",
+                            icon: Icons.person,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  SizedBox(height: 24),
+                  ButtonWidget(
+                    minSize: minButtonSize,
+                    text: "Logout",
+                    onPressed: () async {
+                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                      await authProvider.logout();
+                    },
+                  ),
+                ]),
+
+                _buildCard([
+                  TextWidget(referenceSize: 1.6, text: "Supporters", style: headerStyling),
+                  const Divider(height: 32.0, thickness: 1.0),
+                  AttributionWidget(text: "Logos provided by Synth", url: "https://synthfinance.com"),
+                ]),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

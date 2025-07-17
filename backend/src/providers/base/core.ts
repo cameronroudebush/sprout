@@ -2,6 +2,7 @@ import { Account } from "@backend/model/account";
 import { Holding } from "@backend/model/holding";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
+import { BackgroundSync } from "../../sync";
 import { ProviderRateLimit } from "./rate-limit";
 
 /**
@@ -9,6 +10,12 @@ import { ProviderRateLimit } from "./rate-limit";
  *  for automatically loading finance information.
  */
 export abstract class ProviderBase {
+  public sync: BackgroundSync;
+
+  constructor() {
+    this.sync = new BackgroundSync(this);
+  }
+
   /** The rate limit class for this provider */
   abstract readonly rateLimit: ProviderRateLimit;
 
