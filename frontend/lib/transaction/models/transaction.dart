@@ -7,7 +7,7 @@ class Transaction {
   final double amount;
   final String description;
   final bool pending;
-  final String category;
+  final String? category;
 
   /// The date this transaction posted
   final DateTime posted;
