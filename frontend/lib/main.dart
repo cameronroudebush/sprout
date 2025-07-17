@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_theme/json_theme.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/api.dart';
 import 'package:sprout/account/provider.dart';
@@ -25,23 +26,26 @@ void main() async {
 
   // Grab theme
   final themeStr = await rootBundle.loadString('assets/dark.json');
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final themeJson = jsonDecode(themeStr);
   final theme = ThemeDecoder.decodeThemeData(themeJson)!;
 
-  runApp(Main(theme: theme));
+  runApp(Main(theme: theme, packageInfo: packageInfo));
 }
 
 /// This page contains the process for when the application is first started
 class Main extends StatefulWidget {
   final ThemeData theme;
-  const Main({super.key, required this.theme});
+  final PackageInfo packageInfo;
+  const Main({super.key, required this.theme, required this.packageInfo});
 
   @override
-  State<Main> createState() => MainState(theme: theme);
+  State<Main> createState() => MainState(theme: theme, packageInfo: packageInfo);
 }
 
 class MainState extends State<Main> {
   final ThemeData theme;
+  final PackageInfo packageInfo;
   String? setupPosition = null;
   bool _failedToConnect = false;
 
@@ -54,9 +58,9 @@ class MainState extends State<Main> {
   late final TransactionAPI transactionAPI;
   late final NetWorthAPI netWorthAPI;
 
-  MainState({required this.theme}) {
+  MainState({required this.theme, required this.packageInfo}) {
     client = RESTClient(getBaseURL());
-    configAPI = ConfigAPI(client);
+    configAPI = ConfigAPI(client, packageInfo);
     authAPI = AuthAPI(client);
     setupAPI = SetupAPI(client);
     accountAPI = AccountAPI(client);

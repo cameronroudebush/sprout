@@ -1,12 +1,15 @@
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprout/core/api/client.dart';
 import 'package:sprout/model/config.dart';
 
 /// Class that provides callable endpoints for the configuration
 class ConfigAPI {
+  final PackageInfo packageInfo;
+
   /// Base URL of the sprout backend API
   RESTClient client;
 
-  ConfigAPI(this.client);
+  ConfigAPI(this.client, this.packageInfo);
 
   // TODO: Move to a provider?
   /// The unsecure config given by the backend for reference
