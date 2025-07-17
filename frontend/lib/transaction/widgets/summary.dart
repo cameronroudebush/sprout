@@ -12,7 +12,7 @@ class TransactionSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.5,
+        width: MediaQuery.of(context).size.width * 0.75,
         child: Card(
           elevation: 2.0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),

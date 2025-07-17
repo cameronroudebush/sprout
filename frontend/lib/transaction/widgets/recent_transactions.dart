@@ -32,9 +32,10 @@ class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
           clipBehavior: Clip.antiAlias,
           margin: EdgeInsets.zero,
           child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SizedBox(
-                width: double.infinity,
+            builder: (context, constraints) => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: constraints.maxWidth, // Ensure the SizedBox takes the full width available
                 child: PaginatedDataTable(
                   header: const TextWidget(
                     referenceSize: 2,
@@ -44,7 +45,7 @@ class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
                   columns: const [
                     DataColumn(label: Text('Date')),
                     DataColumn(label: Text('Description')),
-                    DataColumn(label: Text('Category')),
+                    // DataColumn(label: Text('Category')),
                     DataColumn(label: Text('Amount'), numeric: true),
                   ],
                   source: _TransactionDataSource(
@@ -63,10 +64,10 @@ class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
                     }
                   },
                   horizontalMargin: 20,
-                  columnSpacing: constraints.maxWidth * 0.05,
+                  columnSpacing: constraints.maxWidth * 0.05, // Adjust column spacing based on available width
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
       },
@@ -93,7 +94,7 @@ class _TransactionDataSource extends DataTableSource {
       cells: [
         DataCell(Text(formatDate(transaction.posted))), // Using formatter
         DataCell(Text(transaction.description)),
-        DataCell(Text(transaction.category)),
+        // DataCell(Text(transaction.category)),
         DataCell(
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
