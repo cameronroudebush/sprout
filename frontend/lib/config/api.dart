@@ -5,18 +5,15 @@ import 'package:sprout/model/config.dart';
 /// Class that provides callable endpoints for the configuration
 class ConfigAPI {
   final PackageInfo packageInfo;
-
-  /// Base URL of the sprout backend API
+  UnsecureAppConfiguration? unsecureConfig;
   RESTClient client;
-
   ConfigAPI(this.client, this.packageInfo);
 
-  // TODO: Move to a provider?
-  /// The unsecure config given by the backend for reference
-  UnsecureAppConfiguration? unsecureConfig;
-
-  /// The secured config
-  Configuration? config;
+  /// Requests the unsecure config from the backend and populates [unsecureConfig]
+  Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {
+    unsecureConfig = await getUnsecure();
+    return unsecureConfig;
+  }
 
   /// Get's the unsecure config from the backend. This is data that isn't decremental to security.
   Future<UnsecureAppConfiguration> getUnsecure() async {
@@ -25,20 +22,9 @@ class ConfigAPI {
     return UnsecureAppConfiguration.fromJson(result);
   }
 
-  /// Requests the unsecure config from the backend and populates [unsecureConfig]
-  Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {
-    this.unsecureConfig = await this.getUnsecure();
-    return this.unsecureConfig;
-  }
-
   Future<Configuration> getConfig() async {
     final endpoint = "/conf/get";
     dynamic result = await this.client.get(endpoint);
     return Configuration.fromJson(result);
-  }
-
-  Future<Configuration?> populateConfig() async {
-    this.config = await this.getConfig();
-    return this.config;
   }
 }

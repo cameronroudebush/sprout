@@ -6,7 +6,6 @@ import { ConfigurationController } from "./config/controller";
 import { Configuration } from "./config/core";
 import { Logger } from "./logger";
 import { Providers } from "./providers";
-import { Scheduler } from "./scheduler";
 import { RestAPIServer } from "./web-api/server";
 
 /** Main function for kicking off the application */
@@ -23,8 +22,9 @@ async function main() {
   await new RestAPIServer(centralServer.server).initialize();
   Logger.success("Server ready!");
   // Schedule our provider to run
+  await Providers.initializeProviders();
   const provider = Providers.getCurrentProvider();
-  await new Scheduler(provider).start();
+  await provider.sync.start();
 }
 
 // Execute main so long as this file is not being imported

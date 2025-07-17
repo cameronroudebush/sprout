@@ -11,6 +11,7 @@ import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/api.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/api.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/client.dart';
 import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -19,6 +20,7 @@ import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/user/api.dart';
 import 'package:sprout/user/login.dart';
 
 void main() async {
@@ -57,6 +59,7 @@ class MainState extends State<Main> {
   late final AccountAPI accountAPI;
   late final TransactionAPI transactionAPI;
   late final NetWorthAPI netWorthAPI;
+  late final UserAPI userAPI;
 
   MainState({required this.theme, required this.packageInfo}) {
     client = RESTClient(getBaseURL());
@@ -66,6 +69,7 @@ class MainState extends State<Main> {
     accountAPI = AccountAPI(client);
     transactionAPI = TransactionAPI(client);
     netWorthAPI = NetWorthAPI(client);
+    userAPI = UserAPI(client);
   }
 
   @override
@@ -107,12 +111,19 @@ class MainState extends State<Main> {
         Provider<AccountAPI>(create: (_) => accountAPI),
         Provider<TransactionAPI>(create: (_) => transactionAPI),
         Provider<NetWorthAPI>(create: (_) => netWorthAPI),
+        Provider<UserAPI>(create: (_) => userAPI),
         // Change Notifiers
         ChangeNotifierProvider(create: (context) => AuthProvider(authAPI)),
+        // Auth required
         ChangeNotifierProxyProvider<AuthProvider, AccountProvider>(
           update: (context, auth, previousMessages) => AccountProvider(accountAPI, auth),
           create: (BuildContext context) => AccountProvider(accountAPI, null),
         ),
+        ChangeNotifierProxyProvider<AuthProvider, ConfigProvider>(
+          update: (context, auth, previousMessages) => ConfigProvider(configAPI, auth),
+          create: (BuildContext context) => ConfigProvider(configAPI, null),
+        ),
+        // Level two dependencies (auth + another provider)
         ChangeNotifierProxyProvider2<AuthProvider, AccountProvider, NetWorthProvider>(
           update: (context, auth, accountProvider, previousMessages) =>
               NetWorthProvider(netWorthAPI, auth, accountProvider),
@@ -124,8 +135,8 @@ class MainState extends State<Main> {
           create: (BuildContext context) => TransactionProvider(transactionAPI, null, null),
         ),
       ],
-      child: Consumer2<AuthProvider, AccountProvider>(
-        builder: (context, authProvider, accountProvider, child) {
+      child: Consumer3<AuthProvider, AccountProvider, ConfigProvider>(
+        builder: (context, authProvider, accountProvider, configProvider, child) {
           Widget page;
 
           if (_failedToConnect) {
@@ -158,7 +169,6 @@ class MainState extends State<Main> {
             );
           } else if (setupPosition == "complete") {
             if (authProvider.isLoggedIn) {
-              configAPI.populateConfig();
               // If setup is complete AND logged in
               page = const SproutAppShell();
             } else {

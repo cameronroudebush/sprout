@@ -6,13 +6,23 @@ import { SimpleFINProvider } from "@backend/providers/simple-fin/core";
  *  then allows us to use these across the app by accessing one namespace.
  */
 export namespace Providers {
-  /**
-   * @link https://beta-bridge.simplefin.org/
-   */
-  const SIMPLE_FIN = new SimpleFINProvider();
+  /** Providers available to the backend, defined by {@link initializeProviders} */
+  let providers: Array<ProviderBase> = [];
+
+  /** Initializes all providers and schedulers */
+  export async function initializeProviders() {
+    /**
+     * SimpleFIN
+     * @link https://beta-bridge.simplefin.org/
+     */
+    const simpleFIN = new SimpleFINProvider();
+
+    // Initialize the providers from above
+    providers = [simpleFIN];
+  }
 
   /** Returns the currently configured provider for sprout. */
-  export function getCurrentProvider(): ProviderBase {
-    return SIMPLE_FIN;
+  export function getCurrentProvider() {
+    return providers[0]!;
   }
 }

@@ -1,6 +1,6 @@
 /// Defines a sync schedule job. Used purely for visibility on how the jobs are doing
 class Schedule {
-  final DateTime time;
+  final DateTime? time;
   final String status;
   final String? failureReason;
 
