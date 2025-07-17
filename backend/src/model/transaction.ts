@@ -13,7 +13,7 @@ export class Transaction extends DatabaseBase {
   description: string;
   @DatabaseDecorators.column()
   pending: boolean;
-  @DatabaseDecorators.column({ nullable: false })
+  @DatabaseDecorators.column({ nullable: true })
   category: string;
 
   /** The date this transaction posted */
