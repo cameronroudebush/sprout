@@ -63,6 +63,7 @@ class _AccountsWidgetState extends State<AccountsWidget> {
               ),
               ...accounts.map((account) {
                 final isSelected = _selectedAccounts.contains(account);
+                final useSynthLogos = "foo" != "foo";
                 final synthLogoURL =
                     "https://logo.synthfinance.com/${account.institution.id.replaceAll("https://www.", "")}";
                 return Card(
@@ -91,16 +92,19 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                                 size: 24.0,
                               ),
                             ),
-                          Image.network(
-                            width: 30,
-                            height: 30,
-                            synthLogoURL,
-                            webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-                            errorBuilder: (context, error, stackTrace) {
-                              // Fallback icon
-                              return Icon(account.fallbackIcon, size: 30.0);
-                            },
-                          ),
+                          if (useSynthLogos)
+                            Image.network(
+                              width: 30,
+                              height: 30,
+                              synthLogoURL,
+                              webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback icon
+                                return Icon(account.fallbackIcon, size: 30.0);
+                              },
+                            )
+                          else
+                            Icon(account.fallbackIcon, size: 30.0),
                           const SizedBox(width: 16.0),
                           Expanded(
                             child: Column(
