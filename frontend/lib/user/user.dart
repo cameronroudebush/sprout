@@ -20,7 +20,17 @@ class _UserPageState extends State<UserPage> {
   /// Tells the API to manually run an account refresh
   Future<void> _manualSyncRefresh() async {
     final userAPI = Provider.of<UserAPI>(context, listen: false);
-    userAPI.runManualSync();
+    // TODO: Clean this up
+    await userAPI.runManualSync();
+    // final accountProvider = Provider.of<AccountProvider>(context, listen: false);
+    // await accountProvider.populateLinkedAccounts();
+    // final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+    // await transactionProvider.populateTransactions(0, transactionProvider.rowsPerPage);
+    // await transactionProvider.populateStats();
+    // await transactionProvider.populateTotalTransactionCount();
+    // final netWorthProvider = Provider.of<NetWorthProvider>(context, listen: false);
+    // await netWorthProvider.populateHistoricalNetWorth();
+    // await netWorthProvider.populateNetWorth();
   }
 
   @override
