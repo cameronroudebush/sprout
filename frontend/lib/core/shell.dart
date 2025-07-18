@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
+import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
@@ -25,45 +28,51 @@ class _SproutAppShellState extends State<SproutAppShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: MediaQuery.of(context).size.height * .075,
-        scrolledUnderElevation: 0,
-        title: Image.asset(
-          'assets/logo/color-transparent-no-tag.png',
-          width: MediaQuery.of(context).size.height * .2,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
-        ),
-        centerTitle: true,
-        elevation: 0, // Remove shadow for a flat design
-        backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(8.0),
-          child: Container(color: Theme.of(context).colorScheme.secondary.withAlpha(100), height: 8.0),
-        ),
-      ),
-      body: widget.isSetup
-          ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
-          : SingleChildScrollView(child: _pages[_currentIndex]['page']),
-      bottomNavigationBar: widget.isSetup
-          ? null
-          : BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index; // Update the index
-                });
-              },
-              backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              selectedItemColor: Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Theme.of(context).colorScheme.onSurface,
-              type: BottomNavigationBarType.fixed,
-              enableFeedback: true,
-              items: _pages
-                  .map((pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']))
-                  .toList(),
+    return Consumer2<ConfigProvider, SSEProvider>(
+      builder: (context, value, value2, child) {
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: MediaQuery.of(context).size.height * .075,
+            scrolledUnderElevation: 0,
+            title: Image.asset(
+              'assets/logo/color-transparent-no-tag.png',
+              width: MediaQuery.of(context).size.height * .2,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
             ),
+            centerTitle: true,
+            elevation: 0, // Remove shadow for a flat design
+            backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(8.0),
+              child: Container(color: Theme.of(context).colorScheme.secondary.withAlpha(100), height: 8.0),
+            ),
+          ),
+          body: widget.isSetup
+              ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
+              : SingleChildScrollView(child: _pages[_currentIndex]['page']),
+          bottomNavigationBar: widget.isSetup
+              ? null
+              : BottomNavigationBar(
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index; // Update the index
+                    });
+                  },
+                  backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                  selectedItemColor: Theme.of(context).colorScheme.primary,
+                  unselectedItemColor: Theme.of(context).colorScheme.onSurface,
+                  type: BottomNavigationBarType.fixed,
+                  enableFeedback: true,
+                  items: _pages
+                      .map(
+                        (pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']),
+                      )
+                      .toList(),
+                ),
+        );
+      },
     );
   }
 }

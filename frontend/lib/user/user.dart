@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/attribution.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -35,8 +36,8 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ConfigProvider>(
-      builder: (context, configProvider, child) {
+    return Consumer2<ConfigProvider, SSEProvider>(
+      builder: (context, configProvider, sseProvider, child) {
         final config = configProvider.config;
         final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
 
@@ -80,6 +81,13 @@ class _UserPageState extends State<UserPage> {
                     label: "Last Background Sync Status",
                     value: combinedScheduleDisplay,
                     icon: Icons.schedule,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoRow(
+                    context,
+                    label: "SSE Status",
+                    value: sseProvider.isConnected ? "Connected" : "Disconnected",
+                    icon: Icons.event_repeat,
                   ),
                   SizedBox(height: 12),
                   ButtonWidget(text: "Manual Refresh", minSize: minButtonSize, onPressed: _manualSyncRefresh),

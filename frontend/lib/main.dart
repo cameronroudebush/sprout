@@ -13,6 +13,7 @@ import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/api.dart';
@@ -127,6 +128,10 @@ class MainState extends State<Main> {
           update: (context, auth, previousMessages) => ConfigProvider(configAPI, auth),
           create: (BuildContext context) => ConfigProvider(configAPI, null),
         ),
+        ChangeNotifierProxyProvider<AuthProvider, SSEProvider>(
+          update: (context, auth, previousMessages) => SSEProvider(client, auth),
+          create: (BuildContext context) => SSEProvider(client, null),
+        ),
         // Level two dependencies (auth + another provider)
         ChangeNotifierProxyProvider2<AuthProvider, AccountProvider, NetWorthProvider>(
           update: (context, auth, accountProvider, previousMessages) =>
@@ -139,8 +144,8 @@ class MainState extends State<Main> {
           create: (BuildContext context) => TransactionProvider(transactionAPI, null, null),
         ),
       ],
-      child: Consumer3<AuthProvider, AccountProvider, ConfigProvider>(
-        builder: (context, authProvider, accountProvider, configProvider, child) {
+      child: Consumer2<AuthProvider, AccountProvider>(
+        builder: (context, authProvider, accountProvider, child) {
           Widget page;
 
           if (_failedToConnect) {
