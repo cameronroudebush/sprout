@@ -64,4 +64,28 @@ class RESTClient {
       throw Exception('Failed to get to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }
+
+  /// Makes a GET request to the given endpoint and returns a stream of Server-Sent Events (SSE).
+  /// [endpoint] The endpoint to connect to. Must start with a /.
+  Stream<Map<String, dynamic>> getSse(String endpoint) async* {
+    final url = Uri.parse('$_apiUrl$endpoint');
+    final request = http.Request('GET', url);
+    request.headers.addAll(await _getSendHeaders());
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      await for (var chunk in response.stream.transform(utf8.decoder)) {
+        final lines = chunk.split('\n');
+        for (var line in lines) {
+          if (line.startsWith('data: ')) {
+            final data = line.substring(6);
+            yield json.decode(data);
+          }
+        }
+      }
+    } else {
+      throw Exception('Failed to connect to SSE endpoint $endpoint: ${response.statusCode} - ${response.reasonPhrase}');
+    }
+  }
 }

@@ -6,6 +6,8 @@ import 'package:sprout/model/config.dart';
 class ConfigAPI {
   /// The base URL we're connecting to the backend on
   final String baseURL;
+
+  /// Provides the package info for the flutter app including things like versions
   final PackageInfo packageInfo;
   UnsecureAppConfiguration? unsecureConfig;
   RESTClient client;

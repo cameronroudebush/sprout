@@ -68,7 +68,10 @@ class _UserPageState extends State<UserPage> {
                   _buildInfoRow(
                     context,
                     label: "App Version",
-                    value: configProvider.unsecureConfig.version,
+                    value: [
+                      'Backend: ${configProvider.unsecureConfig.version}',
+                      'Frontend: ${configProvider.packageInfo.version}',
+                    ],
                     icon: Icons.info_outline,
                   ),
                   SizedBox(height: 12),
@@ -138,7 +141,17 @@ class _UserPageState extends State<UserPage> {
   }
 
   // Helper method to build consistent info rows
-  Widget _buildInfoRow(BuildContext context, {required String label, required String value, IconData? icon}) {
+  Widget _buildInfoRow(BuildContext context, {required String label, required dynamic value, IconData? icon}) {
+    List<String> values = value is String ? [value] : value;
+    List<Widget> display = values
+        .map(
+          (x) => TextWidget(
+            referenceSize: 1,
+            text: x,
+            style: TextStyle(fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.onSurface),
+          ),
+        )
+        .toList();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -156,11 +169,7 @@ class _UserPageState extends State<UserPage> {
                 style: TextStyle(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 4.0),
-              TextWidget(
-                referenceSize: 1,
-                text: value,
-                style: TextStyle(fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.onSurface),
-              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: display),
             ],
           ),
         ),
