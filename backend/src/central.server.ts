@@ -1,5 +1,5 @@
 import { Configuration } from "@backend/config/core";
-import express from "express";
+import express, { Response } from "express";
 import { rateLimit } from "express-rate-limit";
 import { Logger } from "./logger";
 
@@ -13,6 +13,13 @@ export class CentralServer {
     server.use(this.rateLimiter);
     server.set("trust proxy", 1);
     server.use(express.json());
+    server.all("*", (req, res, next) => {
+      Logger.info(`Incoming request on ${req.url}`);
+      this.setCORSHeaders(res);
+      // Handle options requests
+      if (req.method === "OPTIONS") return res.status(200).end();
+      else return next();
+    });
   }
 
   /** Returns the rate limiter for the express server to attempt to not overwhelm any endpoints */
@@ -23,5 +30,13 @@ export class CentralServer {
       standardHeaders: "draft-7",
       legacyHeaders: false,
     });
+  }
+
+  /** Sets CORS headers for the given response */
+  setCORSHeaders(res: Response) {
+    // TODO
+    res.header(`Access-Control-Allow-Origin`, `*`);
+    res.header(`Access-Control-Allow-Methods`, `GET,PUT,POST,DELETE,OPTIONS`);
+    res.header(`Access-Control-Allow-Headers`, `Content-Type,Authorization`);
   }
 }

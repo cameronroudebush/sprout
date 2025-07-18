@@ -4,10 +4,12 @@ import 'package:sprout/model/config.dart';
 
 /// Class that provides callable endpoints for the configuration
 class ConfigAPI {
+  /// The base URL we're connecting to the backend on
+  final String baseURL;
   final PackageInfo packageInfo;
   UnsecureAppConfiguration? unsecureConfig;
   RESTClient client;
-  ConfigAPI(this.client, this.packageInfo);
+  ConfigAPI(this.client, this.packageInfo, this.baseURL);
 
   /// Requests the unsecure config from the backend and populates [unsecureConfig]
   Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {

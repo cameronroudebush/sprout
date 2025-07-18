@@ -2,3 +2,4 @@
 **/www
 ./frontend/.angular
 **/dist
+package-lock.json

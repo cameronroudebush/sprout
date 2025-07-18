@@ -1,4 +1,3 @@
-import { Configuration } from "@backend/config/core";
 import { RestBody } from "@backend/model/api/rest.request";
 import { Base } from "@backend/model/base";
 import { User } from "@backend/model/user";
@@ -33,7 +32,7 @@ export class RestMetadata {
   requiresAuth: boolean;
 
   constructor(queue: string, type: SupportedRestTypes = "GET", requiresAuth = true) {
-    this.queue = Configuration.server.apiBasePath + queue;
+    this.queue = queue;
     this.type = type;
     this.requiresAuth = requiresAuth;
   }

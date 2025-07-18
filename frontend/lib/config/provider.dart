@@ -14,6 +14,7 @@ class ConfigProvider with ChangeNotifier {
   Configuration get config => _config as Configuration;
   UnsecureAppConfiguration get unsecureConfig => _configAPI.unsecureConfig as UnsecureAppConfiguration;
   PackageInfo get packageInfo => _configAPI.packageInfo;
+  String get baseUrl => _configAPI.baseURL;
 
   // Constructor to check initial login status
   ConfigProvider(this._configAPI, this._authProvider) {

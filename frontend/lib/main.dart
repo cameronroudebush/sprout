@@ -62,8 +62,9 @@ class MainState extends State<Main> {
   late final UserAPI userAPI;
 
   MainState({required this.theme, required this.packageInfo}) {
-    client = RESTClient(getBaseURL());
-    configAPI = ConfigAPI(client, packageInfo);
+    final baseUrl = getBaseURL();
+    client = RESTClient(baseUrl);
+    configAPI = ConfigAPI(client, packageInfo, baseUrl);
     authAPI = AuthAPI(client);
     setupAPI = SetupAPI(client);
     accountAPI = AccountAPI(client);
@@ -94,9 +95,12 @@ class MainState extends State<Main> {
     }
   }
 
+  /// Returns the base URL that the backend should be expected to be running on. This will not include
+  ///   any potential sub-pathing.
   String getBaseURL() {
     Uri uri = Uri.base;
-    return kDebugMode ? 'http://${uri.host}:8001' : 'https://${uri.host}/api';
+    final leading = '${uri.scheme}://${uri.host}';
+    return kDebugMode ? '$leading:8001' : leading;
   }
 
   @override
@@ -141,21 +145,24 @@ class MainState extends State<Main> {
 
           if (_failedToConnect) {
             page = Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image(
-                      image: AssetImage('assets/logo/color-transparent-no-tag.png'),
-                      width: MediaQuery.of(context).size.height * .6,
-                    ),
-                    SizedBox(height: 12),
-                    TextWidget(
-                      referenceSize: 1.5,
-                      text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
-                  ],
+              body: Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image(
+                        image: AssetImage('assets/logo/color-transparent-no-tag.png'),
+                        width: MediaQuery.of(context).size.height * .6,
+                      ),
+                      SizedBox(height: 12),
+                      TextWidget(
+                        referenceSize: 1.5,
+                        text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
+                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
