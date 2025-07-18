@@ -31,7 +31,7 @@ class Transaction {
       amount: (json['amount'] as num).toDouble(),
       description: json['description'] as String,
       pending: json['pending'] as bool,
-      category: json['category'] as String,
+      category: json['category'] as String?,
       posted: DateTime.parse(json['posted'] as String),
       account: Account.fromJson(json['account'] as Map<String, dynamic>),
     );
