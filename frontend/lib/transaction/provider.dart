@@ -13,7 +13,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   // Public getters
   List<Transaction> get transactions => _transactions;
   int get totalTransactionCount => _totalTransactionCount;
-  int get rowsPerPage => 5;
   TransactionStats? get transactionStats => _transactionStats;
   bool isLoading = false;
 
@@ -23,7 +22,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return _totalTransactionCount = await api.getTransactionCount();
   }
 
-  Future<List<Transaction>> populateTransactions(int startIndex, int endIndex) async {
+  Future<List<Transaction>> populateTransactions(int startIndex, int endIndex, {bool shouldNotify = false}) async {
     final newTransactions = await api.getTransactions(startIndex, endIndex);
     // Combine new transactions with existing ones, removing duplicates
     final Set<String> existingTransactionIds = _transactions.map((t) => t.id).toSet();
@@ -32,6 +31,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
         _transactions.add(newTransaction);
       }
     }
+    if (shouldNotify) notifyListeners();
     return _transactions;
   }
 
@@ -48,7 +48,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     notifyListeners();
     await populateTotalTransactionCount();
     await populateStats();
-    await populateTransactions(0, rowsPerPage); // Grab most recent
+    await populateTransactions(0, 20); // Grab some to start
     isLoading = false;
     notifyListeners();
   }
