@@ -1,29 +1,34 @@
-import 'package:flutter/material.dart';
 import 'package:sprout/account/api.dart';
 import 'package:sprout/account/models/account.dart';
-import 'package:sprout/auth/provider.dart';
+import 'package:sprout/core/provider/base.dart';
 
 /// Class that provides the store of current account information
-class AccountProvider with ChangeNotifier {
-  final AccountAPI _accountAPI;
-  final AuthProvider? _authProvider;
-
+class AccountProvider extends BaseProvider<AccountAPI> {
   // Data store
   List<Account> _linkedAccounts = [];
 
   // Getters to not allow editing the internal store
   List<Account> get linkedAccounts => _linkedAccounts;
 
-  AccountProvider(this._accountAPI, this._authProvider) {
-    if (_authProvider != null && _authProvider.isLoggedIn) {
-      populateLinkedAccounts();
-    }
-  }
+  AccountProvider(super.api);
 
   Future<List<Account>> populateLinkedAccounts() async {
-    final result = await _accountAPI.getAccounts();
-    _linkedAccounts = result;
+    _linkedAccounts = await api.getAccounts();
     notifyListeners();
     return _linkedAccounts;
   }
+
+  @override
+  Future<void> onLogin() async {
+    await populateLinkedAccounts();
+  }
+
+  @override
+  Future<void> onLogout() async {
+    _linkedAccounts = [];
+    notifyListeners();
+  }
+
+  @override
+  Future<void> onInit() async {}
 }

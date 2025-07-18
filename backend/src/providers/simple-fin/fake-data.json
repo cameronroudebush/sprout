@@ -34,9 +34,7 @@
                     "amount": "-6.55",
                     "description": "Starbucks",
                     "pending": false,
-                    "extra": {
-                        "category": "Food & Drink"
-                    }
+                    "extra": {}
                 },
                 {
                     "id": "TRN-chase-3",
@@ -44,9 +42,7 @@
                     "amount": "-120.00",
                     "description": "Grocery Store",
                     "pending": false,
-                    "extra": {
-                        "category": "Groceries"
-                    }
+                    "extra": {}
                 },
                 {
                     "id": "TRN-chase-4",

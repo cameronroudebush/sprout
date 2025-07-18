@@ -1,12 +1,9 @@
 import 'package:sprout/account/models/account.dart';
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/base.dart';
 
 /// Class that provides callable endpoints for the accounts
-class AccountAPI {
-  /// Base URL of the sprout backend API
-  RESTClient client;
-
-  AccountAPI(this.client);
+class AccountAPI extends BaseAPI {
+  AccountAPI(super.client);
 
   /// Returns the accounts
   Future<List<Account>> getAccounts() async {

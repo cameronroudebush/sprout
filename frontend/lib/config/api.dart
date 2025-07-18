@@ -1,23 +1,9 @@
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/base.dart';
 import 'package:sprout/model/config.dart';
 
 /// Class that provides callable endpoints for the configuration
-class ConfigAPI {
-  /// The base URL we're connecting to the backend on
-  final String baseURL;
-
-  /// Provides the package info for the flutter app including things like versions
-  final PackageInfo packageInfo;
-  UnsecureAppConfiguration? unsecureConfig;
-  RESTClient client;
-  ConfigAPI(this.client, this.packageInfo, this.baseURL);
-
-  /// Requests the unsecure config from the backend and populates [unsecureConfig]
-  Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {
-    unsecureConfig = await getUnsecure();
-    return unsecureConfig;
-  }
+class ConfigAPI extends BaseAPI {
+  ConfigAPI(super.client);
 
   /// Get's the unsecure config from the backend. This is data that isn't decremental to security.
   Future<UnsecureAppConfiguration> getUnsecure() async {

@@ -1,11 +1,10 @@
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/base.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/models/transaction.stats.dart';
 
 /// Class that provides callable endpoints for the transaction information
-class TransactionAPI {
-  RESTClient client;
-  TransactionAPI(this.client);
+class TransactionAPI extends BaseAPI {
+  TransactionAPI(super.client);
 
   /// Returns a count of the total number of transactions for this user
   Future<int> getTransactionCount() async {

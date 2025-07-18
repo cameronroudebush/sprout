@@ -6,7 +6,7 @@ import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/attribution.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/user/api.dart';
+import 'package:sprout/user/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// A page that display user account information along with other useful info
@@ -20,9 +20,9 @@ class UserPage extends StatefulWidget {
 class _UserPageState extends State<UserPage> {
   /// Tells the API to manually run an account refresh
   Future<void> _manualSyncRefresh() async {
-    final userAPI = Provider.of<UserAPI>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     // TODO: Clean this up
-    await userAPI.runManualSync();
+    await userProvider.api.runManualSync();
     // final accountProvider = Provider.of<AccountProvider>(context, listen: false);
     // await accountProvider.populateLinkedAccounts();
     // final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
@@ -41,11 +41,13 @@ class _UserPageState extends State<UserPage> {
         final config = configProvider.config;
         final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
 
-        final lastScheduleTime = config.lastSchedulerRun.time != null
-            ? timeago.format(config.lastSchedulerRun.time!.toLocal())
+        final lastScheduleTime = config?.lastSchedulerRun.time != null
+            ? timeago.format(config!.lastSchedulerRun.time!.toLocal())
             : "N/A";
         String? lastScheduleStatus = "success";
-        if (config.lastSchedulerRun.status == "failed") {
+        if (config == null) {
+          lastScheduleStatus = "N/A";
+        } else if (config.lastSchedulerRun.status == "failed") {
           if (config.lastSchedulerRun.failureReason == null) {
             lastScheduleStatus = "failed - unknown reason";
           } else {
@@ -70,7 +72,7 @@ class _UserPageState extends State<UserPage> {
                     context,
                     label: "App Version",
                     value: [
-                      'Backend: ${configProvider.unsecureConfig.version}',
+                      'Backend: ${configProvider.unsecureConfig?.version}',
                       'Frontend: ${configProvider.packageInfo.version}',
                     ],
                     icon: Icons.info_outline,
