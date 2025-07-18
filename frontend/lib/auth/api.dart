@@ -1,20 +1,12 @@
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/base.dart';
 import 'package:sprout/model/user.dart';
 
 /// API for backend authentication
-class AuthAPI {
-  /// Base URL of the sprout backend API
-  RESTClient client;
-
+class AuthAPI extends BaseAPI {
   // Key used to store the JWT token in secure storage.
   static const String jwtKey = 'jwt_token';
 
-  AuthAPI(this.client);
-
-  /// Returns the current JWT as saved in storage
-  Future<String?> getJWT() async {
-    return await client.secureStorage.getValue(jwtKey);
-  }
+  AuthAPI(super.client);
 
   /// Authenticates a user with the backend API.
   /// Sends username and password to the login endpoint and stores the received JWT.
@@ -25,12 +17,12 @@ class AuthAPI {
     final endpoint = "/user/login";
     final body = {'username': username, 'password': password};
 
-    dynamic result = await this.client.post(body, endpoint);
+    dynamic result = await client.post(body, endpoint);
     String? success = result["success"];
     String? jwt = result["jwt"];
 
     if (jwt != null) {
-      await this.client.secureStorage.saveValue(jwtKey, jwt);
+      await secureStorage.saveValue(jwtKey, jwt);
     }
 
     if (success == null) {
@@ -44,7 +36,7 @@ class AuthAPI {
   /// [jwt] The JWT to login with
   /// Returns true if login is successful, false otherwise.
   Future<User?> loginWithJWT(String? jwt) async {
-    jwt ??= await getJWT();
+    jwt ??= await secureStorage.getValue(jwtKey);
     final endpoint = "/user/login/jwt";
     final body = {'jwt': jwt};
 
@@ -57,7 +49,7 @@ class AuthAPI {
 
     // If login fails, clear the jwt
     if (success != null) {
-      await client.secureStorage.saveValue(jwtKey, null);
+      await secureStorage.saveValue(jwtKey, null);
       return null;
     } else {
       return User.fromJson(result["user"]);
@@ -67,7 +59,7 @@ class AuthAPI {
   /// Logs out the current user and wipes the JWT so auto logins are not performed.
   ///   Returns true if the logout was successful, false if not.
   Future<bool> logout() async {
-    await client.secureStorage.saveValue(jwtKey, null);
+    await secureStorage.saveValue(jwtKey, null);
     return true;
   }
 }

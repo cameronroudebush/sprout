@@ -1,57 +1,47 @@
-import 'package:flutter/material.dart';
-import 'package:sprout/account/provider.dart';
-import 'package:sprout/auth/provider.dart';
+import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/models/net.worth.ot.dart';
 
 /// Class that provides the store of current net worth information
-class NetWorthProvider with ChangeNotifier {
-  bool _disposed = false;
-  final NetWorthAPI _netWorthAPI;
-  final AuthProvider? _authProvider;
-  final AccountProvider? _accountProvider;
-
+class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   // Data store
   double? _netWorth;
   HistoricalNetWorth? _historicalNetWorth;
 
-  // Getters to not allow editing the internal store
+  // Public getters
   double? get netWorth => _netWorth;
   HistoricalNetWorth? get historicalNetWorth => _historicalNetWorth;
+  bool isLoading = false;
 
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
-  }
-
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  NetWorthProvider(this._netWorthAPI, this._authProvider, this._accountProvider) {
-    if (_authProvider != null && _authProvider.isLoggedIn && _accountProvider != null) {
-      populateNetWorth();
-      populateHistoricalNetWorth();
-    }
-  }
+  NetWorthProvider(super.api);
 
   /// Populates the single current net worth value.
-  Future<double?> populateNetWorth() async {
-    final result = await _netWorthAPI.getNetWorth();
-    _netWorth = result;
-    notifyListeners();
-    return _netWorth;
+  Future<double?> _populateNetWorth() async {
+    return _netWorth = await api.getNetWorth();
   }
 
   /// Populates the net worth overtime flow.
-  Future<HistoricalNetWorth?> populateHistoricalNetWorth() async {
-    final result = await _netWorthAPI.getHistoricalNetWorth();
-    _historicalNetWorth = result;
+  Future<HistoricalNetWorth?> _populateHistoricalNetWorth() async {
+    return _historicalNetWorth = await api.getHistoricalNetWorth();
+  }
+
+  @override
+  Future<void> onInit() async {}
+
+  @override
+  Future<void> onLogin() async {
+    isLoading = true;
     notifyListeners();
-    return _historicalNetWorth;
+    await _populateNetWorth();
+    await _populateHistoricalNetWorth();
+    isLoading = false;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> onLogout() async {
+    _netWorth = null;
+    _historicalNetWorth = null;
+    notifyListeners();
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
-import 'package:sprout/core/provider/sse.dart';
+import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
@@ -27,9 +27,22 @@ class _SproutAppShellState extends State<SproutAppShell> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _informAllProvidersOfLogin();
+  }
+
+  /// Tells all providers we have successfully logged in
+  Future<void> _informAllProvidersOfLogin() async {
+    for (final provider in BaseProvider.getAllProviders(context)) {
+      await provider.onLogin();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer2<ConfigProvider, SSEProvider>(
-      builder: (context, value, value2, child) {
+    return Consumer<ConfigProvider>(
+      builder: (context, configProvider, child) {
         return Scaffold(
           appBar: AppBar(
             toolbarHeight: MediaQuery.of(context).size.height * .075,

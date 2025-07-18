@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_theme/json_theme.dart';
@@ -13,15 +12,17 @@ import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/sse.dart';
+import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
+import 'package:sprout/setup/provider.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
-import 'package:sprout/user/api.dart';
 import 'package:sprout/user/login.dart';
 
 void main() async {
@@ -33,175 +34,98 @@ void main() async {
   final themeJson = jsonDecode(themeStr);
   final theme = ThemeDecoder.decodeThemeData(themeJson)!;
 
-  runApp(Main(theme: theme, packageInfo: packageInfo));
+  // Create base API client
+  final client = RESTClient();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        BaseProvider.createProvider(ConfigProvider(ConfigAPI(client), packageInfo)),
+        ChangeNotifierProvider(create: (context) => AuthProvider(AuthAPI(client), context)),
+        BaseProvider.createProvider(AccountProvider(AccountAPI(client))),
+        BaseProvider.createProvider(SSEProvider(SSEAPI(client))),
+        BaseProvider.createProvider(SetupProvider(SetupAPI(client))),
+        BaseProvider.createProvider(NetWorthProvider(NetWorthAPI(client))),
+        BaseProvider.createProvider(TransactionProvider(TransactionAPI(client))),
+      ],
+      child: Main(theme: theme),
+    ),
+  );
 }
 
 /// This page contains the process for when the application is first started
 class Main extends StatefulWidget {
   final ThemeData theme;
-  final PackageInfo packageInfo;
-  const Main({super.key, required this.theme, required this.packageInfo});
+  const Main({super.key, required this.theme});
 
   @override
-  State<Main> createState() => MainState(theme: theme, packageInfo: packageInfo);
+  State<Main> createState() => MainState(theme: theme);
 }
 
 class MainState extends State<Main> {
   final ThemeData theme;
-  final PackageInfo packageInfo;
-  String? setupPosition = null;
-  bool _failedToConnect = false;
 
-  // API References
-  late final RESTClient client;
-  late final ConfigAPI configAPI;
-  late final AuthAPI authAPI;
-  late final SetupAPI setupAPI;
-  late final AccountAPI accountAPI;
-  late final TransactionAPI transactionAPI;
-  late final NetWorthAPI netWorthAPI;
-  late final UserAPI userAPI;
-
-  MainState({required this.theme, required this.packageInfo}) {
-    final baseUrl = getBaseURL();
-    client = RESTClient(baseUrl);
-    configAPI = ConfigAPI(client, packageInfo, baseUrl);
-    authAPI = AuthAPI(client);
-    setupAPI = SetupAPI(client);
-    accountAPI = AccountAPI(client);
-    transactionAPI = TransactionAPI(client);
-    netWorthAPI = NetWorthAPI(client);
-    userAPI = UserAPI(client);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkIfSetupNeeded();
-  }
-
-  /// Checks if the setup process is needed.
-  Future<void> _checkIfSetupNeeded() async {
-    try {
-      await configAPI.populateUnsecureConfig();
-      String position = configAPI.unsecureConfig!.firstTimeSetupPosition;
-      setState(() {
-        setupPosition = position;
-      });
-    } catch (e) {
-      // This normally means we failed to connect to the backend.
-      setState(() {
-        _failedToConnect = true;
-      });
-    }
-  }
-
-  /// Returns the base URL that the backend should be expected to be running on. This will not include
-  ///   any potential sub-pathing.
-  String getBaseURL() {
-    Uri uri = Uri.base;
-    final leading = '${uri.scheme}://${uri.host}';
-    return kDebugMode ? '$leading:8001' : leading;
-  }
+  MainState({required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // Build the various API providers
-        Provider<RESTClient>(create: (_) => client),
-        Provider<AuthAPI>(create: (_) => authAPI),
-        Provider<SetupAPI>(create: (_) => setupAPI),
-        Provider<ConfigAPI>(create: (_) => configAPI),
-        Provider<AccountAPI>(create: (_) => accountAPI),
-        Provider<TransactionAPI>(create: (_) => transactionAPI),
-        Provider<NetWorthAPI>(create: (_) => netWorthAPI),
-        Provider<UserAPI>(create: (_) => userAPI),
-        // Change Notifiers
-        ChangeNotifierProvider(create: (context) => AuthProvider(authAPI)),
-        // Auth required
-        ChangeNotifierProxyProvider<AuthProvider, AccountProvider>(
-          update: (context, auth, previousMessages) => AccountProvider(accountAPI, auth),
-          create: (BuildContext context) => AccountProvider(accountAPI, null),
-        ),
-        ChangeNotifierProxyProvider<AuthProvider, ConfigProvider>(
-          update: (context, auth, previousMessages) => ConfigProvider(configAPI, auth),
-          create: (BuildContext context) => ConfigProvider(configAPI, null),
-        ),
-        ChangeNotifierProxyProvider<AuthProvider, SSEProvider>(
-          update: (context, auth, previousMessages) => SSEProvider(client, auth),
-          create: (BuildContext context) => SSEProvider(client, null),
-        ),
-        // Level two dependencies (auth + another provider)
-        ChangeNotifierProxyProvider2<AuthProvider, AccountProvider, NetWorthProvider>(
-          update: (context, auth, accountProvider, previousMessages) =>
-              NetWorthProvider(netWorthAPI, auth, accountProvider),
-          create: (BuildContext context) => NetWorthProvider(netWorthAPI, null, null),
-        ),
-        ChangeNotifierProxyProvider2<AuthProvider, AccountProvider, TransactionProvider>(
-          update: (context, auth, accountProvider, previousMessages) =>
-              TransactionProvider(transactionAPI, auth, accountProvider),
-          create: (BuildContext context) => TransactionProvider(transactionAPI, null, null),
-        ),
-      ],
-      child: Consumer2<AuthProvider, AccountProvider>(
-        builder: (context, authProvider, accountProvider, child) {
-          Widget page;
+    return Consumer2<AuthProvider, ConfigProvider>(
+      builder: (context, authProvider, configProvider, child) {
+        final failedToConnect = configProvider.failedToConnect;
+        final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
+        Widget page;
 
-          if (_failedToConnect) {
-            page = Scaffold(
-              body: Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image(
-                        image: AssetImage('assets/logo/color-transparent-no-tag.png'),
-                        width: MediaQuery.of(context).size.height * .6,
-                      ),
-                      SizedBox(height: 12),
-                      TextWidget(
-                        referenceSize: 1.5,
-                        text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
-                      ),
-                    ],
-                  ),
+        if (failedToConnect) {
+          page = Scaffold(
+            body: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image(
+                      image: AssetImage('assets/logo/color-transparent-no-tag.png'),
+                      width: MediaQuery.of(context).size.height * .6,
+                    ),
+                    SizedBox(height: 12),
+                    TextWidget(
+                      referenceSize: 1.5,
+                      text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ],
                 ),
               ),
-            );
-          } else if (setupPosition == null) {
-            page = Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.height * .3,
-                height: MediaQuery.of(context).size.height * .3,
-                child: CircularProgressIndicator(strokeWidth: MediaQuery.of(context).size.height * .01),
-              ),
-            );
-          } else if (setupPosition == "complete") {
-            if (authProvider.isLoggedIn) {
-              // If setup is complete AND logged in
-              page = const SproutAppShell();
-            } else {
-              // If setup is complete but NOT logged in
-              page = const LoginPage();
-            }
+            ),
+          );
+        } else if (setupPosition == null) {
+          page = Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.height * .3,
+              height: MediaQuery.of(context).size.height * .3,
+              child: CircularProgressIndicator(strokeWidth: MediaQuery.of(context).size.height * .01),
+            ),
+          );
+        } else if (setupPosition == "complete") {
+          if (authProvider.isLoggedIn) {
+            // If setup is complete AND logged in
+            page = const SproutAppShell();
           } else {
-            // If setup is not complete
-            page = SproutAppShell(
-              isSetup: true,
-              onSetupSuccess: () {
-                setState(() {
-                  setupPosition = "complete";
-                });
-              },
-            );
+            // If setup is complete but NOT logged in
+            page = const LoginPage();
           }
+        } else {
+          // If setup is not complete
+          page = SproutAppShell(
+            isSetup: true,
+            onSetupSuccess: () {
+              configProvider.populateUnsecureConfig();
+            },
+          );
+        }
 
-          return MaterialApp(home: page, theme: theme, title: "Sprout");
-        },
-      ),
+        return MaterialApp(home: page, theme: theme, title: "Sprout");
+      },
     );
   }
 }

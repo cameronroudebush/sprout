@@ -1,30 +1,66 @@
-import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/api.dart';
+import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/model/config.dart';
 
-class ConfigProvider with ChangeNotifier {
-  final AuthProvider? _authProvider;
-  final ConfigAPI _configAPI;
+class ConfigProvider extends BaseProvider<ConfigAPI> {
+  /// The unsecured version of the config that only contains basic information
+  UnsecureAppConfiguration? _unsecureConfig;
+
+  /// This is tracked if we fail to get the [_unsecureConfig] or not.
+  bool _failedToConnect = false;
 
   /// The secured config
   Configuration? _config;
 
-  Configuration get config => _config as Configuration;
-  UnsecureAppConfiguration get unsecureConfig => _configAPI.unsecureConfig as UnsecureAppConfiguration;
-  PackageInfo get packageInfo => _configAPI.packageInfo;
-  String get baseUrl => _configAPI.baseURL;
+  /// Provides the package info for the flutter app including things like versions
+  final PackageInfo _packageInfo;
+
+  /// The base URL we're connecting to the backend on
+  final String _baseURL = RESTClient.getBaseURL();
+
+  // Public Getters
+  Configuration? get config => _config;
+  UnsecureAppConfiguration? get unsecureConfig => _unsecureConfig;
+  PackageInfo get packageInfo => _packageInfo;
+  String get baseUrl => _baseURL;
+  bool get failedToConnect => _failedToConnect;
 
   // Constructor to check initial login status
-  ConfigProvider(this._configAPI, this._authProvider) {
-    if (_authProvider != null && _authProvider.isLoggedIn && _config == null) {
-      populateConfig();
-    }
+  ConfigProvider(super.api, this._packageInfo) {}
+
+  /// Requests the config from the backend and populates [_config]
+  Future<Configuration?> populateConfig() async {
+    _config = await api.getConfig();
+    notifyListeners();
+    return _config;
   }
 
-  Future<Configuration?> populateConfig() async {
-    _config = await _configAPI.getConfig();
-    return _config;
+  /// Requests the unsecure config from the backend and populates [_unsecureConfig]
+  Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {
+    try {
+      _unsecureConfig = await api.getUnsecure();
+    } catch (e) {
+      _failedToConnect = true;
+    }
+    notifyListeners();
+    return unsecureConfig;
+  }
+
+  @override
+  Future<void> onInit() async {
+    populateUnsecureConfig();
+  }
+
+  @override
+  Future<void> onLogin() async {
+    populateConfig();
+  }
+
+  @override
+  Future<void> onLogout() async {
+    _config = null;
+    notifyListeners();
   }
 }

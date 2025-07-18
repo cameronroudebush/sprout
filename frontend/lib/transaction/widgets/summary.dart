@@ -41,26 +41,35 @@ class TransactionSummaryCard extends StatelessWidget {
                 // Consume the transactions to display
                 Consumer<TransactionProvider>(
                   builder: (context, provider, child) {
-                    int totalTransactions = provider.totalTransactionCount;
-                    double averageAmount = provider.transactionStats?.averageTransactionCost ?? 0;
-                    double largestExpense = provider.transactionStats?.largestExpense ?? 0;
-                    double totalSpend = provider.transactionStats?.totalSpend ?? 0;
-                    ;
-                    double totalIncome = provider.transactionStats?.totalIncome ?? 0;
+                    if (provider.isLoading) {
+                      return Center(
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.height * .05,
+                          height: MediaQuery.of(context).size.height * .05,
+                          child: CircularProgressIndicator(strokeWidth: MediaQuery.of(context).size.height * .005),
+                        ),
+                      );
+                    } else {
+                      int totalTransactions = provider.totalTransactionCount;
+                      double averageAmount = provider.transactionStats?.averageTransactionCost ?? 0;
+                      double largestExpense = provider.transactionStats?.largestExpense ?? 0;
+                      double totalSpend = provider.transactionStats?.totalSpend ?? 0;
+                      double totalIncome = provider.transactionStats?.totalIncome ?? 0;
 
-                    return Column(
-                      children: [
-                        _buildSummaryRow('Total Spent', totalSpend),
-                        const SizedBox(height: 8),
-                        _buildSummaryRow('Total Income', totalIncome, color: Colors.green),
-                        const SizedBox(height: 8),
-                        _buildSummaryRow('Total Transactions', totalTransactions, format: false, color: null),
-                        const SizedBox(height: 8),
-                        _buildSummaryRow('Average Transaction', averageAmount),
-                        const SizedBox(height: 8),
-                        _buildSummaryRow('Largest Expense', largestExpense),
-                      ],
-                    );
+                      return Column(
+                        children: [
+                          _buildSummaryRow('Total Spent', totalSpend),
+                          const SizedBox(height: 8),
+                          _buildSummaryRow('Total Income', totalIncome, color: Colors.green),
+                          const SizedBox(height: 8),
+                          _buildSummaryRow('Total Transactions', totalTransactions, format: false, color: null),
+                          const SizedBox(height: 8),
+                          _buildSummaryRow('Average Transaction', averageAmount),
+                          const SizedBox(height: 8),
+                          _buildSummaryRow('Largest Expense', largestExpense),
+                        ],
+                      );
+                    }
                   },
                 ),
               ],

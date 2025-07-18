@@ -1,49 +1,30 @@
-import 'package:flutter/material.dart';
-import 'package:sprout/account/provider.dart';
-import 'package:sprout/auth/provider.dart';
+import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/models/transaction.stats.dart';
 
 /// Class that provides the store of current transactions
-class TransactionProvider with ChangeNotifier {
-  final TransactionAPI _transactionAPI;
-  final AuthProvider? _authProvider;
-  final AccountProvider? _accountProvider;
-
+class TransactionProvider extends BaseProvider<TransactionAPI> {
   // Data store
   int _totalTransactionCount = 0;
   TransactionStats? _transactionStats;
   List<Transaction> _transactions = [];
 
-  // Getters to not allow editing the internal store
+  // Public getters
   List<Transaction> get transactions => _transactions;
   int get totalTransactionCount => _totalTransactionCount;
-  bool get isLoading => _transactions.isEmpty;
   int get rowsPerPage => 5;
   TransactionStats? get transactionStats => _transactionStats;
+  bool isLoading = false;
 
-  TransactionProvider(this._transactionAPI, this._authProvider, this._accountProvider) {
-    if (_authProvider != null &&
-        _authProvider.isLoggedIn &&
-        _accountProvider != null &&
-        _accountProvider.linkedAccounts.isNotEmpty) {
-      populateTotalTransactionCount();
-      populateStats();
-      // Grab our most recent 20
-      populateTransactions(0, rowsPerPage);
-    }
-  }
+  TransactionProvider(super.api);
 
   Future<int> populateTotalTransactionCount() async {
-    final count = await _transactionAPI.getTransactionCount();
-    _totalTransactionCount = count;
-    notifyListeners();
-    return _totalTransactionCount;
+    return _totalTransactionCount = await api.getTransactionCount();
   }
 
   Future<List<Transaction>> populateTransactions(int startIndex, int endIndex) async {
-    final newTransactions = await _transactionAPI.getTransactions(startIndex, endIndex);
+    final newTransactions = await api.getTransactions(startIndex, endIndex);
     // Combine new transactions with existing ones, removing duplicates
     final Set<String> existingTransactionIds = _transactions.map((t) => t.id).toSet();
     for (var newTransaction in newTransactions) {
@@ -51,14 +32,27 @@ class TransactionProvider with ChangeNotifier {
         _transactions.add(newTransaction);
       }
     }
-    notifyListeners();
     return _transactions;
   }
 
   Future<TransactionStats?> populateStats() async {
-    final total = await _transactionAPI.getStats();
-    _transactionStats = total;
-    notifyListeners();
-    return _transactionStats;
+    return _transactionStats = await api.getStats();
   }
+
+  @override
+  Future<void> onInit() async {}
+
+  @override
+  Future<void> onLogin() async {
+    isLoading = true;
+    notifyListeners();
+    await populateTotalTransactionCount();
+    await populateStats();
+    await populateTransactions(0, rowsPerPage); // Grab most recent
+    isLoading = false;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> onLogout() async {}
 }

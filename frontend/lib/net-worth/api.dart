@@ -1,10 +1,9 @@
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/base.dart';
 import 'package:sprout/net-worth/models/net.worth.ot.dart';
 
 /// Class that provides callable endpoints for the NetWorth information
-class NetWorthAPI {
-  RESTClient client;
-  NetWorthAPI(this.client);
+class NetWorthAPI extends BaseAPI {
+  NetWorthAPI(super.client);
 
   /// Returns the net worth data for all current accounts
   Future<double> getNetWorth() async {

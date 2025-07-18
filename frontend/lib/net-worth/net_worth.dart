@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/provider.dart';
@@ -55,66 +54,62 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
             .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value))
             .toList();
 
-        return Consumer<AccountProvider>(
-          builder: (context, authProvider, child) {
-            return Center(
-              child: Card(
-                elevation: 6.0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: historicalNetWorth == null
-                      ? const SizedBox(height: 350, child: Center(child: CircularProgressIndicator()))
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            TextWidget(referenceSize: 1, text: 'Current Net Worth'),
-                            const SizedBox(height: 10.0),
-                            TextWidget(
-                              referenceSize: 2.5,
-                              text: currencyFormatter.format(currentNetWorth),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: currentNetWorth >= 0 ? Colors.green : colorScheme.error,
-                              ),
-                            ),
-                            const SizedBox(height: 12.0),
-                            TextWidget(referenceSize: 1, text: 'Net Worth Trend'),
-                            const SizedBox(height: 16.0),
-                            _buildChartRangeSelector(theme, colorScheme),
-                            sortedChartEntries.isNotEmpty
-                                ? SizedBox(
-                                    height: 200,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 18.0, left: 12.0, top: 24, bottom: 12),
-                                      child: LineChart(
-                                        _buildNetWorthChartData(
-                                          chartSpots,
-                                          sortedChartEntries,
-                                          theme,
-                                          colorScheme,
-                                          screenWidth,
-                                        ),
-                                        duration: Duration(milliseconds: 0),
-                                      ),
-                                    ),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'No historical data available for this period.',
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                                    ),
-                                  ),
-                            const SizedBox(height: 16.0),
-                          ],
+        return Center(
+          child: Card(
+            elevation: 6.0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: netWorthProvider.isLoading
+                  ? const SizedBox(height: 350, child: Center(child: CircularProgressIndicator()))
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextWidget(referenceSize: 1, text: 'Current Net Worth'),
+                        const SizedBox(height: 10.0),
+                        TextWidget(
+                          referenceSize: 2.5,
+                          text: currencyFormatter.format(currentNetWorth),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: currentNetWorth >= 0 ? Colors.green : colorScheme.error,
+                          ),
                         ),
-                ),
-              ),
-            );
-          },
+                        const SizedBox(height: 12.0),
+                        TextWidget(referenceSize: 1, text: 'Net Worth Trend'),
+                        const SizedBox(height: 16.0),
+                        _buildChartRangeSelector(theme, colorScheme),
+                        sortedChartEntries.isNotEmpty
+                            ? SizedBox(
+                                height: 200,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 18.0, left: 12.0, top: 24, bottom: 12),
+                                  child: LineChart(
+                                    _buildNetWorthChartData(
+                                      chartSpots,
+                                      sortedChartEntries,
+                                      theme,
+                                      colorScheme,
+                                      screenWidth,
+                                    ),
+                                    duration: Duration(milliseconds: 0),
+                                  ),
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'No historical data available for this period.',
+                                  textAlign: TextAlign.center,
+                                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                                ),
+                              ),
+                        const SizedBox(height: 16.0),
+                      ],
+                    ),
+            ),
+          ),
         );
       },
     );

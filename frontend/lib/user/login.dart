@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
-import 'package:sprout/config/api.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/model/user.dart';
 
 /// A stateful widget for the login page.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final VoidCallback? onLoginSuccess;
+
+  const LoginPage({super.key, this.onLoginSuccess});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -56,91 +58,100 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final configAPI = Provider.of<ConfigAPI>(context, listen: false);
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Card(
-            child: Padding(
-              padding: EdgeInsetsGeometry.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/logo/color-transparent-no-tag.png',
-                    width: MediaQuery.of(context).size.height * .4,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 24),
-                    child: TextWidget(
-                      referenceSize: 2,
-                      text: 'Welcome Back!',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 40.0),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 640),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * .7,
-                      child: AutofillGroup(
-                        child: Column(
-                          children: [
-                            TextField(
-                              controller: _usernameController,
-                              autofillHints: const [AutofillHints.username],
-                              keyboardType: TextInputType.text,
-                              autocorrect: false,
-                              enableSuggestions: false,
-                              decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
-                            ),
-                            const SizedBox(height: 20.0),
-                            TextField(
-                              controller: _passwordController,
-                              autofillHints: const [AutofillHints.password],
-                              keyboardType: TextInputType.text,
-                              autocorrect: false,
-                              enableSuggestions: false,
-                              decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
-                              obscureText: true,
-                              textInputAction: TextInputAction.done,
-                              onSubmitted: (String value) {
-                                _login();
-                              },
-                            ),
-                          ],
+    return Consumer<ConfigProvider>(
+      builder: (context, configProvider, child) {
+        return Scaffold(
+          body: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsetsGeometry.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/logo/color-transparent-no-tag.png',
+                        width: MediaQuery.of(context).size.height * .4,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 24),
+                        child: TextWidget(
+                          referenceSize: 2,
+                          text: 'Welcome Back!',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 30.0),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 640),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * .5,
-                      child: ButtonWidget(
-                        text: "Login",
-                        onPressed: _passwordController.text == "" || _usernameController.text == "" ? null : _login,
+                      const SizedBox(height: 40.0),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 640),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * .7,
+                          child: AutofillGroup(
+                            child: Column(
+                              children: [
+                                TextField(
+                                  controller: _usernameController,
+                                  autofillHints: const [AutofillHints.username],
+                                  keyboardType: TextInputType.text,
+                                  autocorrect: false,
+                                  enableSuggestions: false,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Username',
+                                    prefixIcon: Icon(Icons.person),
+                                  ),
+                                ),
+                                const SizedBox(height: 20.0),
+                                TextField(
+                                  controller: _passwordController,
+                                  autofillHints: const [AutofillHints.password],
+                                  keyboardType: TextInputType.text,
+                                  autocorrect: false,
+                                  enableSuggestions: false,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Password',
+                                    prefixIcon: Icon(Icons.lock),
+                                  ),
+                                  obscureText: true,
+                                  textInputAction: TextInputAction.done,
+                                  onSubmitted: (String value) {
+                                    _login();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 30.0),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 640),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * .5,
+                          child: ButtonWidget(
+                            text: "Login",
+                            onPressed: _passwordController.text == "" || _usernameController.text == "" ? null : _login,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      TextWidget(
+                        referenceSize: 1.2,
+                        style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.bold),
+                        text: _message,
+                      ),
+                      const SizedBox(height: 20.0),
+                      TextWidget(referenceSize: .9, text: configProvider.unsecureConfig?.version ?? ""),
+                    ],
                   ),
-                  const SizedBox(height: 20.0),
-                  TextWidget(
-                    referenceSize: 1.2,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.bold),
-                    text: _message,
-                  ),
-                  const SizedBox(height: 20.0),
-                  TextWidget(referenceSize: .9, text: configAPI.unsecureConfig!.version),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

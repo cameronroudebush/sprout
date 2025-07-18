@@ -1,9 +1,8 @@
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/base.dart';
 
 /// API for user handling
-class UserAPI {
-  RESTClient client;
-  UserAPI(this.client);
+class UserAPI extends BaseAPI {
+  UserAPI(super.client);
 
   /// Manually runs a sync for new data
   Future<void> runManualSync() async {

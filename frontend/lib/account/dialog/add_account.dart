@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/api.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/accounts_display.dart';
@@ -33,8 +32,8 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
       _gettingAccounts = true;
     });
     try {
-      final accountAPI = Provider.of<AccountAPI>(context, listen: false);
-      final accounts = await accountAPI.getProviderAccounts();
+      final accountProvider = Provider.of<AccountProvider>(context, listen: false);
+      final accounts = await accountProvider.api.getProviderAccounts();
       setState(() {
         _accounts = accounts;
       });
@@ -51,7 +50,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    AccountAPI accountAPI = Provider.of<AccountAPI>(context, listen: false);
+    AccountProvider accountProvider = Provider.of<AccountProvider>(context, listen: false);
     return AlertDialog(
       title: Center(child: TextWidget(referenceSize: 2, text: 'Select Accounts to Add')),
       content: _accounts.isEmpty
@@ -116,7 +115,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                     setState(() {
                       _isAddingAccounts = true;
                     });
-                    await accountAPI.linkProviderAccounts(_selectedAccounts);
+                    await accountProvider.api.linkProviderAccounts(_selectedAccounts);
                     await Provider.of<AccountProvider>(context, listen: false).populateLinkedAccounts();
                     // Close dialog
                     Navigator.of(context).pop();

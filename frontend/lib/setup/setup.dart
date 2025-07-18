@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/setup/api.dart';
+import 'package:sprout/setup/provider.dart';
 
 /// This page contains the process for when the application is first started
 class SetupPage extends StatefulWidget {
@@ -68,7 +68,7 @@ class _SetupPageState extends State<SetupPage> {
       _message = 'Creating account...';
     });
 
-    final setupAPI = Provider.of<SetupAPI>(context, listen: false);
+    final setupProvider = Provider.of<SetupProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -83,7 +83,7 @@ class _SetupPageState extends State<SetupPage> {
     }
 
     // First, attempt to register the new user
-    final registered = await setupAPI.createUser(username, password);
+    final registered = await setupProvider.api.createUser(username, password);
 
     if (registered) {
       setState(() {

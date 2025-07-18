@@ -1,13 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:sprout/auth/provider.dart';
-import 'package:sprout/core/api/client.dart';
+import 'package:sprout/core/api/sse.dart';
+import 'package:sprout/core/provider/base.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
-class SSEProvider with ChangeNotifier {
-  final AuthProvider? _authProvider;
-  final RESTClient _client;
+class SSEProvider extends BaseProvider<SSEAPI> {
   StreamSubscription<Map<String, dynamic>>? _sseSubscription;
   bool _isConnecting = false;
   bool _isConnected = false;
@@ -25,11 +22,7 @@ class SSEProvider with ChangeNotifier {
   bool get isConnected => _isConnected;
   bool get isConnecting => _isConnecting;
 
-  SSEProvider(this._client, this._authProvider) {
-    if (_authProvider != null && _authProvider.isLoggedIn && _sseSubscription == null) {
-      _startSSE();
-    }
-  }
+  SSEProvider(super.api);
 
   // Exposed method to allow manual retry from UI if needed
   void retryConnection() {
@@ -60,7 +53,7 @@ class SSEProvider with ChangeNotifier {
     await _cancelSubscription();
 
     try {
-      final Stream<Map<String, dynamic>> sseStream = _client.getSse();
+      final Stream<Map<String, dynamic>> sseStream = api.buildSSE();
       _isConnected = true;
       _reconnectAttempts = 0;
       notifyListeners();
@@ -130,4 +123,15 @@ class SSEProvider with ChangeNotifier {
     _cancelSubscription(); // Ensure subscription is cancelled
     super.dispose();
   }
+
+  @override
+  Future<void> onInit() async {}
+
+  @override
+  Future<void> onLogin() async {
+    _startSSE();
+  }
+
+  @override
+  Future<void> onLogout() async {}
 }
