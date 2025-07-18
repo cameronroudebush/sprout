@@ -14,7 +14,7 @@ class ButtonWidget extends StatelessWidget {
     required this.text,
     this.icon,
     this.onPressed,
-    this.fontSize = 18,
+    this.fontSize = 16,
     this.minSize = double.infinity,
     this.color,
   });
@@ -22,10 +22,9 @@ class ButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
-      minimumSize: Size(minSize, 50),
+      minimumSize: Size(minSize, 40),
       elevation: 5,
-      backgroundColor:
-          color ?? Theme.of(context).buttonTheme.colorScheme!.onPrimary,
+      backgroundColor: color ?? Theme.of(context).buttonTheme.colorScheme!.onPrimary,
     );
 
     if (icon != null) {
