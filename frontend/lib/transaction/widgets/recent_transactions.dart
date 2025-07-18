@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/provider.dart';
 
@@ -14,48 +13,52 @@ class RecentTransactionsCard extends StatefulWidget {
 
 class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
   int _currentPage = 0;
+  int _rowsPerPage = 5;
 
   void _fetchDataForPage(int page) {
     final provider = Provider.of<TransactionProvider>(context, listen: false);
-    final rowsPerPage = provider.rowsPerPage;
-    // Assuming populateTransactions can handle fetching data for a specific page
-    provider.populateTransactions(page * rowsPerPage, (page + 1) * rowsPerPage);
+    provider.populateTransactions(page * _rowsPerPage, (page + 1) * _rowsPerPage, shouldNotify: true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
-        return Card(
-          elevation: 2.0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          clipBehavior: Clip.antiAlias,
-          margin: EdgeInsets.zero,
+        double pageHeight = MediaQuery.of(context).size.height;
+        double tableRowHeight = pageHeight < 1000 ? 150 : 110;
+        _rowsPerPage = (pageHeight / tableRowHeight).round();
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(24.0),
           child: LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SizedBox(
-                width: constraints.maxWidth, // Ensure the SizedBox takes the full width available
+                width: constraints.maxWidth,
                 child: PaginatedDataTable(
-                  header: const TextWidget(
-                    referenceSize: 2,
-                    text: 'Recent Transactions',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                   columns: const [
-                    DataColumn(label: Text('Date')),
-                    DataColumn(label: Text('Description')),
-                    // DataColumn(label: Text('Category')),
-                    DataColumn(label: Text('Amount'), numeric: true),
+                    DataColumn(
+                      label: Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    DataColumn(
+                      label: Text(' ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    DataColumn(
+                      label: Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    DataColumn(
+                      label: Text('Amount', style: TextStyle(fontWeight: FontWeight.bold)),
+                      numeric: true,
+                    ),
                   ],
                   source: _TransactionDataSource(
                     transactions: provider.transactions,
                     totalRows: provider.totalTransactionCount,
-                    rowsPerPage: provider.rowsPerPage,
+                    rowsPerPage: _rowsPerPage,
+                    context: context,
                   ),
-                  rowsPerPage: provider.rowsPerPage,
+                  rowsPerPage: _rowsPerPage,
                   onPageChanged: (int pageIndex) {
-                    final newPage = pageIndex ~/ provider.rowsPerPage;
+                    final newPage = pageIndex ~/ _rowsPerPage;
                     if (newPage != _currentPage) {
                       setState(() {
                         _currentPage = newPage;
@@ -64,7 +67,12 @@ class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
                     }
                   },
                   horizontalMargin: 20,
-                  columnSpacing: constraints.maxWidth * 0.05, // Adjust column spacing based on available width
+                  columnSpacing: constraints.maxWidth * 0.03,
+                  dataRowMinHeight: 40,
+                  dataRowMaxHeight: 60,
+                  headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                    return Theme.of(context).colorScheme.secondary.withValues(alpha: 0.08);
+                  }),
                 ),
               ),
             ),
@@ -80,8 +88,15 @@ class _TransactionDataSource extends DataTableSource {
   final List<Transaction> transactions;
   final int totalRows;
   final int rowsPerPage;
+  final BuildContext context;
 
-  _TransactionDataSource({required this.transactions, required this.totalRows, required this.rowsPerPage});
+  _TransactionDataSource({
+    required this.transactions,
+    required this.totalRows,
+    required this.rowsPerPage,
+    required this.context,
+  });
+
   @override
   DataRow? getRow(int index) {
     if (index >= transactions.length) {
@@ -89,24 +104,56 @@ class _TransactionDataSource extends DataTableSource {
     }
     final transaction = transactions[index];
 
+    final isEvenRow = index % 2 == 0;
+    final rowColor = WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
+      }
+      if (transaction.pending) {
+        return Colors.grey.shade50.withValues(alpha: 0.1);
+      }
+      // Alternating row color
+      return isEvenRow ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2) : null;
+    });
+
+    final screenWidth = MediaQuery.of(context).size.width;
     return DataRow.byIndex(
       index: index,
+      color: rowColor,
       cells: [
-        DataCell(Text(formatDate(transaction.posted))), // Using formatter
-        DataCell(Text(transaction.description)),
-        // DataCell(Text(transaction.category)),
+        // Date
+        DataCell(Text(formatDate(transaction.posted))),
+        // Pending
         DataCell(
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                currencyFormatter.format(transaction.amount),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: transaction.amount >= 0 ? Colors.green[700] : Colors.red[700],
-                ),
+          transaction.pending
+              ? Tooltip(
+                  message: 'Transaction is pending',
+                  child: Icon(Icons.pending, color: Theme.of(context).colorScheme.secondary),
+                )
+              : const SizedBox.shrink(),
+        ),
+        // Description
+        DataCell(
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: screenWidth < 450 ? screenWidth * .3 : screenWidth * .5),
+            child: Text(
+              transaction.description,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        // Amount
+        DataCell(
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              currencyFormatter.format(transaction.amount),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: transaction.amount >= 0 ? Colors.green[700] : Colors.red[700],
               ),
-            ],
+            ),
           ),
         ),
       ],

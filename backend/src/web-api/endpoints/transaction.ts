@@ -16,7 +16,12 @@ export class TransactionAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.get, "POST"))
   async getTransactions(request: RestBody, user: User) {
     const parsedRequest = TransactionRequest.fromPlain(request.payload);
-    return await Transaction.find({ skip: parsedRequest.startIndex, take: parsedRequest.endIndex, where: { account: { user: { username: user.username } } } });
+    return await Transaction.find({
+      skip: parsedRequest.startIndex,
+      take: parsedRequest.endIndex,
+      where: { account: { user: { username: user.username } } },
+      order: { posted: "DESC" },
+    });
   }
 
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.count, "GET"))
@@ -28,7 +33,7 @@ export class TransactionAPI {
   async getStats(request: RestBody, user: User) {
     const parsedRequest = TransactionStatsRequest.fromPlain(request.payload);
     const startDate = subDays(new Date(), parsedRequest.days);
-    const where = { account: { user: { id: user.id } }, posted: LessThan(startDate) } as FindOptionsWhere<Transaction>;
+    const where = { account: { user: { id: user.id } }, posted: MoreThan(startDate) } as FindOptionsWhere<Transaction>;
     const totalSpendResult = await Transaction.sum("amount", { ...where, ...{ amount: LessThan(0) } });
     const totalIncome = await Transaction.sum("amount", { ...where, ...{ amount: MoreThan(0) } });
     const transactionCount = await Transaction.count({ where: where });
@@ -39,8 +44,8 @@ export class TransactionAPI {
     const largestExpense = largestExpenseResult || 0;
 
     return TransactionStats.fromPlain({
-      totalSpend,
-      totalIncome,
+      totalSpend: totalSpend ?? 0,
+      totalIncome: totalIncome ?? 0,
       averageTransactionCost: averageTransactionCost,
       largestExpense: largestExpense,
     });
@@ -77,7 +82,7 @@ export class TransactionAPI {
             },
             order: { time: "DESC" },
           })
-        ).map((x) => ({ accountId: x.account.id, balance: x.account.balance }));
+        ).map((x) => ({ accountId: x.account.id, balance: x.balance }));
 
       const latestBalancesPerAccount: { [accountId: string]: number } = {};
       const processedAccountIds: Set<string> = new Set();
