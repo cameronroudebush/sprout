@@ -14,7 +14,7 @@ export class CentralServer {
     server.set("trust proxy", 1);
     server.use(express.json());
     server.all("*", (req, res, next) => {
-      Logger.info(`Incoming request on ${req.url}`);
+      // Logger.info(`Incoming request on ${req.url}`);
       this.setCORSHeaders(res);
       // Handle options requests
       if (req.method === "OPTIONS") return res.status(200).end();

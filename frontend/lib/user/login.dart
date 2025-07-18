@@ -134,10 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     text: _message,
                   ),
                   const SizedBox(height: 20.0),
-                  TextWidget(
-                    referenceSize: .9,
-                    text: "${configAPI.unsecureConfig!.version} (${configAPI.packageInfo.version})",
-                  ),
+                  TextWidget(referenceSize: .9, text: configAPI.unsecureConfig!.version),
                 ],
               ),
             ),
