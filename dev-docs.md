@@ -1,6 +1,5 @@
 TODO:
 
-- Fix synth issues
 - Add SSE to tell frontend to refresh data
   - For things like syncs
   - Move the central re-sync function into some more generic capability to auto refresh

@@ -1,8 +1,8 @@
 import { RestBody } from "@backend/model/api/rest.request";
 import { User } from "@backend/model/user";
-import { Express, Response } from "express";
 import { globSync } from "glob";
 import path from "path";
+import { CentralServer } from "../central.server";
 import { Logger } from "../logger";
 import { EndpointError } from "./error";
 import { RestMetadata } from "./metadata";
@@ -12,7 +12,10 @@ export class RestAPIServer {
   /** The endpoint string that should prefix every request */
   static readonly ENDPOINT_HEADER = "/api";
 
-  constructor(private server: Express) {}
+  constructor(
+    private centralServer: CentralServer,
+    private server = centralServer.server,
+  ) {}
 
   /** Handles loading all endpoints and adding handlers for those callbacks */
   async initialize() {
@@ -33,10 +36,11 @@ export class RestAPIServer {
 
   /** Adds the overarching listener to handle REST requests */
   private async addListener() {
-    this.server.all("*", async (req, res) => {
-      this.setCORSHeaders(res);
+    this.server.all("/api*", async (req, res) => {
+      this.centralServer.setCORSHeaders(res);
       // Handle options requests
       if (req.method === "OPTIONS") return res.status(200).end();
+      const requestUrl = req.url.replace(RestAPIServer.ENDPOINT_HEADER, "");
       // Re useable functions
       const badRequest = (error: Error | EndpointError) => {
         let code = (error as EndpointError).code;
@@ -45,8 +49,8 @@ export class RestAPIServer {
       };
       try {
         // If we have an API base, strip it because the endpoints will not know of it.
-        const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === req.url);
-        if (endpoint == null) throw new EndpointError(`No matching endpoint: ${req.url}`, 400);
+        const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === requestUrl);
+        if (endpoint == null) throw new EndpointError(`No matching endpoint: ${requestUrl}`, 400);
         // Validate authentication if required;
         let user: User | null;
         if (endpoint.metadata.requiresAuth) {
@@ -89,13 +93,5 @@ export class RestAPIServer {
         return badRequest(e as any);
       }
     });
-  }
-
-  /** Sets CORS headers for the given response */
-  private setCORSHeaders(res: Response) {
-    // TODO
-    res.header(`Access-Control-Allow-Origin`, `*`);
-    res.header(`Access-Control-Allow-Methods`, `GET,PUT,POST,DELETE,OPTIONS`);
-    res.header(`Access-Control-Allow-Headers`, `Content-Type,Authorization`);
   }
 }

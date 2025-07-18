@@ -8,10 +8,7 @@ class UnsecureAppConfiguration {
   /// Version of the backend
   final String version;
 
-  UnsecureAppConfiguration({
-    required this.firstTimeSetupPosition,
-    required this.version,
-  });
+  UnsecureAppConfiguration({required this.firstTimeSetupPosition, required this.version});
 
   factory UnsecureAppConfiguration.fromJson(Map<String, dynamic> json) {
     return UnsecureAppConfiguration(
@@ -28,8 +25,6 @@ class Configuration {
   Configuration({required this.lastSchedulerRun});
 
   factory Configuration.fromJson(Map<String, dynamic> json) {
-    return Configuration(
-      lastSchedulerRun: Schedule.fromJson(json['lastSchedulerRun']),
-    );
+    return Configuration(lastSchedulerRun: Schedule.fromJson(json['lastSchedulerRun']));
   }
 }

@@ -10,7 +10,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:lts-alpine3.19 as backend-build
+FROM node:20-alpine3.21 as backend-build
 # Install git
 RUN apk add git
 WORKDIR /app
@@ -29,9 +29,11 @@ FROM nginx:alpine as prod
 # Using port 80 like normal
 EXPOSE 80
 
+# Install some required packages
+RUN apk update && apk add libstdc++ 
+
 # Set some default env variables
 ENV sprout_server_port=8001
-ENV sprout_server_apiBasePath=/api
 ENV sprout_database_sqlite_database=/sprout/sprout.sqlite
 
 # Grab the files we need
@@ -40,11 +42,8 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY --from=frontend-build /app/build/web /usr/share/nginx/html
 # Backend
 COPY --from=backend-build --chmod=0755 /app/sprout /sprout-backend
-# Grab required bcrypt file
-COPY --from=backend-build /app/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node .
-
-# Install some required packages
-RUN apk update && apk add libstdc++
+# Grab required node files
+COPY --from=backend-build /app/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node .=
 
 # Start nginx along side backend. Frontend is hosted via nginx, backend runs it's own internal API
 ENTRYPOINT ["/bin/sh", "-c" , "nginx & ./sprout-backend"]

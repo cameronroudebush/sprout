@@ -19,6 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.2.1",
+    "sharp": "^0.29.3",
+    "sharp-ico": "^0.1.5",
     "source-map-support": "^0.5.21",
     "sqlite3": "^5.1.7",
     "ts-mixer": "^6.0.4",
@@ -32,12 +34,13 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash": "^4.14.202",
     "@types/nodemon": "^1.19.6",
+    "@types/sharp": "^0.29.3",
     "@types/source-map-support": "^0.5.10",
     "@types/uuid": "^9.0.8",
+    "@yao-pkg/pkg": "^6.5.1",
     "cross-env": "^7.0.3",
     "git-describe": "^4.1.1",
     "nodemon": "^3.1.0",
-    "pkg": "^5.8.1",
     "prettier": "^3.6.2",
     "replace-in-file": "^7.1.0",
     "ts-node": "^10.9.2",
@@ -56,7 +59,10 @@
       "node_modules/axios/**/*",
       "node_modules/plaid/node_modules/axios/**/*",
       "node_modules/bcrypt/lib/binding/**/*",
-      "node_modules/sqlite3/**/*"
+      "node_modules/sqlite3/**/*",
+      "node_modules/sharp/**",
+      "node_modules/@img/sharp-linuxmusl-x64/**/*",
+      "./node_modules/sharp/src/build/Release/sharp-linuxmusl-x64.node"
     ],
     "targets": [
       "latest"
