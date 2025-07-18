@@ -1,9 +1,11 @@
 import { RestBody } from "@backend/model/api/rest.request";
 import { User } from "@backend/model/user";
+import { Request } from "express";
 import { globSync } from "glob";
 import path from "path";
 import { CentralServer } from "../central.server";
 import { Logger } from "../logger";
+import { SSEAPI } from "./endpoints/sse";
 import { EndpointError } from "./error";
 import { RestMetadata } from "./metadata";
 
@@ -34,13 +36,37 @@ export class RestAPIServer {
     );
   }
 
+  /** Validates authorization of the request with the headers and throws an error if it fails. If it succeeds, returns the user. */
+  private async validateAuthorization(req: Request) {
+    let user: User;
+    const authorization = req.headers.authorization;
+    if (authorization == null) throw new EndpointError("Unauthorized", 403);
+    else if (!authorization.includes("Bearer")) throw new EndpointError("Malformed Bearer", 403);
+    else
+      try {
+        const cleanJWT = authorization.replace("Bearer ", "");
+        // While sessions aren't really RESTful, I don't care and need a way to authenticate users.
+        const jwtResult = User.verifyJWT(cleanJWT);
+        user = (await User.findOne({ where: { username: jwtResult.username } }))!;
+        if (user == null) throw new Error("User could not be found");
+      } catch (e) {
+        throw new EndpointError("", 403);
+      }
+    return user;
+  }
+
   /** Adds the overarching listener to handle REST requests */
   private async addListener() {
     this.server.all("/api*", async (req, res) => {
       this.centralServer.setCORSHeaders(res);
-      // Handle options requests
       if (req.method === "OPTIONS") return res.status(200).end();
       const requestUrl = req.url.replace(RestAPIServer.ENDPOINT_HEADER, "");
+      // SSE handler
+      if (requestUrl === "/sse") {
+        // Require auth for SSE
+        const user = await this.validateAuthorization(req);
+        return new SSEAPI().setupSSEListener(req, res, user);
+      }
       // Re useable functions
       const badRequest = (error: Error | EndpointError) => {
         let code = (error as EndpointError).code;
@@ -54,19 +80,7 @@ export class RestAPIServer {
         // Validate authentication if required;
         let user: User | null;
         if (endpoint.metadata.requiresAuth) {
-          const authorization = req.headers.authorization;
-          if (authorization == null) throw new EndpointError("Unauthorized", 403);
-          else if (!authorization.includes("Bearer")) throw new EndpointError("Malformed Bearer", 403);
-          else
-            try {
-              const cleanJWT = authorization.replace("Bearer ", "");
-              // While sessions aren't really RESTful, I don't care and need a way to authenticate users.
-              const jwtResult = User.verifyJWT(cleanJWT);
-              user = await User.findOne({ where: { username: jwtResult.username } });
-              if (user == null) throw new Error("User could not be found");
-            } catch (e) {
-              throw new EndpointError("", 403);
-            }
+          user = await this.validateAuthorization(req);
         } else if (req.method !== endpoint.metadata.type)
           throw new EndpointError("Bad Request Type"); // Make sure request types match
         else if (!req.body) throw new EndpointError("Empty body"); // Ignore empty requests
