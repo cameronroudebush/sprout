@@ -50,7 +50,7 @@ export class RestAPIServer {
         user = (await User.findOne({ where: { username: jwtResult.username } }))!;
         if (user == null) throw new Error("User could not be found");
       } catch (e) {
-        throw new EndpointError("", 403);
+        throw new EndpointError("Unauthorized", 403);
       }
     return user;
   }
@@ -61,12 +61,6 @@ export class RestAPIServer {
       this.centralServer.setCORSHeaders(res);
       if (req.method === "OPTIONS") return res.status(200).end();
       const requestUrl = req.url.replace(RestAPIServer.ENDPOINT_HEADER, "");
-      // SSE handler
-      if (requestUrl === "/sse") {
-        // Require auth for SSE
-        const user = await this.validateAuthorization(req);
-        return new SSEAPI().setupSSEListener(req, res, user);
-      }
       // Re useable functions
       const badRequest = (error: Error | EndpointError) => {
         let code = (error as EndpointError).code;
@@ -74,6 +68,12 @@ export class RestAPIServer {
         res.status(code ?? 400).end(error.message || undefined);
       };
       try {
+        // SSE handler
+        if (requestUrl === "/sse") {
+          // Require auth for SSE
+          const user = await this.validateAuthorization(req);
+          return new SSEAPI().setupSSEListener(req, res, user);
+        }
         // If we have an API base, strip it because the endpoints will not know of it.
         const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === requestUrl);
         if (endpoint == null) throw new EndpointError(`No matching endpoint: ${requestUrl}`, 400);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/dialog/account_error.dart';
 import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
@@ -71,6 +72,7 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                         "https://logo.synthfinance.com/${account.institution.id.replaceAll("https://www.", "")}";
                     // Use the backend as our image proxy
                     final imageProxyURL = "${configProvider.baseUrl}/image-proxy?url=$synthLogoURL";
+                    final accountHasError = account.institution.hasError;
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
                       elevation: isSelected ? 6.0 : 3.0,
@@ -82,7 +84,19 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                       ),
                       child: InkWell(
                         // Use InkWell for better tap visual feedback
-                        onTap: widget.onSelectionChanged == null ? null : () => _toggleSelection(account),
+                        onTap: widget.onSelectionChanged != null || accountHasError
+                            ? () async {
+                                if (widget.onSelectionChanged != null) {
+                                  _toggleSelection(account);
+                                }
+                                if (accountHasError) {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (_) => AccountErrorDialog(account: account),
+                                  );
+                                }
+                              }
+                            : null,
                         borderRadius: BorderRadius.circular(15.0),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -102,7 +116,6 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                                 height: 30,
                                 imageProxyURL,
                                 errorBuilder: (context, error, stackTrace) {
-                                  print(stackTrace);
                                   return Icon(account.fallbackIcon, size: 30.0);
                                 },
                               ),
@@ -114,7 +127,7 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                                     TextWidget(referenceSize: 1.05, text: account.name),
                                     const SizedBox(height: 4.0),
                                     Text(
-                                      account.institution.name, // Display institution name
+                                      account.institution.name,
                                       style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                                     ),
                                   ],
@@ -137,7 +150,7 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                                   ),
                                   if (account.institution.hasError)
                                     GestureDetector(
-                                      onTap: () {}, // Required for tooltip to work on tap
+                                      onTap: () {},
                                       child: Tooltip(
                                         message:
                                             'There was an error syncing with ${account.institution.name}. This may need updated in your provider.',
@@ -155,7 +168,7 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                       ),
                     );
                   }),
-                  if (accountsByType.keys.last != accountType) // Add a divider if it's not the last type
+                  if (accountsByType.keys.last != accountType)
                     const Divider(height: 30, thickness: 1.5, indent: 16, endIndent: 16),
                 ],
               );

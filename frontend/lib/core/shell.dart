@@ -63,7 +63,15 @@ class _SproutAppShellState extends State<SproutAppShell> {
           ),
           body: widget.isSetup
               ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
-              : SingleChildScrollView(child: _pages[_currentIndex]['page']),
+              : Center(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1024),
+                      child: SingleChildScrollView(child: _pages[_currentIndex]['page']),
+                    ),
+                  ),
+                ),
           bottomNavigationBar: widget.isSetup
               ? null
               : BottomNavigationBar(
