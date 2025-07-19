@@ -5,15 +5,13 @@ TODO:
 - Centralize snackbar styling
 - Centralize tooltips and apply styling
 - Centralize spinners to better scale them
-- Hide mode to hide real numbers
-- Auto logout on unauthorized evocations
-  - Better handling of API error messages in general could be a good idea.
 - Holdings
 - Bottom bar to sidenav on larger screens
 - Net worth notifications?
 - Add user config info
   - Password reset?
   - OIDC?
+  - Hide mode to hide real numbers
 - Add Coinbase & Zillow providers
   - Maybe move how you config the simpleFin provider
 - A lot of text looks odd on firefox

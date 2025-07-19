@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/model/rest.request.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
@@ -25,14 +27,13 @@ class SSEProvider extends BaseProvider<SSEAPI> {
 
   SSEProvider(super.api);
 
-  // Exposed method to allow manual retry from UI if needed
-  void retryConnection() {
-    _startSSE(forceReconnect: true);
-  }
-
   /// Starts the SSE connection.
   /// [forceReconnect] will cancel any existing connection and attempt a new one.
   Future<void> _startSSE({bool forceReconnect = false}) async {
+    final authProvider = ServiceLocator.get<AuthProvider>();
+    if (!authProvider.isLoggedIn) {
+      _handleConnectionLost();
+    }
     // If a connection is already active and we are not forcing a reconnect, just return.
     if (_sseSubscription != null && !_sseSubscription!.isPaused && !forceReconnect) {
       return;
