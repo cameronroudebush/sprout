@@ -112,8 +112,8 @@ class _AccountsWidgetState extends State<AccountsWidget> {
                                   ),
                                 ),
                               Image.network(
-                                width: 30,
-                                height: 30,
+                                width: 40,
+                                height: 40,
                                 imageProxyURL,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Icon(account.fallbackIcon, size: 30.0);
