@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/model/rest.request.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
 class SSEProvider extends BaseProvider<SSEAPI> {
@@ -11,8 +12,8 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   Timer? _reconnectTimer; // Timer for delayed reconnect attempts
 
   // Holds what to call when messages come in
-  final StreamController<dynamic> _eventController = StreamController.broadcast();
-  Stream<dynamic> get onEvent => _eventController.stream;
+  final StreamController<SSEBody> _eventController = StreamController.broadcast();
+  Stream<SSEBody> get onEvent => _eventController.stream;
 
   // Back-off strategy variables
   int _reconnectAttempts = 0;
@@ -60,8 +61,8 @@ class SSEProvider extends BaseProvider<SSEAPI> {
 
       _sseSubscription = sseStream.listen(
         (event) {
-          print("SSE event received: $event");
-          _eventController.add(event["payload"]);
+          final outEvent = SSEBody.fromJson(event);
+          _eventController.add(outEvent);
         },
         onError: (error) {
           _handleConnectionLost();
@@ -99,7 +100,7 @@ class SSEProvider extends BaseProvider<SSEAPI> {
     });
   }
 
-  Future<void> stopSSE() async {
+  Future<void> _stopSSE() async {
     _reconnectTimer?.cancel(); // Cancel any pending reconnect timer
     _reconnectTimer = null;
 
@@ -125,13 +126,12 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   }
 
   @override
-  Future<void> onInit() async {}
-
-  @override
-  Future<void> onLogin() async {
+  Future<void> updateData() async {
     _startSSE();
   }
 
   @override
-  Future<void> onLogout() async {}
+  Future<void> cleanupData() async {
+    _stopSSE();
+  }
 }

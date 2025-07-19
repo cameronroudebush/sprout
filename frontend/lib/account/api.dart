@@ -28,4 +28,11 @@ class AccountAPI extends BaseAPI {
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Account.fromJson(e)).toList();
   }
+
+  /// Manually runs a sync for new data
+  Future<void> runManualSync() async {
+    final endpoint = "/sync/manual";
+    final body = {};
+    await client.post(body, endpoint);
+  }
 }

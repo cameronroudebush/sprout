@@ -29,14 +29,7 @@ class _SproutAppShellState extends State<SproutAppShell> {
   @override
   void initState() {
     super.initState();
-    _informAllProvidersOfLogin();
-  }
-
-  /// Tells all providers we have successfully logged in
-  Future<void> _informAllProvidersOfLogin() async {
-    for (final provider in BaseProvider.getAllProviders(context)) {
-      await provider.onLogin();
-    }
+    BaseProvider.updateAllData();
   }
 
   @override

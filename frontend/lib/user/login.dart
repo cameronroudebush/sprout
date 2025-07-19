@@ -94,7 +94,6 @@ class _LoginPageState extends State<LoginPage> {
                               children: [
                                 TextField(
                                   controller: _usernameController,
-                                  autofillHints: const [AutofillHints.username],
                                   keyboardType: TextInputType.text,
                                   autocorrect: false,
                                   enableSuggestions: false,
@@ -106,8 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                                 const SizedBox(height: 20.0),
                                 TextField(
                                   controller: _passwordController,
-                                  autofillHints: const [AutofillHints.password],
-                                  keyboardType: TextInputType.text,
+                                  keyboardType: TextInputType.visiblePassword,
                                   autocorrect: false,
                                   enableSuggestions: false,
                                   decoration: const InputDecoration(

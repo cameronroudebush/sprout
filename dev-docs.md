@@ -11,8 +11,10 @@ TODO:
 - Easier way to refresh accounts that need re-authenticated
 - Accounts page
   - Show separate net-worth charts
+- Centralize snackbar styling
 - Centralize tooltips and apply styling
 - Centralize spinners to better scale them
+- Hide mode to hide real numbers
 - Auto logout on unauthorized evocations
   - Better handling of API error messages in general could be a good idea.
 - Holdings
@@ -23,6 +25,8 @@ TODO:
   - OIDC?
 - Add Coinbase & Zillow providers
   - Maybe move how you config the simpleFin provider
+- Custom WPCU icon?
+- A lot of text looks odd on firefox
 - Lots and lots of docs...
 
 Unrelated:

@@ -15,3 +15,14 @@ export class RestBody<PayloadType extends SupportedPayloadTypes = any> extends B
     this.payload = payload;
   }
 }
+
+/** While very similar to a {@link RestBody}, these add an additional "queue" so we can better identify where this data is going */
+export class SSEBody<PayloadType extends SupportedPayloadTypes = any> extends RestBody<PayloadType> {
+  /** The queue of this SSE request so the frontend can direct it. */
+  queue: string;
+
+  constructor(queue: string, payload: PayloadType) {
+    super(payload);
+    this.queue = queue;
+  }
+}
