@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
@@ -13,6 +14,8 @@ import 'package:sprout/user/provider.dart';
 
 /// This class provides lookups to other providers
 class ServiceLocator {
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
   /// Internal service locator
   static final GetIt _sl = GetIt.instance;
 

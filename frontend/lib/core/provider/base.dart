@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/api/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/snackbar.dart';
 
 /// This class provides some basic capability that is required by our data driven providers
 abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
@@ -43,23 +44,8 @@ abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
       await provider.updateData();
     }
 
-    // if (showSnackbar) {
-    //   ScaffoldMessenger.of(
-    //     context,
-    //   ).showSnackBar(SnackBar(content: Text('Accounts refreshed'), duration: Duration(seconds: 2)));
-    // }
-
-    //     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-
-    // MaterialApp(
-    //   scaffoldMessengerKey: scaffoldMessengerKey,
-    //   // ...
-    // );
-
-    // if (showSnackbar) {
-    //   scaffoldMessengerKey.currentState?.showSnackBar(
-    //     SnackBar(content: Text('Accounts refreshed'), duration: Duration(seconds: 2)),
-    //   );
-    // }
+    if (showSnackbar) {
+      SnackbarProvider.openSnackbar("Accounts refreshed");
+    }
   }
 }
