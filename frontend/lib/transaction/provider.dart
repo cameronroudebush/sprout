@@ -14,7 +14,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   List<Transaction> get transactions => _transactions;
   int get totalTransactionCount => _totalTransactionCount;
   TransactionStats? get transactionStats => _transactionStats;
-  bool isLoading = false;
 
   TransactionProvider(super.api);
 
@@ -40,10 +39,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   }
 
   @override
-  Future<void> onInit() async {}
-
-  @override
-  Future<void> onLogin() async {
+  Future<void> updateData() async {
     isLoading = true;
     notifyListeners();
     await populateTotalTransactionCount();
@@ -54,5 +50,10 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   }
 
   @override
-  Future<void> onLogout() async {}
+  Future<void> cleanupData() async {
+    _transactionStats = null;
+    _totalTransactionCount = 0;
+    _transactions = [];
+    notifyListeners();
+  }
 }

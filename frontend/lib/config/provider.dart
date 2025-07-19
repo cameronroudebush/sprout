@@ -28,7 +28,7 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   bool get failedToConnect => _failedToConnect;
 
   // Constructor to check initial login status
-  ConfigProvider(super.api, this._packageInfo) {}
+  ConfigProvider(super.api, this._packageInfo);
 
   /// Requests the config from the backend and populates [_config]
   Future<Configuration?> populateConfig() async {
@@ -54,12 +54,16 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   }
 
   @override
-  Future<void> onLogin() async {
-    populateConfig();
+  Future<void> updateData() async {
+    isLoading = true;
+    notifyListeners();
+    await populateConfig();
+    isLoading = false;
+    notifyListeners();
   }
 
   @override
-  Future<void> onLogout() async {
+  Future<void> cleanupData() async {
     _config = null;
     notifyListeners();
   }

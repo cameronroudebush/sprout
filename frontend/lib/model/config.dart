@@ -20,11 +20,11 @@ class UnsecureAppConfiguration {
 
 /// This class defines the configuration that is returned when a user authenticates
 class Configuration {
-  Schedule lastSchedulerRun;
+  Sync lastSchedulerRun;
 
   Configuration({required this.lastSchedulerRun});
 
   factory Configuration.fromJson(Map<String, dynamic> json) {
-    return Configuration(lastSchedulerRun: Schedule.fromJson(json['lastSchedulerRun']));
+    return Configuration(lastSchedulerRun: Sync.fromJson(json['lastSchedulerRun']));
   }
 }

@@ -13,7 +13,7 @@ import 'package:sprout/config/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/client.dart';
 import 'package:sprout/core/api/sse.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -23,7 +23,9 @@ import 'package:sprout/setup/api.dart';
 import 'package:sprout/setup/provider.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/user/api.dart';
 import 'package:sprout/user/login.dart';
+import 'package:sprout/user/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,16 +39,27 @@ void main() async {
   // Create base API client
   final client = RESTClient();
 
+  // Register all the providers
+  ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigAPI(client), packageInfo));
+  ServiceLocator.register<AuthProvider>(AuthProvider(AuthAPI(client)));
+  ServiceLocator.register<SSEProvider>(SSEProvider(SSEAPI(client)));
+  ServiceLocator.register<AccountProvider>(AccountProvider(AccountAPI(client)));
+  ServiceLocator.register<SetupProvider>(SetupProvider(SetupAPI(client)));
+  ServiceLocator.register<NetWorthProvider>(NetWorthProvider(NetWorthAPI(client)));
+  ServiceLocator.register<TransactionProvider>(TransactionProvider(TransactionAPI(client)));
+  ServiceLocator.register<UserProvider>(UserProvider(UserAPI(client)));
+
   runApp(
     MultiProvider(
       providers: [
-        BaseProvider.createProvider(ConfigProvider(ConfigAPI(client), packageInfo)),
-        ChangeNotifierProvider(create: (context) => AuthProvider(AuthAPI(client), context)),
-        BaseProvider.createProvider(AccountProvider(AccountAPI(client))),
-        BaseProvider.createProvider(SSEProvider(SSEAPI(client))),
-        BaseProvider.createProvider(SetupProvider(SetupAPI(client))),
-        BaseProvider.createProvider(NetWorthProvider(NetWorthAPI(client))),
-        BaseProvider.createProvider(TransactionProvider(TransactionAPI(client))),
+        ServiceLocator.createProvider<ConfigProvider>(),
+        ServiceLocator.createProvider<AuthProvider>(),
+        ServiceLocator.createProvider<SSEProvider>(),
+        ServiceLocator.createProvider<AccountProvider>(),
+        ServiceLocator.createProvider<SetupProvider>(),
+        ServiceLocator.createProvider<NetWorthProvider>(),
+        ServiceLocator.createProvider<TransactionProvider>(),
+        ServiceLocator.createProvider<UserProvider>(),
       ],
       child: Main(theme: theme),
     ),

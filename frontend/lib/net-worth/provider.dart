@@ -26,10 +26,7 @@ class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   }
 
   @override
-  Future<void> onInit() async {}
-
-  @override
-  Future<void> onLogin() async {
+  Future<void> updateData() async {
     isLoading = true;
     notifyListeners();
     await _populateNetWorth();
@@ -39,7 +36,7 @@ class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   }
 
   @override
-  Future<void> onLogout() async {
+  Future<void> cleanupData() async {
     _netWorth = null;
     _historicalNetWorth = null;
     notifyListeners();

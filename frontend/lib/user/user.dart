@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
@@ -18,26 +20,10 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  /// Tells the API to manually run an account refresh
-  Future<void> _manualSyncRefresh() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    // TODO: Clean this up
-    await userProvider.api.runManualSync();
-    // final accountProvider = Provider.of<AccountProvider>(context, listen: false);
-    // await accountProvider.populateLinkedAccounts();
-    // final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
-    // await transactionProvider.populateTransactions(0, transactionProvider.rowsPerPage);
-    // await transactionProvider.populateStats();
-    // await transactionProvider.populateTotalTransactionCount();
-    // final netWorthProvider = Provider.of<NetWorthProvider>(context, listen: false);
-    // await netWorthProvider.populateHistoricalNetWorth();
-    // await netWorthProvider.populateNetWorth();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ConfigProvider, SSEProvider>(
-      builder: (context, configProvider, sseProvider, child) {
+    return Consumer4<ConfigProvider, SSEProvider, UserProvider, AccountProvider>(
+      builder: (context, configProvider, sseProvider, userProvider, accountProvider, child) {
         final config = configProvider.config;
         final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
 
@@ -91,8 +77,14 @@ class _UserPageState extends State<UserPage> {
                     value: sseProvider.isConnected ? "Connected" : "Disconnected",
                     icon: Icons.event_repeat,
                   ),
-                  SizedBox(height: 12),
-                  ButtonWidget(text: "Manual Refresh", minSize: minButtonSize, onPressed: _manualSyncRefresh),
+                  if (kDebugMode) ...[
+                    SizedBox(height: 12),
+                    ButtonWidget(
+                      text: "Manual Account Sync",
+                      minSize: minButtonSize,
+                      onPressed: () => accountProvider.manualSync(),
+                    ),
+                  ],
                 ]),
 
                 // User Information Card

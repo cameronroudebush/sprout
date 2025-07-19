@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/account/dialog/sync.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -48,8 +49,9 @@ class _AccountErrorDialogState extends State<AccountErrorDialog> with WidgetsBin
   }
 
   /// This function is called when the user returns to the app.
-  void _onUserReturn() {
-    // TODO: Refresh data
+  Future<void> _onUserReturn() async {
+    // Open another dialog asking if we want to resync
+    await showDialog(context: context, builder: (_) => SyncDialog());
   }
 
   @override
