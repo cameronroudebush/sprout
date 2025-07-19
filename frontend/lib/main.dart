@@ -137,7 +137,12 @@ class MainState extends State<Main> {
           );
         }
 
-        return MaterialApp(home: page, theme: theme, title: "Sprout");
+        return MaterialApp(
+          home: page,
+          theme: theme,
+          title: "Sprout",
+          scaffoldMessengerKey: ServiceLocator.scaffoldMessengerKey,
+        );
       },
     );
   }

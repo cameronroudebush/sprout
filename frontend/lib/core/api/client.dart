@@ -4,7 +4,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:sprout/auth/api.dart';
+import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/api/storage.dart';
+import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/snackbar.dart';
 import 'package:uuid/uuid.dart';
 
 /// A client for interacting with a REST API that uses JWT for authentication.
@@ -33,6 +36,17 @@ class RESTClient {
     return headers;
   }
 
+  /// Checks if the response included an unauthorized response and logs out if so.
+  Future<void> _checkUnauth(http.Response response) async {
+    if (response.statusCode == 403) {
+      final authProvider = ServiceLocator.get<AuthProvider>();
+      if (authProvider.isLoggedIn) {
+        await authProvider.logout();
+        SnackbarProvider.openSnackbar("Session expired", type: SnackbarType.warning);
+      }
+    }
+  }
+
   /// Posts the requested body content to the given endpoint
   /// [payload] The content to stringify and send as a payload
   /// [endpoint] The endpoint to post to. Must start with a /
@@ -51,6 +65,7 @@ class RESTClient {
       final data = json.decode(response.body);
       return data["payload"];
     } else {
+      _checkUnauth(response);
       throw Exception('Failed to post to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }
@@ -66,6 +81,7 @@ class RESTClient {
       final data = json.decode(response.body);
       return data["payload"];
     } else {
+      _checkUnauth(response);
       throw Exception('Failed to get to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }
