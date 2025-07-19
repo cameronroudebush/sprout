@@ -39,6 +39,9 @@ class AuthProvider extends BaseProvider<AuthAPI> {
   Future<void> logout() async {
     await api.logout();
     _isLoggedIn = false;
+    for (final provider in ServiceLocator.getAllProviders()) {
+      await provider.cleanupData();
+    }
     notifyListeners();
   }
 
