@@ -14,7 +14,7 @@
     },
   ],
   "extensions": {
-    "recommendations": ["ionic.ionic"],
+    "recommendations": [],
   },
   "settings": {
     "files.exclude": {
@@ -26,6 +26,6 @@
     "typescript.tsdk": "Backend\\node_modules\\typescript\\lib",
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifier": "non-relative",
-    "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular/standalone"],
+    "typescript.preferences.autoImportFileExcludePatterns": [],
   },
 }

@@ -10,16 +10,14 @@ export class DatabaseBase extends DBBase {
   declare id: string;
 
   /** Returns the repository from the data source to execute content against */
-  private getRepository() {
+  getRepository() {
     return Database.source!.getRepository(this.constructor) as Repository<this>;
   }
 
-  //   /**
-  //    * @see {@link getRepository}
-  //    */
-  //   private static getRepository<T extends DatabaseBase>(this: CustomTypes.Constructor<T>) {
-  //     return new this().getRepository();
-  //   }
+  /** Returns the repository from the data source to execute content against */
+  static getRepository<T extends DatabaseBase>(this: CustomTypes.Constructor<T>) {
+    return new this().getRepository();
+  }
 
   /** Returns this current element with {@link id} from the database */
   async get(): Promise<this> {
@@ -36,6 +34,11 @@ export class DatabaseBase extends DBBase {
   /** Similar to {@link find} but specifically tries to locate a single object, not multiple */
   static async findOne<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, opts: FindOneOptions<T>) {
     return await new this().getRepository().findOne(opts);
+  }
+
+  /** Given an ID, deletes the matching element in the database. */
+  static async deleteById<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, id: string) {
+    return await new this().getRepository().delete(id);
   }
 
   /** Inserts the element from `this` into the database */

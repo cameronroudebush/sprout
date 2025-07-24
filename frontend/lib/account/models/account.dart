@@ -57,6 +57,7 @@ class Account {
   /// Converts this object to JSON object
   dynamic toJson() {
     return {
+      'id': id,
       'name': name,
       'provider': provider,
       'currency': currency,

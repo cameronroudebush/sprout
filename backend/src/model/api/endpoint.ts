@@ -32,13 +32,19 @@ export module RestEndpoints {
     static get = "/transaction/get";
     static count = "/transaction/count";
     static stats = "/transaction/stats";
+  }
+
+  /** Net worth endpoints for finance data */
+  export class netWorth {
     static getNetWorth = "/transaction/net-worth/get";
     static getNetWorthOverTime = "/transaction/net-worth/get/ot";
+    static getNetWorthByAccount = "/transaction/net-worth/get/by/accounts";
   }
 
   /** Account endpoints for for the users supported banks */
   export class account {
     static get = "/account/get";
+    static delete = "/account/delete";
     static getAll = "/account/get/all";
     static getAllFromProvider = "/account/provider/get/all";
     static link = "/account/provider/link";

@@ -35,4 +35,11 @@ class AccountAPI extends BaseAPI {
     final body = {};
     await client.post(body, endpoint);
   }
+
+  /// Tells the backend to remove a linked account
+  Future<void> deleteAccount(Account account) async {
+    final endpoint = "/account/delete";
+    final body = account.toJson();
+    await client.post(body, endpoint);
+  }
 }
