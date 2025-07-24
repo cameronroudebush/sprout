@@ -15,7 +15,7 @@ class TextWidget extends StatelessWidget implements PreferredSizeWidget {
 
   const TextWidget({
     super.key,
-    required this.referenceSize,
+    this.referenceSize = 1,
     required this.text,
     this.style,
     this.textAlign = TextAlign.center,

@@ -1,17 +1,26 @@
 import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
+import { Base } from "@backend/model/base";
 import { Holding } from "@backend/model/holding";
 import { Institution } from "@backend/model/institution";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import { Providers } from "../../providers";
 import { RestMetadata } from "../metadata";
+import { SSEAPI } from "./sse";
 
 export class AccountAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.account.getAll, "GET"))
   async getAccounts(_data: RestBody, user: User) {
     return await Account.find({ where: { user: user } });
+  }
+
+  @RestMetadata.register(new RestMetadata(RestEndpoints.account.delete, "POST"))
+  async deleteAccount(data: RestBody<Account>, user: User) {
+    await Account.deleteById(data.payload.id);
+    SSEAPI.sendToSSEUser.next({ payload: Base.fromPlain({}), queue: "sync", user });
+    return data.payload.id;
   }
 
   /** Returns accounts the provider knows about to be added to sprout */

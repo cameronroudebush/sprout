@@ -1,4 +1,5 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
+import { AccountHistory } from "@backend/model/account.history";
 import { DatabaseBase } from "@backend/model/database.base";
 import { Institution } from "@backend/model/institution";
 import { User } from "@backend/model/user";
@@ -60,5 +61,20 @@ export class Account extends DatabaseBase {
     this.availableBalance = availableBalance;
     this.type = type;
     this.currency = currency;
+  }
+
+  /** Turns this account to act like account history for today */
+  toAccountHistory() {
+    return AccountHistory.fromPlain({
+      balance: this.balance,
+      account: this,
+      availableBalance: this.availableBalance,
+      time: new Date(),
+    });
+  }
+
+  /** Returns if this account affects the net worth negativity due to being a loan type. */
+  get isNegativeNetWorth() {
+    return this.type === "credit" || this.type === "loan";
   }
 }

@@ -7,10 +7,12 @@ class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   // Data store
   double? _netWorth;
   HistoricalNetWorth? _historicalNetWorth;
+  List<HistoricalNetWorth>? _historicalAccountData;
 
   // Public getters
   double? get netWorth => _netWorth;
   HistoricalNetWorth? get historicalNetWorth => _historicalNetWorth;
+  List<HistoricalNetWorth>? get historicalAccountData => _historicalAccountData;
   bool isLoading = false;
 
   NetWorthProvider(super.api);
@@ -25,12 +27,18 @@ class NetWorthProvider extends BaseProvider<NetWorthAPI> {
     return _historicalNetWorth = await api.getHistoricalNetWorth();
   }
 
+  /// Populates the net worth overtime flow.
+  Future<List<HistoricalNetWorth>> _populateHistoricalAccountData() async {
+    return _historicalAccountData = await api.getNetWorthByAccounts();
+  }
+
   @override
   Future<void> updateData() async {
     isLoading = true;
     notifyListeners();
     await _populateNetWorth();
     await _populateHistoricalNetWorth();
+    await _populateHistoricalAccountData();
     isLoading = false;
     notifyListeners();
   }

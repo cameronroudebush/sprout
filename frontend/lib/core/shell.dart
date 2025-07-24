@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/provider/base.dart';
@@ -22,8 +23,9 @@ class _SproutAppShellState extends State<SproutAppShell> {
 
   final List<Map<String, dynamic>> _pages = const <Map<String, dynamic>>[
     {'page': HomePage(), 'icon': Icons.home, 'label': 'Home'},
+    {'page': AccountOverviewPage(), 'icon': Icons.account_balance, 'label': 'Accounts'},
     {'page': TransactionsOverviewPage(), 'icon': Icons.receipt, 'label': 'Transactions'},
-    {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'Account'},
+    {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'User'},
   ];
 
   @override

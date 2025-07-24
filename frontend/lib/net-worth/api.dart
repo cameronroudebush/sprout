@@ -17,4 +17,11 @@ class NetWorthAPI extends BaseAPI {
     dynamic result = await client.get(endpoint);
     return HistoricalNetWorth.fromJson(result);
   }
+
+  /// Returns net worth over time
+  Future<List<HistoricalNetWorth>> getNetWorthByAccounts() async {
+    final endpoint = "/transaction/net-worth/get/by/accounts";
+    final List<dynamic> result = await client.get(endpoint) as dynamic;
+    return result.map((e) => HistoricalNetWorth.fromJson(e)).toList();
+  }
 }
