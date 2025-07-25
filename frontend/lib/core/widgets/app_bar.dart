@@ -74,7 +74,8 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     return _blankBar(
       context,
       Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Add button
           SproutTooltip(

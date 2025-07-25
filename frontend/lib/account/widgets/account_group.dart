@@ -108,6 +108,7 @@ class AccountGroupWidget extends StatelessWidget {
                                 percentageChange: groupPercentChange,
                                 totalChange: groupAmountChange,
                                 mainAxisAlignment: MainAxisAlignment.start,
+                                netWorthPeriod: netWorthPeriod,
                               ),
                           ],
                         ),

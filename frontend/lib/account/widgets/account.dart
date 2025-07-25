@@ -110,7 +110,7 @@ class AccountWidget extends StatelessWidget {
         ?.getValueByFrame(netWorthPeriod);
 
     return Padding(
-      padding: EdgeInsetsGeometry.directional(start: 12, end: 12),
+      padding: EdgeInsetsGeometry.directional(start: 0, end: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         spacing: 12,
@@ -120,6 +120,7 @@ class AccountWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
+                  flex: 2,
                   child: Row(
                     children: [
                       if (isSelected)
@@ -151,33 +152,44 @@ class AccountWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Add some extra info in the center
-                Column(
-                  children: [
-                    if (account.institution.hasError)
-                      SproutTooltip(
-                        message: 'There was an error syncing with ${account.institution.name}.',
-                        child: const Padding(
-                          padding: EdgeInsets.only(top: 4.0),
-                          child: Icon(Icons.warning, color: Colors.red, size: 20.0),
-                        ),
-                      ),
-                  ],
-                ),
                 // Print details at the end of the row
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     spacing: 4,
                     children: [
-                      // Account balance
-                      if (displayTotals) TextWidget(text: currencyFormatter.format(account.balance)),
-                      // If our day change is null, we don't have enough data to come up with a calculation
-                      if (dayChange != null && dayChange.percentChange != 0 && displayStats)
-                        AccountChangeWidget(
-                          percentageChange: dayChange.percentChange,
-                          totalChange: account.isNegativeNetWorth ? dayChange.valueChange * -1 : dayChange.valueChange,
-                        ),
+                      Row(
+                        spacing: 12,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            spacing: 4,
+                            children: [
+                              // Account balance
+                              if (displayTotals) TextWidget(text: currencyFormatter.format(account.balance)),
+                              // If our day change is null, we don't have enough data to come up with a calculation
+                              if (dayChange != null && dayChange.percentChange != 0 && displayStats)
+                                AccountChangeWidget(
+                                  percentageChange: dayChange.percentChange,
+                                  totalChange: account.isNegativeNetWorth
+                                      ? dayChange.valueChange * -1
+                                      : dayChange.valueChange,
+                                  showPercentage: false,
+                                ),
+                            ],
+                          ),
+                          if (account.institution.hasError)
+                            SproutTooltip(
+                              message: 'There was an error syncing with ${account.institution.name}.',
+                              child: const Padding(
+                                padding: EdgeInsets.only(top: 4.0),
+                                child: Icon(Icons.warning, color: Colors.red, size: 20.0),
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
