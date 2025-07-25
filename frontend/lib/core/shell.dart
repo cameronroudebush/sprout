@@ -4,6 +4,7 @@ import 'package:sprout/account/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
@@ -38,24 +39,9 @@ class _SproutAppShellState extends State<SproutAppShell> {
   Widget build(BuildContext context) {
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
+        final screenHeight = MediaQuery.of(context).size.height;
         return Scaffold(
-          appBar: AppBar(
-            toolbarHeight: MediaQuery.of(context).size.height * .075,
-            scrolledUnderElevation: 0,
-            title: Image.asset(
-              'assets/logo/color-transparent-no-tag.png',
-              width: MediaQuery.of(context).size.height * .2,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
-            centerTitle: true,
-            elevation: 0, // Remove shadow for a flat design
-            backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(8.0),
-              child: Container(color: Theme.of(context).colorScheme.secondary.withAlpha(100), height: 8.0),
-            ),
-          ),
+          appBar: SproutAppBar(screenHeight: screenHeight, currentPage: _pages[_currentIndex]['label']),
           body: widget.isSetup
               ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
               : Center(

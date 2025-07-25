@@ -11,7 +11,6 @@ TODO:
     - Show simplified transactions
       - Just where the charge was from and how much it was
   - Accounts page
-    - Group accounts by their type
     - Allow each type to display separate change in net worth as a percentage
     - common chart at the top
     - Add account button
@@ -21,7 +20,7 @@ TODO:
 
 - Bottom bar to sidenav on larger screens
 - Create new app bar
-- Net worth notifications?
+- Look into refresh cutoffs
 - Add user config info
   - Password reset?
   - OIDC?
@@ -31,5 +30,5 @@ TODO:
 - A lot of text looks odd on firefox
 - Need to look into cleaning up temp transactions ($1.00 transactions that are stuck pending for > 1 week)
 - Confirm rate limit stuff is working in database
-- Maybe a new navbar?
 - Lots and lots of docs...
+- Replace synth
