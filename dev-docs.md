@@ -18,6 +18,7 @@ TODO:
     - Find an API so we can track holdings in more real time
     - Show each account separately and then the holdings associate to them
 
+- User config table
 - Bottom bar to sidenav on larger screens
 - Create new app bar
 - Look into refresh cutoffs

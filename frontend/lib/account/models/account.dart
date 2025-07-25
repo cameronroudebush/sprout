@@ -66,4 +66,9 @@ class Account {
       'availableBalance': availableBalance,
     };
   }
+
+  /// Returns if this account affects the net worth negativity due to being a loan type.
+  get isNegativeNetWorth {
+    return type == "credit" || type == "loan";
+  }
 }

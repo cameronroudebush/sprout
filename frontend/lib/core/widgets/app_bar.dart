@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/account/dialog/add_account.dart';
+import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
 
 /// The bar at the top of the screen we wish to render
 class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -11,13 +14,18 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(screenHeight * .075);
 
   Widget build(BuildContext context) {
+    Widget page = _blankBar(context, null);
+    final currentPageLower = currentPage.toLowerCase();
+    if (currentPageLower == "home") {
+      page = _homeContent(context);
+    } else if (currentPageLower == "accounts") {
+      page = _accountPage(context);
+    }
+
     return AppBar(
       toolbarHeight: preferredSize.height,
       scrolledUnderElevation: 0,
-      title: Padding(
-        padding: EdgeInsetsGeometry.all(12),
-        child: currentPage.toLowerCase() == "home" ? _homeContent(context) : _otherContent(context),
-      ),
+      title: Padding(padding: EdgeInsetsGeometry.all(12), child: page),
       centerTitle: true,
       elevation: 0, // Remove shadow for a flat design
       backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -28,12 +36,13 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _otherContent(BuildContext context) {
+  /// An empty bar that shows the page name and the sprout icon, that's it
+  Widget _blankBar(BuildContext context, Widget? leadingContent) {
     final mediaQuery = MediaQuery.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: SizedBox.shrink()),
+        Expanded(child: leadingContent ?? SizedBox.shrink()),
         TextWidget(
           referenceSize: 2,
           text: currentPage,
@@ -59,6 +68,32 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  /// Renders what to show on the account page
+  Widget _accountPage(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    return _blankBar(
+      context,
+      Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Add button
+          SproutTooltip(
+            message: "Add an account",
+            child: ButtonWidget(
+              icon: Icons.add,
+              minSize: mediaQuery.size.width * .1,
+              onPressed: () async {
+                // Open the add account dialog
+                await showDialog(context: context, builder: (_) => AddAccountDialog());
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Renders what to show on the home page
   Widget _homeContent(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return Row(

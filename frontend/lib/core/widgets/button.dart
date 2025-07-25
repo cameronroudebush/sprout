@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// A reusable button that helps with default sizing for mobile
 class ButtonWidget extends StatelessWidget {
-  final String text;
+  final String? text;
   final IconData? icon;
   final VoidCallback? onPressed;
   final double fontSize;
@@ -11,7 +11,7 @@ class ButtonWidget extends StatelessWidget {
 
   const ButtonWidget({
     super.key,
-    required this.text,
+    this.text,
     this.icon,
     this.onPressed,
     this.fontSize = 16,
@@ -27,19 +27,23 @@ class ButtonWidget extends StatelessWidget {
       backgroundColor: color ?? Theme.of(context).buttonTheme.colorScheme!.onPrimary,
     );
 
-    if (icon != null) {
+    if (icon != null && text != null) {
       return ElevatedButton.icon(
         onPressed: onPressed,
         icon: Icon(icon),
-        label: Text(text, style: TextStyle(fontSize: fontSize)),
+        label: Text(text!, style: TextStyle(fontSize: fontSize)),
         style: buttonStyle,
       );
-    } else {
+    } else if (icon != null && text == null) {
+      return ElevatedButton(onPressed: onPressed, style: buttonStyle, child: Icon(icon));
+    } else if (icon == null && text != null) {
       return ElevatedButton(
         onPressed: onPressed,
         style: buttonStyle,
-        child: Text(text, style: TextStyle(fontSize: fontSize)),
+        child: Text(text!, style: TextStyle(fontSize: fontSize)),
       );
+    } else {
+      return const SizedBox.shrink();
     }
   }
 }
