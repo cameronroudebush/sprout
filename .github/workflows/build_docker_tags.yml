@@ -23,7 +23,7 @@ jobs:
 
       # Grab tags for version numbers
       - name: Get tags
-        run: git fetch --tags originT
+        run: git fetch --tags origin
 
       # Install the packages so we can run the script
       - name: NPM Install
