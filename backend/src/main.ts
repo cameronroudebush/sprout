@@ -4,7 +4,6 @@ import "source-map-support/register";
 import { CentralServer } from "./central.server";
 import { ConfigurationController } from "./config/controller";
 import { Configuration } from "./config/core";
-import { ImageProxy } from "./image.proxy";
 import { Logger } from "./logger";
 import { Providers } from "./providers";
 import { RestAPIServer } from "./web-api/server";
@@ -21,7 +20,6 @@ async function main() {
   // Initialize server
   const centralServer = new CentralServer();
   await new RestAPIServer(centralServer).initialize();
-  new ImageProxy(centralServer);
   Logger.success("Server ready!");
   // Schedule our provider to run
   await Providers.initializeProviders();

@@ -16,7 +16,7 @@ Sprout is a financial management app specializing in automatic account tracking 
 
 ## Code Base
 
-Sprout is designed with a "mobile first" approach utilizing flutter for it's interfaces with a node.js backend.
+Sprout is designed with a "mobile first" approach utilizing [flutter](https://flutter.dev/) for it's interfaces with a [node.js](https://nodejs.org/en) backend.
 
 ## Planed Features
 
@@ -52,8 +52,21 @@ Below is a list of planned features I personally would find beneficial. I make n
 - Additional providers
   - Zillow for house value over time?
   - Crypto? (This will be a pain)
+- Database
+  - Backups
+  - Migrations!
 - Android/IOS Apps
   - Widgets for things like transactions
+
+# Security
+
+Anytime you touch anything with financial data, security is always an important topic. Below are some of our standings on the security of this application:
+
+- While we do know about account balances and transactions, **we do not keep any user authentication** information related to your bank accounts.
+  - Currently we only support [SimpleFin](https://www.simplefin.org/) which has a great slogan of "Why give out your key when they only need a window?"
+- All data transmission from any of the user interfaces to the backend is done via a [REST API](https://blog.postman.com/rest-api-examples/) and each request requires a [JWT](https://www.jwt.io/introduction) bearer to be added for the backend to validate the request and the user who requested it.
+  - The secret key is rotated on [every restart](https://github.com/cameronroudebush/sprout/blob/master/backend/src/config/core.ts#L26)
+  - You can see the [authentication check here that most endpoints use](https://github.com/cameronroudebush/sprout/blob/master/backend/src/web-api/server.ts#L40)
 
 # How do I use Sprout?
 
