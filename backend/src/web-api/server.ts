@@ -5,6 +5,7 @@ import { globSync } from "glob";
 import path from "path";
 import { CentralServer } from "../central.server";
 import { Logger } from "../logger";
+import { ImageProxy } from "./endpoints/image-proxy";
 import { SSEAPI } from "./endpoints/sse";
 import { EndpointError } from "./error";
 import { RestMetadata } from "./metadata";
@@ -60,7 +61,7 @@ export class RestAPIServer {
     this.server.all("/api*", async (req, res) => {
       this.centralServer.setCORSHeaders(res);
       if (req.method === "OPTIONS") return res.status(200).end();
-      const requestUrl = req.url.replace(RestAPIServer.ENDPOINT_HEADER, "");
+      const requestUrl = req.url.replace(RestAPIServer.ENDPOINT_HEADER, "").split("?")[0];
       // Re useable functions
       const badRequest = (error: Error | EndpointError) => {
         let code = (error as EndpointError).code;
@@ -73,10 +74,13 @@ export class RestAPIServer {
           // Require auth for SSE
           const user = await this.validateAuthorization(req);
           return new SSEAPI().setupSSEListener(req, res, user);
+        } else if (requestUrl === "/image-proxy") {
+          const user = await this.validateAuthorization(req);
+          return await new ImageProxy().handleImageProxy(req, res, user);
         }
         // If we have an API base, strip it because the endpoints will not know of it.
         const endpoint = RestMetadata.loadedEndpoints.find((x) => x.metadata.queue === requestUrl);
-        if (endpoint == null) throw new EndpointError(`No matching endpoint: ${requestUrl}`, 400);
+        if (endpoint == null) throw new EndpointError(`No matching endpoint: ${requestUrl}`, 404);
         // Validate authentication if required;
         let user: User | null;
         if (endpoint.metadata.requiresAuth) {
