@@ -5,7 +5,6 @@ import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
-import 'package:sprout/core/widgets/attribution.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/user/provider.dart';
@@ -115,12 +114,6 @@ class _UserPageState extends State<UserPage> {
                       await authProvider.logout();
                     },
                   ),
-                ]),
-
-                _buildCard([
-                  TextWidget(referenceSize: 1.6, text: "Supporters", style: headerStyling),
-                  const Divider(height: 32.0, thickness: 1.0),
-                  AttributionWidget(text: "Logos provided by Synth", url: "https://synthfinance.com"),
                 ]),
               ],
             ),

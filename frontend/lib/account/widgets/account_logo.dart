@@ -14,9 +14,8 @@ class AccountLogoWidget extends StatelessWidget {
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
         final institution = account.institution;
-        final synthLogoURL = "https://logo.synthfinance.com/${institution.id.replaceAll("https://www.", "")}";
         // Use the backend as our image proxy
-        final imageProxyURL = "${configProvider.baseUrl}/image-proxy?url=$synthLogoURL";
+        final imageProxyURL = "${configProvider.baseUrl}/image-proxy?url=${institution.id}";
 
         return ClipRRect(
           borderRadius: BorderRadiusGeometry.circular(24.0),

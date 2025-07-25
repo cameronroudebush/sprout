@@ -4,25 +4,31 @@ import { Readable } from "typeorm/platform/PlatformTools";
 import { CentralServer } from "./central.server";
 
 /**
- * A class that creates an image proxy to deal with CORS errors so this server can
- *  instead proxy them to you. This is intended to be used with {@link https://synthfinance.com/}.
+ * A class that creates an image proxy so that institution URL's can be easily turned into an image
  */
 export class ImageProxy {
   /**
-   * If URL's come in that match any of these, we'll direct the request to this different
-   *  image. This might be because synth doesn't have a good looking logo match.
+   * If google sucks at finding an icon for us to use, we can add manual mappings here to use instead.
+   *
+   * If you want a better looking icon for a site you use, open a PR and update this mapping.
    */
   static MANUAL_PROXY: { [key: string]: string } = {
-    "https://logo.synthfinance.com/www.wpcu.coop": "https://play-lh.googleusercontent.com/mIXMOB7Kxi0BsD5HnYcWdA-wdJbdphhMp0TfSZ6m1o8PBy86xNhegeOmrpJ5S2D2tVU",
+    "www.wpcu.coop": "https://play-lh.googleusercontent.com/mIXMOB7Kxi0BsD5HnYcWdA-wdJbdphhMp0TfSZ6m1o8PBy86xNhegeOmrpJ5S2D2tVU",
+    "www.discover.com": "https://companieslogo.com/img/orig/DFS-72325cfa.png?t=1720244491",
   };
 
   constructor(centralServer: CentralServer) {
     centralServer.server.get("/image-proxy", async (req, res) => {
       try {
-        let imageUrl = req.query["url"] as string | undefined;
+        const imageUrl = req.query["url"] as string | undefined;
         if (!imageUrl) return res.status(400).send("Image URL query is required");
-        if (Object.keys(ImageProxy.MANUAL_PROXY).includes(imageUrl)) imageUrl = ImageProxy.MANUAL_PROXY[imageUrl]!;
-        const result = await fetch(imageUrl);
+        // Cleanup the request url
+        const cleanImageUrl = imageUrl.replace("https://", "");
+        const manualMapping = ImageProxy.MANUAL_PROXY[cleanImageUrl];
+        let imageRequestURL: string;
+        if (manualMapping != null) imageRequestURL = manualMapping;
+        else imageRequestURL = `https://www.google.com/s2/favicons?domain=${cleanImageUrl}&sz=128`;
+        const result = await fetch(imageRequestURL);
         if (!result.ok) return res.status(result.status).send(res.statusMessage);
 
         const contentType = result.headers.get("content-type");
