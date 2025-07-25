@@ -11,9 +11,8 @@ TODO:
     - Show simplified transactions
       - Just where the charge was from and how much it was
   - Accounts page
-    - Allow each type to display separate change in net worth as a percentage
-    - common chart at the top
-    - Add account button
+    - Common chart at the top
+      - Ability to select time frame of look-back for percentage changes
   - Holdings page
     - Find an API so we can track holdings in more real time
     - Show each account separately and then the holdings associate to them
@@ -32,4 +31,3 @@ TODO:
 - Need to look into cleaning up temp transactions ($1.00 transactions that are stuck pending for > 1 week)
 - Confirm rate limit stuff is working in database
 - Lots and lots of docs...
-- Replace synth

@@ -76,7 +76,7 @@ class AccountGroupsWidget extends StatelessWidget {
             }
 
             return Padding(
-              padding: EdgeInsetsGeometry.directional(start: 8, end: 8),
+              padding: EdgeInsetsGeometry.directional(start: 0, end: 0),
               child: AccountGroupWidget(
                 accounts: entry.value,
                 type: entry.key,
