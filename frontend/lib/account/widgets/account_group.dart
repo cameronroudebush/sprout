@@ -14,8 +14,25 @@ class AccountGroupWidget extends StatelessWidget {
   final String type;
   final String netWorthPeriod = "last7Days";
   final double totalNetWorth;
+  final void Function(Account)? onAccountClick;
+  final Set<Account>? selectedAccounts;
 
-  const AccountGroupWidget({super.key, required this.accounts, required this.type, required this.totalNetWorth});
+  /// If stats should be displayed (percentage changes etc)
+  final bool displayStats;
+
+  /// If we should display the total values
+  final bool displayTotals;
+
+  const AccountGroupWidget({
+    super.key,
+    required this.accounts,
+    required this.type,
+    required this.totalNetWorth,
+    this.onAccountClick,
+    required this.displayStats,
+    required this.displayTotals,
+    this.selectedAccounts,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,80 +62,117 @@ class AccountGroupWidget extends StatelessWidget {
         final theme = Theme.of(context);
         final balanceColor = getBalanceColor(totalBalance, theme);
 
+        // Simplify the types and perform some extra handling on debts
         String simpleType;
         if (type == "loan" || type == "credit") {
           simpleType = "debts";
+          groupAmountChange *= -1;
         } else {
           simpleType = "assets";
         }
 
-        return Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Display header row information
-              Padding(
-                padding: EdgeInsetsGeometry.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        /// A cleaned up type name for display
+        String adjustedType = type;
+        if (adjustedType.toLowerCase() == "credit") {
+          adjustedType = "Credit Card";
+        } else if (adjustedType.toLowerCase() == "depository") {
+          adjustedType = "Cash";
+        } else {
+          adjustedType = adjustedType.toCapitalized;
+        }
+
+        return ClipRRect(
+          borderRadius: BorderRadiusGeometry.circular(24),
+          child: Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Display header row information
+                Padding(
+                  padding: EdgeInsetsGeometry.all(12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          spacing: 4,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWidget(
+                              referenceSize: 1.25,
+                              text: adjustedType,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            if (displayStats)
+                              AccountChangeWidget(
+                                percentageChange: groupPercentChange,
+                                totalChange: groupAmountChange,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                              ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          spacing: 4,
+                          children: [
+                            // Group balance
+                            if (displayTotals)
+                              TextWidget(
+                                referenceSize: 1.15,
+                                text: currencyFormatter.format(totalBalance),
+                                style: TextStyle(fontWeight: FontWeight.bold, color: balanceColor),
+                              ),
+                            // Percent of total net worth
+                            if (displayStats)
+                              TextWidget(
+                                referenceSize: .9,
+                                text: "${formatPercentage(percentOfType)} of $simpleType",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Column(
                   children: [
-                    Expanded(
-                      child: Column(
-                        spacing: 4,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextWidget(
-                            referenceSize: 1.25,
-                            text: type.toCapitalized,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                    ...accounts.expand((account) {
+                      final isSelected = selectedAccounts?.contains(account) ?? false;
+
+                      return [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: isSelected == false
+                                ? null
+                                : BoxBorder.all(width: 3, color: theme.colorScheme.secondary),
+                            borderRadius: accounts.last == account
+                                ? BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
+                                : null,
                           ),
-                          AccountChangeWidget(
-                            percentageChange: groupPercentChange,
-                            totalChange: groupAmountChange,
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          child: Column(
+                            children: [
+                              AccountWidget(
+                                account: account,
+                                netWorthPeriod: netWorthPeriod,
+                                displayTotals: displayTotals,
+                                displayStats: displayStats,
+                                onClick: onAccountClick == null ? null : () => onAccountClick!(account),
+                                isSelected: isSelected,
+                              ),
+                              if (account != accounts.last) const Divider(height: 1),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        spacing: 4,
-                        children: [
-                          // Group balance
-                          TextWidget(
-                            referenceSize: 1.15,
-                            text: currencyFormatter.format(totalBalance),
-                            style: TextStyle(fontWeight: FontWeight.bold, color: balanceColor),
-                          ),
-                          // Percent of total net worth
-                          TextWidget(
-                            referenceSize: .9,
-                            text: "${formatPercentage(percentOfType)} of $simpleType",
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      ];
+                    }),
                   ],
                 ),
-              ),
-              const Divider(height: 1),
-              // Display every account with a separator
-              Padding(
-                padding: EdgeInsetsGeometry.directional(start: 12, end: 12),
-                child: Column(
-                  children: [
-                    ...accounts.expand(
-                      (account) => [
-                        AccountWidget(account: account, netWorthPeriod: netWorthPeriod),
-                        if (account != accounts.last) const Divider(height: 1),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

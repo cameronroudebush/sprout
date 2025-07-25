@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/account/accounts.dart';
+import 'package:sprout/account/overview.dart';
 import 'package:sprout/net-worth/net_worth.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,10 +22,10 @@ class _HomePageState extends State<HomePage> {
             children: <Widget>[
               // Net Worth Section
               NetWorthWidget(),
-              SizedBox(height: 24.0), // Spacing between sections
+              SizedBox(height: 24.0),
               // Accounts Section
-              AccountsPage(),
-              SizedBox(height: 24.0), // Spacing between sections
+              AccountOverviewPage(),
+              SizedBox(height: 24.0),
               // Transactions Section
               // TransactionsSection(),
             ],

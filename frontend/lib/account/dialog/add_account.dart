@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/account/widgets/accounts_display.dart';
+import 'package:sprout/account/widgets/selectable_accounts.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 
@@ -73,7 +73,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
           : SizedBox(
               width: MediaQuery.of(context).size.width * 0.8, // Set a fixed width
               height: MediaQuery.of(context).size.height * 0.6, // Set a fixed height
-              child: AccountsWidget(
+              child: SelectableAccountsWidget(
                 accounts: _accounts,
                 onSelectionChanged: (value) {
                   setState(() {

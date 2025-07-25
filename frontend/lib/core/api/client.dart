@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:sprout/auth/api.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/api/storage.dart';
@@ -12,12 +12,19 @@ import 'package:uuid/uuid.dart';
 
 /// A client for interacting with a REST API that uses JWT for authentication.
 class RESTClient {
+  final timeout = Duration(seconds: 30);
+  final client = Client();
+
   /// Base URL of the sprout backend API
   final String _baseUrl = RESTClient.getBaseURL();
   String get apiUrl => "$_baseUrl/api";
 
   /// Storage to use with the REST API's
   final SecureStorage _secureStorage = SecureStorage();
+
+  void dispose() {
+    client.close();
+  }
 
   /// Returns the base URL that the backend should be expected to be running on. This will not include
   ///   any potential sub-pathing.
@@ -37,7 +44,7 @@ class RESTClient {
   }
 
   /// Checks if the response included an unauthorized response and logs out if so.
-  Future<void> _checkUnauth(http.Response response) async {
+  Future<void> _checkUnauth(Response response) async {
     if (response.statusCode == 403) {
       final authProvider = ServiceLocator.get<AuthProvider>();
       if (authProvider.isLoggedIn) {
@@ -59,7 +66,7 @@ class RESTClient {
       'timeStamp': DateTime.timestamp().toIso8601String(),
     };
 
-    final response = await http.post(url, headers: await getSendHeaders(), body: json.encode(body));
+    final response = await client.post(url, headers: await getSendHeaders(), body: json.encode(body)).timeout(timeout);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -75,7 +82,7 @@ class RESTClient {
   Future<Object> get(String endpoint) async {
     final url = Uri.parse('$apiUrl$endpoint');
 
-    final response = await http.get(url, headers: await getSendHeaders());
+    final response = await client.get(url, headers: await getSendHeaders()).timeout(timeout);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
