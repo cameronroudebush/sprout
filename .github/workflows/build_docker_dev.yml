@@ -3,6 +3,8 @@ name: Build Docker
 on:
   push:
     branches: ["master"]
+    tags-ignore:
+      - "**"
 
 jobs:
   build:
@@ -23,7 +25,7 @@ jobs:
 
       # Install the packages so we can run the script
       - name: NPM Install
-        run: npm i --include=dev
+        run: npm i --only=dev && npm i --prefix ./backend --only=dev
 
       # Build docker
       - name: Build Docker with npm script
