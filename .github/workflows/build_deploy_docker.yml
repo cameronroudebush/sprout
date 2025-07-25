@@ -3,6 +3,8 @@ name: Build Docker
 on:
   push:
     branches: ["master"]
+    tags:
+      - "v*.*.*"
 
 jobs:
   build:
@@ -20,6 +22,7 @@ jobs:
 
       - name: Get Git Version and Tag Status
         run: |
+          git fetch --tags origin --force
           VERSION_STRING=$(git describe --tags --always)
           echo "version_string=$VERSION_STRING" >> $GITHUB_OUTPUT
 
@@ -43,7 +46,6 @@ jobs:
 
       # Step to build the Docker image with the 'dev' tag as a base
       - name: Build Docker Image (Base Dev Tag)
-        # Assuming 'npm run build:docker <tag>' builds and tags the image with the given tag
         run: npm run build:docker croudebush/sprout:dev
 
       # Publish 'dev' tag (always pushed on master branch builds)
@@ -70,3 +72,12 @@ jobs:
           echo "Tagging image with 'stable'"
           docker tag $IMAGE_NAME:dev $IMAGE_NAME:stable
           docker push $IMAGE_NAME:stable
+
+      # Update dockerhub readme
+      - name: Docker Hub Description
+        if: ${{ steps.git_info.outputs.is_tagged_commit == 'true' }}
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: croudebush/sprout
