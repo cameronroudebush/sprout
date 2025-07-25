@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 
+/// This class represents a time frame of net worth change.
+class NetWorthFrameData {
+  final double? percentChange;
+  final double valueChange;
+
+  const NetWorthFrameData({required this.valueChange, this.percentChange});
+
+  factory NetWorthFrameData.fromJson(Map<String, dynamic> json) {
+    return NetWorthFrameData(
+      valueChange: json['valueChange']?.toDouble(),
+      percentChange: json['percentChange']?.toDouble(),
+    );
+  }
+}
+
 /// Provides information for how net worth has progressed over time
 class HistoricalNetWorth {
-  double? last1Day;
-  double? last7Days;
-  double? last30Days;
-  double? lastYear;
+  NetWorthFrameData last1Day;
+  NetWorthFrameData last7Days;
+  NetWorthFrameData last30Days;
+  NetWorthFrameData lastYear;
   Map<DateTime, double> historicalData;
   String? accountId;
 
@@ -31,17 +46,17 @@ class HistoricalNetWorth {
     }
 
     return HistoricalNetWorth(
-      last1Day: json['last1Day']?.toDouble(),
-      last7Days: json['last7Days']?.toDouble(),
-      last30Days: json['last30Days']?.toDouble(),
-      lastYear: json['lastYear']?.toDouble(),
+      last1Day: NetWorthFrameData.fromJson(json['last1Day']),
+      last7Days: NetWorthFrameData.fromJson(json['last7Days']),
+      last30Days: NetWorthFrameData.fromJson(json['last30Days']),
+      lastYear: NetWorthFrameData.fromJson(json['lastYear']),
       historicalData: parsedHistoricalData,
       accountId: json['accountId'],
     );
   }
 
   /// Returns the value by the given time frame as supported in the above properties
-  double? getValueByFrame(String frame) {
+  NetWorthFrameData getValueByFrame(String frame) {
     switch (frame) {
       case "last1Day":
         return last1Day;
@@ -52,6 +67,6 @@ class HistoricalNetWorth {
       case "lastYear":
         return lastYear;
     }
-    return null;
+    throw Exception("Couldn't find matching net worth time frame");
   }
 }

@@ -1,7 +1,7 @@
 import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
 import { RestEndpoints } from "@backend/model/api/endpoint";
-import { NetWorthOverTime } from "@backend/model/api/net.worth";
+import { NetWorthFrameData, NetWorthOverTime } from "@backend/model/api/net.worth";
 import { RestBody } from "@backend/model/api/rest.request";
 import { User } from "@backend/model/user";
 import { eachDayOfInterval, isSameDay, subDays, subYears } from "date-fns";
@@ -59,12 +59,19 @@ export class NetWorthAPI {
     // Calculate the percentage change
     const firstNetWorth = netWorthSnapshots.find((x) => x.netWorth !== 0)?.netWorth; // Find first net worth that is non-zero
     const lastNetWorth = netWorthSnapshots[netWorthSnapshots.length - 1]?.netWorth;
-    let percentageChange: number | null = null;
-    if (firstNetWorth && lastNetWorth) percentageChange = ((lastNetWorth - firstNetWorth) / firstNetWorth) * 100;
+    let percentChange: number | null = null;
+    let valueChange = 0;
+    if (firstNetWorth && lastNetWorth) {
+      percentChange = ((lastNetWorth - firstNetWorth) / firstNetWorth) * 100;
+      valueChange = lastNetWorth - firstNetWorth;
+    }
     const account = history.at(0)?.account;
     // Check if this is a drain on finances because a decrease is actually an increase
-    if (percentageChange && account?.isNegativeNetWorth) percentageChange = percentageChange * -1;
-    return { snapshot: netWorthSnapshots, percentageChange: percentageChange };
+    if (account?.isNegativeNetWorth) {
+      if (percentChange) percentChange = percentChange * -1;
+      valueChange = valueChange * -1;
+    }
+    return { snapshot: netWorthSnapshots, frame: NetWorthFrameData.fromPlain({ percentChange, valueChange }) };
   }
 
   /** Returns various net-worth tracking over time */
@@ -78,10 +85,10 @@ export class NetWorthAPI {
     const lastYear = NetWorthAPI.generateNetWorthOverTime(accountHistory, 365);
 
     return NetWorthOverTime.fromPlain({
-      last1Day: last1Day.percentageChange,
-      last7Days: last7Days.percentageChange,
-      last30Days: last30Days.percentageChange,
-      lastYear: lastYear.percentageChange,
+      last1Day: last1Day.frame,
+      last7Days: last7Days.frame,
+      last30Days: last30Days.frame,
+      lastYear: lastYear.frame,
       historicalData: NetWorthAPI.snapshotToHistoricalDict(lastYear.snapshot),
     });
   }
@@ -102,10 +109,10 @@ export class NetWorthAPI {
 
       return NetWorthOverTime.fromPlain({
         accountId,
-        last1Day: last1Day.percentageChange,
-        last7Days: last7Days.percentageChange,
-        last30Days: last30Days.percentageChange,
-        lastYear: lastYear.percentageChange,
+        last1Day: last1Day.frame,
+        last7Days: last7Days.frame,
+        last30Days: last30Days.frame,
+        lastYear: lastYear.frame,
         historicalData: NetWorthAPI.snapshotToHistoricalDict(lastYear.snapshot),
       });
     });

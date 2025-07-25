@@ -51,13 +51,34 @@ class _AccountOverviewPageState extends State<AccountOverviewPage> {
       builder: (context, accountProvider, child) {
         final linkedAccounts = accountProvider.linkedAccounts;
         final sortedAccountEntries = _getSortedGroupedAccounts(linkedAccounts);
+        final totalAssets = linkedAccounts.fold(
+          0.0,
+          (sum, account) => sum + (account.balance > 0 ? account.balance : 0),
+        );
+        final totalDebts = linkedAccounts.fold(
+          0.0,
+          (sum, account) => sum + (account.balance < 0 ? account.balance : 0),
+        );
 
         // TODO: Loading indicator
         return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              ...sortedAccountEntries.map((entry) => AccountGroupWidget(accounts: entry.value, type: entry.key)),
+              ...sortedAccountEntries.map((entry) {
+                double totalNetWorth;
+
+                if (entry.key == "loan" || entry.key == "credit") {
+                  totalNetWorth = totalDebts;
+                } else {
+                  totalNetWorth = totalAssets;
+                }
+
+                return Padding(
+                  padding: EdgeInsetsGeometry.directional(start: 8, end: 8),
+                  child: AccountGroupWidget(accounts: entry.value, type: entry.key, totalNetWorth: totalNetWorth),
+                );
+              }),
             ],
           ),
         );

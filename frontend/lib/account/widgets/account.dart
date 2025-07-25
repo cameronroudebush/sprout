@@ -100,19 +100,22 @@ class _AccountWidgetState extends State<AccountWidget> {
                     AccountLogoWidget(account: account),
                     SizedBox(width: 12),
                     // Print details about the account, start of row
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 8,
-                      children: [
-                        TextWidget(
-                          text: account.name,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        TextWidget(
-                          text: account.type.toCapitalized,
-                          style: TextStyle(color: theme.disabledColor),
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 8,
+                        children: [
+                          TextWidget(
+                            text: account.name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.start,
+                          ),
+                          TextWidget(
+                            text: account.type.toCapitalized,
+                            style: TextStyle(color: theme.disabledColor),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -139,7 +142,11 @@ class _AccountWidgetState extends State<AccountWidget> {
                     // Account balance
                     TextWidget(text: currencyFormatter.format(account.balance)),
                     // If our day change is null, we don't have enough data to come up with a calculation
-                    if (dayChange != null) AccountChangeWidget(percentageChange: dayChange),
+                    if (dayChange != null)
+                      AccountChangeWidget(
+                        percentageChange: dayChange.percentChange,
+                        totalChange: dayChange.valueChange,
+                      ),
                   ],
                 ),
               ),
