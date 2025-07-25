@@ -11,6 +11,7 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/net-worth/models/net.worth.ot.dart';
 import 'package:sprout/net-worth/provider.dart';
 
 /// A widget used to display the given account
@@ -104,7 +105,7 @@ class AccountWidget extends StatelessWidget {
   /// Gets the account header for the expansion panel
   Widget _getAccountHeader(Account account, ThemeData theme, NetWorthProvider netWorthProvider) {
     // Days changed depending on the configuration
-    final dayChange = netWorthProvider.historicalAccountData
+    NetWorthFrameData? dayChange = netWorthProvider.historicalAccountData
         ?.firstWhereOrNull((element) => element.accountId == account.id)
         ?.getValueByFrame(netWorthPeriod);
 
@@ -172,7 +173,7 @@ class AccountWidget extends StatelessWidget {
                       // Account balance
                       if (displayTotals) TextWidget(text: currencyFormatter.format(account.balance)),
                       // If our day change is null, we don't have enough data to come up with a calculation
-                      if (dayChange != null && displayStats)
+                      if (dayChange != null && dayChange.percentChange != 0 && displayStats)
                         AccountChangeWidget(
                           percentageChange: dayChange.percentChange,
                           totalChange: account.isNegativeNetWorth ? dayChange.valueChange * -1 : dayChange.valueChange,
