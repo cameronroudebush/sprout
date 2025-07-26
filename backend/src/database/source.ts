@@ -43,9 +43,11 @@ class InternalDatabase {
     if (upQueries.length > 0) {
       Logger.warn(`Running auto migrations for ${upQueries.length} queries.`, this.logOptions);
       const queries = upQueries.map((x) => x.query);
+      await this.setSQLitePRAGMA(false);
       await source.transaction(async (manager) => {
         for (let query of queries) await manager.query(query);
       });
+      await this.setSQLitePRAGMA(true);
     } else Logger.info("No migration required!", this.logOptions);
   }
 
@@ -70,27 +72,27 @@ class InternalDatabase {
   //     return resolvedMigrations;
   //   }
 
-  //   /**
-  //    * This function sets some given PRAGMA settings that the pain that is SQLite will require when we run migration files
-  //    *
-  //    * Capabilities modified:
-  //    * `foreign_keys`: This is important because migrations recreate tables utilizing temp tables which causes a mess with foreign keys that don't really need to change.
-  //    * `legacy_alter_table`: As tables are altered for migrations, it adjusts sqlite to not update foreign key reference table names. So when we rename the temp tables
-  //    *    it doesn't break any references. Leaving this enabled would cause reverting migrations to always think data changed.
-  //    *
-  //    * See this info: https://github.com/typeorm/typeorm/issues/2584#issuecomment-408013561
-  //    */
-  //   private async setSQLitePRAGMA(enabled: boolean, source = this.source) {
-  //     if (Configuration.database.type !== "sqlite") return; // Don't do anything if not SQLite
-  //     this.validateSource(source);
-  //     if (enabled) {
-  //       await source.query("PRAGMA foreign_keys=ON;");
-  //       await source.query("PRAGMA legacy_alter_table=OFF;");
-  //     } else {
-  //       await source.query("PRAGMA foreign_keys=OFF;");
-  //       await source.query("PRAGMA legacy_alter_table=ON;");
-  //     }
-  //   }
+  /**
+   * This function sets some given PRAGMA settings that the pain that is SQLite will require when we run migration files
+   *
+   * Capabilities modified:
+   * `foreign_keys`: This is important because migrations recreate tables utilizing temp tables which causes a mess with foreign keys that don't really need to change.
+   * `legacy_alter_table`: As tables are altered for migrations, it adjusts sqlite to not update foreign key reference table names. So when we rename the temp tables
+   *    it doesn't break any references. Leaving this enabled would cause reverting migrations to always think data changed.
+   *
+   * See this info: https://github.com/typeorm/typeorm/issues/2584#issuecomment-408013561
+   */
+  private async setSQLitePRAGMA(enabled: boolean, source = this.source) {
+    if (Configuration.database.type !== "sqlite") return; // Don't do anything if not SQLite
+    this.validateSource(source);
+    if (enabled) {
+      await source.query("PRAGMA foreign_keys=ON;");
+      await source.query("PRAGMA legacy_alter_table=OFF;");
+    } else {
+      await source.query("PRAGMA foreign_keys=OFF;");
+      await source.query("PRAGMA legacy_alter_table=ON;");
+    }
+  }
 }
 
 /** The database instance we should use across the app */
