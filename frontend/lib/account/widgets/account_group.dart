@@ -122,7 +122,7 @@ class AccountGroupWidget extends StatelessWidget {
                             if (displayTotals)
                               TextWidget(
                                 referenceSize: 1.15,
-                                text: currencyFormatter.format(totalBalance),
+                                text: getFormattedCurrency(totalBalance),
                                 style: TextStyle(fontWeight: FontWeight.bold, color: balanceColor),
                               ),
                             // Percent of total net worth

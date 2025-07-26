@@ -48,7 +48,7 @@ class RESTClient {
     if (response.statusCode == 403) {
       final authProvider = ServiceLocator.get<AuthProvider>();
       if (authProvider.isLoggedIn) {
-        await authProvider.logout();
+        await authProvider.logout(forced: true);
         SnackbarProvider.openSnackbar("Session expired", type: SnackbarType.warning);
       }
     }

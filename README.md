@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="50%" src="./frontend/assets/logo/color-transparent.svg">
+  <img width="50%" src="https://github.com/cameronroudebush/sprout/blob/master/frontend/assets/logo/color-transparent.svg">
 </p>
 
 > [!caution]
@@ -11,8 +11,8 @@
 
 Sprout is a financial management app specializing in automatic account tracking using various financial API's.
 
-![Sprout Home Page](/docs/images/home.png "Sprout Home Page")
-![Sprout Accounts Page](/docs/images/accounts.png "Sprout Accounts Page")
+![Sprout Home Page](https://github.com/cameronroudebush/sprout/blob/master/docs/images/home.png "Sprout Home Page")
+![Sprout Accounts Page](<(https://github.com/cameronroudebush/sprout/blob/master/docs/images/accounts.png)> "Sprout Accounts Page")
 
 ## Code Base
 
@@ -45,13 +45,13 @@ Below is a list of planned features I personally would find beneficial. I make n
     - Allow additional user creation
       - Allow each user to have their own SimpleFIN access URL.
   - Password resets (I should have probably started with this).
-  - Various config options:
-    - Allow users to hide their balances from display
+  - Various config options
 - Improved desktop mode
   - Move the bottom nav to a sidenav
 - Additional providers
   - Zillow for house value over time?
   - Crypto? (This will be a pain)
+- Improved error handling
 - Database
   - Backups
   - Migrations!
@@ -140,11 +140,11 @@ updateTime: 0 7 * * *
 
 Environment variables are supported within the docker build and even in the executable. The top of the `sprout.config.yml` tells you how to modify each specific config field listed in [configuration](#configuration). Below are some common examples:
 
-```env
-TZ=America/New_York
-sprout_server_port=9000
-sprout_server_jwtExpirationTime=30m
-sprout_providers_simpleFIN_accessToken=MY_ACCESS_TOKEN
+```yml
+TZ: America/New_York
+sprout_server_port: 9000
+sprout_server_jwtExpirationTime: 30m
+sprout_providers_simpleFIN_accessToken: MY_ACCESS_TOKEN
 ```
 
 # Contributions

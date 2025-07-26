@@ -34,13 +34,13 @@ class ServiceLocator {
   /// All provider types that are registered with GetIt.
   static const _allProviderTypes = <Type>[
     AuthProvider,
+    UserProvider,
     AccountProvider,
     ConfigProvider,
     SSEProvider,
     NetWorthProvider,
     TransactionProvider,
     SetupProvider,
-    UserProvider,
   ];
 
   /// Returns every provider that has been initialized by the app in a list like format

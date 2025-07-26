@@ -32,7 +32,7 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   Future<void> _startSSE({bool forceReconnect = false}) async {
     final authProvider = ServiceLocator.get<AuthProvider>();
     if (!authProvider.isLoggedIn) {
-      _handleConnectionLost();
+      _handleConnectionLost(null);
     }
     // If a connection is already active and we are not forcing a reconnect, just return.
     if (_sseSubscription != null && !_sseSubscription!.isPaused && !forceReconnect) {
@@ -66,20 +66,25 @@ class SSEProvider extends BaseProvider<SSEAPI> {
           _eventController.add(outEvent);
         },
         onError: (error) {
-          _handleConnectionLost();
+          _handleConnectionLost(error);
         },
         onDone: () {
-          _handleConnectionLost();
+          _handleConnectionLost(null);
         },
         cancelOnError: true,
       );
     } catch (e) {
-      _handleConnectionLost();
+      _handleConnectionLost(e);
     }
   }
 
   /// Unified handler for when the SSE connection is lost (error or done).
-  void _handleConnectionLost() {
+  void _handleConnectionLost(dynamic e) {
+    if (e != null && e.message != null && e.message.contains('403')) {
+      final authProvider = ServiceLocator.get<AuthProvider>();
+      authProvider.logout(forced: true);
+      return;
+    }
     _isConnected = false;
     _isConnecting = false; // Mark connection attempt as finished for now
     notifyListeners(); // Notify UI about disconnection

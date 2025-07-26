@@ -5,15 +5,13 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/widgets/app_bar.dart';
-import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
 
 /// This class defines the shell that wraps all pages that are displayed for sprout
 class SproutAppShell extends StatefulWidget {
-  final bool isSetup;
   final VoidCallback? onSetupSuccess;
-  const SproutAppShell({super.key, this.isSetup = false, this.onSetupSuccess});
+  const SproutAppShell({super.key, this.onSetupSuccess});
 
   @override
   State<SproutAppShell> createState() => _SproutAppShellState();
@@ -42,37 +40,31 @@ class _SproutAppShellState extends State<SproutAppShell> {
         final screenHeight = MediaQuery.of(context).size.height;
         return Scaffold(
           appBar: SproutAppBar(screenHeight: screenHeight, currentPage: _pages[_currentIndex]['label']),
-          body: widget.isSetup
-              ? SetupPage(onSetupSuccess: widget.onSetupSuccess!)
-              : Center(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1024),
-                      child: SingleChildScrollView(child: _pages[_currentIndex]['page']),
-                    ),
-                  ),
-                ),
-          bottomNavigationBar: widget.isSetup
-              ? null
-              : BottomNavigationBar(
-                  currentIndex: _currentIndex,
-                  onTap: (index) {
-                    setState(() {
-                      _currentIndex = index; // Update the index
-                    });
-                  },
-                  backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                  selectedItemColor: Theme.of(context).colorScheme.primary,
-                  unselectedItemColor: Theme.of(context).colorScheme.onSurface,
-                  type: BottomNavigationBarType.fixed,
-                  enableFeedback: true,
-                  items: _pages
-                      .map(
-                        (pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']),
-                      )
-                      .toList(),
-                ),
+          body: Center(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1024),
+                child: SingleChildScrollView(child: _pages[_currentIndex]['page']),
+              ),
+            ),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index; // Update the index
+              });
+            },
+            backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            unselectedItemColor: Theme.of(context).colorScheme.onSurface,
+            type: BottomNavigationBarType.fixed,
+            enableFeedback: true,
+            items: _pages
+                .map((pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']))
+                .toList(),
+          ),
         );
       },
     );

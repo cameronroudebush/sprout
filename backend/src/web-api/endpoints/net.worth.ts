@@ -43,7 +43,7 @@ export class NetWorthAPI {
    *  those days and the percent change averaged over that time period.
    */
   private static generateNetWorthOverTime(history: AccountHistory[], days: number) {
-    if (history.length === 0) return { snapshot: [], percentageChange: 0 };
+    if (history.length === 0) return { snapshot: [], frame: NetWorthFrameData.fromPlain({ percentChange: 0, valueChange: 0 }) };
     const today = new Date();
 
     const netWorthSnapshots: Array<{ date: Date; netWorth: number }> = [];

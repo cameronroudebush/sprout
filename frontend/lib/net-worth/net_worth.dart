@@ -70,7 +70,7 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
                         const SizedBox(height: 10.0),
                         TextWidget(
                           referenceSize: 2.5,
-                          text: currencyFormatter.format(currentNetWorth),
+                          text: getFormattedCurrency(currentNetWorth),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: currentNetWorth >= 0 ? Colors.green : colorScheme.error,
@@ -241,7 +241,7 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
                 fitInside: SideTitleFitInsideData.fromTitleMeta(metaTitle),
                 meta: metaTitle,
                 child: Text(
-                  currencyFormatter.format(value),
+                  getFormattedCurrency(value),
                   style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface),
                 ),
               );
@@ -279,7 +279,7 @@ class _NetWorthWidgetState extends State<NetWorthWidget> {
                   TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
                   children: [
                     TextSpan(
-                      text: currencyFormatter.format(flSpot.y),
+                      text: getFormattedCurrency(flSpot.y),
                       style: TextStyle(
                         color: flSpot.y >= 0 ? colorScheme.primary : colorScheme.error,
                         fontWeight: FontWeight.bold,

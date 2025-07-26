@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
@@ -7,7 +6,11 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/model/config.dart';
+import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/widgets/info_card.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// A page that display user account information along with other useful info
@@ -19,29 +22,114 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+  /// Returns the status of the last account sync
+  String _getLastSyncStatus(Configuration? config) {
+    final lastScheduleTime = config?.lastSchedulerRun.time != null
+        ? timeago.format(config!.lastSchedulerRun.time!.toLocal())
+        : "N/A";
+    String? lastScheduleStatus = "success";
+    if (config == null) {
+      lastScheduleStatus = "N/A";
+    } else if (config.lastSchedulerRun.status == "failed") {
+      if (config.lastSchedulerRun.failureReason == null) {
+        lastScheduleStatus = "failed - unknown reason";
+      } else {
+        lastScheduleStatus = config.lastSchedulerRun.failureReason;
+      }
+    }
+    return "$lastScheduleTime${lastScheduleStatus == null ? "" : " - $lastScheduleStatus"}";
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer4<ConfigProvider, SSEProvider, UserProvider, AccountProvider>(
-      builder: (context, configProvider, sseProvider, userProvider, accountProvider, child) {
-        final config = configProvider.config;
-        final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
-
-        final lastScheduleTime = config?.lastSchedulerRun.time != null
-            ? timeago.format(config!.lastSchedulerRun.time!.toLocal())
-            : "N/A";
-        String? lastScheduleStatus = "success";
-        if (config == null) {
-          lastScheduleStatus = "N/A";
-        } else if (config.lastSchedulerRun.status == "failed") {
-          if (config.lastSchedulerRun.failureReason == null) {
-            lastScheduleStatus = "failed - unknown reason";
-          } else {
-            lastScheduleStatus = config.lastSchedulerRun.failureReason;
-          }
-        }
-        final combinedScheduleDisplay =
-            "$lastScheduleTime${lastScheduleStatus == null ? "" : " - $lastScheduleStatus"}";
+    return Consumer5<ConfigProvider, SSEProvider, AuthProvider, AccountProvider, UserProvider>(
+      builder: (context, configProvider, sseProvider, authProvider, accountProvider, userProvider, child) {
+        final userConfig = userProvider.currentUserConfig!;
         final minButtonSize = MediaQuery.of(context).size.width * .5;
+        final displayInfo = {
+          "settings": [
+            UserDisplayInfo(
+              title: "Hide Account Balances",
+              hint: "If you would like to hide your account balances, toggle this to true.",
+              settingValue: userConfig.privateMode,
+              settingType: "bool",
+              icon: Icons.remove_red_eye,
+            ),
+          ],
+          "user information": [
+            UserDisplayInfo(
+              title: "Username",
+              value: authProvider.currentUser?.username ?? "N/A",
+              icon: Icons.account_circle,
+              child: Center(
+                child: ButtonWidget(
+                  text: "Logout",
+                  minSize: minButtonSize,
+                  onPressed: () async {
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    await authProvider.logout();
+                  },
+                ),
+              ),
+            ),
+          ],
+          "app details": [
+            UserDisplayInfo(
+              title: "App Version",
+              icon: Icons.info_outline,
+              child: Padding(
+                padding: EdgeInsetsGeometry.directional(start: 12, end: 12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextWidget(text: 'Backend: ${configProvider.unsecureConfig?.version}'),
+                    TextWidget(text: 'Frontend: ${configProvider.packageInfo.version}'),
+                  ],
+                ),
+              ),
+            ),
+            UserDisplayInfo(
+              title: "Last Background Sync Status",
+              icon: Icons.schedule,
+              value: _getLastSyncStatus(configProvider.config),
+            ),
+            UserDisplayInfo(
+              title: "Backend Connection Status",
+              icon: Icons.event_repeat,
+              value: sseProvider.isConnected ? "Connected" : "Disconnected",
+              child: Center(
+                child: SproutTooltip(
+                  message: "Forces an account sync immediately",
+                  child: ButtonWidget(
+                    text: "Manual Account Sync",
+                    minSize: minButtonSize,
+                    onPressed: () => accountProvider.manualSync(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        };
+        ;
+        // final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
+
+        // final lastScheduleTime = config?.lastSchedulerRun.time != null
+        //     ? timeago.format(config!.lastSchedulerRun.time!.toLocal())
+        //     : "N/A";
+        // String? lastScheduleStatus = "success";
+        // if (config == null) {
+        //   lastScheduleStatus = "N/A";
+        // } else if (config.lastSchedulerRun.status == "failed") {
+        //   if (config.lastSchedulerRun.failureReason == null) {
+        //     lastScheduleStatus = "failed - unknown reason";
+        //   } else {
+        //     lastScheduleStatus = config.lastSchedulerRun.failureReason;
+        //   }
+        // }
+        // final combinedScheduleDisplay =
+        //     "$lastScheduleTime${lastScheduleStatus == null ? "" : " - $lastScheduleStatus"}";
+        // final minButtonSize = MediaQuery.of(context).size.width * .5;
 
         return SafeArea(
           child: SingleChildScrollView(
@@ -49,126 +137,78 @@ class _UserPageState extends State<UserPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
+                ...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value)),
                 // App Information Card
-                _buildCard([
-                  TextWidget(referenceSize: 1.6, text: "App Details", style: headerStyling),
-                  const Divider(height: 32.0, thickness: 1.0),
-                  _buildInfoRow(
-                    context,
-                    label: "App Version",
-                    value: [
-                      'Backend: ${configProvider.unsecureConfig?.version}',
-                      'Frontend: ${configProvider.packageInfo.version}',
-                    ],
-                    icon: Icons.info_outline,
-                  ),
-                  SizedBox(height: 12),
-                  _buildInfoRow(
-                    context,
-                    label: "Last Background Sync Status",
-                    value: combinedScheduleDisplay,
-                    icon: Icons.schedule,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoRow(
-                    context,
-                    label: "SSE Status",
-                    value: sseProvider.isConnected ? "Connected" : "Disconnected",
-                    icon: Icons.event_repeat,
-                  ),
-                  if (kDebugMode) ...[
-                    SizedBox(height: 12),
-                    ButtonWidget(
-                      text: "Manual Account Sync",
-                      minSize: minButtonSize,
-                      onPressed: () => accountProvider.manualSync(),
-                    ),
-                  ],
-                ]),
+                // _buildCard([
+                //   TextWidget(referenceSize: 1.6, text: "App Details", style: headerStyling),
+                //   const Divider(height: 32.0, thickness: 1.0),
+                //   _buildInfoRow(
+                //     context,
+                //     label: "App Version",
+                //     value: [
+                //       'Backend: ${configProvider.unsecureConfig?.version}',
+                //       'Frontend: ${configProvider.packageInfo.version}',
+                //     ],
+                //     icon: Icons.info_outline,
+                //   ),
+                //   SizedBox(height: 12),
+                //   _buildInfoRow(
+                //     context,
+                //     label: "Last Background Sync Status",
+                //     value: combinedScheduleDisplay,
+                //     icon: Icons.schedule,
+                //   ),
+                //   const SizedBox(height: 12),
+                //   _buildInfoRow(
+                //     context,
+                //     label: "SSE Status",
+                //     value: sseProvider.isConnected ? "Connected" : "Disconnected",
+                //     icon: Icons.event_repeat,
+                //   ),
+                //   if (kDebugMode) ...[
+                //     SizedBox(height: 12),
+                //     ButtonWidget(
+                //       text: "Manual Account Sync",
+                //       minSize: minButtonSize,
+                //       onPressed: () => accountProvider.manualSync(),
+                //     ),
+                //   ],
+                // ]),
 
-                // User Information Card
-                _buildCard([
-                  TextWidget(referenceSize: 1.6, text: "User Information", style: headerStyling),
-                  const Divider(height: 32.0, thickness: 1.0),
-                  Consumer<AuthProvider>(
-                    builder: (context, authProvider, child) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInfoRow(
-                            context,
-                            label: "Username",
-                            value: authProvider.currentUser?.username ?? "N/A",
-                            icon: Icons.person,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  SizedBox(height: 24),
-                  ButtonWidget(
-                    minSize: minButtonSize,
-                    text: "Logout",
-                    onPressed: () async {
-                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                      await authProvider.logout();
-                    },
-                  ),
-                ]),
+                // // User Information Card
+                // _buildCard([
+                //   TextWidget(referenceSize: 1.6, text: "User Information", style: headerStyling),
+                //   const Divider(height: 32.0, thickness: 1.0),
+                //   Consumer<AuthProvider>(
+                //     builder: (context, authProvider, child) {
+                //       return Column(
+                //         crossAxisAlignment: CrossAxisAlignment.start,
+                //         children: [
+                //           _buildInfoRow(
+                //             context,
+                //             label: "Username",
+                //             value: authProvider.currentUser?.username ?? "N/A",
+                //             icon: Icons.person,
+                //           ),
+                //         ],
+                //       );
+                //     },
+                //   ),
+                //   SizedBox(height: 24),
+                //   ButtonWidget(
+                //     minSize: minButtonSize,
+                //     text: "Logout",
+                //     onPressed: () async {
+                //       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                //       await authProvider.logout();
+                //     },
+                //   ),
+                // ]),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  /// Builds a generic themed card for display on this page
-  Widget _buildCard(List<Widget> children) {
-    return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: children),
-      ),
-    );
-  }
-
-  // Helper method to build consistent info rows
-  Widget _buildInfoRow(BuildContext context, {required String label, required dynamic value, IconData? icon}) {
-    List<String> values = value is String ? [value] : value;
-    List<Widget> display = values
-        .map(
-          (x) => TextWidget(
-            referenceSize: 1,
-            text: x,
-            style: TextStyle(fontWeight: FontWeight.normal, color: Theme.of(context).colorScheme.onSurface),
-          ),
-        )
-        .toList();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (icon != null) ...[
-          Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: 12.0),
-        ],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextWidget(
-                referenceSize: 1.2,
-                text: label,
-                style: TextStyle(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 4.0),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: display),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

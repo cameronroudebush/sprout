@@ -89,7 +89,7 @@ class TransactionSummaryCard extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 16)),
         TextWidget(
           referenceSize: 1,
-          text: format ? currencyFormatter.format(value) : "$value",
+          text: format ? getFormattedCurrency(value) : "$value",
           style: TextStyle(color: color),
         ),
       ],
