@@ -21,19 +21,24 @@ jobs:
           fetch-depth: 0
 
       - name: Get Git Version and Tag Status
+        id: git_info
         run: |
-          git fetch --tags origin --force
+          # Get the version string using git describe --tags --always
+          # This will give 'vX.Y.Z' if on a tag, or 'vX.Y.Z-N-g<hash>' if not directly on a tag.
           VERSION_STRING=$(git describe --tags --always)
           echo "version_string=$VERSION_STRING" >> $GITHUB_OUTPUT
 
-          # Determine if the current commit is directly a tag (e.g., v1.0.0)
-          # A tagged commit will typically have a version string like 'vX.Y.Z'
-          # A non-tagged commit will have a suffix like '-N-g<hash>' (e.g., 'v1.0.0-1-gabcdef')
-          if [[ "$VERSION_STRING" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          # Determine if the current commit is EXACTLY a tag (e.g., v1.0.0)
+          # 'git describe --tags --exact-match' will succeed (exit code 0) if HEAD is a tag,
+          # and fail (non-zero exit code) otherwise.
+          if git describe --tags --exact-match > /dev/null 2>&1; then
             echo "is_tagged_commit=true" >> $GITHUB_OUTPUT
           else
             echo "is_tagged_commit=false" >> $GITHUB_OUTPUT
           fi
+
+          echo "Detected VERSION_STRING: $VERSION_STRING"
+          echo "Is Tagged Commit: ${{ steps.git_info.outputs.is_tagged_commit }}"
 
       - name: NPM Install
         run: npm i --only=dev && npm i --prefix ./backend --only=dev
@@ -44,13 +49,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Step to build the Docker image with the 'dev' tag as a base
-      - name: Build Docker Image (Base Dev Tag)
-        run: npm run build:docker croudebush/sprout:dev
-
-      # Publish 'dev' tag (always pushed on master branch builds)
-      - name: Publish 'dev' tag to Docker Hub
-        run: docker push croudebush/sprout:dev
+      # Build and Push 'dev' tag (always pushed on master branch builds OR tag builds)
+      - name: Build and Publish 'dev' tag
+        run: |
+          IMAGE_NAME="croudebush/sprout"
+          npm run build:docker $IMAGE_NAME:dev
+          docker push $IMAGE_NAME:dev
 
       # Conditionally tag and publish the specific version tag if it's a tagged commit
       - name: Tag and Publish Version Tag
@@ -59,6 +63,7 @@ jobs:
           IMAGE_NAME="croudebush/sprout"
           TAG_VERSION="${{ steps.git_info.outputs.version_string }}"
 
+          # Tag the already built 'dev' image with the version tag
           echo "Tagging image with version: $TAG_VERSION"
           docker tag $IMAGE_NAME:dev $IMAGE_NAME:$TAG_VERSION
           docker push $IMAGE_NAME:$TAG_VERSION
@@ -68,7 +73,7 @@ jobs:
         if: ${{ steps.git_info.outputs.is_tagged_commit == 'true' }}
         run: |
           IMAGE_NAME="croudebush/sprout"
-          # The 'dev' tag should already point to the image built in the "Build Docker Image (Base Dev Tag)" step
+          # Tag the already built 'dev' image with the 'stable' tag
           echo "Tagging image with 'stable'"
           docker tag $IMAGE_NAME:dev $IMAGE_NAME:stable
           docker push $IMAGE_NAME:stable
