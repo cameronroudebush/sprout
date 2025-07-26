@@ -7,19 +7,19 @@ import 'package:sprout/core/widgets/tooltip.dart';
 /// The bar at the top of the screen we wish to render
 class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double screenHeight;
-  final String currentPage;
-  const SproutAppBar({super.key, required this.screenHeight, required this.currentPage});
+  final String? currentPage;
+  const SproutAppBar({super.key, required this.screenHeight, this.currentPage});
 
   @override
   Size get preferredSize => Size.fromHeight(screenHeight * .075);
 
   Widget build(BuildContext context) {
     Widget page = _blankBar(context, null);
-    final currentPageLower = currentPage.toLowerCase();
-    if (currentPageLower == "home") {
-      page = _homeContent(context);
-    } else if (currentPageLower == "accounts") {
+    final currentPageLower = currentPage?.toLowerCase();
+    if (currentPageLower == "accounts") {
       page = _accountPage(context);
+    } else {
+      page = _homeContent(context);
     }
 
     return AppBar(
@@ -45,7 +45,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
         Expanded(child: leadingContent ?? SizedBox.shrink()),
         TextWidget(
           referenceSize: 2,
-          text: currentPage,
+          text: currentPage ?? "",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         Expanded(

@@ -16,11 +16,13 @@ import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
+import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
 import 'package:sprout/setup/provider.dart';
+import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/user/api.dart';
@@ -87,6 +89,7 @@ class MainState extends State<Main> {
         final failedToConnect = configProvider.failedToConnect;
         final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
         Widget page;
+        final screenHeight = MediaQuery.of(context).size.height;
 
         if (failedToConnect) {
           page = Scaffold(
@@ -124,16 +127,19 @@ class MainState extends State<Main> {
             // If setup is complete AND logged in
             page = const SproutAppShell();
           } else {
+            ServiceLocator.get<AuthProvider>().checkInitialLoginStatus();
             // If setup is complete but NOT logged in
             page = const LoginPage();
           }
         } else {
           // If setup is not complete
-          page = SproutAppShell(
-            isSetup: true,
-            onSetupSuccess: () {
-              configProvider.populateUnsecureConfig();
-            },
+          page = Scaffold(
+            appBar: SproutAppBar(screenHeight: screenHeight),
+            body: SetupPage(
+              onSetupSuccess: () {
+                configProvider.populateUnsecureConfig();
+              },
+            ),
           );
         }
 

@@ -1,9 +1,11 @@
 import { Configuration } from "@backend/config/core";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/model/database.base";
+import { UserConfig } from "@backend/model/user.config";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
 import jwt from "jsonwebtoken";
+import { JoinColumn, OneToOne } from "typeorm";
 
 /** JWT object content that will be included */
 type JWTContent = { username: string };
@@ -27,17 +29,22 @@ export class User extends DatabaseBase {
   @Exclude({ toClassOnly: true })
   password!: string;
 
+  @OneToOne(() => UserConfig, { eager: true, onDelete: "CASCADE" })
+  @JoinColumn()
+  config: UserConfig;
+
   get prettyName() {
     if (this.firstName == null && this.lastName == null) return this.username;
     return this.firstName + " " + this.lastName;
   }
 
-  constructor(username: string, firstName: string, lastName: string, admin = false) {
+  constructor(username: string, firstName: string, lastName: string, admin = false, config: UserConfig) {
     super();
     this.username = username;
     this.firstName = firstName;
     this.lastName = lastName;
     this.admin = admin;
+    this.config = config;
   }
 
   /** Given a password, hashes it and returns it */
@@ -84,6 +91,7 @@ export class User extends DatabaseBase {
     const hashedPassword = User.hashPassword(password);
     const user = User.fromPlain({ username, admin });
     user.password = hashedPassword;
+    user.config = await UserConfig.fromPlain({ user: user }).insert();
     return await user.insert();
   }
 }

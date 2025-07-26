@@ -44,15 +44,18 @@ class _LoginPageState extends State<LoginPage> {
     if (_usernameController.text == "" || _passwordController.text == "") {
       return;
     }
-    User? user = await Provider.of<AuthProvider>(
-      context,
-      listen: false,
-    ).login(_usernameController.text.trim(), _passwordController.text.trim());
-
-    if (user == null) {
-      setState(() {
-        _message = 'Login failed. Please check credentials.';
-      });
+    User? user;
+    try {
+      user = await Provider.of<AuthProvider>(
+        context,
+        listen: false,
+      ).login(_usernameController.text.trim(), _passwordController.text.trim());
+    } finally {
+      if (user == null) {
+        setState(() {
+          _message = 'Login failed. Please check credentials.';
+        });
+      }
     }
   }
 

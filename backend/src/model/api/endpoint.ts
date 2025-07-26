@@ -20,6 +20,12 @@ export module RestEndpoints {
     static loginJWT = "/user/login/jwt";
   }
 
+  /** Endpoints related to the user config */
+  export class userConfig {
+    static get = "/user/config";
+    static update = "/user/config/update";
+  }
+
   /** Configuration endpoints */
   export class conf {
     static get = "/conf/get";

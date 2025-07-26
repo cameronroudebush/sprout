@@ -48,7 +48,7 @@ class AccountChangeWidget extends StatelessWidget {
             spacing: 4,
             children: [
               TextWidget(
-                text: currencyFormatter.format(totalChange),
+                text: getFormattedCurrency(totalChange),
                 style: TextStyle(color: changeColor),
               ),
               if (showPercentage)

@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/user/provider.dart';
 
-final NumberFormat currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+final NumberFormat _currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+
+/// Converts the given number into a formatted currency. Currently only works with USD.
+String getFormattedCurrency(double value) {
+  final userProvider = ServiceLocator.get<UserProvider>();
+  return userProvider.currentUserConfig?.privateMode == true ? "***" : _currencyFormatter.format(value);
+}
 
 String formatDate(DateTime date) {
   return DateFormat('MM/dd/yyyy').format(date.toLocal());

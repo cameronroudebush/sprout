@@ -13,6 +13,7 @@ import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/net-worth/models/net.worth.ot.dart';
 import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/user/provider.dart';
 
 /// A widget used to display the given account
 class AccountWidget extends StatelessWidget {
@@ -41,8 +42,8 @@ class AccountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ConfigProvider, NetWorthProvider>(
-      builder: (context, configProvider, netWorthProvider, child) {
+    return Consumer3<ConfigProvider, NetWorthProvider, UserProvider>(
+      builder: (context, configProvider, netWorthProvider, userProvider, child) {
         final theme = Theme.of(context);
         return InkWell(
           onTap: onClick != null
@@ -53,7 +54,7 @@ class AccountWidget extends StatelessWidget {
           child: IgnorePointer(
             ignoring: onClick != null,
             child: ExpansionTile(
-              title: _getAccountHeader(account, theme, netWorthProvider),
+              title: _getAccountHeader(account, theme, netWorthProvider, userProvider),
               showTrailingIcon: false,
               children: [
                 // Inner details
@@ -103,7 +104,12 @@ class AccountWidget extends StatelessWidget {
   }
 
   /// Gets the account header for the expansion panel
-  Widget _getAccountHeader(Account account, ThemeData theme, NetWorthProvider netWorthProvider) {
+  Widget _getAccountHeader(
+    Account account,
+    ThemeData theme,
+    NetWorthProvider netWorthProvider,
+    UserProvider userProvider,
+  ) {
     // Days changed depending on the configuration
     NetWorthFrameData? dayChange = netWorthProvider.historicalAccountData
         ?.firstWhereOrNull((element) => element.accountId == account.id)
@@ -168,7 +174,7 @@ class AccountWidget extends StatelessWidget {
                             spacing: 4,
                             children: [
                               // Account balance
-                              if (displayTotals) TextWidget(text: currencyFormatter.format(account.balance)),
+                              if (displayTotals) TextWidget(text: getFormattedCurrency(account.balance)),
                               // If our day change is null, we don't have enough data to come up with a calculation
                               if (dayChange != null && dayChange.percentChange != 0 && displayStats)
                                 AccountChangeWidget(

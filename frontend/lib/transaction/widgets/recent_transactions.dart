@@ -148,7 +148,7 @@ class _TransactionDataSource extends DataTableSource {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              currencyFormatter.format(transaction.amount),
+              getFormattedCurrency(transaction.amount),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: transaction.amount >= 0 ? Colors.green[700] : Colors.red[700],

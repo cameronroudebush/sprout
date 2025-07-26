@@ -56,6 +56,7 @@ export class AccountAPI {
         addedAccounts.push(matchingAccount.account);
       }
     }
+    SSEAPI.sendToSSEUser.next({ payload: Base.fromPlain({}), queue: "sync", user });
     return addedAccounts;
   }
 }
