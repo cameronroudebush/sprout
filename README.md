@@ -11,8 +11,10 @@
 
 Sprout is a financial management app specializing in automatic account tracking using various financial API's.
 
-![Sprout Home Page](https://github.com/cameronroudebush/sprout/blob/master/docs/images/home.png "Sprout Home Page")
-![Sprout Accounts Page](https://github.com/cameronroudebush/sprout/blob/master/docs/images/accounts.png "Sprout Accounts Page")
+<p align="center">
+<img src="https://github.com/cameronroudebush/sprout/blob/master/docs/images/home.png" alt="Sprout Home Page" width="300"/>
+<img src="https://github.com/cameronroudebush/sprout/blob/master/docs/images/accounts.png" alt="Sprout Accounts Page" width="300"/>
+</p>
 
 ## Code Base
 
