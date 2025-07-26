@@ -170,11 +170,11 @@
         },
         {
             "org": {
-                "domain": "www.fidelity.com",
-                "name": "Fidelity Investments",
+                "domain": "investor.vanguard.com/",
+                "name": "Vanguard Investments",
                 "sfin-url": "https://beta-bridge.simplefin.org/simplefin",
-                "url": "https://www.fidelity.com",
-                "id": "www.fidelity.com"
+                "url": "https://investor.vanguard.com/",
+                "id": "investor.vanguard.com"
             },
             "id": "ACT-985d764f-f984-49d0-8861-7ed0de9af966",
             "name": "IRA Account",
@@ -304,11 +304,11 @@
         },
         {
             "org": {
-                "domain": "www.fidelity.com",
-                "name": "Fidelity Investments",
+                "domain": "investor.vanguard.com/",
+                "name": "Vanguard Investments",
                 "sfin-url": "https://beta-bridge.simplefin.org/simplefin",
-                "url": "https://www.fidelity.com",
-                "id": "www.fidelity.com"
+                "url": "https://investor.vanguard.com/",
+                "id": "investor.vanguard.com"
             },
             "id": "ACT-4d3fab31-bc92-4307-a2d0-914a86046b31",
             "name": "Health Savings Account",
@@ -365,61 +365,33 @@
         },
         {
             "org": {
-                "domain": "www.wpcu.coop",
-                "name": "Wright-Patt Credit Union",
+                "domain": "www.wellsfargo.com",
+                "name": "Wells Fargo Bank",
                 "sfin-url": "https://beta-bridge.simplefin.org/simplefin",
-                "url": "https://www.wpcu.coop/Index.aspx",
-                "id": "www.wpcu.coop"
+                "url": "https://www.wellsfargo.com",
+                "id": "www.wellsfargo.com"
             },
-            "id": "ACT-45f5a58e-bdd9-4563-b51c-3b48ce605f1d",
-            "name": "Savings Account",
+            "id": "ACT-7d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a",
+            "name": "Checking Account",
             "currency": "USD",
-            "balance": "1300.00",
-            "available-balance": "1250.00",
-            "balance-date": 1747786159,
+            "balance": "2500.00",
+            "available-balance": "2450.00",
+            "balance-date": 1748534941,
             "transactions": [
                 {
-                    "id": "TRN-wpcu-save-1",
+                    "id": "TRN-wf-check-1",
                     "posted": 1716921600,
-                    "amount": "100.00",
-                    "description": "Transfer from Checking",
-                    "pending": false,
-                    "extra": {
-                        "category": "Transfer"
-                    }
-                }
-            ],
-            "holdings": []
-        },
-        {
-            "org": {
-                "domain": "www.wpcu.coop",
-                "name": "Wright-Patt Credit Union",
-                "sfin-url": "https://beta-bridge.simplefin.org/simplefin",
-                "url": "https://www.wpcu.coop/Index.aspx",
-                "id": "www.wpcu.coop"
-            },
-            "id": "ACT-4c000a4c-e38b-4e30-8a71-9db8c69931ce",
-            "name": "Primary Checking",
-            "currency": "USD",
-            "balance": "1834.75",
-            "available-balance": "1834.75",
-            "balance-date": 1747786159,
-            "transactions": [
-                {
-                    "id": "TRN-wpcu-check-1",
-                    "posted": 1716921600,
-                    "amount": "-85.75",
-                    "description": "Electric Bill",
+                    "amount": "-75.00",
+                    "description": "Utilities Payment",
                     "pending": false,
                     "extra": {
                         "category": "Utilities"
                     }
                 },
                 {
-                    "id": "TRN-wpcu-check-2",
+                    "id": "TRN-wf-check-2",
                     "posted": 1716576000,
-                    "amount": "1500.00",
+                    "amount": "1800.00",
                     "description": "Payroll Deposit",
                     "pending": false,
                     "extra": {
@@ -431,31 +403,71 @@
         },
         {
             "org": {
-                "domain": "www.wpcu.coop",
-                "name": "Wright-Patt Credit Union",
+                "domain": "www.wellsfargo.com",
+                "name": "Wells Fargo Bank",
                 "sfin-url": "https://beta-bridge.simplefin.org/simplefin",
-                "url": "https://www.wpcu.coop/Index.aspx",
-                "id": "www.wpcu.coop"
+                "url": "https://www.wellsfargo.com",
+                "id": "www.wellsfargo.com"
             },
-            "id": "ACT-ec30074c-5537-45a2-9a77-de40ba67ec31",
-            "name": "Money Market Account",
+            "id": "ACT-8e9f0a1b-2c3d-4e5f-6a7b-8c9d0e1f2a3b",
+            "name": "Savings Account",
             "currency": "USD",
-            "balance": "32515.25",
-            "available-balance": "32415.25",
-            "balance-date": 1747786159,
+            "balance": "5500.00",
+            "available-balance": "5400.00",
+            "balance-date": 1748534941,
             "transactions": [
                 {
-                    "id": "TRN-wpcu-mma-1",
-                    "posted": 1717008000,
-                    "amount": "15.25",
-                    "description": "Interest Earned",
+                    "id": "TRN-wf-save-1",
+                    "posted": 1716921600,
+                    "amount": "200.00",
+                    "description": "Transfer from Checking",
                     "pending": false,
                     "extra": {
-                        "category": "Income"
+                        "category": "Transfer"
                     }
                 }
             ],
             "holdings": []
+        },
+        {
+            "org": {
+                "domain": "www.wellsfargo.com",
+                "name": "Wells Fargo Bank",
+                "sfin-url": "https://beta-bridge.simplefin.org/simplefin",
+                "url": "https://www.wellsfargo.com",
+                "id": "www.wellsfargo.com"
+            },
+            "id": "ACT-9f0a1b2c-3d4e-5f6a-7b8c-9d0e1f2a3b4c",
+            "name": "Investment Account",
+            "currency": "USD",
+            "balance": "15000.00",
+            "available-balance": "0.00",
+            "balance-date": 1748534941,
+            "transactions": [
+                {
+                    "id": "TRN-wf-invest-1",
+                    "posted": 1716921600,
+                    "amount": "-300.00",
+                    "description": "Buy Stock XYZ",
+                    "pending": false,
+                    "extra": {
+                        "category": "Investments"
+                    }
+                }
+            ],
+            "holdings": [
+                {
+                    "id": "HOL-abcdef01-2345-6789-abcd-ef0123456789",
+                    "created": 1746386278,
+                    "currency": "USD",
+                    "cost_basis": "14000.00",
+                    "description": "GLOBAL GROWTH FUND",
+                    "market_value": "15000.00",
+                    "purchase_price": "100.00",
+                    "shares": "150.00",
+                    "symbol": "GGF"
+                }
+            ]
         },
         {
             "org": {
