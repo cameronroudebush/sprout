@@ -151,4 +151,4 @@ sprout_providers_simpleFIN_accessToken: MY_ACCESS_TOKEN
 
 # Contributions
 
-We welcome contributions from the community! Whether you're fixing bugs, adding new features, improving documentation, or simply reporting issues, your help is greatly appreciated.
+For feature requests and bug reports, please open an issue on GitHub. We appreciate all reports!
