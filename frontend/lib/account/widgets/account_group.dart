@@ -143,13 +143,29 @@ class AccountGroupWidget extends StatelessWidget {
                   children: [
                     ...accounts.expand((account) {
                       final isSelected = selectedAccounts?.contains(account) ?? false;
+                      final lastAccountIsSelected =
+                          accounts.first != account &&
+                          (selectedAccounts?.contains(accounts[accounts.indexOf(account) - 1]) ?? false);
+
+                      // Determine border for selection
+                      BoxBorder? border;
+                      if (isSelected == true) {
+                        final width = 3.0;
+                        final color = theme.colorScheme.secondary;
+                        border = Border(
+                          top: accounts.first == account || !lastAccountIsSelected
+                              ? BorderSide(width: width, color: color)
+                              : BorderSide.none,
+                          left: BorderSide(width: width, color: color),
+                          right: BorderSide(width: width, color: color),
+                          bottom: BorderSide(width: width, color: color),
+                        );
+                      }
 
                       return [
                         Container(
                           decoration: BoxDecoration(
-                            border: isSelected == false
-                                ? null
-                                : BoxBorder.all(width: 3, color: theme.colorScheme.secondary),
+                            border: border,
                             borderRadius: accounts.last == account
                                 ? BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
                                 : null,
