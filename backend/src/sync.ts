@@ -1,5 +1,4 @@
 import { Configuration } from "@backend/config/core";
-import { TimeZone } from "@backend/config/tz";
 import { Logger } from "@backend/logger";
 import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
@@ -7,42 +6,23 @@ import { Holding } from "@backend/model/holding";
 import { Sync } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import CronExpressionParser, { CronExpression } from "cron-parser";
+import { BackgroundJob } from "./background.job";
 import { ProviderBase } from "./providers/base/core";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
-export class BackgroundSync {
-  interval!: CronExpression;
+export class BackgroundSync extends BackgroundJob<Sync> {
+  constructor(public provider: ProviderBase) {
+    super("sync", Configuration.providers.updateTime);
+  }
 
-  constructor(public provider: ProviderBase) {}
-
-  /** Starts the scheduler to perform updates of accounts on a certain time frame */
-  async start() {
-    Logger.info(`Initializing background sync with job of: ${Configuration.updateTime}`);
-    // Validate the cronjob
-    this.interval = CronExpressionParser.parse(Configuration.updateTime, { tz: TimeZone.timeZone });
-    // Perform update, if one wasn't ran today. Else schedule the next update
+  override async start() {
+    // Check if we've ran a job yet today.
     const lastSchedule = (await Sync.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
-    if (lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString()) await this.update();
-    else this.scheduleNextUpdate();
+    const hasNotRanSyncToday = lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString();
+    return super.start(hasNotRanSyncToday);
   }
 
-  private scheduleNextUpdate() {
-    const nextExecutionDate = this.interval.next().toDate();
-    const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
-    Logger.info(`Next update time: ${TimeZone.formatDate(nextExecutionDate)}`);
-    setTimeout(async () => {
-      await this.update();
-    }, timeUntilNextExecution);
-  }
-
-  /** Manually runs a sync out of the current process */
-  async runManual() {
-    return await this.update();
-  }
-
-  /** Performs an update for our API */
-  private async update() {
+  protected async update() {
     Logger.info("Performing background update");
     const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
     // Handle each user
@@ -113,9 +93,6 @@ export class BackgroundSync {
       schedule.status = "failed";
       await schedule.update();
     }
-
-    // Schedule next update
-    this.scheduleNextUpdate();
     return schedule;
   }
 }

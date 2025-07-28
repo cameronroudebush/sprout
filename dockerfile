@@ -35,6 +35,7 @@ RUN apk update && apk add libstdc++
 # Set some default env variables
 ENV sprout_server_port=8001
 ENV sprout_database_sqlite_database=/sprout/sprout.sqlite
+ENV sprout_database_backup_directory=/sprout/backups/database
 
 # Grab the files we need
 COPY ./nginx.conf /etc/nginx/nginx.conf

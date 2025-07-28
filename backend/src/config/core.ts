@@ -25,9 +25,6 @@ export class Configuration {
   /** A secret key that can be used to create JWT's and other relevant info for this app. **This will be regenerated during every restart!** */
   static secretKey = uuid.v4();
 
-  @ConfigurationMetadata.assign({ comment: "How often to perform data queries for data from providers. Default is once a day at 7am." })
-  static updateTime: string = "0 7 * * *";
-
   static get appName() {
     return name;
   }
