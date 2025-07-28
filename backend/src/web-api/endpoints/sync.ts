@@ -9,7 +9,7 @@ export class SyncAPI {
   /** Runs a manual schedule re-sync */
   @RestMetadata.register(new RestMetadata(RestEndpoints.sync.runManual, "GET"))
   async manualRun(_: RestBody, user: User) {
-    const syncRun = await Providers.getCurrentProvider().sync.runManual();
+    const syncRun = await Providers.getCurrentProvider().sync.updateNow();
     // Inform of the completed sync
     SSEAPI.sendToSSEUser.next({ payload: syncRun, queue: "sync", user });
     return syncRun;

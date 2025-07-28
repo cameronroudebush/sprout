@@ -55,7 +55,6 @@ Below is a list of planned features I personally would find beneficial. I make n
   - Crypto? (This will be a pain)
 - Improved error handling
 - Database
-  - Backups
   - Migrations!
 - Android/IOS Apps
   - Widgets for things like transactions
@@ -106,6 +105,8 @@ The configuration file is generated dynamically and placed directly next to the 
 ```yml
 # Configuration for the various providers
 providers:
+  # How often to perform data queries for data from providers. Default is once a day at 7am.
+  updateTime: 0 7 * * *
   # SimpleFIN configuration: https://www.simplefin.org/
   simpleFIN:
     # This access token is acquired from SimpleFIN that allows us to authenticate and grab your data.
@@ -126,6 +127,16 @@ server:
 
 # Database specific options
 database:
+  # Configuration for performing database backups automatically
+  backup:
+    # If backups should occur
+    enabled: true
+    # How many backups we should keep
+    count: 3
+    # When to backup the database. Default is once a day at 4am.
+    time: 0 4 * * *
+    # Where to place the backup files.
+    directory: /backups/database
   # The type of database we want to use
   # Must be one of: [sqlite]
   type: sqlite
@@ -133,9 +144,6 @@ database:
   sqlite:
     # Database file name
     database: sprout.sqlite
-
-# How often to perform data queries for data from providers. Default is once a day at 7am.
-updateTime: 0 7 * * *
 ```
 
 ### Environment Variables
@@ -145,7 +153,7 @@ Environment variables are supported within the docker build and even in the exec
 ```yml
 TZ: America/New_York
 sprout_server_port: 9000
-sprout_server_jwtExpirationTime: 30m
+sprout_server_jwtExpirationTime: 7d
 sprout_providers_simpleFIN_accessToken: MY_ACCESS_TOKEN
 ```
 
