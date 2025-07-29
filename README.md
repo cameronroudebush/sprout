@@ -144,6 +144,11 @@ database:
   sqlite:
     # Database file name
     database: sprout.sqlite
+
+# Settings specific to transactions
+transaction:
+  # When to check for stuck transactions. This includes things like stuck pending.
+  stuckTransactionTime: 0 3 * * *
 ```
 
 ### Environment Variables

@@ -2,7 +2,7 @@ import { Configuration } from "@backend/config/core";
 import { Logger } from "@backend/logger";
 import fs from "fs";
 import path from "path";
-import { BackgroundJob } from "../background.job";
+import { BackgroundJob } from "./base";
 
 /** This class defines a background job to execute routinely for backing up the database. */
 export class DatabaseBackup extends BackgroundJob<any> {

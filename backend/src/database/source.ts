@@ -1,5 +1,4 @@
 import { Configuration } from "@backend/config/core";
-import { DatabaseBackup } from "@backend/database/backup";
 import { LogConfig, Logger } from "@backend/logger";
 import { DataSource } from "typeorm";
 
@@ -13,8 +12,6 @@ class InternalDatabase {
 
   /** Initializes the database based on the backend configuration */
   async init() {
-    // Initialize backup service
-    if (Configuration.database.backup.enabled) await new DatabaseBackup().start();
     this.source = new DataSource(Configuration.database.dbConfig);
     Logger.info(`Attempting SQLite connection at: ${this.source.options.database}`, this.logOptions);
     await this.source.initialize();

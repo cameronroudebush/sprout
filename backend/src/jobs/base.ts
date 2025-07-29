@@ -1,6 +1,6 @@
 import { TimeZone } from "@backend/config/tz";
 import CronExpressionParser, { CronExpression } from "cron-parser";
-import { LogConfig, Logger } from "./logger";
+import { LogConfig, Logger } from "../logger";
 
 /** A generic class that lets us create background jobs based on a cronjob timeframe. Intended to be used as an extension. */
 export abstract class BackgroundJob<T extends any> {
@@ -8,7 +8,7 @@ export abstract class BackgroundJob<T extends any> {
 
   /** Gets some extra configuration for the logger to display better messages for these jobs. */
   protected get logConfig(): LogConfig {
-    return { header: `[${this.jobName}]` };
+    return { header: `[job][${this.jobName}]`, shouldPrependLoggerFile: false };
   }
 
   /**
@@ -29,8 +29,9 @@ export abstract class BackgroundJob<T extends any> {
    */
   public async start(shouldExecuteImmediately = false) {
     // Perform update if requested, else schedule the next update
-    if (shouldExecuteImmediately) this.update();
+    if (shouldExecuteImmediately) await this.update();
     this.scheduleNextUpdate();
+    return this;
   }
 
   /** Schedules the next update based on the cronjob time */

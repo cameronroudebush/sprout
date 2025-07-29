@@ -1,5 +1,6 @@
 import { DatabaseConfig } from "@backend/config/db.config";
 import { ServerConfig } from "@backend/config/server";
+import { TransactionConfig } from "@backend/config/transaction";
 import * as uuid from "uuid";
 import { name } from "../../package.json";
 import { ConfigurationMetadata } from "./configuration.metadata";
@@ -18,6 +19,9 @@ export class Configuration {
 
   @ConfigurationMetadata.assign({ comment: "Database specific optioons" })
   static database = new DatabaseConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Settings specific to transactions" })
+  static transaction = new TransactionConfig();
 
   /** This variable contains the application version of this build. This will be replaced by {@link build.ts}. */
   static version = "APP-VERSION";

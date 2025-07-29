@@ -8,7 +8,8 @@
       "@backend/providers/*": ["./src/providers/*"],
       "@backend/config/*": ["./src/config/*"],
       "@backend/model/*": ["./src/model/*"],
-      "@backend/database/*": ["./src/database/*"]
+      "@backend/database/*": ["./src/database/*"],
+      "@backend/jobs/*": ["./src/jobs/*"]
     }
   },
   "include": ["./src/**/*", "../common/src/**/*"]
