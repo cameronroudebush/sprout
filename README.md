@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="50%" src="https://github.com/cameronroudebush/sprout/blob/master/frontend/assets/logo/color-transparent.svg">
+  <img width="75%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png">
 </p>
 
 > [!caution]
@@ -7,13 +7,16 @@
 >
 > **_Use at your own risk_**
 
+![Docker Pulls](https://img.shields.io/docker/pulls/croudebush/sprout)
+![GitHub Tag](https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release)
+
 # What is Sprout?
 
 Sprout is a financial management app specializing in automatic account tracking using various financial API's.
 
 <p align="center">
-<img src="https://github.com/cameronroudebush/sprout/blob/master/docs/images/home.png" alt="Sprout Home Page" width="300"/>
-<img src="https://github.com/cameronroudebush/sprout/blob/master/docs/images/accounts.png" alt="Sprout Accounts Page" width="300"/>
+  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/accounts.png" alt="Sprout Home Page" width="300"/>
+  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/accounts.png" alt="Sprout Accounts Page" width="300"/>
 </p>
 
 ## Code Base

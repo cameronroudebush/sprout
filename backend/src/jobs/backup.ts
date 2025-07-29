@@ -1,4 +1,5 @@
 import { Configuration } from "@backend/config/core";
+import { TimeZone } from "@backend/config/tz";
 import { Logger } from "@backend/logger";
 import fs from "fs";
 import path from "path";
@@ -20,7 +21,8 @@ export class DatabaseBackup extends BackgroundJob<any> {
     if (!fs.existsSync(Configuration.database.backup.directory)) fs.mkdirSync(Configuration.database.backup.directory, { recursive: true });
 
     const dbPath = Configuration.database.dbConfig.database as string;
-    const backupFileName = `sprout_backup_${new Date().toISOString().replace(/:/g, "-")}.sqlite`;
+    const nowAsString = TimeZone.formatDate(new Date()).replace(/:/g, "-").replaceAll(" ", "_");
+    const backupFileName = `sprout_backup_${nowAsString}.sqlite`;
     const backupPath = path.join(Configuration.database.backup.directory, backupFileName);
 
     Logger.info(`Creating database backup: ${backupPath}`, this.logConfig);
