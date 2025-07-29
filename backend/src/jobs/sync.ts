@@ -6,8 +6,8 @@ import { Holding } from "@backend/model/holding";
 import { Sync } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { BackgroundJob } from "./background.job";
-import { ProviderBase } from "./providers/base/core";
+import { ProviderBase } from "@backend/providers/base/core";
+import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
 export class BackgroundSync extends BackgroundJob<Sync> {

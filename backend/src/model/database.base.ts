@@ -41,6 +41,11 @@ export class DatabaseBase extends DBBase {
     return await new this().getRepository().delete(id);
   }
 
+  /** Given the ID's of many objects, removes them from the database. */
+  static async deleteMany<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, ids: Array<string>) {
+    return await new this().getRepository().delete(ids);
+  }
+
   /** Inserts the element from `this` into the database */
   async insert() {
     return await this.getRepository().save(this);

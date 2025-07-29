@@ -1,4 +1,5 @@
 import { Database } from "@backend/database/source";
+import { JobProcessor } from "@backend/jobs/jobs";
 import "reflect-metadata";
 import "source-map-support/register";
 import { CentralServer } from "./central.server";
@@ -17,6 +18,8 @@ async function main() {
   // Initialize database
   // TODO: Database migrations
   await Database.init();
+  // Initialize background jobs
+  await new JobProcessor().start();
   // Initialize server
   const centralServer = new CentralServer();
   await new RestAPIServer(centralServer).initialize();

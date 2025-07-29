@@ -1,8 +1,8 @@
+import { BackgroundSync } from "@backend/jobs/sync";
 import { Account } from "@backend/model/account";
 import { Holding } from "@backend/model/holding";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { BackgroundSync } from "../../sync";
 import { ProviderRateLimit } from "./rate-limit";
 
 /**
