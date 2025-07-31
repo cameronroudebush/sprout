@@ -50,7 +50,7 @@ class _UserPageState extends State<UserPage> {
           "settings": [
             UserDisplayInfo(
               title: "Hide Account Balances",
-              hint: "If you would like to hide your account balances, toggle this to true.",
+              hint: "Toggle to hide balances across the app.",
               settingValue: userConfig.privateMode,
               settingType: "bool",
               icon: Icons.remove_red_eye,
