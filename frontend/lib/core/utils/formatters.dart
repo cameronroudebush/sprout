@@ -13,8 +13,9 @@ String getFormattedCurrency(dynamic value, {bool round = false}) {
   return userProvider.currentUserConfig?.privateMode == true ? "***" : currencyFormatter.format(value);
 }
 
-String formatDate(DateTime date) {
-  return DateFormat('MM/dd/yyyy').format(date.toLocal());
+String formatDate(DateTime date, {bool includeTime = false}) {
+  final format = includeTime ? "MM/dd/yyyy HH:mm" : "MM/dd/yyyy";
+  return DateFormat(format).format(date.toLocal());
 }
 
 /// Returns the given number as a percentage

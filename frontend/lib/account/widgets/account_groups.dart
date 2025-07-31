@@ -86,20 +86,25 @@ class AccountGroupsWidget extends StatelessWidget {
               totalNetWorth = totalAssets;
             }
 
-            return Padding(
-              padding: EdgeInsetsGeometry.directional(start: 0, end: 0),
-              child: AccountGroupWidget(
-                netWorthPeriod: netWorthPeriod,
-                accounts: entry.value,
-                type: entry.key,
-                totalNetWorth: totalNetWorth,
-                onAccountClick: onAccountClick,
-                displayStats: displayStats,
-                displayTotals: displayTotals,
-                selectedAccounts: selectedAccounts,
-                allowCollapse: allowCollapse,
-                applyCard: applyCard,
-              ),
+            return Column(
+              children: [
+                Padding(
+                  padding: EdgeInsetsGeometry.directional(start: 0, end: 0),
+                  child: AccountGroupWidget(
+                    netWorthPeriod: netWorthPeriod,
+                    accounts: entry.value,
+                    type: entry.key,
+                    totalNetWorth: totalNetWorth,
+                    onAccountClick: onAccountClick,
+                    displayStats: displayStats,
+                    displayTotals: displayTotals,
+                    selectedAccounts: selectedAccounts,
+                    allowCollapse: allowCollapse,
+                    applyCard: applyCard,
+                  ),
+                ),
+                if (!applyCard) const Divider(height: 1),
+              ],
             );
           }),
         ],

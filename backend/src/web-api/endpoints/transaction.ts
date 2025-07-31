@@ -1,11 +1,12 @@
+import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
-import { TransactionRequest } from "@backend/model/api/transaction";
+import { TransactionQueryRequest, TransactionRequest } from "@backend/model/api/transaction";
 import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import { subDays } from "date-fns";
-import { FindOptionsWhere, LessThan, MoreThan } from "typeorm";
+import { FindOptionsWhere, LessThan, Like, MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
 
 export class TransactionAPI {
@@ -15,7 +16,16 @@ export class TransactionAPI {
     return await Transaction.find({
       skip: parsedRequest.startIndex,
       take: parsedRequest.endIndex,
-      where: { account: { user: { username: user.username } } },
+      where: { account: { user: { username: user.username } }, category: parsedRequest.category },
+      order: { posted: "DESC" },
+    });
+  }
+
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getByDescription, "GET"))
+  async getTransactionsByDescription(request: RestBody, user: User) {
+    const parsedRequest = TransactionQueryRequest.fromPlain(request.payload);
+    return await Transaction.find({
+      where: { account: { user: { username: user.username } }, description: Like(`%${parsedRequest.description!}%`) },
       order: { posted: "DESC" },
     });
   }
@@ -23,6 +33,18 @@ export class TransactionAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.count, "GET"))
   async getTotalTransactions(_request: RestBody, user: User) {
     return Transaction.count({ where: { account: { user: { id: user.id } } } });
+  }
+
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getUniqueCategories, "GET"))
+  async getUniqueTransactionCategories(_request: RestBody, user: User) {
+    const repository = Transaction.getRepository();
+    const uniqueCategories = await repository
+      .createQueryBuilder("transaction")
+      .select("DISTINCT transaction.category", "category")
+      .innerJoin(Account, "account", "transaction.accountId = account.id")
+      .where("account.userId = :userId", { userId: user.id })
+      .getRawMany();
+    return uniqueCategories.map((item) => item.category);
   }
 
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.stats, "GET"))

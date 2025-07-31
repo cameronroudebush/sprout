@@ -21,8 +21,8 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return _totalTransactionCount = await api.getTransactionCount();
   }
 
-  Future<List<Transaction>> populateTransactions(int startIndex, int endIndex, {bool shouldNotify = false}) async {
-    final newTransactions = await api.getTransactions(startIndex, endIndex);
+  /// Adds new transactions to our global list and filters duplicates out
+  void _addNewTransactions(List<Transaction> newTransactions) {
     // Combine new transactions with existing ones, removing duplicates
     final Set<String> existingTransactionIds = _transactions.map((t) => t.id).toSet();
     for (var newTransaction in newTransactions) {
@@ -30,12 +30,26 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
         _transactions.add(newTransaction);
       }
     }
+    _transactions.sort((a, b) => b.posted.compareTo(a.posted));
+  }
+
+  Future<List<Transaction>> populateTransactions(int startIndex, int endIndex, {bool shouldNotify = false}) async {
+    final newTransactions = await api.getTransactions(startIndex, endIndex);
+    _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
     return _transactions;
   }
 
   Future<TransactionStats?> populateStats() async {
     return _transactionStats = await api.getStats();
+  }
+
+  /// Same as @populateTransactions but now does it with a specific search term
+  Future<List<Transaction>> populateTransactionsWithSearch(String description, {bool shouldNotify = true}) async {
+    final newTransactions = await api.getTransactionsByDescription(description);
+    _addNewTransactions(newTransactions);
+    if (shouldNotify) notifyListeners();
+    return _transactions;
   }
 
   @override

@@ -10,14 +10,9 @@ class TransactionsOverviewPage extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsGeometry.all(12),
       child: Column(
+        spacing: 12,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const TransactionSummaryCard(),
-          const SizedBox(height: 16.0),
-
-          const RecentTransactionsCard(),
-          const SizedBox(height: 16.0),
-        ],
+        children: [const TransactionSummaryCard(), const RecentTransactionsCard(rowsPerPage: 12)],
       ),
     );
   }
