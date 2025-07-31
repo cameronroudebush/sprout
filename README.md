@@ -28,15 +28,13 @@ Sprout is designed with a "mobile first" approach utilizing [flutter](https://fl
 Below is a list of planned features I personally would find beneficial. I make no guarantees on when these will be implemented but I am working on them.
 
 - Redesigned Interfaces
-  - Home Page
-    - Show simplified transactions of maybe the last N number of transactions
   - Accounts Page
     - Adding improved account views for details of each account
       - Things like transactions for this account, net worth over time, etc.
   - Overhauled Transactions
-    - Update the table display to be a bit more friendly
-    - Allow editing the transactions category
-      - Automatic rules for these edits?
+    - Pie chart of categories
+    - Category Editing?
+    - Guessing of subscriptions to display
   - Holdings page
     - Real time stock ticket updates
     - Show each account separately, the holdings associated to them, and the % change for today.

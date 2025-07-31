@@ -47,7 +47,13 @@ class _SproutAppShellState extends State<SproutAppShell> {
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1024),
-                child: SingleChildScrollView(controller: _scrollController, child: _pages[_currentIndex]['page']),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+                    child: _pages[_currentIndex]['page'],
+                  ),
+                ),
               ),
             ),
           ),
