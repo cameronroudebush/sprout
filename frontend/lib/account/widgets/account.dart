@@ -6,11 +6,13 @@ import 'package:sprout/account/dialog/account_error.dart';
 import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/institution_error.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/net-worth/models/chart_range.dart';
 import 'package:sprout/net-worth/models/net.worth.ot.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/user/provider.dart';
@@ -20,7 +22,7 @@ class AccountWidget extends StatelessWidget {
   /// On click of this account. Overrides the expansion behavior.
   final VoidCallback? onClick;
   final Account account;
-  final String netWorthPeriod;
+  final ChartRange netWorthPeriod;
   // If this account should display a "selected" indicator
   final bool isSelected;
 
@@ -149,7 +151,7 @@ class AccountWidget extends StatelessWidget {
                             ),
                             TextWidget(
                               text: account.institution.name.toTitleCase,
-                              style: TextStyle(color: theme.disabledColor),
+                              style: TextStyle(color: Colors.grey),
                               textAlign: TextAlign.start,
                             ),
                           ],
@@ -160,39 +162,27 @@ class AccountWidget extends StatelessWidget {
                 ),
                 // Print details at the end of the row
                 Expanded(
-                  child: Column(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     spacing: 4,
                     children: [
-                      Row(
+                      InstitutionError(institution: account.institution),
+                      Column(
                         spacing: 12,
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            spacing: 4,
-                            children: [
-                              // Account balance
-                              if (displayTotals) TextWidget(text: getFormattedCurrency(account.balance)),
-                              // If our day change is null, we don't have enough data to come up with a calculation
-                              if (dayChange != null && dayChange.percentChange != 0 && displayStats)
-                                AccountChangeWidget(
-                                  percentageChange: dayChange.percentChange,
-                                  totalChange: account.isNegativeNetWorth
-                                      ? dayChange.valueChange * -1
-                                      : dayChange.valueChange,
-                                  showPercentage: false,
-                                ),
-                            ],
-                          ),
-                          if (account.institution.hasError)
-                            SproutTooltip(
-                              message: 'There was an error syncing with ${account.institution.name}.',
-                              child: const Padding(
-                                padding: EdgeInsets.only(top: 4.0),
-                                child: Icon(Icons.warning, color: Colors.red, size: 20.0),
-                              ),
+                          // Account balance
+                          if (displayTotals) TextWidget(text: getFormattedCurrency(account.balance)),
+                          // If our day change is null, we don't have enough data to come up with a calculation
+                          if (dayChange != null && dayChange.percentChange != 0 && displayStats)
+                            AccountChangeWidget(
+                              percentageChange: dayChange.percentChange,
+                              totalChange: account.isNegativeNetWorth
+                                  ? dayChange.valueChange * -1
+                                  : dayChange.valueChange,
+                              showPercentage: false,
                             ),
                         ],
                       ),

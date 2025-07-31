@@ -5,11 +5,11 @@ import { Holding } from "@backend/model/holding";
 import { Institution } from "@backend/model/institution";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
+import { DevFinancialDataGenerator } from "@backend/providers/base/random-data";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
-import * as fakeData from "./fake-data.json";
 
 /**
  * This provider adds automated account syncing using the SimpleFIN provider.
@@ -92,7 +92,7 @@ export class SimpleFINProvider extends ProviderBase {
     const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
     if (Configuration.isDevBuild) {
       Logger.warn(`Dev build detected. SimpleFIN will return fake data.`);
-      return fakeData as SimpleFINReturn.FinancialData;
+      return new DevFinancialDataGenerator().generateFinancialData(true) as any as SimpleFINReturn.FinancialData;
     } else {
       await this.rateLimit.incrementOrError();
       const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${user}:${pass}`) } });

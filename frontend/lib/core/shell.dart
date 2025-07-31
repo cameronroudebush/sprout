@@ -19,10 +19,11 @@ class SproutAppShell extends StatefulWidget {
 
 class _SproutAppShellState extends State<SproutAppShell> {
   int _currentIndex = 0;
+  final ScrollController _scrollController = ScrollController();
 
   final List<Map<String, dynamic>> _pages = const <Map<String, dynamic>>[
     {'page': HomePage(), 'icon': Icons.home, 'label': 'Home'},
-    {'page': AccountOverviewPage(), 'icon': Icons.account_balance, 'label': 'Accounts'},
+    {'page': AccountsOverview(), 'icon': Icons.account_balance, 'label': 'Accounts'},
     {'page': TransactionsOverviewPage(), 'icon': Icons.receipt, 'label': 'Transactions'},
     {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'User'},
   ];
@@ -37,6 +38,7 @@ class _SproutAppShellState extends State<SproutAppShell> {
   Widget build(BuildContext context) {
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
+        if (_scrollController.positions.isNotEmpty) _scrollController.jumpTo(0);
         final screenHeight = MediaQuery.of(context).size.height;
         return Scaffold(
           appBar: SproutAppBar(screenHeight: screenHeight, currentPage: _pages[_currentIndex]['label']),
@@ -45,7 +47,7 @@ class _SproutAppShellState extends State<SproutAppShell> {
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1024),
-                child: SingleChildScrollView(child: _pages[_currentIndex]['page']),
+                child: SingleChildScrollView(controller: _scrollController, child: _pages[_currentIndex]['page']),
               ),
             ),
           ),

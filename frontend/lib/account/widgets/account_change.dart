@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/net-worth/models/chart_range.dart';
 
 /// A widget used to display the percentage change of an account with icons and coloring
 class AccountChangeWidget extends StatelessWidget {
   final double? percentageChange;
-  final double totalChange;
+  final double? totalChange;
   final MainAxisAlignment mainAxisAlignment;
-  final String? netWorthPeriod;
+  final ChartRange? netWorthPeriod;
   final bool showPercentage;
+
+  /// If we should use the extended period information for the string (1 month vs 1m)
+  final bool useExtendedPeriodString;
 
   const AccountChangeWidget({
     super.key,
@@ -17,22 +21,8 @@ class AccountChangeWidget extends StatelessWidget {
     this.percentageChange,
     this.mainAxisAlignment = MainAxisAlignment.end,
     this.showPercentage = true,
+    this.useExtendedPeriodString = false,
   });
-
-  String _netWorthPeriodAsPretty() {
-    switch (netWorthPeriod) {
-      case "last1Day":
-        return "1 day";
-      case "last7Days":
-        return "1 week";
-      case "last30Days":
-        return "1 month";
-      case "lastYear":
-        return "1 year";
-      default:
-        return netWorthPeriod!;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +38,7 @@ class AccountChangeWidget extends StatelessWidget {
             spacing: 4,
             children: [
               TextWidget(
-                text: getFormattedCurrency(totalChange),
+                text: getFormattedCurrency(totalChange ?? 0),
                 style: TextStyle(color: changeColor),
               ),
               if (showPercentage)
@@ -60,7 +50,7 @@ class AccountChangeWidget extends StatelessWidget {
               if (netWorthPeriod != null)
                 TextWidget(
                   referenceSize: .75,
-                  text: _netWorthPeriodAsPretty(),
+                  text: ChartRangeUtility.asPretty(netWorthPeriod!, useExtendedPeriodString: useExtendedPeriodString),
                   style: TextStyle(color: Colors.grey),
                 ),
             ],

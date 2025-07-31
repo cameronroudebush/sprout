@@ -4,7 +4,7 @@ import { RestEndpoints } from "@backend/model/api/endpoint";
 import { NetWorthFrameData, NetWorthOverTime } from "@backend/model/api/net.worth";
 import { RestBody } from "@backend/model/api/rest.request";
 import { User } from "@backend/model/user";
-import { eachDayOfInterval, isSameDay, subDays, subYears } from "date-fns";
+import { differenceInDays, eachDayOfInterval, isSameDay, subDays, subYears } from "date-fns";
 import { groupBy } from "lodash";
 import { MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
@@ -74,23 +74,36 @@ export class NetWorthAPI {
     return { snapshot: netWorthSnapshots, frame: NetWorthFrameData.fromPlain({ percentChange, valueChange }) };
   }
 
-  /** Returns various net-worth tracking over time */
-  @RestMetadata.register(new RestMetadata(RestEndpoints.netWorth.getNetWorthOverTime, "GET"))
-  async getNetWorthOT(_request: RestBody, user: User) {
-    const accountHistory = await NetWorthAPI.getHistory(user);
+  /** Central function to turn {@link AccountHistory} into {@link NetWorthOverTime} */
+  private static getOTForHistory(history: AccountHistory[]) {
+    // How far back we have data for, total
+    const sproutAccountLifetime = differenceInDays(new Date(), history[history.length - 1]?.time ?? 1);
 
-    const last1Day = NetWorthAPI.generateNetWorthOverTime(accountHistory, 1);
-    const last7Days = NetWorthAPI.generateNetWorthOverTime(accountHistory, 7);
-    const last30Days = NetWorthAPI.generateNetWorthOverTime(accountHistory, 30);
-    const lastYear = NetWorthAPI.generateNetWorthOverTime(accountHistory, 365);
+    const last1Day = NetWorthAPI.generateNetWorthOverTime(history, 1);
+    const last7Days = NetWorthAPI.generateNetWorthOverTime(history, 7);
+    const lastMonth = NetWorthAPI.generateNetWorthOverTime(history, 30);
+    const lastThreeMonths = NetWorthAPI.generateNetWorthOverTime(history, 90);
+    const lastSixMonths = NetWorthAPI.generateNetWorthOverTime(history, 180);
+    const lastYear = NetWorthAPI.generateNetWorthOverTime(history, 365);
+    const allTime = NetWorthAPI.generateNetWorthOverTime(history, sproutAccountLifetime);
 
     return NetWorthOverTime.fromPlain({
       last1Day: last1Day.frame,
       last7Days: last7Days.frame,
-      last30Days: last30Days.frame,
+      lastMonth: lastMonth.frame,
+      lastThreeMonths: lastThreeMonths.frame,
+      lastSixMonths: lastSixMonths.frame,
       lastYear: lastYear.frame,
+      allTime: allTime.frame,
       historicalData: NetWorthAPI.snapshotToHistoricalDict(lastYear.snapshot),
     });
+  }
+
+  /** Returns various net-worth tracking over time */
+  @RestMetadata.register(new RestMetadata(RestEndpoints.netWorth.getNetWorthOverTime, "GET"))
+  async getNetWorthOT(_request: RestBody, user: User) {
+    const accountHistory = await NetWorthAPI.getHistory(user);
+    return NetWorthAPI.getOTForHistory(accountHistory);
   }
 
   /** Returns the net-worth of all accounts individually */
@@ -101,20 +114,9 @@ export class NetWorthAPI {
     // Loop over each account
     return Object.keys(groupedAccounts).map((accountId) => {
       const accountHistory = groupedAccounts[accountId]!;
-
-      const last1Day = NetWorthAPI.generateNetWorthOverTime(accountHistory, 1);
-      const last7Days = NetWorthAPI.generateNetWorthOverTime(accountHistory, 7);
-      const last30Days = NetWorthAPI.generateNetWorthOverTime(accountHistory, 30);
-      const lastYear = NetWorthAPI.generateNetWorthOverTime(accountHistory, 365);
-
-      return NetWorthOverTime.fromPlain({
-        accountId,
-        last1Day: last1Day.frame,
-        last7Days: last7Days.frame,
-        last30Days: last30Days.frame,
-        lastYear: lastYear.frame,
-        historicalData: NetWorthAPI.snapshotToHistoricalDict(lastYear.snapshot),
-      });
+      const ot = NetWorthAPI.getOTForHistory(accountHistory);
+      ot.accountId = accountId;
+      return ot;
     });
   }
 }

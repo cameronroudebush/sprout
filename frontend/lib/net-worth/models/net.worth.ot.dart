@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/net-worth/models/chart_range.dart';
 
 /// This class represents a time frame of net worth change.
 class NetWorthFrameData {
@@ -19,16 +20,23 @@ class NetWorthFrameData {
 class HistoricalNetWorth {
   NetWorthFrameData last1Day;
   NetWorthFrameData last7Days;
-  NetWorthFrameData last30Days;
+  NetWorthFrameData lastMonth;
+  NetWorthFrameData lastThreeMonths;
+  NetWorthFrameData lastSixMonths;
   NetWorthFrameData lastYear;
+  NetWorthFrameData allTime;
+
   Map<DateTime, double> historicalData;
   String? accountId;
 
   HistoricalNetWorth({
     required this.last1Day,
     required this.last7Days,
-    required this.last30Days,
+    required this.lastMonth,
+    required this.lastThreeMonths,
+    required this.lastSixMonths,
     required this.lastYear,
+    required this.allTime,
     required this.historicalData,
     this.accountId,
   });
@@ -48,25 +56,33 @@ class HistoricalNetWorth {
     return HistoricalNetWorth(
       last1Day: NetWorthFrameData.fromJson(json['last1Day']),
       last7Days: NetWorthFrameData.fromJson(json['last7Days']),
-      last30Days: NetWorthFrameData.fromJson(json['last30Days']),
+      lastMonth: NetWorthFrameData.fromJson(json['lastMonth']),
+      lastThreeMonths: NetWorthFrameData.fromJson(json['lastThreeMonths']),
+      lastSixMonths: NetWorthFrameData.fromJson(json['lastSixMonths']),
       lastYear: NetWorthFrameData.fromJson(json['lastYear']),
+      allTime: NetWorthFrameData.fromJson(json['allTime']),
       historicalData: parsedHistoricalData,
       accountId: json['accountId'],
     );
   }
 
   /// Returns the value by the given time frame as supported in the above properties
-  NetWorthFrameData getValueByFrame(String frame) {
+  NetWorthFrameData getValueByFrame(ChartRange frame) {
     switch (frame) {
-      case "last1Day":
+      case ChartRange.oneDay:
         return last1Day;
-      case "last7Days":
+      case ChartRange.sevenDays:
         return last7Days;
-      case "last30Days":
-        return last30Days;
-      case "lastYear":
+      case ChartRange.oneMonth:
+        return lastMonth;
+      case ChartRange.threeMonths:
+        return lastThreeMonths;
+      case ChartRange.sixMonths:
+        return lastSixMonths;
+      case ChartRange.oneYear:
         return lastYear;
+      case ChartRange.allTime:
+        return allTime;
     }
-    throw Exception("Couldn't find matching net worth time frame");
   }
 }

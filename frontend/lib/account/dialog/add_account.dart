@@ -66,7 +66,9 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                     child: Center(
                       child: TextWidget(
                         referenceSize: 1,
-                        text: _gettingAccountsError ?? 'No accounts found. Did you add them in the provider?',
+                        text:
+                            _gettingAccountsError ??
+                            'No accounts found. Did you add them in the provider? Or have you already added them all?',
                       ),
                     ),
                   )
