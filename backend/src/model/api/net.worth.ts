@@ -17,8 +17,11 @@ export class NetWorthFrameData extends Base {
 export class NetWorthOverTime extends Base {
   last1Day: NetWorthFrameData;
   last7Days: NetWorthFrameData;
-  last30Days: NetWorthFrameData;
+  lastMonth: NetWorthFrameData;
+  lastThreeMonths: NetWorthFrameData;
+  lastSixMonths: NetWorthFrameData;
   lastYear: NetWorthFrameData;
+  allTime: NetWorthFrameData;
   historicalData: Dictionary<number>;
 
   /** Some net worth OT data may contain an account Id */
@@ -27,15 +30,21 @@ export class NetWorthOverTime extends Base {
   constructor(
     last1Day: NetWorthFrameData,
     last7Days: NetWorthFrameData,
-    last30Days: NetWorthFrameData,
+    lastMonth: NetWorthFrameData,
+    lastThreeMonths: NetWorthFrameData,
+    lastSixMonths: NetWorthFrameData,
     lastYear: NetWorthFrameData,
+    allTime: NetWorthFrameData,
     historicalData: Dictionary<number>,
   ) {
     super();
     this.last1Day = last1Day;
     this.last7Days = last7Days;
-    this.last30Days = last30Days;
+    this.lastMonth = lastMonth;
+    this.lastThreeMonths = lastThreeMonths;
+    this.lastSixMonths = lastSixMonths;
     this.lastYear = lastYear;
+    this.allTime = allTime;
     this.historicalData = historicalData;
   }
 }

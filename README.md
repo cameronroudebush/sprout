@@ -29,13 +29,10 @@ Below is a list of planned features I personally would find beneficial. I make n
 
 - Redesigned Interfaces
   - Home Page
-    - Show an improved simplified net worth for the past month
     - Show simplified transactions of maybe the last N number of transactions
   - Accounts Page
     - Adding improved account views for details of each account
       - Things like transactions for this account, net worth over time, etc.
-    - Centralized chart at the top
-      - Allow the ability to select time frames to look back at net worth over time
   - Overhauled Transactions
     - Update the table display to be a bit more friendly
     - Allow editing the transactions category

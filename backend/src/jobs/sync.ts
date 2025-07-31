@@ -7,6 +7,7 @@ import { Sync } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import { ProviderBase } from "@backend/providers/base/core";
+import { subDays } from "date-fns";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
@@ -53,7 +54,7 @@ export class BackgroundSync extends BackgroundJob<Sync> {
             account: accountInDB,
             balance: accountInDB.balance,
             availableBalance: accountInDB.availableBalance,
-            time: new Date(),
+            time: subDays(new Date(), 1),
           }).insert();
           // Update current account
           accountInDB.balance = data.account.balance;

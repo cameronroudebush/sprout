@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/account/widgets/account_groups.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/net-worth/models/chart_range.dart';
 
 /// A widget used to display given accounts with selection capability
 class SelectableAccountsWidget extends StatefulWidget {
@@ -39,10 +40,13 @@ class _SelectableAccountsWidgetState extends State<SelectableAccountsWidget> {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),
           child: AccountGroupsWidget(
+            netWorthPeriod: ChartRange.sevenDays,
             accounts: widget.accounts,
             onAccountClick: _toggleSelection,
             displayStats: false,
             selectedAccounts: _selectedAccounts,
+            allowCollapse: false,
+            applyCard: true,
           ),
         );
       },

@@ -3,12 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/user/provider.dart';
 
-final NumberFormat _currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$');
-
 /// Converts the given number into a formatted currency. Currently only works with USD.
-String getFormattedCurrency(double value) {
+///
+/// @round If we should round this value and drop the decimals
+String getFormattedCurrency(dynamic value, {bool round = false}) {
   final userProvider = ServiceLocator.get<UserProvider>();
-  return userProvider.currentUserConfig?.privateMode == true ? "***" : _currencyFormatter.format(value);
+  final currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: round ? 0 : null);
+  if (round) value = value.round();
+  return userProvider.currentUserConfig?.privateMode == true ? "***" : currencyFormatter.format(value);
 }
 
 String formatDate(DateTime date) {

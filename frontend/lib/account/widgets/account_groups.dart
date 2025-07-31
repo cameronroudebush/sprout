@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/widgets/account_group.dart';
+import 'package:sprout/net-worth/models/chart_range.dart';
 
 /// Uses the AccountGroupWidget to render all of the given accounts after sorting them and migrating them by type.
 class AccountGroupsWidget extends StatelessWidget {
   final List<Account> accounts;
+  final ChartRange netWorthPeriod;
   final void Function(Account)? onAccountClick;
   final Set<Account>? selectedAccounts;
 
@@ -14,13 +16,22 @@ class AccountGroupsWidget extends StatelessWidget {
   /// If we should display the total values
   final bool displayTotals;
 
+  /// If the account groups should be collapsible
+  final bool allowCollapse;
+
+  /// If the groups should render in a card
+  final bool applyCard;
+
   const AccountGroupsWidget({
     super.key,
     required this.accounts,
+    required this.netWorthPeriod,
     this.onAccountClick,
     this.displayStats = true,
     this.displayTotals = true,
     this.selectedAccounts,
+    required this.allowCollapse,
+    required this.applyCard,
   });
 
   /// Given a list of accounts, sorts and groups them for display
@@ -78,6 +89,7 @@ class AccountGroupsWidget extends StatelessWidget {
             return Padding(
               padding: EdgeInsetsGeometry.directional(start: 0, end: 0),
               child: AccountGroupWidget(
+                netWorthPeriod: netWorthPeriod,
                 accounts: entry.value,
                 type: entry.key,
                 totalNetWorth: totalNetWorth,
@@ -85,6 +97,8 @@ class AccountGroupsWidget extends StatelessWidget {
                 displayStats: displayStats,
                 displayTotals: displayTotals,
                 selectedAccounts: selectedAccounts,
+                allowCollapse: allowCollapse,
+                applyCard: applyCard,
               ),
             );
           }),
