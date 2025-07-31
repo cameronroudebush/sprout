@@ -82,6 +82,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
             message: "Add an account",
             child: ButtonWidget(
               icon: Icons.add,
+              height: mediaQuery.size.height * .035,
               minSize: mediaQuery.size.width * .1,
               onPressed: () async {
                 // Open the add account dialog
