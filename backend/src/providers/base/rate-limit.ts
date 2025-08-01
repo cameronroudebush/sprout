@@ -41,11 +41,13 @@ export class ProviderRateLimit extends DatabaseBase {
     else if (inDb.count >= this.MAX_CALLS_PER_DAY && inDb.lastUpdated.toDateString() === today.toDateString()) {
       throw new Error(`Rate limit exceeded for provider ${this.name}. Max calls per day: ${this.MAX_CALLS_PER_DAY}`);
     } else if (inDb.lastUpdated.toDateString() !== today.toDateString()) {
-      this.count = 1;
-      this.lastUpdated = today;
+      inDb.count = 1;
+      inDb.lastUpdated = today;
+      await inDb.update();
     } else {
-      this.count++;
-      this.lastUpdated = today;
+      inDb.count++;
+      inDb.lastUpdated = today;
+      await inDb.update();
     }
   }
 }
