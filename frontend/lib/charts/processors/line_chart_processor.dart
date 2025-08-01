@@ -1,10 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
-import 'package:sprout/net-worth/models/chart_data.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
+import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/charts/models/line_chart_data.dart';
 
 /// This class provides the functionality for building the complex chart display.
-class NetWorthChartDataProcessor {
-  /// Filters a raw map of historical net worth data based on a selected time range
+class LineChartDataProcessor {
+  /// Filters a raw map of historical data based on a selected time range
   ///
   /// @historicalData The data to process and filter
   /// @selectedChartRange The chart range we want to keep the data within
@@ -29,14 +29,14 @@ class NetWorthChartDataProcessor {
 
   /// Takes the filtered historical data from @filterHistoricalData and converts it
   ///   into the expected type for the fl_chart library
-  static ChartData prepareChartData(Map<DateTime, double> filteredHistoricalData) {
+  static SproutLineChartData prepareChartData(Map<DateTime, double> filteredHistoricalData) {
     final sortedChartEntries = filteredHistoricalData.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     final chartSpots = sortedChartEntries
         .asMap()
         .entries
         .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value))
         .toList();
-    return ChartData(spots: chartSpots, sortedEntries: sortedChartEntries);
+    return SproutLineChartData(spots: chartSpots, sortedEntries: sortedChartEntries);
   }
 
   /// Calculates how many chart intervals to display based on the difference in given y values

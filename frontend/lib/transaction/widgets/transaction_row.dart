@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -55,7 +56,12 @@ class TransactionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rowColor = isEvenRow ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2) : null;
+    Color? rowColor;
+    if (transaction!.pending) {
+      rowColor = Colors.grey.withValues(alpha: 0.2);
+    } else if (isEvenRow) {
+      rowColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2);
+    }
     if (transaction == null) return Center(child: CircularProgressIndicator());
 
     final avatarSize = 20.0;
@@ -65,47 +71,64 @@ class TransactionRow extends StatelessWidget {
 
     return Container(
       color: rowColor,
+      width: double.infinity,
+      height: 65,
       padding: EdgeInsetsGeometry.all(6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            spacing: 12,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // Render an type icon
-              CircleAvatar(radius: avatarSize, child: Icon(_getIconForCategory(transaction!.category))),
-              // Description info
-              Column(
-                spacing: 6,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Description
-                  TextWidget(
-                    referenceSize: 1.15,
-                    text: transaction!.description,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  // Time
-                  Row(
-                    spacing: 4,
+          Expanded(
+            flex: 3,
+            child: Row(
+              spacing: 12,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Render an type icon
+                CircleAvatar(radius: avatarSize, child: Icon(_getIconForCategory(transaction!.category))),
+                // Description info
+                Flexible(
+                  child: Column(
+                    spacing: 6,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.calendar_month),
-                      TextWidget(referenceSize: .9, text: timeText),
+                      // Description
+                      Expanded(
+                        child: TextWidget(
+                          referenceSize: 1.15,
+                          text: transaction!.description,
+                          style: TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
+                      // Time
+                      Row(
+                        spacing: 4,
+                        children: [
+                          Icon(Icons.calendar_month),
+                          TextWidget(referenceSize: .9, text: timeText),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-          // Value
-          Column(
-            children: [
-              TextWidget(
-                text: getFormattedCurrency(transaction!.amount),
-                style: TextStyle(color: getBalanceColor(transaction!.amount, theme)),
-              ),
-            ],
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                transaction!.pending
+                    ? SproutTooltip(
+                        message: "This transaction has not yet posted",
+                        child: Icon(Icons.hourglass_empty, size: 24, color: theme.colorScheme.onSurfaceVariant),
+                      )
+                    : SizedBox.shrink(),
+                TextWidget(
+                  text: getFormattedCurrency(transaction!.amount),
+                  style: TextStyle(color: getBalanceColor(transaction!.amount, theme)),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -30,4 +30,11 @@ export class DatabaseDecorators {
       return Column({ ...options, type: "double" })(target, key);
     };
   }
+
+  /** Decorates this column to expect json data */
+  static jsonColumn(options?: ColumnOptions) {
+    return function (target: any, key: string) {
+      return Column({ ...options, type: "json" })(target, key);
+    };
+  }
 }

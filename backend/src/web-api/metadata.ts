@@ -22,7 +22,7 @@ export class RestMetadata {
   static readonly METADATA_KEY = "rest:api:metadata";
 
   /** All loaded endpoints from anything using this file */
-  static loadedEndpoints: { metadata: RestMetadata; fnc: RestMetadataFunctionTypes }[] = []; // TODO: This is inefficient
+  static loadedEndpoints: { metadata: RestMetadata; fnc: RestMetadataFunctionTypes }[] = [];
 
   /** Queue to listen on */
   queue: string;

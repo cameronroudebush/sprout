@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/accounts.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
-import 'package:sprout/transaction/widgets/recent_transactions.dart';
+import 'package:sprout/transaction/widgets/transactions.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,38 +59,18 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // Recent Transactions
-            // Accounts Section
             SproutCard(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: EdgeInsetsGeometry.directional(start: 12, top: 4, bottom: 4),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextWidget(
-                          referenceSize: 1.5,
-                          text: "Recent Transactions",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.start,
-                        ),
-                        Padding(
-                          padding: EdgeInsetsGeometry.directional(start: 4),
-                          child: TextWidget(
-                            referenceSize: .9,
-                            text: "Last $lastTransactionCount",
-                            style: TextStyle(color: Colors.grey),
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
-                      ],
-                    ),
+                  TransactionsCard(
+                    applyCard: false,
+                    allowPagination: false,
+                    rowsPerPage: lastTransactionCount,
+                    allowSearch: false,
+                    title: "Recent $lastTransactionCount Transactions",
                   ),
-                  const Divider(height: 1),
-                  RecentTransactionsCard(applyCard: false, allowPagination: false, rowsPerPage: lastTransactionCount),
                 ],
               ),
             ),

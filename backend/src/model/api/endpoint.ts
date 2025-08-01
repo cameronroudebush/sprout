@@ -38,7 +38,6 @@ export module RestEndpoints {
     static get = "/transaction/get";
     static count = "/transaction/count";
     static stats = "/transaction/stats";
-    static getUniqueCategories = "/transaction/unique/categories";
     static getByDescription = "/transaction/get/by/description";
   }
 

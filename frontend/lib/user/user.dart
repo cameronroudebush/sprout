@@ -111,102 +111,10 @@ class _UserPageState extends State<UserPage> {
             ),
           ],
         };
-        ;
-        // final headerStyling = TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary);
 
-        // final lastScheduleTime = config?.lastSchedulerRun.time != null
-        //     ? timeago.format(config!.lastSchedulerRun.time!.toLocal())
-        //     : "N/A";
-        // String? lastScheduleStatus = "success";
-        // if (config == null) {
-        //   lastScheduleStatus = "N/A";
-        // } else if (config.lastSchedulerRun.status == "failed") {
-        //   if (config.lastSchedulerRun.failureReason == null) {
-        //     lastScheduleStatus = "failed - unknown reason";
-        //   } else {
-        //     lastScheduleStatus = config.lastSchedulerRun.failureReason;
-        //   }
-        // }
-        // final combinedScheduleDisplay =
-        //     "$lastScheduleTime${lastScheduleStatus == null ? "" : " - $lastScheduleStatus"}";
-        // final minButtonSize = MediaQuery.of(context).size.width * .5;
-
-        return SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                ...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value)),
-                // App Information Card
-                // _buildCard([
-                //   TextWidget(referenceSize: 1.6, text: "App Details", style: headerStyling),
-                //   const Divider(height: 32.0, thickness: 1.0),
-                //   _buildInfoRow(
-                //     context,
-                //     label: "App Version",
-                //     value: [
-                //       'Backend: ${configProvider.unsecureConfig?.version}',
-                //       'Frontend: ${configProvider.packageInfo.version}',
-                //     ],
-                //     icon: Icons.info_outline,
-                //   ),
-                //   SizedBox(height: 12),
-                //   _buildInfoRow(
-                //     context,
-                //     label: "Last Background Sync Status",
-                //     value: combinedScheduleDisplay,
-                //     icon: Icons.schedule,
-                //   ),
-                //   const SizedBox(height: 12),
-                //   _buildInfoRow(
-                //     context,
-                //     label: "SSE Status",
-                //     value: sseProvider.isConnected ? "Connected" : "Disconnected",
-                //     icon: Icons.event_repeat,
-                //   ),
-                //   if (kDebugMode) ...[
-                //     SizedBox(height: 12),
-                //     ButtonWidget(
-                //       text: "Manual Account Sync",
-                //       minSize: minButtonSize,
-                //       onPressed: () => accountProvider.manualSync(),
-                //     ),
-                //   ],
-                // ]),
-
-                // // User Information Card
-                // _buildCard([
-                //   TextWidget(referenceSize: 1.6, text: "User Information", style: headerStyling),
-                //   const Divider(height: 32.0, thickness: 1.0),
-                //   Consumer<AuthProvider>(
-                //     builder: (context, authProvider, child) {
-                //       return Column(
-                //         crossAxisAlignment: CrossAxisAlignment.start,
-                //         children: [
-                //           _buildInfoRow(
-                //             context,
-                //             label: "Username",
-                //             value: authProvider.currentUser?.username ?? "N/A",
-                //             icon: Icons.person,
-                //           ),
-                //         ],
-                //       );
-                //     },
-                //   ),
-                //   SizedBox(height: 24),
-                //   ButtonWidget(
-                //     minSize: minButtonSize,
-                //     text: "Logout",
-                //     onPressed: () async {
-                //       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                //       await authProvider.logout();
-                //     },
-                //   ),
-                // ]),
-              ],
-            ),
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value))],
         );
       },
     );

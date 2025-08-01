@@ -8,7 +8,7 @@ export abstract class BackgroundJob<T extends any> {
 
   /** Gets some extra configuration for the logger to display better messages for these jobs. */
   protected get logConfig(): LogConfig {
-    return { header: `[job][${this.jobName}]`, shouldPrependLoggerFile: false };
+    return { header: `[jobs][${this.jobName}]`, shouldPrependLoggerFile: false };
   }
 
   /**

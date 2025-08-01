@@ -10,7 +10,7 @@ import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
 /// A card that displays the recent transactions located in the database
-class RecentTransactionsCard extends StatefulWidget {
+class TransactionsCard extends StatefulWidget {
   /// How many rows to render per page
   final int rowsPerPage;
 
@@ -20,13 +20,24 @@ class RecentTransactionsCard extends StatefulWidget {
   /// If the paginator should render
   final bool allowPagination;
 
-  const RecentTransactionsCard({super.key, this.rowsPerPage = 5, this.applyCard = true, this.allowPagination = true});
+  final bool allowSearch;
+
+  final String? title;
+
+  const TransactionsCard({
+    super.key,
+    this.rowsPerPage = 5,
+    this.applyCard = true,
+    this.allowPagination = true,
+    this.allowSearch = true,
+    this.title,
+  });
 
   @override
-  State<RecentTransactionsCard> createState() => _RecentTransactionsCardState();
+  State<TransactionsCard> createState() => _TransactionsCardState();
 }
 
-class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
+class _TransactionsCardState extends State<TransactionsCard> {
   int _currentPage = 0;
   String _searchQuery = '';
   Timer? _debounce;
@@ -93,41 +104,69 @@ class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
         final content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Search by description',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                    _currentPage = 0;
-                  });
-                  if (searchIsActive) _debounce?.cancel();
-                  if (value.isNotEmpty) {
-                    _debounce = Timer(const Duration(milliseconds: 500), () {
-                      provider.populateTransactionsWithSearch(value, shouldNotify: true);
-                    });
-                  }
-                },
+            // Title
+            if (widget.title != null)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsetsGeometry.directional(start: 12, top: 4, bottom: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextWidget(
+                          referenceSize: 1.5,
+                          text: widget.title!,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                ],
               ),
-            ),
+            // Search Bar
+            if (widget.allowSearch)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search by description',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                FocusScope.of(context).unfocus();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                        _currentPage = 0;
+                      });
+                      if (searchIsActive) _debounce?.cancel();
+                      if (value.isNotEmpty) {
+                        _debounce = Timer(const Duration(milliseconds: 500), () {
+                          provider.populateTransactionsWithSearch(value, shouldNotify: true);
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
             // Spinner if we're waiting for a search result
             if (searchIsActive)
               const Padding(
@@ -189,7 +228,9 @@ class _RecentTransactionsCardState extends State<RecentTransactionsCard> {
       if (elementIndex >= transactions.length) break;
       final transaction = transactions.isNotEmpty ? transactions.elementAt(elementIndex) : null;
       widgets.add(TransactionRow(transaction: transaction, isEvenRow: elementIndex % 2 == 0));
-      widgets.add(const Divider(height: 1));
+      if (i < itemsToRender - 1) {
+        widgets.add(const Divider(height: 1));
+      }
     }
     return widgets;
   }

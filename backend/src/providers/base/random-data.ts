@@ -185,7 +185,7 @@ export class DevFinancialDataGenerator {
       return {
         ...acc,
         balance: balance.toString(),
-        "available-balance": balance.toString(),
+        "available-balance": acc.type !== "loan" ? balance.toString() : "0",
         "balance-date": new Date().getTime() / 1000,
         transactions,
         holdings,

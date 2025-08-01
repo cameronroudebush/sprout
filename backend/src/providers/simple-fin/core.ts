@@ -35,7 +35,17 @@ export class SimpleFINProvider extends ProviderBase {
       else if (x.holdings.length !== 0) type = "investment";
       else if (availableBalance !== 0) type = "depository";
       else type = "loan";
-      const account = Account.fromPlain({ name, id: x.id, type, currency: x.currency, provider: "simple-fin", balance, availableBalance, institution });
+      const account = Account.fromPlain({
+        name,
+        id: x.id,
+        type,
+        currency: x.currency,
+        provider: "simple-fin",
+        balance,
+        availableBalance,
+        institution,
+        extra: x.extra,
+      });
       // Try to parse any holdings
       const holdings = x.holdings.map((hold) =>
         Holding.fromPlain({
@@ -59,6 +69,7 @@ export class SimpleFINProvider extends ProviderBase {
           description: t.description,
           pending: t.pending ?? false,
           category: t.extra?.category,
+          extra: t.extra,
         }),
       );
       return {

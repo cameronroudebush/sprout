@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 
 /// This class represents a time frame of net worth change.
 class NetWorthFrameData {

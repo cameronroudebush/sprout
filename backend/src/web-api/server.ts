@@ -59,7 +59,7 @@ export class RestAPIServer {
   /** Adds the overarching listener to handle REST requests */
   private async addListener() {
     this.server.all("/api*", async (req, res) => {
-      this.centralServer.setCORSHeaders(res);
+      this.centralServer.setCORSHeaders(req, res);
       if (req.method === "OPTIONS") return res.status(200).end();
       const requestUrl = req.url.replace(RestAPIServer.ENDPOINT_HEADER, "").split("?")[0];
       // Re useable functions

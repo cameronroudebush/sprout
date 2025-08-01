@@ -16,7 +16,6 @@ async function main() {
   // Initialize config
   new ConfigurationController().load();
   // Initialize database
-  // TODO: Database migrations
   await Database.init();
   // Initialize background jobs
   await new JobProcessor().start();

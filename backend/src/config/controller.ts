@@ -100,7 +100,7 @@ export class ConfigurationController {
           if (metadata.restrictedValues) commentAsArray.push(`Must be one of: [${metadata.restrictedValues.join(", ")}]`);
           commentString = commentAsArray.map((x) => `${paddingDepth}# ${x}`).join("\n") + "\n";
         }
-        const needsQuoted = outputString?.startsWith("*"); // TODO: This is kind of a band-aid
+        const needsQuoted = outputString?.startsWith("*");
         const actualValue = `${paddingDepth}${key}:${shouldNewlineWrap ? "\n" : " "}${needsQuoted ? '"' : ""}${outputString == null ? "" : outputString}${needsQuoted ? '"' : ""}`;
         return `${commentString}${actualValue}`;
       })

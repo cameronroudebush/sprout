@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/widgets/info_row.dart';
@@ -14,9 +15,7 @@ class UserInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+    return SproutCard(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(

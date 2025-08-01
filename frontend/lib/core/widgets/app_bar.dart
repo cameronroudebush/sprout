@@ -18,7 +18,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     final currentPageLower = currentPage?.toLowerCase();
     if (currentPageLower == "accounts") {
       page = _accountPage(context);
-    } else {
+    } else if (currentPageLower == "home") {
       page = _homeContent(context);
     }
 
