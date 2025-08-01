@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction/provider.dart';
 
@@ -10,74 +11,59 @@ class TransactionSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Center(
-      child: SizedBox(
-        width: screenWidth < 450 ? screenWidth * .925 : screenWidth * 0.55,
-        child: Card(
-          elevation: 2.0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          clipBehavior: Clip.antiAlias,
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: const TextWidget(
-                    referenceSize: 2,
-                    text: 'Monthly Summary',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Center(
-                  child: TextWidget(
-                    referenceSize: 1,
-                    text: 'Last 30 days',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Consume the transactions to display
-                Consumer<TransactionProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return Center(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.height * .05,
-                          height: MediaQuery.of(context).size.height * .05,
-                          child: CircularProgressIndicator(strokeWidth: MediaQuery.of(context).size.height * .005),
-                        ),
-                      );
-                    } else {
-                      int totalTransactions = provider.totalTransactionCount;
-                      double averageAmount = provider.transactionStats?.averageTransactionCost ?? 0;
-                      double largestExpense = provider.transactionStats?.largestExpense ?? 0;
-                      double totalSpend = provider.transactionStats?.totalSpend ?? 0;
-                      double totalIncome = provider.transactionStats?.totalIncome ?? 0;
+    return Consumer<TransactionProvider>(
+      builder: (context, provider, child) {
+        Widget content;
+        if (provider.isLoading) {
+          content = Center(child: CircularProgressIndicator());
+        } else {
+          double averageAmount = provider.transactionStats?.averageTransactionCost ?? 0;
+          double largestExpense = provider.transactionStats?.largestExpense ?? 0;
 
-                      return Column(
-                        children: [
-                          _buildSummaryRow('Total Spent', totalSpend),
-                          const SizedBox(height: 8),
-                          _buildSummaryRow('Total Income', totalIncome, color: Colors.green),
-                          const SizedBox(height: 8),
-                          _buildSummaryRow('Total Transactions', totalTransactions, format: false, color: null),
-                          const SizedBox(height: 8),
-                          _buildSummaryRow('Average Transaction', averageAmount),
-                          const SizedBox(height: 8),
-                          _buildSummaryRow('Largest Expense', largestExpense),
-                        ],
-                      );
-                    }
-                  },
-                ),
-              ],
+          content = Center(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                spacing: 4,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Center(
+                          child: const TextWidget(
+                            referenceSize: 2,
+                            text: 'Monthly Summary',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Center(
+                          child: TextWidget(
+                            referenceSize: 1,
+                            text: 'Last 30 days',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _buildSummaryRow('Average Transaction', averageAmount),
+                        _buildSummaryRow('Largest Expense', largestExpense),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
+          );
+        }
+
+        return SproutCard(child: content);
+      },
     );
   }
 

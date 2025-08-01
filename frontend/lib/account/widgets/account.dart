@@ -12,7 +12,7 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/net-worth/models/net.worth.ot.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/user/provider.dart';

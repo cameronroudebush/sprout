@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/widgets/account_group.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 
 /// Uses the AccountGroupWidget to render all of the given accounts after sorting them and migrating them by type.
 class AccountGroupsWidget extends StatelessWidget {
@@ -103,7 +103,7 @@ class AccountGroupsWidget extends StatelessWidget {
                     applyCard: applyCard,
                   ),
                 ),
-                if (!applyCard) const Divider(height: 1),
+                if (!applyCard && sortedAccountEntries.last != entry) const Divider(height: 1),
               ],
             );
           }),

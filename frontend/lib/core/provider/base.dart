@@ -12,7 +12,7 @@ abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
   bool _disposed = false;
 
   /// Used to track if we are loading data or not from [updateData]
-  bool isLoading = false;
+  bool isLoading = true;
 
   BaseProvider(this.api);
 

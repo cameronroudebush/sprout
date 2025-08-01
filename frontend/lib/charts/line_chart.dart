@@ -3,15 +3,13 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/charts/models/line_chart_data.dart';
+import 'package:sprout/charts/processors/line_chart_processor.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/net-worth/models/chart_data.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
-import 'package:sprout/net-worth/provider.dart';
-import 'package:sprout/net-worth/widgets/chart/data_processor.dart';
 
 /// A line chart that displays the given data in a line chart format
-class NetWorthLineChart extends StatelessWidget {
+class SproutLineChart extends StatelessWidget {
   /// If the y axis number should be shown
   final bool showYAxis;
 
@@ -27,40 +25,39 @@ class NetWorthLineChart extends StatelessWidget {
   /// The chart range to render of
   final ChartRange chartRange;
 
-  const NetWorthLineChart({
+  /// The data to render in this line chart
+  final Map<DateTime, double>? data;
+
+  final double height;
+
+  const SproutLineChart({
     super.key,
+    required this.data,
     required this.chartRange,
     this.showYAxis = false,
     this.showXAxis = false,
     this.showGrid = false,
     this.showBorder = false,
+    this.height = 150,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<NetWorthProvider>(
-      builder: (context, netWorthProvider, child) {
-        final theme = Theme.of(context);
-        final historicalData = netWorthProvider.historicalNetWorth?.historicalData;
-        if (historicalData == null || historicalData.isEmpty) {
-          return SizedBox.shrink();
-        } else {
-          final filteredHistoricalData = NetWorthChartDataProcessor.filterHistoricalData(
-            netWorthProvider.historicalNetWorth!.historicalData,
-            chartRange,
-          );
-          final data = NetWorthChartDataProcessor.prepareChartData(filteredHistoricalData);
-          return SizedBox(
-            height: 300, // Or whatever height you desire
-            child: LineChart(_buildLineChartData(data, chartRange, theme), duration: Duration.zero),
-          );
-        }
-      },
-    );
+    final theme = Theme.of(context);
+    if (data == null || data!.isEmpty) {
+      return SizedBox.shrink();
+    } else {
+      final filteredHistoricalData = LineChartDataProcessor.filterHistoricalData(data, chartRange);
+      final preparedData = LineChartDataProcessor.prepareChartData(filteredHistoricalData);
+      return SizedBox(
+        height: height,
+        child: LineChart(_buildLineChartData(preparedData, chartRange, theme), duration: Duration.zero),
+      );
+    }
   }
 
   /// Builds the widget for our necessary line chart
-  LineChartData _buildLineChartData(ChartData data, ChartRange selectedChartRange, ThemeData theme) {
+  LineChartData _buildLineChartData(SproutLineChartData data, ChartRange selectedChartRange, ThemeData theme) {
     final spots = data.spots;
 
     double minY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
@@ -134,7 +131,7 @@ class NetWorthLineChart extends StatelessWidget {
                 ),
               );
             },
-            interval: NetWorthChartDataProcessor.getChartValueInterval(minY, maxY),
+            interval: LineChartDataProcessor.getChartValueInterval(minY, maxY),
           ),
         ),
       ),

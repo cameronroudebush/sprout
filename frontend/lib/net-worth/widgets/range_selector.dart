@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
 
 class ChartRangeSelector extends StatelessWidget {
   final ChartRange selectedChartRange;

@@ -42,7 +42,7 @@ export class NetWorthAPI {
    * Generates net worth over time for the given days. Returns the history snapshot for
    *  those days and the percent change averaged over that time period.
    */
-  private static generateNetWorthOverTime(history: AccountHistory[], days: number) {
+  private static generateNetWorthOverTime(history: AccountHistory[], relatedAccount: Account | undefined, days: number) {
     if (history.length === 0) return { snapshot: [], frame: NetWorthFrameData.fromPlain({ percentChange: 0, valueChange: 0 }) };
     const today = new Date();
 
@@ -65,9 +65,8 @@ export class NetWorthAPI {
       percentChange = ((lastNetWorth - firstNetWorth) / firstNetWorth) * 100;
       valueChange = lastNetWorth - firstNetWorth;
     }
-    const account = history.at(0)?.account;
     // Check if this is a drain on finances because a decrease is actually an increase
-    if (account?.isNegativeNetWorth) {
+    if (relatedAccount?.isNegativeNetWorth) {
       if (percentChange) percentChange = percentChange * -1;
       valueChange = valueChange * -1;
     }
@@ -75,17 +74,18 @@ export class NetWorthAPI {
   }
 
   /** Central function to turn {@link AccountHistory} into {@link NetWorthOverTime} */
-  private static getOTForHistory(history: AccountHistory[]) {
+  private static getOTForHistory(history: AccountHistory[], relatedAccount?: Account) {
     // How far back we have data for, total
     const sproutAccountLifetime = differenceInDays(new Date(), history[history.length - 1]?.time ?? 1);
+    const boundCallback = NetWorthAPI.generateNetWorthOverTime.bind(this, history, relatedAccount);
 
-    const last1Day = NetWorthAPI.generateNetWorthOverTime(history, 1);
-    const last7Days = NetWorthAPI.generateNetWorthOverTime(history, 7);
-    const lastMonth = NetWorthAPI.generateNetWorthOverTime(history, 30);
-    const lastThreeMonths = NetWorthAPI.generateNetWorthOverTime(history, 90);
-    const lastSixMonths = NetWorthAPI.generateNetWorthOverTime(history, 180);
-    const lastYear = NetWorthAPI.generateNetWorthOverTime(history, 365);
-    const allTime = NetWorthAPI.generateNetWorthOverTime(history, sproutAccountLifetime);
+    const last1Day = boundCallback(1);
+    const last7Days = boundCallback(7);
+    const lastMonth = boundCallback(30);
+    const lastThreeMonths = boundCallback(90);
+    const lastSixMonths = boundCallback(180);
+    const lastYear = boundCallback(365);
+    const allTime = boundCallback(sproutAccountLifetime);
 
     return NetWorthOverTime.fromPlain({
       last1Day: last1Day.frame,
@@ -109,12 +109,14 @@ export class NetWorthAPI {
   /** Returns the net-worth of all accounts individually */
   @RestMetadata.register(new RestMetadata(RestEndpoints.netWorth.getNetWorthByAccount, "GET"))
   async getNetWorthByAccounts(_request: RestBody, user: User) {
+    const accounts = await Account.getForUser(user);
     const completeAccountHistory = await NetWorthAPI.getHistory(user);
     const groupedAccounts = groupBy(completeAccountHistory, "account.id");
     // Loop over each account
     return Object.keys(groupedAccounts).map((accountId) => {
+      const account = accounts.find((x) => x.id === accountId);
       const accountHistory = groupedAccounts[accountId]!;
-      const ot = NetWorthAPI.getOTForHistory(accountHistory);
+      const ot = NetWorthAPI.getOTForHistory(accountHistory, account);
       ot.accountId = accountId;
       return ot;
     });

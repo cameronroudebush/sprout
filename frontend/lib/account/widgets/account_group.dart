@@ -5,11 +5,11 @@ import 'package:sprout/account/models/account.dart'; // Assuming you have this m
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
 import 'package:sprout/net-worth/provider.dart';
 
 /// A widget used to display a grouping of accounts for a specific type

@@ -1,11 +1,10 @@
-import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
 import { TransactionQueryRequest, TransactionRequest } from "@backend/model/api/transaction";
 import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { subDays } from "date-fns";
+import { subDays, subMonths } from "date-fns";
 import { FindOptionsWhere, LessThan, Like, MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
 
@@ -35,18 +34,6 @@ export class TransactionAPI {
     return Transaction.count({ where: { account: { user: { id: user.id } } } });
   }
 
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getUniqueCategories, "GET"))
-  async getUniqueTransactionCategories(_request: RestBody, user: User) {
-    const repository = Transaction.getRepository();
-    const uniqueCategories = await repository
-      .createQueryBuilder("transaction")
-      .select("DISTINCT transaction.category", "category")
-      .innerJoin(Account, "account", "transaction.accountId = account.id")
-      .where("account.userId = :userId", { userId: user.id })
-      .getRawMany();
-    return uniqueCategories.map((item) => item.category);
-  }
-
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.stats, "GET"))
   async getStats(request: RestBody, user: User) {
     const parsedRequest = TransactionStatsRequest.fromPlain(request.payload);
@@ -60,12 +47,14 @@ export class TransactionAPI {
     const totalSpend = totalSpendResult || 0;
     const averageTransactionCost = transactionCount > 0 ? totalSpend / transactionCount : 0;
     const largestExpense = largestExpenseResult || 0;
+    const categories = await Transaction.getCategories(user, subMonths(new Date(), 1));
 
     return TransactionStats.fromPlain({
       totalSpend: totalSpend ?? 0,
       totalIncome: totalIncome ?? 0,
       averageTransactionCost: averageTransactionCost,
       largestExpense: largestExpense,
+      categories,
     });
   }
 }

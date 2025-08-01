@@ -37,6 +37,10 @@ export class Account extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false, type: "varchar" })
   type: "depository" | "credit" | "loan" | "investment";
 
+  /** Any extra data that we want to store as JSON */
+  @DatabaseDecorators.jsonColumn({ nullable: true })
+  extra?: object;
+
   /** Given a user, returns all accounts in the database for that user */
   static getForUser(user: User) {
     return Account.find({ where: { user } });

@@ -42,6 +42,7 @@ export namespace SimpleFINReturn {
     "balance-date": number;
     transactions: Transaction[];
     holdings: Holding[];
+    extra: any;
   }
 
   export interface FinancialData {

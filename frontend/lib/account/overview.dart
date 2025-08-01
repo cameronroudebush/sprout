@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/accounts.dart';
-import 'package:sprout/net-worth/models/chart_range.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
 
 /// The main accounts display that contains the chart along side the actual accounts list
@@ -21,8 +21,7 @@ class _AccountsOverviewState extends State<AccountsOverview> {
       children: [
         // Render graph
         NetWorthOverviewWidget(
-          showCard: false,
-          showNetWorthText: false,
+          showCard: true,
           selectedChartRange: _selectedChartRange,
           onRangeSelected: (value) {
             setState(() {

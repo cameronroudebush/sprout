@@ -37,7 +37,6 @@ class InternalDatabase {
 
   /** Generates migrations automatically and runs them against the database. */
   private async runAutoMigrations(source = this.source) {
-    // TODO: Replace this with real migrations for production
     this.validateSource(source);
     const upQueries = (await source.driver.createSchemaBuilder().log()).upQueries;
     if (upQueries.length > 0) {

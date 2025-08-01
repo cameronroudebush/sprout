@@ -5,6 +5,7 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/widgets/app_bar.dart';
+import 'package:sprout/holding/overview.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
 
@@ -25,7 +26,8 @@ class _SproutAppShellState extends State<SproutAppShell> {
     {'page': HomePage(), 'icon': Icons.home, 'label': 'Home'},
     {'page': AccountsOverview(), 'icon': Icons.account_balance, 'label': 'Accounts'},
     {'page': TransactionsOverviewPage(), 'icon': Icons.receipt, 'label': 'Transactions'},
-    {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'User'},
+    {'page': HoldingsOverview(), 'icon': Icons.stacked_line_chart_rounded, 'label': 'Investments'},
+    {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'Settings'},
   ];
 
   @override
@@ -58,6 +60,9 @@ class _SproutAppShellState extends State<SproutAppShell> {
             ),
           ),
           bottomNavigationBar: BottomNavigationBar(
+            iconSize: 28,
+            showUnselectedLabels: false,
+            showSelectedLabels: false,
             currentIndex: _currentIndex,
             onTap: (index) {
               setState(() {
