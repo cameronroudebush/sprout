@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/charts/models/line_chart_data.dart';
 import 'package:sprout/charts/processors/line_chart_processor.dart';
-import 'package:sprout/core/utils/formatters.dart';
 
 /// A line chart that displays the given data in a line chart format
 class SproutLineChart extends StatelessWidget {
@@ -28,12 +27,16 @@ class SproutLineChart extends StatelessWidget {
   /// The data to render in this line chart
   final Map<DateTime, double>? data;
 
+  /// An optional function to format the value displayed in the line chart
+  final String Function(num value)? formatValue;
+
   final double height;
 
   const SproutLineChart({
     super.key,
     required this.data,
     required this.chartRange,
+    this.formatValue,
     this.showYAxis = false,
     this.showXAxis = false,
     this.showGrid = false,
@@ -126,7 +129,7 @@ class SproutLineChart extends StatelessWidget {
                 fitInside: SideTitleFitInsideData.fromTitleMeta(metaTitle),
                 meta: metaTitle,
                 child: Text(
-                  getFormattedCurrency(value),
+                  formatValue != null ? formatValue!(value) : value.toString(),
                   style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface),
                 ),
               );
@@ -169,7 +172,7 @@ class SproutLineChart extends StatelessWidget {
                   TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
                   children: [
                     TextSpan(
-                      text: getFormattedCurrency(flSpot.y),
+                      text: formatValue != null ? formatValue!(flSpot.y) : flSpot.y.toString(),
                       style: TextStyle(
                         color: flSpot.y >= 0 ? colorScheme.primary : colorScheme.error,
                         fontWeight: FontWeight.bold,
