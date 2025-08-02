@@ -89,23 +89,20 @@ class TransactionRow extends StatelessWidget {
                 Flexible(
                   child: Column(
                     spacing: 6,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Description
-                      Expanded(
-                        child: TextWidget(
-                          referenceSize: 1.15,
-                          text: transaction!.description,
-                          style: TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
-                        ),
+                      TextWidget(
+                        referenceSize: 1.15,
+                        text: transaction!.description,
+                        style: TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
                       ),
-                      // Time
-                      Row(
-                        spacing: 4,
-                        children: [
-                          Icon(Icons.calendar_month),
-                          TextWidget(referenceSize: .9, text: timeText),
-                        ],
+                      // Account
+                      TextWidget(
+                        referenceSize: 0.9,
+                        text: transaction!.account.name.toTitleCase,
+                        style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
@@ -114,6 +111,7 @@ class TransactionRow extends StatelessWidget {
             ),
           ),
           Expanded(
+            flex: 2,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -123,9 +121,30 @@ class TransactionRow extends StatelessWidget {
                         child: Icon(Icons.hourglass_empty, size: 24, color: theme.colorScheme.onSurfaceVariant),
                       )
                     : SizedBox.shrink(),
-                TextWidget(
-                  text: getFormattedCurrency(transaction!.amount),
-                  style: TextStyle(color: getBalanceColor(transaction!.amount, theme)),
+                Column(
+                  spacing: 6,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // Amount
+                    TextWidget(
+                      text: getFormattedCurrency(transaction!.amount),
+                      style: TextStyle(color: getBalanceColor(transaction!.amount, theme)),
+                      textAlign: TextAlign.end,
+                    ),
+                    // Time
+                    Row(
+                      spacing: 4,
+                      children: [
+                        TextWidget(
+                          referenceSize: .9,
+                          text: timeText,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        Icon(Icons.calendar_month, color: Colors.grey),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

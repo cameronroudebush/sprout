@@ -26,7 +26,7 @@ class ButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final dynamicHeightMultiplier = mediaQuery.size.height > 1200 ? 0.03 : 0.035;
+    final dynamicHeightMultiplier = mediaQuery.size.height > 1200 ? 0.03 : 0.04;
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       minimumSize: Size(minSize, height ?? mediaQuery.size.height * dynamicHeightMultiplier),
       elevation: 5,
