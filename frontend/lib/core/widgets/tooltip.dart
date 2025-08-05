@@ -8,14 +8,17 @@ class SproutTooltip extends StatelessWidget {
   /// The child to wrap the tooltip with
   final Widget child;
 
-  const SproutTooltip({super.key, required this.message, required this.child});
+  final TextStyle? style;
+
+  const SproutTooltip({super.key, required this.message, required this.child, this.style});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bgColor = theme.colorScheme.secondary;
+    final completeTextStyle = TextStyle(color: theme.textTheme.bodyLarge!.color, backgroundColor: bgColor).merge(style);
     return Tooltip(
-      textStyle: TextStyle(color: theme.textTheme.bodyLarge!.color, backgroundColor: bgColor),
+      textStyle: completeTextStyle,
       decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
       message: message,
       child: child,

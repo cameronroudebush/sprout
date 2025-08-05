@@ -7,11 +7,9 @@ import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/model/config.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/provider.dart';
 import 'package:sprout/user/widgets/info_card.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 /// A page that display user account information along with other useful info
 class UserPage extends StatefulWidget {
@@ -23,10 +21,9 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   /// Returns the status of the last account sync
-  String _getLastSyncStatus(Configuration? config) {
-    final lastScheduleTime = config?.lastSchedulerRun.time != null
-        ? timeago.format(config!.lastSchedulerRun.time!.toLocal())
-        : "N/A";
+  String _getLastSyncStatus(ConfigProvider provider) {
+    final config = provider.config;
+    final lastScheduleTime = provider.getLastSyncStatus();
     String? lastScheduleStatus = "success";
     if (config == null) {
       lastScheduleStatus = "N/A";
@@ -92,7 +89,7 @@ class _UserPageState extends State<UserPage> {
             UserDisplayInfo(
               title: "Last Background Sync Status",
               icon: Icons.schedule,
-              value: _getLastSyncStatus(configProvider.config),
+              value: _getLastSyncStatus(configProvider),
             ),
             UserDisplayInfo(
               title: "Backend Connection Status",

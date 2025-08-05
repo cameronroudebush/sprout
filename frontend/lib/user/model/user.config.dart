@@ -3,13 +3,16 @@ class UserConfig {
   /// If we should hide balances on the users display
   bool privateMode;
 
-  UserConfig({this.privateMode = false});
+  /// The net worth range to display by default
+  String netWorthRange;
+
+  UserConfig({this.privateMode = false, this.netWorthRange = "oneDay"});
 
   Map<String, dynamic> toJson() {
-    return {'privateMode': privateMode};
+    return {'privateMode': privateMode, 'netWorthRange': netWorthRange};
   }
 
   factory UserConfig.fromJson(Map<String, dynamic> json) {
-    return UserConfig(privateMode: json['privateMode'] ?? false);
+    return UserConfig(privateMode: json['privateMode'] ?? false, netWorthRange: json['netWorthRange'] ?? "oneDay");
   }
 }

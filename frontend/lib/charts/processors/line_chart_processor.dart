@@ -22,7 +22,7 @@ class LineChartDataProcessor {
         .toList()
         .cast<MapEntry<DateTime, double>>()
         .fold<Map<DateTime, double>>({}, (map, entry) {
-          map[entry.key] = entry.value;
+          map[entry.key] = double.parse(entry.value.toStringAsFixed(2));
           return map;
         });
   }

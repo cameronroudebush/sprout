@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:sprout/account/api.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/model/rest.request.dart';
 
 /// Class that provides the store of current account information
@@ -19,20 +17,7 @@ class AccountProvider extends BaseProvider<AccountAPI> {
   AccountProvider(super.api);
 
   Future<List<Account>> populateLinkedAccounts() async {
-    _linkedAccounts = await api.getAccounts();
-    notifyListeners();
-    return _linkedAccounts;
-  }
-
-  @override
-  Future<void> onInit() async {
-    final sseProvider = ServiceLocator.get<SSEProvider>();
-    // Listen for sync requests
-    _sub = sseProvider.onEvent.listen((data) {
-      if (data.queue == "sync") {
-        BaseProvider.updateAllData(showSnackbar: true);
-      }
-    });
+    return _linkedAccounts = await api.getAccounts();
   }
 
   /// Tells the API to manually run an account refresh

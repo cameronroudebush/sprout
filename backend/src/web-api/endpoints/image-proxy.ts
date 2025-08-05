@@ -21,16 +21,28 @@ export class ImageProxy {
   /** Handles the given request for the institution image proxy  */
   async handleImageProxy(req: Request, res: Response, _user: User) {
     {
-      const imageUrl = req.query["url"] as string | undefined;
-      if (!imageUrl) return res.status(400).send("Image URL query is required");
-      // Cleanup the request url
-      const cleanImageUrl = imageUrl.replace("https://", "");
-      const manualMapping = ImageProxy.MANUAL_PROXY[cleanImageUrl];
-      let imageRequestURL: string;
-      if (manualMapping != null) imageRequestURL = manualMapping;
-      else imageRequestURL = `https://www.google.com/s2/favicons?domain=${cleanImageUrl}&sz=128`;
-      const result = await fetch(imageRequestURL);
-      if (!result.ok) return res.status(result.status).send(res.statusMessage);
+      /** This is a full URL that is already built. Here we don't need to use favicon parsing. */
+      const fullImageUrl = req.query["fullImageUrl"] as string | undefined;
+      /** If this is given, we want to turn it into a favicon lookup because we don't know the actual path. */
+      const faviconImageUrl = req.query["faviconImageUrl"] as string | undefined;
+      if (!fullImageUrl && !faviconImageUrl) return res.status(400).send("We require either a [fullImageUrl] or [faviconImageUrl] query.");
+
+      let result: globalThis.Response;
+      // Determine how we should handle this
+      if (fullImageUrl) {
+        result = await fetch(fullImageUrl);
+      } else {
+        const cleanImageUrl = faviconImageUrl!.replace("https://", "");
+        const manualMapping = ImageProxy.MANUAL_PROXY[cleanImageUrl];
+        let imageRequestURL: string;
+        if (manualMapping != null) imageRequestURL = manualMapping;
+        else imageRequestURL = `https://www.google.com/s2/favicons?domain=${cleanImageUrl}&sz=128`;
+        result = await fetch(imageRequestURL);
+      }
+
+      if (result == null) {
+        return res.status(500).send();
+      } else if (!result.ok) return res.status(result.status).send(res.statusMessage);
 
       const contentType = result.headers.get("content-type");
       // Handle some issues with content types

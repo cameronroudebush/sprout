@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sprout/account/accounts.dart';
-import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
+import 'package:sprout/user/provider.dart';
 
 /// The main accounts display that contains the chart along side the actual accounts list
 class AccountsOverview extends StatefulWidget {
@@ -12,26 +13,27 @@ class AccountsOverview extends StatefulWidget {
 }
 
 class _AccountsOverviewState extends State<AccountsOverview> {
-  /// The current range of data we wish to display
-  ChartRange _selectedChartRange = ChartRange.sevenDays;
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Render graph
-        NetWorthOverviewWidget(
-          showCard: true,
-          selectedChartRange: _selectedChartRange,
-          onRangeSelected: (value) {
-            setState(() {
-              _selectedChartRange = value;
-            });
-          },
-        ),
-        // Render accounts
-        AccountsWidget(allowCollapse: false, netWorthPeriod: _selectedChartRange),
-      ],
+    return Consumer<UserProvider>(
+      builder: (context, provider, child) {
+        final chartRange = provider.userDefaultChartRange;
+
+        return Column(
+          children: [
+            // Render graph
+            NetWorthOverviewWidget(
+              showCard: true,
+              selectedChartRange: chartRange,
+              onRangeSelected: (value) {
+                provider.updateChartRange(value);
+              },
+            ),
+            // Render accounts
+            AccountsWidget(allowCollapse: false, netWorthPeriod: chartRange),
+          ],
+        );
+      },
     );
   }
 }

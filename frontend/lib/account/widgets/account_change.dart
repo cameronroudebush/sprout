@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/charts/models/chart_range.dart';
 
 /// A widget used to display the percentage change of an account with icons and coloring
 class AccountChangeWidget extends StatelessWidget {

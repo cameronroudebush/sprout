@@ -18,6 +18,8 @@ import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/holding/api.dart';
+import 'package:sprout/holding/provider.dart';
 import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
@@ -50,6 +52,7 @@ void main() async {
   ServiceLocator.register<NetWorthProvider>(NetWorthProvider(NetWorthAPI(client)));
   ServiceLocator.register<TransactionProvider>(TransactionProvider(TransactionAPI(client)));
   ServiceLocator.register<UserProvider>(UserProvider(UserAPI(client)));
+  ServiceLocator.register<HoldingProvider>(HoldingProvider(HoldingAPI(client)));
 
   runApp(
     MultiProvider(
@@ -62,6 +65,7 @@ void main() async {
         ServiceLocator.createProvider<NetWorthProvider>(),
         ServiceLocator.createProvider<TransactionProvider>(),
         ServiceLocator.createProvider<UserProvider>(),
+        ServiceLocator.createProvider<HoldingProvider>(),
       ],
       child: Main(theme: theme),
     ),
@@ -79,6 +83,7 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> {
   final ThemeData theme;
+  bool hasTriedInitialLogin = false;
 
   MainState({required this.theme});
 
@@ -127,7 +132,10 @@ class MainState extends State<Main> {
             // If setup is complete AND logged in
             page = const SproutAppShell();
           } else {
-            ServiceLocator.get<AuthProvider>().checkInitialLoginStatus();
+            if (!hasTriedInitialLogin) {
+              ServiceLocator.get<AuthProvider>().checkInitialLoginStatus();
+              hasTriedInitialLogin = true;
+            }
             // If setup is complete but NOT logged in
             page = const LoginPage();
           }

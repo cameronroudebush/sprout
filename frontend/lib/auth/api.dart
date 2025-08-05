@@ -44,15 +44,21 @@ class AuthAPI extends BaseAPI {
       return null;
     }
 
-    dynamic result = await client.post(body, endpoint);
-    String? success = result["success"];
-
-    // If login fails, clear the jwt
-    if (success != null) {
+    String? success;
+    try {
+      dynamic result = await client.post(body, endpoint);
+      success = result["success"]; // If login fails, clear the jwt
+      // If login fails, clear the jwt
+      if (success != null) {
+        await secureStorage.saveValue(jwtKey, null);
+        return null;
+      } else {
+        return User.fromJson(result["user"]);
+      }
+    } catch (e) {
+      // Wipe JWT if not successful
       await secureStorage.saveValue(jwtKey, null);
-      return null;
-    } else {
-      return User.fromJson(result["user"]);
+      rethrow;
     }
   }
 

@@ -66,4 +66,9 @@ export module RestEndpoints {
   export class sync {
     static runManual = "/sync/manual";
   }
+
+  /** Holding endpoints for finance data */
+  export class holding {
+    static get = "/holding/get";
+  }
 }
