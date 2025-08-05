@@ -71,7 +71,7 @@ export class BackgroundSync extends BackgroundJob<Sync> {
           if (accountInDB.type === "investment" && data.holdings.length !== 0)
             for (const holding of data.holdings) {
               holding.account = accountInDB;
-              let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol } }))[0];
+              let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol, account: { id: accountInDB.id } } }))[0];
               // If we aren't tracking this holding yet, start tracking it
               if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();
               else {
