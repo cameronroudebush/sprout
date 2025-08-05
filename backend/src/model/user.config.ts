@@ -10,8 +10,13 @@ export class UserConfig extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false, default: false })
   privateMode: boolean;
 
-  constructor(privateMode: boolean) {
+  /** The net worth range to display by default */
+  @DatabaseDecorators.column({ nullable: false, default: "oneDay" })
+  netWorthRange: string;
+
+  constructor(privateMode: boolean, netWorthRange: string) {
     super();
     this.privateMode = privateMode;
+    this.netWorthRange = netWorthRange;
   }
 }

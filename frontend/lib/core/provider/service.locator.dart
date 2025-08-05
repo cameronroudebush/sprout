@@ -7,6 +7,7 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/base.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
+import 'package:sprout/holding/provider.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/provider.dart';
 import 'package:sprout/transaction/provider.dart';
@@ -40,6 +41,7 @@ class ServiceLocator {
     SSEProvider,
     NetWorthProvider,
     TransactionProvider,
+    HoldingProvider,
     SetupProvider,
   ];
 

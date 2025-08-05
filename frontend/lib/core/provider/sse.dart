@@ -12,6 +12,8 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   bool _isConnecting = false;
   bool _isConnected = false;
   Timer? _reconnectTimer; // Timer for delayed reconnect attempts
+  /// Subscription for incoming events
+  StreamSubscription<SSEBody<dynamic>>? _sub;
 
   // Holds what to call when messages come in
   final StreamController<SSEBody> _eventController = StreamController.broadcast();
@@ -26,6 +28,15 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   bool get isConnecting => _isConnecting;
 
   SSEProvider(super.api);
+
+  @override
+  Future<void> onInit() async {
+    _sub = onEvent.listen((data) {
+      if (data.queue == "sync") {
+        BaseProvider.updateAllData(showSnackbar: true);
+      }
+    });
+  }
 
   /// Starts the SSE connection.
   /// [forceReconnect] will cancel any existing connection and attempt a new one.
@@ -139,5 +150,6 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   @override
   Future<void> cleanupData() async {
     _stopSSE();
+    _sub?.cancel();
   }
 }

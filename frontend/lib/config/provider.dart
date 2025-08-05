@@ -3,6 +3,7 @@ import 'package:sprout/config/api.dart';
 import 'package:sprout/core/api/client.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/model/config.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class ConfigProvider extends BaseProvider<ConfigAPI> {
   /// The unsecured version of the config that only contains basic information
@@ -66,5 +67,10 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   Future<void> cleanupData() async {
     _config = null;
     notifyListeners();
+  }
+
+  /// Returns the status of the last account sync
+  String getLastSyncStatus() {
+    return config?.lastSchedulerRun.time != null ? timeago.format(config!.lastSchedulerRun.time!.toLocal()) : "N/A";
   }
 }

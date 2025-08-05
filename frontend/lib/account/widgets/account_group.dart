@@ -56,7 +56,7 @@ class AccountGroupWidget extends StatelessWidget {
         double groupAmountChange = 0;
         // Filter the historical data once.
         final filteredGroupData = netWorthProvider.historicalAccountData?.where(
-          (element) => accounts.any((account) => account.id == element.accountId),
+          (element) => accounts.any((account) => account.id == element.connectedId),
         );
 
         // Use a for-in loop to iterate through the filtered data and accumulate sums.

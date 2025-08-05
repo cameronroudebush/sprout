@@ -1,3 +1,4 @@
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/user/api.dart';
 import 'package:sprout/user/model/user.config.dart';
@@ -7,6 +8,7 @@ class UserProvider extends BaseProvider<UserAPI> {
   UserConfig? _currentUserConfig;
 
   UserConfig? get currentUserConfig => _currentUserConfig;
+  ChartRange get userDefaultChartRange => ChartRange.values.byName(_currentUserConfig?.netWorthRange ?? "sevenDays");
 
   UserProvider(super.api);
 
@@ -20,6 +22,12 @@ class UserProvider extends BaseProvider<UserAPI> {
     _currentUserConfig = await api.getUserConfig();
     notifyListeners();
     return _currentUserConfig;
+  }
+
+  /// Updates the users last selected chart range to the given value
+  Future<void> updateChartRange(ChartRange chartRange) async {
+    currentUserConfig!.netWorthRange = chartRange.name;
+    updateConfig(currentUserConfig!);
   }
 
   @override

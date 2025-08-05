@@ -7,13 +7,13 @@ import 'package:sprout/account/models/account.dart'; // Assuming you have this m
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/charts/models/chart_range.dart';
-import 'package:sprout/net-worth/models/net.worth.ot.dart';
+import 'package:sprout/net-worth/models/entity.history.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/user/provider.dart';
 
@@ -21,6 +21,7 @@ import 'package:sprout/user/provider.dart';
 class AccountWidget extends StatelessWidget {
   /// On click of this account. Overrides the expansion behavior.
   final VoidCallback? onClick;
+  final bool allowClick;
   final Account account;
   final ChartRange netWorthPeriod;
   // If this account should display a "selected" indicator
@@ -32,6 +33,9 @@ class AccountWidget extends StatelessWidget {
   /// If we should display the total values
   final bool displayTotals;
 
+  /// If we should show the percentage change of this netWorthPeriod
+  final bool showPercentage;
+
   const AccountWidget({
     super.key,
     required this.account,
@@ -40,6 +44,8 @@ class AccountWidget extends StatelessWidget {
     required this.displayTotals,
     this.onClick,
     this.isSelected = false,
+    this.allowClick = true,
+    this.showPercentage = false,
   });
 
   @override
@@ -48,56 +54,64 @@ class AccountWidget extends StatelessWidget {
       builder: (context, configProvider, netWorthProvider, userProvider, child) {
         final theme = Theme.of(context);
         return InkWell(
-          onTap: onClick != null
+          onTap: allowClick && onClick != null
               ? () {
                   onClick!();
                 }
               : null,
           child: IgnorePointer(
             ignoring: onClick != null,
-            child: ExpansionTile(
-              title: _getAccountHeader(account, theme, netWorthProvider, userProvider),
-              showTrailingIcon: false,
-              children: [
-                // Inner details
-                Padding(
-                  padding: EdgeInsetsGeometry.directional(start: 24, top: 12, bottom: 12, end: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 12,
-                    children: [
-                      // Account error fixing
-                      if (account.institution.hasError)
-                        Expanded(
-                          child: SproutTooltip(
-                            message: "Opens a page to fix this account.",
-                            child: ButtonWidget(
-                              text: "Fix Account",
-                              onPressed: () async {
-                                await showDialog(
-                                  context: context,
-                                  builder: (_) => AccountErrorDialog(account: account),
-                                );
-                              },
+            child: Theme(
+              data: theme.copyWith(
+                // Remove trailing and leading dividers when expansion tile is open
+                dividerColor: Colors.transparent,
+                disabledColor: theme.textTheme.titleMedium?.color,
+              ),
+              child: ExpansionTile(
+                enabled: allowClick,
+                title: _getAccountHeader(account, theme, netWorthProvider, userProvider),
+                showTrailingIcon: false,
+                children: [
+                  // Inner details
+                  Padding(
+                    padding: EdgeInsetsGeometry.directional(start: 24, top: 12, bottom: 12, end: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 12,
+                      children: [
+                        // Account error fixing
+                        if (account.institution.hasError)
+                          Expanded(
+                            child: SproutTooltip(
+                              message: "Opens a page to fix this account.",
+                              child: ButtonWidget(
+                                text: "Fix Account",
+                                onPressed: () async {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (_) => AccountErrorDialog(account: account),
+                                  );
+                                },
+                              ),
                             ),
                           ),
+                        Expanded(
+                          child: ButtonWidget(
+                            text: "Delete",
+                            color: theme.colorScheme.onError,
+                            onPressed: () async {
+                              await showDialog(
+                                context: context,
+                                builder: (_) => AccountDeleteDialog(account: account),
+                              );
+                            },
+                          ),
                         ),
-                      Expanded(
-                        child: ButtonWidget(
-                          text: "Delete",
-                          color: theme.colorScheme.onError,
-                          onPressed: () async {
-                            await showDialog(
-                              context: context,
-                              builder: (_) => AccountDeleteDialog(account: account),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -113,8 +127,8 @@ class AccountWidget extends StatelessWidget {
     UserProvider userProvider,
   ) {
     // Days changed depending on the configuration
-    NetWorthFrameData? dayChange = netWorthProvider.historicalAccountData
-        ?.firstWhereOrNull((element) => element.accountId == account.id)
+    EntityHistoryDataPoint? dayChange = netWorthProvider.historicalAccountData
+        ?.firstWhereOrNull((element) => element.connectedId == account.id)
         ?.getValueByFrame(netWorthPeriod);
 
     return Padding(
@@ -136,7 +150,7 @@ class AccountWidget extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 4.0, right: 16),
                           child: Icon(Icons.check_circle, color: theme.colorScheme.secondary, size: 24.0),
                         ),
-                      AccountLogoWidget(account: account),
+                      AccountLogoWidget(account),
                       SizedBox(width: 12),
                       // Print details about the account, start of row
                       Expanded(
@@ -171,18 +185,18 @@ class AccountWidget extends StatelessWidget {
                       Column(
                         spacing: 12,
                         mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           // Account balance
                           if (displayTotals) TextWidget(text: getFormattedCurrency(account.balance)),
                           // If our day change is null, we don't have enough data to come up with a calculation
-                          if (dayChange != null && dayChange.percentChange != 0 && displayStats)
+                          if (dayChange != null && displayStats)
                             AccountChangeWidget(
                               percentageChange: dayChange.percentChange,
                               totalChange: account.isNegativeNetWorth
                                   ? dayChange.valueChange * -1
                                   : dayChange.valueChange,
-                              showPercentage: false,
+                              showPercentage: showPercentage,
                             ),
                         ],
                       ),

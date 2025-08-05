@@ -1,18 +1,18 @@
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/net-worth/api.dart';
-import 'package:sprout/net-worth/models/net.worth.ot.dart';
+import 'package:sprout/net-worth/models/entity.history.dart';
 
 /// Class that provides the store of current net worth information
 class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   // Data store
   double? _netWorth;
-  HistoricalNetWorth? _historicalNetWorth;
-  List<HistoricalNetWorth>? _historicalAccountData;
+  EntityHistory? _historicalNetWorth;
+  List<EntityHistory>? _historicalAccountData;
 
   // Public getters
   double? get netWorth => _netWorth;
-  HistoricalNetWorth? get historicalNetWorth => _historicalNetWorth;
-  List<HistoricalNetWorth>? get historicalAccountData => _historicalAccountData;
+  EntityHistory? get historicalNetWorth => _historicalNetWorth;
+  List<EntityHistory>? get historicalAccountData => _historicalAccountData;
   bool isLoading = false;
 
   NetWorthProvider(super.api);
@@ -23,12 +23,12 @@ class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   }
 
   /// Populates the net worth overtime flow.
-  Future<HistoricalNetWorth?> _populateHistoricalNetWorth() async {
+  Future<EntityHistory?> _populateHistoricalNetWorth() async {
     return _historicalNetWorth = await api.getHistoricalNetWorth();
   }
 
   /// Populates the net worth overtime flow.
-  Future<List<HistoricalNetWorth>> _populateHistoricalAccountData() async {
+  Future<List<EntityHistory>> _populateHistoricalAccountData() async {
     return _historicalAccountData = await api.getNetWorthByAccounts();
   }
 
