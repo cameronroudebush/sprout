@@ -12,7 +12,7 @@ import 'package:uuid/uuid.dart';
 
 /// A client for interacting with a REST API that uses JWT for authentication.
 class RESTClient {
-  final timeout = Duration(seconds: 30);
+  final timeout = kDebugMode ? Duration(seconds: 2) : Duration(seconds: 30);
   final client = Client();
 
   /// Base URL of the sprout backend API

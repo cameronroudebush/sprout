@@ -139,6 +139,7 @@ class SSEProvider extends BaseProvider<SSEAPI> {
   void dispose() {
     _reconnectTimer?.cancel(); // Clean up timer
     _cancelSubscription(); // Ensure subscription is cancelled
+    cleanupData();
     super.dispose();
   }
 
