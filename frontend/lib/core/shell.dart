@@ -19,7 +19,7 @@ class SproutAppShell extends StatefulWidget {
 }
 
 class _SproutAppShellState extends State<SproutAppShell> {
-  int _currentIndex = 3; // TODO
+  int _currentIndex = 0;
   final ScrollController _scrollController = ScrollController();
 
   final List<Map<String, dynamic>> _pages = const <Map<String, dynamic>>[
@@ -59,30 +59,33 @@ class _SproutAppShellState extends State<SproutAppShell> {
               ),
             ),
           ),
-          bottomNavigationBar: SizedBox(
-            height: 50,
-            child: BottomNavigationBar(
-              iconSize: 20,
-              showUnselectedLabels: false,
-              showSelectedLabels: false,
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index; // Update the index
-                });
-              },
-              backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              selectedItemColor: Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Theme.of(context).colorScheme.onSurface,
-              type: BottomNavigationBarType.fixed,
-              enableFeedback: true,
-              items: _pages
-                  .map((pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']))
-                  .toList(),
-            ),
-          ),
+          bottomNavigationBar: _getBottomNavBar(context),
         );
       },
+    );
+  }
+
+  Widget _getBottomNavBar(BuildContext context) {
+    return BottomNavigationBar(
+      iconSize: 28,
+      selectedFontSize: 0,
+      unselectedFontSize: 0,
+      showUnselectedLabels: false,
+      showSelectedLabels: false,
+      currentIndex: _currentIndex,
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index; // Update the index
+        });
+      },
+      backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+      selectedItemColor: Theme.of(context).colorScheme.primary,
+      unselectedItemColor: Theme.of(context).colorScheme.onSurface,
+      type: BottomNavigationBarType.fixed,
+      enableFeedback: true,
+      items: _pages
+          .map((pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']))
+          .toList(),
     );
   }
 }

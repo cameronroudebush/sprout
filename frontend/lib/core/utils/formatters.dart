@@ -30,7 +30,7 @@ extension StringCasingExtension on String {
 
 /// Returns the color to display for a balance
 Color getBalanceColor(double balance, ThemeData theme) {
-  final checkVal = balance.roundToDouble();
+  final checkVal = num.parse(balance.toStringAsFixed(2));
   return checkVal < 0
       ? Colors.red
       : checkVal > 0
@@ -40,7 +40,7 @@ Color getBalanceColor(double balance, ThemeData theme) {
 
 /// Returns the icon for a change in net worth
 IconData getChangeIcon(double percentChange) {
-  final checkVal = percentChange.roundToDouble();
+  final checkVal = num.parse(percentChange.toStringAsFixed(2));
   return checkVal == 0.0
       ? Icons.horizontal_rule
       : checkVal > 0
