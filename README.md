@@ -131,7 +131,7 @@ Sprout is designed with a "mobile first" approach utilizing [flutter](https://fl
 Below is a list of planned features I personally would find beneficial. I make no guarantees on when these will be implemented but I am working on them.
 
 - Holdings
-  - API integration for current values
+  - API integration for current ticker values
 - Transactions
   - Category editing/rules
   - Monthly subscription tracker

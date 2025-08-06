@@ -1,3 +1,6 @@
+import 'dart:html';
+
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprout/config/api.dart';
 import 'package:sprout/core/api/client.dart';
@@ -44,6 +47,11 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
       _unsecureConfig = await api.getUnsecure();
     } catch (e) {
       _failedToConnect = true;
+      // If this is debug, manually refresh. This is because SSE can tend
+      //  to timeout due to dispose not being called on hot reloads.
+      if (kDebugMode && kIsWeb) {
+        window.location.reload();
+      }
     }
     notifyListeners();
     return unsecureConfig;

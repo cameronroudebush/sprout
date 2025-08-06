@@ -25,7 +25,7 @@ export class CentralServer {
   get rateLimiter() {
     return rateLimit({
       windowMs: 1 * 60000, // 1 minute
-      limit: Configuration.isDevBuild ? 10000000000 : 1000, // 1000 requests per minute
+      limit: Configuration.isDevBuild ? Infinity : 1000, // 1000 requests per minute when not developer
       standardHeaders: "draft-7",
       legacyHeaders: false,
     });
