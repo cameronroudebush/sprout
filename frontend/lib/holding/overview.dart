@@ -75,16 +75,15 @@ class HoldingsOverview extends StatelessWidget {
                     AccountWidget(
                       account: account,
                       netWorthPeriod: ChartRange.oneDay,
-                      displayStats: false,
+                      displayStats: true,
                       displayTotals: true,
                       allowClick: false,
                       showPercentage: true,
+                      showPeriod: true,
                     ),
                     const Divider(height: 1),
-                    const SizedBox(height: 8),
                     // Holdings
                     Column(
-                      spacing: 12,
                       children: entry.value.map((holding) {
                         return Column(
                           children: [
@@ -94,7 +93,6 @@ class HoldingsOverview extends StatelessWidget {
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 8),
                   ],
                 ),
               );

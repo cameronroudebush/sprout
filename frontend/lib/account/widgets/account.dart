@@ -36,6 +36,9 @@ class AccountWidget extends StatelessWidget {
   /// If we should show the percentage change of this netWorthPeriod
   final bool showPercentage;
 
+  /// If we want to show the netWorthPeriod string in the percentage change
+  final bool showPeriod;
+
   const AccountWidget({
     super.key,
     required this.account,
@@ -46,6 +49,7 @@ class AccountWidget extends StatelessWidget {
     this.isSelected = false,
     this.allowClick = true,
     this.showPercentage = false,
+    this.showPeriod = false,
   });
 
   @override
@@ -197,6 +201,7 @@ class AccountWidget extends StatelessWidget {
                                   ? dayChange.valueChange * -1
                                   : dayChange.valueChange,
                               showPercentage: showPercentage,
+                              netWorthPeriod: showPeriod ? netWorthPeriod : null,
                             ),
                         ],
                       ),

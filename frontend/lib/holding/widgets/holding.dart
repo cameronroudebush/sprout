@@ -20,72 +20,63 @@ class HoldingWidget extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 600;
+
+        final renderSymbol = true;
+        final renderDescription = false;
+
+        final statsContent = _buildContent(isMobile, costBasisTotalChange, costBasisPercentChange);
+
         return Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 0),
-          child: Column(
+          padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            spacing: 12,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                spacing: 12,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Row(
-                      spacing: 24,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Row(
-                            spacing: 12,
-                            children: [
-                              // Render logo
-                              HoldingLogoWidget(holding),
-                              // Print details about the holding
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 8,
-                                  children: [
+              Expanded(
+                flex: 2,
+                child: Row(
+                  spacing: 24,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      flex: isMobile ? 2 : 1,
+                      child: Row(
+                        spacing: 12,
+                        children: [
+                          // Render logo
+                          HoldingLogoWidget(holding),
+                          // Print details about the holding
+                          // ignore: dead_code
+                          if (renderSymbol || renderDescription)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 8,
+                                children: [
+                                  if (renderSymbol)
                                     TextWidget(
                                       text: holding.symbol,
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                       textAlign: TextAlign.start,
                                     ),
+                                  if (renderDescription)
+                                    // ignore: dead_code
                                     TextWidget(
                                       text: holding.description,
                                       style: TextStyle(color: Colors.grey),
                                       textAlign: TextAlign.start,
                                     ),
-                                  ],
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        // Print details at the end of the row
-                        if (!isMobile)
-                          Expanded(
-                            flex: 2,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: isMobile
-                                      ? SizedBox.shrink()
-                                      : _buildContent(costBasisTotalChange, costBasisPercentChange),
-                                ),
-                              ],
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    // Print details at the end of the row
+                    Expanded(flex: isMobile ? 5 : 7, child: statsContent),
+                  ],
+                ),
               ),
-
-              isMobile ? _buildContent(costBasisTotalChange, costBasisPercentChange) : SizedBox.shrink(),
             ],
           ),
         );
@@ -93,28 +84,45 @@ class HoldingWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(double costBasisTotalChange, double costBasisPercentChange) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Amount of shares
-        _buildColumnOfContent("Number of Shares", holding.shares.toStringAsFixed(2)),
-        // Cost basis
-        _buildColumnOfContent(
-          "Cost Basis",
-          getFormattedCurrency(holding.costBasis),
-          description: "The original total cost for this asset",
-        ),
-        // Current Value
-        _buildColumnOfContent(
-          "Market Value",
-          getFormattedCurrency(holding.marketValue),
-          child: AccountChangeWidget(totalChange: costBasisTotalChange, percentageChange: costBasisPercentChange),
-          alignment: CrossAxisAlignment.end,
-        ),
-      ],
-    );
+  Widget _buildContent(bool isMobile, double costBasisTotalChange, double costBasisPercentChange) {
+    final content = [
+      // Amount of shares
+      _buildColumnOfContent("Shares", holding.shares.toStringAsFixed(2), row: isMobile),
+      const Divider(height: 1),
+      // Cost basis
+      _buildColumnOfContent(
+        "Cost Basis",
+        getFormattedCurrency(holding.costBasis),
+        description: "The original total cost for this asset",
+        row: isMobile,
+      ),
+      const Divider(height: 1),
+      // Current Value
+      _buildColumnOfContent(
+        "Market Value",
+        getFormattedCurrency(holding.marketValue),
+        description: "The current value of this asset",
+        row: isMobile,
+      ),
+      const Divider(height: 1),
+      // Total value change
+      _buildColumnOfContent(
+        "Total Change",
+        "",
+        description: "This is the total gain/loss calculated from cost basis and market value",
+        child: AccountChangeWidget(totalChange: costBasisTotalChange, percentageChange: costBasisPercentChange),
+        row: isMobile,
+      ),
+    ];
+
+    return isMobile
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 4,
+            children: content,
+          )
+        : Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: content);
   }
 
   /// Builds a column of a specific type of content related to the stock
@@ -123,30 +131,34 @@ class HoldingWidget extends StatelessWidget {
     dynamic displayText, {
     String? description,
     Widget? child,
-    CrossAxisAlignment alignment = CrossAxisAlignment.center,
+    bool row = false,
   }) {
-    return Column(
-      crossAxisAlignment: alignment,
-      spacing: 4,
-      children: [
-        Row(
-          spacing: 4,
-          children: [
-            TextWidget(
-              text: text,
-              referenceSize: 0.9,
-              style: TextStyle(color: Colors.grey),
+    final statsContent = [if (displayText != "") TextWidget(text: displayText), if (child != null) child];
+    final content = [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 4,
+        children: [
+          TextWidget(
+            text: text,
+            referenceSize: 0.9,
+            style: TextStyle(color: Colors.grey),
+          ),
+          if (description != null)
+            SproutTooltip(
+              message: description,
+              child: Icon(Icons.info, size: 16, color: Colors.grey),
             ),
-            if (description != null)
-              SproutTooltip(
-                message: description,
-                child: Icon(Icons.info, size: 16, color: Colors.grey),
-              ),
-          ],
-        ),
-        TextWidget(text: displayText),
-        if (child != null) child,
-      ],
-    );
+        ],
+      ),
+      row
+          ? Row(spacing: 8, children: statsContent)
+          : Column(crossAxisAlignment: CrossAxisAlignment.end, children: statsContent),
+    ];
+
+    return row
+        ? Row(spacing: 4, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: content)
+        : Column(spacing: 4, children: content);
   }
 }
