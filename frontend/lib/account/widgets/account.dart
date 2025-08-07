@@ -180,6 +180,7 @@ class AccountWidget extends StatelessWidget {
                 ),
                 // Print details at the end of the row
                 Expanded(
+                  flex: 2,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,

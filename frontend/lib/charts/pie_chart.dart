@@ -64,7 +64,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
     final mediaQuery = MediaQuery.of(context);
 
     if (widget.data == null || widget.data!.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: TextWidget(text: "No data available"));
     }
 
     final centerSpacingRadius = mediaQuery.size.height > 1200 ? 15 : widget.height / 15;

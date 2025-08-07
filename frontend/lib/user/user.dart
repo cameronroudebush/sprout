@@ -27,11 +27,11 @@ class _UserPageState extends State<UserPage> {
     String? lastScheduleStatus = "success";
     if (config == null) {
       lastScheduleStatus = "N/A";
-    } else if (config.lastSchedulerRun.status == "failed") {
-      if (config.lastSchedulerRun.failureReason == null) {
+    } else if (config.lastSchedulerRun?.status == "failed") {
+      if (config.lastSchedulerRun?.failureReason == null) {
         lastScheduleStatus = "failed - unknown reason";
       } else {
-        lastScheduleStatus = config.lastSchedulerRun.failureReason;
+        lastScheduleStatus = config.lastSchedulerRun?.failureReason;
       }
     }
     return "$lastScheduleTime${lastScheduleStatus == null ? "" : " - $lastScheduleStatus"}";
