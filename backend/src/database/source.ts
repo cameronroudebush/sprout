@@ -21,8 +21,8 @@ export class InternalDatabase {
     Logger.info(`Connection successful`, this.logOptions);
     if (!(await this.databaseExists())) {
       Logger.info("Initializing a new database", this.logOptions);
-    }
-    if (await this.databaseExists()) {
+      await this.executeMigrations();
+    } else {
       Logger.info("Database already initialized. Checking migrations...");
       const executedMigrations = await this.executeMigrations();
       if (executedMigrations.length > 0) Logger.info(`Executed ${executedMigrations.length} migration(s)`);
