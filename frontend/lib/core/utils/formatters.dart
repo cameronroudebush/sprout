@@ -7,6 +7,7 @@ import 'package:sprout/user/provider.dart';
 ///
 /// @round If we should round this value and drop the decimals
 String getFormattedCurrency(dynamic value, {bool round = false}) {
+  if (value == -0.0) value = 0.0;
   final userProvider = ServiceLocator.get<UserProvider>();
   final currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: round ? 0 : null);
   if (round) value = value.round();
@@ -20,6 +21,7 @@ String formatDate(DateTime date, {bool includeTime = false}) {
 
 /// Returns the given number as a percentage
 String formatPercentage(double number) {
+  if (number == -0.0) number = 0.0;
   return "${number.toStringAsFixed(2)}%";
 }
 

@@ -24,7 +24,7 @@ export class AccountHistory extends DatabaseBase {
     const subQuery = repository
       .createQueryBuilder("ah_sub")
       .select("ah_sub.account.id", "accountId")
-      .addSelect("MAX(ah_sub.time)", "maxTime")
+      .addSelect("MIN(ah_sub.time)", "minTime")
       .innerJoin("ah_sub.account", "account_sub")
       .where("account_sub.userId = :userId", { userId: user.id })
       .groupBy("ah_sub.account.id")
@@ -33,9 +33,9 @@ export class AccountHistory extends DatabaseBase {
     const mainQuery = repository
       .createQueryBuilder("account_history")
       .innerJoinAndSelect("account_history.account", "account")
-      .innerJoin("(" + subQuery.getQuery() + ")", "latest_entries", "latest_entries.accountId = account.id AND latest_entries.maxTime = account_history.time")
+      .innerJoin("(" + subQuery.getQuery() + ")", "latest_entries", "latest_entries.accountId = account.id AND latest_entries.minTime = account_history.time")
       .setParameters(subQuery.getParameters())
-      .orderBy("account_history.time", "DESC");
+      .orderBy("account_history.time", "ASC");
 
     if (opts?.where) mainQuery.andWhere(opts.where);
     return await mainQuery.getMany();
