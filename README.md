@@ -15,8 +15,9 @@
 Sprout is a financial management app specializing in automatic account tracking using various financial API's. We focus on the capability of viewing the previous day of finance information. This means we'll be able to display things like stocks and account balances from yesterday.
 
 <p align="center">
-  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/home.png" alt="Sprout Home Page" width="300"/>
-  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/accounts.png" alt="Sprout Accounts Page" width="300"/>
+  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/home.png" alt="Home Page" width="250"/>
+  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/transactions.png" alt="Transactions Page" width="250"/>
+  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/holdings.png" alt="Holdings Page" width="250"/>
 </p>
 
 # How do I use Sprout?
