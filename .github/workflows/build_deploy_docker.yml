@@ -87,3 +87,27 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: croudebush/sprout
+
+      # Generate github release
+      - name: Create GitHub Release
+        if: ${{ steps.git_info.outputs.is_tagged_commit == 'true' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          # files: |
+          #   assets/icon.png
+          tag_name: ${{ steps.git_info.outputs.version_string }}
+          name: Release ${{ steps.git_info.outputs.version_string }}
+          body: |
+            <p align="center">
+              <img width="25%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-color.png">
+            </p>
+
+            # Sprout - Release Notes (${{ steps.git_info.outputs.version_string }})
+
+            # Known Issues / Future Enhancements:
+            Please reference to [this section](https://github.com/cameronroudebush/sprout?tab=readme-ov-file#planed-features) for future enhancements.
+
+            **Remember**: This project is still in active development! No features are guaranteed.
+          prerelease: false
+          draft: true
+          generate_release_notes: false

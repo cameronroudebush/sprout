@@ -4,7 +4,7 @@
 
 import { InternalDatabase } from "@backend/database/source";
 import { Logger } from "@backend/logger";
-import "../main";
+import "../main"; // Load main so we know what database models we have
 
 let database: InternalDatabase;
 
