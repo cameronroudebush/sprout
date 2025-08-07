@@ -22,9 +22,9 @@ class CurrentNetWorthDisplay extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         final currentNetWorth = netWorthProvider.netWorth ?? 0;
-        final yesterdayNetWorthChange = netWorthProvider.historicalNetWorth?.getValueByFrame(chartRange).valueChange;
-        final yesterdayNetWorth = currentNetWorth + (yesterdayNetWorthChange ?? 0).abs();
-        final percentageChange = ((currentNetWorth - yesterdayNetWorth) / yesterdayNetWorth) * 100;
+        final pastNetWorthChange = netWorthProvider.historicalNetWorth?.getValueByFrame(chartRange).valueChange;
+        final pastNetWorth = currentNetWorth - (pastNetWorthChange ?? 0);
+        final percentageChange = ((currentNetWorth - pastNetWorth) / pastNetWorth) * 100;
         return Padding(
           padding: EdgeInsetsGeometry.all(12),
           child: Column(
@@ -42,7 +42,7 @@ class CurrentNetWorthDisplay extends StatelessWidget {
                 padding: EdgeInsetsGeometry.only(left: 12),
                 child: AccountChangeWidget(
                   percentageChange: percentageChange.isNaN ? null : percentageChange,
-                  totalChange: yesterdayNetWorthChange,
+                  totalChange: pastNetWorthChange,
                   netWorthPeriod: chartRange,
                   mainAxisAlignment: MainAxisAlignment.start,
                   useExtendedPeriodString: true,
