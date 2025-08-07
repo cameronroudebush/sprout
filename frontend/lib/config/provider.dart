@@ -79,6 +79,6 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
 
   /// Returns the status of the last account sync
   String getLastSyncStatus() {
-    return config?.lastSchedulerRun.time != null ? timeago.format(config!.lastSchedulerRun.time!.toLocal()) : "N/A";
+    return config?.lastSchedulerRun?.time != null ? timeago.format(config!.lastSchedulerRun!.time!.toLocal()) : "N/A";
   }
 }

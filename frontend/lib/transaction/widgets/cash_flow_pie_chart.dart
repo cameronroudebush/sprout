@@ -17,9 +17,12 @@ class CashFlowPieChart extends StatelessWidget {
         final totalIncome = provider.transactionStats?.totalIncome;
         final totalSpent = provider.transactionStats?.totalSpend;
         // Create our mapping
-        final data = totalIncome == null || totalSpent == null
+        final data = totalIncome == null || totalIncome == 0 || totalSpent == null || totalSpent == 0
             ? null
             : {"Income": totalIncome, "Spent": totalSpent.abs()};
+        if (provider.isLoading) {
+          return SproutCard(child: Center(child: CircularProgressIndicator()));
+        }
         return SproutCard(
           applySizedBox: false,
           child: SproutPieChart(

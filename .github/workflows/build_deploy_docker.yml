@@ -1,5 +1,8 @@
 name: Build Docker
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: ["master"]
@@ -91,7 +94,7 @@ jobs:
       # Generate github release
       - name: Create GitHub Release
         if: ${{ steps.git_info.outputs.is_tagged_commit == 'true' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           # files: |
           #   assets/icon.png

@@ -14,6 +14,9 @@ class CategoryPieChart extends StatelessWidget {
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
         final data = provider.transactionStats?.categories;
+        if (provider.isLoading) {
+          return SproutCard(child: Center(child: CircularProgressIndicator()));
+        }
         return SproutCard(
           applySizedBox: false,
           child: SproutPieChart(data: data, header: "Categories", showLegend: showLegend, showPieTitle: false),
