@@ -2,8 +2,8 @@ import { Configuration } from "@backend/config/core";
 import { LogConfig, Logger } from "@backend/logger";
 import { DataSource } from "typeorm";
 
-/** This class contains the actual database initialization */
-export class InternalDatabase {
+/** This class contains Sprout's database access via typeorm. */
+export class Database {
   /** The connection data source */
   source: DataSource;
 
@@ -89,6 +89,3 @@ export class InternalDatabase {
     }
   }
 }
-
-/** The database instance we should use across the app */
-export const Database = new InternalDatabase();

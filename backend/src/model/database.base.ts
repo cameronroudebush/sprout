@@ -6,12 +6,15 @@ import { FindManyOptions, FindOneOptions, FindOptionsWhere, PrimaryGeneratedColu
 
 /** This class implements a bunch of common functionality that can be reused for other models that utilize the database */
 export class DatabaseBase extends DBBase {
+  /** The database connection we use for all queries. Set during startup. */
+  static database: Database;
+
   @decorate(PrimaryGeneratedColumn("uuid"))
   declare id: string;
 
   /** Returns the repository from the data source to execute content against */
   getRepository() {
-    return Database.source!.getRepository(this.constructor) as Repository<this>;
+    return DatabaseBase.database!.source!.getRepository(this.constructor) as Repository<this>;
   }
 
   /** Returns the repository from the data source to execute content against */

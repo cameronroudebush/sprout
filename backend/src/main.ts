@@ -1,5 +1,6 @@
 import { Database } from "@backend/database/source";
 import { JobProcessor } from "@backend/jobs/jobs";
+import { DatabaseBase } from "@backend/model/database.base";
 import "reflect-metadata";
 import "source-map-support/register";
 import { CentralServer } from "./central.server";
@@ -17,7 +18,8 @@ async function main() {
     // Initialize config
     new ConfigurationController().load();
     // Initialize database
-    await Database.init();
+    const database = await new Database().init();
+    DatabaseBase.database = database;
     // Initialize background jobs
     await new JobProcessor().start();
     // Initialize server
