@@ -26,7 +26,7 @@ class _SproutAppShellState extends State<SproutAppShell> {
     {'page': HomePage(), 'icon': Icons.home, 'label': 'Home'},
     {'page': AccountsOverview(), 'icon': Icons.account_balance, 'label': 'Accounts'},
     {'page': TransactionsOverviewPage(), 'icon': Icons.receipt, 'label': 'Transactions'},
-    {'page': HoldingsOverview(), 'icon': Icons.stacked_line_chart_rounded, 'label': 'Investments'},
+    {'page': HoldingsOverview(), 'icon': Icons.stacked_line_chart_rounded, 'label': 'Stocks'},
     {'page': UserPage(), 'icon': Icons.account_circle, 'label': 'Settings'},
   ];
 
@@ -42,36 +42,44 @@ class _SproutAppShellState extends State<SproutAppShell> {
       builder: (context, configProvider, child) {
         if (_scrollController.positions.isNotEmpty) _scrollController.jumpTo(0);
         final screenHeight = MediaQuery.of(context).size.height;
-        return Scaffold(
-          appBar: SproutAppBar(screenHeight: screenHeight, currentPage: _pages[_currentIndex]['label']),
-          body: Center(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1024),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Padding(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
-                    child: _pages[_currentIndex]['page'],
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600;
+
+            return Scaffold(
+              appBar: SproutAppBar(screenHeight: screenHeight, currentPage: _pages[_currentIndex]['label']),
+              body: Center(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1024),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Padding(
+                        padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+                        child: _pages[_currentIndex]['page'],
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          bottomNavigationBar: _getBottomNavBar(context),
+              bottomNavigationBar: _getBottomNavBar(isMobile, context),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _getBottomNavBar(BuildContext context) {
+  Widget _getBottomNavBar(bool isMobile, BuildContext context) {
+    double fontSize = isMobile ? 8 : 12;
     return BottomNavigationBar(
-      iconSize: 28,
-      selectedFontSize: 0,
-      unselectedFontSize: 0,
-      showUnselectedLabels: false,
-      showSelectedLabels: false,
+      iconSize: isMobile ? 24 : 28,
+      selectedFontSize: fontSize,
+      unselectedFontSize: fontSize,
+      showUnselectedLabels: true,
+      showSelectedLabels: true,
       currentIndex: _currentIndex,
       onTap: (index) {
         setState(() {
@@ -84,7 +92,15 @@ class _SproutAppShellState extends State<SproutAppShell> {
       type: BottomNavigationBarType.fixed,
       enableFeedback: true,
       items: _pages
-          .map((pageData) => BottomNavigationBarItem(icon: Icon(pageData['icon']), label: pageData['label']))
+          .map(
+            (pageData) => BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Icon(pageData['icon'], color: pageData['color']),
+              ),
+              label: pageData['label'],
+            ),
+          )
           .toList(),
     );
   }

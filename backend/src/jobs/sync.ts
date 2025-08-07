@@ -16,13 +16,6 @@ export class BackgroundSync extends BackgroundJob<Sync> {
     super("sync", Configuration.providers.updateTime);
   }
 
-  override async start() {
-    // Check if we've ran a job yet today.
-    const lastSchedule = (await Sync.find({ skip: 0, take: 1, order: { time: "DESC" } }))[0];
-    const hasNotRanSyncToday = lastSchedule == null || lastSchedule.time.toDateString() !== new Date().toDateString();
-    return super.start(hasNotRanSyncToday);
-  }
-
   protected async update() {
     Logger.info("Performing background update");
     const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
