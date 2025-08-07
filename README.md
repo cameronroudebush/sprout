@@ -83,7 +83,7 @@ database:
     # If backups should occur
     enabled: true
     # How many backups we should keep
-    count: 3
+    count: 30
     # When to backup the database. Default is once a day at 4am.
     time: 0 4 * * *
     # Where to place the backup files.
