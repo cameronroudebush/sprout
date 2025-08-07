@@ -40,6 +40,7 @@
     "@types/uuid": "^9.0.8",
     "@yao-pkg/pkg": "^6.5.1",
     "cross-env": "^7.0.3",
+    "cross-var": "^1.1.0",
     "git-describe": "^4.1.1",
     "nodemon": "^3.1.0",
     "prettier": "^3.6.2",
@@ -52,7 +53,8 @@
   },
   "scripts": {
     "start": "ts-node -r source-map-support/register ./build.ts -m dev",
-    "build": "ts-node ./build.ts -m prod"
+    "build": "ts-node ./build.ts -m prod",
+    "migrate": "cross-var ts-node -r tsconfig-paths/register --project ./tsconfig.json ./node_modules/typeorm/cli.js migration:generate -d ./src/database/migration.ts ./src/database/migration/sqlite/$npm_config_name"
   },
   "pkg": {
     "assets": [

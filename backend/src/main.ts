@@ -11,22 +11,27 @@ import { RestAPIServer } from "./web-api/server";
 
 /** Main function for kicking off the application */
 async function main() {
-  // Log what program is starting up
-  Logger.success(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
-  // Initialize config
-  new ConfigurationController().load();
-  // Initialize database
-  await Database.init();
-  // Initialize background jobs
-  await new JobProcessor().start();
-  // Initialize server
-  const centralServer = new CentralServer();
-  await new RestAPIServer(centralServer).initialize();
-  Logger.success("Server ready!");
-  // Schedule our provider to run
-  await Providers.initializeProviders();
-  const provider = Providers.getCurrentProvider();
-  await provider.sync.start();
+  try {
+    // Log what program is starting up
+    Logger.success(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
+    // Initialize config
+    new ConfigurationController().load();
+    // Initialize database
+    await Database.init();
+    // Initialize background jobs
+    await new JobProcessor().start();
+    // Initialize server
+    const centralServer = new CentralServer();
+    await new RestAPIServer(centralServer).initialize();
+    Logger.success("Server ready!");
+    // Schedule our provider to run
+    await Providers.initializeProviders();
+    const provider = Providers.getCurrentProvider();
+    await provider.sync.start();
+  } catch (e) {
+    Logger.error(e as Error);
+    process.exit(1);
+  }
 }
 
 // Execute main so long as this file is not being imported
