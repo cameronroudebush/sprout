@@ -142,7 +142,7 @@ class MainState extends State<Main> {
         } else {
           // If setup is not complete
           page = Scaffold(
-            appBar: SproutAppBar(screenHeight: screenHeight),
+            appBar: SproutAppBar(screenHeight: screenHeight, currentPage: "Setup"),
             body: SetupPage(
               onSetupSuccess: () {
                 configProvider.populateUnsecureConfig();

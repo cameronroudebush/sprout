@@ -99,7 +99,7 @@ jobs:
           # files: |
           #   assets/icon.png
           tag_name: ${{ steps.git_info.outputs.version_string }}
-          name: Release ${{ steps.git_info.outputs.version_string }}
+          name: ${{ steps.git_info.outputs.version_string }}
           body: |
             <p align="center">
               <img width="25%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-color.png">
