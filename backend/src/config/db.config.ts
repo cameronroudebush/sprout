@@ -1,5 +1,6 @@
 import { ConfigurationMetadata } from "@backend/config/configuration.metadata";
 import { registeredEntities } from "@backend/database/decorators";
+import { glob } from "glob";
 import path from "path";
 import { DataSourceOptions } from "typeorm";
 
@@ -37,6 +38,15 @@ export class DatabaseConfig {
 
   /** Returns the database configuration used to initialize the data source */
   get dbConfig() {
-    return { ...this.sqlite, type: this.type, entities: registeredEntities } as DataSourceOptions;
+    const migrationsDirectory = path.join("..", "database", "migration", this.type);
+    const migrationFiles = glob.sync("/**/*.*[!.map]", { root: path.join(__dirname, migrationsDirectory) });
+    return {
+      ...this.sqlite,
+      type: this.type,
+      entities: registeredEntities,
+      migrationsRun: false,
+      migrations: migrationFiles,
+      synchronize: false,
+    } as DataSourceOptions;
   }
 }

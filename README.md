@@ -146,8 +146,6 @@ Below is a list of planned features I personally would find beneficial. I make n
 - Additional providers
   - Zillow for house value over time?
   - Crypto? (This will be a pain)
-- Database
-  - Migrations!
 - Android/IOS Apps
   - Widgets for things like transactions
   - Biometric auth to protect account balance info
