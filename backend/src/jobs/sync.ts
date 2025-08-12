@@ -3,6 +3,7 @@ import { Logger } from "@backend/logger";
 import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
 import { Holding } from "@backend/model/holding";
+import { HoldingHistory } from "@backend/model/holding.history";
 import { Sync } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
@@ -49,33 +50,23 @@ export class BackgroundSync extends BackgroundJob<Sync> {
             availableBalance: accountInDB.availableBalance,
             time: subDays(new Date(), 1),
           }).insert();
+
           // Update current account
           accountInDB.balance = data.account.balance;
           accountInDB.availableBalance = data.account.availableBalance;
           await accountInDB.update();
+
           // Update current institution if in database
           const institution = accountInDB.institution;
           institution.hasError = data.account.institution.hasError;
           await institution.update();
+
           // Sync transactions
           data.transactions.map((x) => (x.account = accountInDB));
           await Transaction.insertMany<Transaction>(data.transactions);
-          // Sync holdings if investment
-          if (accountInDB.type === "investment" && data.holdings.length !== 0)
-            for (const holding of data.holdings) {
-              holding.account = accountInDB;
-              let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol, account: { id: accountInDB.id } } }))[0];
-              // If we aren't tracking this holding yet, start tracking it
-              if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();
-              else {
-                // Else, update values
-                holdingInDB.costBasis = holding.costBasis;
-                holdingInDB.marketValue = holding.marketValue;
-                holdingInDB.purchasePrice = holding.purchasePrice;
-                holdingInDB.shares = holding.shares;
-                await holdingInDB.update();
-              }
-            }
+
+          // Sync holdings if investment type
+          if (accountInDB.type === "investment" && data.holdings.length !== 0) await this.updateHoldingData(accountInDB, data.holdings);
         }
         Logger.success(`Information updated successfully for: ${user.username}`);
       }
@@ -88,5 +79,35 @@ export class BackgroundSync extends BackgroundJob<Sync> {
       await schedule.update();
     }
     return schedule;
+  }
+
+  /**
+   * Updates holding data for the given account and holding information set.
+   */
+  private async updateHoldingData(accountInDb: Account, holdings: Holding[]) {
+    for (const holding of holdings) {
+      holding.account = accountInDb;
+      let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol, account: { id: accountInDb.id } } }))[0];
+      // If we aren't tracking this holding yet, start tracking it
+      if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();
+      else {
+        // Set old holding history
+        await HoldingHistory.fromPlain({
+          holding: holdingInDB,
+          costBasis: holdingInDB.costBasis,
+          marketValue: holdingInDB.marketValue,
+          purchasePrice: holdingInDB.purchasePrice,
+          shares: holdingInDB.shares,
+          time: subDays(new Date(), 1),
+        }).insert();
+
+        // Update current holding values
+        holdingInDB.costBasis = holding.costBasis;
+        holdingInDB.marketValue = holding.marketValue;
+        holdingInDB.purchasePrice = holding.purchasePrice;
+        holdingInDB.shares = holding.shares;
+        await holdingInDB.update();
+      }
+    }
   }
 }
