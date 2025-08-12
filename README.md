@@ -40,13 +40,13 @@ sprout:
     sprout_server_jwtExpirationTime: 7d
 ```
 
-After launching the above docker compose, you'll be able to navigate to your browser on the same machine to `http://localhost` and you'll see sprout's setup.
+After launching the above docker compose, you'll be able to navigate to your browser on the same machine to `http://localhost` and you'll see sprout's setup. We currently only support web viewing of the flutter app. It however does support PWA until we build the mobile app.
 
 ## Available Images:
 
-- `croudebush/sprout:stable`
+- [`croudebush/sprout:stable`](https://hub.docker.com/r/croudebush/sprout)
   - This is the recommended image that will only be updated with tagged releases on the main branch.
-- `croudebush/sprout:dev`
+- [`croudebush/sprout:dev`](https://hub.docker.com/r/croudebush/sprout)
   - This is directly tied to the main branch and will update every time a commit is pushed.
 
 ## Configuration
