@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg" href="favicon-bg.svg" />
+    <title>Sprout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        /* surface color from theme */
+        background-color: #111418;
+      }
+      /* Custom styles for the scroll-to-top button */
+      #scrollToTopBtn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 99;
+        cursor: pointer;
+        border-radius: 9999px;
+        padding: 0.75rem;
+        /* secondary color from theme */
+        background-color: #116383;
+        color: white;
+        transition:
+          opacity 0.3s ease-in-out,
+          transform 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      #scrollToTopBtn.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      /* Custom shadow for a more subtle effect on dark backgrounds */
+      .custom-shadow {
+        box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.25);
+      }
+      /* FIX: Add a custom scroll margin to prevent header cutoff */
+      .scroll-mt-20 {
+        scroll-margin-top: 5rem; /* Adjust this value if your header size changes */
+      }
+    </style>
+  </head>
+  <body class="text-[#e1e2e8]">
+    <header class="bg-[#1d2024]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#43474e]">
+      <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#" class="text-3xl font-bold text-[#a0cafd]">
+          <img
+            src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent-no-tag.png"
+            alt="Sprout Logo"
+            class="w-1/3 md:w-1/4 mx-auto md:mx-0 rounded-lg"
+          />
+        </a>
+        <div class="hidden md:flex space-x-6 font-medium text-[#c3c7cf]">
+          <a href="#about" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">What is Sprout?</a>
+          <a href="#how-to-use" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">How to Use</a>
+          <a href="#security" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">Security</a>
+          <a href="#features" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">Features</a>
+          <a href="https://github.com/cameronroudebush/sprout" target="_blank" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300"
+            >GitHub</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <main class="py-16">
+      <section class="container mx-auto px-6 py-20 text-center scroll-mt-20">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-[#a0cafd] leading-tight mb-4">Grow Your Financial Future</h1>
+        <p class="text-lg md:text-xl text-[#c3c7cf] max-w-2xl mx-auto mb-8">
+          Sprout is a financial management app specializing in automatic account tracking and a clear view of your daily finances.
+        </p>
+        <a
+          href="#how-to-use"
+          class="inline-block bg-[#116383] text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-[#194975] transition-all duration-300 transform hover:scale-105"
+        >
+          Get Started
+        </a>
+        <div class="mt-8 flex justify-center items-center space-x-4">
+          <a href="https://hub.docker.com/r/croudebush/sprout" target="_blank">
+            <img src="https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker" alt="Docker Pulls" class="h-8" />
+          </a>
+          <a href="https://github.com/cameronroudebush/sprout/releases/latest" target="_blank">
+            <img
+              src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github"
+              alt="GitHub Tag"
+              class="h-8"
+            />
+          </a>
+        </div>
+      </section>
+
+      <section id="about" class="container mx-auto px-6 py-16 scroll-mt-20">
+        <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">What is Sprout?</h2>
+        <div class="bg-[#272a2f] rounded-xl custom-shadow p-8 md:p-12 mb-12">
+          <div class="md:flex md:items-center md:space-x-12">
+            <img
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent-no-tag.png"
+              alt="Sprout Logo"
+              class="w-1/2 md:w-1/3 mx-auto md:mx-0 rounded-lg"
+            />
+            <div class="mt-8 md:mt-0">
+              <p class="text-[#c3c7cf] text-lg leading-relaxed">
+                Sprout is a financial management app designed to give you a clear, simple view of your money. We specialize in providing a daily snapshot of
+                your financial data by automatically tracking your accounts using financial APIs. This allows you to easily view things like account balances
+                and stock holdings, helping you stay on top of your financial health.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 flex flex-col items-center text-center">
+            <img
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/home.png"
+              alt="Home Page"
+              class="w-full h-auto rounded-lg shadow-md mb-4 border border-[#43474e]"
+            />
+            <h3 class="text-xl font-semibold text-[#e1e2e8]">Home Page</h3>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 flex flex-col items-center text-center">
+            <img
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/transactions.png"
+              alt="Transactions Page"
+              class="w-full h-auto rounded-lg shadow-md mb-4 border border-[#43474e]"
+            />
+            <h3 class="text-xl font-semibold text-[#e1e2e8]">Transactions Page</h3>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 flex flex-col items-center text-center">
+            <img
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/holdings.png"
+              alt="Holdings Page"
+              class="w-full h-auto rounded-lg shadow-md mb-4 border border-[#43474e]"
+            />
+            <h3 class="text-xl font-semibold text-[#e1e2e8]">Holdings Page</h3>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-to-use" class="container mx-auto px-6 py-16 scroll-mt-20">
+        <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">How to Use Sprout</h2>
+        <div class="max-w-4xl mx-auto">
+          <p class="text-lg text-[#c3c7cf] mb-6">The recommended way to use Sprout is with a Docker image. Follow the steps below to get started.</p>
+          <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg mb-8 border border-[#43474e]">
+            <pre><code class="language-yml">
+sprout:
+  container_name: sprout
+  image: croudebush/sprout:stable
+  volumes:
+    # The database .sqlite file will be stored in /sprout
+    - /mnt/user/appdata/sprout:/sprout
+  ports:
+    - 80:80
+  restart: unless-stopped
+  environment:
+    TZ: America/New_York
+    sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
+    sprout_server_jwtExpirationTime: 7d
+            </code></pre>
+          </div>
+          <p class="text-[#c3c7cf] text-lg">
+            After launching the above docker compose, you can navigate to
+            <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">http://localhost</code>
+            in your browser on the same machine to see Sprout's setup.
+          </p>
+        </div>
+      </section>
+
+      <section id="security" class="container mx-auto px-6 py-16 bg-[#191c20] rounded-xl scroll-mt-20">
+        <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">Security is Our Priority</h2>
+        <div class="max-w-4xl mx-auto text-lg text-[#c3c7cf] space-y-6">
+          <p>Anytime you're dealing with financial data, security is an important topic. Here is our stance on the security of Sprout:</p>
+          <ul class="list-disc list-inside space-y-4 pl-4">
+            <li>
+              While we do know about account balances and transactions,
+              <strong class="text-[#a0cafd]">we do not keep any user authentication</strong> information related to your bank accounts.
+            </li>
+            <ul class="list-disc list-inside space-y-4 pl-4">
+              <li>We use finance API's like SimpleFIN, which has a great slogan: "Why give out your key when they only need a window?"</li>
+            </ul>
+            <li>
+              All data transmission from the user interface to the backend is done via a <strong class="text-[#a0cafd]">REST API</strong>. Each request requires
+              a <strong class="text-[#a0cafd]">JWT (JSON Web Token)</strong> bearer token to be added for the backend to validate the request and the user who
+              requested it.
+            </li>
+            <li>
+              The secret key for the JWT is <strong class="text-[#a0cafd]">rotated on every restart</strong> of the application, ensuring a high level of
+              security.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="features" class="container mx-auto px-6 py-16 scroll-mt-20">
+        <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">What's Next for Sprout?</h2>
+        <p class="text-center text-lg text-[#c3c7cf] max-w-2xl mx-auto mb-8">
+          Sprout is designed with a "mobile first" approach utilizing Flutter for its interfaces with a Node.js backend. We are constantly working on new
+          features.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 border border-transparent hover:border-[#a0cafd] transition-all duration-300">
+            <h3 class="text-2xl font-semibold text-[#a0cafd] mb-2">Holdings</h3>
+            <ul class="list-disc list-inside text-[#c3c7cf]">
+              <li>API integration for current ticker values</li>
+            </ul>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 border border-transparent hover:border-[#a0cafd] transition-all duration-300">
+            <h3 class="text-2xl font-semibold text-[#a0cafd] mb-2">Transactions</h3>
+            <ul class="list-disc list-inside text-[#c3c7cf]">
+              <li>Category editing/rules</li>
+              <li>Monthly subscription tracker</li>
+            </ul>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 border border-transparent hover:border-[#a0cafd] transition-all duration-300">
+            <h3 class="text-2xl font-semibold text-[#a0cafd] mb-2">User Configuration</h3>
+            <ul class="list-disc list-inside text-[#c3c7cf]">
+              <li>OIDC support</li>
+              <li>Improved user management</li>
+            </ul>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 border border-transparent hover:border-[#a0cafd] transition-all duration-300">
+            <h3 class="text-2xl font-semibold text-[#a0cafd] mb-2">Improved Desktop Mode</h3>
+            <ul class="list-disc list-inside text-[#c3c7cf]">
+              <li>Move the bottom nav to a sidenav</li>
+            </ul>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 border border-transparent hover:border-[#a0cafd] transition-all duration-300">
+            <h3 class="text-2xl font-semibold text-[#a0cafd] mb-2">Additional Providers</h3>
+            <ul class="list-disc list-inside text-[#c3c7cf]">
+              <li>Zillow for house value</li>
+              <li>Crypto tracking</li>
+            </ul>
+          </div>
+          <div class="bg-[#1d2024] rounded-xl custom-shadow p-6 border border-transparent hover:border-[#a0cafd] transition-all duration-300">
+            <h3 class="text-2xl font-semibold text-[#a0cafd] mb-2">Mobile Apps</h3>
+            <ul class="list-disc list-inside text-[#c3c7cf]">
+              <li>Android/iOS apps</li>
+              <li>Biometric authentication</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-[#0b0e13] text-white py-12">
+      <div class="container mx-auto px-6 text-center">
+        <p class="text-sm text-gray-500">&copy; 2025 Sprout. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <button id="scrollToTopBtn" aria-label="Scroll to top">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+      </svg>
+    </button>
+
+    <script>
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const targetElement = document.querySelector(this.getAttribute("href"));
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: "smooth",
+            });
+          }
+        });
+      });
+
+      // Show/hide scroll to top button
+      const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+      const scrollThreshold = 200; // Pixels to scroll before showing button
+
+      const handleScroll = () => {
+        if (window.scrollY > scrollThreshold) {
+          scrollToTopBtn.classList.add("show");
+        } else {
+          scrollToTopBtn.classList.remove("show");
+        }
+      };
+
+      window.addEventListener("scroll", handleScroll, { passive: true });
+
+      // Scroll to top functionality
+      scrollToTopBtn.addEventListener("click", () => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      });
+    </script>
+  </body>
+</html>
