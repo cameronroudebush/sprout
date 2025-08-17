@@ -1,0 +1,36 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Get Repo Info
+        id: get_repo_info
+        uses: ./.github/actions/get-repo-info
+        with:
+          fetch-depth: "0"
+
+      - name: Create GitHub Release
+        if: ${{ steps.get_repo_info.outputs.is_tagged_commit == 'true' }}
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_repo_info.outputs.version_string }}
+          name: ${{ steps.get_repo_info.outputs.version_string }}
+          body: |
+            <p align="center">
+              <img width="25%" src="https://github.com/cameronroudebush/sprout/blob/master/frontend/assets/icon/favicon-color.svg">
+            </p>
+
+            **Remember**: This project is still in active development! No features are guaranteed.
+          prerelease: false
+          draft: true
+          generate_release_notes: true

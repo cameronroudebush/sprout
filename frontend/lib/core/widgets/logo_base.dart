@@ -12,7 +12,7 @@ abstract class LogoBaseWidget<T> extends StatefulWidget {
   /// Returns the backend image proxy url without any query context.
   String getBackendProxy(BuildContext context) {
     final configProvider = Provider.of<ConfigProvider>(context);
-    return "${configProvider.baseUrl}/api/image-proxy";
+    return "${configProvider.api.client.baseUrl}/api/image-proxy";
   }
 
   /// Returns the logo URL that we wish to render

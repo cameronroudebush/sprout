@@ -1,0 +1,57 @@
+# .github/workflows/android.yml
+name: Build and Release Android APK
+
+on:
+  workflow_run:
+    workflows: ["Create GitHub Release"]
+    types:
+      - completed
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Get Repo Info
+        id: get_repo_info
+        uses: ./.github/actions/get-repo-info
+        with:
+          fetch-depth: "0"
+          lfs: "true"
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "gradle"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+          channel: "stable"
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Rename APK for Release
+        run: |
+          VERSION="${{ steps.get_repo_info.outputs.version_string }}"
+          mv build/app/outputs/flutter-apk/app-release.apk "build/app/outputs/flutter-apk/$VERSION.apk"
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "build/app/outputs/flutter-apk/${{ steps.get_repo_info.outputs.version_string }}.apk"
+          tag_name: ${{ steps.get_repo_info.outputs.version_string }}
+          body: ""
+          draft: true
+          prerelease: false
+          update_existing: true

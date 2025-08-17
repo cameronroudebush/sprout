@@ -13,7 +13,6 @@ class NetWorthProvider extends BaseProvider<NetWorthAPI> {
   double? get netWorth => _netWorth;
   EntityHistory? get historicalNetWorth => _historicalNetWorth;
   List<EntityHistory>? get historicalAccountData => _historicalAccountData;
-  bool isLoading = false;
 
   NetWorthProvider(super.api);
 

@@ -16,13 +16,15 @@ import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
-import 'package:sprout/core/widgets/app_bar.dart';
+import 'package:sprout/core/widgets/connect_fail.dart';
+import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/holding/api.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
+import 'package:sprout/setup/connection.dart';
 import 'package:sprout/setup/provider.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/api.dart';
@@ -42,6 +44,7 @@ void main() async {
 
   // Create base API client
   final client = RESTClient();
+  await client.setBaseUrl();
 
   // Register all the providers
   ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigAPI(client), packageInfo));
@@ -91,34 +94,44 @@ class MainState extends State<Main> {
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, ConfigProvider>(
       builder: (context, authProvider, configProvider, child) {
+        final hasConnectionUrl = configProvider.api.client.hasConnectionUrl();
         final failedToConnect = configProvider.failedToConnect;
         final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
         Widget page;
-        final screenHeight = MediaQuery.of(context).size.height;
 
-        if (failedToConnect) {
-          page = Scaffold(
-            body: Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image(
-                      image: AssetImage('assets/logo/color-transparent-no-tag.png'),
-                      width: MediaQuery.of(context).size.height * .6,
-                    ),
-                    SizedBox(height: 12),
-                    TextWidget(
-                      referenceSize: 1.5,
-                      text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
-                  ],
-                ),
+        if (!hasConnectionUrl) {
+          page = SproutScaffold(
+            applyAppBar: true,
+            currentPage: "Setup",
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 24,
+                children: [
+                  TextWidget(
+                    referenceSize: 3,
+                    text: "Connection Setup",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextWidget(
+                    referenceSize: 1.25,
+                    text:
+                        "Due to Sprouts nature of being self hosted, you must provide a URL to connect to your instance. Please enter the URL below. You will be able to change this later if the connection fails.",
+                  ),
+
+                  ConnectionSetup(
+                    onURLSet: () {
+                      // Reload to render the normal connection
+                      setState(() {});
+                    },
+                  ),
+                ],
               ),
             ),
           );
+        } else if (failedToConnect) {
+          page = SproutScaffold(child: FailToConnectWidget());
         } else if (setupPosition == null) {
           page = Center(
             child: SizedBox(
@@ -141,9 +154,10 @@ class MainState extends State<Main> {
           }
         } else {
           // If setup is not complete
-          page = Scaffold(
-            appBar: SproutAppBar(screenHeight: screenHeight, currentPage: "Setup"),
-            body: SetupPage(
+          page = SproutScaffold(
+            applyAppBar: true,
+            currentPage: "Setup",
+            child: SetupPage(
               onSetupSuccess: () {
                 configProvider.populateUnsecureConfig();
               },

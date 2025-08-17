@@ -145,9 +145,9 @@
         <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">How to Use Sprout</h2>
         <div class="max-w-4xl mx-auto">
           <p class="text-lg text-[#c3c7cf] mb-6">The recommended way to use Sprout is with a Docker image. Follow the steps below to get started.</p>
-          <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg mb-8 border border-[#43474e]">
+          <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg mb-8 border border-[#43474e] break-words">
             <pre><code class="language-yml">
-sprout:
+<span style="white-space: pre-wrap;">sprout:
   container_name: sprout
   image: croudebush/sprout:stable
   volumes:
@@ -160,7 +160,7 @@ sprout:
     TZ: America/New_York
     sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
     sprout_server_jwtExpirationTime: 7d
-            </code></pre>
+</span></code></pre>
           </div>
           <p class="text-[#c3c7cf] text-lg">
             After launching the above docker compose, you can navigate to

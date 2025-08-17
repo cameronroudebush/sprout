@@ -8,6 +8,14 @@ class AuthAPI extends BaseAPI {
 
   AuthAPI(super.client);
 
+  /// Fills settings that are only provided by the frontend/app when running without connecting directly to the web server
+  Future<User?> _fillInterfaceOnlySettings(User? user) async {
+    if (user != null) {
+      user.config.connectionUrl = client.baseUrl;
+    }
+    return user;
+  }
+
   /// Authenticates a user with the backend API.
   /// Sends username and password to the login endpoint and stores the received JWT.
   /// [username] The user's username.
@@ -26,7 +34,7 @@ class AuthAPI extends BaseAPI {
     }
 
     if (success == null) {
-      return User.fromJson(result["user"]);
+      return await _fillInterfaceOnlySettings(User.fromJson(result["user"]));
     } else {
       return null;
     }
@@ -53,7 +61,7 @@ class AuthAPI extends BaseAPI {
         await secureStorage.saveValue(jwtKey, null);
         return null;
       } else {
-        return User.fromJson(result["user"]);
+        return await _fillInterfaceOnlySettings(User.fromJson(result["user"]));
       }
     } catch (e) {
       // Wipe JWT if not successful

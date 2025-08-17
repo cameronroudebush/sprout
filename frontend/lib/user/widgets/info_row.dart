@@ -24,7 +24,7 @@ class UserInfoRow extends StatelessWidget {
         ),
         if (info.hint != null)
           Padding(
-            padding: EdgeInsetsGeometry.directional(start: 12, end: 12),
+            padding: EdgeInsetsGeometry.directional(start: 12, end: 0),
             child: TextWidget(
               referenceSize: .8,
               text: info.hint!,
@@ -79,27 +79,3 @@ class UserInfoRow extends StatelessWidget {
     );
   }
 }
-
-// return Row(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         if (icon != null) ...[
-//           Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
-//           const SizedBox(width: 12.0),
-//         ],
-//         Expanded(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               TextWidget(
-//                 referenceSize: 1.2,
-//                 text: label,
-//                 style: TextStyle(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurfaceVariant),
-//               ),
-//               const SizedBox(height: 4.0),
-//               Column(crossAxisAlignment: CrossAxisAlignment.start, children: display),
-//             ],
-//           ),
-//         ),
-//       ],
-//     );

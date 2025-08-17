@@ -6,7 +6,10 @@ class UserConfig {
   /// The net worth range to display by default
   String netWorthRange;
 
-  UserConfig({this.privateMode = false, this.netWorthRange = "oneDay"});
+  /// A URL set by the frontend if sprout is running in non web mode
+  String? connectionUrl;
+
+  UserConfig({this.privateMode = false, this.netWorthRange = "oneDay", this.connectionUrl});
 
   Map<String, dynamic> toJson() {
     return {'privateMode': privateMode, 'netWorthRange': netWorthRange};

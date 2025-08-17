@@ -8,7 +8,8 @@ class NetWorthAPI extends BaseAPI {
   /// Returns the net worth data for all current accounts
   Future<double> getNetWorth() async {
     final endpoint = "/transaction/net-worth/get";
-    return await client.get(endpoint) as double;
+    final result = await client.get(endpoint);
+    return (result as num).toDouble();
   }
 
   /// Returns net worth over time
