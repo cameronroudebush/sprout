@@ -39,17 +39,17 @@ jobs:
         run: flutter pub get
 
       - name: Build Android APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Rename APK for Release
         run: |
           VERSION="${{ steps.get_repo_info.outputs.version_string }}"
-          mv build/app/outputs/flutter-apk/app-release.apk "build/app/outputs/flutter-apk/$VERSION.apk"
+          mv build/app/outputs/flutter-apk/app-release.apk "build/app/outputs/flutter-apk/sprout-$VERSION.apk"
 
       - name: Upload APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "build/app/outputs/flutter-apk/${{ steps.get_repo_info.outputs.version_string }}.apk"
+          files: "build/app/outputs/flutter-apk/sprout-${{ steps.get_repo_info.outputs.version_string }}.apk"
           tag_name: ${{ steps.get_repo_info.outputs.version_string }}
           body: ""
           draft: true

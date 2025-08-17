@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg" href="favicon-bg.svg" />
     <title>Sprout Docs</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,14 +24,25 @@
   </head>
   <body class="text-[#e1e2e8]">
     <header class="bg-[#1d2024]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#43474e]">
-      <nav class="max-w-6xl mx-auto px-6 py-0 flex justify-between items-center">
-        <a href="index.html" class="text-3xl font-bold text-[#a0cafd]">
-          <img
-            src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-color.png"
-            alt="Sprout Logo"
-            class="w-1/2 max-w-sm mx-auto"
-          />
-        </a>
+      <nav class="max-w-6xl mx-auto px-6 py-0 flex justify-between items-center relative">
+        <div class="flex-1 flex justify-center md:flex-grow-0 md:justify-start">
+          <a href="#home" class="text-3xl font-bold text-[#a0cafd]">
+            <img
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-color.png"
+              alt="Sprout Logo"
+              class="max-w-[4rem] mx-auto"
+            />
+          </a>
+        </div>
+
+        <div class="md:hidden absolute right-6">
+          <button id="mobile-menu-button" class="text-gray-400 hover:text-white focus:outline-none focus:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+        </div>
+
         <div class="hidden md:flex space-x-6 font-medium text-[#c3c7cf]">
           <a href="index.html" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">Home</a>
           <a href="https://github.com/cameronroudebush/sprout" target="_blank" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300"
@@ -40,9 +50,18 @@
           >
         </div>
       </nav>
+
+      <div id="mobile-menu" class="hidden md:hidden bg-[#1d2024] pb-4">
+        <div class="flex flex-col items-center space-y-4 font-medium text-[#c3c7cf] pt-4">
+          <a href="index.html" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300">Home</a>
+          <a href="https://github.com/cameronroudebush/sprout" target="_blank" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300"
+            >GitHub</a
+          >
+        </div>
+      </div>
     </header>
 
-    <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-6xl mx-auto px-4">
       <div class="flex">
         <aside class="sidenav w-64 hidden md:block sticky top-24 self-start py-8 pr-8">
           <nav class="flex flex-col space-y-2">
@@ -81,7 +100,7 @@
               The recommended way to use Sprout is with a Docker image. To get started, use the following
               <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">docker-compose.yml</code> snippet:
             </p>
-            <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg mb-8 border border-[#43474e] break-words">
+            <div class="bg-[#0b0e13] text-gray-300 p-4 rounded-xl shadow-lg mb-8 border border-[#43474e] break-words text-sm">
               <pre><code class="language-yml"><span style="white-space: pre-wrap;">sprout:
   container_name: sprout
   image: croudebush/sprout:stable
@@ -123,9 +142,8 @@
               The configuration file, <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">sprout.config.yml</code>, is generated dynamically and
               placed next to the executable inside the container. Below are the available options with definitions.
             </p>
-            <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg border border-[#43474e] break-words">
-              <pre><code class="language-yml"><span style="white-space: pre-wrap;"># Configuration for the various providers
-providers:
+            <div class="bg-[#0b0e13] text-gray-300 p-4 rounded-xl shadow-lg border border-[#43474e] break-words">
+              <pre><code class="language-yml"><span style="white-space: pre-wrap;">providers:
   # How often to perform data queries for data from providers. Default is once a day at 7am.
   updateTime: 0 7 * * *
   # SimpleFIN configuration: https://www.simplefin.org/
@@ -172,7 +190,7 @@ transaction:
               Environment variables are fully supported. Use the prefix <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">sprout_</code> followed
               by the config path. Here are some common examples:
             </p>
-            <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg border border-[#43474e] break-words">
+            <div class="bg-[#0b0e13] text-gray-300 p-1 rounded-xl shadow-lg border border-[#43474e] break-words">
               <pre><code class="language-yml"><span style="white-space: pre-wrap;">TZ: America/New_York
 sprout_server_port: 9000
 sprout_server_jwtExpirationTime: 7d
@@ -239,6 +257,22 @@ sprout_providers_simpleFIN_accessToken: MY_ACCESS_TOKEN
               behavior: "smooth",
             });
           });
+        });
+      });
+
+      // Toggle mobile menu
+      const mobileMenuButton = document.getElementById("mobile-menu-button");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      mobileMenuButton.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+
+      // Hide mobile menu on link click
+      const mobileMenuLinks = document.querySelectorAll(".mobile-menu-link");
+      mobileMenuLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          mobileMenu.classList.add("hidden");
         });
       });
     </script>

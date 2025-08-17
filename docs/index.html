@@ -5,17 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg" href="favicon-bg.svg" />
     <title>Sprout</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         font-family: "Inter", sans-serif;
-        /* surface color from theme */
         background-color: #111418;
       }
-      /* Custom styles for the scroll-to-top button */
       #scrollToTopBtn {
         position: fixed;
         bottom: 2rem;
@@ -37,28 +34,32 @@
         opacity: 1;
         transform: translateY(0);
       }
-      /* Custom shadow for a more subtle effect on dark backgrounds */
       .custom-shadow {
         box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.25);
-      }
-      /* FIX: Add a custom scroll margin to prevent header cutoff */
-      .scroll-mt-20 {
-        scroll-margin-top: 5rem;
       }
     </style>
   </head>
   <body class="text-[#e1e2e8]">
     <header class="bg-[#1d2024]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#43474e]">
-      <nav class="max-w-6xl mx-auto px-6 py-0 flex justify-between items-center">
-        <div class="flex-grow flex justify-center md:flex-grow-0 md:justify-start">
+      <nav class="max-w-6xl mx-auto px-6 py-0 flex justify-between items-center relative">
+        <div class="flex-1 flex justify-center md:flex-grow-0 md:justify-start">
           <a href="#home" class="text-3xl font-bold text-[#a0cafd]">
             <img
               src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-color.png"
               alt="Sprout Logo"
-              class="w-1/2 max-w-sm mx-auto"
+              class="max-w-[4rem] mx-auto"
             />
           </a>
         </div>
+
+        <div class="md:hidden absolute right-6">
+          <button id="mobile-menu-button" class="text-gray-400 hover:text-white focus:outline-none focus:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+        </div>
+
         <div class="hidden md:flex space-x-6 font-medium text-[#c3c7cf]">
           <a href="#about" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">What is Sprout?</a>
           <a href="#how-to-use" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">How to Use</a>
@@ -70,10 +71,23 @@
           >
         </div>
       </nav>
+
+      <div id="mobile-menu" class="hidden md:hidden bg-[#1d2024] pb-4">
+        <div class="flex flex-col items-center space-y-4 font-medium text-[#c3c7cf] pt-4">
+          <a href="#about" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300">What is Sprout?</a>
+          <a href="#how-to-use" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300">How to Use</a>
+          <a href="#security" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300">Security</a>
+          <a href="#features" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300">What's Next?</a>
+          <a href="docs.html" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300">Docs</a>
+          <a href="https://github.com/cameronroudebush/sprout" target="_blank" class="mobile-menu-link hover:text-[#a0cafd] transition-colors duration-300"
+            >GitHub</a
+          >
+        </div>
+      </div>
     </header>
 
     <main class="py-16">
-      <section class="container mx-auto px-6 py-0 text-center scroll-mt-20" id="home">
+      <section class="container mx-auto px-6 py-0 text-center scroll-mt-96 md:scroll-mt-16" id="home">
         <img
           src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png"
           alt="sprout logo"
@@ -93,7 +107,7 @@
         </div>
       </section>
 
-      <section id="about" class="container mx-auto px-6 py-24 scroll-mt-20">
+      <section id="about" class="container mx-auto px-6 py-24 scroll-mt-96 md:scroll-mt-16">
         <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">What is Sprout?</h2>
         <div class="bg-[#272a2f] rounded-xl custom-shadow p-8 md:p-12 mb-12">
           <div class="md:flex md:items-center md:space-x-12 text-center">
@@ -134,7 +148,7 @@
         </div>
       </section>
 
-      <section id="how-to-use" class="container mx-auto px-6 py-0 scroll-mt-20">
+      <section id="how-to-use" class="container mx-auto px-6 py-0 scroll-mt-96 md:scroll-mt-16">
         <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">How to Use Sprout</h2>
         <div class="max-w-4xl mx-auto">
           <p class="text-lg text-[#c3c7cf] mb-6 text-center">
@@ -165,7 +179,7 @@
         </div>
       </section>
 
-      <section id="security" class="container mx-auto max-w-6xl px-6 py-16 scroll-mt-20">
+      <section id="security" class="container mx-auto max-w-6xl px-6 py-16 scroll-mt-96 md:scroll-mt-16">
         <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">Security</h2>
 
         <div class="bg-[#272a2f] rounded-xl custom-shadow p-8 md:p-12 mb-12">
@@ -193,7 +207,7 @@
         </div>
       </section>
 
-      <section id="features" class="container mx-auto px-6 py-0 scroll-mt-20">
+      <section id="features" class="container mx-auto px-6 py-0 scroll-mt-96 md:scroll-mt-16">
         <h2 class="text-4xl font-bold text-center text-[#a0cafd] mb-12">What's Next for Sprout?</h2>
         <p class="text-center text-lg text-[#c3c7cf] max-w-2xl mx-auto mb-8">Below is a non exhaustive list of features that we plan to add.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -286,6 +300,22 @@
         window.scrollTo({
           top: 0,
           behavior: "smooth",
+        });
+      });
+
+      // Toggle mobile menu
+      const mobileMenuButton = document.getElementById("mobile-menu-button");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      mobileMenuButton.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+
+      // Hide mobile menu on link click
+      const mobileMenuLinks = document.querySelectorAll(".mobile-menu-link");
+      mobileMenuLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          mobileMenu.classList.add("hidden");
         });
       });
     </script>
