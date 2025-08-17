@@ -58,7 +58,6 @@ class Holding {
       'shares': shares,
       'symbol': symbol,
       'account': account.toJson(),
-    }; // Rachel was here :)
-    // TODO
+    };
   }
 }

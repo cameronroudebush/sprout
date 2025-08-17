@@ -1,9 +1,5 @@
-import 'dart:html';
-
-import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprout/config/api.dart';
-import 'package:sprout/core/api/client.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/model/config.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -21,14 +17,10 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   /// Provides the package info for the flutter app including things like versions
   final PackageInfo _packageInfo;
 
-  /// The base URL we're connecting to the backend on
-  final String _baseURL = RESTClient.getBaseURL();
-
   // Public Getters
   Configuration? get config => _config;
   UnsecureAppConfiguration? get unsecureConfig => _unsecureConfig;
   PackageInfo get packageInfo => _packageInfo;
-  String get baseUrl => _baseURL;
   bool get failedToConnect => _failedToConnect;
 
   // Constructor to check initial login status
@@ -44,14 +36,16 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   /// Requests the unsecure config from the backend and populates [_unsecureConfig]
   Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {
     try {
+      _failedToConnect = false;
       _unsecureConfig = await api.getUnsecure();
     } catch (e) {
       _failedToConnect = true;
       // If this is debug, manually refresh. This is because SSE can tend
       //  to timeout due to dispose not being called on hot reloads.
-      if (kDebugMode && kIsWeb) {
-        window.location.reload();
-      }
+      // This is a terrible way to patch this. We just need dispose to fire on hot reloads
+      // if (kDebugMode && kIsWeb) {
+      //   window.location.reload();
+      // }
     }
     notifyListeners();
     return unsecureConfig;

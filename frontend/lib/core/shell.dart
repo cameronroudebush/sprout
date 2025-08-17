@@ -4,7 +4,7 @@ import 'package:sprout/account/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/widgets/app_bar.dart';
+import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/holding/overview.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/user.dart';
@@ -41,15 +41,16 @@ class _SproutAppShellState extends State<SproutAppShell> {
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
         if (_scrollController.positions.isNotEmpty) _scrollController.jumpTo(0);
-        final screenHeight = MediaQuery.of(context).size.height;
 
         return LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
 
-            return Scaffold(
-              appBar: SproutAppBar(screenHeight: screenHeight, currentPage: _pages[_currentIndex]['label']),
-              body: Center(
+            return SproutScaffold(
+              applyAppBar: true,
+              currentPage: _pages[_currentIndex]['label'],
+              bottomNav: _getBottomNavBar(isMobile, context),
+              child: Center(
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
@@ -64,7 +65,6 @@ class _SproutAppShellState extends State<SproutAppShell> {
                   ),
                 ),
               ),
-              bottomNavigationBar: _getBottomNavBar(isMobile, context),
             );
           },
         );

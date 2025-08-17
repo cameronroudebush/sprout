@@ -13,6 +13,8 @@ class ButtonWidget extends StatelessWidget {
   final double? height;
   final Color? color;
 
+  final ButtonStyle? style;
+
   const ButtonWidget({
     super.key,
     this.text,
@@ -21,6 +23,7 @@ class ButtonWidget extends StatelessWidget {
     this.minSize = double.infinity,
     this.color,
     this.height,
+    this.style,
   });
 
   @override
@@ -31,7 +34,7 @@ class ButtonWidget extends StatelessWidget {
       minimumSize: Size(minSize, height ?? mediaQuery.size.height * dynamicHeightMultiplier),
       elevation: 5,
       backgroundColor: color ?? Theme.of(context).buttonTheme.colorScheme!.onPrimary,
-    );
+    ).merge(style);
 
     final fontSize = MediaQuery.of(context).size.height * .0125 * (1.1);
 

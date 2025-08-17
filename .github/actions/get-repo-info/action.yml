@@ -1,0 +1,44 @@
+name: "Get Repository Info"
+description: "Checks out the code and determines Git version and tag status."
+inputs:
+  fetch-depth:
+    description: "Number of commits to fetch."
+    required: false
+    default: "0"
+  lfs:
+    description: "Whether to enable Git LFS."
+    required: false
+    default: "false"
+outputs:
+  is_tagged_commit:
+    description: "Boolean indicating if the current commit is a tag."
+    value: ${{ steps.get_git_info.outputs.is_tagged_commit }}
+  version_string:
+    description: "The Git version string (e.g., v1.2.3)."
+    value: ${{ steps.get_git_info.outputs.version_string }}
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        lfs: ${{ inputs.lfs }}
+
+    - name: Get Git Version and Tag Status
+      id: get_git_info
+      shell: bash
+      run: |
+        # Get the version string using git describe --tags --always
+        VERSION_STRING=$(git describe --tags --always)
+        echo "version_string=$VERSION_STRING" >> $GITHUB_OUTPUT
+
+        # Determine if the current commit is EXACTLY a tag
+        if git describe --tags --exact-match > /dev/null 2>&1; then
+          echo "is_tagged_commit=true" >> $GITHUB_OUTPUT
+        else
+          echo "is_tagged_commit=false" >> $GITHUB_OUTPUT
+        fi
+
+        echo "Detected VERSION_STRING: $VERSION_STRING"
+        echo "Is Tagged Commit: ${{ steps.get_git_info.outputs.is_tagged_commit }}"

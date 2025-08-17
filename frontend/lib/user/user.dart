@@ -7,6 +7,7 @@ import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/setup/connection.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/provider.dart';
 import 'package:sprout/user/widgets/info_card.dart';
@@ -42,15 +43,31 @@ class _UserPageState extends State<UserPage> {
     return Consumer5<ConfigProvider, SSEProvider, AuthProvider, AccountProvider, UserProvider>(
       builder: (context, configProvider, sseProvider, authProvider, accountProvider, userProvider, child) {
         final userConfig = userProvider.currentUserConfig!;
-        final minButtonSize = MediaQuery.of(context).size.width * .5;
+        final screenWidth = MediaQuery.of(context).size.width;
+        final minButtonSize = screenWidth * .5;
         final displayInfo = {
-          "settings": [
+          "user settings": [
             UserDisplayInfo(
               title: "Hide Account Balances",
               hint: "Toggle to hide balances across the app.",
               settingValue: userConfig.privateMode,
               settingType: "bool",
               icon: Icons.remove_red_eye,
+            ),
+          ],
+          "app settings": [
+            UserDisplayInfo(
+              title: "Backend connection URL",
+              hint: "The URL at which we are connecting to the backend.",
+              settingValue: userConfig.connectionUrl,
+              settingType: "string",
+              icon: Icons.wifi,
+              child: Center(
+                child: SizedBox(
+                  width: screenWidth / 1.15,
+                  child: ConnectionSetup(disabled: true, minButtonSize: minButtonSize),
+                ),
+              ),
             ),
           ],
           "user information": [

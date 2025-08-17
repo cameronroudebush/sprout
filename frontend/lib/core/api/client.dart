@@ -12,26 +12,46 @@ import 'package:uuid/uuid.dart';
 
 /// A client for interacting with a REST API that uses JWT for authentication.
 class RESTClient {
+  // Key used to store the connection url in storage so we know where we're connecting.
+  static const String connectionUrlKey = 'connection_url';
+
   final timeout = kDebugMode ? Duration(seconds: 2) : Duration(seconds: 30);
   final client = Client();
 
   /// Base URL of the sprout backend API
-  final String _baseUrl = RESTClient.getBaseURL();
+  String? _baseUrl;
+  // Returns the base URL without any API addition
+  String? get baseUrl => _baseUrl;
+
+  /// Returns the base URL + the API path
   String get apiUrl => "$_baseUrl/api";
 
   /// Storage to use with the REST API's
   final SecureStorage _secureStorage = SecureStorage();
 
+  SecureStorage get secureStorage => _secureStorage;
+
   void dispose() {
     client.close();
   }
 
-  /// Returns the base URL that the backend should be expected to be running on. This will not include
-  ///   any potential sub-pathing.
-  static String getBaseURL() {
-    Uri uri = Uri.base;
-    final leading = '${uri.scheme}://${uri.host}';
-    return kDebugMode ? '$leading:8001' : leading;
+  /// Returns if we have a connection URL or not
+  bool hasConnectionUrl() {
+    return _baseUrl != null;
+  }
+
+  /// Sets the base URL for the client so other API's can access what the base URL should be
+  Future<String?> setBaseUrl() async {
+    if (kIsWeb) {
+      // Web can base connections on the uri of the current connection
+      Uri uri = Uri.base;
+      final leading = '${uri.scheme}://${uri.host}';
+      _baseUrl = kDebugMode ? '$leading:8001' : leading;
+    } else {
+      // Apps must specify the connection URL so we know where to look
+      _baseUrl = await _secureStorage.getValue(RESTClient.connectionUrlKey);
+    }
+    return _baseUrl;
   }
 
   Future<Map<String, String>> getSendHeaders() async {
