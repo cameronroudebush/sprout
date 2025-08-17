@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg" href="favicon-bg.svg" />
+    <title>Sprout Docs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #111418;
+      }
+      .scroll-mt-24 {
+        scroll-margin-top: 6rem;
+      }
+      .sidenav a.active {
+        color: #a0cafd;
+        border-left-color: #a0cafd;
+      }
+    </style>
+  </head>
+  <body class="text-[#e1e2e8]">
+    <header class="bg-[#1d2024]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#43474e]">
+      <nav class="max-w-6xl mx-auto px-6 py-0 flex justify-between items-center">
+        <a href="index.html" class="text-3xl font-bold text-[#a0cafd]">
+          <img
+            src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-color.png"
+            alt="Sprout Logo"
+            class="w-1/2 max-w-sm mx-auto"
+          />
+        </a>
+        <div class="hidden md:flex space-x-6 font-medium text-[#c3c7cf]">
+          <a href="index.html" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300">Home</a>
+          <a href="https://github.com/cameronroudebush/sprout" target="_blank" class="whitespace-nowrap hover:text-[#a0cafd] transition-colors duration-300"
+            >GitHub</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex">
+        <aside class="sidenav w-64 hidden md:block sticky top-24 self-start py-8 pr-8">
+          <nav class="flex flex-col space-y-2">
+            <h3 class="text-lg font-bold text-[#a0cafd] mb-2">Getting Started</h3>
+            <a href="#how-to-use" class="pl-4 border-l-2 border-transparent text-[#c3c7cf] hover:text-[#a0cafd] hover:border-[#a0cafd] transition-colors"
+              >How to Use</a
+            >
+            <a href="#available-images" class="pl-4 border-l-2 border-transparent text-[#c3c7cf] hover:text-[#a0cafd] hover:border-[#a0cafd] transition-colors"
+              >Available Images</a
+            >
+
+            <h3 class="text-lg font-bold text-[#a0cafd] mt-6 mb-2">Configuration</h3>
+            <a href="#configuration" class="pl-4 border-l-2 border-transparent text-[#c3c7cf] hover:text-[#a0cafd] hover:border-[#a0cafd] transition-colors"
+              >File Configuration</a
+            >
+            <a
+              href="#environment-variables"
+              class="pl-4 border-l-2 border-transparent text-[#c3c7cf] hover:text-[#a0cafd] hover:border-[#a0cafd] transition-colors"
+              >Environment Variables</a
+            >
+
+            <h3 class="text-lg font-bold text-[#a0cafd] mt-6 mb-2">Additional Info</h3>
+            <a href="#development" class="pl-4 border-l-2 border-transparent text-[#c3c7cf] hover:text-[#a0cafd] hover:border-[#a0cafd] transition-colors"
+              >Development</a
+            >
+            <a href="#contributions" class="pl-4 border-l-2 border-transparent text-[#c3c7cf] hover:text-[#a0cafd] hover:border-[#a0cafd] transition-colors"
+              >Contributions</a
+            >
+          </nav>
+        </aside>
+
+        <main class="flex-1 py-8 md:pl-8">
+          <section id="how-to-use" class="mb-16 scroll-mt-24">
+            <h2 class="text-4xl font-bold text-[#a0cafd] mb-6 pb-2 border-b border-[#43474e]">How to Use Sprout</h2>
+            <p class="text-lg text-[#c3c7cf] mb-6">
+              The recommended way to use Sprout is with a Docker image. To get started, use the following
+              <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">docker-compose.yml</code> snippet:
+            </p>
+            <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg mb-8 border border-[#43474e] break-words">
+              <pre><code class="language-yml"><span style="white-space: pre-wrap;">sprout:
+  container_name: sprout
+  image: croudebush/sprout:stable
+  volumes:
+    # The database .sqlite file will be stored in /sprout
+    - /mnt/user/appdata/sprout:/sprout
+  ports:
+    - 80:80
+  restart: unless-stopped
+  environment:
+    TZ: America/New_York
+    sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
+    sprout_server_jwtExpirationTime: 7d
+</span></code></pre>
+            </div>
+            <p class="text-[#c3c7cf] text-lg">
+              After launching the container, navigate to <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">http://localhost</code> in your browser
+              to begin the setup process.
+            </p>
+          </section>
+
+          <section id="available-images" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold text-[#a0cafd] mb-4">Available Images</h3>
+            <ul class="list-disc list-inside space-y-4 text-lg text-[#c3c7cf]">
+              <li>
+                <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">croudebush/sprout:stable</code>: This is the recommended image for most users. It
+                is only updated with tagged, stable releases from the main branch.
+              </li>
+              <li>
+                <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">croudebush/sprout:dev</code>: This image is tied directly to the master branch
+                and updates with every commit. Use this for testing the latest features, but expect potential instability.
+              </li>
+            </ul>
+          </section>
+
+          <section id="configuration" class="mb-16 scroll-mt-24">
+            <h2 class="text-4xl font-bold text-[#a0cafd] mb-6 pb-2 border-b border-[#43474e]">Configuration</h2>
+            <p class="text-lg text-[#c3c7cf] mb-6">
+              The configuration file, <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">sprout.config.yml</code>, is generated dynamically and
+              placed next to the executable inside the container. Below are the available options with definitions.
+            </p>
+            <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg border border-[#43474e] break-words">
+              <pre><code class="language-yml"><span style="white-space: pre-wrap;"># Configuration for the various providers
+providers:
+  # How often to perform data queries for data from providers. Default is once a day at 7am.
+  updateTime: 0 7 * * *
+  # SimpleFIN configuration: https://www.simplefin.org/
+  simpleFIN:
+    # This access token is acquired from SimpleFIN.
+    # Get one here: https://beta-bridge.simplefin.org/info/developers
+    accessToken:
+    # How many days to look back for transactional data.
+    lookBackDays: 7
+    # How many API calls we allow per day for this provider.
+    rateLimit: 24
+
+# Core server config options
+server:
+  # The port to accept backend requests on.
+  port: 8001
+  # How long JWT's should stay valid for users
+  jwtExpirationTime: 30m
+
+# Database specific options
+database:
+  # Configuration for performing database backups automatically
+  backup:
+    enabled: true
+    count: 30
+    time: 0 4 * * *
+    directory: /backups/database
+  # Must be one of: [sqlite]
+  type: sqlite
+  sqlite:
+    database: sprout.sqlite
+
+# Settings specific to transactions
+transaction:
+  # When to check for stuck transactions. This includes things like stuck pending.
+  stuckTransactionTime: 0 3 * * *
+</span></code></pre>
+            </div>
+          </section>
+
+          <section id="environment-variables" class="mb-16 scroll-mt-24">
+            <h3 class="text-3xl font-bold text-[#a0cafd] mb-4">Environment Variables</h3>
+            <p class="text-lg text-[#c3c7cf] mb-6">
+              Environment variables are fully supported. Use the prefix <code class="bg-[#43474e] text-[#e1e2e8] px-2 py-1 rounded-md">sprout_</code> followed
+              by the config path. Here are some common examples:
+            </p>
+            <div class="bg-[#0b0e13] text-gray-300 p-6 rounded-xl shadow-lg border border-[#43474e] break-words">
+              <pre><code class="language-yml"><span style="white-space: pre-wrap;">TZ: America/New_York
+sprout_server_port: 9000
+sprout_server_jwtExpirationTime: 7d
+sprout_providers_simpleFIN_accessToken: MY_ACCESS_TOKEN
+</span></code></pre>
+            </div>
+          </section>
+
+          <section id="development" class="mb-16 scroll-mt-24">
+            <h2 class="text-4xl font-bold text-[#a0cafd] mb-6 pb-2 border-b border-[#43474e]">Development</h2>
+            <p class="text-lg text-[#c3c7cf] mb-6">
+              Sprout is built with a "mobile first" approach using
+              <a href="https://flutter.dev/" target="_blank" class="text-[#a0cafd] hover:underline">Flutter</a> for its interfaces and a
+              <a href="https://nodejs.org/en" target="_blank" class="text-[#a0cafd] hover:underline">Node.js</a> backend.
+            </p>
+            <p class="text-lg text-[#c3c7cf] mb-6">
+              For development, we recommend using <a href="https://code.visualstudio.com/" target="_blank" class="text-[#a0cafd] hover:underline">VS Code</a>.
+              The repository includes a VS Code workspace file that sets up recommended extensions and debug configurations. You can launch the debuggers
+              directly from VS Code to run and debug both the Flutter frontend and Node.js backend.
+            </p>
+          </section>
+
+          <section id="contributions" class="mb-16 scroll-mt-24">
+            <h2 class="text-4xl font-bold text-[#a0cafd] mb-6 pb-2 border-b border-[#43474e]">Contributions</h2>
+            <p class="text-lg text-[#c3c7cf]">
+              For feature requests and bug reports, please
+              <a href="https://github.com/cameronroudebush/sprout/issues" target="_blank" class="text-[#a0cafd] hover:underline">open an issue on GitHub</a>. We
+              appreciate all reports and contributions!
+            </p>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const sections = document.querySelectorAll("main section");
+        const navLinks = document.querySelectorAll(".sidenav a");
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                navLinks.forEach((link) => {
+                  link.classList.remove("active");
+                  if (link.getAttribute("href").substring(1) === entry.target.id) {
+                    link.classList.add("active");
+                  }
+                });
+              }
+            });
+          },
+          { rootMargin: "-20% 0px -70% 0px" },
+        );
+
+        sections.forEach((section) => {
+          observer.observe(section);
+        });
+
+        navLinks.forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+              behavior: "smooth",
+            });
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
