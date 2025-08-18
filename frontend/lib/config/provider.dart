@@ -1,5 +1,6 @@
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprout/config/api.dart';
+import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/model/config.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -39,6 +40,7 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
       _failedToConnect = false;
       _unsecureConfig = await api.getUnsecure();
     } catch (e) {
+      LoggerService.error(e);
       _failedToConnect = true;
       // If this is debug, manually refresh. This is because SSE can tend
       //  to timeout due to dispose not being called on hot reloads.
