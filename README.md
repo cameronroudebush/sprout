@@ -1,14 +1,14 @@
 <p align="center">
   <img width="75%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png">
+  <br>
+  <img src="https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker" alt="Docker Pulls">
+  <img src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github" alt="GitHub Tag">
 </p>
 
 > [!caution]
 > This application is in **_active_** development. We do not make any guarantees about capability, or security. Note that while this will improve with time, we are not to our 1.0 release yet.
 >
 > **_Use at your own risk_**
-
-[![Docker Pulls](https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker)](https://hub.docker.com/r/croudebush/sprout)
-[![GitHub Tag](https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github)](https://github.com/cameronroudebush/sprout/releases/latest)
 
 # What is Sprout?
 
