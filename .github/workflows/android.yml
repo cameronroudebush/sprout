@@ -41,7 +41,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Android APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
 
       - name: Rename APK for Release
         run: |
