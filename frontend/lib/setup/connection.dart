@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/config/provider.dart';
@@ -90,11 +89,7 @@ class _ConnectionSetupState extends State<ConnectionSetup> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 isDense: true,
                 alignLabelWithHint: true,
-                hintText: widget.disabled
-                    ? ""
-                    : kDebugMode
-                    ? "DEV NOTE: http://10.0.2.2"
-                    : 'eg. https://sprout.example.com',
+                hintText: widget.disabled ? "" : 'eg. https://sprout.example.com',
                 prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                 prefixIcon: Icon(Icons.link),
               ),

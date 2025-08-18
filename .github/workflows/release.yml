@@ -12,6 +12,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Get Repo Info
         id: get_repo_info
         uses: ./.github/actions/get-repo-info
