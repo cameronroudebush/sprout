@@ -14,7 +14,7 @@
 
 Sprout is a financial management app specializing in automatic account tracking using various financial API's. We focus on the capability of viewing the previous day of finance information. This means we'll be able to display things like stocks and account balances from yesterday.
 
-Want to to see more? Check out our **[overview site](https://cameronroudebush.github.io/sprout)**
+Want to to see more? Check out our **[overview site](https://sprout.croudebush.net)**
 
 <p align="center">
   <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/home.png" alt="Home Page" width="250"/>
@@ -24,4 +24,4 @@ Want to to see more? Check out our **[overview site](https://cameronroudebush.gi
 
 # Documentation
 
-For detailed instructions on setup, configuration, and development, please visit our **[full documentation site](https://cameronroudebush.github.io/sprout/docs)**.
+For detailed instructions on setup, configuration, and development, please visit our **[full documentation site](https://sprout.croudebush.net/docs)**.

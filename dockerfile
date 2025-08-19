@@ -16,7 +16,7 @@ RUN apk add git
 WORKDIR /app
 # Copy and install packages so they can cache
 COPY ./backend/package.json ./package.json
-RUN npm i
+RUN npm i --include=optional
 # Copy all content
 COPY .git .git
 COPY ./backend .

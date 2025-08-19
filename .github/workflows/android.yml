@@ -13,6 +13,11 @@ jobs:
     permissions:
       contents: write
 
+    env:
+      ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -40,8 +45,30 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
+      - name: Decode Keystore
+        env:
+          ENCODED_STRING: ${{ secrets.ANDROID_SIGNING_KEY }}
+        run: |
+          echo $ENCODED_STRING | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Set Keystore Path
+        run: |
+          echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/android/app/upload-keystore.jks" >> $GITHUB_ENV
+
       - name: Build Android APK
         run: flutter build apk --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
+
+      - name: Build Android App Bundle (AAB)
+        run: flutter build appbundle --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
+
+      - name: Upload to Google Play Store (Closed Beta)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          packageName: com.your.app.package
+          serviceAccountJson: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          releaseFile: build/app/outputs/bundle/release/app-release.aab
+          track: qa # TODO
+          status: completed
 
       - name: Rename APK for Release
         run: |
