@@ -104,7 +104,7 @@ class SSEProvider extends BaseProvider<SSEAPI> {
 
     // Implement exponential back-off for reconnect attempts
     _reconnectAttempts++;
-    double delaySeconds = (_initialReconnectDelay.inSeconds * (1 << (_reconnectAttempts - 1))) as double;
+    double delaySeconds = (_initialReconnectDelay.inSeconds * (1 << (_reconnectAttempts - 1))).toDouble();
     if (delaySeconds > _maxReconnectDelay.inSeconds) {
       delaySeconds = _maxReconnectDelay.inSeconds.toDouble();
     }
