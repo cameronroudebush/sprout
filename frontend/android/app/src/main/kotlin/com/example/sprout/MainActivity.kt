@@ -1,4 +1,4 @@
-package io.github.sprout
+package net.croudebush.sprout
 
 import io.flutter.embedding.android.FlutterActivity
 
