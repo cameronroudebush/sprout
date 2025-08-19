@@ -17,13 +17,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          lfs: "true"
 
       - name: Get Repo Info
         id: get_repo_info
         uses: ./.github/actions/get-repo-info
         with:
           fetch-depth: "0"
-          lfs: "true"
 
       - name: NPM Install
         run: npm i --only=dev && npm i --prefix ./backend --only=dev
