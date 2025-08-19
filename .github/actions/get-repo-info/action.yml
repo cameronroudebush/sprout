@@ -5,10 +5,6 @@ inputs:
     description: "Number of commits to fetch."
     required: false
     default: "0"
-  lfs:
-    description: "Whether to enable Git LFS."
-    required: false
-    default: "false"
 outputs:
   is_tagged_commit:
     description: "Boolean indicating if the current commit is a tag."
@@ -23,7 +19,6 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: ${{ inputs.fetch-depth }}
-        lfs: ${{ inputs.lfs }}
 
     - name: Get Git Version and Tag Status
       id: get_git_info
