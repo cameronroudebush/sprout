@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/api.dart';
@@ -58,13 +59,15 @@ class _LogoBaseWidgetState extends State<LogoBaseWidget> {
         height: 40,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator(strokeWidth: 2.0))
-            : Image.network(
-                url,
+            : CachedNetworkImage(
+                imageUrl: url,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
+                errorWidget: (context, url, error) {
                   return Icon(widget.getFallbackIcon(context), size: 30.0);
                 },
-                headers: {if (_jwt != null) 'Authorization': 'Bearer $_jwt'},
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    CircularProgressIndicator(value: downloadProgress.progress),
+                httpHeaders: {if (_jwt != null) 'Authorization': 'Bearer $_jwt'},
               ),
       ),
     );

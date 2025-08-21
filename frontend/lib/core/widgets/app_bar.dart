@@ -11,21 +11,28 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   const SproutAppBar({super.key, required this.screenHeight, this.currentPage});
 
   @override
-  Size get preferredSize => Size.fromHeight(screenHeight * .075);
+  Size get preferredSize => Size.fromHeight(screenHeight * .06);
 
+  @override
   Widget build(BuildContext context) {
-    Widget page = _blankBar(context, null);
-    final currentPageLower = currentPage?.toLowerCase();
-    if (currentPageLower == "accounts") {
-      page = _accountPage(context);
-    } else if (currentPageLower == "home" || currentPageLower == "setup") {
-      page = _homeContent(context);
+    // Use a switch statement for cleaner page routing logic.
+    final Widget pageContent;
+    switch (currentPage?.toLowerCase()) {
+      case "accounts":
+        pageContent = _accountPage(context);
+        break;
+      case "home":
+      case "setup":
+        pageContent = _homeContent(context);
+        break;
+      default:
+        pageContent = _blankBar(context, null);
     }
 
     return AppBar(
       toolbarHeight: preferredSize.height,
       scrolledUnderElevation: 0,
-      title: Padding(padding: EdgeInsetsGeometry.all(12), child: page),
+      title: Padding(padding: const EdgeInsets.all(12), child: pageContent),
       centerTitle: true,
       elevation: 0, // Remove shadow for a flat design
       backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -36,31 +43,27 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  /// An empty bar that shows the page name and the sprout icon, that's it
+  /// An empty bar that shows the page name and the sprout icon.
   Widget _blankBar(BuildContext context, Widget? leadingContent) {
-    final mediaQuery = MediaQuery.of(context);
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: leadingContent ?? SizedBox.shrink()),
+        // The leading content on the left.
+        Expanded(child: leadingContent ?? const SizedBox.shrink()),
+        // The page title in the center.
         TextWidget(
           referenceSize: 2,
           text: currentPage ?? "",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+        // The icon on the right, aligned properly.
         Expanded(
-          child: SizedBox(
-            height: mediaQuery.size.height * .065,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Image.asset(
-                  'assets/icon/favicon-color.png',
-                  width: mediaQuery.size.height * .1,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                ),
-              ],
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Image.asset(
+              'assets/icon/favicon-color.png',
+              height: preferredSize.height * 0.85,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
             ),
           ),
         ),
@@ -68,46 +71,35 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  /// Renders what to show on the account page
+  /// Renders the content for the "Accounts" page app bar.
   Widget _accountPage(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
     return _blankBar(
       context,
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Add button
-          SproutTooltip(
-            message: "Add an account",
-            child: ButtonWidget(
-              icon: Icons.add,
-              height: mediaQuery.size.height * .035,
-              minSize: mediaQuery.size.width * .1,
-              onPressed: () async {
-                // Open the add account dialog
-                await showDialog(context: context, builder: (_) => AddAccountDialog());
-              },
-            ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: SproutTooltip(
+          message: "Add an account",
+          child: ButtonWidget(
+            icon: Icons.add,
+            height: screenHeight * .035,
+            minSize: MediaQuery.of(context).size.width * .1,
+            onPressed: () async {
+              // Open the add account dialog
+              await showDialog(context: context, builder: (_) => const AddAccountDialog());
+            },
           ),
-        ],
+        ),
       ),
     );
   }
 
-  /// Renders what to show on the home page
+  /// Renders the content for the "Home" and "Setup" page app bars.
   Widget _homeContent(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset(
-          'assets/logo/color-transparent-no-tag.png',
-          width: mediaQuery.size.height * .15,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
-        ),
-      ],
+    return Image.asset(
+      'assets/logo/color-transparent-no-tag.png',
+      width: screenHeight * .12,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
     );
   }
 }
