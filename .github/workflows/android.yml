@@ -29,7 +29,6 @@ jobs:
         uses: ./.github/actions/get-repo-info
         with:
           fetch-depth: "0"
-          lfs: "true"
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -43,6 +42,9 @@ jobs:
         with:
           flutter-version: "3.x"
           channel: "stable"
+
+      - name: Change to Frontend Directory
+        run: cd frontend
 
       - name: Get Flutter dependencies
         run: flutter pub get
@@ -62,6 +64,12 @@ jobs:
 
       - name: Build Android App Bundle (AAB)
         run: flutter build appbundle --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: <project>/.../workloadIdentityPools/<provider>
+          service_account: <service-account>@<project>.iam.gserviceaccount.com
 
       - name: Upload to Google Play Store (Closed Beta)
         uses: r0adkll/upload-google-play@v1
