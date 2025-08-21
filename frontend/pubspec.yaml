@@ -28,6 +28,7 @@ dependencies:
   collection: ^1.19.1
   flutter_launcher_icons: ^0.14.4
   logger: ^2.6.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

@@ -52,14 +52,7 @@ class ChartRangeUtility {
 
   /// If we have enough data for this chart to be curved for this range
   static bool shouldBeCurved(ChartRange chartRange) {
-    switch (chartRange) {
-      case ChartRange.oneDay:
-      case ChartRange.sevenDays:
-      case ChartRange.oneMonth:
-        return false;
-      default:
-        return true;
-    }
+    return false;
   }
 
   /// Returns the given chart range as a pretty string

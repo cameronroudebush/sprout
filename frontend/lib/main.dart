@@ -94,6 +94,7 @@ class MainState extends State<Main> {
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, ConfigProvider>(
       builder: (context, authProvider, configProvider, child) {
+        final mediaQuery = MediaQuery.of(context).size;
         final hasConnectionUrl = configProvider.api.client.hasConnectionUrl();
         final failedToConnect = configProvider.failedToConnect;
         final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
@@ -133,11 +134,28 @@ class MainState extends State<Main> {
         } else if (failedToConnect) {
           page = SproutScaffold(child: FailToConnectWidget());
         } else if (setupPosition == null) {
-          page = Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.height * .3,
-              height: MediaQuery.of(context).size.height * .3,
-              child: CircularProgressIndicator(strokeWidth: MediaQuery.of(context).size.height * .01),
+          page = SproutScaffold(
+            child: Center(
+              child: SizedBox(
+                width: mediaQuery.height * .3,
+                height: mediaQuery.height * .3,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: mediaQuery.height * .3,
+                      height: mediaQuery.height * .3,
+                      child: CircularProgressIndicator(strokeWidth: mediaQuery.height * .01),
+                    ),
+                    Image.asset(
+                      'assets/icon/favicon-color.png',
+                      height: mediaQuery.height * .15,
+                      width: mediaQuery.height * .15,
+                      fit: BoxFit.contain,
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         } else if (setupPosition == "complete") {

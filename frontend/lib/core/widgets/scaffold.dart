@@ -15,16 +15,25 @@ class SproutScaffold extends StatelessWidget {
   /// A bottom navigation to render on our scaffold
   final Widget? bottomNav;
 
-  const SproutScaffold({super.key, required this.child, this.applyAppBar = false, this.currentPage, this.bottomNav});
+  /// A background color to replace
+  final Color? backgroundColor;
+
+  const SproutScaffold({
+    super.key,
+    required this.child,
+    this.applyAppBar = false,
+    this.currentPage,
+    this.bottomNav,
+    this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        systemNavigationBarColor: const Color(0xFF001e2c),
-      ),
+      value: SystemUiOverlayStyle(systemNavigationBarColor: const Color(0xFF001e2c)),
       child: Scaffold(
+        backgroundColor: backgroundColor,
         appBar: applyAppBar ? SproutAppBar(screenHeight: screenHeight, currentPage: currentPage) : null,
         body: SafeArea(child: child),
         bottomNavigationBar: bottomNav,
