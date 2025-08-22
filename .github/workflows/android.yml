@@ -44,9 +44,6 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Change to Frontend Directory
-        run: cd frontend
-
       - name: Get Flutter dependencies
         run: flutter pub get
         working-directory: ./frontend
@@ -56,6 +53,10 @@ jobs:
           ENCODED_STRING: ${{ secrets.ANDROID_SIGNING_KEY }}
         run: |
           echo $ENCODED_STRING | base64 --decode > frontend/android/app/upload-keystore.jks
+
+      - name: Set Keystore Path Environment Variable
+        run: |
+          echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks" >> $GITHUB_ENV
 
       - name: Build Android APK
         working-directory: ./frontend
@@ -94,5 +95,4 @@ jobs:
         with:
           files: "frontend/build/app/outputs/flutter-apk/app-release.apk"
           tag_name: ${{ steps.get_repo_info.outputs.version_string }}
-          # This action finds the existing draft release and uploads the file to it, then publishes it.
           draft: false
