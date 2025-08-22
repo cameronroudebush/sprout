@@ -1,11 +1,13 @@
 import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
+import { LinkProvider } from "@backend/model/api/link_provider";
 import { RestBody } from "@backend/model/api/rest.request";
 import { Base } from "@backend/model/base";
 import { Holding } from "@backend/model/holding";
 import { Institution } from "@backend/model/institution";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
+import { ProviderConfig } from "@backend/providers/base/config";
 import { Providers } from "../../providers";
 import { RestMetadata } from "../metadata";
 import { SSEAPI } from "./sse";
@@ -23,20 +25,25 @@ export class AccountAPI {
     return data.payload.id;
   }
 
-  /** Returns accounts the provider knows about to be added to sprout */
+  /** Returns accounts for the given provider that are not already synced */
   @RestMetadata.register(new RestMetadata(RestEndpoints.account.getAllFromProvider, "GET"))
-  async getProviderAccounts(_data: RestBody, user: User) {
-    const providerAccounts = (await Providers.getCurrentProvider().get(user, true)).map((x) => x.account);
+  async getProviderAccounts(data: RestBody<ProviderConfig>, user: User) {
+    const matchingProvider = Providers.getAll().find((x) => x.config.name === data.payload.name);
+    if (matchingProvider == null) throw new Error(`Failed to locate matching provider for ${data.payload.name}`);
     const existingAccounts = await Account.find({ where: { user: user } });
+    const providerAccounts = (await matchingProvider.get(user, true)).map((x) => x.account);
     return providerAccounts.filter((providerAccount) => !existingAccounts.some((existingAccount) => existingAccount.id === providerAccount.id));
   }
 
   /** Links the provider accounts to the given user */
   @RestMetadata.register(new RestMetadata(RestEndpoints.account.link, "POST"))
-  async linkProviderAccounts(data: RestBody<Array<Account>>, user: User) {
-    const accountsToLink = data.payload;
+  async linkProviderAccounts(data: RestBody<LinkProvider>, user: User) {
+    const accountsToLink = data.payload.accounts;
+    const providers = Providers.getAll();
+    const providerMatch = providers.find((x) => x.config.name === data.payload.provider.name);
+    if (providerMatch == null) throw new Error("Failed to locate matching provider");
     // We need to grab all the provider accounts again because we want to make sure we have correct data
-    const providerAccounts = await Providers.getCurrentProvider().get(user, true);
+    const providerAccounts = await providerMatch.get(user, true);
     // Add these new accounts to the database
     const addedAccounts: Account[] = [];
     for (const account of accountsToLink) {
@@ -56,6 +63,7 @@ export class AccountAPI {
         addedAccounts.push(matchingAccount.account);
       }
     }
+    // TODO
     SSEAPI.sendToSSEUser.next({ payload: Base.fromPlain({}), queue: "sync", user });
     return addedAccounts;
   }

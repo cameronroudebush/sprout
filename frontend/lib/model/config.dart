@@ -1,3 +1,4 @@
+import 'package:sprout/core/models/finance_provider_config.dart';
 import 'package:sprout/model/schedule.dart';
 
 /// This class provides additional information to those who request but it is **not secured behind authentication requirements**
@@ -22,11 +23,14 @@ class UnsecureAppConfiguration {
 class Configuration {
   Sync? lastSchedulerRun;
 
-  Configuration({required this.lastSchedulerRun});
+  List<FinanceProviderConfig> providers;
+
+  Configuration({required this.lastSchedulerRun, required this.providers});
 
   factory Configuration.fromJson(Map<String, dynamic> json) {
     return Configuration(
       lastSchedulerRun: json['lastSchedulerRun'] == null ? null : Sync.fromJson(json['lastSchedulerRun']),
+      providers: (json['providers'] as List).map((e) => FinanceProviderConfig.fromJson(e)).toList(),
     );
   }
 }

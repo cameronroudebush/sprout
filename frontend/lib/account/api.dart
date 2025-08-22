@@ -1,5 +1,6 @@
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/api/base.dart';
+import 'package:sprout/core/models/finance_provider_config.dart';
 
 /// Class that provides callable endpoints for the accounts
 class AccountAPI extends BaseAPI {
@@ -13,18 +14,18 @@ class AccountAPI extends BaseAPI {
     return (result).map((e) => Account.fromJson(e)).toList();
   }
 
-  /// Returns accounts that can be added
-  Future<List<Account>> getProviderAccounts() async {
+  /// Returns accounts available to be added by the given provider
+  Future<List<Account>> getProviderAccounts(FinanceProviderConfig provider) async {
     final endpoint = "/account/provider/get/all";
-    final body = {};
-    List result = await client.post(body, endpoint) as List<dynamic>;
-    return (result).map((e) => Account.fromJson(e)).toList();
+    final body = provider;
+    final result = await client.post(body, endpoint) as List<dynamic>;
+    return result.map((e) => Account.fromJson(e)).toList();
   }
 
-  /// Returns accounts that can be added
-  Future<List<Account>> linkProviderAccounts(List<Account> accounts) async {
+  /// Links the given accounts for the given provider
+  Future<List<Account>> linkProviderAccounts(FinanceProviderConfig provider, List<Account> accounts) async {
     final endpoint = "/account/provider/link";
-    final body = accounts.map((e) => e.toJson()).toList();
+    final body = {"provider": provider, "accounts": accounts.map((e) => e.toJson()).toList()};
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Account.fromJson(e)).toList();
   }

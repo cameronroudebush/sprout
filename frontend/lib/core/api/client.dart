@@ -15,7 +15,7 @@ class RESTClient {
   // Key used to store the connection url in storage so we know where we're connecting.
   static const String connectionUrlKey = 'connection_url';
 
-  final timeout = kDebugMode ? Duration(seconds: 2) : Duration(seconds: 30);
+  final timeout = kDebugMode ? Duration(seconds: 10) : Duration(seconds: 30);
   final client = Client();
 
   /// Base URL of the sprout backend API
