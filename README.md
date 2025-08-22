@@ -1,8 +1,8 @@
 <p align="center">
   <img width="75%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png">
   <br>
-  <img src="https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker" alt="Docker Pulls">
-  <img src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github" alt="GitHub Tag">
+  <img href="https://hub.docker.com/r/croudebush/sprout" src="https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker" alt="Docker Pulls">
+  <img href="https://github.com/cameronroudebush/sprout/releases/latest" src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github" alt="GitHub Tag">
 </p>
 
 > [!caution]

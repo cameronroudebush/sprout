@@ -1,17 +1,17 @@
-name: Build and Release Android APK
+name: Build and Deploy Android
 
 on:
-  workflow_run:
-    workflows: ["Create GitHub Release"]
-    types:
-      - completed
+  push:
+    branches:
+      - master
+    tags:
+      - "v*.*.*"
 
 jobs:
-  build-and-upload:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
     permissions:
-      contents: write
+      contents: write # Required to upload release assets
 
     env:
       ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
@@ -31,7 +31,7 @@ jobs:
           fetch-depth: "0"
 
       - name: Set up Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
@@ -42,55 +42,57 @@ jobs:
         with:
           flutter-version: "3.x"
           channel: "stable"
+          cache: true
 
       - name: Change to Frontend Directory
         run: cd frontend
 
       - name: Get Flutter dependencies
         run: flutter pub get
+        working-directory: ./frontend
 
       - name: Decode Keystore
         env:
           ENCODED_STRING: ${{ secrets.ANDROID_SIGNING_KEY }}
         run: |
-          echo $ENCODED_STRING | base64 --decode > android/app/upload-keystore.jks
-
-      - name: Set Keystore Path
-        run: |
-          echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/android/app/upload-keystore.jks" >> $GITHUB_ENV
+          echo $ENCODED_STRING | base64 --decode > frontend/android/app/upload-keystore.jks
 
       - name: Build Android APK
+        working-directory: ./frontend
         run: flutter build apk --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
 
       - name: Build Android App Bundle (AAB)
+        working-directory: ./frontend
         run: flutter build appbundle --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
 
-      - id: auth
+      - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: <project>/.../workloadIdentityPools/<provider>
-          service_account: <service-account>@<project>.iam.gserviceaccount.com
+          credentials_json: ${{ secrets.SERVICE_ACCOUNT_JSON }}
 
-      - name: Upload to Google Play Store (Closed Beta)
+      - name: Deploy to Google Play (QA)
+        if: github.ref == 'refs/heads/master'
         uses: r0adkll/upload-google-play@v1
         with:
-          packageName: com.your.app.package
-          serviceAccountJson: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          releaseFile: build/app/outputs/bundle/release/app-release.aab
-          track: qa # TODO
+          packageName: net.croudebush.sprout
+          releaseFile: frontend/build/app/outputs/bundle/release/app-release.aab
+          track: qa
           status: completed
 
-      - name: Rename APK for Release
-        run: |
-          VERSION="${{ steps.get_repo_info.outputs.version_string }}"
-          mv build/app/outputs/flutter-apk/app-release.apk "build/app/outputs/flutter-apk/sprout-$VERSION.apk"
+      - name: Deploy to Google Play (Production)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: r0adkll/upload-google-play@v1
+        with:
+          packageName: net.croudebush.sprout
+          releaseFile: frontend/build/app/outputs/bundle/release/app-release.aab
+          track: production
+          status: completed
 
       - name: Upload APK to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: "build/app/outputs/flutter-apk/sprout-${{ steps.get_repo_info.outputs.version_string }}.apk"
+          files: "frontend/build/app/outputs/flutter-apk/app-release.apk"
           tag_name: ${{ steps.get_repo_info.outputs.version_string }}
-          body: ""
-          draft: true
-          prerelease: false
-          update_existing: true
+          # This action finds the existing draft release and uploads the file to it, then publishes it.
+          draft: false
