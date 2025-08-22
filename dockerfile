@@ -1,7 +1,7 @@
 # -------------------------------
 #       Build Frontend
 # -------------------------------
-FROM ghcr.io/cirruslabs/flutter:3.32.5 as frontend-build
+FROM ghcr.io/cirruslabs/flutter:3.32.5 AS frontend-build
 WORKDIR /app
 COPY .git .git
 COPY ./frontend ./
@@ -10,7 +10,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:20-alpine3.21 as backend-build
+FROM node:20-alpine3.21 AS backend-build
 # Install git
 RUN apk add git
 WORKDIR /app
@@ -25,7 +25,7 @@ RUN npm run build
 # -------------------------------
 #      Build Final Result
 # -------------------------------
-FROM nginx:alpine as prod
+FROM nginx:alpine AS prod
 # Using port 80 like normal
 EXPOSE 80
 
