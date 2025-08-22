@@ -114,11 +114,13 @@ class _UserPageState extends State<UserPage> {
               value: sseProvider.isConnected ? "Connected" : "Disconnected",
               child: Center(
                 child: SproutTooltip(
-                  message: "Forces an account sync immediately",
+                  message: accountProvider.manualSyncIsRunning
+                      ? "Manual Sync is running"
+                      : "Forces an account sync immediately",
                   child: ButtonWidget(
                     text: "Manual Account Sync",
                     minSize: minButtonSize,
-                    onPressed: () => accountProvider.manualSync(),
+                    onPressed: accountProvider.manualSyncIsRunning ? null : () => accountProvider.manualSync(),
                   ),
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/base.dart';
@@ -31,9 +32,13 @@ class SSEProvider extends BaseProvider<SSEAPI> {
 
   @override
   Future<void> onInit() async {
-    _sub = onEvent.listen((data) {
+    _sub = onEvent.listen((data) async {
       if (data.queue == "sync") {
-        BaseProvider.updateAllData(showSnackbar: true);
+        await BaseProvider.updateAllData(showSnackbar: true);
+        // Update manual tracking incase that's what this was from
+        final accountProvider = ServiceLocator.get<AccountProvider>();
+        accountProvider.manualSyncIsRunning = false;
+        accountProvider.notifyListeners();
       }
     });
   }
