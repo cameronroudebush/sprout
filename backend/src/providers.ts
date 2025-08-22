@@ -1,3 +1,4 @@
+import { ProviderConfig } from "@backend/providers/base/config";
 import { ProviderBase } from "@backend/providers/base/core";
 import { SimpleFINProvider } from "@backend/providers/simple-fin/core";
 
@@ -15,14 +16,16 @@ export namespace Providers {
      * SimpleFIN
      * @link https://beta-bridge.simplefin.org/
      */
-    const simpleFIN = new SimpleFINProvider();
+    const simpleFIN = new SimpleFINProvider(
+      new ProviderConfig("SimpleFIN", "simple-fin", "https://beta-bridge.simplefin.org/static/logo.svg", "https://beta-bridge.simplefin.org/my-account"),
+    );
 
     // Initialize the providers from above
     providers = [simpleFIN];
   }
 
-  /** Returns the currently configured provider for sprout. */
-  export function getCurrentProvider() {
-    return providers[0]!;
+  /** Returns all currently registered providers */
+  export function getAll() {
+    return providers;
   }
 }

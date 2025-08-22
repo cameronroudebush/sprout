@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/model/user.dart';
 
@@ -63,8 +64,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
-        return Scaffold(
-          body: Center(
+        return SproutScaffold(
+          child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Card(

@@ -91,8 +91,12 @@ export class RestAPIServer {
         // Grab data from body
         const data = req.body;
         // Try to parse as type
-        const typedData = RestBody.fromPlain(data);
-        const result = await (endpoint.fnc.call(this, typedData, user!) as Promise<void | RestBody<any>>);
+        const typedData = RestBody.fromPlain(data); // TODO: This should be validated against the expected type
+        let result = await (endpoint.fnc.call(this, typedData, user!) as Promise<void | RestBody<any>>);
+
+        // If result is a map, turn it into a basic object
+        if (result instanceof Map) result = Object.fromEntries(result);
+
         // Make sure response know's it's JSON
         res.setHeader("Content-Type", "application/json");
         if (endpoint.metadata.type === "POST" || endpoint.metadata.type === "GET")

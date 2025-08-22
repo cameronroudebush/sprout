@@ -1,6 +1,6 @@
 import { User } from "@backend/model/user";
 import { Request, Response } from "express";
-import { Sharp } from "sharp";
+import sharp, { Sharp } from "sharp";
 import ico from "sharp-ico";
 import { Readable } from "typeorm/platform/PlatformTools";
 
@@ -51,6 +51,10 @@ export class ImageProxy {
         const icons = ico.sharpsFromIco(buffer as unknown as Buffer) as Sharp[];
         res.setHeader("Content-Type", "image/png");
         const png = icons[0]!.png();
+        return png!.pipe(res);
+      } else if (contentType === "image/svg+xml") {
+        const buffer = await result.arrayBuffer();
+        const png = sharp(buffer).png();
         return png!.pipe(res);
       } else {
         res.setHeader("Content-Type", contentType!);

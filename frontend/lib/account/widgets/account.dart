@@ -73,7 +73,7 @@ class AccountWidget extends StatelessWidget {
               ),
               child: ExpansionTile(
                 enabled: allowClick,
-                title: _getAccountHeader(account, theme, netWorthProvider, userProvider),
+                title: _getAccountHeader(context, account, theme, netWorthProvider, userProvider),
                 showTrailingIcon: false,
                 children: [
                   // Inner details
@@ -125,11 +125,13 @@ class AccountWidget extends StatelessWidget {
 
   /// Gets the account header for the expansion panel
   Widget _getAccountHeader(
+    BuildContext context,
     Account account,
     ThemeData theme,
     NetWorthProvider netWorthProvider,
     UserProvider userProvider,
   ) {
+    final mediaQuery = MediaQuery.of(context).size;
     // Days changed depending on the configuration
     EntityHistoryDataPoint? dayChange = netWorthProvider.historicalAccountData
         ?.firstWhereOrNull((element) => element.connectedId == account.id)
@@ -149,7 +151,8 @@ class AccountWidget extends StatelessWidget {
                   flex: 2,
                   child: Row(
                     children: [
-                      if (isSelected)
+                      // Only show on large enough screens
+                      if (isSelected && mediaQuery.width > 640)
                         Padding(
                           padding: const EdgeInsets.only(top: 4.0, right: 16),
                           child: Icon(Icons.check_circle, color: theme.colorScheme.secondary, size: 24.0),

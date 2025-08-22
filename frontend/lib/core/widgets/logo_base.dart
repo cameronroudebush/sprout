@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/api.dart';
@@ -8,7 +7,10 @@ import 'package:sprout/config/provider.dart';
 abstract class LogoBaseWidget<T> extends StatefulWidget {
   final T logoClass;
 
-  const LogoBaseWidget(this.logoClass, {super.key});
+  final double height;
+  final double width;
+
+  const LogoBaseWidget(this.logoClass, {super.key, this.height = 40, this.width = 40});
 
   /// Returns the backend image proxy url without any query context.
   String getBackendProxy(BuildContext context) {
@@ -27,25 +29,18 @@ abstract class LogoBaseWidget<T> extends StatefulWidget {
 }
 
 class _LogoBaseWidgetState extends State<LogoBaseWidget> {
-  String? _jwt;
-  bool _isLoading = true;
+  late Future<String?> _jwtFuture; // Store the Future itself
 
   @override
   void initState() {
     super.initState();
-    _fetchJwt();
+    _jwtFuture = _fetchJwt();
   }
 
-  /// Asynchronously fetches the JWT from secure storage.
-  Future<void> _fetchJwt() async {
+  /// Asynchronously fetches and returns the JWT from secure storage.
+  Future<String?> _fetchJwt() {
     final configProvider = Provider.of<ConfigProvider>(context, listen: false);
-    final String? fetchedJwt = await configProvider.api.secureStorage.getValue(AuthAPI.jwtKey);
-    if (mounted) {
-      setState(() {
-        _jwt = fetchedJwt;
-        _isLoading = false;
-      });
-    }
+    return configProvider.api.secureStorage.getValue(AuthAPI.jwtKey);
   }
 
   @override
@@ -55,20 +50,30 @@ class _LogoBaseWidgetState extends State<LogoBaseWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24.0),
       child: SizedBox(
-        width: 40,
-        height: 40,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator(strokeWidth: 2.0))
-            : CachedNetworkImage(
-                imageUrl: url,
-                fit: BoxFit.cover,
-                errorWidget: (context, url, error) {
-                  return Icon(widget.getFallbackIcon(context), size: 30.0);
-                },
-                progressIndicatorBuilder: (context, url, downloadProgress) =>
-                    CircularProgressIndicator(value: downloadProgress.progress),
-                httpHeaders: {if (_jwt != null) 'Authorization': 'Bearer $_jwt'},
-              ),
+        width: widget.height,
+        height: widget.width,
+        child: FutureBuilder<String?>(
+          future: _jwtFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
+            }
+
+            if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+              return Icon(widget.getFallbackIcon(context), size: 30.0);
+            }
+
+            final jwt = snapshot.data!;
+            return Image.network(
+              url,
+              fit: BoxFit.cover,
+              headers: {'Authorization': 'Bearer $jwt'},
+              errorBuilder: (context, url, error) {
+                return Icon(widget.getFallbackIcon(context), size: 30.0);
+              },
+            );
+          },
+        ),
       ),
     );
   }

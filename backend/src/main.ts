@@ -20,16 +20,14 @@ async function main() {
     // Initialize database
     const database = await new Database().init();
     DatabaseBase.database = database;
+    // Init our providers
+    await Providers.initializeProviders();
     // Initialize background jobs
-    await new JobProcessor().start();
+    await JobProcessor.start();
     // Initialize server
     const centralServer = new CentralServer();
     await new RestAPIServer(centralServer).initialize();
     Logger.success("Server ready!");
-    // Schedule our provider to run
-    await Providers.initializeProviders();
-    const provider = Providers.getCurrentProvider();
-    await provider.sync.start();
   } catch (e) {
     Logger.error(e as Error);
     process.exit(1);
