@@ -10,6 +10,7 @@ class AccountProvider extends BaseProvider<AccountAPI> {
   // Data store
   List<Account> _linkedAccounts = [];
   StreamSubscription<SSEBody<dynamic>>? _sub;
+  bool manualSyncIsRunning = false;
 
   // Getters to not allow editing the internal store
   List<Account> get linkedAccounts => _linkedAccounts;
@@ -22,6 +23,8 @@ class AccountProvider extends BaseProvider<AccountAPI> {
 
   /// Tells the API to manually run an account refresh
   Future<void> manualSync() async {
+    manualSyncIsRunning = true;
+    notifyListeners();
     await api.runManualSync();
   }
 
