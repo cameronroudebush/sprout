@@ -2,7 +2,7 @@ import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
 import { Base } from "@backend/model/base";
 import { differenceInDays, eachDayOfInterval, isSameDay, subDays } from "date-fns";
-import { Dictionary } from "lodash";
+import { cloneDeep, Dictionary } from "lodash";
 
 /** This class represents a point in time of an entity history. */
 export class EntityHistoryDataPoint extends Base {
@@ -70,11 +70,11 @@ export class EntityHistory extends Base {
     }
 
     // Calculate the percentage change
-    const firstNetWorth = netWorthSnapshots.find((x) => x.netWorth !== 0)?.netWorth; // Find first net worth that is non-zero
+    const firstNetWorth = netWorthSnapshots[0]?.netWorth;
     const lastNetWorth = netWorthSnapshots[netWorthSnapshots.length - 1]?.netWorth;
     let percentChange: number | null = null;
     let valueChange = 0;
-    if (firstNetWorth && lastNetWorth) {
+    if (firstNetWorth != null && lastNetWorth != null) {
       percentChange = ((lastNetWorth - firstNetWorth) / firstNetWorth) * 100;
       valueChange = lastNetWorth - firstNetWorth;
     }
@@ -89,7 +89,7 @@ export class EntityHistory extends Base {
   /** Given an account history, returns the entity value over time for the given history */
   static getForHistory(history: AccountHistory[], relatedAccount?: Account) {
     // How far back we have data for, total
-    const sproutAccountLifetime = differenceInDays(new Date(), history[history.length - 1]?.time ?? 1);
+    const sproutAccountLifetime = differenceInDays(new Date(), history[0]?.time ?? 1);
     const boundCallback = EntityHistory.generateNetWorthOverTime.bind(this, history, relatedAccount);
 
     const last1Day = boundCallback(1);
@@ -100,7 +100,10 @@ export class EntityHistory extends Base {
     const lastYear = boundCallback(365);
     // Convert the last year of snapshot into a map
     const historicalData = lastYear.snapshot.reduce((acc, curr) => ({ ...acc, [curr.date.toISOString().split("T")[0]!]: curr.netWorth }), {});
-    const allTime = boundCallback(sproutAccountLifetime);
+    // We must make a separate history so we can show that we started from 0
+    const allTimeHistory = cloneDeep(history);
+    allTimeHistory.unshift(AccountHistory.fromPlain({ time: subDays(new Date(), sproutAccountLifetime + 1), balance: 0 }));
+    const allTime = EntityHistory.generateNetWorthOverTime(allTimeHistory, relatedAccount, sproutAccountLifetime + 1);
 
     return EntityHistory.fromPlain({
       last1Day: last1Day.frame,
