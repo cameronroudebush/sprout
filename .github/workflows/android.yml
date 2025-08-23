@@ -80,7 +80,7 @@ jobs:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: net.croudebush.sprout
           releaseFiles: frontend/build/app/outputs/bundle/release/app-release.aab
-          track: qa
+          track: alpha # Internal testing. Should update to beta once production is allowed
           status: completed
           inAppUpdatePriority: 5
 
