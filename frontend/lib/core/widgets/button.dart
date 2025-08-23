@@ -38,29 +38,36 @@ class ButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final dynamicHeightMultiplier = mediaQuery.size.height > 1200 ? 0.03 : 0.04;
+    final theme = Theme.of(context);
+    final mediaQuery = MediaQuery.of(context).size;
+    final dynamicHeightMultiplier = mediaQuery.height > 1200 ? 0.02 : 0.03;
+    final maxWidth = mediaQuery.width * .5;
     final ButtonStyle buttonStyle = (style ?? const ButtonStyle()).merge(
-      ElevatedButton.styleFrom(
-        minimumSize: Size(minSize, height ?? mediaQuery.size.height * dynamicHeightMultiplier),
+      FilledButton.styleFrom(
+        minimumSize: Size(minSize, height ?? mediaQuery.height * dynamicHeightMultiplier),
+        maximumSize: Size(
+          minSize > maxWidth ? minSize : maxWidth,
+          height ?? mediaQuery.height * dynamicHeightMultiplier,
+        ),
         elevation: 5,
-        backgroundColor: color ?? Theme.of(context).buttonTheme.colorScheme!.onPrimary,
+        backgroundColor: color ?? theme.colorScheme.primary,
+        textStyle: TextStyle(color: theme.colorScheme.onPrimary),
       ),
     );
 
     final fontSize = MediaQuery.of(context).size.height * .0125 * (1.1);
 
     if (icon != null && text != null) {
-      return ElevatedButton.icon(
+      return FilledButton.icon(
         onPressed: onPressed,
         icon: Icon(icon),
         label: Text(text!, style: TextStyle(fontSize: fontSize)),
         style: buttonStyle,
       );
     } else if (icon != null && text == null) {
-      return ElevatedButton(onPressed: onPressed, style: buttonStyle, child: Icon(icon));
+      return FilledButton(onPressed: onPressed, style: buttonStyle, child: Icon(icon));
     } else if (icon == null && text != null) {
-      return ElevatedButton(
+      return FilledButton(
         onPressed: onPressed,
         style: buttonStyle,
         child: Row(

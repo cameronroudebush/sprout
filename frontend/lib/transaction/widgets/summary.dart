@@ -22,39 +22,34 @@ class TransactionSummaryCard extends StatelessWidget {
 
           content = Center(
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 spacing: 4,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Center(
-                          child: const TextWidget(
-                            referenceSize: 2,
-                            text: 'Monthly Summary',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                  Column(
+                    children: [
+                      Center(
+                        child: const TextWidget(
+                          referenceSize: 2,
+                          text: 'Monthly Summary',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        Center(
-                          child: TextWidget(
-                            referenceSize: 1,
-                            text: 'Last 30 days',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
+                      ),
+                      Center(
+                        child: TextWidget(
+                          referenceSize: 1,
+                          text: 'Last 30 days',
+                          style: TextStyle(color: Colors.grey[600]),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildSummaryRow('Average Transaction', averageAmount),
-                        _buildSummaryRow('Largest Expense', largestExpense),
-                      ],
-                    ),
+                  Column(
+                    children: [
+                      _buildSummaryRow('Average Transaction', averageAmount),
+                      _buildSummaryRow('Largest Expense', largestExpense),
+                    ],
                   ),
                 ],
               ),

@@ -62,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
         return SproutScaffold(
@@ -143,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 20.0),
                       TextWidget(
                         referenceSize: 1.2,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
                         text: _message,
                       ),
                       const SizedBox(height: 20.0),

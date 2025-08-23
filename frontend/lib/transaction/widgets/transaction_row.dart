@@ -72,7 +72,7 @@ class TransactionRow extends StatelessWidget {
     return Container(
       color: rowColor,
       width: double.infinity,
-      height: 65,
+      height: 66,
       padding: EdgeInsetsGeometry.all(6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

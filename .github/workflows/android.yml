@@ -22,13 +22,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           lfs: "true"
-
-      - name: Get Repo Info
-        id: get_repo_info
-        uses: ./.github/actions/get-repo-info
-        with:
-          fetch-depth: "0"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -58,13 +53,19 @@ jobs:
         run: |
           echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks" >> $GITHUB_ENV
 
-      - name: Build Android APK
-        working-directory: ./frontend
-        run: flutter build apk --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
+      - name: Make build script executable
+        run: chmod +x scripts/build_app.sh
 
       - name: Build Android App Bundle (AAB)
+        id: build_aab
         working-directory: ./frontend
-        run: flutter build appbundle --release --no-tree-shake-icons --build-name=${{ steps.get_repo_info.outputs.version_string }}
+        run: ../scripts/build_app.sh appbundle
+
+      - name: Build Android APK for Release
+        id: build_apk
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ./frontend
+        run: ../scripts/build_app.sh apk
 
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
@@ -94,5 +95,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: "frontend/build/app/outputs/flutter-apk/app-release.apk"
-          tag_name: ${{ steps.get_repo_info.outputs.version_string }}
+          tag_name: ${{ steps.build_apk.outputs.build_name }}
           draft: false

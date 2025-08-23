@@ -44,7 +44,7 @@ class _UserPageState extends State<UserPage> {
       builder: (context, configProvider, sseProvider, authProvider, accountProvider, userProvider, child) {
         final userConfig = userProvider.currentUserConfig!;
         final screenWidth = MediaQuery.of(context).size.width;
-        final minButtonSize = screenWidth * .5;
+        final minButtonSize = screenWidth * .25;
         final displayInfo = {
           "user settings": [
             UserDisplayInfo(

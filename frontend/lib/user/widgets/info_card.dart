@@ -14,7 +14,6 @@ class UserInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SproutCard(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -25,7 +24,7 @@ class UserInfoCard extends StatelessWidget {
             TextWidget(
               text: name.toTitleCase,
               referenceSize: 1.75,
-              style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+              style: TextStyle(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const Divider(height: 32.0, thickness: 1.0),

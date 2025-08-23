@@ -70,7 +70,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
     final centerSpacingRadius = mediaQuery.size.height > 1200 ? 15 : widget.height / 15;
 
     return Padding(
-      padding: EdgeInsetsGeometry.all(12),
+      padding: EdgeInsetsGeometry.all(10),
       child: Column(
         children: [
           TextWidget(
