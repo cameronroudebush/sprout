@@ -79,7 +79,7 @@ jobs:
         with:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: net.croudebush.sprout
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: frontend/build/app/outputs/bundle/release/app-release.aab
           track: qa
           status: completed
           inAppUpdatePriority: 5
@@ -90,7 +90,7 @@ jobs:
         with:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: net.croudebush.sprout
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: frontend/build/app/outputs/bundle/release/app-release.aab
           track: production
           status: completed
           inAppUpdatePriority: 2
