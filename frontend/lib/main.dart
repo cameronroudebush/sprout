@@ -1,8 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:json_theme/json_theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/api.dart';
@@ -16,6 +12,7 @@ import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/shell.dart';
+import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/connect_fail.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -35,12 +32,7 @@ import 'package:sprout/user/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Grab theme
-  final themeStr = await rootBundle.loadString('assets/dark.json');
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final themeJson = jsonDecode(themeStr);
-  final theme = ThemeDecoder.decodeThemeData(themeJson)!;
 
   // Create base API client
   final client = RESTClient();
@@ -70,25 +62,21 @@ void main() async {
         ServiceLocator.createProvider<UserProvider>(),
         ServiceLocator.createProvider<HoldingProvider>(),
       ],
-      child: Main(theme: theme),
+      child: Main(),
     ),
   );
 }
 
 /// This page contains the process for when the application is first started
 class Main extends StatefulWidget {
-  final ThemeData theme;
-  const Main({super.key, required this.theme});
+  const Main({super.key});
 
   @override
-  State<Main> createState() => MainState(theme: theme);
+  State<Main> createState() => MainState();
 }
 
 class MainState extends State<Main> {
-  final ThemeData theme;
   bool hasTriedInitialLogin = false;
-
-  MainState({required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +173,10 @@ class MainState extends State<Main> {
 
         return MaterialApp(
           home: page,
-          theme: theme,
           title: "Sprout",
+          theme: AppTheme.dark,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.dark,
           scaffoldMessengerKey: ServiceLocator.scaffoldMessengerKey,
         );
       },

@@ -15,7 +15,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use a switch statement for cleaner page routing logic.
+    final theme = Theme.of(context);
     final Widget pageContent;
     switch (currentPage?.toLowerCase()) {
       case "accounts":
@@ -35,10 +35,10 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Padding(padding: const EdgeInsets.all(12), child: pageContent),
       centerTitle: true,
       elevation: 0, // Remove shadow for a flat design
-      backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+      backgroundColor: theme.colorScheme.primaryContainer,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(8.0),
-        child: Container(color: Theme.of(context).colorScheme.secondary.withAlpha(100), height: 8.0),
+        child: Container(color: theme.colorScheme.secondary.withAlpha(100), height: 8.0),
       ),
     );
   }

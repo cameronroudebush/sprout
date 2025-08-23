@@ -77,7 +77,7 @@ class SproutDialogWidget extends StatelessWidget {
                 ),
               ],
             ),
-            Divider(height: 4, thickness: 4, color: theme.colorScheme.onSecondaryContainer),
+            Divider(height: 4, thickness: 4, color: theme.colorScheme.secondary),
           ],
         ),
       ),
@@ -100,7 +100,10 @@ class SproutDialogWidget extends StatelessWidget {
                     ButtonWidget(
                       text: closeButtonText,
                       minSize: mediaQuery.width * .25,
-                      color: Theme.of(context).colorScheme.onError,
+                      color: theme.colorScheme.error,
+                      style: ButtonStyle(
+                        textStyle: WidgetStateProperty.all(TextStyle(color: theme.colorScheme.onError)),
+                      ),
                       onPressed: !allowCloseClick
                           ? null
                           : () {

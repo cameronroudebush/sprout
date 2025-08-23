@@ -102,7 +102,7 @@ class AccountWidget extends StatelessWidget {
                         Expanded(
                           child: ButtonWidget(
                             text: "Delete",
-                            color: theme.colorScheme.onError,
+                            color: theme.colorScheme.error,
                             onPressed: () async {
                               await showDialog(
                                 context: context,

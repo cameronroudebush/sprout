@@ -73,6 +73,7 @@ class _SproutAppShellState extends State<SproutAppShell> {
   }
 
   Widget _getBottomNavBar(bool isMobile, BuildContext context) {
+    final theme = Theme.of(context);
     double fontSize = isMobile ? 8 : 12;
     return BottomNavigationBar(
       iconSize: isMobile ? 24 : 28,
@@ -80,28 +81,32 @@ class _SproutAppShellState extends State<SproutAppShell> {
       unselectedFontSize: fontSize,
       showUnselectedLabels: true,
       showSelectedLabels: true,
+      unselectedLabelStyle: TextStyle(fontSize: fontSize),
+      selectedLabelStyle: TextStyle(fontSize: fontSize),
       currentIndex: _currentIndex,
       onTap: (index) {
         setState(() {
           _currentIndex = index; // Update the index
         });
       },
-      backgroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-      selectedItemColor: Theme.of(context).colorScheme.primary,
-      unselectedItemColor: Theme.of(context).colorScheme.onSurface,
+      backgroundColor: theme.colorScheme.primaryContainer,
+      selectedItemColor: theme.colorScheme.secondaryContainer,
+      unselectedItemColor: theme.colorScheme.onPrimaryContainer,
       type: BottomNavigationBarType.fixed,
       enableFeedback: true,
-      items: _pages
-          .map(
-            (pageData) => BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.all(4.0),
-                child: Icon(pageData['icon'], color: pageData['color']),
-              ),
-              label: pageData['label'],
+      items: _pages.map((pageData) {
+        final isSelected = pageData['label'] == _pages[_currentIndex]['label'];
+        return BottomNavigationBarItem(
+          icon: Padding(
+            padding: EdgeInsets.all(4.0),
+            child: Icon(
+              pageData['icon'],
+              color: isSelected ? theme.colorScheme.secondaryContainer : theme.colorScheme.onPrimaryContainer,
             ),
-          )
-          .toList(),
+          ),
+          label: pageData['label'],
+        );
+      }).toList(),
     );
   }
 }

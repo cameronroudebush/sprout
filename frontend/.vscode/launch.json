@@ -7,7 +7,7 @@
       "program": "lib/main.dart",
       "console": "debugConsole",
       "flutterMode": "debug",
-      "args": ["--web-hostname", "0.0.0.0", "--web-port", "8989", "--web-launch-url", "http://localhost:8989"]
+      "args": ["--web-port", "8989", "--web-launch-url", "http://localhost:8989"]
     }
   ]
 }
