@@ -5,6 +5,7 @@ import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/connection.dart';
@@ -42,7 +43,8 @@ class _UserPageState extends State<UserPage> {
   Widget build(BuildContext context) {
     return Consumer5<ConfigProvider, SSEProvider, AuthProvider, AccountProvider, UserProvider>(
       builder: (context, configProvider, sseProvider, authProvider, accountProvider, userProvider, child) {
-        final userConfig = userProvider.currentUserConfig!;
+        final userConfig = userProvider.currentUserConfig;
+        if (userConfig == null) return Center(child: CircularProgressIndicator());
         final screenWidth = MediaQuery.of(context).size.width;
         final minButtonSize = screenWidth * .25;
         final displayInfo = {
@@ -128,9 +130,11 @@ class _UserPageState extends State<UserPage> {
           ],
         };
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value))],
+        return SproutScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value))],
+          ),
         );
       },
     );

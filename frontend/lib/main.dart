@@ -90,8 +90,7 @@ class MainState extends State<Main> {
 
         if (!hasConnectionUrl) {
           page = SproutScaffold(
-            applyAppBar: true,
-            currentPage: "Setup",
+            appBar: AppBar(),
             child: Padding(
               padding: EdgeInsetsGeometry.all(24),
               child: Column(
@@ -161,8 +160,7 @@ class MainState extends State<Main> {
         } else {
           // If setup is not complete
           page = SproutScaffold(
-            applyAppBar: true,
-            currentPage: "Setup",
+            appBar: AppBar(),
             child: SetupPage(
               onSetupSuccess: () {
                 configProvider.populateUnsecureConfig();

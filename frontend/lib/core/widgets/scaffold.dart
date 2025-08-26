@@ -1,43 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sprout/core/widgets/app_bar.dart';
 
-/// A generic scaffold component used to wrap everything we display
+/// A generic scaffold component used to wrap everything we display. This also includes
+///   the display capability for the sidenav.
 class SproutScaffold extends StatelessWidget {
-  final Widget child;
+  final Widget? child;
 
-  /// If we should render the top app bar
-  final bool applyAppBar;
+  /// App bar to display for our scaffold
+  final PreferredSizeWidget? appBar;
 
-  /// The current page to display in the app bar if we wish
-  final String? currentPage;
+  /// Bottom navigation to display
+  final Widget? bottomNavigation;
 
-  /// A bottom navigation to render on our scaffold
-  final Widget? bottomNav;
+  /// Drawer to display a sidenav
+  final Widget? drawer;
 
-  /// A background color to replace
-  final Color? backgroundColor;
-
-  const SproutScaffold({
-    super.key,
-    required this.child,
-    this.applyAppBar = false,
-    this.currentPage,
-    this.bottomNav,
-    this.backgroundColor,
-  });
+  const SproutScaffold({super.key, required this.child, this.appBar, this.bottomNavigation, this.drawer});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(systemNavigationBarColor: const Color(0xFF001e2c)),
-      child: Scaffold(
-        backgroundColor: backgroundColor,
-        appBar: applyAppBar ? SproutAppBar(screenHeight: screenHeight, currentPage: currentPage) : null,
-        body: SafeArea(child: child),
-        bottomNavigationBar: bottomNav,
-      ),
+      child: Scaffold(appBar: appBar, body: child, bottomNavigationBar: bottomNavigation, drawer: drawer),
     );
   }
 }

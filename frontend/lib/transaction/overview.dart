@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/transaction/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/transaction/widgets/category_pie_chart.dart';
 import 'package:sprout/transaction/widgets/summary.dart';
@@ -47,14 +48,16 @@ class TransactionsOverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        if (constraints.maxWidth < 600) {
-          return _getMobileLayout(context);
-        } else {
-          return _getDesktopLayout(context);
-        }
-      },
+    return SproutScrollView(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          if (constraints.maxWidth < 600) {
+            return _getMobileLayout(context);
+          } else {
+            return _getDesktopLayout(context);
+          }
+        },
+      ),
     );
   }
 }

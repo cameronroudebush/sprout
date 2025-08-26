@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// A reusable button that helps with default sizing for mobile
+/// [deprecated] We will be discontinuing this in support of individual buttons
 class ButtonWidget extends StatelessWidget {
   final String? text;
   final IconData? icon;
@@ -40,7 +41,7 @@ class ButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context).size;
-    final dynamicHeightMultiplier = mediaQuery.height > 1200 ? 0.02 : 0.03;
+    final dynamicHeightMultiplier = mediaQuery.height > 1200 ? 0.03 : 0.03;
     final maxWidth = mediaQuery.width * .5;
     final ButtonStyle buttonStyle = (style ?? const ButtonStyle()).merge(
       FilledButton.styleFrom(

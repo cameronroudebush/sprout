@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/text.dart';
 
 /// A reusable widget for displaying dialogs in Sprout
@@ -86,7 +87,7 @@ class SproutDialogWidget extends StatelessWidget {
           maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .8,
           maxHeight: mediaQuery.height * .75,
         ),
-        child: SingleChildScrollView(
+        child: SproutScrollView(
           child: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 8), child: child),
         ),
       ),
@@ -97,27 +98,24 @@ class SproutDialogWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (showCloseDialogButton)
-                    ButtonWidget(
-                      text: closeButtonText,
-                      minSize: mediaQuery.width * .25,
-                      color: theme.colorScheme.error,
-                      style: ButtonStyle(
-                        textStyle: WidgetStateProperty.all(TextStyle(color: theme.colorScheme.onError)),
+                    Expanded(
+                      child: FilledButton(
+                        style: ButtonStyle(backgroundColor: WidgetStateProperty.all(theme.colorScheme.error)),
+                        onPressed: !allowCloseClick
+                            ? null
+                            : () {
+                                Navigator.of(context).pop();
+                              },
+                        child: TextWidget(text: closeButtonText),
                       ),
-                      onPressed: !allowCloseClick
-                          ? null
-                          : () {
-                              Navigator.of(context).pop();
-                            },
                     ),
-                  if (!showCloseDialogButton) const SizedBox.shrink(),
                   if (showSubmitButton)
-                    ButtonWidget(
-                      text: submitButtonText,
-                      minSize: mediaQuery.width * .25,
-                      onPressed: !allowSubmitClick ? null : onSubmitClick,
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: !allowSubmitClick ? null : onSubmitClick,
+                        child: TextWidget(text: submitButtonText),
+                      ),
                     ),
-                  if (!showSubmitButton) const SizedBox.shrink(),
                 ],
               ),
             ]

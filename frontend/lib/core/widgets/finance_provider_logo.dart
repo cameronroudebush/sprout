@@ -5,10 +5,10 @@ import 'package:sprout/core/widgets/logo_base.dart';
 /// A widget used to display finance provider logos
 class FinanceProviderLogoWidget extends LogoBaseWidget<FinanceProviderConfig> {
   @override
-  double get height => 40;
+  double get height => 30;
 
   @override
-  double get width => 40;
+  double get width => 30;
 
   const FinanceProviderLogoWidget(super.logoClass, {super.key});
 

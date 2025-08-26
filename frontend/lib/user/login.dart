@@ -6,6 +6,7 @@ import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
+import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/model/user.dart';
 
@@ -67,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
       builder: (context, configProvider, child) {
         return SproutScaffold(
           child: Center(
-            child: SingleChildScrollView(
+            child: SproutScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Card(
                 child: Padding(
@@ -141,12 +142,13 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
-                      TextWidget(
-                        referenceSize: 1.2,
-                        style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
-                        text: _message,
-                      ),
+                      if (_message.isNotEmpty) const SizedBox(height: 20.0),
+                      if (_message.isNotEmpty)
+                        TextWidget(
+                          referenceSize: 1.2,
+                          style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
+                          text: _message,
+                        ),
                       const SizedBox(height: 20.0),
                       TextWidget(referenceSize: .9, text: configProvider.unsecureConfig?.version ?? ""),
                     ],

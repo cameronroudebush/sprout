@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/dialog/add_account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_groups.dart';
+import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/user/provider.dart';
 
 /// A widget that displays all accounts
@@ -18,10 +18,23 @@ class AccountsWidget extends StatelessWidget {
   final bool allowCollapse;
   final ChartRange netWorthPeriod;
 
+  /// If provided, allows a specific account type to be loaded only
+  final String? accountType;
+
   /// If this groups should render in a card
   final bool applyCard;
 
-  const AccountsWidget({super.key, required this.netWorthPeriod, this.allowCollapse = false, this.applyCard = true});
+  /// If group titles should be shown for each account group
+  final bool showGroupTitles;
+
+  const AccountsWidget({
+    super.key,
+    required this.netWorthPeriod,
+    this.allowCollapse = false,
+    this.applyCard = true,
+    this.accountType,
+    this.showGroupTitles = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +78,17 @@ class AccountsWidget extends StatelessWidget {
           );
           return applyCard ? SproutCard(child: content) : content;
         }
+
+        final accounts = accountType == null
+            ? accountProvider.linkedAccounts
+            : accountProvider.linkedAccounts.where((element) => element.type == accountType).toList();
+
         return AccountGroupsWidget(
-          accounts: accountProvider.linkedAccounts,
+          accounts: accounts,
           allowCollapse: allowCollapse,
           netWorthPeriod: netWorthPeriod,
           applyCard: applyCard,
+          showGroupTitles: showGroupTitles,
         );
       },
     );

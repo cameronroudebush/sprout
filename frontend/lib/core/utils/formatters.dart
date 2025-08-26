@@ -49,3 +49,15 @@ IconData getChangeIcon(double percentChange) {
       ? Icons.arrow_upward
       : Icons.arrow_downward;
 }
+
+/// Formats the given account type string to a prettier name
+String formatAccountType(String accountType) {
+  switch (accountType) {
+    case "depository":
+      return "Cash";
+    case "credit":
+      return "Credit Card";
+    default:
+      return accountType.toTitleCase;
+  }
+}

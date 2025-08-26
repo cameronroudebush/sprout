@@ -22,6 +22,9 @@ class AccountGroupsWidget extends StatelessWidget {
   /// If the groups should render in a card
   final bool applyCard;
 
+  /// If we should render the title of the groups
+  final bool showGroupTitles;
+
   const AccountGroupsWidget({
     super.key,
     required this.accounts,
@@ -32,6 +35,7 @@ class AccountGroupsWidget extends StatelessWidget {
     this.selectedAccounts,
     required this.allowCollapse,
     required this.applyCard,
+    this.showGroupTitles = true,
   });
 
   /// Given a list of accounts, sorts and groups them for display
@@ -101,6 +105,7 @@ class AccountGroupsWidget extends StatelessWidget {
                     selectedAccounts: selectedAccounts,
                     allowCollapse: allowCollapse,
                     applyCard: applyCard,
+                    showTitle: showGroupTitles,
                   ),
                 ),
                 if (!applyCard && sortedAccountEntries.last != entry) const Divider(height: 1),
