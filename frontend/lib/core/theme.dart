@@ -34,5 +34,7 @@ abstract final class AppTheme {
       ).copyWith(
         cardTheme: const CardThemeData(color: Color(0xff191c20)),
         dialogTheme: DialogThemeData(backgroundColor: Color(0xff14171b)),
+        listTileTheme: ListTileThemeData(),
+        drawerTheme: DrawerThemeData(),
       );
 }

@@ -2,16 +2,19 @@ import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
 import { Base } from "@backend/model/base";
 import { differenceInDays, eachDayOfInterval, isSameDay, subDays } from "date-fns";
-import { cloneDeep, Dictionary } from "lodash";
+import { cloneDeep } from "lodash";
 
 /** This class represents a point in time of an entity history. */
 export class EntityHistoryDataPoint extends Base {
   percentChange?: number;
   valueChange: number;
+  /** This is the history for this specific data point */
+  history: Map<number, number>;
 
-  constructor(valueChange: number, percentChange?: number) {
+  constructor(valueChange: number, history: Map<number, number>, percentChange?: number) {
     super();
     this.valueChange = valueChange;
+    this.history = history;
     this.percentChange = percentChange;
   }
 }
@@ -25,7 +28,7 @@ export class EntityHistory extends Base {
   lastSixMonths: EntityHistoryDataPoint;
   lastYear: EntityHistoryDataPoint;
   allTime: EntityHistoryDataPoint;
-  historicalData: Dictionary<number>;
+  historicalData: Map<number, number>;
 
   /** Some entity history data may have a connected Id of what it relates to. This could be something like an account Id. */
   connectedId?: string;
@@ -38,7 +41,7 @@ export class EntityHistory extends Base {
     lastSixMonths: EntityHistoryDataPoint,
     lastYear: EntityHistoryDataPoint,
     allTime: EntityHistoryDataPoint,
-    historicalData: Dictionary<number>,
+    historicalData: Map<number, number>,
   ) {
     super();
     this.last1Day = last1Day;
@@ -83,7 +86,13 @@ export class EntityHistory extends Base {
       if (percentChange) percentChange = percentChange * -1;
       valueChange = valueChange * -1;
     }
-    return { snapshot: netWorthSnapshots, frame: EntityHistoryDataPoint.fromPlain({ percentChange, valueChange }) };
+
+    const frameHistory = netWorthSnapshots.reduce((acc, item) => {
+      acc[item.date.getTime()] = item.netWorth;
+      return acc;
+    }, {} as any);
+
+    return { snapshot: netWorthSnapshots, frame: EntityHistoryDataPoint.fromPlain({ percentChange, valueChange, history: frameHistory }) };
   }
 
   /** Given an account history, returns the entity value over time for the given history */
@@ -99,7 +108,7 @@ export class EntityHistory extends Base {
     const lastSixMonths = boundCallback(180);
     const lastYear = boundCallback(365);
     // Convert the last year of snapshot into a map
-    const historicalData = lastYear.snapshot.reduce((acc, curr) => ({ ...acc, [curr.date.toISOString().split("T")[0]!]: curr.netWorth }), {});
+    const historicalData = lastYear.snapshot.reduce((acc, curr) => ({ ...acc, [curr.date.getTime()]: curr.netWorth }), {});
     // We must make a separate history so we can show that we started from 0
     const allTimeHistory = cloneDeep(history);
     allTimeHistory.unshift(AccountHistory.fromPlain({ time: subDays(new Date(), sproutAccountLifetime + 1), balance: 0 }));

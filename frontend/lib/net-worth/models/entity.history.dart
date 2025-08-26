@@ -5,13 +5,26 @@ import 'package:sprout/charts/models/chart_range.dart';
 class EntityHistoryDataPoint {
   final double? percentChange;
   final double valueChange;
+  Map<DateTime, double> history;
 
-  const EntityHistoryDataPoint({required this.valueChange, this.percentChange});
+  EntityHistoryDataPoint({required this.valueChange, required this.history, this.percentChange});
 
   factory EntityHistoryDataPoint.fromJson(Map<String, dynamic> json) {
+    Map<DateTime, double> parsedHistoricalData = {};
+    (json['history'] as Map).forEach((key, value) {
+      try {
+        final ms = int.parse(key.toString());
+        final date = DateTime.fromMillisecondsSinceEpoch(ms);
+        parsedHistoricalData[date] = double.parse(value.toString());
+      } catch (e) {
+        debugPrint('Error parsing historical date $key on point: $e');
+      }
+    });
+
     return EntityHistoryDataPoint(
       valueChange: json['valueChange']?.toDouble(),
       percentChange: json['percentChange']?.toDouble(),
+      history: parsedHistoricalData,
     );
   }
 }
@@ -46,7 +59,9 @@ class EntityHistory {
     if (json.containsKey('historicalData') && json['historicalData'] is Map) {
       (json['historicalData'] as Map).forEach((key, value) {
         try {
-          parsedHistoricalData[DateTime.parse(key)] = value.toDouble();
+          final ms = int.parse(key.toString());
+          final date = DateTime.fromMillisecondsSinceEpoch(ms);
+          parsedHistoricalData[date] = double.parse(value.toString());
         } catch (e) {
           debugPrint('Error parsing historical date $key: $e');
         }

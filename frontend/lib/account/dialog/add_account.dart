@@ -170,6 +170,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
             // final accounts = entry.value; // If you need to use the accounts list for this provider
             return ButtonWidget(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              height: 60,
               text: provider.name,
               image: Expanded(
                 child: Row(
