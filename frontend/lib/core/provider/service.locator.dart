@@ -28,16 +28,15 @@ class ServiceLocator {
   /// Creates a ChangeNotifierProvider for the given type.
   static ChangeNotifierProvider<T> createProvider<T extends BaseProvider<BaseAPI>>() {
     final prov = _sl<T>();
-    prov.onInit();
     return ChangeNotifierProvider.value(value: prov);
   }
 
   /// All provider types that are registered with GetIt.
   static const _allProviderTypes = <Type>[
     AuthProvider,
+    ConfigProvider,
     UserProvider,
     AccountProvider,
-    ConfigProvider,
     SSEProvider,
     NetWorthProvider,
     TransactionProvider,

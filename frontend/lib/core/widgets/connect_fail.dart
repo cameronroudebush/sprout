@@ -44,7 +44,7 @@ class FailToConnectWidget extends StatelessWidget {
                         text: "Reset connection",
                         minSize: screenWidth / 2,
                         onPressed: () async {
-                          await ConnectionSetup.setUrl(null);
+                          await ConnectionSetupField.setUrl(null);
                           // Try to reconnect
                           await configProvider.populateUnsecureConfig();
                           if (onConnectionReset != null) onConnectionReset!();

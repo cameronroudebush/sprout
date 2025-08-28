@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/core/logger.dart';
 
 /// This class represents a time frame of net worth change.
 class EntityHistoryDataPoint {
@@ -17,7 +17,7 @@ class EntityHistoryDataPoint {
         final date = DateTime.fromMillisecondsSinceEpoch(ms);
         parsedHistoricalData[date] = double.parse(value.toString());
       } catch (e) {
-        debugPrint('Error parsing historical date $key on point: $e');
+        LoggerService.error('Error parsing historical date $key on point: $e');
       }
     });
 
@@ -63,7 +63,7 @@ class EntityHistory {
           final date = DateTime.fromMillisecondsSinceEpoch(ms);
           parsedHistoricalData[date] = double.parse(value.toString());
         } catch (e) {
-          debugPrint('Error parsing historical date $key: $e');
+          LoggerService.error('Error parsing historical date $key: $e');
         }
       });
     }

@@ -5,6 +5,9 @@ class SproutScrollView extends StatelessWidget {
   final Widget? child;
   final EdgeInsetsGeometry? padding;
 
+  /// A scroll controller to use for this view
+  final ScrollController? scrollController;
+
   /// If we should constrain the size of the child
   final bool constrain;
 
@@ -13,12 +16,14 @@ class SproutScrollView extends StatelessWidget {
     this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
     this.constrain = true,
+    this.scrollController,
   });
 
   @override
   Widget build(BuildContext context) {
     if (constrain) {
       return SingleChildScrollView(
+        controller: scrollController,
         padding: padding,
         child: Center(
           child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1024), child: child),

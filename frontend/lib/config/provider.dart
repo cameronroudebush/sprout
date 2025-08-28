@@ -55,7 +55,8 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
 
   @override
   Future<void> onInit() async {
-    populateUnsecureConfig();
+    await populateUnsecureConfig();
+    await super.onInit();
   }
 
   @override

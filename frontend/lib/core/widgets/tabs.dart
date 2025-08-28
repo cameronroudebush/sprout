@@ -14,7 +14,7 @@ class ScrollableTabsWidget extends StatefulWidget {
   /// List of widgets to display for the tabs
   final List<Widget> tabContent;
 
-  const ScrollableTabsWidget(this.tabNames, this.tabContent);
+  const ScrollableTabsWidget(this.tabNames, this.tabContent, {super.key});
 
   @override
   State<ScrollableTabsWidget> createState() => _ScrollableTabsWidgetState();

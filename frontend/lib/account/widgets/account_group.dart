@@ -124,7 +124,6 @@ class AccountGroupWidget extends StatelessWidget {
             // Remove trailing and leading dividers when expansion tile is open
             dividerColor: Colors.transparent,
             disabledColor: theme.textTheme.titleMedium?.color,
-            expansionTileTheme: ExpansionTileThemeData(backgroundColor: theme.cardTheme.color),
           ),
           child: ExpansionTile(
             enabled: allowCollapse,
