@@ -22,6 +22,30 @@ Want to to see more? Check out our **[overview site](https://sprout.croudebush.n
   <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/holdings.png" alt="Holdings Page" width="250"/>
 </p>
 
-# Documentation
+# Getting Started
 
-For detailed instructions on setup, configuration, and development, please visit our **[full documentation site](https://sprout.croudebush.net/docs)**.
+Getting started with sprout is easy! All you need is a computer running docker that you have access to. You can use the following compose:
+
+```yml
+sprout:
+  container_name: sprout
+  image: croudebush/sprout:stable
+  volumes:
+    # The database .sqlite file will be stored in /sprout
+    - /mnt/user/appdata/sprout:/sprout
+  ports:
+    - 80:80
+  restart: unless-stopped
+  environment:
+    TZ: America/New_York
+    sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
+    sprout_server_jwtExpirationTime: 7d
+```
+
+After launching the container, navigate to `http://localhost` in your browser to begin the setup process.
+
+You can review the [documentation](https://sprout.croudebush.net/docs.html) for more information on how to use sprout.
+
+# Additional Information
+
+[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy.html) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/docs.html) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md)
