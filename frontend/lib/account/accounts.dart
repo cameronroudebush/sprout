@@ -4,6 +4,7 @@ import 'package:sprout/account/dialog/add_account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_groups.dart';
 import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -89,6 +90,9 @@ class AccountsWidget extends StatelessWidget {
           netWorthPeriod: netWorthPeriod,
           applyCard: applyCard,
           showGroupTitles: showGroupTitles,
+          onAccountClick: (account) {
+            SproutNavigator.redirect("account", extra: account);
+          },
         );
       },
     );

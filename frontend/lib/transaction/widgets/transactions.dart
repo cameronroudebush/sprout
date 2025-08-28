@@ -168,15 +168,15 @@ class _TransactionsCardState extends State<TransactionsCard> {
                 ),
               ),
             // Spinner if we're waiting for a search result
-            if (searchIsActive)
+            if (searchIsActive || provider.isLoading)
               const Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                child: SizedBox(height: 325, child: Center(child: CircularProgressIndicator())),
               ),
             // Render rows
-            if (!searchIsActive) Column(children: _getTransactions()),
+            if (!searchIsActive && !provider.isLoading) Column(children: _getTransactions()),
             // Display if we have no transactions
-            if (transactions.isEmpty && !(searchIsActive))
+            if (transactions.isEmpty && !(searchIsActive || provider.isLoading))
               Center(
                 child: Padding(
                   padding: EdgeInsetsGeometry.all(24),

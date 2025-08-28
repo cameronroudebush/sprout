@@ -5,7 +5,6 @@ import 'package:sprout/account/widgets/account_row.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/provider.dart';
@@ -42,65 +41,63 @@ class HoldingsOverview extends StatelessWidget {
           );
         }
 
-        return SproutScrollView(
-          child: Column(
-            children: [
-              // Last priced info
-              SproutCard(
-                child: Padding(
-                  padding: EdgeInsetsGeometry.symmetric(vertical: 12),
-                  child: Column(
-                    children: [
-                      TextWidget(
-                        text: "Last Priced",
-                        referenceSize: 2,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      const Divider(height: 1),
-                      Padding(
-                        padding: EdgeInsetsGeometry.only(top: 12),
-                        child: TextWidget(text: configProvider.getLastSyncStatus(), referenceSize: 1.25),
-                      ),
-                    ],
-                  ),
+        return Column(
+          children: [
+            // Last priced info
+            SproutCard(
+              child: Padding(
+                padding: EdgeInsetsGeometry.symmetric(vertical: 12),
+                child: Column(
+                  children: [
+                    TextWidget(
+                      text: "Last Priced",
+                      referenceSize: 2,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    const Divider(height: 1),
+                    Padding(
+                      padding: EdgeInsetsGeometry.only(top: 12),
+                      child: TextWidget(text: configProvider.getLastSyncStatus(), referenceSize: 1.25),
+                    ),
+                  ],
                 ),
               ),
-              // Holdings
-              ...holdingsByAccount.entries.map((entry) {
-                final account = accountProvider.linkedAccounts.firstWhere((element) => element.id == entry.key);
-                return SproutCard(
-                  child: Column(
-                    spacing: 0,
-                    children: [
-                      // Account Row
-                      AccountRowWidget(
-                        account: account,
-                        netWorthPeriod: ChartRange.oneDay,
-                        displayStats: true,
-                        displayTotals: true,
-                        allowClick: false,
-                        showPercentage: true,
-                        showPeriod: true,
-                      ),
-                      const Divider(height: 1),
-                      // Holdings
-                      Column(
-                        children: entry.value.map((holding) {
-                          return Column(
-                            children: [
-                              HoldingWidget(holding: holding),
-                              if (entry.value.last != holding) const Divider(height: 1),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ],
-          ),
+            ),
+            // Holdings
+            ...holdingsByAccount.entries.map((entry) {
+              final account = accountProvider.linkedAccounts.firstWhere((element) => element.id == entry.key);
+              return SproutCard(
+                child: Column(
+                  spacing: 0,
+                  children: [
+                    // Account Row
+                    AccountRowWidget(
+                      account: account,
+                      netWorthPeriod: ChartRange.oneDay,
+                      displayStats: true,
+                      displayTotals: true,
+                      allowClick: false,
+                      showPercentage: true,
+                      showPeriod: true,
+                    ),
+                    const Divider(height: 1),
+                    // Holdings
+                    Column(
+                      children: entry.value.map((holding) {
+                        return Column(
+                          children: [
+                            HoldingWidget(holding: holding),
+                            if (entry.value.last != holding) const Divider(height: 1),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         );
       },
     );

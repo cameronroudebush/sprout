@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/dialog/sync.dart';
 import 'package:sprout/account/models/account.dart';
-import 'package:sprout/core/widgets/button.dart';
+import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -58,25 +58,18 @@ class _AccountErrorDialogState extends State<AccountErrorDialog> with WidgetsBin
   Widget build(BuildContext context) {
     final account = widget.account;
     final institution = widget.account.institution;
-    return AlertDialog(
-      title: Center(child: TextWidget(referenceSize: 2, text: '${institution.name} Error')),
-      content: TextWidget(
+    return SproutDialogWidget(
+      '${institution.name} Error',
+      showSubmitButton: true,
+      submitButtonText: "Navigate to fix",
+      onSubmitClick: () {
+        Navigator.of(context).pop();
+        _launchSimpleFinUrl();
+      },
+      child: TextWidget(
         referenceSize: 1,
-        text:
-            'The account "${account.name}" has an error and needs to be updated. Click the button below to be taken to update it.',
+        text: '${account.name} has an error and needs to be updated. Click the button below to be taken to update it.',
       ),
-      actions: <Widget>[
-        Center(
-          child: ButtonWidget(
-            text: "Navigate to fix",
-            minSize: MediaQuery.of(context).size.width * .4,
-            onPressed: () {
-              Navigator.of(context).pop();
-              _launchSimpleFinUrl();
-            },
-          ),
-        ),
-      ],
     );
   }
 }

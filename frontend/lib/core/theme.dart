@@ -4,6 +4,24 @@ import 'package:flutter/material.dart';
 
 /// Defines themes for use in sprout
 abstract final class AppTheme {
+  /// Styling for displaying error buttons
+  static final errorButton = FilledButton.styleFrom(
+    backgroundColor: dark.colorScheme.error,
+    foregroundColor: dark.colorScheme.onError,
+  );
+
+  /// Styling for displaying primary buttons
+  static final primaryButton = FilledButton.styleFrom(
+    backgroundColor: dark.colorScheme.primary,
+    foregroundColor: dark.colorScheme.onPrimary,
+  );
+
+  /// Styling for displaying primary buttons
+  static final secondaryButton = FilledButton.styleFrom(
+    backgroundColor: dark.colorScheme.secondary,
+    foregroundColor: dark.colorScheme.secondary,
+  );
+
   /// Dark theme design
   static ThemeData dark =
       FlexThemeData.dark(
@@ -36,5 +54,9 @@ abstract final class AppTheme {
         dialogTheme: DialogThemeData(backgroundColor: Color(0xff14171b)),
         listTileTheme: ListTileThemeData(),
         drawerTheme: DrawerThemeData(),
+        progressIndicatorTheme: ProgressIndicatorThemeData(
+          color: Color(0xff6b9ac4),
+          refreshBackgroundColor: Color(0xff6b9ac4),
+        ),
       );
 }

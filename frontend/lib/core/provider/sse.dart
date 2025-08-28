@@ -41,6 +41,7 @@ class SSEProvider extends BaseProvider<SSEAPI> {
         accountProvider.notifyListeners();
       }
     });
+    await super.onInit();
   }
 
   /// Starts the SSE connection.

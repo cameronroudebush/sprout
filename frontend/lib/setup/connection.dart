@@ -8,12 +8,13 @@ import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/setup/provider.dart';
 import 'package:sprout/user/provider.dart';
 
-class ConnectionSetup extends StatefulWidget {
+/// Renders a field that allows setting the current setup connection
+class ConnectionSetupField extends StatefulWidget {
   final VoidCallback? onURLSet;
   final double? minButtonSize;
   final bool disabled;
 
-  const ConnectionSetup({super.key, this.onURLSet, this.minButtonSize, this.disabled = false});
+  const ConnectionSetupField({super.key, this.onURLSet, this.minButtonSize, this.disabled = false});
 
   /// Sets the connection url to the given value and re-attempts a connection
   static Future<void> setUrl(String? url) async {
@@ -26,10 +27,10 @@ class ConnectionSetup extends StatefulWidget {
   }
 
   @override
-  State<ConnectionSetup> createState() => _ConnectionSetupState();
+  State<ConnectionSetupField> createState() => _ConnectionSetupState();
 }
 
-class _ConnectionSetupState extends State<ConnectionSetup> {
+class _ConnectionSetupState extends State<ConnectionSetupField> {
   final TextEditingController _connectionUrlController = TextEditingController();
   String _message = '';
 
@@ -59,7 +60,7 @@ class _ConnectionSetupState extends State<ConnectionSetup> {
     }
 
     try {
-      await ConnectionSetup.setUrl(url);
+      await ConnectionSetupField.setUrl(url);
       setState(() {
         _message = 'Connection URL saved successfully!';
       });

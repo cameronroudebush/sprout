@@ -14,6 +14,8 @@ abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
   /// Used to track if we are loading data or not from [updateData]
   bool isLoading = true;
 
+  bool isInitialized = false;
+
   BaseProvider(this.api);
 
   @override
@@ -36,12 +38,20 @@ abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
   Future<void> cleanupData() async {}
 
   /// When this provider is initialized this will be called. Note that no auth will be ready!
-  Future<void> onInit() async {}
+  Future<void> onInit() async {
+    await updateData();
+    isInitialized = true;
+    notifyListeners();
+  }
 
   /// Requests all providers to refresh their data
-  static Future<void> updateAllData({bool showSnackbar = false}) async {
-    for (final provider in ServiceLocator.getAllProviders()) {
-      await provider.updateData();
+  static Future<void> updateAllData({bool showSnackbar = false, bool async = true}) async {
+    if (async) {
+      await Future.wait(ServiceLocator.getAllProviders().map((e) async => await e.updateData()));
+    } else {
+      for (final provider in ServiceLocator.getAllProviders()) {
+        await provider.updateData();
+      }
     }
 
     if (showSnackbar) {

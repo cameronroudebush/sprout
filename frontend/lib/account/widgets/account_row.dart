@@ -1,8 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/dialog/account_delete.dart';
-import 'package:sprout/account/dialog/account_error.dart';
 import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
@@ -10,9 +8,7 @@ import 'package:sprout/account/widgets/institution_error.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/net-worth/models/entity.history.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/user/provider.dart';
@@ -75,46 +71,6 @@ class AccountRowWidget extends StatelessWidget {
                 enabled: allowClick,
                 title: _getAccountHeader(context, account, theme, netWorthProvider, userProvider),
                 showTrailingIcon: false,
-                children: [
-                  // Inner details
-                  Padding(
-                    padding: EdgeInsetsGeometry.directional(start: 24, top: 12, bottom: 12, end: 24),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 12,
-                      children: [
-                        // Account error fixing
-                        if (account.institution.hasError)
-                          Expanded(
-                            child: SproutTooltip(
-                              message: "Opens a page to fix this account.",
-                              child: ButtonWidget(
-                                text: "Fix Account",
-                                onPressed: () async {
-                                  await showDialog(
-                                    context: context,
-                                    builder: (_) => AccountErrorDialog(account: account),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        Expanded(
-                          child: ButtonWidget(
-                            text: "Delete",
-                            color: theme.colorScheme.error,
-                            onPressed: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (_) => AccountDeleteDialog(account: account),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ),
           ),

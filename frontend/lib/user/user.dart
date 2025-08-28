@@ -5,7 +5,6 @@ import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
-import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/connection.dart';
@@ -67,7 +66,7 @@ class _UserPageState extends State<UserPage> {
               child: Center(
                 child: SizedBox(
                   width: screenWidth / 1.15,
-                  child: ConnectionSetup(disabled: true, minButtonSize: minButtonSize),
+                  child: ConnectionSetupField(disabled: true, minButtonSize: minButtonSize),
                 ),
               ),
             ),
@@ -130,11 +129,10 @@ class _UserPageState extends State<UserPage> {
           ],
         };
 
-        return SproutScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value))],
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value))],
         );
       },
     );

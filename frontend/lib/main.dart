@@ -9,25 +9,20 @@ import 'package:sprout/config/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/client.dart';
 import 'package:sprout/core/api/sse.dart';
+import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
-import 'package:sprout/core/shell.dart';
+import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/widgets/connect_fail.dart';
-import 'package:sprout/core/widgets/scaffold.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/holding/api.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
-import 'package:sprout/setup/connection.dart';
 import 'package:sprout/setup/provider.dart';
-import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/user/api.dart';
-import 'package:sprout/user/login.dart';
 import 'package:sprout/user/provider.dart';
 
 void main() async {
@@ -61,6 +56,16 @@ void main() async {
         ServiceLocator.createProvider<TransactionProvider>(),
         ServiceLocator.createProvider<UserProvider>(),
         ServiceLocator.createProvider<HoldingProvider>(),
+
+        // Create a future that waits for all the providers to be initialized, in order
+        ChangeNotifierProvider<InitializationNotifier>(
+          create: (_) {
+            final notifier = InitializationNotifier();
+            notifier.initialize();
+            return notifier;
+          },
+          lazy: false, // Keep this to ensure it runs immediately
+        ),
       ],
       child: Main(),
     ),
@@ -68,115 +73,58 @@ void main() async {
 }
 
 /// This page contains the process for when the application is first started
-class Main extends StatefulWidget {
+class Main extends StatelessWidget {
   const Main({super.key});
 
-  @override
-  State<Main> createState() => MainState();
-}
-
-class MainState extends State<Main> {
-  bool hasTriedInitialLogin = false;
+  Widget _getLoadingIndicator(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context).size;
+    return Theme(
+      data: AppTheme.dark,
+      child: Center(
+        child: SizedBox(
+          width: mediaQuery.height * .3,
+          height: mediaQuery.height * .3,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: mediaQuery.height * .3,
+                height: mediaQuery.height * .3,
+                child: CircularProgressIndicator(strokeWidth: mediaQuery.height * .01),
+              ),
+              Image.asset(
+                'assets/icon/color.png',
+                height: mediaQuery.height * .15,
+                width: mediaQuery.height * .15,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthProvider, ConfigProvider>(
-      builder: (context, authProvider, configProvider, child) {
-        final mediaQuery = MediaQuery.of(context).size;
-        final hasConnectionUrl = configProvider.api.client.hasConnectionUrl();
-        final failedToConnect = configProvider.failedToConnect;
-        final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
-        Widget page;
+    return Consumer<InitializationNotifier>(
+      builder: (context, value, child) {
+        final init = value;
+        switch (init.status) {
+          case InitStatus.loading:
+            return _getLoadingIndicator(context);
 
-        if (!hasConnectionUrl) {
-          page = SproutScaffold(
-            appBar: AppBar(),
-            child: Padding(
-              padding: EdgeInsetsGeometry.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 24,
-                children: [
-                  TextWidget(
-                    referenceSize: 3,
-                    text: "Connection Setup",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  TextWidget(
-                    referenceSize: 1.25,
-                    text:
-                        "Due to Sprouts nature of being self hosted, you must provide a URL to connect to your instance. Please enter the URL below. You will be able to change this later if the connection fails.",
-                  ),
-
-                  ConnectionSetup(
-                    onURLSet: () {
-                      // Reload to render the normal connection
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (failedToConnect) {
-          page = SproutScaffold(child: FailToConnectWidget());
-        } else if (setupPosition == null) {
-          page = SproutScaffold(
-            child: Center(
-              child: SizedBox(
-                width: mediaQuery.height * .3,
-                height: mediaQuery.height * .3,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: mediaQuery.height * .3,
-                      height: mediaQuery.height * .3,
-                      child: CircularProgressIndicator(strokeWidth: mediaQuery.height * .01),
-                    ),
-                    Image.asset(
-                      'assets/icon/favicon-color.png',
-                      height: mediaQuery.height * .15,
-                      width: mediaQuery.height * .15,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        } else if (setupPosition == "complete") {
-          if (authProvider.isLoggedIn) {
-            // If setup is complete AND logged in
-            page = const SproutAppShell();
-          } else {
-            if (!hasTriedInitialLogin) {
-              ServiceLocator.get<AuthProvider>().checkInitialLoginStatus();
-              hasTriedInitialLogin = true;
-            }
-            // If setup is complete but NOT logged in
-            page = const LoginPage();
-          }
-        } else {
-          // If setup is not complete
-          page = SproutScaffold(
-            appBar: AppBar(),
-            child: SetupPage(
-              onSetupSuccess: () {
-                configProvider.populateUnsecureConfig();
-              },
-            ),
-          );
+          default:
+            return MaterialApp.router(
+              routerConfig: SproutRouter.router,
+              title: "Sprout",
+              theme: AppTheme.dark,
+              darkTheme: AppTheme.dark,
+              themeMode: ThemeMode.dark,
+              scaffoldMessengerKey: ServiceLocator.scaffoldMessengerKey,
+            );
         }
-
-        return MaterialApp(
-          home: page,
-          title: "Sprout",
-          theme: AppTheme.dark,
-          darkTheme: AppTheme.dark,
-          themeMode: ThemeMode.dark,
-          scaffoldMessengerKey: ServiceLocator.scaffoldMessengerKey,
-        );
       },
     );
   }

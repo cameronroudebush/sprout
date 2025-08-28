@@ -6,6 +6,7 @@ import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_group.dart';
 import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -25,14 +26,15 @@ class AccountsOverview extends StatefulWidget {
 class _AccountsOverviewState extends State<AccountsOverview> {
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context).size;
     return Consumer3<UserProvider, AccountProvider, NetWorthProvider>(
       builder: (context, userProvider, accountProvider, netWorthProvider, child) {
         final accountTypes = ["depository", "investment", "loan", "credit"];
         final accountTypesContent = accountTypes.map((a) {
           return _buildTabContent(context, a, userProvider, accountProvider, netWorthProvider);
         }).toList();
-        return Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+        return SizedBox(
+          height: mediaQuery.height - SproutAppBar.getHeightFromScreenHeight(mediaQuery.height),
           child: ScrollableTabsWidget(accountTypes.map((el) => formatAccountType(el)).toList(), accountTypesContent),
         );
       },
@@ -73,55 +75,52 @@ class _AccountsOverviewState extends State<AccountsOverview> {
     final percentageChange = groupCalc.percentageChange;
     if (accountType == "loan" || accountType == "credit") totalChange *= -1;
 
-    return Padding(
-      padding: EdgeInsetsGeometry.only(top: 12),
-      child: Column(
-        children: [
-          // Render net worth chart
-          SproutCard(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12, right: 12, left: 12, bottom: 12),
-              child: Column(
-                spacing: 12,
-                children: data.isEmpty
-                    ? [
-                        const SizedBox(
-                          height: 150,
-                          child: Center(child: TextWidget(text: "No data for accounts")),
-                        ),
-                      ]
-                    : [
-                        NetWorthTextWidget(
-                          chartRange,
-                          netWorth,
-                          percentageChange,
-                          totalChange,
-                          title: "${formatAccountType(accountType)} Accounts Value",
-                        ),
-                        SproutLineChart(
-                          data: data,
-                          chartRange: chartRange,
-                          formatValue: (value) => getFormattedCurrency(value),
-                        ),
-                        ChartRangeSelector(
-                          selectedChartRange: chartRange,
-                          onRangeSelected: (value) {
-                            provider.updateChartRange(value);
-                          },
-                        ),
-                      ],
-              ),
+    return Column(
+      children: [
+        // Render net worth chart
+        SproutCard(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12, right: 12, left: 12, bottom: 12),
+            child: Column(
+              spacing: 12,
+              children: data.isEmpty
+                  ? [
+                      const SizedBox(
+                        height: 150,
+                        child: Center(child: TextWidget(text: "No data for accounts")),
+                      ),
+                    ]
+                  : [
+                      NetWorthTextWidget(
+                        chartRange,
+                        netWorth,
+                        percentageChange,
+                        totalChange,
+                        title: "${formatAccountType(accountType)} Accounts Value",
+                      ),
+                      SproutLineChart(
+                        data: data,
+                        chartRange: chartRange,
+                        formatValue: (value) => getFormattedCurrency(value),
+                      ),
+                      ChartRangeSelector(
+                        selectedChartRange: chartRange,
+                        onRangeSelected: (value) {
+                          provider.updateChartRange(value);
+                        },
+                      ),
+                    ],
             ),
           ),
-          // Render accounts
-          AccountsWidget(
-            allowCollapse: false,
-            netWorthPeriod: chartRange,
-            accountType: accountType,
-            showGroupTitles: false,
-          ),
-        ],
-      ),
+        ),
+        // Render accounts
+        AccountsWidget(
+          allowCollapse: false,
+          netWorthPeriod: chartRange,
+          accountType: accountType,
+          showGroupTitles: false,
+        ),
+      ],
     );
   }
 }

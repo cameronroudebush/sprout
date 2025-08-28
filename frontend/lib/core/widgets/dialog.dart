@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -13,12 +14,14 @@ class SproutDialogWidget extends StatelessWidget {
   final bool showCloseDialogButton;
   final bool allowCloseClick;
   final String closeButtonText;
+  final ButtonStyle? closeButtonStyle;
 
   /// If we want to show the submit button
   final bool showSubmitButton;
   final bool allowSubmitClick;
   final String submitButtonText;
   final VoidCallback? onSubmitClick;
+  final ButtonStyle? submitButtonStyle;
 
   const SproutDialogWidget(
     this.dialogTitleText, {
@@ -27,9 +30,11 @@ class SproutDialogWidget extends StatelessWidget {
     this.showCloseDialogButton = false,
     this.closeButtonText = "Close",
     this.allowCloseClick = true,
+    this.closeButtonStyle,
     this.showSubmitButton = false,
     this.submitButtonText = "Submit",
     this.allowSubmitClick = true,
+    this.submitButtonStyle,
     this.onSubmitClick,
   });
 
@@ -84,7 +89,7 @@ class SproutDialogWidget extends StatelessWidget {
       ),
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .8,
+          maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .9,
           maxHeight: mediaQuery.height * .75,
         ),
         child: SproutScrollView(
@@ -100,7 +105,9 @@ class SproutDialogWidget extends StatelessWidget {
                   if (showCloseDialogButton)
                     Expanded(
                       child: FilledButton(
-                        style: ButtonStyle(backgroundColor: WidgetStateProperty.all(theme.colorScheme.error)),
+                        style: closeButtonStyle == null
+                            ? AppTheme.errorButton
+                            : closeButtonStyle!.merge(AppTheme.errorButton),
                         onPressed: !allowCloseClick
                             ? null
                             : () {
@@ -112,6 +119,7 @@ class SproutDialogWidget extends StatelessWidget {
                   if (showSubmitButton)
                     Expanded(
                       child: FilledButton(
+                        style: submitButtonStyle,
                         onPressed: !allowSubmitClick ? null : onSubmitClick,
                         child: TextWidget(text: submitButtonText),
                       ),
