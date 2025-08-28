@@ -5,10 +5,13 @@ import 'package:sprout/core/widgets/layout.dart';
 class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double screenHeight;
 
+  /// If true, we'll use the full logo and center it and ignore other button requests
+  final bool useFullLogo;
+
   /// Buttons we should show on the app bar
   final Widget Function(BuildContext context, bool isDesktop)? buttonBuilder;
 
-  const SproutAppBar({super.key, required this.screenHeight, this.buttonBuilder});
+  const SproutAppBar({super.key, required this.screenHeight, this.buttonBuilder, this.useFullLogo = false});
 
   static double getHeightFromScreenHeight(double screenHeight) {
     return screenHeight * .06;
@@ -22,7 +25,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
     final theme = Theme.of(context);
 
     return SproutLayoutBuilder((isDesktop, context) {
-      final logo = isDesktop
+      final logo = useFullLogo || isDesktop
           ? Image.asset(
               'assets/logo/color-transparent-no-tag.png',
               width: screenHeight * .12,
@@ -33,12 +36,14 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       final buttons = buttonBuilder != null ? buttonBuilder!(context, isDesktop) : null;
 
-      final content = isDesktop
-          ? Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [logo, ?buttons]),
-            )
-          : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [?buttons, logo]);
+      final content = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: useFullLogo
+            ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [logo])
+            : isDesktop
+            ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [logo, ?buttons])
+            : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [buttons ?? SizedBox.shrink(), logo]),
+      );
 
       return AppBar(
         toolbarHeight: preferredSize.height,

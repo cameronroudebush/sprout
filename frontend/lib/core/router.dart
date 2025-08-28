@@ -1,4 +1,5 @@
 // GoRouter configuration
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/account/dialog/add_account.dart';
@@ -49,6 +50,7 @@ class SproutRouter {
       'Setup',
       icon: Icons.settings_backup_restore,
       renderNav: false,
+      useFullLogo: true,
     ),
     // Connection Setup
     SproutPage(
@@ -57,6 +59,8 @@ class SproutRouter {
       icon: Icons.settings_backup_restore,
       renderNav: false,
       scrollWrapper: false,
+      useFullLogo: true,
+      preserveState: false,
     ),
     // Connection Fail
     SproutPage(
@@ -64,6 +68,7 @@ class SproutRouter {
       'Connection Failure',
       icon: Icons.settings_backup_restore,
       renderNav: false,
+      renderAppBar: false,
       scrollWrapper: false,
     ),
     // Home
@@ -138,10 +143,6 @@ class SproutRouter {
   /// A list of all pages in order including sub pages
   static final allPagesInOrder = SproutRouter.pages.map((e) => [e, ...?e.subPages]).expand((e) => e).toList();
 
-  /// A list of navigator keys, one for each branch. This is crucial for preserving
-  /// the navigation stack state of each branch when switching between them.
-  static final branchNavigatorKeys = pages.map((_) => GlobalKey<NavigatorState>()).toList();
-
   /// The router for navigation around Sprout
   static final router = GoRouter(
     initialLocation: '/login',
@@ -169,6 +170,15 @@ class SproutRouter {
     },
     // Generate routes from pages
     routes: [
+      // Add routes that we don't want to maintain state of
+      ...SproutRouter.pages
+          .where((e) => !e.preserveState)
+          .map((e) {
+            SproutShell childOverride(BuildContext context, GoRouterState state) =>
+                SproutShell(currentPage: e, child: e.page(context, state));
+            return _routesFromPage(e, childOverride: childOverride);
+          })
+          .expand((e) => e),
       // Use an index stack for every page that requires a shell
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -180,38 +190,33 @@ class SproutRouter {
           );
 
           return SproutShell(
-            navigationShell: navigationShell,
             currentPage: currentPage,
             renderAppBar: currentPage.renderAppBar,
             renderNav: currentPage.renderNav,
+            child: navigationShell,
           );
         },
-        branches: SproutRouter.pages.asMap().entries.map((entry) {
-          final index = entry.key;
-          final top = entry.value;
-          return StatefulShellBranch(
-            navigatorKey: branchNavigatorKeys[index],
-            routes: [
-              // Top level route
-              GoRoute(
-                name: top.label.toLowerCase(),
-                path: top.path,
-                pageBuilder: (context, state) => NoTransitionPage(key: state.pageKey, child: top.page(context, state)),
-              ),
-              // Sub routes
-              if (top.subPages != null)
-                ...top.subPages!.map(
-                  (sub) => GoRoute(
-                    name: sub.label.toLowerCase(),
-                    path: sub.path,
-                    pageBuilder: (context, state) =>
-                        NoTransitionPage(key: state.pageKey, child: sub.page(context, state)),
-                  ),
-                ),
-            ],
-          );
+        branches: SproutRouter.pages.where((e) => e.preserveState).mapIndexed((index, top) {
+          return StatefulShellBranch(routes: _routesFromPage(top));
         }).toList(),
       ),
     ],
   );
+
+  /// Generates the route for the given page
+  static List<GoRoute> _routesFromPage(
+    SproutPage page, {
+    Widget Function(BuildContext context, GoRouterState state)? childOverride,
+  }) {
+    final mainRoute = GoRoute(
+      name: page.label.toLowerCase(),
+      path: page.path,
+      pageBuilder: (context, state) => NoTransitionPage(
+        key: state.pageKey,
+        child: childOverride != null ? childOverride(context, state) : page.page(context, state),
+      ),
+    );
+    final subRoutes = page.subPages?.expand((e) => _routesFromPage(e)).toList();
+    return [mainRoute, ...?subRoutes];
+  }
 }

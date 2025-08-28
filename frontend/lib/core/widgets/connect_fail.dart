@@ -2,16 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/connection.dart';
 
 class FailToConnectWidget extends StatelessWidget {
-  /// Called when the connection URL reset button is clicked.
-  final VoidCallback? onConnectionReset;
-
-  const FailToConnectWidget({super.key, this.onConnectionReset});
+  const FailToConnectWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +43,8 @@ class FailToConnectWidget extends StatelessWidget {
                         minSize: screenWidth / 2,
                         onPressed: () async {
                           await ConnectionSetupField.setUrl(null);
-                          // Try to reconnect
-                          await configProvider.populateUnsecureConfig();
-                          if (onConnectionReset != null) onConnectionReset!();
+                          // Try to go to home again
+                          SproutNavigator.redirect("home");
                         },
                       ),
                     ),
