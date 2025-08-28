@@ -13,7 +13,7 @@ import 'package:sprout/core/widgets/text.dart';
 /// A wrapper around the scaffold that renders the navigation selection options as well as the current page
 class SproutShell extends StatelessWidget {
   // This object is provided by GoRouter and contains the state of the branches.
-  final StatefulNavigationShell navigationShell;
+  final Widget child;
 
   /// The current rendered page
   final SproutPage currentPage;
@@ -27,7 +27,7 @@ class SproutShell extends StatelessWidget {
   final ScrollController _scrollController = ScrollController();
 
   SproutShell({
-    required this.navigationShell,
+    required this.child,
     required this.currentPage,
     super.key,
     this.renderAppBar = true,
@@ -47,28 +47,32 @@ class SproutShell extends StatelessWidget {
       /// The app bar we want, if necessary
       final appBar = !renderAppBar
           ? null
-          : SproutAppBar(screenHeight: mediaQuery.height, buttonBuilder: currentPage.buttonBuilder);
+          : SproutAppBar(
+              screenHeight: mediaQuery.height,
+              buttonBuilder: currentPage.buttonBuilder,
+              useFullLogo: currentPage.useFullLogo,
+            );
 
       // The page to render, considering scroll-ability
       final page = currentPage.scrollWrapper
           ? SizedBox(
               width: mediaQuery.width,
               height: mediaQuery.height - (appBar?.preferredSize.height ?? 0),
-              child: SproutScrollView(scrollController: _scrollController, child: navigationShell),
+              child: SproutScrollView(scrollController: _scrollController, child: child),
             )
           : Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [navigationShell]),
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [child]),
             );
 
       return SproutScaffold(
         appBar: appBar,
-        bottomNavigation: !renderNav
+        bottomNavigation: !renderNav || child is! StatefulNavigationShell
             ? null
             : isDesktop
             ? null
             : _getBottomNav(context),
-        drawer: !renderNav
+        drawer: !renderNav || child is! StatefulNavigationShell
             ? null
             : isDesktop
             ? null
@@ -92,6 +96,7 @@ class SproutShell extends StatelessWidget {
   Widget _buildSideNav(BuildContext context, bool isDesktop) {
     final theme = Theme.of(context);
     final buttons = SproutRouter.pages
+        .where((e) => e.preserveState)
         .mapIndexed((i, page) {
           final elements = _buildNavItem(context, page, i, isDesktop);
           if (page.canNavigateTo) {
@@ -134,7 +139,7 @@ class SproutShell extends StatelessWidget {
       SproutNavigator.redirect(page.label);
     }
 
-    final currentTopLevelIndex = navigationShell.currentIndex;
+    final currentTopLevelIndex = (child as StatefulNavigationShell).currentIndex;
     final topLevelPageIsSelected = currentPage.label == page.label || currentTopLevelIndex == index;
     final tiles = [
       ListTile(
@@ -166,7 +171,7 @@ class SproutShell extends StatelessWidget {
   /// Returns the bottom navigation to display
   Widget _getBottomNav(BuildContext context) {
     final theme = Theme.of(context);
-    final topLevelPages = SproutRouter.pages.where((e) => e.canNavigateTo).toList();
+    final topLevelPages = SproutRouter.pages.where((e) => e.preserveState && e.canNavigateTo).toList();
     double fontSize = 8;
     return BottomNavigationBar(
       iconSize: 24,
@@ -187,9 +192,11 @@ class SproutShell extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       enableFeedback: true,
       items: SproutRouter.pages
+          .where((e) => e.preserveState)
           .mapIndexed((i, page) {
             if (!page.canNavigateTo) return null;
-            final isSelected = page.label == currentPage.label || navigationShell.currentIndex == i;
+            print("$i ${page.label} ${currentPage.label} ${(child as StatefulNavigationShell).currentIndex}");
+            final isSelected = page.label == currentPage.label || (child as StatefulNavigationShell).currentIndex == i;
             return BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.all(4.0),

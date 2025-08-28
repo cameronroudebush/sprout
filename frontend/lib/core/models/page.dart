@@ -16,6 +16,9 @@ class SproutPage {
   /// Custom buttons to display on the app bar
   final Widget Function(BuildContext context, bool isDesktop)? buttonBuilder;
 
+  /// If we want to display the full logo on the app bar. Directly conflicts with [buttonBuilder]
+  final bool useFullLogo;
+
   /// Pages that are considered part of this page
   final List<SproutPage>? subPages;
 
@@ -30,6 +33,9 @@ class SproutPage {
 
   /// If we should wrap this element with a scrollable area
   final bool scrollWrapper;
+
+  /// If we should preserve state when switching back between routes. Enabled by default.
+  final bool preserveState;
 
   /// Returns the path for the router
   get path {
@@ -50,6 +56,8 @@ class SproutPage {
     this.renderAppBar = true,
     bool? canNavigateTo,
     this.scrollWrapper = true,
+    this.useFullLogo = false,
+    this.preserveState = true,
   }) : renderNav = renderNav ?? true,
        canNavigateTo = canNavigateTo ?? renderNav ?? true;
 }

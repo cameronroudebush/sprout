@@ -47,11 +47,11 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
-  image_path: "assets/icon/favicon-color.png"
+  image_path: "assets/icon/color.png"
   min_sdk_android: 21
   adaptive_icon_background: "#141a1f"
   adaptive_icon_foreground_inset: 24
-  adaptive_icon_foreground: "assets/icon/favicon-color.png"
+  adaptive_icon_foreground: "assets/icon/color.png"
   # We can't use this because we want to use an SVG as they render better on web
   # web:
   #   generate: true
