@@ -20,9 +20,9 @@ class CurrentNetWorthDisplay extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         final currentNetWorth = netWorthProvider.netWorth ?? 0;
-        final pastNetWorthChange = netWorthProvider.historicalNetWorth?.getValueByFrame(chartRange).valueChange;
-        final pastNetWorth = currentNetWorth - (pastNetWorthChange ?? 0);
-        final percentageChange = ((currentNetWorth - pastNetWorth) / pastNetWorth) * 100;
+        final pastValueRange = netWorthProvider.historicalNetWorth?.getValueByFrame(chartRange);
+        final pastNetWorthChange = pastValueRange?.valueChange;
+        final percentageChange = pastValueRange?.percentChange ?? 0;
 
         return NetWorthTextWidget(
           chartRange,

@@ -76,7 +76,7 @@ class SproutShell extends StatelessWidget {
             ? null
             : isDesktop
             ? null
-            : Drawer(child: _buildSideNav(context, isDesktop)),
+            : Drawer(child: SafeArea(child: _buildSideNav(context, isDesktop))),
         child: isDesktop && renderNav ? _getSideNav(context, page, isDesktop) : page,
       );
     });

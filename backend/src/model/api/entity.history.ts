@@ -55,8 +55,39 @@ export class EntityHistory extends Base {
   }
 
   /**
+   * Filters out outliers from an array of net worth snapshots using the IQR method.
+   * @param snapshots The original array of data points.
+   * @returns A new array with outliers removed.
+   */
+  private static removeOutliersIQR(snapshots: Array<{ date: Date; netWorth: number }>): Array<{ date: Date; netWorth: number }> {
+    // Can't reliably detect outliers with too few data points, so return the original array.
+    if (snapshots.length < 4) {
+      return snapshots;
+    }
+
+    // Get a sorted array of just the net worth values
+    const netWorths = snapshots.map((s) => s.netWorth).sort((a, b) => a - b);
+
+    // Calculate Q1 (25th percentile) and Q3 (75th percentile)
+    const q1Index = Math.floor(netWorths.length * 0.25);
+    const q3Index = Math.floor(netWorths.length * 0.75);
+    const q1 = netWorths[q1Index]!;
+    const q3 = netWorths[q3Index]!;
+
+    // Calculate the Interquartile Range (IQR)
+    const iqr = q3 - q1;
+
+    // Define the upper and lower bounds for what is considered a non-outlier
+    const lowerBound = q1 - 1.5 * iqr;
+    const upperBound = q3 + 1.5 * iqr;
+
+    // Return a new array containing only the snapshots within the valid bounds
+    return snapshots.filter((snapshot) => snapshot.netWorth >= lowerBound && snapshot.netWorth <= upperBound);
+  }
+
+  /**
    * Generates net worth over time for the given days. Returns the history snapshot for
-   *  those days and the percent change averaged over that time period.
+   * those days and the percent change averaged over that time period.
    */
   private static generateNetWorthOverTime(history: AccountHistory[], relatedAccount: Account | undefined, days: number) {
     if (history.length === 0) return { snapshot: [], frame: EntityHistoryDataPoint.fromPlain({ percentChange: 0, valueChange: 0 }) };
@@ -65,34 +96,46 @@ export class EntityHistory extends Base {
     const netWorthSnapshots: Array<{ date: Date; netWorth: number }> = [];
 
     // Populate snapshot for every of the last N days
+    days -= 1; // We want to make sure to only include the correct amount of days in our calculation
     const daysInArray = eachDayOfInterval({ start: subDays(today, days), end: today });
     for (const day of daysInArray) {
       const historyForDay = history.filter((x) => isSameDay(x.time, day));
       const netWorth = historyForDay.reduce((prev, curr) => (prev += curr.balance), 0);
-      netWorthSnapshots.push({ date: day, netWorth });
+      // We only push days that have data to avoid skewing calculations with zero-value days
+      if (historyForDay.length > 0) {
+        netWorthSnapshots.push({ date: day, netWorth });
+      }
     }
 
-    // Calculate the percentage change
-    const firstNetWorth = netWorthSnapshots[0]?.netWorth;
-    const lastNetWorth = netWorthSnapshots[netWorthSnapshots.length - 1]?.netWorth;
+    // --- Call the new function to remove outliers ---
+    const filteredSnapshots = this.removeOutliersIQR(netWorthSnapshots);
+
+    const firstNetWorth = filteredSnapshots[0]?.netWorth;
+    const lastNetWorth = filteredSnapshots[filteredSnapshots.length - 1]?.netWorth;
+
     let percentChange: number | null = null;
     let valueChange = 0;
-    if (firstNetWorth != null && lastNetWorth != null) {
-      percentChange = ((lastNetWorth - firstNetWorth) / firstNetWorth) * 100;
+    if (firstNetWorth != null && lastNetWorth != null && firstNetWorth !== 0) {
+      // Note: Changed denominator to firstNetWorth for a standard percentage change calculation
+      percentChange = ((lastNetWorth - firstNetWorth) / Math.abs(firstNetWorth)) * 100;
       valueChange = lastNetWorth - firstNetWorth;
+    } else if (firstNetWorth === 0 && lastNetWorth != null) {
+      percentChange = lastNetWorth > 0 ? 100 : lastNetWorth < 0 ? -100 : 0; // or Infinity, depending on desired behavior
+      valueChange = lastNetWorth;
     }
+
     // Check if this is a drain on finances because a decrease is actually an increase
     if (relatedAccount?.isNegativeNetWorth) {
       if (percentChange) percentChange = percentChange * -1;
       valueChange = valueChange * -1;
     }
 
-    const frameHistory = netWorthSnapshots.reduce((acc, item) => {
+    const frameHistory = filteredSnapshots.reduce((acc, item) => {
       acc[item.date.getTime()] = item.netWorth;
       return acc;
     }, {} as any);
 
-    return { snapshot: netWorthSnapshots, frame: EntityHistoryDataPoint.fromPlain({ percentChange, valueChange, history: frameHistory }) };
+    return { snapshot: filteredSnapshots, frame: EntityHistoryDataPoint.fromPlain({ percentChange, valueChange, history: frameHistory }) };
   }
 
   /** Given an account history, returns the entity value over time for the given history */
@@ -101,7 +144,7 @@ export class EntityHistory extends Base {
     const sproutAccountLifetime = differenceInDays(new Date(), history[0]?.time ?? 1);
     const boundCallback = EntityHistory.generateNetWorthOverTime.bind(this, history, relatedAccount);
 
-    const last1Day = boundCallback(1);
+    const last1Day = boundCallback(2);
     const last7Days = boundCallback(7);
     const lastMonth = boundCallback(30);
     const lastThreeMonths = boundCallback(90);

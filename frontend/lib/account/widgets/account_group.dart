@@ -159,6 +159,7 @@ class AccountGroupWidget extends StatelessWidget {
                         ),
                       ),
                       Expanded(
+                        flex: 2,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           spacing: 10,
