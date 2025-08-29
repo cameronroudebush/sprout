@@ -14,6 +14,7 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
+import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/holding/api.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/net-worth/api.dart';
@@ -80,26 +81,31 @@ class Main extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context).size;
     return Theme(
       data: AppTheme.dark,
-      child: Center(
-        child: SizedBox(
-          width: mediaQuery.height * .3,
-          height: mediaQuery.height * .3,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: mediaQuery.height * .3,
-                height: mediaQuery.height * .3,
-                child: CircularProgressIndicator(strokeWidth: mediaQuery.height * .01),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: SproutScaffold(
+          child: Center(
+            child: SizedBox(
+              width: mediaQuery.height * .3,
+              height: mediaQuery.height * .3,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: mediaQuery.height * .3,
+                    height: mediaQuery.height * .3,
+                    child: CircularProgressIndicator(strokeWidth: mediaQuery.height * .01),
+                  ),
+                  Image.asset(
+                    'assets/icon/color.png',
+                    height: mediaQuery.height * .15,
+                    width: mediaQuery.height * .15,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ],
               ),
-              Image.asset(
-                'assets/icon/color.png',
-                height: mediaQuery.height * .15,
-                width: mediaQuery.height * .15,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-              ),
-            ],
+            ),
           ),
         ),
       ),

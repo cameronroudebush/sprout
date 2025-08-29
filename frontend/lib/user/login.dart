@@ -1,4 +1,5 @@
-// lib/main.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -37,13 +38,24 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.addListener(_updateButtonState);
     // Attempt initial login
     final authProvider = ServiceLocator.get<AuthProvider>();
-    loginIsRunning = true;
-    authProvider.checkInitialLoginStatus().then((user) {
-      loginIsRunning = false;
-      if (user != null) {
-        SproutNavigator.redirect("home");
-      }
+    setState(() {
+      loginIsRunning = true;
     });
+    authProvider
+        .checkInitialLoginStatus()
+        .then((user) {
+          setState(() {
+            loginIsRunning = false;
+          });
+          if (user != null) {
+            SproutNavigator.redirect("home");
+          }
+        })
+        .onError((Object error, StackTrace stackTrace) {
+          setState(() {
+            loginIsRunning = true;
+          });
+        });
   }
 
   /// Forces a rerender
@@ -60,6 +72,9 @@ class _LoginPageState extends State<LoginPage> {
     }
     User? user;
     try {
+      setState(() {
+        loginIsRunning = true;
+      });
       user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
       // Successful login? Request data and go home
       _usernameController.clear();
@@ -70,6 +85,7 @@ class _LoginPageState extends State<LoginPage> {
       if (user == null) {
         setState(() {
           _message = 'Login failed. Please check credentials.';
+          loginIsRunning = false;
         });
       }
     }
@@ -148,6 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                         width: MediaQuery.of(context).size.width * .5,
                         child: ButtonWidget(
                           text: "Login",
+                          icon: loginIsRunning ? Icons.hourglass_full : null,
                           onPressed: _passwordController.text == "" || _usernameController.text == "" || loginIsRunning
                               ? null
                               : _login,
