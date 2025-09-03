@@ -59,7 +59,7 @@ export class EntityHistory extends Base {
    * @param snapshots The original array of data points.
    * @returns A new array with outliers removed.
    */
-  private static removeOutliersIQR(snapshots: Array<{ date: Date; netWorth: number }>): Array<{ date: Date; netWorth: number }> {
+  static removeOutliersIQR(snapshots: Array<{ date: Date; netWorth: number }>): Array<{ date: Date; netWorth: number }> {
     // Can't reliably detect outliers with too few data points, so return the original array.
     if (snapshots.length < 4) {
       return snapshots;
@@ -107,8 +107,8 @@ export class EntityHistory extends Base {
       }
     }
 
-    // --- Call the new function to remove outliers ---
-    const filteredSnapshots = this.removeOutliersIQR(netWorthSnapshots);
+    // const filteredSnapshots = this.removeOutliersIQR(netWorthSnapshots);
+    const filteredSnapshots = netWorthSnapshots;
 
     const firstNetWorth = filteredSnapshots[0]?.netWorth;
     const lastNetWorth = filteredSnapshots[filteredSnapshots.length - 1]?.netWorth;
@@ -143,6 +143,8 @@ export class EntityHistory extends Base {
     // How far back we have data for, total
     const sproutAccountLifetime = differenceInDays(new Date(), history[0]?.time ?? 1);
     const boundCallback = EntityHistory.generateNetWorthOverTime.bind(this, history, relatedAccount);
+
+    // TODO This seems to be improperly considering the past day
 
     const last1Day = boundCallback(2);
     const last7Days = boundCallback(7);
