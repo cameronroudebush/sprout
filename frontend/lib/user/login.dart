@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // Message to display login status or errors.
   String _message = '';
-  bool loginIsRunning = false;
+  bool _loginIsRunning = false;
 
   @override
   void initState() {
@@ -39,13 +39,13 @@ class _LoginPageState extends State<LoginPage> {
     // Attempt initial login
     final authProvider = ServiceLocator.get<AuthProvider>();
     setState(() {
-      loginIsRunning = true;
+      _loginIsRunning = true;
     });
     authProvider
         .checkInitialLoginStatus()
         .then((user) {
           setState(() {
-            loginIsRunning = false;
+            _loginIsRunning = false;
           });
           if (user != null) {
             SproutNavigator.redirect("home");
@@ -53,7 +53,8 @@ class _LoginPageState extends State<LoginPage> {
         })
         .onError((Object error, StackTrace stackTrace) {
           setState(() {
-            loginIsRunning = true;
+            _loginIsRunning = false;
+            _message = "Login failed. Please check credentials.";
           });
         });
   }
@@ -73,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
     User? user;
     try {
       setState(() {
-        loginIsRunning = true;
+        _loginIsRunning = true;
       });
       user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
       // Successful login? Request data and go home
@@ -85,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
       if (user == null) {
         setState(() {
           _message = 'Login failed. Please check credentials.';
-          loginIsRunning = false;
+          _loginIsRunning = false;
         });
       }
     }
@@ -164,8 +165,8 @@ class _LoginPageState extends State<LoginPage> {
                         width: MediaQuery.of(context).size.width * .5,
                         child: ButtonWidget(
                           text: "Login",
-                          icon: loginIsRunning ? Icons.hourglass_full : null,
-                          onPressed: _passwordController.text == "" || _usernameController.text == "" || loginIsRunning
+                          icon: _loginIsRunning ? Icons.hourglass_full : null,
+                          onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
                               ? null
                               : _login,
                         ),
