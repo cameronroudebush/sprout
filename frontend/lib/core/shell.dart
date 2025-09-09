@@ -195,7 +195,6 @@ class SproutShell extends StatelessWidget {
           .where((e) => e.preserveState)
           .mapIndexed((i, page) {
             if (!page.canNavigateTo) return null;
-            print("$i ${page.label} ${currentPage.label} ${(child as StatefulNavigationShell).currentIndex}");
             final isSelected = page.label == currentPage.label || (child as StatefulNavigationShell).currentIndex == i;
             return BottomNavigationBarItem(
               icon: Padding(

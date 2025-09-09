@@ -17,7 +17,10 @@ import 'package:sprout/user/provider.dart';
 
 /// The main accounts display that contains the chart along side the actual accounts list
 class AccountsOverview extends StatefulWidget {
-  const AccountsOverview({super.key});
+  /// The account type tab to go to by default
+  final String? defaultAccountType;
+
+  const AccountsOverview({super.key, this.defaultAccountType});
 
   @override
   State<AccountsOverview> createState() => _AccountsOverviewState();
@@ -33,9 +36,16 @@ class _AccountsOverviewState extends State<AccountsOverview> {
         final accountTypesContent = accountTypes.map((a) {
           return _buildTabContent(context, a, userProvider, accountProvider, netWorthProvider);
         }).toList();
+        final initialIndex = widget.defaultAccountType == null
+            ? 0
+            : accountTypes.indexOf(widget.defaultAccountType.toString());
         return SizedBox(
           height: mediaQuery.height - SproutAppBar.getHeightFromScreenHeight(mediaQuery.height),
-          child: ScrollableTabsWidget(accountTypes.map((el) => formatAccountType(el)).toList(), accountTypesContent),
+          child: ScrollableTabsWidget(
+            accountTypes.map((el) => formatAccountType(el)).toList(),
+            accountTypesContent,
+            initialIndex: initialIndex == -1 ? 0 : initialIndex,
+          ),
         );
       },
     );
@@ -75,52 +85,57 @@ class _AccountsOverviewState extends State<AccountsOverview> {
     final percentageChange = groupCalc.percentageChange;
     if (accountType == "loan" || accountType == "credit") totalChange *= -1;
 
-    return Column(
-      children: [
-        // Render net worth chart
-        SproutCard(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12, right: 12, left: 12, bottom: 12),
-            child: Column(
-              spacing: 12,
-              children: data.isEmpty
-                  ? [
-                      const SizedBox(
-                        height: 150,
-                        child: Center(child: TextWidget(text: "No data for accounts")),
-                      ),
-                    ]
-                  : [
-                      NetWorthTextWidget(
-                        chartRange,
-                        netWorth,
-                        percentageChange,
-                        totalChange,
-                        title: "${formatAccountType(accountType)} Accounts Value",
-                      ),
-                      SproutLineChart(
-                        data: data,
-                        chartRange: chartRange,
-                        formatValue: (value) => getFormattedCurrency(value),
-                      ),
-                      ChartRangeSelector(
-                        selectedChartRange: chartRange,
-                        onRangeSelected: (value) {
-                          provider.updateChartRange(value);
-                        },
-                      ),
-                    ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Render net worth chart
+          SproutCard(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, right: 12, left: 12, bottom: 12),
+              child: Column(
+                spacing: 12,
+                children: data.isEmpty
+                    ? [
+                        const SizedBox(
+                          height: 150,
+                          child: Center(child: TextWidget(text: "No data for accounts")),
+                        ),
+                      ]
+                    : [
+                        NetWorthTextWidget(
+                          chartRange,
+                          netWorth,
+                          percentageChange,
+                          totalChange,
+                          title: "${formatAccountType(accountType)} Accounts Value",
+                          applyColor: true,
+                        ),
+                        SproutLineChart(
+                          data: data,
+                          chartRange: chartRange,
+                          formatValue: (value) => getFormattedCurrency(value),
+                          showYAxis: false,
+                          showXAxis: true,
+                        ),
+                        ChartRangeSelector(
+                          selectedChartRange: chartRange,
+                          onRangeSelected: (value) {
+                            provider.updateChartRange(value);
+                          },
+                        ),
+                      ],
+              ),
             ),
           ),
-        ),
-        // Render accounts
-        AccountsWidget(
-          allowCollapse: false,
-          netWorthPeriod: chartRange,
-          accountType: accountType,
-          showGroupTitles: false,
-        ),
-      ],
+          // Render accounts
+          AccountsWidget(
+            allowCollapse: false,
+            netWorthPeriod: chartRange,
+            accountType: accountType,
+            showGroupTitles: false,
+          ),
+        ],
+      ),
     );
   }
 }

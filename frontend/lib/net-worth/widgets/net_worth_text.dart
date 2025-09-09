@@ -14,6 +14,8 @@ class NetWorthTextWidget extends StatelessWidget {
   final double? percentageChange;
   final double? totalChange;
 
+  final bool applyColor;
+
   const NetWorthTextWidget(
     this.chartRange,
     this.netWorth,
@@ -22,10 +24,12 @@ class NetWorthTextWidget extends StatelessWidget {
     super.key,
     this.title = "Net Worth",
     this.renderTitle = true,
+    this.applyColor = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsetsGeometry.all(12),
       child: Column(
@@ -36,9 +40,8 @@ class NetWorthTextWidget extends StatelessWidget {
           TextWidget(
             referenceSize: 2.25,
             text: getFormattedCurrency(netWorth),
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: applyColor ? getBalanceColor(netWorth, theme) : null),
           ),
-
           Padding(
             padding: EdgeInsetsGeometry.only(left: 12),
             child: AccountChangeWidget(

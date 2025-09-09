@@ -30,7 +30,7 @@ class ChartRangeUtility {
       case ChartRange.sevenDays:
         return 1;
       case ChartRange.oneMonth:
-        return 6;
+        return 7;
       // case ChartRange.oneYear:
       default:
         return 30;
@@ -40,6 +40,7 @@ class ChartRangeUtility {
   /// Given a chart range, returns the date format to use for displaying that chart data
   static String getDateFormat(ChartRange chartRange) {
     switch (chartRange) {
+      case ChartRange.oneDay:
       case ChartRange.sevenDays:
         return 'EEE';
       case ChartRange.oneMonth:

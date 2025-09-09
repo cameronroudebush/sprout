@@ -73,7 +73,6 @@ class AccountGroupWidget extends StatelessWidget {
     if (filteredGroupData != null) {
       for (final element in filteredGroupData) {
         final valueByFrame = element.getValueByFrame(chartRange);
-        // TODO This seems to be off
         groupAmountChange += valueByFrame.valueChange;
       }
     }
