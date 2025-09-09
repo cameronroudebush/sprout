@@ -91,7 +91,7 @@ class AccountsWidget extends StatelessWidget {
           applyCard: applyCard,
           showGroupTitles: showGroupTitles,
           onAccountClick: (account) {
-            SproutNavigator.redirect("account", extra: account);
+            SproutNavigator.redirect("account", queryParameters: {"acc": account.id});
           },
         );
       },

@@ -3,8 +3,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/account/dialog/add_account.dart';
-import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/overview.dart';
+import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
@@ -75,7 +75,10 @@ class SproutRouter {
     SproutPage((context, state) => HomePage(), 'Home', icon: Icons.home),
     // Accounts
     SproutPage(
-      (context, state) => AccountsOverview(),
+      (context, state) {
+        final accType = state.uri.queryParameters["acc-type"];
+        return AccountsOverview(defaultAccountType: accType);
+      },
       'Accounts',
       icon: Icons.account_balance,
       buttonBuilder: (BuildContext context, bool isDesktop) {
@@ -100,7 +103,9 @@ class SproutRouter {
         SproutPage((context, state) => HoldingsOverview(), 'Holdings', icon: Icons.stacked_line_chart_rounded),
         SproutPage(
           (context, state) {
-            final Account? account = state.extra as Account?;
+            final accountProvider = ServiceLocator.get<AccountProvider>();
+            final accountId = state.uri.queryParameters["acc"];
+            final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
             if (account == null) {
               return const Text('Error: Account not found');
             }
@@ -110,6 +115,11 @@ class SproutRouter {
           icon: Icons.account_balance_wallet,
           canNavigateTo: false,
           buttonBuilder: (context, isDesktop) {
+            final accountProvider = ServiceLocator.get<AccountProvider>();
+            final state = GoRouter.of(context).state;
+            final accountId = state.uri.queryParameters["acc"];
+            final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
+            void redirect() => SproutNavigator.redirect("accounts", queryParameters: {"acc-type": account?.type});
             // Back to accounts
             return Expanded(
               child: Padding(
@@ -120,11 +130,10 @@ class SproutRouter {
                       FilledButton.icon(
                         icon: Icon(Icons.arrow_back),
                         style: AppTheme.primaryButton,
-                        onPressed: () => SproutNavigator.redirect("accounts"),
+                        onPressed: redirect,
                         label: TextWidget(text: "Back to accounts"),
                       ),
-                    if (!isDesktop)
-                      IconButton(onPressed: () => SproutNavigator.redirect("accounts"), icon: Icon(Icons.arrow_back)),
+                    if (!isDesktop) IconButton(onPressed: redirect, icon: Icon(Icons.arrow_back)),
                   ],
                 ),
               ),

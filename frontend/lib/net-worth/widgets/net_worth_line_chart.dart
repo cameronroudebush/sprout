@@ -10,7 +10,13 @@ class NetWorthLineChart extends StatelessWidget {
   /// The chart range to render of
   final ChartRange chartRange;
 
-  const NetWorthLineChart({super.key, required this.chartRange});
+  /// If the y axis number should be shown
+  final bool showYAxis;
+
+  /// If the x axis dates should be shown
+  final bool showXAxis;
+
+  const NetWorthLineChart({super.key, required this.chartRange, this.showYAxis = false, this.showXAxis = true});
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +30,8 @@ class NetWorthLineChart extends StatelessWidget {
             data: data,
             chartRange: chartRange,
             formatValue: (value) => getFormattedCurrency(value),
+            showYAxis: showYAxis,
+            showXAxis: showXAxis,
           );
         }
       },

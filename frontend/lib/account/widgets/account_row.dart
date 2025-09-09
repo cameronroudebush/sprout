@@ -35,6 +35,9 @@ class AccountRowWidget extends StatelessWidget {
   /// If we want to show the netWorthPeriod string in the percentage change
   final bool showPeriod;
 
+  /// If we should apply the green/red color to the total
+  final bool applyColorToTotal;
+
   const AccountRowWidget({
     super.key,
     required this.account,
@@ -46,6 +49,7 @@ class AccountRowWidget extends StatelessWidget {
     this.allowClick = true,
     this.showPercentage = false,
     this.showPeriod = false,
+    this.applyColorToTotal = false,
   });
 
   @override
@@ -152,11 +156,19 @@ class AccountRowWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           // Account balance
-                          if (displayTotals) TextWidget(text: getFormattedCurrency(account.balance)),
+                          if (displayTotals)
+                            TextWidget(
+                              text: getFormattedCurrency(account.balance),
+                              style: TextStyle(
+                                color: applyColorToTotal ? getBalanceColor(account.balance, theme) : null,
+                              ),
+                            ),
                           // If our day change is null, we don't have enough data to come up with a calculation
                           if (dayChange != null && displayStats)
                             AccountChangeWidget(
-                              percentageChange: dayChange.percentChange,
+                              percentageChange: account.isNegativeNetWorth && dayChange.percentChange != null
+                                  ? dayChange.percentChange! * -1
+                                  : dayChange.valueChange,
                               totalChange: account.isNegativeNetWorth
                                   ? dayChange.valueChange * -1
                                   : dayChange.valueChange,
