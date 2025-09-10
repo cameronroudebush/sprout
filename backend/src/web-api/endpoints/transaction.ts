@@ -57,4 +57,9 @@ export class TransactionAPI {
       categories,
     });
   }
+
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.subscriptions, "GET"))
+  async getSubscriptions(_request: RestBody, user: User) {
+    return await Transaction.findSubscriptions(user);
+  }
 }
