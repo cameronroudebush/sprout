@@ -2,6 +2,7 @@ import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/models/transaction.stats.dart';
+import 'package:sprout/transaction/models/transaction.subscriptions.dart';
 
 /// Class that provides the store of current transactions
 class TransactionProvider extends BaseProvider<TransactionAPI> {
@@ -9,11 +10,13 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   int _totalTransactionCount = 0;
   TransactionStats? _transactionStats;
   List<Transaction> _transactions = [];
+  List<TransactionSubscription> _subscriptions = [];
 
   // Public getters
   List<Transaction> get transactions => _transactions;
   int get totalTransactionCount => _totalTransactionCount;
   TransactionStats? get transactionStats => _transactionStats;
+  List<TransactionSubscription> get subscriptions => _subscriptions;
 
   TransactionProvider(super.api);
 
@@ -52,6 +55,11 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return _transactions;
   }
 
+  /// Populates subscription information built from transactions
+  Future<List<TransactionSubscription>> populateSubscriptions() async {
+    return _subscriptions = await api.getSubscriptions();
+  }
+
   @override
   Future<void> updateData() async {
     isLoading = true;
@@ -59,6 +67,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     await populateTotalTransactionCount();
     await populateStats();
     await populateTransactions(0, 20); // Grab some to start
+    await populateSubscriptions();
     isLoading = false;
     notifyListeners();
   }

@@ -9,8 +9,9 @@ import 'package:timeago/timeago.dart' as timeago;
 class TransactionRow extends StatelessWidget {
   final Transaction? transaction;
   final bool isEvenRow;
+  final bool renderPostedTime;
 
-  const TransactionRow({required this.transaction, required this.isEvenRow});
+  const TransactionRow({super.key, required this.transaction, required this.isEvenRow, this.renderPostedTime = true});
 
   IconData _getIconForCategory(String? category) {
     if (category == null) {
@@ -133,17 +134,18 @@ class TransactionRow extends StatelessWidget {
                       textAlign: TextAlign.end,
                     ),
                     // Time
-                    Row(
-                      spacing: 4,
-                      children: [
-                        TextWidget(
-                          referenceSize: .9,
-                          text: timeText,
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        Icon(Icons.calendar_month, color: Colors.grey),
-                      ],
-                    ),
+                    if (renderPostedTime)
+                      Row(
+                        spacing: 4,
+                        children: [
+                          TextWidget(
+                            referenceSize: .9,
+                            text: timeText,
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Icon(Icons.calendar_month, color: Colors.grey),
+                        ],
+                      ),
                   ],
                 ),
               ],

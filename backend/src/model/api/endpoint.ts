@@ -39,6 +39,7 @@ export module RestEndpoints {
     static count = "/transaction/count";
     static stats = "/transaction/stats";
     static getByDescription = "/transaction/get/by/description";
+    static subscriptions = "/transaction/subscriptions";
   }
 
   /** Net worth endpoints for finance data */
