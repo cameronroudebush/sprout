@@ -23,6 +23,12 @@ jobs:
         with:
           fetch-depth: "0"
 
+      - name: Generate Changelogs
+        id: generate_changelogs
+        uses: ./.github/actions/generate-changelog
+        with:
+          starting-version: ${{ steps.get_repo_info.outputs.version_string }}
+
       - name: Create GitHub Release
         if: ${{ steps.get_repo_info.outputs.is_tagged_commit == 'true' }}
         id: create_release
@@ -35,8 +41,10 @@ jobs:
                 <img width="40%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png">
             </p>
 
+            ${{ steps.generate_changelogs.outputs.markdown_changelog  }}
+
             # Additional Information
-            [🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy.html) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/docs.html) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md)
+            [🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy.html) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/docs.html) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/blob/master/CHANGELOG.md)
           prerelease: false
           draft: true
           generate_release_notes: true

@@ -1,0 +1,52 @@
+name: "Generate Changelogs"
+description: "Sets up Node.js, installs auto-changelog, and generates both Markdown and Android-formatted changelogs."
+
+# Define the inputs this action requires
+inputs:
+  starting-version:
+    description: "The starting version tag for generating the changelog (e.g., v1.2.3)."
+    required: true
+  markdown-template:
+    description: "Path to the markdown template file."
+    required: true
+    default: "./docs/changelog-templates/markdown.hbs"
+  android-template:
+    description: "Path to the android template file."
+    required: true
+    default: "./docs/changelog-templates/android.hbs"
+
+# Define the outputs this action will provide
+outputs:
+  markdown_changelog:
+    description: "The full changelog in Markdown format."
+    value: ${{ steps.generate.outputs.markdown_changelog }}
+  android_changelog:
+    description: "The concise changelog formatted for the Google Play Store."
+    value: ${{ steps.generate.outputs.android_changelog }}
+
+# Define the steps to run
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install auto-changelog
+      shell: bash
+      run: npm install -g auto-changelog
+
+    - name: Generate Changelog Outputs
+      id: generate
+      shell: bash
+      run: |
+        # Generate the standard markdown changelog for GitHub Releases
+        echo "markdown_changelog<<EOF" >> $GITHUB_OUTPUT
+        auto-changelog --stdout --starting-version ${{ inputs.starting-version }} --template ${{ inputs.markdown-template }} >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        # Generate the Android-specific changelog for the Google Play Store
+        echo "android_changelog<<EOF" >> $GITHUB_OUTPUT
+        auto-changelog --stdout --starting-version ${{ inputs.starting-version }} --template ${{ inputs.android-template }} >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT

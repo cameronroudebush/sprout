@@ -4,13 +4,44 @@
     "install:all": "npm i && npm i --prefix ./backend",
     "build:docker": "ts-node --project ./backend/tsconfig.build.json ./scripts/build.docker.ts",
     "prettier:check": "prettier . --check",
-    "prettier:write": "prettier . --write"
+    "prettier:write": "prettier . --write",
+    "changelog:generate:md": "auto-changelog --template ./docs/changelog-templates/markdown.hbs",
+    "changelog:generate:android": "auto-changelog --template ./docs/changelog-templates/android.hbs"
   },
   "devDependencies": {
+    "auto-changelog": "^2.5.0",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2"
   },
   "prettier": {
     "printWidth": 160
+  },
+  "auto-changelog": {
+    "template": "./docs/changelog-template.hbs",
+    "package": true,
+    "commitLimit": false,
+    "hideEmptyReleases": true,
+    "sortCommits": "date-desc",
+    "unreleased": true,
+    "replaceText": {
+      "([bB]reaking [cC]hange:)": "Breaking Change:",
+      "([bB]reaking:)": "Breaking:",
+      "(^[fF]eat:)": "",
+      "(^[fF]eat\\()": "(",
+      "(^[fF]ix:)": "",
+      "(^[fF]ix\\()": "(",
+      "(^[cC]hore:)": "",
+      "(^[cC]hore\\()": "(",
+      "(^[dD]ocs:)": "",
+      "(^[dD]ocs\\()": "(",
+      "(^[rR]efactor:)": "",
+      "(^[rR]efactor\\()": "(",
+      "(^[tT]est:)": "",
+      "(^[tT]est\\()": "(",
+      "(^[sS]tyle:)": "",
+      "(^[sS]tyle\\()": "(",
+      "(^[pP]erf:)": "",
+      "(^[pP]erf\\()": "("
+    }
   }
 }
