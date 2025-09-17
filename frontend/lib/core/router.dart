@@ -61,7 +61,6 @@ class SproutRouter {
       renderNav: false,
       scrollWrapper: false,
       useFullLogo: true,
-      preserveState: false,
     ),
     // Connection Fail
     SproutPage(
@@ -73,7 +72,7 @@ class SproutRouter {
       scrollWrapper: false,
     ),
     // Home
-    SproutPage((context, state) => HomePage(), 'Home', icon: Icons.home),
+    SproutPage((context, state) => HomePage(), 'Home', icon: Icons.home, showOnBottomNav: true),
     // Accounts
     SproutPage(
       (context, state) {
@@ -82,6 +81,7 @@ class SproutRouter {
       },
       'Accounts',
       icon: Icons.account_balance,
+      showOnBottomNav: true,
       buttonBuilder: (BuildContext context, bool isDesktop) {
         return Row(
           children: [
@@ -100,65 +100,64 @@ class SproutRouter {
           ],
         );
       },
-      subPages: [
-        SproutPage((context, state) => HoldingsOverview(), 'Holdings', icon: Icons.stacked_line_chart_rounded),
-        SproutPage(
-          (context, state) {
-            final accountProvider = ServiceLocator.get<AccountProvider>();
-            final accountId = state.uri.queryParameters["acc"];
-            final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
-            if (account == null) {
-              return const Text('Error: Account not found');
-            }
-            return AccountWidget(account);
-          },
-          'Account',
-          icon: Icons.account_balance_wallet,
-          canNavigateTo: false,
-          buttonBuilder: (context, isDesktop) {
-            final accountProvider = ServiceLocator.get<AccountProvider>();
-            final state = GoRouter.of(context).state;
-            final accountId = state.uri.queryParameters["acc"];
-            final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
-            void redirect() => SproutNavigator.redirect("accounts", queryParameters: {"acc-type": account?.type});
-            // Back to accounts
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsetsGeometry.only(left: isDesktop ? 24 : 0),
-                child: Row(
-                  children: [
-                    if (isDesktop)
-                      FilledButton.icon(
-                        icon: Icon(Icons.arrow_back),
-                        style: AppTheme.primaryButton,
-                        onPressed: redirect,
-                        label: TextWidget(text: "Back to accounts"),
-                      ),
-                    if (!isDesktop) IconButton(onPressed: redirect, icon: Icon(Icons.arrow_back)),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
     ),
-
+    // Overall Holdings
+    SproutPage((context, state) => HoldingsOverview(), 'Holdings', icon: Icons.stacked_line_chart_rounded),
+    // Singular account
+    SproutPage(
+      (context, state) {
+        final accountProvider = ServiceLocator.get<AccountProvider>();
+        final accountId = state.uri.queryParameters["acc"];
+        final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
+        if (account == null) {
+          return const Text('Error: Account not found');
+        }
+        return AccountWidget(account);
+      },
+      'Account',
+      icon: Icons.account_balance_wallet,
+      canNavigateTo: false,
+      buttonBuilder: (context, isDesktop) {
+        final accountProvider = ServiceLocator.get<AccountProvider>();
+        final state = GoRouter.of(context).state;
+        final accountId = state.uri.queryParameters["acc"];
+        final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
+        void redirect() => SproutNavigator.redirect("accounts", queryParameters: {"acc-type": account?.type});
+        // Back to accounts
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsetsGeometry.only(left: isDesktop ? 24 : 0),
+            child: Row(
+              children: [
+                if (isDesktop)
+                  FilledButton.icon(
+                    icon: Icon(Icons.arrow_back),
+                    style: AppTheme.primaryButton,
+                    onPressed: redirect,
+                    label: TextWidget(text: "Back to accounts"),
+                  ),
+                if (!isDesktop) IconButton(onPressed: redirect, icon: Icon(Icons.arrow_back)),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
     // Transactions
     SproutPage(
       (context, state) => TransactionsOverviewPage(),
       'Transactions',
       icon: Icons.receipt,
-      subPages: [
-        SproutPage((context, state) => TransactionMonthlySubscriptions(), 'Subscriptions', icon: Icons.subscriptions),
-      ],
+      showOnBottomNav: true,
     ),
+    // Subscriptions
+    SproutPage((context, state) => TransactionMonthlySubscriptions(), 'Subscriptions', icon: Icons.subscriptions),
     // Settings
-    SproutPage((context, state) => UserPage(), 'Settings', icon: Icons.settings),
+    SproutPage((context, state) => UserPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
   ];
 
   /// A list of all pages in order including sub pages
-  static final allPagesInOrder = SproutRouter.pages.map((e) => [e, ...?e.subPages]).expand((e) => e).toList();
+  static final allPagesInOrder = SproutRouter.pages.toList();
 
   /// The router for navigation around Sprout
   static final router = GoRouter(
@@ -182,58 +181,35 @@ class SproutRouter {
       // Check if we're already authenticated (JWT or not)
       if (!authProvider.isLoggedIn) return "/login";
 
+      // If we're already logged in and somehow going back to login, kick them back to home
+      final isGoingToLogin = state.matchedLocation == '/login';
+      if (authProvider.isLoggedIn && isGoingToLogin) {
+        return '/';
+      }
+
       // No case hit? Don't redirect
       return null;
     },
     // Generate routes from pages
-    routes: [
-      // Add routes that we don't want to maintain state of
-      ...SproutRouter.pages
-          .where((e) => !e.preserveState)
-          .map((e) {
-            SproutShell childOverride(BuildContext context, GoRouterState state) =>
-                SproutShell(currentPage: e, child: e.page(context, state));
-            return _routesFromPage(e, childOverride: childOverride);
-          })
-          .expand((e) => e),
-      // Use an index stack for every page that requires a shell
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          final String? currentPath = state.fullPath;
-          final SproutPage currentPage = allPagesInOrder.firstWhere(
-            (p) => p.path == currentPath,
-            // As a fallback, use the top-level page of the current branch. This is a safe default.
-            orElse: () => pages[navigationShell.currentIndex],
-          );
-
-          return SproutShell(
-            currentPage: currentPage,
-            renderAppBar: currentPage.renderAppBar,
-            renderNav: currentPage.renderNav,
-            child: navigationShell,
-          );
-        },
-        branches: SproutRouter.pages.where((e) => e.preserveState).mapIndexed((index, top) {
-          return StatefulShellBranch(routes: _routesFromPage(top));
-        }).toList(),
-      ),
-    ],
+    routes: SproutRouter.pages.map((page) => _routeFromPage(page)).toList(),
   );
 
   /// Generates the route for the given page
-  static List<GoRoute> _routesFromPage(
-    SproutPage page, {
-    Widget Function(BuildContext context, GoRouterState state)? childOverride,
-  }) {
-    final mainRoute = GoRoute(
+  static GoRoute _routeFromPage(SproutPage page) {
+    return GoRoute(
       name: page.label.toLowerCase(),
       path: page.path,
       pageBuilder: (context, state) => NoTransitionPage(
         key: state.pageKey,
-        child: childOverride != null ? childOverride(context, state) : page.page(context, state),
+        child: SproutShell(
+          currentPage: page,
+          renderAppBar: page.renderAppBar,
+          renderNav: page.renderNav,
+          child: page.page(context, state),
+        ),
       ),
     );
-    final subRoutes = page.subPages?.expand((e) => _routesFromPage(e)).toList();
-    return [mainRoute, ...?subRoutes];
   }
 }
+
+// TODO: Sub page routes

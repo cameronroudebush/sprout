@@ -19,9 +19,6 @@ class SproutPage {
   /// If we want to display the full logo on the app bar. Directly conflicts with [buttonBuilder]
   final bool useFullLogo;
 
-  /// Pages that are considered part of this page
-  final List<SproutPage>? subPages;
-
   /// If we should render the navigation bar. Disabling this also makes it so the user can't navigate to it.
   final bool renderNav;
 
@@ -34,8 +31,11 @@ class SproutPage {
   /// If we should wrap this element with a scrollable area
   final bool scrollWrapper;
 
-  /// If we should preserve state when switching back between routes. Enabled by default.
-  final bool preserveState;
+  /// If this should be shown on the bottom navigation. Default is false.
+  final bool showOnBottomNav;
+
+  /// If we should show on the sidenav. Default is true.
+  final bool showOnSideNav;
 
   /// Returns the path for the router
   get path {
@@ -51,13 +51,13 @@ class SproutPage {
     this.label, {
     required this.icon,
     this.buttonBuilder,
-    this.subPages,
     bool? renderNav,
     this.renderAppBar = true,
     bool? canNavigateTo,
     this.scrollWrapper = true,
     this.useFullLogo = false,
-    this.preserveState = true,
+    this.showOnBottomNav = false,
+    this.showOnSideNav = true,
   }) : renderNav = renderNav ?? true,
        canNavigateTo = canNavigateTo ?? renderNav ?? true;
 }

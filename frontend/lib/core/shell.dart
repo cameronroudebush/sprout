@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/models/page.dart';
 import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/widgets/app_bar.dart';
+import 'package:sprout/core/widgets/exit.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/scroll.dart';
@@ -24,9 +26,7 @@ class SproutShell extends StatelessWidget {
   /// If navigation should be rendered
   final bool renderNav;
 
-  final ScrollController _scrollController = ScrollController();
-
-  SproutShell({
+  const SproutShell({
     required this.child,
     required this.currentPage,
     super.key,
@@ -39,11 +39,6 @@ class SproutShell extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context).size;
 
     return SproutLayoutBuilder((isDesktop, context) {
-      // Auto scroll back to the top on page switches
-      Future.delayed(const Duration(milliseconds: 1), () {
-        if (_scrollController.positions.isNotEmpty) _scrollController.jumpTo(0);
-      });
-
       /// The app bar we want, if necessary
       final appBar = !renderAppBar
           ? null
@@ -58,26 +53,28 @@ class SproutShell extends StatelessWidget {
           ? SizedBox(
               width: mediaQuery.width,
               height: mediaQuery.height - (appBar?.preferredSize.height ?? 0),
-              child: SproutScrollView(scrollController: _scrollController, child: child),
+              child: SproutScrollView(child: child),
             )
           : Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [child]),
             );
 
-      return SproutScaffold(
-        appBar: appBar,
-        bottomNavigation: !renderNav || child is! StatefulNavigationShell
-            ? null
-            : isDesktop
-            ? null
-            : _getBottomNav(context),
-        drawer: !renderNav || child is! StatefulNavigationShell
-            ? null
-            : isDesktop
-            ? null
-            : Drawer(child: SafeArea(child: _buildSideNav(context, isDesktop))),
-        child: isDesktop && renderNav ? _getSideNav(context, page, isDesktop) : page,
+      return ExitWidget(
+        child: SproutScaffold(
+          appBar: appBar,
+          bottomNavigation: !renderNav
+              ? null
+              : isDesktop
+              ? null
+              : _getBottomNav(context),
+          drawer: !renderNav
+              ? null
+              : isDesktop
+              ? null
+              : Drawer(child: SafeArea(child: _buildSideNav(context, isDesktop))),
+          child: isDesktop && renderNav ? _getSideNav(context, page, isDesktop) : page,
+        ),
       );
     });
   }
@@ -95,8 +92,9 @@ class SproutShell extends StatelessWidget {
   // This is the widget for the side navigation menu.
   Widget _buildSideNav(BuildContext context, bool isDesktop) {
     final theme = Theme.of(context);
+    final authProvider = ServiceLocator.get<AuthProvider>();
     final buttons = SproutRouter.pages
-        .where((e) => e.preserveState)
+        .where((e) => e.canNavigateTo && e.showOnSideNav)
         .mapIndexed((i, page) {
           final elements = _buildNavItem(context, page, i, isDesktop);
           if (page.canNavigateTo) {
@@ -111,18 +109,47 @@ class SproutShell extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          // ListView.separated is the best way to build a list with dividers between items.
-          child: ListView(
-            padding: EdgeInsets.zero,
+          child: Column(
             children: [
-              if (!isDesktop) ...[
-                Padding(
-                  padding: EdgeInsetsGeometry.symmetric(vertical: 12),
-                  child: Image.asset('assets/logo/color-transparent-no-tag.png', height: 64),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (!isDesktop) ...[
+                      Padding(
+                        padding: EdgeInsetsGeometry.symmetric(vertical: 12),
+                        child: Image.asset('assets/logo/color-transparent-no-tag.png', height: 64),
+                      ),
+                      Divider(height: 4, color: theme.colorScheme.secondary),
+                    ],
+                    ...buttons.map((e) => [e, const Divider(height: 1)]).expand((e) => e),
+                  ],
                 ),
-                Divider(height: 4, color: theme.colorScheme.secondary),
-              ],
-              ...buttons.map((e) => [e, const Divider(height: 1)]).expand((e) => e),
+              ),
+
+              // Settings button
+              Padding(
+                padding: EdgeInsetsGeometry.all(12),
+                child: FilledButton(
+                  onPressed: () {
+                    final settingsPage = SproutRouter.pages.firstWhereOrNull(
+                      (e) => e.label.toLowerCase() == "settings",
+                    );
+                    if (settingsPage != null) {
+                      _navigateToPage(context, settingsPage, isDesktop);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 12,
+                    children: [
+                      Icon(Icons.settings, size: 36),
+                      TextWidget(referenceSize: 1.5, text: authProvider.currentUser?.prettyName ?? ""),
+                      const SizedBox.shrink(),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -131,48 +158,32 @@ class SproutShell extends StatelessWidget {
     );
   }
 
+  /// Navigates to the given page. Intended for the drawer.
+  void _navigateToPage(BuildContext context, SproutPage page, bool isDesktop) {
+    // Close the drawer on mobile
+    if (!isDesktop) Navigator.pop(context);
+    SproutNavigator.redirect(page.label);
+  }
+
   /// Builds a navigation item, which can be a regular [ListTile] or an [ExpansionTile] if it has sub-pages.
   List<Widget> _buildNavItem(BuildContext context, SproutPage page, int index, bool isDesktop) {
-    void navigate(SproutPage page) {
-      // Close the drawer on mobile
-      if (!isDesktop) Navigator.pop(context);
-      SproutNavigator.redirect(page.label);
-    }
-
-    final currentTopLevelIndex = (child as StatefulNavigationShell).currentIndex;
-    final topLevelPageIsSelected = currentPage.label == page.label || currentTopLevelIndex == index;
+    final topLevelPageIsSelected = currentPage.label == page.label;
     final tiles = [
       ListTile(
         leading: Icon(page.icon),
         title: TextWidget(text: page.label),
         selected: topLevelPageIsSelected,
-        onTap: () => navigate(page),
+        onTap: () => _navigateToPage(context, page, isDesktop),
       ),
     ];
-
-    // If page has sub-pages, return them with my current
-    if (page.subPages?.isNotEmpty ?? false) {
-      tiles.addAll(
-        // Include sub pages
-        page.subPages!.where((e) => e.canNavigateTo).map((subPage) {
-          return ListTile(
-            contentPadding: const EdgeInsets.only(left: 30.0),
-            title: TextWidget(text: subPage.label),
-            leading: Icon(subPage.icon),
-            selected: currentPage.label == subPage.label,
-            onTap: () => navigate(subPage),
-          );
-        }),
-      );
-    }
     return tiles;
   }
 
   /// Returns the bottom navigation to display
   Widget _getBottomNav(BuildContext context) {
     final theme = Theme.of(context);
-    final topLevelPages = SproutRouter.pages.where((e) => e.preserveState && e.canNavigateTo).toList();
     double fontSize = 8;
+    final bottomNavButtons = SproutRouter.pages.where((e) => e.canNavigateTo && e.showOnBottomNav).toList();
     return BottomNavigationBar(
       iconSize: 24,
       selectedFontSize: fontSize,
@@ -181,21 +192,19 @@ class SproutShell extends StatelessWidget {
       showSelectedLabels: true,
       unselectedLabelStyle: TextStyle(fontSize: fontSize),
       selectedLabelStyle: TextStyle(fontSize: fontSize),
-      // currentIndex: currentTopLevelIndex,
       onTap: (index) {
-        final selectedTopLevelPage = topLevelPages[index];
-        SproutNavigator.redirect(selectedTopLevelPage.label);
+        final page = bottomNavButtons[index];
+        SproutNavigator.redirect(page.label);
       },
       backgroundColor: theme.colorScheme.primaryContainer,
       selectedItemColor: theme.colorScheme.secondaryContainer,
       unselectedItemColor: theme.colorScheme.onPrimaryContainer,
       type: BottomNavigationBarType.fixed,
       enableFeedback: true,
-      items: SproutRouter.pages
-          .where((e) => e.preserveState)
+      items: bottomNavButtons
           .mapIndexed((i, page) {
             if (!page.canNavigateTo) return null;
-            final isSelected = page.label == currentPage.label || (child as StatefulNavigationShell).currentIndex == i;
+            final isSelected = page.label == currentPage.label;
             return BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.all(4.0),
