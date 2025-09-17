@@ -14,6 +14,22 @@ String getFormattedCurrency(dynamic value, {bool round = false}) {
   return userProvider.currentUserConfig?.privateMode == true ? "***" : currencyFormatter.format(value);
 }
 
+/// Returns the formatted currency but in a short format
+String getShortFormattedCurrency(dynamic number) {
+  final userProvider = ServiceLocator.get<UserProvider>();
+  String returnVal;
+  if (number >= 1000000000) {
+    returnVal = '\$${(number / 1000000000).toStringAsFixed(1)}B';
+  } else if (number >= 1000000) {
+    returnVal = '\$${(number / 1000000).toStringAsFixed(1)}M';
+  } else if (number >= 1000) {
+    returnVal = '\$${(number / 1000).toStringAsFixed(1)}K';
+  } else {
+    returnVal = '\$${number.toStringAsFixed(0)}';
+  }
+  return userProvider.currentUserConfig?.privateMode == true ? "***" : returnVal;
+}
+
 String formatDate(DateTime date, {bool includeTime = false}) {
   final format = includeTime ? "MM/dd/yyyy HH:mm" : "MM/dd/yyyy";
   return DateFormat(format).format(date.toLocal());

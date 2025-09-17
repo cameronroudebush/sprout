@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
 
 /// A generic calendar intended to display the given content
 class SproutCalendar<T> extends StatefulWidget {
@@ -58,6 +59,18 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
     });
   }
 
+  void _focusDay(DateTime day) {
+    final events = widget.events.where((e) {
+      return widget.isOnDay(day, e);
+    }).toList();
+    setState(() {
+      _focusedDate = day;
+    });
+    if (widget.onDaySelected != null) {
+      widget.onDaySelected!(day, events);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -73,8 +86,23 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Flex space holder
-              Expanded(flex: 1, child: const SizedBox.shrink()),
+              // Go to todays date button
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    SproutTooltip(
+                      message: "Go to today's date.",
+                      child: IconButton(
+                        icon: Icon(Icons.today),
+                        onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now())
+                            ? () => _focusDay(DateTime.now())
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Text(
                 DateFormat.yMMMM().format(_focusedDate),
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -101,6 +129,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
             ],
           ),
         ),
+        const Divider(height: 1),
         // Day of Week Headers
         GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
@@ -142,12 +171,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
               events: eventsForDay,
               eventMarkerBuilder: widget.dayDisplay,
               onDaySelected: (day, List<T> events) {
-                setState(() {
-                  _focusedDate = day;
-                });
-                if (widget.onDaySelected != null) {
-                  widget.onDaySelected!(day, events);
-                }
+                _focusDay(day);
               },
             );
           },

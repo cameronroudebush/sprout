@@ -41,7 +41,10 @@ class _TransactionMonthlySubscriptionsState extends State<TransactionMonthlySubs
             padding: EdgeInsetsGeometry.all(12),
             child: Column(
               children: [
-                TextWidget(text: "Below is a calendar of all transactions that Sprout has determined to be recurring."),
+                TextWidget(
+                  referenceSize: 1.25,
+                  text: "Welcome to your subscription calendar! Sprout has found these recurring transactions for you.",
+                ),
               ],
             ),
           ),
@@ -112,6 +115,7 @@ class _TransactionMonthlySubscriptionsState extends State<TransactionMonthlySubs
               spacing: 0,
               children: [
                 TextWidget(text: DateFormat.yMMMMd().format(_selectedDay), referenceSize: 1.5),
+                const SizedBox(height: 12),
                 const Divider(height: 1),
                 // No available subscriptions
                 if (_eventsForCurrentDay.isEmpty)
