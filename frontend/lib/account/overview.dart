@@ -116,6 +116,9 @@ class _AccountsOverviewState extends State<AccountsOverview> {
                           formatValue: (value) => getFormattedCurrency(value),
                           showYAxis: false,
                           showXAxis: true,
+                          formatYAxis: (value) => getShortFormattedCurrency(value),
+                          yAxisSize: 50,
+                          showGrid: true,
                         ),
                         ChartRangeSelector(
                           selectedChartRange: chartRange,

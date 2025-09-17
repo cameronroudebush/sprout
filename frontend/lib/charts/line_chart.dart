@@ -23,6 +23,7 @@ class SproutLineChart extends StatelessWidget {
 
   /// If the grid should be shown as a background to this chart
   final bool showGrid;
+  final bool drawVerticalGrid;
 
   /// If we want a border around the chart
   final bool showBorder;
@@ -35,6 +36,10 @@ class SproutLineChart extends StatelessWidget {
 
   /// An optional function to format the value displayed in the line chart
   final String Function(num value)? formatValue;
+
+  /// An optional function to format the yAxis value. Takes precedence over [formatValue]
+  final String Function(num value)? formatYAxis;
+  final int? yAxisSize;
 
   final double height;
 
@@ -60,6 +65,9 @@ class SproutLineChart extends StatelessWidget {
     this.applyPosNegColors = true,
     this.showMinMax = true,
     this.showZeroLine = true,
+    this.formatYAxis,
+    this.yAxisSize,
+    this.drawVerticalGrid = false,
   });
 
   @override
@@ -106,7 +114,7 @@ class SproutLineChart extends StatelessWidget {
       lineTouchData: touchData,
       gridData: FlGridData(
         show: showGrid,
-        drawVerticalLine: true,
+        drawVerticalLine: drawVerticalGrid,
         getDrawingHorizontalLine: (value) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
         getDrawingVerticalLine: (value) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
       ),
@@ -214,7 +222,7 @@ class SproutLineChart extends StatelessWidget {
       yAxisBounds.maxY.abs().toInt().toString().length,
       yAxisBounds.minY.abs().toInt().toString().length,
     );
-    final yReservedSize = 60 + (numDigits - 3).clamp(0, 4) * 10;
+    final yReservedSize = yAxisSize ?? 60 + (numDigits - 3).clamp(0, 4) * 10;
 
     // Calculate the interval that fl_chart will use for the labels.
     final appliedInterval = LineChartDataProcessor.getChartValueInterval(yAxisBounds.minY, yAxisBounds.maxY);
@@ -273,7 +281,11 @@ class SproutLineChart extends StatelessWidget {
             return SideTitleWidget(
               meta: meta,
               child: Text(
-                formatValue != null ? formatValue!(value) : value.toStringAsFixed(2),
+                formatYAxis != null
+                    ? formatYAxis!(value)
+                    : formatValue != null
+                    ? formatValue!(value)
+                    : value.toStringAsFixed(2),
                 style: theme.textTheme.bodySmall,
               ),
             );
