@@ -1,4 +1,5 @@
 import { RestBody } from "@backend/model/api/rest.request";
+import { Base } from "@backend/model/base";
 import { User } from "@backend/model/user";
 import { Request } from "express";
 import { globSync } from "glob";
@@ -92,10 +93,11 @@ export class RestAPIServer {
         const data = req.body;
         // Try to parse as type
         const typedData = RestBody.fromPlain(data); // TODO: This should be validated against the expected type
-        let result = await (endpoint.fnc.call(this, typedData, user!) as Promise<void | RestBody<any>>);
+        let result: any = await endpoint.fnc.call(this, typedData, user!);
 
         // If result is a map, turn it into a basic object
         if (result instanceof Map) result = Object.fromEntries(result);
+        else if (result != null && (result as any).prototype instanceof Base) result = result.toPlain();
 
         // Make sure response know's it's JSON
         res.setHeader("Content-Type", "application/json");

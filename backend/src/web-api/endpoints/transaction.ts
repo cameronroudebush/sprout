@@ -1,6 +1,7 @@
+import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
-import { TransactionQueryRequest, TransactionRequest } from "@backend/model/api/transaction";
+import { TotalTransactions, TransactionQueryRequest, TransactionRequest } from "@backend/model/api/transaction";
 import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
@@ -15,7 +16,7 @@ export class TransactionAPI {
     return await Transaction.find({
       skip: parsedRequest.startIndex,
       take: parsedRequest.endIndex,
-      where: { account: { user: { username: user.username } }, category: parsedRequest.category },
+      where: { account: { id: parsedRequest.accountId, user: { username: user.username } }, category: parsedRequest.category },
       order: { posted: "DESC" },
     });
   }
@@ -24,14 +25,21 @@ export class TransactionAPI {
   async getTransactionsByDescription(request: RestBody, user: User) {
     const parsedRequest = TransactionQueryRequest.fromPlain(request.payload);
     return await Transaction.find({
-      where: { account: { user: { username: user.username } }, description: Like(`%${parsedRequest.description!}%`) },
+      where: { account: { id: parsedRequest.accountId, user: { username: user.username } }, description: Like(`%${parsedRequest.description!}%`) },
       order: { posted: "DESC" },
     });
   }
 
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.count, "GET"))
   async getTotalTransactions(_request: RestBody, user: User) {
-    return Transaction.count({ where: { account: { user: { id: user.id } } } });
+    const map: TotalTransactions["accounts"] = {};
+    const accounts = await Account.getForUser(user);
+    for (const account of accounts) {
+      const transactionCount = await Transaction.count({ where: { account: { id: account.id, user: { id: user.id } } } });
+      map[account.id] = transactionCount;
+    }
+    const total = await Transaction.count({ where: { account: { user: { id: user.id } } } });
+    return new TotalTransactions(map, total);
   }
 
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.stats, "GET"))

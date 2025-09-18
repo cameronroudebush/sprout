@@ -1,4 +1,4 @@
-import { plainToInstance } from "class-transformer";
+import { instanceToPlain, plainToInstance } from "class-transformer";
 import { CustomTypes } from "./utility/custom.types";
 
 /** The base class to every model of this application that provides generic capabilities */
@@ -16,6 +16,11 @@ export class Base {
   /** Returns `this` as a JSON string */
   toJSONString() {
     return JSON.stringify(this);
+  }
+
+  /** Returns `this` as a plain javascript object with no typing */
+  toPlain() {
+    return instanceToPlain(this);
   }
 }
 

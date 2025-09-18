@@ -1,4 +1,6 @@
+import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/api/base.dart';
+import 'package:sprout/transaction/models/transaction.count.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/models/transaction.stats.dart';
 import 'package:sprout/transaction/models/transaction.subscriptions.dart';
@@ -8,23 +10,23 @@ class TransactionAPI extends BaseAPI {
   TransactionAPI(super.client);
 
   /// Returns a count of the total number of transactions for this user
-  Future<int> getTransactionCount() async {
+  Future<TotalTransactions> getTransactionCount() async {
     final endpoint = "/transaction/count";
     dynamic result = await client.get(endpoint) as dynamic;
-    return result as int;
+    return TotalTransactions.fromJson(result);
   }
 
   /// Returns the transactions between the indexes given
-  Future<List<Transaction>> getTransactions(int startIndex, int endIndex) async {
+  Future<List<Transaction>> getTransactions(int startIndex, int endIndex, {Account? account}) async {
     final endpoint = "/transaction/get";
-    final body = {'startIndex': startIndex, 'endIndex': endIndex};
+    final body = {'startIndex': startIndex, 'endIndex': endIndex, 'accountId': account?.id};
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Transaction.fromJson(e)).toList();
   }
 
-  Future<List<Transaction>> getTransactionsByDescription(String description) async {
+  Future<List<Transaction>> getTransactionsByDescription(String description, {Account? account}) async {
     final endpoint = "/transaction/get/by/description";
-    final body = {'description': description};
+    final body = {'description': description, 'accountId': account?.id};
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Transaction.fromJson(e)).toList();
   }

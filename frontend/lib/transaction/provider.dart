@@ -1,5 +1,7 @@
+import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/transaction/api.dart';
+import 'package:sprout/transaction/models/transaction.count.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/models/transaction.stats.dart';
 import 'package:sprout/transaction/models/transaction.subscriptions.dart';
@@ -7,21 +9,21 @@ import 'package:sprout/transaction/models/transaction.subscriptions.dart';
 /// Class that provides the store of current transactions
 class TransactionProvider extends BaseProvider<TransactionAPI> {
   // Data store
-  int _totalTransactionCount = 0;
+  TotalTransactions? _totalTransactions;
   TransactionStats? _transactionStats;
   List<Transaction> _transactions = [];
   List<TransactionSubscription> _subscriptions = [];
 
   // Public getters
   List<Transaction> get transactions => _transactions;
-  int get totalTransactionCount => _totalTransactionCount;
+  TotalTransactions? get totalTransactions => _totalTransactions;
   TransactionStats? get transactionStats => _transactionStats;
   List<TransactionSubscription> get subscriptions => _subscriptions;
 
   TransactionProvider(super.api);
 
-  Future<int> populateTotalTransactionCount() async {
-    return _totalTransactionCount = await api.getTransactionCount();
+  Future<TotalTransactions> populateTotalTransactionCount() async {
+    return _totalTransactions = await api.getTransactionCount();
   }
 
   /// Adds new transactions to our global list and filters duplicates out
@@ -36,8 +38,13 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     _transactions.sort((a, b) => b.posted.compareTo(a.posted));
   }
 
-  Future<List<Transaction>> populateTransactions(int startIndex, int endIndex, {bool shouldNotify = false}) async {
-    final newTransactions = await api.getTransactions(startIndex, endIndex);
+  Future<List<Transaction>> populateTransactions(
+    int startIndex,
+    int endIndex, {
+    bool shouldNotify = false,
+    Account? account,
+  }) async {
+    final newTransactions = await api.getTransactions(startIndex, endIndex, account: account);
     _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
     return _transactions;
@@ -48,7 +55,11 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   }
 
   /// Same as @populateTransactions but now does it with a specific search term
-  Future<List<Transaction>> populateTransactionsWithSearch(String description, {bool shouldNotify = true}) async {
+  Future<List<Transaction>> populateTransactionsWithSearch(
+    String description, {
+    bool shouldNotify = true,
+    Account? account,
+  }) async {
     final newTransactions = await api.getTransactionsByDescription(description);
     _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
@@ -75,7 +86,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   @override
   Future<void> cleanupData() async {
     _transactionStats = null;
-    _totalTransactionCount = 0;
+    _totalTransactions = null;
     _transactions = [];
     notifyListeners();
   }
