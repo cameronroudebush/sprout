@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
@@ -24,6 +26,11 @@ class TransactionsCard extends StatefulWidget {
 
   final String? title;
 
+  final bool enforceMinHeight;
+
+  /// The specific account that we want transactions for
+  final Account? account;
+
   const TransactionsCard({
     super.key,
     this.rowsPerPage = 5,
@@ -31,6 +38,8 @@ class TransactionsCard extends StatefulWidget {
     this.allowPagination = true,
     this.allowSearch = true,
     this.title,
+    this.account,
+    this.enforceMinHeight = true,
   });
 
   @override
@@ -61,35 +70,61 @@ class _TransactionsCardState extends State<TransactionsCard> {
     // Do not fetch if we're in a search as the content is already resolved
     if (_searchQuery.isNotEmpty) return;
     final provider = Provider.of<TransactionProvider>(context, listen: false);
-    provider.populateTransactions(page * widget.rowsPerPage, (page + 1) * widget.rowsPerPage, shouldNotify: true);
+    provider.populateTransactions(
+      page * widget.rowsPerPage,
+      (page + 1) * widget.rowsPerPage,
+      shouldNotify: true,
+      account: widget.account,
+    );
+  }
+
+  void _goToPage(int pageIndex) {
+    setState(() {
+      _currentPage = pageIndex;
+    });
+    _fetchDataForPage(_currentPage);
   }
 
   /// Goes to the previous page
   void _goToPreviousPage() {
-    setState(() {
-      _currentPage = (_currentPage - 1).clamp(0, _currentPage);
-    });
-    _fetchDataForPage(_currentPage);
+    final page = (_currentPage - 1).clamp(0, _currentPage);
+    _goToPage(page);
   }
 
   /// Goes to the next page
   void _goToNextPage(int totalPages) {
-    setState(() {
-      _currentPage = (_currentPage + 1).clamp(0, totalPages - 1);
-    });
-    _fetchDataForPage(_currentPage);
+    final page = (_currentPage + 1).clamp(0, totalPages - 1);
+    _goToPage(page);
   }
 
   /// Returns the providers transactions
   List<Transaction> _getTransactionsList() {
     final transactionProvider = ServiceLocator.get<TransactionProvider>();
-    final transactions = transactionProvider.transactions;
+    final transactions = widget.account != null
+        ? transactionProvider.transactions.where((t) => t.account.id == widget.account!.id).toList()
+        : transactionProvider.transactions;
     if (_searchQuery.isEmpty) {
       return transactions;
     } else {
       return transactions.where((transaction) {
-        return transaction.description.toLowerCase().contains(_searchQuery.toLowerCase());
+        final containsDescription = transaction.description.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (widget.account != null) {
+          return containsDescription && transaction.account.id == widget.account!.id;
+        } else {
+          return containsDescription;
+        }
       }).toList();
+    }
+  }
+
+  int _getTotalTransactionCount(TransactionProvider provider) {
+    if (_searchQuery.isNotEmpty) {
+      final transactionsForQuery = _getTransactionsList();
+      return transactionsForQuery.length;
+    } else if (widget.account != null && provider.totalTransactions != null) {
+      return provider.totalTransactions!.accounts[widget.account!.id] ?? 0;
+    } else {
+      return provider.totalTransactions?.total ?? 0;
     }
   }
 
@@ -97,9 +132,12 @@ class _TransactionsCardState extends State<TransactionsCard> {
   Widget build(BuildContext context) {
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
-        final totalPages = (provider.totalTransactionCount / widget.rowsPerPage).ceil();
-        final transactions = _getTransactionsList();
+        final totalTransactionCount = _getTotalTransactionCount(provider);
+        final totalPages = (totalTransactionCount / widget.rowsPerPage).ceil();
+        final transactions = _getTransactions();
+        final transactionsWidgets = transactions.map((e) => e[0] as List<Widget>).expand((e) => e).toList();
         final searchIsActive = _debounce?.isActive ?? false;
+        final minHeight = (widget.rowsPerPage * TransactionRow.rowHeight) + 5;
 
         final content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +174,7 @@ class _TransactionsCardState extends State<TransactionsCard> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
+                      isDense: true,
                       labelText: 'Search by description',
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
@@ -160,47 +199,70 @@ class _TransactionsCardState extends State<TransactionsCard> {
                       if (searchIsActive) _debounce?.cancel();
                       if (value.isNotEmpty) {
                         _debounce = Timer(const Duration(milliseconds: 500), () {
-                          provider.populateTransactionsWithSearch(value, shouldNotify: true);
+                          provider.populateTransactionsWithSearch(value, shouldNotify: true, account: widget.account);
                         });
                       }
                     },
                   ),
                 ),
               ),
+            const Divider(height: 1),
             // Spinner if we're waiting for a search result
             if (searchIsActive || provider.isLoading)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(8.0),
                 child: SizedBox(height: 325, child: Center(child: CircularProgressIndicator())),
               ),
             // Render rows
-            if (!searchIsActive && !provider.isLoading) Column(children: _getTransactions()),
-            // Display if we have no transactions
-            if (transactions.isEmpty && !(searchIsActive || provider.isLoading))
-              Center(
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(24),
-                  child: TextWidget(
-                    referenceSize: 1.5,
-                    text: "No matching transactions",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+            if (!searchIsActive && !provider.isLoading)
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: widget.enforceMinHeight ? minHeight : 0),
+                child: Column(
+                  mainAxisAlignment: transactionsWidgets.isEmpty ? MainAxisAlignment.center : MainAxisAlignment.start,
+                  children: [
+                    // Render any transactions
+                    ...transactionsWidgets,
+                    // Display if we have no transactions
+                    if (transactions.isEmpty && !(searchIsActive || provider.isLoading)) ...[
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsetsGeometry.all(24),
+                          child: TextWidget(
+                            referenceSize: 1.5,
+                            text: "No matching transactions",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
+            const Divider(height: 1),
             // Pagination Controls
-            if (widget.allowPagination && provider.totalTransactionCount > widget.rowsPerPage)
+            if (widget.allowPagination && totalTransactionCount > widget.rowsPerPage)
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    SproutTooltip(
+                      message: "First page",
+                      child: IconButton(
+                        padding: const EdgeInsets.all(0),
+                        icon: const Icon(Icons.first_page, size: 30),
+                        onPressed: _currentPage != 0 ? () => _goToPage(0) : null,
+                      ),
+                    ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      padding: const EdgeInsets.all(0),
+                      icon: const Icon(Icons.arrow_back_ios_new),
                       onPressed: _currentPage > 0 ? () => _goToPreviousPage() : null,
                     ),
                     Text('${_currentPage + 1} / $totalPages'),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward),
+                      padding: const EdgeInsets.all(0),
+                      icon: const Icon(Icons.arrow_forward_ios),
                       onPressed: _currentPage < totalPages - 1 ? () => _goToNextPage(totalPages) : null,
                     ),
                   ],
@@ -215,9 +277,9 @@ class _TransactionsCardState extends State<TransactionsCard> {
   }
 
   /// Returns the current transactions to render based on the current page
-  List<Widget> _getTransactions() {
+  List<dynamic> _getTransactions() {
     final transactions = _getTransactionsList();
-    final widgets = <Widget>[];
+    final transactionsToReturn = [];
 
     final itemsToRender = transactions.length < widget.rowsPerPage
         ? transactions.length - (_currentPage * widget.rowsPerPage)
@@ -227,11 +289,12 @@ class _TransactionsCardState extends State<TransactionsCard> {
       final elementIndex = (_currentPage * widget.rowsPerPage) + i;
       if (elementIndex >= transactions.length) break;
       final transaction = transactions.isNotEmpty ? transactions.elementAt(elementIndex) : null;
-      widgets.add(TransactionRow(transaction: transaction, isEvenRow: elementIndex % 2 == 0));
+      final widgets = <Widget>[TransactionRow(transaction: transaction, isEvenRow: elementIndex % 2 == 0)];
       if (i < itemsToRender - 1) {
         widgets.add(const Divider(height: 1));
       }
+      transactionsToReturn.add([widgets, transaction!]);
     }
-    return widgets;
+    return transactionsToReturn;
   }
 }

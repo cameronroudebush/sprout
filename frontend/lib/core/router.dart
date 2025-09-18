@@ -151,7 +151,12 @@ class SproutRouter {
       showOnBottomNav: true,
     ),
     // Subscriptions
-    SproutPage((context, state) => TransactionMonthlySubscriptions(), 'Subscriptions', icon: Icons.subscriptions),
+    SproutPage(
+      (context, state) => TransactionMonthlySubscriptions(),
+      'Subscriptions',
+      icon: Icons.subscriptions,
+      showOnBottomNav: true,
+    ),
     // Settings
     SproutPage((context, state) => UserPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
   ];

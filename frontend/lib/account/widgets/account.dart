@@ -16,6 +16,7 @@ import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
+import 'package:sprout/transaction/widgets/transactions.dart';
 import 'package:sprout/user/provider.dart';
 
 /// A page that displays information about the given account
@@ -125,6 +126,7 @@ class AccountWidget extends StatelessWidget {
                             data: accountDataForRange.history,
                             chartRange: chartRange,
                             formatValue: (value) => getFormattedCurrency(value),
+                            showGrid: true,
                           ),
                           ChartRangeSelector(
                             selectedChartRange: chartRange,
@@ -136,7 +138,7 @@ class AccountWidget extends StatelessWidget {
                       ),
               ),
             ),
-            // TODO: Account specific transactions
+            TransactionsCard(title: "Transactions for this account", account: account),
           ],
         );
       },

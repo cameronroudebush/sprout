@@ -7,6 +7,8 @@ import 'package:timeago/timeago.dart' as timeago;
 
 /// A widget that displays a transaction row on a transaction table
 class TransactionRow extends StatelessWidget {
+  static double rowHeight = 66;
+
   final Transaction? transaction;
   final bool isEvenRow;
   final bool renderPostedTime;
@@ -73,7 +75,7 @@ class TransactionRow extends StatelessWidget {
     return Container(
       color: rowColor,
       width: double.infinity,
-      height: 66,
+      height: TransactionRow.rowHeight,
       padding: EdgeInsetsGeometry.all(6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

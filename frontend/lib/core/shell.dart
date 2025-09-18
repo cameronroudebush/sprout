@@ -144,7 +144,7 @@ class SproutShell extends StatelessWidget {
                     spacing: 12,
                     children: [
                       Icon(Icons.settings, size: 36),
-                      TextWidget(referenceSize: 1.5, text: authProvider.currentUser?.prettyName ?? ""),
+                      TextWidget(referenceSize: 1.25, text: authProvider.currentUser?.prettyName ?? ""),
                       const SizedBox.shrink(),
                     ],
                   ),

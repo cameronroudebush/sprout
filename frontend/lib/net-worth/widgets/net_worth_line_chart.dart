@@ -33,6 +33,7 @@ class NetWorthLineChart extends StatelessWidget {
             showYAxis: showYAxis,
             showXAxis: showXAxis,
             formatYAxis: (value) => getShortFormattedCurrency(value),
+            showGrid: true,
           );
         }
       },
