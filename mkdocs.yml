@@ -1,0 +1,57 @@
+site_name: Sprout
+site_url: https://sprout.croudebush.net
+repo_name: cameronroudebush/sprout
+repo_url: https://github.com/cameronroudebush/sprout
+theme:
+  name: material
+  logo: assets/favicon-bg.svg
+  favicon: assets/favicon-bg.svg
+  features:
+    - header.autohide
+    - navigation.tabs
+    - content.code.copy
+    - content.code.annotate
+    - navigation.top
+  palette:
+    - scheme: slate
+      primary: custom
+      accent: custom
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/custom-html.css
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/cameronroudebush/sprout
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/croudebush/sprout
+  generator: false
+plugins:
+  - social
+  - search
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Overview: getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Configuration: getting-started/configuration.md
+      - Accessing Sprout: getting-started/access.md
+      - Backups: getting-started/backups.md
+  - Developer:
+      - Overview: developer/index.md
+      - Configuration: developer/configuration.md
+      - Known Issues: developer/known-issues.md
+  - What's Next?: planned-features.md
+  - Privacy Policy: privacy-policy.md
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+copyright: "&copy; 2025 Sprout. All rights reserved."

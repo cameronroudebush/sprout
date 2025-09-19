@@ -6,15 +6,13 @@
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write",
     "changelog:generate:md": "auto-changelog --template ./docs/changelog-templates/markdown.hbs",
-    "changelog:generate:android": "auto-changelog --template ./docs/changelog-templates/android.hbs"
+    "changelog:generate:android": "auto-changelog --template ./docs/changelog-templates/android.hbs",
+    "docs:serve": "docker run --rm -it -p 8000:8000 -v \"%cd%\":/docs squidfunk/mkdocs-material"
   },
   "devDependencies": {
     "auto-changelog": "^2.5.0",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2"
-  },
-  "prettier": {
-    "printWidth": 160
   },
   "auto-changelog": {
     "template": "./docs/changelog-template.hbs",

@@ -27,5 +27,6 @@
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifier": "non-relative",
     "typescript.preferences.autoImportFileExcludePatterns": [],
+    "markdown.extension.list.indentationSize": "inherit",
   },
 }
