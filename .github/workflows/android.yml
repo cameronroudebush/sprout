@@ -6,6 +6,9 @@ on:
       - master
     tags:
       - "v*.*.*"
+    paths:
+      - "frontend/**"
+      - "backend/**"
 
 jobs:
   build-and-deploy:

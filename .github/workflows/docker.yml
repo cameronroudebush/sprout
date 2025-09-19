@@ -8,8 +8,14 @@ on:
     branches: ["master"]
     tags:
       - "v*.*.*"
+    paths:
+      - "frontend/**"
+      - "backend/**"
   pull_request:
     branches: ["*"] # Run on all branches for a pull request
+    paths:
+      - "frontend/**"
+      - "backend/**"
 
 jobs:
   build-and-publish:
