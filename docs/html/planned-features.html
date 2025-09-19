@@ -1,0 +1,87 @@
+<head>
+  <style>
+    .next-info {
+      font-size: 0.8rem !important;
+    }
+
+    .card > h3 {
+        text-align: center;
+        font-weight: bold;
+        border-bottom: .1rem solid var(--light-color);
+        width: 100%;
+    }
+
+    .card {
+        height: 200px;
+    }
+
+    ul {
+        flex: 1;
+        width: 100%;
+        margin-left: 2rem !important;
+    }
+
+    li {
+        margin-bottom: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Planned Features -->
+  <section id="about">
+    <div class="info center">
+      <h2>What's Next for Sprout?</h2>
+      <p class="center next-info">
+        I'm a busy guy but I'm trying my best to get out new features out in my free time. Here is a non exhaustive list of features that we plan to add.
+      </p>
+    </div>
+  </section>
+
+  <!-- Grid of planned features -->
+  <div>
+    <!-- First row -->
+    <div class="card-row">
+      <div class="card">
+        <h3>Holdings</h3>
+        <ul>
+            <li>Live Pricing</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Transactions</h3>
+        <ul>
+            <li>Category editing/rules</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Accounts</h3>
+        <ul>
+            <li>Overhauled individual account display</li>
+        </ul>
+      </div>
+      <!-- Second row -->
+      <div class="card-row">
+      <div class="card">
+        <h3>User Configuration</h3>
+        <ul>
+            <li>OIDC Support</li>
+            <li>User Management</li>
+            <li>Individual Providers per user</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Providers</h3>
+        <ul>
+            <li>Zillow</li>
+            <li>Crypto</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Mobile Apps</h3>
+        <ul>
+            <li>Android Widgets</li>
+            <li>Biometric auth</li>
+        </ul>
+      </div>
+  </div>
+</body>

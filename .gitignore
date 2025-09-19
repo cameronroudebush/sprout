@@ -81,3 +81,4 @@ build/
 
 dev-docs.md
 backups
+.cache

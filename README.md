@@ -6,7 +6,7 @@
 </p>
 
 > [!caution]
-> This application is in **_active_** development. We do not make any guarantees about capability, or security. Note that while this will improve with time, we are not to our 1.0 release yet.
+> This application is in **_active_** development. We do not make any guarantees about capability, or security.
 >
 > **_Use at your own risk_**
 
@@ -28,24 +28,24 @@ Getting started with sprout is easy! All you need is a computer running docker t
 
 ```yml
 sprout:
-  container_name: sprout
-  image: croudebush/sprout:stable
-  volumes:
-    # The database .sqlite file will be stored in /sprout
-    - /mnt/user/appdata/sprout:/sprout
-  ports:
-    - 80:80
-  restart: unless-stopped
-  environment:
-    TZ: America/New_York
-    sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
-    sprout_server_jwtExpirationTime: 7d
+    container_name: sprout
+    image: croudebush/sprout:stable
+    volumes:
+        # The database .sqlite file will be stored in /sprout
+        - /appdata/sprout:/sprout
+    ports:
+        - 80:80
+    restart: unless-stopped
+    environment:
+        TZ: America/New_York
+        sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
+        sprout_server_jwtExpirationTime: 7d
 ```
 
 After launching the container, navigate to `http://localhost` in your browser to begin the setup process.
 
-You can review the [documentation](https://sprout.croudebush.net/docs.html) for more information on how to use sprout.
+You can review the [documentation](https://sprout.croudebush.net/getting-started) for more information on how to use sprout.
 
 # Additional Information
 
-[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy.html) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/docs.html) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)
+[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/developer) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)
