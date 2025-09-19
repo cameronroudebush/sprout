@@ -51,7 +51,7 @@ class _ExitWidgetState extends State<ExitWidget> {
           // If it's the first press, update the last pressed time.
           _lastPressedAt = now;
           if (allowExit) {
-            SnackbarProvider.openSnackbar("Press back again to open exit");
+            SnackbarProvider.openSnackbar("Press back again to exit the app");
           }
         }
       },
