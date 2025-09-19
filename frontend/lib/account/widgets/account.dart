@@ -13,6 +13,8 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/holding/provider.dart';
+import 'package:sprout/holding/widgets/account.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
@@ -28,11 +30,13 @@ class AccountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<UserProvider, AccountProvider, NetWorthProvider>(
-      builder: (context, userProvider, accountProvider, netWorthProvider, child) {
+    return Consumer4<UserProvider, AccountProvider, NetWorthProvider, HoldingProvider>(
+      builder: (context, userProvider, accountProvider, netWorthProvider, holdingProvider, child) {
         final chartRange = userProvider.userDefaultChartRange;
         final data = netWorthProvider.historicalAccountData?.firstWhereOrNull((e) => e.connectedId == account.id);
         final accountDataForRange = data?.getValueByFrame(chartRange);
+        final holdings = holdingProvider.holdings.where((h) => h.account.id == account.id).toList();
+
         return Column(
           children: [
             // Top Bar
@@ -127,6 +131,7 @@ class AccountWidget extends StatelessWidget {
                             chartRange: chartRange,
                             formatValue: (value) => getFormattedCurrency(value),
                             showGrid: true,
+                            height: 150,
                           ),
                           ChartRangeSelector(
                             selectedChartRange: chartRange,
@@ -138,7 +143,10 @@ class AccountWidget extends StatelessWidget {
                       ),
               ),
             ),
+            // Transactions
             TransactionsCard(title: "Transactions for this account", account: account),
+            // Holdings if available
+            if (holdings.isNotEmpty) HoldingAccount(account, holdings, displayAccountHeader: false),
           ],
         );
       },

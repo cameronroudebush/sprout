@@ -53,10 +53,13 @@ class SproutShell extends StatelessWidget {
           ? SizedBox(
               width: mediaQuery.width,
               height: mediaQuery.height - (appBar?.preferredSize.height ?? 0),
-              child: SproutScrollView(child: child),
+              child: SproutScrollView(
+                padding: EdgeInsets.symmetric(horizontal: currentPage.pagePadding),
+                child: child,
+              ),
             )
           : Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
+              padding: EdgeInsets.symmetric(horizontal: currentPage.pagePadding),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [child]),
             );
 

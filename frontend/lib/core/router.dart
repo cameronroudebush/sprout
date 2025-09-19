@@ -82,6 +82,7 @@ class SproutRouter {
       'Accounts',
       icon: Icons.account_balance,
       showOnBottomNav: true,
+      pagePadding: 0,
       buttonBuilder: (BuildContext context, bool isDesktop) {
         return Row(
           children: [
@@ -216,5 +217,3 @@ class SproutRouter {
     );
   }
 }
-
-// TODO: Sub page routes

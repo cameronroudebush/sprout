@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sprout/account/models/account.dart';
+import 'package:sprout/account/provider.dart';
+import 'package:sprout/account/widgets/account_row.dart';
+import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/holding/models/holding.dart';
+import 'package:sprout/holding/provider.dart';
+import 'package:sprout/holding/widgets/holding.dart';
+import 'package:sprout/net-worth/provider.dart';
+
+/// Renders a holding display for a specific account
+class HoldingAccount extends StatelessWidget {
+  /// The account these holdings go to
+  final Account account;
+
+  /// The holdings list to render
+  final List<Holding> holdings;
+
+  /// If we should render the account header info at the top of the bar. Else renders "Holdings".
+  final bool displayAccountHeader;
+
+  const HoldingAccount(this.account, this.holdings, {super.key, this.displayAccountHeader = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer4<HoldingProvider, AccountProvider, ConfigProvider, NetWorthProvider>(
+      builder: (context, holdingProvider, accountProvider, configProvider, netWorthProvider, child) {
+        final mediaQuery = MediaQuery.of(context).size;
+
+        // Loading/no holdings indicator
+        if (holdingProvider.isLoading || holdingProvider.holdings.isEmpty) {
+          return SizedBox(
+            height: mediaQuery.height * .7,
+            child: Center(
+              child: holdingProvider.isLoading
+                  ? CircularProgressIndicator()
+                  : TextWidget(
+                      referenceSize: 2,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      text: 'No holdings found',
+                    ),
+            ),
+          );
+        }
+
+        return SproutCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 0,
+            children: [
+              // Account Row
+              if (displayAccountHeader)
+                AccountRowWidget(
+                  account: account,
+                  netWorthPeriod: ChartRange.oneDay,
+                  displayStats: true,
+                  displayTotals: true,
+                  allowClick: false,
+                  showPercentage: true,
+                  showPeriod: true,
+                ),
+              if (!displayAccountHeader)
+                Padding(
+                  padding: EdgeInsetsGeometry.directional(start: 12, top: 4, bottom: 4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextWidget(
+                        referenceSize: 1.5,
+                        text: "Holdings",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
+                  ),
+                ),
+              const Divider(height: 1),
+              // Holdings
+              Column(
+                children: holdings.map((holding) {
+                  return Column(
+                    children: [
+                      HoldingWidget(holding: holding),
+                      if (holdings.last != holding) const Divider(height: 1),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

@@ -238,9 +238,9 @@ class _TransactionsCardState extends State<TransactionsCard> {
                   ],
                 ),
               ),
-            const Divider(height: 1),
             // Pagination Controls
-            if (widget.allowPagination && totalTransactionCount > widget.rowsPerPage)
+            if (widget.allowPagination && totalTransactionCount > widget.rowsPerPage) ...[
+              const Divider(height: 1),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -268,6 +268,7 @@ class _TransactionsCardState extends State<TransactionsCard> {
                   ],
                 ),
               ),
+            ],
           ],
         );
 

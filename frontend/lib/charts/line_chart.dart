@@ -224,10 +224,15 @@ class SproutLineChart extends StatelessWidget {
     );
     final yReservedSize = yAxisSize ?? 60 + (numDigits - 3).clamp(0, 4) * 10;
 
-    // Calculate the interval that fl_chart will use for the labels.
-    final appliedInterval = LineChartDataProcessor.getChartValueInterval(yAxisBounds.minY, yAxisBounds.maxY);
-    // Define a "collision zone" as a fraction of the interval. Any label within 40% of the interval from the min/max will be hidden.
-    final collisionThreshold = appliedInterval * 0.4;
+    // Calculate the interval that fl_chart will use for the Y-axis labels.
+    final yAppliedInterval = LineChartDataProcessor.getChartValueInterval(yAxisBounds.minY, yAxisBounds.maxY);
+    // Define a "collision zone" for Y-axis. Any label within 40% of the interval from the min/max will be hidden.
+    final yCollisionThreshold = yAppliedInterval * 0.4;
+
+    // Calculate the interval for the X-axis labels.
+    final xAppliedInterval = ChartRangeUtility.getChartInterval(selectedChartRange, spots.length);
+    // Define a "collision zone" for X-axis to prevent overlap with first/last labels.
+    final xCollisionThreshold = xAppliedInterval * 0.4;
 
     return FlTitlesData(
       show: true,
@@ -239,13 +244,25 @@ class SproutLineChart extends StatelessWidget {
           maxIncluded: showMinMax,
           showTitles: showXAxis,
           reservedSize: 30,
-          interval: ChartRangeUtility.getChartInterval(selectedChartRange, spots.length),
+          interval: xAppliedInterval, // Use the calculated interval
           getTitlesWidget: (value, meta) {
-            if (value.toInt() < chartData.sortedEntries.length) {
+            if (showMinMax) {
+              // Only check for intermediate labels, not the very first or last one.
+              if (value != meta.min && value != meta.max) {
+                // Check if the current label is too close to the edges.
+                if ((value - meta.min).abs() < xCollisionThreshold || (meta.max - value).abs() < xCollisionThreshold) {
+                  // If it's in the "collision zone", draw nothing.
+                  return const Text('');
+                }
+              }
+            }
+
+            if (value.toInt() >= 0 && value.toInt() < chartData.sortedEntries.length) {
               final date = chartData.sortedEntries[value.toInt()].key;
               String format = ChartRangeUtility.getDateFormat(selectedChartRange);
               return SideTitleWidget(
                 meta: meta,
+                // Ensures labels like 'Dec' don't get clipped on the right edge.
                 fitInside: SideTitleFitInsideData.fromTitleMeta(meta, enabled: true, distanceFromEdge: 0),
                 child: Text(DateFormat(format).format(date), style: theme.textTheme.bodySmall),
               );
@@ -260,20 +277,17 @@ class SproutLineChart extends StatelessWidget {
           maxIncluded: showMinMax,
           showTitles: showYAxis,
           reservedSize: yReservedSize.toDouble(),
-          interval: appliedInterval,
+          interval: yAppliedInterval,
           getTitlesWidget: (value, meta) {
             // If we're not showing min/max, no collision is possible.
-            if (!showMinMax) {
-              // Standard label drawing
-            } else {
+            if (showMinMax) {
               // If the current label is the min or max, always show it.
-              if (value == meta.min || value == meta.max) {
-                // Standard label drawing
-              }
-              // If it's a regular interval label, check if it's too close to the edges.
-              else if ((value - meta.min).abs() < collisionThreshold || (meta.max - value).abs() < collisionThreshold) {
-                // If it's in the "collision zone", draw nothing to prevent overlap.
-                return const Text('');
+              if (value != meta.min && value != meta.max) {
+                // If it's a regular interval label, check if it's too close to the edges.
+                if ((value - meta.min).abs() < yCollisionThreshold || (meta.max - value).abs() < yCollisionThreshold) {
+                  // If it's in the "collision zone", draw nothing to prevent overlap.
+                  return const Text('');
+                }
               }
             }
 

@@ -37,6 +37,9 @@ class SproutPage {
   /// If we should show on the sidenav. Default is true.
   final bool showOnSideNav;
 
+  /// How much padding to apply to the side of the page by default.
+  final double pagePadding;
+
   /// Returns the path for the router
   get path {
     if (label.toLowerCase() == "home") {
@@ -58,6 +61,7 @@ class SproutPage {
     this.useFullLogo = false,
     this.showOnBottomNav = false,
     this.showOnSideNav = true,
+    this.pagePadding = 12,
   }) : renderNav = renderNav ?? true,
        canNavigateTo = canNavigateTo ?? renderNav ?? true;
 }

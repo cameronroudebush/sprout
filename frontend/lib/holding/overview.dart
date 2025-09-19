@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/account/widgets/account_row.dart';
-import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/provider.dart';
-import 'package:sprout/holding/widgets/holding.dart';
+import 'package:sprout/holding/widgets/account.dart';
 import 'package:sprout/net-worth/provider.dart';
 
 /// The overview page for rendering the holdings for each account
@@ -67,35 +65,7 @@ class HoldingsOverview extends StatelessWidget {
             // Holdings
             ...holdingsByAccount.entries.map((entry) {
               final account = accountProvider.linkedAccounts.firstWhere((element) => element.id == entry.key);
-              return SproutCard(
-                child: Column(
-                  spacing: 0,
-                  children: [
-                    // Account Row
-                    AccountRowWidget(
-                      account: account,
-                      netWorthPeriod: ChartRange.oneDay,
-                      displayStats: true,
-                      displayTotals: true,
-                      allowClick: false,
-                      showPercentage: true,
-                      showPeriod: true,
-                    ),
-                    const Divider(height: 1),
-                    // Holdings
-                    Column(
-                      children: entry.value.map((holding) {
-                        return Column(
-                          children: [
-                            HoldingWidget(holding: holding),
-                            if (entry.value.last != holding) const Divider(height: 1),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              );
+              return HoldingAccount(account, entry.value);
             }),
           ],
         );

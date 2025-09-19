@@ -99,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       builder: (context, configProvider, child) {
         return Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(22.0),
             child: Card(
               child: Padding(
                 padding: EdgeInsetsGeometry.all(20),
