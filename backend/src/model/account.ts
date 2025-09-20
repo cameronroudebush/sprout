@@ -68,12 +68,12 @@ export class Account extends DatabaseBase {
   }
 
   /** Turns this account to act like account history for today */
-  toAccountHistory() {
+  toAccountHistory(date = new Date()) {
     return AccountHistory.fromPlain({
       balance: this.balance,
       account: this,
       availableBalance: this.availableBalance,
-      time: new Date(),
+      time: date,
     });
   }
 

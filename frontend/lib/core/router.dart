@@ -10,6 +10,7 @@ import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/models/page.dart';
+import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/shell.dart';
@@ -43,8 +44,11 @@ class SproutRouter {
       (context, state) {
         final configProvider = ServiceLocator.get<ConfigProvider>();
         return SetupPage(
-          onSetupSuccess: () {
-            configProvider.populateUnsecureConfig();
+          onSetupSuccess: () async {
+            await configProvider.populateUnsecureConfig();
+            // Grab all updated data
+            await InitializationNotifier.initializeWithNotification((status) {});
+            SproutNavigator.redirect("home");
           },
         );
       },
@@ -182,7 +186,7 @@ class SproutRouter {
 
       // Check if this is first time setup
       final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
-      if (setupPosition == null) return "/setup";
+      if (setupPosition == "welcome") return "/setup";
 
       // Check if we're already authenticated (JWT or not)
       if (!authProvider.isLoggedIn) return "/login";

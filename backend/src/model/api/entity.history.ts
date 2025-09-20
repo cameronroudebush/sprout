@@ -144,8 +144,6 @@ export class EntityHistory extends Base {
     const sproutAccountLifetime = differenceInDays(new Date(), history[0]?.time ?? 1);
     const boundCallback = EntityHistory.generateNetWorthOverTime.bind(this, history, relatedAccount);
 
-    // TODO This seems to be improperly considering the past day
-
     const last1Day = boundCallback(2);
     const last7Days = boundCallback(7);
     const lastMonth = boundCallback(30);

@@ -113,10 +113,12 @@ class _SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context).size;
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.width > 1024 ? .6 : .8),
+          maxWidth: mediaQuery.width * (mediaQuery.width > 1024 ? .6 : .8),
+          maxHeight: mediaQuery.height * .8,
         ),
         child: PageView(
           controller: _pageController,

@@ -161,8 +161,12 @@ class SproutLineChart extends StatelessWidget {
     double paddedMinY = actualMinY - padding;
     double paddedMaxY = actualMaxY + padding;
 
-    // If the original max value was negative, ensure the padded max value
-    // does not cross the zero line and become positive.
+    // If the original min value was positive, ensure the padded min value does not cross the zero line and become negative.
+    if (actualMinY >= 0) {
+      paddedMinY = max(0, paddedMinY);
+    }
+
+    // If the original max value was negative, ensure the padded max value does not cross the zero line and become positive.
     if (actualMaxY <= 0) {
       paddedMaxY = min(0, paddedMaxY);
     }
@@ -181,15 +185,24 @@ class SproutLineChart extends StatelessWidget {
     List<double>? lineGradientStops;
 
     if (minY >= 0) {
+      // If all values are positive, use only the positive color.
       lineGradientColors = [positiveColor, positiveColor];
       lineGradientStops = null;
     } else if (maxY <= 0) {
+      // If all values are negative, use only the negative color.
       lineGradientColors = [negativeColor, negativeColor];
       lineGradientStops = null;
     } else {
-      final zeroStop = (-minY / (maxY - minY)).clamp(0.0, 1.0);
-      lineGradientColors = [negativeColor, negativeColor, positiveColor, positiveColor];
-      lineGradientStops = [0.0, zeroStop, zeroStop, 1.0];
+      // For mixed values, create a sharp transition at y=0.
+      // Calculate the proportional position of y=0 on the axis.
+      final zeroStop = -minY / (maxY - minY);
+
+      lineGradientColors = [negativeColor, positiveColor];
+
+      // By setting both stops to the same value, we create an instantaneous
+      // color switch from negative to positive at the precise zero point.
+      // This is a more robust way to prevent rendering artifacts like color bleeding.
+      lineGradientStops = [zeroStop, zeroStop];
     }
 
     final lineGradient = LinearGradient(
