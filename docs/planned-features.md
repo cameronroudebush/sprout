@@ -2,6 +2,8 @@
 hide:
     - navigation
     - toc
+title: Planned Features
+description: Learn about the planned features for sprout.
 ---
 
 <!-- Custom styling to remove the header text -->

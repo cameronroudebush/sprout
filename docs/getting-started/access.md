@@ -1,3 +1,8 @@
+---
+title: Accessing
+description: Learn how to access Sprout.
+---
+
 # Accessing Sprout
 
 Sprout is designed to be accessible wherever you are. You can use it on your mobile device through our [App's](#apps) or as a [Progressive Web App (PWA)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps).

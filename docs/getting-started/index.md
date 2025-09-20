@@ -1,6 +1,8 @@
 ---
 hide:
     - toc
+title: Getting started
+description: Learn how to start using Sprout today.
 ---
 
 # Getting Started with Sprout 🚀

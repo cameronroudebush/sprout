@@ -1,7 +1,9 @@
 ---
 hide:
-  - navigation
-  - toc
+    - navigation
+    - toc
+title: Overview
+description: Grow your financial future.
 ---
 
 <!-- Custom styling to remove the header text -->

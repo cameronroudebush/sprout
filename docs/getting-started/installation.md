@@ -1,3 +1,8 @@
+---
+title: Installation
+description: Learn how to install and use Sprout.
+---
+
 # Installation
 
 The recommended way to install Sprout is with a Docker image.

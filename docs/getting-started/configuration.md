@@ -1,6 +1,8 @@
 ---
 hide:
     - toc
+title: Quick Configuration
+description: Learn about some of the configuration options available to Sprout.
 ---
 
 <style>
