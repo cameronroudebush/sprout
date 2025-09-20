@@ -25,7 +25,7 @@ fi
 BUILD_NUMBER=$(git rev-list --count HEAD)
 
 # Git describe gives us our string formatted version
-BUILD_NAME=$(git describe --tags --long)
+BUILD_NAME=$(git describe --tags --always)
 
 
 # --- Sanity Check ---
