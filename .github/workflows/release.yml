@@ -37,10 +37,6 @@ jobs:
           tag_name: ${{ steps.get_repo_info.outputs.version_string }}
           name: ${{ steps.get_repo_info.outputs.version_string }}
           body: |
-            <p align="center">
-                <img width="40%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png">
-            </p>
-
             ${{ steps.generate_changelogs.outputs.markdown_changelog  }}
 
             # Additional Information
