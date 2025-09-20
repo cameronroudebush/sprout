@@ -30,9 +30,9 @@ export class NetWorthAPI {
     });
 
     const accountsForUser = await Account.getForUser(user);
-    // If we don't have anything from yesterday, add some fake data
+    // If we don't have anything from yesterday, and we have no data in general, add some fake data
     const yesterday = subDays(new Date(), 1);
-    if (!accountHistory.find((x) => isSameDay(x.time, yesterday))) {
+    if (accountHistory.length === 0 && !accountHistory.find((x) => isSameDay(x.time, yesterday))) {
       accountHistory.push(
         ...accountsForUser.map((x) => {
           const history = x.toAccountHistory(yesterday);
