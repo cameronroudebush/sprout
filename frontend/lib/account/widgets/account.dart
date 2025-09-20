@@ -131,6 +131,7 @@ class AccountWidget extends StatelessWidget {
                             chartRange: chartRange,
                             formatValue: (value) => getFormattedCurrency(value),
                             showGrid: true,
+                            showXAxis: true,
                             height: 150,
                           ),
                           ChartRangeSelector(

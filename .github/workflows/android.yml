@@ -33,7 +33,7 @@ jobs:
       - name: Get changed files in frontend
         if: steps.check_tag.outputs.is_tag == 'false'
         id: changed_files
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v47
         with:
           files: |
             frontend/**

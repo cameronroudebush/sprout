@@ -46,8 +46,12 @@ You can find the [app here](https://play.google.com/store/apps/details?id=net.cr
 
 As of right now, we do not offer an IOS app. This will hopefully change in the future. In the meantime, we suggest [using PWA](#progressive-web-app-pwa).
 
-## Beta Testing
+### Beta Testing
 
 For users who want to test upcoming features before they are released, we offer a closed testing program.
 
 To request access, please email the developer. You can find contact information on the [developer's GitHub profile](https://github.com/cameronroudebush).
+
+### Manual Downloads
+
+If you'd rather not download the apps from an app store, you can also find them located on [the releases](https://github.com/cameronroudebush/sprout/releases) as they occur.
