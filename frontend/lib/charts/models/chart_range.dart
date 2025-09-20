@@ -31,7 +31,7 @@ class ChartRangeUtility {
         return 1;
       case ChartRange.oneMonth:
         return 7;
-      // case ChartRange.oneYear:
+      case ChartRange.threeMonths:
       default:
         return 30;
     }
@@ -44,10 +44,9 @@ class ChartRangeUtility {
       case ChartRange.sevenDays:
         return 'EEE';
       case ChartRange.oneMonth:
-        return 'MMM dd';
-      // case ChartRange.oneYear:
+      case ChartRange.threeMonths:
       default:
-        return 'MMM yy';
+        return 'MMM dd';
     }
   }
 
