@@ -27,8 +27,12 @@ extra:
       link: https://hub.docker.com/r/croudebush/sprout
   generator: false
 plugins:
-  - social
   - search
+  - social:
+      cards: true
+      cards_layout_options:
+        background_color: "#1d2127"
+        color: "#FFFFFF"
 nav:
   - Home: index.md
   - Getting Started:

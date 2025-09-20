@@ -2,6 +2,8 @@
 hide:
     - navigation
     - toc
+title: Privacy Policy
+description: Information regarding the privacy policy of Sprout
 ---
 
 <!-- Custom styling to remove the header text -->

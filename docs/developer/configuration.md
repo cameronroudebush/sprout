@@ -1,3 +1,8 @@
+---
+title: Total Configuration
+description: Learn about the configuration capabilities of sprout.
+---
+
 # Configuration
 
 The configuration file, `sprout.config.yml`, is generated dynamically and placed next to the executable inside the container. Below are the available options with definitions.

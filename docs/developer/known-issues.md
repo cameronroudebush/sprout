@@ -1,3 +1,8 @@
+---
+title: Known Issues
+description: Known issues regarding Sprout.
+---
+
 # Known Issues
 
 Just like every application, there's some issues that we just can't seem to fix because, normally, it's out of our hands. Below is a table of exactly that.

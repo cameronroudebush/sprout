@@ -1,3 +1,8 @@
+---
+title: Developer Overview
+description: Learn about the inter-workings of Sprout.
+---
+
 # Development Overview
 
 Sprout is built with a **mobile first** approach using [Flutter](https://flutter.dev/) for its interfaces and a [Node.js](https://nodejs.org/en) backend.

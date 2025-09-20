@@ -1,21 +1,62 @@
 name: Build and Deploy Android
 
+permissions:
+  contents: write
+  pull-requests: read
+
 on:
+  # The workflow now triggers broadly. The 'filter' job below handles the specific logic.
   push:
-    branches:
-      - master
-    tags:
-      - "v*.*.*"
-    paths:
-      - "frontend/**"
-      - "backend/**"
+    branches: ["master"]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["*"]
 
 jobs:
-  build-and-deploy:
+  ## ------------------------------------------------------------------------------------
+  ##  Filter Job: Decides if the main build job should run.
+  ## ------------------------------------------------------------------------------------
+  filter:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # Required to upload release assets
+    outputs:
+      should_run: ${{ steps.decision.outputs.should_run }}
+    steps:
+      - name: Check if this is a tag push
+        id: check_tag
+        run: echo "is_tag=${{ startsWith(github.ref, 'refs/tags/') }}" >> $GITHUB_OUTPUT
 
+      # The following steps are skipped for tag pushes to save time.
+      - name: Checkout for path analysis
+        if: steps.check_tag.outputs.is_tag == 'false'
+        uses: actions/checkout@v4
+
+      - name: Get changed files in frontend
+        if: steps.check_tag.outputs.is_tag == 'false'
+        id: changed_files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            frontend/**
+
+      - name: Decide whether to proceed
+        id: decision
+        run: |
+          if [[ "${{ steps.check_tag.outputs.is_tag }}" == "true" || "${{ steps.changed_files.outputs.any_changed }}" == "true" ]]; then
+            echo "Proceeding: A tag was pushed or relevant files changed."
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "Skipping: Not a tag push and no changes in frontend/."
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  ## ------------------------------------------------------------------------------------
+  ##  Build and Deploy Job
+  ## ------------------------------------------------------------------------------------
+  build-and-deploy:
+    # This job only runs if the 'filter' job gives the green light.
+    needs: filter
+    if: needs.filter.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
     env:
       ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -120,6 +161,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: "build/app/outputs/flutter-apk/app-release.apk"
+          files: "frontend/build/app/outputs/flutter-apk/app-release.apk"
           tag_name: ${{ steps.build_apk.outputs.build_name }}
           draft: false
