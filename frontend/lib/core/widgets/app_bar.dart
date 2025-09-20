@@ -53,6 +53,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
         centerTitle: true,
         elevation: 0, // Remove shadow for a flat design
         backgroundColor: theme.colorScheme.primaryContainer,
+        automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(8.0),
           child: Container(color: theme.colorScheme.secondary, height: 8.0),

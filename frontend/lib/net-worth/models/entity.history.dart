@@ -11,15 +11,17 @@ class EntityHistoryDataPoint {
 
   factory EntityHistoryDataPoint.fromJson(Map<String, dynamic> json) {
     Map<DateTime, double> parsedHistoricalData = {};
-    (json['history'] as Map).forEach((key, value) {
-      try {
-        final ms = int.parse(key.toString());
-        final date = DateTime.fromMillisecondsSinceEpoch(ms);
-        parsedHistoricalData[date] = double.parse(value.toString());
-      } catch (e) {
-        LoggerService.error('Error parsing historical date $key on point: $e');
-      }
-    });
+    if (json.containsKey('history') && json['history'] is Map) {
+      (json['history'] as Map).forEach((key, value) {
+        try {
+          final ms = int.parse(key.toString());
+          final date = DateTime.fromMillisecondsSinceEpoch(ms);
+          parsedHistoricalData[date] = double.parse(value.toString());
+        } catch (e) {
+          LoggerService.error('Error parsing historical date $key on point: $e');
+        }
+      });
+    }
 
     return EntityHistoryDataPoint(
       valueChange: json['valueChange']?.toDouble(),

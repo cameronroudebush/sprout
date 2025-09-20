@@ -4,7 +4,7 @@ import { RestEndpoints } from "@backend/model/api/endpoint";
 import { EntityHistory } from "@backend/model/api/entity.history";
 import { RestBody } from "@backend/model/api/rest.request";
 import { User } from "@backend/model/user";
-import { isSameDay, subYears } from "date-fns";
+import { isSameDay, subDays, subYears } from "date-fns";
 import { groupBy } from "lodash";
 import { MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
@@ -28,6 +28,21 @@ export class NetWorthAPI {
       where: { time: MoreThan(oneYearAgo) },
       order: { time: "ASC" },
     });
+
+    const accountsForUser = await Account.getForUser(user);
+    // If we don't have anything from yesterday, add some fake data
+    const yesterday = subDays(new Date(), 1);
+    if (!accountHistory.find((x) => isSameDay(x.time, yesterday))) {
+      accountHistory.push(
+        ...accountsForUser.map((x) => {
+          const history = x.toAccountHistory(yesterday);
+          history.balance = 0;
+          history.availableBalance = 0;
+          return history;
+        }),
+      );
+    }
+
     // Add today as account history, if we don't have any for today
     if (!accountHistory.find((x) => isSameDay(x.time, new Date()))) accountHistory.push(...(await Account.getForUser(user)).map((x) => x.toAccountHistory()));
     return accountHistory;

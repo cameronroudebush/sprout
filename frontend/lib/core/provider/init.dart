@@ -10,23 +10,26 @@ class InitializationNotifier extends ChangeNotifier {
   InitStatus _status = InitStatus.loading;
   InitStatus get status => _status;
 
-  Future<void> initialize() async {
+  static Future<void> initializeWithNotification(Function(InitStatus) onStatusUpdate) async {
     final providersToInit = ServiceLocator.getAllProviders();
     for (final provider in providersToInit) {
       try {
         await provider.onInit();
       } catch (e) {
         LoggerService.error(e);
-
-        /// If this is a config provider and we failed to load, it's probably due to a login failure, we need out of the rest of the initialization
         if (provider is ConfigProvider) {
-          _status = InitStatus.done;
-          notifyListeners();
+          onStatusUpdate(InitStatus.done);
           return;
         }
       }
     }
-    _status = InitStatus.done;
-    notifyListeners();
+    onStatusUpdate(InitStatus.done);
+  }
+
+  Future<void> initialize() async {
+    initializeWithNotification((status) {
+      _status = status;
+      notifyListeners();
+    });
   }
 }
