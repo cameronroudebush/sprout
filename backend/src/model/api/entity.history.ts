@@ -100,11 +100,17 @@ export class EntityHistory extends Base {
     const daysInArray = eachDayOfInterval({ start: subDays(today, days), end: today });
     for (const day of daysInArray) {
       const historyForDay = history.filter((x) => isSameDay(x.time, day));
-      const netWorth = historyForDay.reduce((prev, curr) => (prev += curr.balance), 0);
-      // We only push days that have data to avoid skewing calculations with zero-value days
-      if (historyForDay.length > 0) {
-        netWorthSnapshots.push({ date: day, netWorth });
+      let netWorth = historyForDay.reduce((prev, curr) => (prev += curr.balance), 0);
+
+      // If there's no data for the current day, use the net worth from the most recent previous day
+      if (historyForDay.length === 0 && netWorthSnapshots.length > 0) {
+        netWorth = netWorthSnapshots[netWorthSnapshots.length - 1]?.netWorth ?? 0;
+      } else if (historyForDay.length === 0 && daysInArray.length > 7) {
+        // If there's no data and it's not within the last 7 days, skip this day to avoid skewing with zero-value days
+        continue;
       }
+
+      netWorthSnapshots.push({ date: day, netWorth });
     }
 
     // const filteredSnapshots = this.removeOutliersIQR(netWorthSnapshots);
