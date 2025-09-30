@@ -1,4 +1,5 @@
 import { ConfigurationMetadata } from "@backend/config/configuration.metadata";
+import { JobsConfig } from "@backend/config/jobs";
 
 /** Options that should be provided to the core of the web server */
 export class ServerConfig {
@@ -7,4 +8,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "How long JWT's should stay valid for users" })
   jwtExpirationTime = "30m";
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for the various jobs" })
+  jobs = new JobsConfig();
 }

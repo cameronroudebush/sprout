@@ -1,5 +1,7 @@
+import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/tz";
 import CronExpressionParser, { CronExpression } from "cron-parser";
+import { addMinutes } from "date-fns";
 import { LogConfig, Logger } from "../logger";
 
 /** A generic class that lets us create background jobs based on a cronjob timeframe. Intended to be used as an extension. */
@@ -34,14 +36,26 @@ export abstract class BackgroundJob<T extends any> {
     return this;
   }
 
-  /** Schedules the next update based on the cronjob time */
-  private scheduleNextUpdate() {
-    const nextExecutionDate = this.interval.next().toDate();
+  /**
+   * Schedules the next update based on the cronjob time
+   *
+   * @param fromFailed If a job failed and we are auto-retrying after some time, this indicates this was from a failed job.
+   */
+  private scheduleNextUpdate(nextExecutionDate = this.interval.next().toDate(), fromFailed = false) {
     const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
     Logger.info(`Next update time: ${TimeZone.formatDate(nextExecutionDate)}`, this.logConfig);
     setTimeout(async () => {
-      await this.update();
-      this.scheduleNextUpdate();
+      try {
+        await this.update();
+      } catch (e) {
+        Logger.error(e as Error);
+        // Schedule a sooner one, just in case of a failure out of our control, which is most of them.
+        const soonerNextExecution = addMinutes(new Date(), Configuration.server.jobs.autoRetryTime);
+        this.scheduleNextUpdate(soonerNextExecution, true);
+
+        // Schedule our next update, only if this isn't from a failure "nextUpdate"
+        if (!fromFailed) this.scheduleNextUpdate();
+      }
     }, timeUntilNextExecution);
   }
 
