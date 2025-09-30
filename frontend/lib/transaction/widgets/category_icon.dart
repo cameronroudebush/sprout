@@ -24,7 +24,7 @@ class CategoryIcon extends StatelessWidget {
       case 'shopping':
         return Icons.shopping_bag;
       case 'online shopping':
-        return Icons.shopping_cart;
+        return Icons.web;
       case 'utilities':
         return Icons.lightbulb;
       case 'housing':

@@ -93,4 +93,12 @@ class TransactionAPI extends BaseAPI {
     final result = await client.post(body, endpoint) as dynamic;
     return TransactionRule.fromJson(result);
   }
+
+  /// Updates the given transaction via the API
+  Future<Transaction> editTransaction(Transaction t) async {
+    final endpoint = "/transaction/edit";
+    final body = t.toJson();
+    final result = await client.post(body, endpoint) as dynamic;
+    return Transaction.fromJson(result);
+  }
 }

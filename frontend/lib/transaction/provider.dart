@@ -122,6 +122,16 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return updatedRule;
   }
 
+  Future<Transaction> editTransaction(Transaction t) async {
+    final updatedTransaction = await api.editTransaction(t);
+    final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
+    if (index != -1) _transactions[index] = updatedTransaction;
+    // Update category info
+    await populateCategoryStats();
+    notifyListeners();
+    return updatedTransaction;
+  }
+
   @override
   Future<void> updateData() async {
     isLoading = true;

@@ -37,4 +37,16 @@ class Transaction {
       account: Account.fromJson(json['account'] as Map<String, dynamic>),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'amount': amount,
+      'description': description,
+      'pending': pending,
+      'category': category?.toJson(),
+      'posted': posted.toIso8601String(),
+      'account': account.toJson(),
+    };
+  }
 }

@@ -3,6 +3,7 @@ import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
 import { TotalTransactions, TransactionQueryRequest, TransactionRequest } from "@backend/model/api/transaction";
 import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
+import { Category } from "@backend/model/category";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import { subDays } from "date-fns";
@@ -70,5 +71,18 @@ export class TransactionAPI {
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.subscriptions, "GET"))
   async getSubscriptions(_request: RestBody, user: User) {
     return await Transaction.findSubscriptions(user);
+  }
+
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.edit, "POST"))
+  async editRule(request: RestBody<Transaction>, user: User) {
+    const matchingTransaction = await Transaction.findOne({ where: { id: request.payload.id, account: { user: { id: user.id } } } });
+    if (matchingTransaction == null) throw new Error("Failed to locate a matching transaction to assign update.");
+    // Currently, we only allow category updating
+    const matchingCategory = await Category.findOne({ where: { id: request.payload.category?.id, user: { id: user.id } } });
+    if (matchingCategory == null) throw new Error("Failed to locate a matching category to assign the transaction to.");
+    matchingTransaction.category = matchingCategory;
+
+    const updatedTransaction = await matchingTransaction.update();
+    return updatedTransaction;
   }
 }
