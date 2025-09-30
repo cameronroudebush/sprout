@@ -7,7 +7,7 @@ import { filter, Subject } from "rxjs";
 /** This class exposes an API for server sent events */
 export class SSEAPI {
   /** A message bus used to send to an SSE endpoint for the given user. */
-  static sendToSSEUser = new Subject<{ payload: Base; queue: string; user: User }>();
+  static sendToSSEUser = new Subject<{ payload?: Base; queue: "sync" | "force-update"; user: User }>();
 
   /** This function initializes an SSE listener for a specific user. It will send messages from the bus as necessary. */
   setupSSEListener(req: Request, res: Response, user: User) {
@@ -26,5 +26,10 @@ export class SSEAPI {
       res.end();
       sub.unsubscribe();
     });
+  }
+
+  /** Tells every client for the given user to update it's data */
+  static forceUpdate(user: User) {
+    SSEAPI.sendToSSEUser.next({ queue: "force-update", user });
   }
 }

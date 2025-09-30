@@ -1,4 +1,5 @@
 import 'package:sprout/account/models/account.dart';
+import 'package:sprout/transaction/models/category.dart';
 
 class Transaction {
   final String id;
@@ -7,7 +8,7 @@ class Transaction {
   final double amount;
   final String description;
   final bool pending;
-  final String? category;
+  final Category? category;
 
   /// The date this transaction posted
   final DateTime posted;
@@ -31,7 +32,7 @@ class Transaction {
       amount: (json['amount'] as num).toDouble(),
       description: json['description'] as String,
       pending: json['pending'] as bool,
-      category: json['category'] as String?,
+      category: json['category'] == null ? null : Category.fromJson(json['category']),
       posted: DateTime.parse(json['posted'] as String),
       account: Account.fromJson(json['account'] as Map<String, dynamic>),
     );

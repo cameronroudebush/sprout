@@ -41,10 +41,7 @@ class _TransactionMonthlySubscriptionsState extends State<TransactionMonthlySubs
             padding: EdgeInsetsGeometry.all(12),
             child: Column(
               children: [
-                TextWidget(
-                  referenceSize: 1.25,
-                  text: "Welcome to your subscription calendar! Sprout has found these recurring transactions for you.",
-                ),
+                TextWidget(referenceSize: 1.25, text: "Sprout has found these recurring transactions for you."),
               ],
             ),
           ),

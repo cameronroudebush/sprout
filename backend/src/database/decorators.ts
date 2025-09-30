@@ -1,6 +1,6 @@
 import { DatabaseBase } from "@backend/model/database.base";
 import { CustomTypes } from "@backend/model/utility/custom.types";
-import { Column, ColumnOptions, Entity, EntityOptions } from "typeorm";
+import { Column, ColumnOptions, Entity, EntityOptions, Unique } from "typeorm";
 
 /** Currently registered entities to the database */
 export const registeredEntities: CustomTypes.Constructor<DatabaseBase>[] = [];
@@ -35,6 +35,13 @@ export class DatabaseDecorators {
   static jsonColumn(options?: ColumnOptions) {
     return function (target: any, key: string) {
       return Column({ ...options, type: "json" })(target, key);
+    };
+  }
+
+  /** Makes the decorated class unique based on the given fields */
+  static compositeUnique<T extends DatabaseBase>(...col: Array<CustomTypes.PropertyNames<T, any>>) {
+    return function (target: any) {
+      return Unique(col)(target);
     };
   }
 }

@@ -39,6 +39,7 @@ nav:
       - Overview: getting-started/index.md
       - Installation: getting-started/installation.md
       - Configuration: getting-started/configuration.md
+      - Providers: getting-started/providers.md
       - Accessing Sprout: getting-started/access.md
       - Backups: getting-started/backups.md
   - Developer:

@@ -39,6 +39,8 @@ class SSEProvider extends BaseProvider<SSEAPI> {
         final accountProvider = ServiceLocator.get<AccountProvider>();
         accountProvider.manualSyncIsRunning = false;
         accountProvider.notifyListeners();
+      } else if (data.queue == "force-update") {
+        await BaseProvider.updateAllData(showSnackbar: false);
       }
     });
     await super.onInit();

@@ -2,6 +2,7 @@ import { Configuration } from "@backend/config/core";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { Account } from "@backend/model/account";
 import { BillingPeriod, TransactionSubscription } from "@backend/model/api/transaction.subscriptions";
+import { Category } from "@backend/model/category";
 import { DatabaseBase } from "@backend/model/database.base";
 import { User } from "@backend/model/user";
 import { ManyToOne } from "typeorm";
@@ -16,8 +17,10 @@ export class Transaction extends DatabaseBase {
   description: string;
   @DatabaseDecorators.column()
   pending: boolean;
-  @DatabaseDecorators.column({ nullable: true })
-  category: string;
+
+  /** The category this transaction belongs to. A null category signifies an unknown category. */
+  @ManyToOne(() => Category, (a) => a.id, { nullable: true, eager: true, onDelete: "CASCADE" })
+  category?: Category;
 
   /** The date this transaction posted */
   @DatabaseDecorators.column({ nullable: false })
@@ -31,7 +34,7 @@ export class Transaction extends DatabaseBase {
   @DatabaseDecorators.jsonColumn({ nullable: true })
   extra?: object;
 
-  constructor(amount: number, posted: Date, description: string, category: string, pending: boolean, account: Account) {
+  constructor(amount: number, posted: Date, description: string, category: Category | undefined, pending: boolean, account: Account) {
     super();
     this.amount = amount;
     this.posted = posted;
@@ -39,28 +42,6 @@ export class Transaction extends DatabaseBase {
     this.category = category;
     this.pending = pending;
     this.account = account;
-  }
-
-  /**
-   * Returns a map of all categories and the times they occur for the given look-back time
-   */
-  static async getCategories(user: User, dateToLookBackTo: Date) {
-    const repository = Transaction.getRepository();
-    const uniqueCategories = await repository
-      .createQueryBuilder("transaction")
-      .select("transaction.category", "category")
-      .addSelect("COUNT(*)", "count")
-      .innerJoin(Account, "account", "transaction.accountId = account.id")
-      .where("account.userId = :userId", { userId: user.id })
-      .andWhere("transaction.posted >= :oneMonthAgo", { oneMonthAgo: dateToLookBackTo })
-      .groupBy("transaction.category")
-      .getRawMany();
-
-    return uniqueCategories.reduce((acc: { [category: string]: number }, curr: { category: string | null; count: string }) => {
-      const categoryName = curr.category ?? "Unknown"; // Check for null and set to "Unknown"
-      acc[categoryName] = parseInt(curr.count);
-      return acc;
-    }, {});
   }
 
   /**

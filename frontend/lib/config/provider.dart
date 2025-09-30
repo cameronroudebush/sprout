@@ -40,7 +40,7 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
       _failedToConnect = false;
       _unsecureConfig = await api.getUnsecure();
     } catch (e) {
-      LoggerService.error(e);
+      LoggerService.error(e, error: e);
       _failedToConnect = true;
       // If this is debug, manually refresh. This is because SSE can tend
       //  to timeout due to dispose not being called on hot reloads.

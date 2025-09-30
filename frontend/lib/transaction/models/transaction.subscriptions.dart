@@ -149,7 +149,7 @@ class TransactionSubscription {
       amount: -amount,
       posted: DateTime.now(),
       description: description,
-      category: "Subscriptions", // Hardcode category for subscriptions
+      category: null, // Hardcode category
       pending: false, // Subscriptions are considered posted
       account: account,
     );

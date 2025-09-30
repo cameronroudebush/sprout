@@ -40,6 +40,14 @@ export module RestEndpoints {
     static stats = "/transaction/stats";
     static getByDescription = "/transaction/get/by/description";
     static subscriptions = "/transaction/subscriptions";
+    /// Categories
+    static categories = "/transaction/categories";
+    static categoryStats = "/transaction/category/stats";
+    /// Rules
+    static getRules = "/transaction/rule";
+    static addRule = "/transaction/rule/add";
+    static editRule = "/transaction/rule/edit";
+    static deleteRule = "/transaction/rule/delete";
   }
 
   /** Net worth endpoints for finance data */

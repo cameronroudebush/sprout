@@ -157,10 +157,14 @@ jobs:
       #     status: completed
       #     inAppUpdatePriority: 2
 
+      - name: Rename APK
+        if: startsWith(github.ref, 'refs/tags/')
+        run: mv frontend/build/app/outputs/flutter-apk/app-release.apk frontend/build/app/outputs/flutter-apk/sprout.apk
+
       - name: Upload APK to Draft Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: "frontend/build/app/outputs/flutter-apk/app-release.apk"
+          files: "frontend/build/app/outputs/flutter-apk/sprout.apk"
           tag_name: ${{ steps.get_repo_info.outputs.version_string }}
           draft: true
