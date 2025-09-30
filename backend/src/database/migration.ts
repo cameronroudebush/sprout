@@ -5,6 +5,7 @@
 import { Database } from "@backend/database/source";
 import { Logger } from "@backend/logger";
 import "../main"; // Load main so we know what database models we have
+import { RestAPIServer } from "../web-api/server";
 
 let database: Database;
 
@@ -12,6 +13,8 @@ let database: Database;
 async function setup() {
   Logger.info("Starting sqlite migration");
   database = new Database();
+  // Initialize required endpoints so we have all db models loaded
+  new RestAPIServer({} as any).initialize();
 
   const originalInitialize = database.source!.initialize.bind(database.source);
   const monkeyPatchedInitialize = async () => {

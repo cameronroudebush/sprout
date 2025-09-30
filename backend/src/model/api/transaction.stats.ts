@@ -17,14 +17,12 @@ export class TransactionStats extends Base {
   totalIncome: number;
   averageTransactionCost: number;
   largestExpense: number;
-  categories: { [category: string]: number };
 
-  constructor(totalSpend: number, totalIncome: number, averageTransactionCost: number, largestExpense: number, categories: TransactionStats["categories"]) {
+  constructor(totalSpend: number, totalIncome: number, averageTransactionCost: number, largestExpense: number) {
     super();
     this.totalSpend = totalSpend;
     this.totalIncome = totalIncome;
     this.averageTransactionCost = averageTransactionCost;
     this.largestExpense = largestExpense;
-    this.categories = categories;
   }
 }

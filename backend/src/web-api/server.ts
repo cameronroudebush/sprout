@@ -24,7 +24,13 @@ export class RestAPIServer {
   /** Handles loading all endpoints and adding handlers for those callbacks */
   async initialize() {
     await this.registerEndpoints(); // Check all files for endpoints
+    return this;
+  }
+
+  /** Starts listening for incoming messages */
+  async start() {
     await this.addListener(); // Add the overarching listener
+    return this;
   }
 
   /** Registers all endpoints dynamically from the endpoints folder */

@@ -17,6 +17,9 @@ async function main() {
     Logger.success(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
     // Initialize config
     new ConfigurationController().load();
+    // Initialize server
+    const centralServer = new CentralServer();
+    const apiServer = await new RestAPIServer(centralServer).initialize();
     // Initialize database
     const database = await new Database().init();
     DatabaseBase.database = database;
@@ -24,9 +27,8 @@ async function main() {
     await Providers.initializeProviders();
     // Initialize background jobs
     await JobProcessor.start();
-    // Initialize server
-    const centralServer = new CentralServer();
-    await new RestAPIServer(centralServer).initialize();
+    // Start listening for requests
+    apiServer.start();
     Logger.success("Server ready!");
   } catch (e) {
     Logger.error(e as Error);

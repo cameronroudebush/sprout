@@ -5,7 +5,7 @@ import { TotalTransactions, TransactionQueryRequest, TransactionRequest } from "
 import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { subDays, subMonths } from "date-fns";
+import { subDays } from "date-fns";
 import { FindOptionsWhere, LessThan, Like, MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
 
@@ -16,7 +16,10 @@ export class TransactionAPI {
     return await Transaction.find({
       skip: parsedRequest.startIndex,
       take: parsedRequest.endIndex,
-      where: { account: { id: parsedRequest.accountId, user: { username: user.username } }, category: parsedRequest.category },
+      where: {
+        account: { id: parsedRequest.accountId, user: { username: user.username } },
+        category: parsedRequest.category ? { name: Like(parsedRequest.category) } : undefined,
+      },
       order: { posted: "DESC" },
     });
   }
@@ -55,14 +58,12 @@ export class TransactionAPI {
     const totalSpend = totalSpendResult || 0;
     const averageTransactionCost = transactionCount > 0 ? totalSpend / transactionCount : 0;
     const largestExpense = largestExpenseResult || 0;
-    const categories = await Transaction.getCategories(user, subMonths(new Date(), 1));
 
     return TransactionStats.fromPlain({
       totalSpend: totalSpend ?? 0,
       totalIncome: totalIncome ?? 0,
       averageTransactionCost: averageTransactionCost,
       largestExpense: largestExpense,
-      categories,
     });
   }
 

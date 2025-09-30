@@ -51,6 +51,7 @@ export class DatabaseBase extends DBBase {
 
   /** Inserts the element from `this` into the database */
   async insert() {
+    this.id = undefined as any; // Make sure no id is set during inserts
     return await this.getRepository().save(this);
   }
 
