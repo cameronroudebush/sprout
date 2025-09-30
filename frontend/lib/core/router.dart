@@ -88,6 +88,7 @@ class SproutRouter {
       icon: Icons.account_balance,
       showOnBottomNav: true,
       pagePadding: 0,
+      scrollWrapper: false,
       buttonBuilder: (BuildContext context, bool isDesktop) {
         return Row(
           children: [
@@ -156,7 +157,7 @@ class SproutRouter {
       icon: Icons.receipt,
       showOnBottomNav: true,
     ),
-    SproutPage((context, state) => TransactionRuleOverview(), 'Transaction Rules', icon: Icons.rule),
+    SproutPage((context, state) => TransactionRuleOverview(), 'Rules', icon: Icons.rule),
     // Subscriptions
     SproutPage(
       (context, state) => TransactionMonthlySubscriptions(),
