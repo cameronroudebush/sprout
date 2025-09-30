@@ -12,6 +12,8 @@ theme:
     - content.code.copy
     - content.code.annotate
     - navigation.top
+    - navigation.expand
+    - navigation.footer
   palette:
     - scheme: slate
       primary: custom

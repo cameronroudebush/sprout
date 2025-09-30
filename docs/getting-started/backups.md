@@ -3,6 +3,10 @@ title: Backups
 description: Learn how to backups work in Sprout.
 ---
 
+<style>
+.md-footer__link--next { display: none; }
+</style>
+
 # Backing Up Your Data
 
 Your financial data is important. Sprout helps protect your data by creating automatic backups for you. While Sprout handles the creation of backups, you are still responsible for ensuring these backups are stored securely in an external location.

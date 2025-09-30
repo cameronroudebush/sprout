@@ -2,6 +2,7 @@
 hide:
     - navigation
     - toc
+    - footer
 title: Overview
 description: Grow your financial future.
 ---

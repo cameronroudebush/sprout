@@ -2,6 +2,7 @@
 hide:
     - navigation
     - toc
+    - footer
 title: Planned Features
 description: Learn about the planned features for sprout.
 ---

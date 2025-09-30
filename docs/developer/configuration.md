@@ -1,6 +1,8 @@
 ---
 title: Total Configuration
 description: Learn about the configuration capabilities of sprout.
+hide:
+    - footer
 ---
 
 # Configuration

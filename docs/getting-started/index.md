@@ -5,6 +5,10 @@ title: Getting started
 description: Learn how to start using Sprout today.
 ---
 
+<style>
+.md-footer__link--prev { display: none; }
+</style>
+
 # Getting Started with Sprout 🚀
 
 Welcome to Sprout! This guide will walk you through setting up, configuring, and using the application.
