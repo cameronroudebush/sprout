@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
-// Assuming the Category model is also available and provides a fromJson method.
-// For this example, we'll use a simple placeholder.
 import 'package:sprout/transaction/models/category.dart';
 import 'package:sprout/transaction/models/transaction_rule.dart';
 import 'package:sprout/transaction/provider.dart';
