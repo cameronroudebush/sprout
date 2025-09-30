@@ -1,6 +1,8 @@
 ---
 title: Known Issues
 description: Known issues regarding Sprout.
+hide:
+    - footer
 ---
 
 # Known Issues

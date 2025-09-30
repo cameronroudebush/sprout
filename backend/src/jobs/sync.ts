@@ -6,6 +6,7 @@ import { Holding } from "@backend/model/holding";
 import { HoldingHistory } from "@backend/model/holding.history";
 import { Sync } from "@backend/model/schedule";
 import { Transaction } from "@backend/model/transaction";
+import { TransactionRule } from "@backend/model/transaction.rule";
 import { User } from "@backend/model/user";
 import { ProviderBase } from "@backend/providers/base/core";
 import { subDays } from "date-fns";
@@ -84,6 +85,10 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         // Sync holdings if investment type
         if (accountInDB.type === "investment" && data.holdings.length !== 0) await this.updateHoldingData(accountInDB, data.holdings);
       }
+
+      // Attempt to auto categorize transactions
+      await TransactionRule.applyRulesToTransactions(user);
+
       Logger.success(`Information updated successfully for: ${user.username}`);
     }
   }

@@ -2,6 +2,7 @@
 hide:
     - navigation
     - toc
+    - footer
 title: Privacy Policy
 description: Information regarding the privacy policy of Sprout
 ---
