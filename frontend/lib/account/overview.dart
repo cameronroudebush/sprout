@@ -6,7 +6,6 @@ import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_group.dart';
 import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -29,7 +28,6 @@ class AccountsOverview extends StatefulWidget {
 class _AccountsOverviewState extends State<AccountsOverview> {
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context).size;
     return Consumer3<UserProvider, AccountProvider, NetWorthProvider>(
       builder: (context, userProvider, accountProvider, netWorthProvider, child) {
         final accountTypes = ["depository", "investment", "loan", "credit"];
@@ -39,12 +37,15 @@ class _AccountsOverviewState extends State<AccountsOverview> {
         final initialIndex = widget.defaultAccountType == null
             ? 0
             : accountTypes.indexOf(widget.defaultAccountType.toString());
-        return SizedBox(
-          height: mediaQuery.height - SproutAppBar.getHeightFromScreenHeight(mediaQuery.height) - 150,
-          child: ScrollableTabsWidget(
-            accountTypes.map((el) => formatAccountType(el)).toList(),
-            accountTypesContent,
-            initialIndex: initialIndex == -1 ? 0 : initialIndex,
+        return Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return ScrollableTabsWidget(
+                accountTypes.map((el) => formatAccountType(el)).toList(),
+                accountTypesContent,
+                initialIndex: initialIndex == -1 ? 0 : initialIndex,
+              );
+            },
           ),
         );
       },
