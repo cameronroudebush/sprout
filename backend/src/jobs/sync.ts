@@ -26,11 +26,11 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     try {
       for (const provider of providers) await this.updateProvider(provider);
     } catch (e) {
-      Logger.error(e as Error);
       schedule.failureReason = (e as Error).message;
       schedule.status = "failed";
       await schedule.update();
-      return schedule; // On failure, cancel all
+      // Don't fail graceful, let the jobs base handle this
+      throw e;
     }
     return schedule;
   }
