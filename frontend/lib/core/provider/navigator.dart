@@ -8,6 +8,10 @@ class SproutNavigator {
 
   /// Redirects to the given page name
   static void redirect(String page, {Map<String, dynamic>? queryParameters}) {
-    SproutRouter.router.pushNamed(page.toLowerCase(), queryParameters: queryParameters ?? {});
+    final currentRoute = SproutRouter.router.state.topRoute?.name;
+    final targetRoute = page.toLowerCase();
+    if (currentRoute != targetRoute) {
+      SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
+    }
   }
 }
