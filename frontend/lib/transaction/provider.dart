@@ -1,13 +1,12 @@
 import 'package:sprout/account/models/account.dart';
+import 'package:sprout/category/provider.dart';
 import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/transaction/api.dart';
-import 'package:sprout/transaction/models/category.dart';
-import 'package:sprout/transaction/models/category_stats.dart';
 import 'package:sprout/transaction/models/transaction.count.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/models/transaction.stats.dart';
 import 'package:sprout/transaction/models/transaction.subscriptions.dart';
-import 'package:sprout/transaction/models/transaction_rule.dart';
 
 /// Class that provides the store of current transactions
 class TransactionProvider extends BaseProvider<TransactionAPI> {
@@ -16,20 +15,12 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   TransactionStats? _transactionStats;
   List<Transaction> _transactions = [];
   List<TransactionSubscription> _subscriptions = [];
-  List<TransactionRule> _rules = [];
-  List<Category> _categories = [];
-  CategoryStats? _categoryStats;
-  bool _transactionRulesRunning = false;
 
   // Public getters
   List<Transaction> get transactions => _transactions;
   TotalTransactions? get totalTransactions => _totalTransactions;
   TransactionStats? get transactionStats => _transactionStats;
   List<TransactionSubscription> get subscriptions => _subscriptions;
-  List<TransactionRule> get rules => _rules;
-  List<Category> get categories => _categories;
-  CategoryStats? get categoryStats => _categoryStats;
-  bool get transactionRulesRunning => _transactionRulesRunning;
 
   TransactionProvider(super.api);
 
@@ -65,10 +56,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return _transactionStats = await api.getStats();
   }
 
-  Future<List<TransactionRule>> populateTransactionRules() async {
-    return _rules = await api.getTransactionRules();
-  }
-
   /// Same as @populateTransactions but now does it with a specific search term
   Future<List<Transaction>> populateTransactionsWithSearch(
     String description, {
@@ -86,48 +73,13 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return _subscriptions = await api.getSubscriptions();
   }
 
-  Future<List<Category>> populateCategories() async {
-    return _categories = await api.getCategories();
-  }
-
-  Future<CategoryStats> populateCategoryStats() async {
-    return _categoryStats = await api.getCategoryStats();
-  }
-
-  Future<TransactionRule> addTransactionRule(TransactionRule rule) async {
-    _transactionRulesRunning = true;
-    notifyListeners();
-    final addedRule = await api.addTransactionRule(rule);
-    _rules.add(addedRule);
-    notifyListeners();
-    return addedRule;
-  }
-
-  Future<TransactionRule> deleteTransactionRule(TransactionRule rule) async {
-    _transactionRulesRunning = true;
-    notifyListeners();
-    final deletedRule = await api.deleteTransactionRule(rule);
-    _rules.removeWhere((r) => r.id == deletedRule.id);
-    notifyListeners();
-    return deletedRule;
-  }
-
-  Future<TransactionRule> editTransactionRule(TransactionRule rule) async {
-    _transactionRulesRunning = true;
-    notifyListeners();
-    final updatedRule = await api.editTransactionRule(rule);
-    final index = _rules.indexWhere((r) => r.id == updatedRule.id);
-    if (index != -1) _rules[index] = updatedRule;
-    notifyListeners();
-    return updatedRule;
-  }
-
+  /// Utilizes the API to edit the given transaction and updates the data store
   Future<Transaction> editTransaction(Transaction t) async {
     final updatedTransaction = await api.editTransaction(t);
     final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
     if (index != -1) _transactions[index] = updatedTransaction;
     // Update category info
-    await populateCategoryStats();
+    await ServiceLocator.get<CategoryProvider>().populateCategoryStats();
     notifyListeners();
     return updatedTransaction;
   }
@@ -140,11 +92,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     await populateStats();
     await populateTransactions(0, 20); // Grab some to start
     await populateSubscriptions();
-    await populateTransactionRules();
-    await populateCategories();
-    await populateCategoryStats();
     isLoading = false;
-    _transactionRulesRunning = false;
     notifyListeners();
   }
 
@@ -153,9 +101,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     _transactionStats = null;
     _totalTransactions = null;
     _transactions = [];
-    _rules = [];
-    _categories = [];
-    _categoryStats = null;
     notifyListeners();
   }
 }

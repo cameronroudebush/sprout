@@ -41,14 +41,22 @@ export module RestEndpoints {
     static getByDescription = "/transaction/get/by/description";
     static subscriptions = "/transaction/subscriptions";
     static edit = "/transaction/edit";
-    /// Categories
-    static categories = "/transaction/categories";
-    static categoryStats = "/transaction/category/stats";
-    /// Rules
-    static getRules = "/transaction/rule";
-    static addRule = "/transaction/rule/add";
-    static editRule = "/transaction/rule/edit";
-    static deleteRule = "/transaction/rule/delete";
+  }
+
+  /** Rules that help apply categories to transactions */
+  export class transactionRules {
+    static get = "/transaction/rule";
+    static add = "/transaction/rule/add";
+    static edit = "/transaction/rule/edit";
+    static delete = "/transaction/rule/delete";
+  }
+
+  /** Category endpoints for how we link transactions */
+  export class category {
+    static get = "/category";
+    static stats = "/category/stats";
+    static add = "/category/add";
+    static delete = "/category/delete";
   }
 
   /** Net worth endpoints for finance data */

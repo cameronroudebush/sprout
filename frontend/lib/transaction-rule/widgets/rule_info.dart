@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/category/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/transaction-rule/provider.dart';
 import 'package:sprout/transaction/models/category.dart';
 import 'package:sprout/transaction/models/transaction_rule.dart';
-import 'package:sprout/transaction/provider.dart';
 
 /// A widget that displays the editing capabilities of a [TransactionRule]
 class TransactionRuleInfo extends StatefulWidget {
@@ -27,8 +28,8 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
 
   @override
   void initState() {
-    final transactionProvider = ServiceLocator.get<TransactionProvider>();
-    final lastRuleOrder = transactionProvider.rules.lastOrNull?.order;
+    final provider = ServiceLocator.get<TransactionRuleProvider>();
+    final lastRuleOrder = provider.rules.lastOrNull?.order;
     super.initState();
     final rule = widget.rule;
     if (rule != null) {
@@ -82,7 +83,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
 
   void _submit() {
     final isEdit = widget.rule != null;
-    final transactionProvider = ServiceLocator.get<TransactionProvider>();
+    final provider = ServiceLocator.get<TransactionRuleProvider>();
 
     // Validate the form before proceeding with submission
     if (_formKey.currentState!.validate()) {
@@ -92,10 +93,10 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
         // Don't submit if no changes, just exit
       } else if (isEdit) {
         // Tell provider to update content
-        transactionProvider.editTransactionRule(newRule);
+        provider.edit(newRule);
       } else {
         // Add a new rule
-        transactionProvider.addTransactionRule(newRule);
+        provider.add(newRule);
       }
 
       // Close dialog
@@ -144,7 +145,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
 
     final helpStyle = TextStyle(fontSize: 12, color: Colors.grey);
 
-    return Consumer<TransactionProvider>(
+    return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
         return Form(
           key: _formKey,
@@ -320,10 +321,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                         spacing: 4,
                         children: [
                           const Text("Enabled", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(
-                            "Toggle to enable or disable this rule. Disabled rules will not update categories.",
-                            style: helpStyle,
-                          ),
+                          Text("Toggle to enable or disable this rule from running.", style: helpStyle),
                         ],
                       ),
                       const Spacer(),

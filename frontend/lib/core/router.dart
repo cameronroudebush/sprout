@@ -21,9 +21,9 @@ import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/holding/overview.dart';
 import 'package:sprout/setup/connection_setup.dart';
 import 'package:sprout/setup/setup.dart';
+import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
 import 'package:sprout/transaction/monthly.dart';
 import 'package:sprout/transaction/overview.dart';
-import 'package:sprout/transaction/widgets/rule_overview.dart';
 import 'package:sprout/user/login.dart';
 import 'package:sprout/user/user.dart';
 
