@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/category/provider.dart';
 import 'package:sprout/charts/pie_chart.dart';
 import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/transaction/provider.dart';
 
 /// This renders a pie chart for the transaction category mapping
 class CategoryPieChart extends StatelessWidget {
@@ -11,7 +11,7 @@ class CategoryPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TransactionProvider>(
+    return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
         final data = provider.categoryStats?.categoryCount;
         if (provider.isLoading) {

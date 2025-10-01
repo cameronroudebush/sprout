@@ -19,7 +19,7 @@ export class Transaction extends DatabaseBase {
   pending: boolean;
 
   /** The category this transaction belongs to. A null category signifies an unknown category. */
-  @ManyToOne(() => Category, (a) => a.id, { nullable: true, eager: true, onDelete: "CASCADE" })
+  @ManyToOne(() => Category, (a) => a.id, { nullable: true, eager: true, onDelete: "SET NULL" })
   category?: Category;
 
   /** The date this transaction posted */

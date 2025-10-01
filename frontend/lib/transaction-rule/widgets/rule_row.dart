@@ -6,10 +6,10 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/transaction-rule/provider.dart';
+import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction/models/transaction_rule.dart';
-import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
-import 'package:sprout/transaction/widgets/rule_info.dart';
 
 /// Renders a transaction rule in a modern, card-based format.
 class TransactionRuleRow extends StatelessWidget {
@@ -19,7 +19,7 @@ class TransactionRuleRow extends StatelessWidget {
   const TransactionRuleRow(this.rule, {required this.index, super.key});
 
   void _delete(BuildContext context) {
-    final transactionProvider = ServiceLocator.get<TransactionProvider>();
+    final provider = ServiceLocator.get<TransactionRuleProvider>();
     showDialog(
       context: context,
       builder: (_) => SproutDialogWidget(
@@ -30,7 +30,7 @@ class TransactionRuleRow extends StatelessWidget {
         submitButtonText: "Delete",
         submitButtonStyle: AppTheme.errorButton,
         onSubmitClick: () {
-          transactionProvider.deleteTransactionRule(rule);
+          provider.delete(rule);
           Navigator.of(context).pop();
         },
         child: const TextWidget(text: 'Removing this transaction rule cannot be undone.'),
@@ -93,7 +93,7 @@ class TransactionRuleRow extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final String condition = rule.strict ? 'is exactly' : 'contains';
 
-    return Consumer<TransactionProvider>(
+    return Consumer<TransactionRuleProvider>(
       builder: (context, provider, child) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -123,7 +123,7 @@ class TransactionRuleRow extends StatelessWidget {
                           value: rule.enabled,
                           onChanged: (bool isEnabled) {
                             final newRule = rule.copyWith(enabled: isEnabled);
-                            provider.editTransactionRule(newRule);
+                            provider.edit(newRule);
                           },
                         ),
                       ],

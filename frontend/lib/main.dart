@@ -5,6 +5,8 @@ import 'package:sprout/account/api.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/api.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/category/api.dart';
+import 'package:sprout/category/provider.dart';
 import 'package:sprout/config/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/client.dart';
@@ -21,6 +23,8 @@ import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/setup/api.dart';
 import 'package:sprout/setup/provider.dart';
+import 'package:sprout/transaction-rule/api.dart';
+import 'package:sprout/transaction-rule/provider.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/user/api.dart';
@@ -44,6 +48,8 @@ void main() async {
   ServiceLocator.register<TransactionProvider>(TransactionProvider(TransactionAPI(client)));
   ServiceLocator.register<UserProvider>(UserProvider(UserAPI(client)));
   ServiceLocator.register<HoldingProvider>(HoldingProvider(HoldingAPI(client)));
+  ServiceLocator.register<TransactionRuleProvider>(TransactionRuleProvider(TransactionRuleAPI(client)));
+  ServiceLocator.register<CategoryProvider>(CategoryProvider(CategoryAPI(client)));
 
   runApp(
     MultiProvider(
@@ -57,6 +63,8 @@ void main() async {
         ServiceLocator.createProvider<TransactionProvider>(),
         ServiceLocator.createProvider<UserProvider>(),
         ServiceLocator.createProvider<HoldingProvider>(),
+        ServiceLocator.createProvider<TransactionRuleProvider>(),
+        ServiceLocator.createProvider<CategoryProvider>(),
 
         // Create a future that waits for all the providers to be initialized, in order
         ChangeNotifierProvider<InitializationNotifier>(

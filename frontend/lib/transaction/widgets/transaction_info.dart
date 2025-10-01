@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/category/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/transaction/models/category.dart';
@@ -122,7 +123,7 @@ class _TransactionInfoState extends State<TransactionInfo> {
   Widget _getForm() {
     final helpStyle = TextStyle(fontSize: 12, color: Colors.grey);
 
-    return Consumer<TransactionProvider>(
+    return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
         return Form(
           key: _formKey,

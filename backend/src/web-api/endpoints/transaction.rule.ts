@@ -8,12 +8,12 @@ import { RestMetadata } from "../metadata";
 import { SSEAPI } from "./sse";
 
 export class TransactionRuleAPI {
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getRules, "GET"))
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transactionRules.get, "GET"))
   async getRules(_request: RestBody, user: User) {
     return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" } });
   }
 
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.addRule, "POST"))
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transactionRules.add, "POST"))
   async insertRule(request: RestBody<TransactionRule>, user: User) {
     const rule = TransactionRule.fromPlain(request.payload);
     rule.user = user;
@@ -32,7 +32,7 @@ export class TransactionRuleAPI {
     return rule;
   }
 
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.deleteRule, "POST"))
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transactionRules.delete, "POST"))
   async deleteRule(request: RestBody<TransactionRule>, user: User) {
     // Grab it from the database to make sure it exists for this user
     const ruleInDb = await TransactionRule.findOne({ where: { id: request.payload.id, user: { id: user.id } } });
@@ -44,7 +44,7 @@ export class TransactionRuleAPI {
     return ruleInDb;
   }
 
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.editRule, "POST"))
+  @RestMetadata.register(new RestMetadata(RestEndpoints.transactionRules.edit, "POST"))
   async editRule(request: RestBody<TransactionRule>, user: User) {
     const matchingRule = await TransactionRule.findOne({ where: { id: request.payload.id, user: { id: user.id } } });
     if (matchingRule == null) throw new Error("Failed to find matching rule to update.");
