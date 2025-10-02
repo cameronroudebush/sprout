@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 import 'package:sprout/transaction-rule/provider.dart';
 
@@ -268,7 +270,23 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
                     children: [
-                      const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
+                          // Add Category button
+                          SproutTooltip(
+                            message: "Opens a dialog to add a new category",
+                            child: IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () async {
+                                await showDialog(context: context, builder: (_) => CategoryInfo(null));
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                       provider.isLoading
                           ? const Center(child: CircularProgressIndicator())
                           : DropdownButtonFormField<Category?>(
@@ -290,7 +308,6 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                       Text("This is the category that will be applied when the rule is met.", style: helpStyle),
                     ],
                   ),
-
                   Row(
                     children: [
                       Column(
