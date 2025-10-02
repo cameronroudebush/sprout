@@ -129,7 +129,19 @@ class CategoryOverview extends StatelessWidget {
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const SproutCard(
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(12),
+              child: Center(
+                child: Column(
+                  children: [
+                    Text("Loading Categories", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              ),
+            ),
+          );
         }
 
         // Find only the top-level categories to start the recursion
