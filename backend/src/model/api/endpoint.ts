@@ -70,6 +70,7 @@ export module RestEndpoints {
   /** Account endpoints for for the users supported banks */
   export class account {
     static get = "/account/get";
+    static edit = "/account/edit";
     static delete = "/account/delete";
     static getAll = "/account/get/all";
     static getAllFromProvider = "/account/provider/get/all";

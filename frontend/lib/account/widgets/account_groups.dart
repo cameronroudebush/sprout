@@ -25,6 +25,9 @@ class AccountGroupsWidget extends StatelessWidget {
   /// If we should render the title of the groups
   final bool showGroupTitles;
 
+  /// If we should display the selectable subType of the account
+  final bool displaySubTypes;
+
   const AccountGroupsWidget({
     super.key,
     required this.accounts,
@@ -36,6 +39,7 @@ class AccountGroupsWidget extends StatelessWidget {
     required this.allowCollapse,
     required this.applyCard,
     this.showGroupTitles = true,
+    this.displaySubTypes = false,
   });
 
   /// Given a list of accounts, sorts and groups them for display
@@ -106,6 +110,7 @@ class AccountGroupsWidget extends StatelessWidget {
                     allowCollapse: allowCollapse,
                     applyCard: applyCard,
                     showTitle: showGroupTitles,
+                    displaySubTypes: displaySubTypes,
                   ),
                 ),
                 if (!applyCard && sortedAccountEntries.last != entry) const Divider(height: 1),

@@ -100,7 +100,9 @@ export class Category extends DatabaseBase {
     if (category == null) return await this.getUnknownCategory(user);
     else {
       const name = startCase(category);
-      return await Category.fromPlain({ name, user, type }).insert();
+      const matchingCategory = Category.findOne({ where: { name: name, user: { id: user.id }, type: type } });
+      if (matchingCategory) return matchingCategory;
+      else return await Category.fromPlain({ name, user, type }).insert();
     }
   }
 }

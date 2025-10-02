@@ -94,3 +94,8 @@ String formatAccountType(String accountType) {
       return accountType.toTitleCase;
   }
 }
+
+/// Returns a locale formatted number
+String formatNumber(dynamic number) {
+  return NumberFormat().format(number);
+}

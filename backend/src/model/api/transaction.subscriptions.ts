@@ -1,5 +1,6 @@
 import { Account } from "@backend/model/account";
 import { Base } from "@backend/model/base";
+import { Transaction } from "@backend/model/transaction";
 
 /** An enum to define how often a subscription is billed. */
 export enum BillingPeriod {
@@ -29,7 +30,10 @@ export class TransactionSubscription extends Base {
   /** The account related to this subscription */
   account: Account;
 
-  constructor(description: string, amount: number, count: number, period: BillingPeriod, startDate: Date, account: Account) {
+  /** The transaction that matches the first subscription indication */
+  transaction: Transaction;
+
+  constructor(description: string, amount: number, count: number, period: BillingPeriod, startDate: Date, account: Account, transaction: Transaction) {
     super();
     this.description = description;
     this.amount = amount;
@@ -37,6 +41,7 @@ export class TransactionSubscription extends Base {
     this.count = count;
     this.startDate = startDate;
     this.account = account;
+    this.transaction = transaction;
   }
 
   /** A helper function to classify the period based on average days. */

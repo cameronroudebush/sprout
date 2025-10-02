@@ -6,6 +6,7 @@ import { Base } from "@backend/model/base";
 import { Holding } from "@backend/model/holding";
 import { Institution } from "@backend/model/institution";
 import { Transaction } from "@backend/model/transaction";
+import { TransactionRule } from "@backend/model/transaction.rule";
 import { User } from "@backend/model/user";
 import { ProviderConfig } from "@backend/providers/base/config";
 import { Providers } from "../../providers";
@@ -53,10 +54,14 @@ export class AccountAPI {
         // Try to find a matching institution first if it exists
         const matchingInstitution = await Institution.findOne({ where: { id: matchingAccount.account.institution.id } });
         if (matchingInstitution) matchingAccount.account.institution = matchingInstitution;
+        matchingAccount.account.subType = account.subType;
+        if (account.subType != null) Account.validateSubType(account.subType);
         await matchingAccount.account.insert();
         // Insert matching transactions
         matchingAccount.transactions.map((x) => (x.account = matchingAccount.account));
         await Transaction.insertMany(matchingAccount.transactions);
+        // Run transaction rules
+        await TransactionRule.applyRulesToTransactions(user);
         // Insert holdings
         matchingAccount.holdings.map((x) => (x.account = matchingAccount.account));
         await Holding.insertMany(matchingAccount.holdings);
@@ -65,5 +70,16 @@ export class AccountAPI {
     }
     SSEAPI.sendToSSEUser.next({ payload: Base.fromPlain({}), queue: "sync", user });
     return addedAccounts;
+  }
+
+  /** Allows editing certain account metadata */
+  @RestMetadata.register(new RestMetadata(RestEndpoints.account.edit, "POST"))
+  async edit(data: RestBody<Account>, user: User) {
+    const matchingAccount = await Account.findOne({ where: { id: data.payload.id, user: { id: user.id } } });
+    if (matchingAccount == null) throw new Error("Failed to locate a matching account to update");
+    // Update only the allowed fields
+    matchingAccount.name = data.payload.name ?? matchingAccount.name;
+    matchingAccount.subType = data.payload.subType;
+    return await matchingAccount.update();
   }
 }

@@ -43,4 +43,12 @@ class AccountAPI extends BaseAPI {
     final body = account.toJson();
     await client.post(body, endpoint);
   }
+
+  /// Updates the given account via the API
+  Future<Account> edit(Account a) async {
+    final endpoint = "/account/edit";
+    final body = a.toJson();
+    final result = await client.post(body, endpoint) as dynamic;
+    return Account.fromJson(result);
+  }
 }

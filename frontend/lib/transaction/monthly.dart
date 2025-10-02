@@ -124,7 +124,12 @@ class _TransactionMonthlySubscriptionsState extends State<TransactionMonthlySubs
                   ..._eventsForCurrentDay.mapIndexed((i, e) {
                     // Mock this as a transaction
                     final transaction = e.toMockTransaction();
-                    return TransactionRow(transaction: transaction, isEvenRow: i % 2 == 0, renderPostedTime: false);
+                    return TransactionRow(
+                      transaction: transaction,
+                      isEvenRow: i % 2 == 0,
+                      renderPostedTime: false,
+                      allowDialog: false,
+                    );
                   }),
               ],
             ),

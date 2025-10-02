@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/core/router.dart';
 
@@ -11,7 +12,11 @@ class SproutNavigator {
     final currentRoute = SproutRouter.router.state.topRoute?.name;
     final targetRoute = page.toLowerCase();
     if (currentRoute != targetRoute) {
-      SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
+      if (kIsWeb) {
+        SproutRouter.router.goNamed(targetRoute, queryParameters: queryParameters ?? {});
+      } else {
+        SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
+      }
     }
   }
 }

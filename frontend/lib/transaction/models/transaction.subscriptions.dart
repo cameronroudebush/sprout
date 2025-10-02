@@ -51,6 +51,9 @@ class TransactionSubscription {
   /// The account related to the subscription
   final Account account;
 
+  /// The transaction that matches the first subscription indication
+  final Transaction transaction;
+
   TransactionSubscription({
     required this.description,
     required this.amount,
@@ -58,6 +61,7 @@ class TransactionSubscription {
     required this.period,
     required this.startDate,
     required this.account,
+    required this.transaction,
   });
 
   factory TransactionSubscription.fromJson(Map<String, dynamic> json) {
@@ -68,6 +72,7 @@ class TransactionSubscription {
       period: BillingPeriod.fromString(json['period'] as String),
       startDate: DateTime.parse(json['startDate'] as String),
       account: Account.fromJson(json['account']),
+      transaction: Transaction.fromJson(json['transaction']),
     );
   }
 
@@ -149,7 +154,7 @@ class TransactionSubscription {
       amount: -amount,
       posted: DateTime.now(),
       description: description,
-      category: null, // Hardcode category
+      category: transaction.category, // Hardcode category
       pending: false, // Subscriptions are considered posted
       account: account,
     );

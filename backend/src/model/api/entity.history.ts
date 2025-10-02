@@ -105,6 +105,10 @@ export class EntityHistory extends Base {
       // If there's no data for the current day, use the net worth from the most recent previous day
       if (historyForDay.length === 0 && netWorthSnapshots.length > 0) {
         netWorth = netWorthSnapshots[netWorthSnapshots.length - 1]?.netWorth ?? 0;
+      } else if (historyForDay.length === 0 && netWorthSnapshots.length === 0 && days === 1) {
+        // No previous data, try further back if this is a small days of change
+        const furtherHistory = history.filter((x) => isSameDay(x.time, subDays(day, 1)));
+        netWorth = furtherHistory.reduce((prev, curr) => (prev += curr.balance), 0);
       } else if (historyForDay.length === 0 && daysInArray.length > 7) {
         // If there's no data and it's not within the last 7 days, skip this day to avoid skewing with zero-value days
         continue;

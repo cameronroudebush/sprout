@@ -1,4 +1,5 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
+import { Account } from "@backend/model/account";
 import { Category } from "@backend/model/category";
 import { DatabaseBase } from "@backend/model/database.base";
 import { Transaction } from "@backend/model/transaction";
@@ -51,10 +52,11 @@ export class TransactionRule extends DatabaseBase {
    * Iterates over the transaction table and attempts to handle the transaction rules for a given user.
    *
    * @param user The user to apply the rules for.
+   * @param account A specific account we only want to apply the rules for. If this is not given, rules will be run for all user accounts
    */
-  static async applyRulesToTransactions(user: User) {
+  static async applyRulesToTransactions(user: User, account?: Account) {
     const rules = await TransactionRule.find({ where: { user: { id: user.id } } });
-    const transactions = await Transaction.find({ where: { account: { user: { id: user.id } } } });
+    const transactions = await Transaction.find({ where: { account: { id: account?.id, user: { id: user.id } } } });
 
     for (const rule of rules) {
       if (!rule.enabled) continue; // Ignore disabled rules

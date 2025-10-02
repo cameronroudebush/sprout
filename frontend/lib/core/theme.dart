@@ -23,7 +23,7 @@ abstract final class AppTheme {
   );
 
   /// Dark theme design
-  static ThemeData dark =
+  static final ThemeData dark =
       FlexThemeData.dark(
         colors: const FlexSchemeColor(
           primary: Color(0xff6b9ac4),
@@ -46,7 +46,7 @@ abstract final class AppTheme {
           navigationRailUseIndicator: true,
         ),
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
+        useMaterial3: true, 
         platform: TargetPlatform.windows,
         cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
       ).copyWith(
@@ -54,7 +54,7 @@ abstract final class AppTheme {
         dialogTheme: DialogThemeData(backgroundColor: Color(0xff14171b)),
         listTileTheme: ListTileThemeData(),
         drawerTheme: DrawerThemeData(),
-        progressIndicatorTheme: ProgressIndicatorThemeData(
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
           color: Color(0xff6b9ac4),
           refreshBackgroundColor: Color(0xff6b9ac4),
         ),

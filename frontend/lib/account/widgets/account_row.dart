@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/config/provider.dart';
@@ -38,6 +39,9 @@ class AccountRowWidget extends StatelessWidget {
   /// If we should apply the green/red color to the total
   final bool applyColorToTotal;
 
+  /// If we should display the selectable subType of the account
+  final bool displaySubType;
+
   const AccountRowWidget({
     super.key,
     required this.account,
@@ -50,6 +54,7 @@ class AccountRowWidget extends StatelessWidget {
     this.showPercentage = false,
     this.showPeriod = false,
     this.applyColorToTotal = false,
+    this.displaySubType = false,
   });
 
   @override
@@ -63,19 +68,15 @@ class AccountRowWidget extends StatelessWidget {
                   onClick!();
                 }
               : null,
-          child: IgnorePointer(
-            ignoring: onClick != null,
-            child: Theme(
-              data: theme.copyWith(
-                // Remove trailing and leading dividers when expansion tile is open
-                dividerColor: Colors.transparent,
-                disabledColor: theme.textTheme.titleMedium?.color,
-              ),
-              child: ExpansionTile(
-                enabled: allowClick,
-                title: _getAccountHeader(context, account, theme, netWorthProvider, userProvider),
-                showTrailingIcon: false,
-              ),
+          child: Theme(
+            data: theme.copyWith(
+              // Remove trailing and leading dividers when expansion tile is open
+              dividerColor: Colors.transparent,
+              disabledColor: theme.textTheme.titleMedium?.color,
+            ),
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(12),
+              child: _getAccountHeader(context, account, theme, netWorthProvider, userProvider),
             ),
           ),
         );
@@ -135,6 +136,9 @@ class AccountRowWidget extends StatelessWidget {
                               style: TextStyle(color: Colors.grey),
                               textAlign: TextAlign.start,
                             ),
+
+                            // Sub type selection
+                            if (displaySubType) AccountSubTypeSelect(account),
                           ],
                         ),
                       ),

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/accounts.dart';
+import 'package:sprout/category/provider.dart';
+import 'package:sprout/core/models/notification.dart';
+import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
@@ -20,10 +24,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, provider, child) {
+    return Consumer2<UserProvider, CategoryProvider>(
+      builder: (context, provider, catProvider, child) {
+        final theme = Theme.of(context).colorScheme;
         final chartRange = provider.userDefaultChartRange;
         final lastTransactionCount = 10;
+        final catStats = catProvider.categoryStats?.categoryCount;
+
+        List<HomeNotification> notifications = [];
+
+        if (catStats != null && catStats.containsKey("Unknown") && catStats["Unknown"] != 0) {
+          final unknownCatCount = catStats["Unknown"];
+          notifications.add(
+            HomeNotification(
+              "You have ${formatNumber(unknownCatCount)} un-categorized transactions",
+              theme.primary,
+              theme.onPrimary,
+              icon: Icons.category,
+              onClick: () => SproutNavigator.redirect("transactions"),
+            ),
+          );
+        }
 
         return Center(
           child: Padding(
@@ -32,6 +53,39 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 0,
               children: <Widget>[
+                // Render notifications available
+                if (notifications.isNotEmpty)
+                  Column(
+                    children: notifications.map((n) {
+                      return SproutCard(
+                        bgColor: n.bgColor,
+                        child: Padding(
+                          padding: EdgeInsetsGeometry.all(12),
+                          child: InkWell(
+                            onTap: n.onClick,
+                            child: Row(
+                              spacing: 8,
+                              children: [
+                                if (n.icon != null) Icon(n.icon, color: n.color),
+                                Expanded(
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    children: [
+                                      TextWidget(
+                                        text: n.message,
+                                        referenceSize: 1.15,
+                                        style: TextStyle(color: n.color),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 // Net Worth Section
                 NetWorthOverviewWidget(
                   showCard: true,

@@ -6,6 +6,7 @@ import 'package:sprout/account/dialog/account_error.dart';
 import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
 import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/theme.dart';
@@ -70,10 +71,22 @@ class AccountWidget extends StatelessWidget {
                     ),
                     const Divider(height: 1),
                     // End buttons
-                    Row(
+                    Wrap(
                       spacing: 24,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.center,
                       children: [
+                        // Account sub type
+                        SizedBox(
+                          width: 240,
+                          child: AccountSubTypeSelect(
+                            account,
+                            onChanged: (newSubType) {
+                              account.subType = newSubType;
+                              accountProvider.edit(account);
+                            },
+                          ),
+                        ),
                         // Institution error fix
                         if (account.institution.hasError)
                           SproutTooltip(

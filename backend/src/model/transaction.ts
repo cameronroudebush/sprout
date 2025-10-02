@@ -97,8 +97,17 @@ export class Transaction extends DatabaseBase {
           );
           if (arePeriodsConsistent && areAmountsConsistent && period !== BillingPeriod.UNKNOWN) {
             const account = await Account.findOne({ where: { id: row.accountId } });
+            const transaction = await Transaction.findOne({ where: { description: row.normalizedDescription, account: { id: row.accountId } } });
             if (account)
-              return new TransactionSubscription(row.normalizedDescription, Math.abs(row.averageAmount), parseInt(row.count), period, startDate, account);
+              return new TransactionSubscription(
+                row.normalizedDescription,
+                Math.abs(row.averageAmount),
+                parseInt(row.count),
+                period,
+                startDate,
+                account,
+                transaction!,
+              );
           }
           return null;
         }),

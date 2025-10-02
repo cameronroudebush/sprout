@@ -89,7 +89,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
       showCloseDialogButton: !_isAddingAccounts,
       closeButtonText: accountsAvailable ? "Close" : "Cancel",
       showSubmitButton: accountsAvailable && !_isAddingAccounts,
-      allowSubmitClick: accountsAvailable,
+      allowSubmitClick: accountsAvailable && _selectedAccounts.isNotEmpty,
       onSubmitClick: () async {
         setState(() {
           _isAddingAccounts = true;
@@ -142,6 +142,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
         if (accounts.isNotEmpty)
           SelectableAccountsWidget(
             accounts: accounts,
+            displaySubTypes: true,
             onSelectionChanged: (value) {
               setState(() {
                 _selectedAccounts = value;
