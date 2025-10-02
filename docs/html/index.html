@@ -83,16 +83,7 @@
           While we do know about account balances and transactions,
           <strong>we do not keep any user authentication</strong> information related to your bank accounts.
         </li>
-        <ul>
-          <li>We use finance API's like SimpleFIN, which has a great slogan: "Why give out your key when they only need a window?"</li>
-        </ul>
-        <li>
-          All data transmission from the user interface to the backend is done via a <strong>REST API</strong>. Each request requires a
-          <strong>JWT (JSON Web Token)</strong> bearer token to be added for the backend to validate the request and the user who requested it.
-        </li>
-        <ul>
-          <li>The secret key for the JWT is <strong>rotated on every restart</strong> of the application, ensuring a high level of security.</li>
-        </ul>
+        <li>All data transmission from the user interface to the backend is done <strong>securely</strong>.</li>
       </ul>
     </div>
   </section>

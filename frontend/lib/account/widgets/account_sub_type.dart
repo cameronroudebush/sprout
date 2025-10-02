@@ -61,6 +61,8 @@ class AccountSubTypeSelect extends StatelessWidget {
     }
 
     return DropdownButtonFormField<String>(
+      dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
         isDense: true,

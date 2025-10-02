@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
@@ -212,6 +213,8 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                     children: [
                       const Text("Rule Type", style: TextStyle(fontWeight: FontWeight.bold)),
                       DropdownButtonFormField<TransactionRuleType>(
+                        dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
                         value: _type,
                         decoration: const InputDecoration(border: OutlineInputBorder()),
                         items: TransactionRuleType.values.map((type) {
@@ -294,24 +297,11 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                           ),
                         ],
                       ),
-                      provider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : DropdownButtonFormField<Category?>(
-                              value: _category,
-                              decoration: const InputDecoration(border: OutlineInputBorder()),
-                              hint: const Text("Select a category"),
-                              items: [
-                                const DropdownMenuItem<Category?>(value: null, child: Text("Unknown")),
-                                ...provider.categories
-                                    .map((cat) => DropdownMenuItem(value: cat, child: Text(cat.name)))
-                                    .toList(),
-                              ],
-                              onChanged: (newValue) {
-                                setState(() {
-                                  _category = newValue;
-                                });
-                              },
-                            ),
+                      CategoryDropdown(_category, (cat) {
+                        setState(() {
+                          _category = cat;
+                        });
+                      }),
                       Text("This is the category that will be applied when the rule is met.", style: helpStyle),
                     ],
                   ),
@@ -359,9 +349,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                           runSpacing: 4,
                           children: [
                             const Text("Enabled", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Expanded(
-                              child: Text("Toggle to enable or disable this rule from running.", style: helpStyle),
-                            ),
+                            Text("Toggle to enable or disable this rule from running.", style: helpStyle),
                           ],
                         ),
                       ),
