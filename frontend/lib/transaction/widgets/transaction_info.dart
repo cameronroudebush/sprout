@@ -5,6 +5,8 @@ import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction/models/transaction.dart';
 import 'package:sprout/transaction/provider.dart';
 
@@ -140,7 +142,27 @@ class _TransactionInfoState extends State<TransactionInfo> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
                     children: [
-                      const Text("Description", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Description", style: TextStyle(fontWeight: FontWeight.bold)),
+                          // Add rule button
+                          SproutTooltip(
+                            message: "Opens a dialog to add a new transaction rule based on the description.",
+                            child: IconButton(
+                              icon: const Icon(Icons.rule),
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (_) =>
+                                      TransactionRuleInfo(null, initialValue: widget.transaction.description),
+                                );
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                       TextFormField(
                         enabled: !widget.disableNonEditable,
                         controller: _descriptionController,
