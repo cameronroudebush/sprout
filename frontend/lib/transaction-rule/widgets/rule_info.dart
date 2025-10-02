@@ -315,24 +315,33 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                       Text("This is the category that will be applied when the rule is met.", style: helpStyle),
                     ],
                   ),
+
+                  // Strict matching
                   Row(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          Text("Strict Match", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text("Enables an exact match, rather than a partial match.", style: helpStyle),
-                        ],
+                      Expanded(
+                        flex: 9,
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          runAlignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            Text("Strict Match", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text("Enables an exact match, rather than a partial match.", style: helpStyle),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      Switch(
-                        value: _strict,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _strict = newValue;
-                          });
-                        },
+                      Expanded(
+                        child: Switch(
+                          value: _strict,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _strict = newValue;
+                            });
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -340,20 +349,29 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                   // Enabled status
                   Row(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          const Text("Enabled", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text("Toggle to enable or disable this rule from running.", style: helpStyle),
-                        ],
+                      Expanded(
+                        flex: 9,
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          runAlignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            const Text("Enabled", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Expanded(
+                              child: Text("Toggle to enable or disable this rule from running.", style: helpStyle),
+                            ),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      Switch(
-                        value: _enabled,
-                        onChanged: (newValue) {
-                          setState(() => _enabled = newValue);
-                        },
+                      Expanded(
+                        child: Switch(
+                          value: _enabled,
+                          onChanged: (newValue) {
+                            setState(() => _enabled = newValue);
+                          },
+                        ),
                       ),
                     ],
                   ),

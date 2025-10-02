@@ -1,6 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/models/institution.dart';
 
+enum DepositoryAccountType {
+  savings('Savings'),
+  checking('Checking'),
+  hysa('HYSA');
+
+  const DepositoryAccountType(this.value);
+  final String value;
+}
+
+enum InvestmentAccountType {
+  four01k('401K'),
+  brokerage('Brokerage'),
+  ira('IRA'),
+  hsa('HSA');
+
+  const InvestmentAccountType(this.value);
+  final String value;
+}
+
+enum LoanAccountType {
+  student('Student'),
+  mortgage('Mortgage'),
+  personal('Personal'),
+  auto('Auto');
+
+  const LoanAccountType(this.value);
+  final String value;
+}
+
+enum CreditAccountType {
+  travel('Travel'),
+  cashBack('Cash Back');
+
+  const CreditAccountType(this.value);
+  final String value;
+}
+
 /// This account defines what an account should look like from the API
 class Account {
   final String id;
@@ -17,6 +54,9 @@ class Account {
   /// An icon to use in the event the institution url's logo can't be found
   final IconData fallbackIcon;
 
+  /// The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.
+  String? subType;
+
   Account({
     required this.id,
     required this.name,
@@ -26,6 +66,7 @@ class Account {
     required this.availableBalance,
     required this.currency,
     required this.type,
+    this.subType,
     required this.institution,
   });
 
@@ -49,6 +90,7 @@ class Account {
       type: json['type'] as String,
       balance: (json['balance'] as num).toDouble(),
       availableBalance: (json['availableBalance'] as num).toDouble(),
+      subType: json['subType'],
       fallbackIcon: defaultIcon,
       institution: Institution.fromJson(json["institution"]),
     );
@@ -64,6 +106,7 @@ class Account {
       'type': type,
       'balance': balance,
       'availableBalance': availableBalance,
+      'subType': subType,
     };
   }
 

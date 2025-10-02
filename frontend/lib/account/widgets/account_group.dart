@@ -45,6 +45,9 @@ class AccountGroupWidget extends StatelessWidget {
   /// If we should render the title for this section with more info and total percentages
   final bool showTitle;
 
+  /// If we should display the selectable subType of the account
+  final bool displaySubTypes;
+
   const AccountGroupWidget({
     super.key,
     required this.netWorthPeriod,
@@ -58,6 +61,7 @@ class AccountGroupWidget extends StatelessWidget {
     required this.allowCollapse,
     required this.applyCard,
     this.showTitle = true,
+    this.displaySubTypes = false,
   });
 
   /// Calculates useful content per group of given accounts with historical data and returns it
@@ -233,6 +237,7 @@ class AccountGroupWidget extends StatelessWidget {
                           displayStats: displayStats,
                           onClick: onAccountClick == null ? null : () => onAccountClick!(account),
                           isSelected: isSelected,
+                          displaySubType: displaySubTypes,
                         ),
                         if (account != accounts.last) const Divider(height: 1),
                       ],

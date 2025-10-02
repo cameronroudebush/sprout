@@ -6,8 +6,9 @@ class SproutCard extends StatelessWidget {
   final double? widthMultiplier;
   final bool applySizedBox;
   final double? height;
+  final Color? bgColor;
 
-  const SproutCard({super.key, this.child, this.widthMultiplier, this.applySizedBox = true, this.height});
+  const SproutCard({super.key, this.child, this.widthMultiplier, this.applySizedBox = true, this.height, this.bgColor});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class SproutCard extends StatelessWidget {
       child: Card(
         elevation: 3.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        color: bgColor,
         child: child,
       ),
     );

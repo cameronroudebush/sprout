@@ -11,7 +11,15 @@ class SelectableAccountsWidget extends StatefulWidget {
   final List<Account> accounts;
   final ValueChanged<List<Account>>? onSelectionChanged;
 
-  const SelectableAccountsWidget({super.key, required this.accounts, this.onSelectionChanged});
+  /// If we should display the selectable subType of the account
+  final bool displaySubTypes;
+
+  const SelectableAccountsWidget({
+    super.key,
+    required this.accounts,
+    this.onSelectionChanged,
+    this.displaySubTypes = false,
+  });
 
   @override
   State<SelectableAccountsWidget> createState() => _SelectableAccountsWidgetState();
@@ -48,6 +56,7 @@ class _SelectableAccountsWidgetState extends State<SelectableAccountsWidget> {
             selectedAccounts: _selectedAccounts,
             allowCollapse: false,
             applyCard: true,
+            displaySubTypes: widget.displaySubTypes,
           ),
         );
       },

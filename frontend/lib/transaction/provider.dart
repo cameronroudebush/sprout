@@ -87,6 +87,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   @override
   Future<void> updateData() async {
     isLoading = true;
+    _transactions = []; // Forcible reset so we need to update all transactions
     notifyListeners();
     await populateTotalTransactionCount();
     await populateStats();

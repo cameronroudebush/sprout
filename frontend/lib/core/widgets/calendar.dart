@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 
@@ -77,107 +78,109 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
     final days = _getDaysInMonth(_focusedDate);
     final dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Month/Year - Navigation
-        Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Go to todays date button
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: [
-                    SproutTooltip(
-                      message: "Go to today's date.",
-                      child: IconButton(
-                        icon: Icon(Icons.today),
-                        onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now())
-                            ? () => _focusDay(DateTime.now())
-                            : null,
+    return SproutLayoutBuilder((isDesktop, context) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Month/Year - Navigation
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Go to todays date button
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      SproutTooltip(
+                        message: "Go to today's date.",
+                        child: IconButton(
+                          icon: Icon(Icons.today),
+                          onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now())
+                              ? () => _focusDay(DateTime.now())
+                              : null,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                DateFormat.yMMMM().format(_focusedDate),
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+                Text(
+                  DateFormat.yMMMM().format(_focusedDate),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurface),
-                      onPressed: _previousMonth,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.chevron_right, color: theme.colorScheme.onSurface),
-                      onPressed: _nextMonth,
-                    ),
-                  ],
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurface),
+                        onPressed: _previousMonth,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.chevron_right, color: theme.colorScheme.onSurface),
+                        onPressed: _nextMonth,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const Divider(height: 1),
-        // Day of Week Headers
-        GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
-          itemCount: 7,
-          itemBuilder: (context, index) {
-            return Center(
-              child: TextWidget(
-                text: dayHeaders[index],
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onPrimary.withOpacity(0.6),
-                  fontWeight: FontWeight.bold,
+          const Divider(height: 1),
+          // Day of Week Headers
+          GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+            itemCount: 7,
+            itemBuilder: (context, index) {
+              return Center(
+                child: TextWidget(
+                  text: dayHeaders[index],
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimary.withOpacity(0.6),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-
-        // Calendar Grid
-        GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7,
-            childAspectRatio: 1, // Adjust aspect ratio for cell height
+              );
+            },
           ),
-          itemCount: days.length,
-          itemBuilder: (context, index) {
-            final date = days[index];
-            // Find events for the specific day from our grouped map.
-            final eventsForDay = widget.events.where((e) {
-              return widget.isOnDay(date, e);
-            }).toList();
 
-            return _CalendarCell(
-              date: date,
-              focusedDate: _focusedDate,
-              events: eventsForDay,
-              eventMarkerBuilder: widget.dayDisplay,
-              onDaySelected: (day, List<T> events) {
-                _focusDay(day);
-              },
-            );
-          },
-        ),
-      ],
-    );
+          // Calendar Grid
+          GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: isDesktop ? 1.5 : 1, // Adjust aspect ratio for cell height
+            ),
+            itemCount: days.length,
+            itemBuilder: (context, index) {
+              final date = days[index];
+              // Find events for the specific day from our grouped map.
+              final eventsForDay = widget.events.where((e) {
+                return widget.isOnDay(date, e);
+              }).toList();
+
+              return _CalendarCell(
+                date: date,
+                focusedDate: _focusedDate,
+                events: eventsForDay,
+                eventMarkerBuilder: widget.dayDisplay,
+                onDaySelected: (day, List<T> events) {
+                  _focusDay(day);
+                },
+              );
+            },
+          ),
+        ],
+      );
+    });
   }
 
   /// Calculates the list of days to display for a given month,

@@ -15,7 +15,16 @@ class TransactionRow extends StatelessWidget {
   final bool isEvenRow;
   final bool renderPostedTime;
 
-  const TransactionRow({super.key, required this.transaction, required this.isEvenRow, this.renderPostedTime = true});
+  /// If we're allowed to open this dialog menu
+  final bool allowDialog;
+
+  const TransactionRow({
+    super.key,
+    required this.transaction,
+    required this.isEvenRow,
+    this.renderPostedTime = true,
+    this.allowDialog = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +42,11 @@ class TransactionRow extends StatelessWidget {
         : timeago.format(transaction!.posted);
 
     return InkWell(
-      onTap: () {
-        showDialog(context: context, builder: (_) => TransactionInfo(transaction!));
-      },
+      onTap: allowDialog
+          ? () {
+              showDialog(context: context, builder: (_) => TransactionInfo(transaction!));
+            }
+          : null,
       child: Container(
         color: rowColor,
         width: double.infinity,
