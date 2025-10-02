@@ -1,5 +1,5 @@
 import 'package:sprout/account/models/account.dart';
-import 'package:sprout/transaction/models/category.dart';
+import 'package:sprout/category/models/category.dart';
 
 class Transaction {
   final String id;

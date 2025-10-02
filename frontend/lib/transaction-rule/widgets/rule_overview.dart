@@ -5,10 +5,10 @@ import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 import 'package:sprout/transaction-rule/provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction-rule/widgets/rule_row.dart';
-import 'package:sprout/transaction/models/transaction_rule.dart';
 
 /// A widget that displays all of our transaction rules and allows adding more
 class TransactionRuleOverview extends StatelessWidget {

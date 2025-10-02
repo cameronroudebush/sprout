@@ -1,6 +1,6 @@
+import 'package:sprout/category/models/category.dart';
+import 'package:sprout/category/models/category_stats.dart';
 import 'package:sprout/core/api/base.dart';
-import 'package:sprout/transaction/models/category.dart';
-import 'package:sprout/transaction/models/category_stats.dart';
 
 /// Class that provides callable endpoints for the categories of transactions
 class CategoryAPI extends BaseAPI {
@@ -32,6 +32,14 @@ class CategoryAPI extends BaseAPI {
   /// Deletes the given category via the API
   Future<Category> delete(Category rule) async {
     final endpoint = "/category/delete";
+    final body = rule.toJson();
+    final result = await client.post(body, endpoint) as dynamic;
+    return Category.fromJson(result);
+  }
+
+  /// Edits the given category via the API
+  Future<Category> edit(Category rule) async {
+    final endpoint = "/category/edit";
     final body = rule.toJson();
     final result = await client.post(body, endpoint) as dynamic;
     return Category.fromJson(result);

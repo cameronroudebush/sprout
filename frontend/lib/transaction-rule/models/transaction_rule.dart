@@ -1,4 +1,4 @@
-import 'package:sprout/transaction/models/category.dart';
+import 'package:sprout/category/models/category.dart';
 
 /// An enum to represent the fixed types of a transaction rule.
 enum TransactionRuleType {

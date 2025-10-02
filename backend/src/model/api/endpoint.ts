@@ -56,6 +56,7 @@ export module RestEndpoints {
     static get = "/category";
     static stats = "/category/stats";
     static add = "/category/add";
+    static edit = "/category/edit";
     static delete = "/category/delete";
   }
 

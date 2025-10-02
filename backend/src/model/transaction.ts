@@ -84,35 +84,26 @@ export class Transaction extends DatabaseBase {
             .map((d: string) => new Date(d))
             .sort((a: Date, b: Date) => a.getTime() - b.getTime());
           const amounts = row.amounts.split(",").map(Number);
-
           const startDate = postedDates[0];
-
           const timeDifferences = [];
           for (let i = 1; i < postedDates.length; i++) timeDifferences.push(postedDates[i].getTime() - postedDates[i - 1].getTime());
-
           if (timeDifferences.length === 0) return null;
-
           const averagePeriodMs = timeDifferences.reduce((sum, diff) => sum + diff, 0) / timeDifferences.length;
           const averagePeriodDays = Math.round(averagePeriodMs / (1000 * 60 * 60 * 24));
-
           const period = TransactionSubscription.classifyPeriod(averagePeriodDays);
-
           const arePeriodsConsistent = timeDifferences.every((diff) => Math.abs(diff - averagePeriodMs) / averagePeriodMs < deviationTolerance);
           const areAmountsConsistent = amounts.every(
             (amount: number) => Math.abs(amount - row.averageAmount) / Math.abs(row.averageAmount) < deviationTolerance,
           );
-
           if (arePeriodsConsistent && areAmountsConsistent && period !== BillingPeriod.UNKNOWN) {
             const account = await Account.findOne({ where: { id: row.accountId } });
             if (account)
               return new TransactionSubscription(row.normalizedDescription, Math.abs(row.averageAmount), parseInt(row.count), period, startDate, account);
           }
-
           return null;
         }),
       )
     ).filter(Boolean); // Filter out any null values
-
     return subscriptions as TransactionSubscription[];
   }
 }

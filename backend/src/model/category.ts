@@ -15,7 +15,7 @@ export class Category extends DatabaseBase {
   static UNKNOWN_NAME = "Unknown";
 
   /** The category this user belongs to */
-  @ManyToOne(() => User, (u) => u.id)
+  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   user: User;
   @DatabaseDecorators.column({ nullable: false })
@@ -30,7 +30,7 @@ export class Category extends DatabaseBase {
   type: "income" | "expense";
 
   /** The parent category this category belongs to */
-  @ManyToOne(() => Category, { nullable: true })
+  @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
   parentCategory?: Category;
 
   constructor(user: User, name: string, type: Category["type"], parentCategory?: Category) {

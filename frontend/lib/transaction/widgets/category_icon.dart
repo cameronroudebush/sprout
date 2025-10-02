@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/transaction/models/category.dart';
+import 'package:sprout/category/models/category.dart';
 
 /// An icon display for transaction categories
 class CategoryIcon extends StatelessWidget {

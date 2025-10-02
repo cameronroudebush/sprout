@@ -6,9 +6,9 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 import 'package:sprout/transaction-rule/provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
-import 'package:sprout/transaction/models/transaction_rule.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
 
 /// Renders a transaction rule in a modern, card-based format.
@@ -29,6 +29,7 @@ class TransactionRuleRow extends StatelessWidget {
         showSubmitButton: true,
         submitButtonText: "Delete",
         submitButtonStyle: AppTheme.errorButton,
+        closeButtonStyle: AppTheme.primaryButton,
         onSubmitClick: () {
           provider.delete(rule);
           Navigator.of(context).pop();

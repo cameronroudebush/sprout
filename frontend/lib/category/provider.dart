@@ -1,7 +1,7 @@
 import 'package:sprout/category/api.dart';
+import 'package:sprout/category/models/category.dart';
+import 'package:sprout/category/models/category_stats.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/transaction/models/category.dart';
-import 'package:sprout/transaction/models/category_stats.dart';
 
 /// Class that provides the store of current category info
 class CategoryProvider extends BaseProvider<CategoryAPI> {
@@ -39,6 +39,15 @@ class CategoryProvider extends BaseProvider<CategoryAPI> {
     _categories.removeWhere((r) => r.id == deletedCategory.id);
     notifyListeners();
     return deletedCategory;
+  }
+
+  Future<Category> edit(Category c) async {
+    notifyListeners();
+    final updatedCategory = await api.edit(c);
+    final index = _categories.indexWhere((r) => r.id == updatedCategory.id);
+    if (index != -1) _categories[index] = updatedCategory;
+    notifyListeners();
+    return updatedCategory;
   }
 
   @override

@@ -1,5 +1,5 @@
 import 'package:sprout/core/api/base.dart';
-import 'package:sprout/transaction/models/transaction_rule.dart';
+import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 
 /// Class that provides callable endpoints for the transaction rules
 class TransactionRuleAPI extends BaseAPI {
