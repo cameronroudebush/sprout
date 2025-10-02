@@ -13,7 +13,8 @@ import 'package:sprout/transaction-rule/provider.dart';
 /// A widget that displays the editing capabilities of a [TransactionRule]
 class TransactionRuleInfo extends StatefulWidget {
   final TransactionRule? rule;
-  const TransactionRuleInfo(this.rule, {super.key});
+  final dynamic initialValue;
+  const TransactionRuleInfo(this.rule, {super.key, this.initialValue});
 
   @override
   State<TransactionRuleInfo> createState() => _TransactionRuleInfoState();
@@ -43,13 +44,19 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
       _enabled = rule.enabled;
     } else {
       // Initialize for a new rule
-      _valueController.text = "";
+      _valueController.text = widget.initialValue == null ? "" : widget.initialValue.toString();
       _priorityController.text = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
       _type = TransactionRuleType.description;
       _category = null;
       _enabled = true;
       _strict = false;
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -278,7 +285,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                           SproutTooltip(
                             message: "Opens a dialog to add a new category",
                             child: IconButton(
-                              icon: const Icon(Icons.add),
+                              icon: const Icon(Icons.category),
                               onPressed: () async {
                                 await showDialog(context: context, builder: (_) => CategoryInfo(null));
                                 setState(() {});
