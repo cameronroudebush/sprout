@@ -3,7 +3,6 @@ enum CategoryType {
   income,
   expense;
 
-  /// Converts a string to its corresponding enum value.
   static CategoryType fromString(String type) {
     if (type == 'income') {
       return CategoryType.income;
@@ -15,8 +14,7 @@ enum CategoryType {
   }
 }
 
-/// A class representing a category.
-/// This class is a pure data model and does not contain database logic.
+/// A class representing a category of a transaction
 class Category {
   final String id;
   final String name;
@@ -25,7 +23,6 @@ class Category {
 
   const Category({required this.id, required this.name, required this.type, this.parentCategory});
 
-  /// A factory constructor to create a Category instance from a JSON map.
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
       id: json['id'] as String,

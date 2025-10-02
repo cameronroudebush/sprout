@@ -1,6 +1,6 @@
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/transaction-rule/api.dart';
-import 'package:sprout/transaction/models/transaction_rule.dart';
+import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 
 /// Class that provides the store of current transactions
 class TransactionRuleProvider extends BaseProvider<TransactionRuleAPI> {

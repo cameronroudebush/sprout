@@ -7,6 +7,7 @@ import 'package:sprout/account/overview.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/category/widgets/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/models/page.dart';
@@ -158,6 +159,7 @@ class SproutRouter {
       showOnBottomNav: true,
     ),
     SproutPage((context, state) => TransactionRuleOverview(), 'Rules', icon: Icons.rule),
+    SproutPage((context, state) => CategoryOverview(), 'Categories', icon: Icons.category),
     // Subscriptions
     SproutPage(
       (context, state) => TransactionMonthlySubscriptions(),

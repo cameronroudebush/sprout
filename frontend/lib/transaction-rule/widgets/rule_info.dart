@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 import 'package:sprout/transaction-rule/provider.dart';
-import 'package:sprout/transaction/models/category.dart';
-import 'package:sprout/transaction/models/transaction_rule.dart';
 
 /// A widget that displays the editing capabilities of a [TransactionRule]
 class TransactionRuleInfo extends StatefulWidget {

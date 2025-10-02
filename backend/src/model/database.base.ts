@@ -66,6 +66,11 @@ export class DatabaseBase extends DBBase {
     else return await this.getRepository().save(this);
   }
 
+  /** Given a condition and a field partial object to update, updates all elements that match this condition to include the partial object. */
+  static async updateWhere<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, where: FindOptionsWhere<T>, partial: Partial<T>) {
+    return await new this().getRepository().update(where, partial as any);
+  }
+
   /** Counts the total amount of fields that match the given query options */
   static async count<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, options?: FindManyOptions<T>) {
     return await new this().getRepository().count(options);
