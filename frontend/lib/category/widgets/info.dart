@@ -161,6 +161,8 @@ class _CategoryInfoState extends State<CategoryInfo> {
                     children: [
                       const Text("Type", style: TextStyle(fontWeight: FontWeight.bold)),
                       DropdownButtonFormField<CategoryType>(
+                        dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
                         value: _type,
                         decoration: const InputDecoration(border: OutlineInputBorder()),
                         items: CategoryType.values.map((type) {

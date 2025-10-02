@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
@@ -214,24 +215,11 @@ class _TransactionInfoState extends State<TransactionInfo> {
                     spacing: 4,
                     children: [
                       const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
-                      provider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : DropdownButtonFormField<Category?>(
-                              value: _category,
-                              decoration: const InputDecoration(border: OutlineInputBorder()),
-                              hint: const Text("Select a category"),
-                              items: [
-                                const DropdownMenuItem<Category?>(value: null, child: Text("Unknown")),
-                                ...provider.categories
-                                    .map((cat) => DropdownMenuItem(value: cat, child: Text(cat.name)))
-                                    .toList(),
-                              ],
-                              onChanged: (newValue) {
-                                setState(() {
-                                  _category = newValue;
-                                });
-                              },
-                            ),
+                      CategoryDropdown(_category, (cat) {
+                        setState(() {
+                          _category = cat;
+                        });
+                      }),
                       Text("The category this transaction belongs to.", style: helpStyle),
                     ],
                   ),
