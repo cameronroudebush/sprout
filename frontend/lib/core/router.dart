@@ -7,6 +7,8 @@ import 'package:sprout/account/overview.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
@@ -125,6 +127,7 @@ class SproutRouter {
       'Account',
       icon: Icons.account_balance_wallet,
       canNavigateTo: false,
+      scrollWrapper: false,
       buttonBuilder: (context, isDesktop) {
         final accountProvider = ServiceLocator.get<AccountProvider>();
         final state = GoRouter.of(context).state;
@@ -153,10 +156,18 @@ class SproutRouter {
     ),
     // Transactions
     SproutPage(
-      (context, state) => TransactionsOverviewPage(),
+      (context, state) {
+        final provider = ServiceLocator.get<CategoryProvider>();
+        final categoryId = state.uri.queryParameters["cat"];
+        final category = categoryId == "unknown"
+            ? null
+            : provider.categories.firstWhereOrNull((c) => c.id == categoryId) ?? CategoryDropdown.fakeAllCategory;
+        return TransactionsOverview(initialCategoryFilter: category);
+      },
       'Transactions',
       icon: Icons.receipt,
       showOnBottomNav: true,
+      scrollWrapper: false,
     ),
     SproutPage((context, state) => TransactionRuleOverview(), 'Rules', icon: Icons.rule),
     SproutPage((context, state) => CategoryOverview(), 'Categories', icon: Icons.category),

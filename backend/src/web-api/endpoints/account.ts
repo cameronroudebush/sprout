@@ -61,7 +61,7 @@ export class AccountAPI {
         matchingAccount.transactions.map((x) => (x.account = matchingAccount.account));
         await Transaction.insertMany(matchingAccount.transactions);
         // Run transaction rules
-        await TransactionRule.applyRulesToTransactions(user);
+        await TransactionRule.applyRulesToTransactions(user, undefined, true);
         // Insert holdings
         matchingAccount.holdings.map((x) => (x.account = matchingAccount.account));
         await Holding.insertMany(matchingAccount.holdings);

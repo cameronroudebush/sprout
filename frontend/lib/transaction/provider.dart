@@ -10,6 +10,8 @@ import 'package:sprout/transaction/models/transaction.subscriptions.dart';
 
 /// Class that provides the store of current transactions
 class TransactionProvider extends BaseProvider<TransactionAPI> {
+  /// How many transactions we should initially pull
+  static final initialTransactionCount = 20;
   // Data store
   TotalTransactions? _totalTransactions;
   TransactionStats? _transactionStats;
@@ -40,13 +42,22 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     _transactions.sort((a, b) => b.posted.compareTo(a.posted));
   }
 
+  /// Populates transactions based on the parameters given
   Future<List<Transaction>> populateTransactions(
     int startIndex,
     int endIndex, {
-    bool shouldNotify = false,
+    bool shouldNotify = true,
     Account? account,
+    dynamic category,
+    String? description,
   }) async {
-    final newTransactions = await api.getTransactions(startIndex, endIndex, account: account);
+    final newTransactions = await api.getTransactions(
+      startIndex,
+      endIndex,
+      account: account,
+      category: category,
+      description: description,
+    );
     _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
     return _transactions;
@@ -54,18 +65,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
 
   Future<TransactionStats?> populateStats() async {
     return _transactionStats = await api.getStats();
-  }
-
-  /// Same as @populateTransactions but now does it with a specific search term
-  Future<List<Transaction>> populateTransactionsWithSearch(
-    String description, {
-    bool shouldNotify = true,
-    Account? account,
-  }) async {
-    final newTransactions = await api.getTransactionsByDescription(description);
-    _addNewTransactions(newTransactions);
-    if (shouldNotify) notifyListeners();
-    return _transactions;
   }
 
   /// Populates subscription information built from transactions
@@ -91,7 +90,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     notifyListeners();
     await populateTotalTransactionCount();
     await populateStats();
-    await populateTransactions(0, 20); // Grab some to start
+    await populateTransactions(0, initialTransactionCount, shouldNotify: false);
     await populateSubscriptions();
     isLoading = false;
     notifyListeners();

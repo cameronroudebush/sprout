@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 
 /// Defines themes for use in sprout
 abstract final class AppTheme {
+  /// How many pixels display content can max out at on desktops.
+  static final maxDesktopSize = 1024.0;
+
   /// Styling for displaying error buttons
   static final errorButton = FilledButton.styleFrom(
     backgroundColor: dark.colorScheme.error,
@@ -46,7 +49,7 @@ abstract final class AppTheme {
           navigationRailUseIndicator: true,
         ),
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true, 
+        useMaterial3: true,
         platform: TargetPlatform.windows,
         cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
       ).copyWith(
