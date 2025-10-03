@@ -4,7 +4,7 @@ import { Category } from "@backend/model/category";
 import { DatabaseBase } from "@backend/model/database.base";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { ManyToOne } from "typeorm";
+import { IsNull, ManyToOne } from "typeorm";
 
 /** This class defines a rule that allows us to organize transactions based on a rule  */
 @DatabaseDecorators.entity()
@@ -53,10 +53,14 @@ export class TransactionRule extends DatabaseBase {
    *
    * @param user The user to apply the rules for.
    * @param account A specific account we only want to apply the rules for. If this is not given, rules will be run for all user accounts
+   * @param onlyApplyToEmpty If we should only apply transaction rules to transactions with empty categories
    */
-  static async applyRulesToTransactions(user: User, account?: Account) {
-    const rules = await TransactionRule.find({ where: { user: { id: user.id } } });
-    const transactions = await Transaction.find({ where: { account: { id: account?.id, user: { id: user.id } } } });
+  static async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false) {
+    // Run rules in descending order so if it's updated, it's updated with the highest priority
+    const rules = await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "DESC" } });
+    const transactions = await Transaction.find({
+      where: { category: onlyApplyToEmpty ? IsNull() : undefined, account: { id: account?.id, user: { id: user.id } } },
+    });
 
     for (const rule of rules) {
       if (!rule.enabled) continue; // Ignore disabled rules

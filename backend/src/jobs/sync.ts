@@ -87,7 +87,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       }
 
       // Attempt to auto categorize transactions
-      await TransactionRule.applyRulesToTransactions(user);
+      await TransactionRule.applyRulesToTransactions(user, undefined, true);
 
       Logger.success(`Information updated successfully for: ${user.username}`);
     }

@@ -1,36 +1,61 @@
 import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
-import { TotalTransactions, TransactionQueryRequest, TransactionRequest } from "@backend/model/api/transaction";
+import { TotalTransactions, TransactionRequest } from "@backend/model/api/transaction";
 import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Category } from "@backend/model/category";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
 import { subDays } from "date-fns";
-import { FindOptionsWhere, LessThan, Like, MoreThan } from "typeorm";
+import { FindOptionsWhere, In, IsNull, LessThan, Like, MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
 
 export class TransactionAPI {
+  /**
+   * Get's transactions based on the request information in the payload. For what you can request, you should see
+   *  {@link TransactionRequest}
+   */
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.get, "POST"))
-  async getTransactions(request: RestBody, user: User) {
+  async get(request: RestBody, user: User) {
     const parsedRequest = TransactionRequest.fromPlain(request.payload);
+
+    // Define category clause of this search
+    let categoryQuery;
+    if (parsedRequest.category == null) {
+      categoryQuery = undefined; // No category filter
+    } else if (parsedRequest.category === "Unknown") {
+      categoryQuery = IsNull(); // Filter for un-categorized
+    } else {
+      // Handle nested categories
+      const allIds = [parsedRequest.category.id];
+      const queue = [parsedRequest.category.id];
+
+      while (queue.length > 0) {
+        const currentId = queue.shift()!;
+        const children = await Category.find({
+          where: { parentCategory: { id: currentId } },
+          select: ["id"], // Only fetch the IDs for efficiency
+        });
+
+        for (const child of children) {
+          allIds.push(child.id);
+          queue.push(child.id);
+        }
+      }
+
+      categoryQuery = { id: In(allIds) };
+    }
+
     return await Transaction.find({
       skip: parsedRequest.startIndex,
       take: parsedRequest.endIndex,
       where: {
         account: { id: parsedRequest.accountId, user: { username: user.username } },
-        category: parsedRequest.category ? { name: Like(parsedRequest.category) } : undefined,
+        category: categoryQuery,
+        description: parsedRequest.description ? Like(`%${parsedRequest.description}%`) : undefined,
       },
-      order: { posted: "DESC" },
-    });
-  }
-
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.getByDescription, "GET"))
-  async getTransactionsByDescription(request: RestBody, user: User) {
-    const parsedRequest = TransactionQueryRequest.fromPlain(request.payload);
-    return await Transaction.find({
-      where: { account: { id: parsedRequest.accountId, user: { username: user.username } }, description: Like(`%${parsedRequest.description!}%`) },
-      order: { posted: "DESC" },
+      order: { posted: "DESC", pending: "DESC", description: "ASC" },
+      relations: ["category", "category.parentCategory"],
     });
   }
 

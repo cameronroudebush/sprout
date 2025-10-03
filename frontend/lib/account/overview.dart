@@ -5,6 +5,7 @@ import 'package:sprout/account/accounts.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_group.dart';
 import 'package:sprout/charts/line_chart.dart';
+import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
@@ -38,14 +39,17 @@ class _AccountsOverviewState extends State<AccountsOverview> {
             ? 0
             : accountTypes.indexOf(widget.defaultAccountType.toString());
         return Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return ScrollableTabsWidget(
-                accountTypes.map((el) => formatAccountType(el)).toList(),
-                accountTypesContent,
-                initialIndex: initialIndex == -1 ? 0 : initialIndex,
-              );
-            },
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: AppTheme.maxDesktopSize),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return ScrollableTabsWidget(
+                  accountTypes.map((el) => formatAccountType(el)).toList(),
+                  accountTypesContent,
+                  initialIndex: initialIndex == -1 ? 0 : initialIndex,
+                );
+              },
+            ),
           ),
         );
       },

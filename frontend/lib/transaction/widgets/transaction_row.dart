@@ -38,7 +38,7 @@ class TransactionRow extends StatelessWidget {
     if (transaction == null) return Center(child: CircularProgressIndicator());
 
     final timeText = DateTime.now().difference(transaction!.posted).inDays > 3
-        ? formatDate(transaction!.posted, includeTime: false)
+        ? transaction!.posted.toShort
         : timeago.format(transaction!.posted);
 
     return InkWell(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/setup/provider.dart';
@@ -117,7 +118,7 @@ class _SetupPageState extends State<SetupPage> {
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: mediaQuery.width * (mediaQuery.width > 1024 ? .6 : .8),
+          maxWidth: mediaQuery.width * (mediaQuery.width > AppTheme.maxDesktopSize ? .6 : .8),
           maxHeight: mediaQuery.height * .8,
         ),
         child: PageView(

@@ -30,17 +30,13 @@ String getShortFormattedCurrency(dynamic number) {
   return userProvider.currentUserConfig?.privateMode == true ? "***" : returnVal;
 }
 
-String formatDate(DateTime date, {bool includeTime = false}) {
-  final format = includeTime ? "MM/dd/yyyy HH:mm" : "MM/dd/yyyy";
-  return DateFormat(format).format(date.toLocal());
-}
-
 /// Returns the given number as a percentage
 String formatPercentage(double number) {
   if (number == -0.0) number = 0.0;
   return "${number.toStringAsFixed(2)}%";
 }
 
+/// String formatters
 extension StringCasingExtension on String {
   String get toCapitalized => length > 0 ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
   String get toTitleCase => replaceAll(RegExp(' +'), ' ').split(' ').map((str) => str.toCapitalized).join(' ');
@@ -98,4 +94,18 @@ String formatAccountType(String accountType) {
 /// Returns a locale formatted number
 String formatNumber(dynamic number) {
   return NumberFormat().format(number);
+}
+
+/// Date formatters
+extension DateToStringFormatterExtension on DateTime {
+  /// MM/dd/yyyy
+  String get toShort => DateFormat("MM/dd/yyyy").format(toLocal());
+
+  /// MM/dd/yyyy
+  String get toShortMonth => DateFormat("MMM dd, yyyy").format(toLocal());
+
+  /// Returns true if the given date is on the same day as this date
+  bool isSameDay(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
 }

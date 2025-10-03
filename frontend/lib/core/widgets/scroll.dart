@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/core/theme.dart';
 
 /// A generic scroll view element that provides some generic styling for Sprout
 class SproutScrollView extends StatelessWidget {
@@ -26,7 +27,10 @@ class SproutScrollView extends StatelessWidget {
         controller: scrollController,
         padding: padding,
         child: Center(
-          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1024), child: child),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: AppTheme.maxDesktopSize),
+            child: child,
+          ),
         ),
       );
     }
