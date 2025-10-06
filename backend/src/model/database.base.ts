@@ -2,7 +2,7 @@ import { Database } from "@backend/database/source";
 import { DBBase } from "@backend/model/base";
 import { CustomTypes } from "@backend/model/utility/custom.types";
 import { decorate } from "ts-mixer";
-import { FindManyOptions, FindOneOptions, FindOptionsWhere, PrimaryGeneratedColumn, Repository } from "typeorm";
+import { FindManyOptions, FindOneOptions, FindOptionsWhere, In, PrimaryGeneratedColumn, Repository } from "typeorm";
 
 /** This class implements a bunch of common functionality that can be reused for other models that utilize the database */
 export class DatabaseBase extends DBBase {
@@ -89,5 +89,53 @@ export class DatabaseBase extends DBBase {
   /** Given a column name, returns the sum of all values matching the where clause */
   static async sum<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, columnName: CustomTypes.PropertyNames<T, number>, options: FindOptionsWhere<T>) {
     return await new this().getRepository().sum(columnName as any, options);
+  }
+
+  /**
+   * Finds the most recent record for each group based on a date column. This is useful for "greatest-n-per-group" queries.
+   * For example, finding the latest log entry for each user per day.
+   *
+   * @param options An object containing query options.
+   * @param options.dateColumn The name of the date/timestamp column to use for ordering.
+   * @param options.partitionBy An array of column names to group by (e.g., ['userId', 'eventType']).
+   * @param options.partitionByDateOnly If true, the grouping will be on the DATE part of the `dateColumn`. Defaults to true.
+   * @param options.where An optional TypeORM `where` clause to pre-filter the records.
+   * @param options.joins An optional array of relation names to LEFT JOIN before applying the where clause.
+   * @returns A promise that resolves to an array of the most recent entities for each group.
+   */
+  static async findMostRecentInGroup<T extends DatabaseBase>(
+    this: CustomTypes.Constructor<T> & typeof DatabaseBase,
+    options: {
+      dateColumn: keyof T & string;
+      partitionBy: (keyof T & string)[];
+      partitionByDateOnly?: boolean;
+      where?: FindOptionsWhere<T> | FindOptionsWhere<T>[];
+      joins?: string[];
+    },
+  ): Promise<T[]> {
+    const repository = new this().getRepository();
+    const alias = repository.metadata.tableName;
+    const { dateColumn, partitionBy, where, joins } = options;
+    const partitionByDateOnly = options.partitionByDateOnly !== false;
+    const partitionClauses = [...partitionBy.map((col) => `"${alias}"."${col}"`)];
+    if (partitionByDateOnly) partitionClauses.push(`DATE("${alias}"."${dateColumn}")`);
+    const partitionSql = partitionClauses.join(", ");
+    const subQuery = repository.createQueryBuilder(alias);
+    if (joins) for (const relation of joins) subQuery.leftJoinAndSelect(`${alias}.${relation}`, relation);
+    subQuery.select(`"${alias}".*`).addSelect(`ROW_NUMBER() OVER (PARTITION BY ${partitionSql} ORDER BY "${alias}"."${dateColumn}" DESC) as "row_num"`);
+    if (where) subQuery.where(where);
+    const rawResults = await repository.manager.connection
+      .createQueryBuilder()
+      .select("subquery.*")
+      .from(`(${subQuery.getQuery()})`, "subquery")
+      .setParameters(subQuery.getParameters())
+      .where(`"subquery"."row_num" = 1`)
+      .getRawMany();
+    const ids = rawResults.map((r) => r.id) as string[];
+    const fullEntities = await this.find({
+      where: { id: In(ids) } as any,
+    });
+    const entityMap = new Map(fullEntities.map((e) => [e.id, e]));
+    return ids.map((id) => entityMap.get(id)!);
   }
 }

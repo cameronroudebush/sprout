@@ -43,20 +43,22 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   }
 
   /// Populates transactions based on the parameters given
-  Future<List<Transaction>> populateTransactions(
-    int startIndex,
-    int endIndex, {
+  Future<List<Transaction>> populateTransactions({
+    int? startIndex,
+    int? endIndex,
     bool shouldNotify = true,
     Account? account,
     dynamic category,
     String? description,
+    DateTime? date,
   }) async {
     final newTransactions = await api.getTransactions(
-      startIndex,
-      endIndex,
+      startIndex: startIndex,
+      endIndex: endIndex,
       account: account,
       category: category,
       description: description,
+      date: date,
     );
     _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
@@ -90,7 +92,9 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     notifyListeners();
     await populateTotalTransactionCount();
     await populateStats();
-    await populateTransactions(0, initialTransactionCount, shouldNotify: false);
+    await populateTransactions(startIndex: 0, endIndex: initialTransactionCount, shouldNotify: false);
+    // Grab all transactions for today no matter what
+    await populateTransactions(date: DateTime.now(), shouldNotify: false);
     await populateSubscriptions();
     isLoading = false;
     notifyListeners();

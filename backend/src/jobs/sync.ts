@@ -32,6 +32,9 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       // Don't fail graceful, let the jobs base handle this
       throw e;
     }
+    // Make sure to track that the update is complete with no errors
+    schedule.status = "complete";
+    await schedule.update();
     return schedule;
   }
 

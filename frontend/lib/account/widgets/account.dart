@@ -9,6 +9,7 @@ import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
 import 'package:sprout/charts/line_chart.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
@@ -16,6 +17,7 @@ import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/holding/widgets/account.dart';
 import 'package:sprout/net-worth/provider.dart';
@@ -24,12 +26,34 @@ import 'package:sprout/net-worth/widgets/range_selector.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/provider.dart';
 
-/// A page that displays information about the given account
-class AccountWidget extends StatelessWidget {
+/// Renders a holding display for a specific account
+class AccountWidget extends StatefulWidget {
   /// The account we must have data from
   final Account account;
 
   const AccountWidget(this.account, {super.key});
+
+  @override
+  State<AccountWidget> createState() => _AccountWidgetState();
+}
+
+/// A page that displays information about the given account
+class _AccountWidgetState extends State<AccountWidget> {
+  Holding? _selectedHolding;
+
+  @override
+  void initState() {
+    super.initState();
+    if (holdings.isNotEmpty) {
+      _selectedHolding = holdings[0];
+    }
+  }
+
+  Account get account => widget.account;
+  List<Holding> get holdings {
+    final holdingProvider = ServiceLocator.get<HoldingProvider>();
+    return holdingProvider.holdings.where((h) => h.account.id == account.id).toList();
+  }
 
   /// Returns the tab content for the overview display
   Widget _buildOverviewContent(BuildContext context, NetWorthProvider netWorthProvider, UserProvider userProvider) {
@@ -82,9 +106,69 @@ class AccountWidget extends StatelessWidget {
   }
 
   /// Returns the tab content for the holdings display
-  Widget _buildHoldingsContent(BuildContext context, HoldingProvider holdingProvider) {
-    final holdings = holdingProvider.holdings.where((h) => h.account.id == account.id).toList();
-    return Column(children: [HoldingAccount(account, holdings, displayAccountHeader: false)]);
+  Widget _buildHoldingsContent(BuildContext context, HoldingProvider holdingProvider, UserProvider userProvider) {
+    final chartRange = userProvider.userDefaultChartRange;
+    final holdingsOT = holdingProvider.holdingsOT[account.id];
+    final selectedHoldingOT = holdingsOT?.firstWhereOrNull((ot) => ot.connectedId == _selectedHolding?.id);
+    final selectedHolding = holdings.firstWhereOrNull((h) => h.id == _selectedHolding?.id);
+    final holdingDataForRange = selectedHoldingOT?.getValueByFrame(chartRange);
+    return SproutScrollView(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          /// Overtime value of the selected account
+          selectedHolding == null
+              ? TextWidget(text: "No Holding Selected")
+              : SproutCard(
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.all(12),
+                    child: holdingDataForRange == null
+                        ? SizedBox(height: 250, child: TextWidget(text: "Failed to locate any holding history"))
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 24,
+                            children: [
+                              NetWorthTextWidget(
+                                chartRange,
+                                selectedHolding.marketValue,
+                                holdingDataForRange.percentChange,
+                                holdingDataForRange.valueChange,
+                                title: "${selectedHolding.symbol} Value",
+                              ),
+                              SproutLineChart(
+                                data: holdingDataForRange.history,
+                                chartRange: chartRange,
+                                formatValue: (value) => getFormattedCurrency(value),
+                                showGrid: true,
+                                showXAxis: true,
+                                height: 150,
+                              ),
+                              ChartRangeSelector(
+                                selectedChartRange: chartRange,
+                                onRangeSelected: (value) {
+                                  userProvider.updateChartRange(value);
+                                },
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+
+          HoldingAccount(
+            account,
+            holdings,
+            displayAccountHeader: false,
+            selectedHolding: _selectedHolding,
+            onHoldingClick: (holding) {
+              setState(() {
+                _selectedHolding = holding;
+              });
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -99,7 +183,7 @@ class AccountWidget extends StatelessWidget {
 
         if (account.type == "investment") {
           tabs.add("Holdings");
-          tabContents.add(_buildHoldingsContent(context, holdingProvider));
+          tabContents.add(_buildHoldingsContent(context, holdingProvider, userProvider));
         }
 
         return Expanded(

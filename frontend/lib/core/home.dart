@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/accounts.dart';
 import 'package:sprout/category/provider.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/utils/formatters.dart';
@@ -25,8 +26,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<UserProvider, CategoryProvider, TransactionProvider>(
-      builder: (context, provider, catProvider, transactionProvider, child) {
+    return Consumer4<UserProvider, CategoryProvider, TransactionProvider, ConfigProvider>(
+      builder: (context, provider, catProvider, transactionProvider, configProvider, child) {
         final theme = Theme.of(context);
         final chartRange = provider.userDefaultChartRange;
         final catStats = catProvider.categoryStats?.categoryCount;
@@ -36,6 +37,20 @@ class _HomePageState extends State<HomePage> {
 
         List<HomeNotification> notifications = [];
 
+        // Check if a sync hasn't ran recently
+        final lastSync = configProvider.config?.lastSchedulerRun;
+        if (lastSync != null && (!lastSync.time!.isSameDay(DateTime.now()) || lastSync.status == "in-progress")) {
+          notifications.add(
+            HomeNotification(
+              "An account sync has not yet ran today",
+              theme.colorScheme.error,
+              theme.colorScheme.onError,
+              icon: Icons.sync,
+            ),
+          );
+        }
+
+        // Check if we have uncategorized transactions so the user can deal wit hthose
         if (catStats != null && catStats.containsKey("Unknown") && catStats["Unknown"] != 0) {
           final unknownCatCount = catStats["Unknown"];
           notifications.add(
@@ -119,7 +134,7 @@ class _HomePageState extends State<HomePage> {
             ),
 
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 400),
+              constraints: BoxConstraints(minHeight: 140, maxHeight: 400),
               child: SizedBox(
                 height: 65 + (todaysTransactions.length * 70),
                 child: SproutCard(

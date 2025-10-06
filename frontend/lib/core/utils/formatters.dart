@@ -72,7 +72,7 @@ Color getBalanceColor(double balance, ThemeData theme) {
 /// Returns the icon for a change in net worth
 IconData getChangeIcon(double percentChange) {
   final checkVal = num.parse(percentChange.toStringAsFixed(2));
-  return checkVal == 0.0
+  return checkVal == 0.0 || checkVal.isNaN
       ? Icons.horizontal_rule
       : checkVal > 0
       ? Icons.arrow_upward

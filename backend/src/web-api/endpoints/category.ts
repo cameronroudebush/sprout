@@ -15,8 +15,9 @@ export class CategoryAPI {
   /** Returns the category stats for this users transactions */
   @RestMetadata.register(new RestMetadata(RestEndpoints.category.stats, "GET"))
   async getCategoryStats(request: RestBody, user: User) {
-    const days = parseInt(request.payload["days"]);
-    if (days == null || isNaN(days)) throw new Error("You must include the number of days to get stats from");
+    const requestedDays = request.payload["days"];
+    if (requestedDays != null && isNaN(parseInt(requestedDays))) throw new Error("The number of days for category stats must be an integer.");
+    const days = requestedDays ? parseInt(requestedDays) : undefined;
     return await Category.getStats(user, days);
   }
 

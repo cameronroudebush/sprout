@@ -4,7 +4,7 @@ import { User } from "@backend/model/user";
 
 /** Supported RESTful API req types we currently use */
 export type SupportedRestTypes = "GET" | "POST";
-export type SupportedReturnTypes = void | Base | Base[] | Map<string, any> | string | number;
+export type SupportedReturnTypes = void | Base | Base[] | Map<string, any> | string | number | Object;
 
 /// Define our different styles of returns
 type FunctionAuth<ReturnType extends SupportedReturnTypes = void> = (request: RestBody, user: User) => Promise<ReturnType>;
@@ -39,7 +39,7 @@ export class RestMetadata {
 
   /** Assigns the given metadata to the property this value decorates. */
   static register(data: RestMetadata) {
-    return function <ReturnType extends Base | Base[] | Map<string, any> | string | number | void>(
+    return function <ReturnType extends Base | Base[] | Map<string, any> | string | number | Object | void>(
       target: any,
       key: string,
       _descriptor:
