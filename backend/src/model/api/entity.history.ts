@@ -1,6 +1,8 @@
 import { Account } from "@backend/model/account";
 import { AccountHistory } from "@backend/model/account.history";
 import { Base } from "@backend/model/base";
+import { HoldingHistory } from "@backend/model/holding.history";
+import { CustomTypes } from "@backend/model/utility/custom.types";
 import { differenceInDays, eachDayOfInterval, isSameDay, subDays } from "date-fns";
 import { cloneDeep } from "lodash";
 
@@ -86,10 +88,12 @@ export class EntityHistory extends Base {
   }
 
   /**
-   * Generates net worth over time for the given days. Returns the history snapshot for
+   * Generates value over time for the given days. Returns the history snapshot for
    * those days and the percent change averaged over that time period.
    */
-  private static generateNetWorthOverTime(history: AccountHistory[], relatedAccount: Account | undefined, days: number) {
+  private static generateNetWorthOverTime<T extends AccountHistory | HoldingHistory>(history: T[], relatedAccount: Account | undefined, days: number) {
+    const getHistoryVal = (h: T) => (h instanceof AccountHistory ? h.balance : h.marketValue);
+
     if (history.length === 0) return { snapshot: [], frame: EntityHistoryDataPoint.fromPlain({ percentChange: 0, valueChange: 0 }) };
     const today = new Date();
 
@@ -100,7 +104,7 @@ export class EntityHistory extends Base {
     const daysInArray = eachDayOfInterval({ start: subDays(today, days), end: today });
     for (const day of daysInArray) {
       const historyForDay = history.filter((x) => isSameDay(x.time, day));
-      let netWorth = historyForDay.reduce((prev, curr) => (prev += curr.balance), 0);
+      let netWorth = historyForDay.reduce((prev, curr) => (prev += getHistoryVal(curr)), 0);
 
       // If there's no data for the current day, use the net worth from the most recent previous day
       if (historyForDay.length === 0 && netWorthSnapshots.length > 0) {
@@ -108,7 +112,7 @@ export class EntityHistory extends Base {
       } else if (historyForDay.length === 0 && netWorthSnapshots.length === 0 && days === 1) {
         // No previous data, try further back if this is a small days of change
         const furtherHistory = history.filter((x) => isSameDay(x.time, subDays(day, 1)));
-        netWorth = furtherHistory.reduce((prev, curr) => (prev += curr.balance), 0);
+        netWorth = furtherHistory.reduce((prev, curr) => (prev += getHistoryVal(curr)), 0);
       } else if (historyForDay.length === 0 && daysInArray.length > 7) {
         // If there's no data and it's not within the last 7 days, skip this day to avoid skewing with zero-value days
         continue;
@@ -149,7 +153,11 @@ export class EntityHistory extends Base {
   }
 
   /** Given an account history, returns the entity value over time for the given history */
-  static getForHistory(history: AccountHistory[], relatedAccount?: Account) {
+  static getForHistory<T extends AccountHistory | HoldingHistory>(
+    historyType: CustomTypes.Constructor<T> & typeof Base,
+    history: T[],
+    relatedAccount?: Account,
+  ) {
     // How far back we have data for, total
     const sproutAccountLifetime = differenceInDays(new Date(), history[0]?.time ?? 1);
     const boundCallback = EntityHistory.generateNetWorthOverTime.bind(this, history, relatedAccount);
@@ -164,7 +172,7 @@ export class EntityHistory extends Base {
     const historicalData = lastYear.snapshot.reduce((acc, curr) => ({ ...acc, [curr.date.getTime()]: curr.netWorth }), {});
     // We must make a separate history so we can show that we started from 0
     const allTimeHistory = cloneDeep(history);
-    allTimeHistory.unshift(AccountHistory.fromPlain({ time: subDays(new Date(), sproutAccountLifetime + 1), balance: 0 }));
+    allTimeHistory.unshift(historyType.fromPlain({ time: subDays(new Date(), sproutAccountLifetime + 1), balance: 0 }));
     const allTime = EntityHistory.generateNetWorthOverTime(allTimeHistory, relatedAccount, sproutAccountLifetime + 1);
 
     return EntityHistory.fromPlain({

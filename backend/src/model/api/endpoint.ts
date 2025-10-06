@@ -90,5 +90,7 @@ export module RestEndpoints {
   /** Holding endpoints for finance data */
   export class holding {
     static get = "/holding/get";
+    /// Gets all holding history
+    static getHistory = "/holding/history/all";
   }
 }

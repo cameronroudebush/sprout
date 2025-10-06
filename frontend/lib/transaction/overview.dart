@@ -18,7 +18,6 @@ import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
 /// An overview component that allows the user to navigate their total transactions
-// ignore: must_be_immutable
 class TransactionsOverview extends StatefulWidget {
   /// An account that we should only show transactions for. Used in the query for loading transactions.
   final Account? account;
@@ -31,9 +30,9 @@ class TransactionsOverview extends StatefulWidget {
   final DateTime? focusDate;
 
   /// A category to start filtering on
-  Category? initialCategoryFilter = CategoryDropdown.fakeAllCategory;
+  final dynamic initialCategoryFilter;
 
-  TransactionsOverview({
+  const TransactionsOverview({
     super.key,
     this.account,
     this.allowFiltering = true,
@@ -64,7 +63,11 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     super.initState();
     _scrollController.addListener(_onScroll);
 
-    if (widget.initialCategoryFilter != CategoryDropdown.fakeAllCategory) {
+    if (widget.initialCategoryFilter == "unknown") {
+      _filteredCategory = null;
+    } else if (widget.initialCategoryFilter == null) {
+      _filteredCategory = CategoryDropdown.fakeAllCategory;
+    } else {
       _filteredCategory = widget.initialCategoryFilter;
     }
 
@@ -131,8 +134,8 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       await provider.populateTransactions(
-        _currentTransactionIndex,
-        _currentTransactionIndex + _transactionsPerPage,
+        startIndex: _currentTransactionIndex,
+        endIndex: _currentTransactionIndex + _transactionsPerPage,
         category: categoryFilter,
         description: _searchController.text,
         account: widget.account,

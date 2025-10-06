@@ -2,6 +2,8 @@ import 'package:sprout/account/models/account.dart';
 
 /// This class provides information for a current stock that is associated to an account.
 class Holding {
+  final String id;
+
   /// The account this holding is associated to
   final Account account;
 
@@ -25,6 +27,7 @@ class Holding {
   final String symbol;
 
   Holding({
+    required this.id,
     required this.currency,
     required this.costBasis,
     required this.description,
@@ -37,6 +40,7 @@ class Holding {
 
   factory Holding.fromJson(Map<String, dynamic> json) {
     return Holding(
+      id: json['id'] as String,
       currency: json['currency'],
       costBasis: json['costBasis']?.toDouble(),
       description: json['description'],

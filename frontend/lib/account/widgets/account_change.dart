@@ -44,7 +44,11 @@ class AccountChangeWidget extends StatelessWidget {
               if (showPercentage)
                 TextWidget(
                   referenceSize: .85,
-                  text: percentageChange == double.infinity ? "(∞)" : "(${formatPercentage(percentageChange!)})",
+                  text: percentageChange == double.infinity
+                      ? "(∞)"
+                      : percentageChange!.isNaN
+                      ? ""
+                      : "(${formatPercentage(percentageChange!)})",
                   style: TextStyle(color: changeColor),
                 ),
               if (netWorthPeriod != null)

@@ -6,8 +6,8 @@ import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/tr
 import { Category } from "@backend/model/category";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { subDays } from "date-fns";
-import { FindOptionsWhere, In, IsNull, LessThan, Like, MoreThan } from "typeorm";
+import { endOfDay, startOfDay, subDays } from "date-fns";
+import { Between, FindOptionsWhere, In, IsNull, LessThan, Like, MoreThan } from "typeorm";
 import { RestMetadata } from "../metadata";
 
 export class TransactionAPI {
@@ -53,6 +53,7 @@ export class TransactionAPI {
         account: { id: parsedRequest.accountId, user: { username: user.username } },
         category: categoryQuery,
         description: parsedRequest.description ? Like(`%${parsedRequest.description}%`) : undefined,
+        posted: parsedRequest.date != null ? Between(startOfDay(parsedRequest.date), endOfDay(parsedRequest.date)) : undefined,
       },
       order: { posted: "DESC", pending: "DESC", description: "ASC" },
       relations: ["category", "category.parentCategory"],
@@ -99,9 +100,10 @@ export class TransactionAPI {
   }
 
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.edit, "POST"))
-  async editRule(request: RestBody<Transaction>, user: User) {
+  async edit(request: RestBody<Transaction>, user: User) {
     const matchingTransaction = await Transaction.findOne({ where: { id: request.payload.id, account: { user: { id: user.id } } } });
     if (matchingTransaction == null) throw new Error("Failed to locate a matching transaction to assign update.");
+    if (matchingTransaction.pending) throw new Error("Pending transactions cannot be updated.");
     // Currently, we only allow category updating
     const matchingCategory = await Category.findOne({ where: { id: request.payload.category?.id, user: { id: user.id } } });
     if (matchingCategory == null) throw new Error("Failed to locate a matching category to assign the transaction to.");

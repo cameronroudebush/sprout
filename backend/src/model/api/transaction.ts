@@ -1,5 +1,6 @@
 import { Base } from "@backend/model/base";
 import { Category } from "@backend/model/category";
+import { Type } from "class-transformer";
 
 /** Required content to be sent when we request transactional data */
 export class TransactionRequest extends Base {
@@ -14,6 +15,9 @@ export class TransactionRequest extends Base {
   accountId?: string;
   /** Description to request. We'll use `Like` within the query so it will find anything similar. */
   description?: string;
+  /** A specific date you want to get transactions for. */
+  @Type(() => Date)
+  date?: Date;
 
   constructor(startIndex?: number, endIndex?: number, accountId?: string, description?: string) {
     super();

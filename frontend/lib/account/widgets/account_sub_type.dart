@@ -64,12 +64,13 @@ class AccountSubTypeSelect extends StatelessWidget {
       dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
       decoration: const InputDecoration(
+        labelText: "Sub-Type",
         border: OutlineInputBorder(),
         isDense: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       value: selectedValue,
-      hint: const Text("Select a Sub-Type"),
+      hint: const Text("Sub-Type"),
       items: items.map((String value) {
         return DropdownMenuItem<String>(value: value, child: Text(value));
       }).toList(),

@@ -17,12 +17,13 @@ class TransactionAPI extends BaseAPI {
   }
 
   /// Returns the transactions between the indexes given
-  Future<List<Transaction>> getTransactions(
-    int startIndex,
-    int endIndex, {
+  Future<List<Transaction>> getTransactions({
+    int? startIndex,
+    int? endIndex,
     Account? account,
     dynamic category,
     String? description,
+    DateTime? date,
   }) async {
     final endpoint = "/transaction/get";
     final body = {
@@ -31,6 +32,7 @@ class TransactionAPI extends BaseAPI {
       'accountId': account?.id,
       'category': category,
       'description': description,
+      'date': date?.millisecondsSinceEpoch,
     };
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Transaction.fromJson(e)).toList();

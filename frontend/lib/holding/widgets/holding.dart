@@ -7,10 +7,13 @@ import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/widgets/holding_logo.dart';
 
 /// Renders a single holding
+// ignore: must_be_immutable
 class HoldingWidget extends StatelessWidget {
   final Holding holding;
+  bool isSelected;
+  Function(Holding holding)? onClick;
 
-  const HoldingWidget({super.key, required this.holding});
+  HoldingWidget({super.key, required this.holding, this.isSelected = false, this.onClick});
 
   @override
   Widget build(BuildContext context) {
@@ -26,58 +29,64 @@ class HoldingWidget extends StatelessWidget {
 
         final statsContent = _buildContent(isMobile, costBasisTotalChange, costBasisPercentChange);
 
-        return Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            spacing: 12,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Row(
-                  spacing: 24,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Expanded(
-                      flex: isMobile ? 2 : 1,
-                      child: Row(
-                        spacing: 12,
-                        children: [
-                          // Render logo
-                          HoldingLogoWidget(holding),
-                          // Print details about the holding
-                          // ignore: dead_code
-                          if (renderSymbol || renderDescription)
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 8,
-                                children: [
-                                  if (renderSymbol)
-                                    TextWidget(
-                                      text: holding.symbol,
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  if (renderDescription)
-                                    // ignore: dead_code
-                                    TextWidget(
-                                      text: holding.description,
-                                      style: TextStyle(color: Colors.grey),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                ],
+        return InkWell(
+          onTap: () {
+            if (onClick != null) onClick!(holding);
+          },
+          child: Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+              spacing: 12,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    spacing: 24,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        flex: isMobile ? 2 : 1,
+                        child: Row(
+                          spacing: 12,
+                          children: [
+                            // Render logo
+                            HoldingLogoWidget(holding),
+                            // Print details about the holding
+                            // ignore: dead_code
+                            if (renderSymbol || renderDescription)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 8,
+                                  children: [
+                                    if (renderSymbol)
+                                      TextWidget(
+                                        text: holding.symbol,
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    if (renderDescription)
+                                      // ignore: dead_code
+                                      TextWidget(
+                                        text: holding.description,
+                                        style: TextStyle(color: Colors.grey),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    // Print details at the end of the row
-                    Expanded(flex: isMobile ? 5 : 7, child: statsContent),
-                  ],
+                      // Print details at the end of the row
+                      Expanded(flex: isMobile ? 5 : 7, child: statsContent),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

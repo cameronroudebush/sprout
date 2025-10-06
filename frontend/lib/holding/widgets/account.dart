@@ -23,10 +23,24 @@ class HoldingAccount extends StatelessWidget {
   /// If we should render the account header info at the top of the bar. Else renders "Holdings".
   final bool displayAccountHeader;
 
-  const HoldingAccount(this.account, this.holdings, {super.key, this.displayAccountHeader = true});
+  /// A selected holding if we have one
+  final Holding? selectedHolding;
+
+  /// A callback to fire when a holding is clicked
+  final Function(Holding holding)? onHoldingClick;
+
+  const HoldingAccount(
+    this.account,
+    this.holdings, {
+    super.key,
+    this.displayAccountHeader = true,
+    this.selectedHolding,
+    this.onHoldingClick,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Consumer4<HoldingProvider, AccountProvider, ConfigProvider, NetWorthProvider>(
       builder: (context, holdingProvider, accountProvider, configProvider, netWorthProvider, child) {
         final mediaQuery = MediaQuery.of(context).size;
@@ -81,16 +95,51 @@ class HoldingAccount extends StatelessWidget {
                 ),
               const Divider(height: 1),
               // Holdings
-              Column(
-                children: holdings.map((holding) {
-                  return Column(
-                    children: [
-                      HoldingWidget(holding: holding),
-                      if (holdings.last != holding) const Divider(height: 1),
-                    ],
-                  );
-                }).toList(),
-              ),
+              holdings.isEmpty
+                  ? TextWidget(text: "No holdings available")
+                  : Column(
+                      children: holdings.map((holding) {
+                        final isSelected = selectedHolding == holding;
+                        final lastIsSelected =
+                            holdings.first != holding && (selectedHolding == holdings[holdings.indexOf(holding) - 1]);
+
+                        // Determine border for selection
+                        BoxBorder? border;
+                        if (isSelected == true) {
+                          final width = 3.0;
+                          final color = theme.colorScheme.secondary;
+                          border = Border(
+                            top: holdings.first == holding || !lastIsSelected
+                                ? BorderSide(width: width, color: color)
+                                : BorderSide.none,
+                            left: BorderSide(width: width, color: color),
+                            right: BorderSide(width: width, color: color),
+                            bottom: BorderSide(width: width, color: color),
+                          );
+                        }
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: border,
+                            borderRadius: holdings.last == holding
+                                ? BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
+                                : null,
+                          ),
+                          child: Column(
+                            children: [
+                              HoldingWidget(
+                                holding: holding,
+                                isSelected: isSelected,
+                                onClick: (holding) {
+                                  if (onHoldingClick != null) onHoldingClick!(holding);
+                                },
+                              ),
+                              if (holdings.last != holding) const Divider(height: 1),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
             ],
           ),
         );

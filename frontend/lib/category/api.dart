@@ -14,7 +14,7 @@ class CategoryAPI extends BaseAPI {
   }
 
   /// Gets the stats for our category information for the last N days
-  Future<CategoryStats> getStats({int days = 30}) async {
+  Future<CategoryStats> getStats({int? days}) async {
     final endpoint = "/category/stats";
     final body = {'days': days};
     final result = await client.post(body, endpoint) as dynamic;

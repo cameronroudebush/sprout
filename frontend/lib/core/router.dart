@@ -21,7 +21,6 @@ import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/connect_fail.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/holding/overview.dart';
 import 'package:sprout/setup/connection_setup.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
@@ -111,8 +110,6 @@ class SproutRouter {
         );
       },
     ),
-    // Overall Holdings
-    SproutPage((context, state) => HoldingsOverview(), 'Holdings', icon: Icons.stacked_line_chart_rounded),
     // Singular account
     SproutPage(
       (context, state) {
@@ -160,7 +157,7 @@ class SproutRouter {
         final provider = ServiceLocator.get<CategoryProvider>();
         final categoryId = state.uri.queryParameters["cat"];
         final category = categoryId == "unknown"
-            ? null
+            ? "unknown"
             : provider.categories.firstWhereOrNull((c) => c.id == categoryId) ?? CategoryDropdown.fakeAllCategory;
         return TransactionsOverview(initialCategoryFilter: category);
       },
