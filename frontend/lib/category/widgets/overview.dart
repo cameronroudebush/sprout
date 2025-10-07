@@ -56,6 +56,16 @@ class CategoryOverview extends StatelessWidget {
                 spacing: 8,
                 children: [
                   CategoryIcon(c),
+                  if (c.type == CategoryType.expense)
+                    SproutTooltip(
+                      message: "Expense",
+                      child: Icon(Icons.arrow_downward, color: Colors.red),
+                    ),
+                  if (c.type == CategoryType.income)
+                    SproutTooltip(
+                      message: "Expense",
+                      child: Icon(Icons.arrow_upward, color: Colors.green),
+                    ),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +166,7 @@ class CategoryOverview extends StatelessWidget {
                       const Flexible(
                         child: TextWidget(
                           referenceSize: 1.25,
-                          text: "Categories allow us to tell Sprout where our money is going. You can add them below.",
+                          text: "Categories allow us to tell Sprout where our money is going.",
                         ),
                       ),
                     ],
