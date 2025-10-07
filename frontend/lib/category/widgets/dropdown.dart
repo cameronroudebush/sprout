@@ -14,7 +14,15 @@ class CategoryDropdown extends StatelessWidget {
   /// If we want an "all categories" button. Normally used for searching.
   final bool displayAllCategoryButton;
 
-  const CategoryDropdown(this.category, this.onChanged, {super.key, this.displayAllCategoryButton = false});
+  final bool enabled;
+
+  const CategoryDropdown(
+    this.category,
+    this.onChanged, {
+    super.key,
+    this.displayAllCategoryButton = false,
+    this.enabled = true,
+  });
 
   /// Recursively builds the list of dropdown menu items with indentation for children.
   List<DropdownMenuItem<Category>> _buildCategoryItems(
@@ -89,7 +97,7 @@ class CategoryDropdown extends StatelessWidget {
                     return topLevel.expand((parent) => _buildCategoryItems(provider.categories, parent, 0));
                   }(),
                 ],
-                onChanged: onChanged,
+                onChanged: !enabled ? null : onChanged,
               );
       },
     );

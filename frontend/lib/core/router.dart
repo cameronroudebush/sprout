@@ -9,6 +9,7 @@ import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/auth/provider.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
+import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/category/widgets/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
@@ -23,6 +24,7 @@ import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/connection_setup.dart';
 import 'package:sprout/setup/setup.dart';
+import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
 import 'package:sprout/transaction/monthly.dart';
 import 'package:sprout/transaction/overview.dart';
@@ -166,8 +168,38 @@ class SproutRouter {
       showOnBottomNav: true,
       scrollWrapper: false,
     ),
-    SproutPage((context, state) => TransactionRuleOverview(), 'Rules', icon: Icons.rule),
-    SproutPage((context, state) => CategoryOverview(), 'Categories', icon: Icons.category),
+    SproutPage(
+      (context, state) => TransactionRuleOverview(),
+      'Rules',
+      icon: Icons.rule,
+      buttonBuilder: (context, isDesktop) {
+        return
+        // Add button
+        SproutTooltip(
+          message: "Add a new transaction rule",
+          child: IconButton(
+            onPressed: () => showDialog(context: context, builder: (_) => TransactionRuleInfo(null)),
+            icon: Icon(Icons.add),
+            style: AppTheme.primaryButton,
+          ),
+        );
+      },
+    ),
+    SproutPage(
+      (context, state) => CategoryOverview(),
+      'Categories',
+      icon: Icons.category,
+      buttonBuilder: (context, isDesktop) {
+        return SproutTooltip(
+          message: "Add Category",
+          child: IconButton(
+            onPressed: () => showDialog(context: context, builder: (_) => CategoryInfo(null)),
+            icon: const Icon(Icons.add),
+            style: AppTheme.primaryButton,
+          ),
+        );
+      },
+    ),
     // Subscriptions
     SproutPage(
       (context, state) => TransactionMonthlySubscriptions(),

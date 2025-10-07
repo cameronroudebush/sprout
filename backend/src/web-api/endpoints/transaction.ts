@@ -103,7 +103,7 @@ export class TransactionAPI {
   async edit(request: RestBody<Transaction>, user: User) {
     const matchingTransaction = await Transaction.findOne({ where: { id: request.payload.id, account: { user: { id: user.id } } } });
     if (matchingTransaction == null) throw new Error("Failed to locate a matching transaction to assign update.");
-    if (matchingTransaction.pending) throw new Error("Pending transactions cannot be updated.");
+    if (matchingTransaction.pending) throw new Error("Pending transactions cannot be edited.");
     // Currently, we only allow category updating
     const matchingCategory = await Category.findOne({ where: { id: request.payload.category?.id, user: { id: user.id } } });
     if (matchingCategory == null) throw new Error("Failed to locate a matching category to assign the transaction to.");

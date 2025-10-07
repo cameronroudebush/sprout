@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
+import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
@@ -15,7 +16,7 @@ import 'package:sprout/transaction/provider.dart';
 class TransactionInfo extends StatefulWidget {
   final Transaction transaction;
 
-  /// If fields the backend doesn't support editing should be disabled.
+  /// If fields the backend doesn't support editing should be disabled. Pending is auto disabled.
   final bool disableNonEditable;
 
   const TransactionInfo(this.transaction, {super.key, this.disableNonEditable = true});
@@ -119,12 +120,13 @@ class _TransactionInfoState extends State<TransactionInfo> {
       // Enable submit only if form is valid and values have changed
       allowSubmitClick: _valHasChanged() && (_formKey.currentState?.validate() ?? false),
       onSubmitClick: _submit,
-      child: _getForm(),
+      child: _getForm(context),
     );
   }
 
-  Widget _getForm() {
+  Widget _getForm(BuildContext context) {
     final helpStyle = TextStyle(fontSize: 12, color: Colors.grey);
+    final theme = Theme.of(context);
 
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
@@ -133,11 +135,18 @@ class _TransactionInfoState extends State<TransactionInfo> {
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (widget.transaction.pending)
+                    Center(
+                      child: Text(
+                        "Pending transactions cannot be edited",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: theme.colorScheme.error),
+                      ),
+                    ),
                   // Description
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +174,7 @@ class _TransactionInfoState extends State<TransactionInfo> {
                         ],
                       ),
                       TextFormField(
-                        enabled: !widget.disableNonEditable,
+                        enabled: !widget.disableNonEditable && !widget.transaction.pending,
                         controller: _descriptionController,
                         decoration: const InputDecoration(
                           hintText: "e.g., 'Coffee Shop'",
@@ -191,7 +200,7 @@ class _TransactionInfoState extends State<TransactionInfo> {
                       const Text("Amount", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextFormField(
                         controller: _amountController,
-                        enabled: !widget.disableNonEditable,
+                        enabled: !widget.disableNonEditable && !widget.transaction.pending,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: const InputDecoration(hintText: "e.g., '15.50'", border: OutlineInputBorder()),
                         onChanged: (value) => setState(() {}),
@@ -214,12 +223,38 @@ class _TransactionInfoState extends State<TransactionInfo> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
                     children: [
-                      const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
+                          // Add Category button
+                          SproutTooltip(
+                            message: "Opens a dialog to add a new category",
+                            child: IconButton(
+                              icon: const Icon(Icons.category),
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (_) => CategoryInfo(
+                                    null,
+                                    onAdd: (category) {
+                                      setState(() {
+                                        _category = category;
+                                      });
+                                    },
+                                  ),
+                                );
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                       CategoryDropdown(_category, (cat) {
                         setState(() {
                           _category = cat;
                         });
-                      }),
+                      }, enabled: !widget.transaction.pending),
                       Text("The category this transaction belongs to.", style: helpStyle),
                     ],
                   ),
@@ -238,7 +273,9 @@ class _TransactionInfoState extends State<TransactionInfo> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.calendar_today),
-                            onPressed: widget.disableNonEditable ? null : () => _selectDate(context),
+                            onPressed: widget.disableNonEditable || widget.transaction.pending
+                                ? null
+                                : () => _selectDate(context),
                           ),
                         ],
                       ),

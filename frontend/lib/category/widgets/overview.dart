@@ -5,7 +5,6 @@ import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -61,11 +60,7 @@ class CategoryOverview extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          c.name.toTitleCase,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                          softWrap: true,
-                        ),
+                        Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24), softWrap: true),
                       ],
                     ),
                   ),
@@ -162,14 +157,6 @@ class CategoryOverview extends StatelessWidget {
                         child: TextWidget(
                           referenceSize: 1.25,
                           text: "Categories allow us to tell Sprout where our money is going. You can add them below.",
-                        ),
-                      ),
-                      SproutTooltip(
-                        message: "Add Category",
-                        child: IconButton(
-                          onPressed: () => _openInfoDialog(context, null),
-                          icon: const Icon(Icons.add),
-                          style: AppTheme.primaryButton,
                         ),
                       ),
                     ],

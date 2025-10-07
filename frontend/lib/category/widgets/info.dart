@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 
 /// A widget that displays the editing capabilities of a [Category]
 class CategoryInfo extends StatefulWidget {
   final Category? category;
-  const CategoryInfo(this.category, {super.key});
+
+  /// When a category is added (because category was given as null) this will be called with the new one.
+  final Function(Category category)? onAdd;
+  const CategoryInfo(this.category, {super.key, this.onAdd});
 
   @override
   State<CategoryInfo> createState() => _CategoryInfoState();
@@ -66,7 +70,7 @@ class _CategoryInfoState extends State<CategoryInfo> {
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final isEdit = widget.category != null;
     final provider = ServiceLocator.get<CategoryProvider>();
 
@@ -81,7 +85,8 @@ class _CategoryInfoState extends State<CategoryInfo> {
         provider.edit(newCategory);
       } else {
         // Add a new category
-        provider.add(newCategory);
+        final createdCategory = await provider.add(newCategory);
+        if (widget.onAdd != null) widget.onAdd!(createdCategory);
       }
 
       // Close dialog
@@ -112,9 +117,6 @@ class _CategoryInfoState extends State<CategoryInfo> {
 
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
-        // Filter out the current category to prevent self-parenting
-        final availableParents = provider.categories.where((cat) => cat.id != widget.category?.id).toList();
-
         return Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -188,18 +190,11 @@ class _CategoryInfoState extends State<CategoryInfo> {
                     spacing: 4,
                     children: [
                       const Text("Parent Category", style: TextStyle(fontWeight: FontWeight.bold)),
-                      provider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : DropdownButtonFormField<Category?>(
-                              value: _parentCategory,
-                              decoration: const InputDecoration(border: OutlineInputBorder()),
-                              hint: const Text("Select a parent (optional)"),
-                              items: [
-                                const DropdownMenuItem<Category?>(value: null, child: Text("No Parent")),
-                                ...availableParents.map((cat) => DropdownMenuItem(value: cat, child: Text(cat.name))),
-                              ],
-                              onChanged: (newValue) => setState(() => _parentCategory = newValue),
-                            ),
+                      CategoryDropdown(_parentCategory, (cat) {
+                        setState(() {
+                          _parentCategory = cat;
+                        });
+                      }),
                       Text("Assign a parent to create a sub-category.", style: helpStyle),
                     ],
                   ),
