@@ -2,6 +2,7 @@ import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
 import { Category } from "@backend/model/category";
 import { User } from "@backend/model/user";
+import { IsNull } from "typeorm";
 import { RestMetadata } from "../metadata";
 import { SSEAPI } from "./sse";
 
@@ -26,6 +27,19 @@ export class CategoryAPI {
   async add(request: RestBody<Category>, user: User) {
     const category = Category.fromPlain(request.payload);
     category.user = user;
+
+    const parentId = category.parentCategory?.id;
+
+    // Make sure we don't have any overlaps for user, name, and parentCategoryId
+    const similarCategories = await Category.find({
+      where: {
+        name: category.name,
+        user: { id: user.id },
+        parentCategoryId: parentId ? parentId : IsNull(),
+      },
+    });
+    if (similarCategories.length > 0) throw new Error("A similar category already exists.");
+
     return await category.insert();
   }
 

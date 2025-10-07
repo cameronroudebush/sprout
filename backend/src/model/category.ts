@@ -9,7 +9,7 @@ import { JoinColumn, ManyToOne } from "typeorm";
 
 /** This class defines a category that a transcription belongs to */
 @DatabaseDecorators.entity()
-@DatabaseDecorators.compositeUnique<Category>("name", "userId")
+@DatabaseDecorators.compositeUnique<Category>("name", "userId", "parentCategoryId")
 export class Category extends DatabaseBase {
   /** The name when no category is defined for a transaction */
   static UNKNOWN_NAME = "Unknown";
@@ -19,7 +19,7 @@ export class Category extends DatabaseBase {
   @JoinColumn({ name: "userId" })
   user: User;
   @DatabaseDecorators.column({ nullable: false })
-  userId!: number;
+  userId!: string;
 
   /** The name of this category */
   @DatabaseDecorators.column({ nullable: false })
@@ -31,7 +31,10 @@ export class Category extends DatabaseBase {
 
   /** The parent category this category belongs to */
   @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
+  @JoinColumn({ name: "parentCategoryId" })
   parentCategory?: Category;
+  @DatabaseDecorators.column({ nullable: true })
+  parentCategoryId!: string;
 
   constructor(user: User, name: string, type: Category["type"], parentCategory?: Category) {
     super();

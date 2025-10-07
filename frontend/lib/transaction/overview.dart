@@ -204,6 +204,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
         final groupedTransactions = transactions.groupListsBy(
           (e) => DateTime(e.posted.year, e.posted.month, e.posted.day),
         );
+        final isLoading = _isLoadingMore || provider.isLoading;
 
         return Expanded(
           child: ConstrainedBox(
@@ -272,7 +273,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
                   child: Stack(
                     children: [
                       /// In the event we don't find a match
-                      if (transactions.isEmpty && !_isLoadingMore)
+                      if (transactions.isEmpty && !isLoading)
                         Center(
                           child: TextWidget(
                             text: "No matching transactions",
@@ -289,7 +290,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
                         itemBuilder: (context, index) {
                           // If it's the last item, show a loading indicator or an empty box
                           if (index == groupedTransactions.length) {
-                            return _isLoadingMore
+                            return isLoading
                                 ? const Center(
                                     child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
                                   )

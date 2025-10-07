@@ -290,7 +290,17 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                             child: IconButton(
                               icon: const Icon(Icons.category),
                               onPressed: () async {
-                                await showDialog(context: context, builder: (_) => CategoryInfo(null));
+                                await showDialog(
+                                  context: context,
+                                  builder: (_) => CategoryInfo(
+                                    null,
+                                    onAdd: (category) {
+                                      setState(() {
+                                        _category = category;
+                                      });
+                                    },
+                                  ),
+                                );
                                 setState(() {});
                               },
                             ),

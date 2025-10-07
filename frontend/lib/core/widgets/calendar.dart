@@ -49,14 +49,14 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
   /// Moves the calendar to the previous month.
   void _previousMonth() {
     setState(() {
-      _focusedDate = DateTime(_focusedDate.year, _focusedDate.month - 1);
+      _focusedDate = DateUtils.addDaysToDate(_focusedDate, -1);
     });
   }
 
   /// Moves the calendar to the next month.
   void _nextMonth() {
     setState(() {
-      _focusedDate = DateTime(_focusedDate.year, _focusedDate.month + 1);
+      _focusedDate = DateUtils.addDaysToDate(_focusedDate, 1);
     });
   }
 
@@ -187,28 +187,9 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
   /// including days from the previous and next months to fill the grid.
   List<DateTime> _getDaysInMonth(DateTime date) {
     final firstDayOfMonth = DateTime(date.year, date.month, 1);
-    final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
-    final firstWeekday = firstDayOfMonth.weekday % 7; // Sunday is 0
-
-    final List<DateTime> days = [];
-
-    // Add days from previous month
-    for (int i = 0; i < firstWeekday; i++) {
-      days.add(firstDayOfMonth.subtract(Duration(days: firstWeekday - i)));
-    }
-
-    // Add days of the current month
-    for (int i = 0; i < daysInMonth; i++) {
-      days.add(firstDayOfMonth.add(Duration(days: i)));
-    }
-
-    // Add days from next month to fill the grid
-    final remaining = 42 - days.length; // 6 rows * 7 days
-    for (int i = 0; i < remaining; i++) {
-      days.add(firstDayOfMonth.add(Duration(days: daysInMonth + i)));
-    }
-
-    return days;
+    final firstWeekday = firstDayOfMonth.weekday % 7;
+    final startOfCalendar = DateUtils.addDaysToDate(firstDayOfMonth, -firstWeekday);
+    return List.generate(42, (index) => DateUtils.addDaysToDate(startOfCalendar, index));
   }
 }
 

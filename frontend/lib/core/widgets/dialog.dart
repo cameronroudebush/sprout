@@ -43,91 +43,94 @@ class SproutDialogWidget extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context).size;
     final theme = Theme.of(context);
 
-    return AlertDialog(
-      insetPadding: EdgeInsets.zero,
-      titlePadding: EdgeInsets.symmetric(vertical: 12),
-      contentPadding: EdgeInsets.only(bottom: 24),
-      title: Center(
-        child: Column(
-          spacing: 12,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Flex holder
-                Expanded(child: const SizedBox(width: 1)),
-                TextWidget(
-                  referenceSize: 2.25,
-                  text: dialogTitleText,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                // Close button
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      ButtonWidget(
-                        style: ButtonStyle(
-                          elevation: WidgetStateProperty.all(0.0),
-                          shadowColor: WidgetStateProperty.all(Colors.transparent),
-                        ),
-                        color: Colors.transparent,
-                        icon: Icons.close,
-                        minSize: 24,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Divider(height: 4, thickness: 4, color: theme.colorScheme.secondary),
-          ],
-        ),
-      ),
-      content: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .9,
-          maxHeight: mediaQuery.height * .75,
-        ),
-        child: SproutScrollView(
-          child: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 8), child: child),
-        ),
-      ),
-      actions: showSubmitButton || showCloseDialogButton
-          ? [
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: AlertDialog(
+        insetPadding: EdgeInsets.zero,
+        titlePadding: EdgeInsets.symmetric(vertical: 12),
+        contentPadding: EdgeInsets.only(bottom: 24),
+        title: Center(
+          child: Column(
+            spacing: 12,
+            children: [
               Row(
-                spacing: 12,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (showCloseDialogButton)
-                    Expanded(
-                      child: FilledButton(
-                        style: closeButtonStyle == null
-                            ? AppTheme.errorButton
-                            : closeButtonStyle!.merge(AppTheme.errorButton),
-                        onPressed: !allowCloseClick
-                            ? null
-                            : () {
-                                Navigator.of(context).pop();
-                              },
-                        child: TextWidget(text: closeButtonText),
-                      ),
+                  // Flex holder
+                  Expanded(child: const SizedBox(width: 1)),
+                  TextWidget(
+                    referenceSize: 2.25,
+                    text: dialogTitleText,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  // Close button
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        ButtonWidget(
+                          style: ButtonStyle(
+                            elevation: WidgetStateProperty.all(0.0),
+                            shadowColor: WidgetStateProperty.all(Colors.transparent),
+                          ),
+                          color: Colors.transparent,
+                          icon: Icons.close,
+                          minSize: 24,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
                     ),
-                  if (showSubmitButton)
-                    Expanded(
-                      child: FilledButton(
-                        style: submitButtonStyle,
-                        onPressed: !allowSubmitClick ? null : onSubmitClick,
-                        child: TextWidget(text: submitButtonText),
-                      ),
-                    ),
+                  ),
                 ],
               ),
-            ]
-          : null,
+              Divider(height: 4, thickness: 4, color: theme.colorScheme.secondary),
+            ],
+          ),
+        ),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .9,
+            maxHeight: mediaQuery.height * .75,
+          ),
+          child: SproutScrollView(
+            child: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 8), child: child),
+          ),
+        ),
+        actions: showSubmitButton || showCloseDialogButton
+            ? [
+                Row(
+                  spacing: 12,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (showCloseDialogButton)
+                      Expanded(
+                        child: FilledButton(
+                          style: closeButtonStyle == null
+                              ? AppTheme.errorButton
+                              : closeButtonStyle!.merge(AppTheme.errorButton),
+                          onPressed: !allowCloseClick
+                              ? null
+                              : () {
+                                  Navigator.of(context).pop();
+                                },
+                          child: TextWidget(text: closeButtonText),
+                        ),
+                      ),
+                    if (showSubmitButton)
+                      Expanded(
+                        child: FilledButton(
+                          style: submitButtonStyle,
+                          onPressed: !allowSubmitClick ? null : onSubmitClick,
+                          child: TextWidget(text: submitButtonText),
+                        ),
+                      ),
+                  ],
+                ),
+              ]
+            : null,
+      ),
     );
   }
 }
