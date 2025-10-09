@@ -1,6 +1,7 @@
 **/node_modules
 **/www
-./frontend/.angular
-**/dist
+./frontend/build
 package-lock.json
+**/.flutter-plugins
+**/.dart_tool
 docs
