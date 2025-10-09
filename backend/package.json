@@ -38,7 +38,7 @@
     "@types/sharp": "^0.29.3",
     "@types/source-map-support": "^0.5.10",
     "@types/uuid": "^9.0.8",
-    "@yao-pkg/pkg": "^6.5.1",
+    "@yao-pkg/pkg": "^6.8.0",
     "cross-env": "^7.0.3",
     "cross-var": "^1.1.0",
     "git-describe": "^4.1.1",
@@ -69,7 +69,7 @@
       "node_modules/@img/sharp-libvips-linuxmusl-x64/**/*"
     ],
     "targets": [
-      "latest"
+      "host"
     ]
   }
 }
