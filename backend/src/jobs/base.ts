@@ -52,10 +52,10 @@ export abstract class BackgroundJob<T extends any> {
         // Schedule a sooner one, just in case of a failure out of our control, which is most of them.
         const soonerNextExecution = addMinutes(new Date(), Configuration.server.jobs.autoRetryTime);
         this.scheduleNextUpdate(soonerNextExecution, true);
-
-        // Schedule our next update, only if this isn't from a failure "nextUpdate"
-        if (!fromFailed) this.scheduleNextUpdate();
       }
+
+      // Schedule our next update, only if this isn't from a failure that is running sooner than expected.
+      if (!fromFailed) this.scheduleNextUpdate();
     }, timeUntilNextExecution);
   }
 
