@@ -60,7 +60,7 @@ class TransactionsOverview extends StatefulWidget {
 class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
-  int _currentTransactionIndex = TransactionProvider.initialTransactionCount;
+  int _currentTransactionIndex = 0;
   final _transactionsPerPage = TransactionProvider.initialTransactionCount;
   bool _showBackToTop = false;
   double _lastScrollPosition = 0.0;
