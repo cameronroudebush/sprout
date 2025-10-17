@@ -10,6 +10,7 @@ import { TransactionRule } from "@backend/model/transaction.rule";
 import { User } from "@backend/model/user";
 import { ProviderBase } from "@backend/providers/base/core";
 import { subDays } from "date-fns";
+import { merge } from "lodash";
 import { Providers } from "../providers";
 import { BackgroundJob } from "./base";
 
@@ -82,8 +83,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         await institution.update();
 
         // Sync transactions
-        data.transactions.map((x) => (x.account = accountInDB));
-        await Transaction.insertMany<Transaction>(data.transactions);
+        if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
 
         // Sync holdings if investment type
         if (accountInDB.type === "investment" && data.holdings.length !== 0) await this.updateHoldingData(accountInDB, data.holdings);
@@ -93,6 +93,26 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       await TransactionRule.applyRulesToTransactions(user, undefined, true);
 
       Logger.success(`Information updated successfully for: ${user.username}`);
+    }
+  }
+
+  /** Updates all transaction data for the given account that matches the given transaction */
+  private async updateTransactionData(accountInDb: Account, transactions: Transaction[]) {
+    for (const transaction of transactions) {
+      transaction.account = accountInDb;
+      let transactionInDb = (await Transaction.find({ where: { id: transaction.id, account: { id: accountInDb.id } } }))[0];
+      // If we aren't tracking this transaction yet, go ahead and add it
+      if (transactionInDb == null) transactionInDb = await Transaction.fromPlain(transaction).insert();
+      else {
+        // Update our related holding
+        transactionInDb.amount = transaction.amount;
+        transactionInDb.pending = transaction.pending;
+        transactionInDb.posted = transaction.posted;
+        transactionInDb.extra = merge(transactionInDb.extra, transaction.extra);
+        // If we haven't already set it's category, go ahead and set it
+        if (transactionInDb.category == null) transactionInDb.category = transaction.category;
+        await transactionInDb.update();
+      }
     }
   }
 
