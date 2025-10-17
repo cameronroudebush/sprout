@@ -5,7 +5,6 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/models/transaction.count.dart';
 import 'package:sprout/transaction/models/transaction.dart';
-import 'package:sprout/transaction/models/transaction.stats.dart';
 import 'package:sprout/transaction/models/transaction.subscriptions.dart';
 
 /// Class that provides the store of current transactions
@@ -14,14 +13,12 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   static final initialTransactionCount = 20;
   // Data store
   TotalTransactions? _totalTransactions;
-  TransactionStats? _transactionStats;
   List<Transaction> _transactions = [];
   List<TransactionSubscription> _subscriptions = [];
 
   // Public getters
   List<Transaction> get transactions => _transactions;
   TotalTransactions? get totalTransactions => _totalTransactions;
-  TransactionStats? get transactionStats => _transactionStats;
   List<TransactionSubscription> get subscriptions => _subscriptions;
 
   TransactionProvider(super.api);
@@ -65,10 +62,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     return _transactions;
   }
 
-  Future<TransactionStats?> populateStats() async {
-    return _transactionStats = await api.getStats();
-  }
-
   /// Populates subscription information built from transactions
   Future<List<TransactionSubscription>> populateSubscriptions() async {
     return _subscriptions = await api.getSubscriptions();
@@ -91,7 +84,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     _transactions = []; // Forcible reset so we need to update all transactions
     notifyListeners();
     await populateTotalTransactionCount();
-    await populateStats();
     await populateTransactions(startIndex: 0, endIndex: initialTransactionCount, shouldNotify: false);
     // Grab all transactions for today no matter what
     await populateTransactions(date: DateTime.now(), shouldNotify: false);
@@ -102,7 +94,6 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
 
   @override
   Future<void> cleanupData() async {
-    _transactionStats = null;
     _totalTransactions = null;
     _transactions = [];
     notifyListeners();

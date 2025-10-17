@@ -38,7 +38,7 @@ class SproutShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
 
-    return SproutLayoutBuilder((isDesktop, context) {
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
       /// The app bar we want, if necessary
       final appBar = !renderAppBar
           ? null

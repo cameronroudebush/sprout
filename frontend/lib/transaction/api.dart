@@ -2,7 +2,6 @@ import 'package:sprout/account/models/account.dart';
 import 'package:sprout/core/api/base.dart';
 import 'package:sprout/transaction/models/transaction.count.dart';
 import 'package:sprout/transaction/models/transaction.dart';
-import 'package:sprout/transaction/models/transaction.stats.dart';
 import 'package:sprout/transaction/models/transaction.subscriptions.dart';
 
 /// Class that provides callable endpoints for the transaction information
@@ -43,13 +42,6 @@ class TransactionAPI extends BaseAPI {
     final body = {'description': description, 'accountId': account?.id};
     List result = await client.post(body, endpoint) as List<dynamic>;
     return (result).map((e) => Transaction.fromJson(e)).toList();
-  }
-
-  /// Gets transaction stats for the last N days
-  Future<TransactionStats> getStats({int days = 30}) async {
-    final endpoint = "/transaction/stats";
-    final body = {'days': days};
-    return TransactionStats.fromJson(await client.post(body, endpoint) as dynamic);
   }
 
   /// Gets subscriptions information
