@@ -29,8 +29,17 @@ class TransactionsOverview extends StatefulWidget {
   /// A date we only want to focus on. Does not display any transactions that don't match this date.
   final DateTime? focusDate;
 
+  /// How many transactions we should focus on getting. We won't display over this number if set.
+  final int? focusCount;
+
   /// A category to start filtering on
   final dynamic initialCategoryFilter;
+
+  /// If scrolling down the widget should automatically load more where applicable
+  final bool allowLoadingMore;
+
+  /// If the back to top button should render when scrolling
+  final bool showBackToTop;
 
   const TransactionsOverview({
     super.key,
@@ -39,6 +48,9 @@ class TransactionsOverview extends StatefulWidget {
     this.focusDate,
     this.renderHeader = true,
     this.initialCategoryFilter,
+    this.focusCount,
+    this.allowLoadingMore = true,
+    this.showBackToTop = true,
   });
 
   @override
@@ -101,7 +113,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     final scrolledEnough = (pixels - _lastScrollPosition).abs() > 500;
 
     // If we're near the bottom of the list or have scrolled a significant amount, load more.
-    if (nearBottom || scrolledEnough) {
+    if (widget.allowLoadingMore && (nearBottom || scrolledEnough)) {
       _lastScrollPosition = pixels;
       _loadMoreTransactions();
     }
@@ -157,6 +169,10 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
 
     if (widget.focusDate != null) {
       toReturn = toReturn.where((t) => t.posted.isSameDay(widget.focusDate!)).toList();
+    }
+
+    if (widget.focusCount != null) {
+      toReturn = toReturn.sublist(0, widget.focusCount);
     }
 
     /// Null is the "Unknown" category selector
@@ -349,7 +365,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
                       ),
 
                       // Back to top button
-                      if (_showBackToTop)
+                      if (widget.showBackToTop && _showBackToTop)
                         Align(
                           alignment: Alignment.topCenter,
                           child: Padding(

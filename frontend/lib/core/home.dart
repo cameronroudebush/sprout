@@ -31,9 +31,11 @@ class _HomePageState extends State<HomePage> {
         final theme = Theme.of(context);
         final chartRange = provider.userDefaultChartRange;
         final catStats = catProvider.categoryStats?.categoryCount;
-        final transactionsDay = DateTime.now();
-        final todaysTransactions = transactionProvider.transactions.where((t) => t.posted.isSameDay(transactionsDay));
-        final todaysTransactionsDiff = todaysTransactions.fold(0.0, (prev, element) => prev + element.amount);
+
+        // final transactionsDay = DateTime.now();
+        final recentTransactionsCount = 10;
+        final recentTransactions = transactionProvider.transactions.sublist(0, recentTransactionsCount);
+        final recentTransactionsDiff = recentTransactions.fold(0.0, (prev, element) => prev + element.amount);
 
         List<HomeNotification> notifications = [];
 
@@ -136,7 +138,7 @@ class _HomePageState extends State<HomePage> {
             ConstrainedBox(
               constraints: BoxConstraints(minHeight: 140, maxHeight: 400),
               child: SizedBox(
-                height: 65 + (todaysTransactions.length * 70),
+                height: 65 + (recentTransactions.length * 70),
                 child: SproutCard(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -149,22 +151,28 @@ class _HomePageState extends State<HomePage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             TextWidget(
-                              text: "Today's Transactions",
+                              text: "Recent $recentTransactionsCount Transactions",
                               referenceSize: 1.25,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
 
                             /// Total value change
                             TextWidget(
-                              text: getFormattedCurrency(todaysTransactionsDiff),
-                              style: TextStyle(color: getBalanceColor(todaysTransactionsDiff, theme)),
+                              text: getFormattedCurrency(recentTransactionsDiff),
+                              style: TextStyle(color: getBalanceColor(recentTransactionsDiff, theme)),
                               referenceSize: 1.15,
                             ),
                           ],
                         ),
                       ),
                       const Divider(height: 1),
-                      TransactionsOverview(focusDate: transactionsDay, allowFiltering: false, renderHeader: false),
+                      TransactionsOverview(
+                        focusCount: recentTransactionsCount,
+                        allowFiltering: false,
+                        renderHeader: false,
+                        allowLoadingMore: false,
+                        showBackToTop: false,
+                      ),
                     ],
                   ),
                 ),
