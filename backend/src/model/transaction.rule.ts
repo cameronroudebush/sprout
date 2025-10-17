@@ -49,54 +49,84 @@ export class TransactionRule extends DatabaseBase {
   }
 
   /**
-   * Iterates over the transaction table and attempts to handle the transaction rules for a given user.
+   * Applies transaction rules to a user's transactions.
    *
-   * @param user The user to apply the rules for.
-   * @param account A specific account we only want to apply the rules for. If this is not given, rules will be run for all user accounts
-   * @param onlyApplyToEmpty If we should only apply transaction rules to transactions with empty categories
+   * This function iterates through all of a user's transaction rules, ordered by priority (descending).
+   * It applies the first matching rule to each transaction and updates the transaction's category.
+   * To prevent a transaction from being matched multiple times, it keeps track of matched
+   * transaction IDs and skips them in subsequent, lower-priority rule checks. This ensures
+   * that the `matches` count on each rule is accurate, reflecting only the transactions
+   * uniquely categorized by that rule.
+   *
+   * @param user The user for whom to apply the rules.
+   * @param account Optional account to scope the transactions.
+   * @param onlyApplyToEmpty If true, only applies rules to transactions with no category.
    */
   static async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false) {
-    // Run rules in descending order so if it's updated, it's updated with the highest priority
-    const rules = await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "DESC" } });
-    const transactions = await Transaction.find({
-      where: { category: onlyApplyToEmpty ? IsNull() : undefined, account: { id: account?.id, user: { id: user.id } } },
+    // Fetches rules in descending order of priority. Higher `order` values are processed first.
+    const rules = await TransactionRule.find({
+      where: { user: { id: user.id } },
+      order: { order: "DESC" },
     });
 
+    // Fetches all potentially relevant transactions just once.
+    const transactions = await Transaction.find({
+      where: {
+        category: onlyApplyToEmpty ? IsNull() : undefined,
+        account: { id: account?.id, user: { id: user.id } },
+      },
+    });
+
+    // This Set will store the IDs of transactions that have already been matched
+    // by a higher-priority rule, preventing them from being processed again.
+    const matchedTransactionIds = new Set<string>();
+
     for (const rule of rules) {
-      if (!rule.enabled) continue; // Ignore disabled rules
-      let matches = 0;
+      if (!rule.enabled) continue; // Skip disabled rules.
+
+      let currentRuleMatches = rule.matches;
+
+      // Iterate through all transactions for each rule.
       for (const transaction of transactions) {
-        let matched = false;
+        // If this transaction has already been claimed by a rule with higher priority, skip it.
+        if (matchedTransactionIds.has(transaction.id)) continue;
+
+        let isMatch = false;
+
         if (rule.type === "description") {
           if (rule.strict) {
-            matched = transaction.description === rule.value;
+            isMatch = transaction.description === rule.value;
           } else {
+            // For non-strict matches, check if the description includes any of the piped values.
             const values = rule.value.split("|").map((s) => s.toLowerCase().trim());
             for (const val of values) {
               if (transaction.description.toLowerCase().includes(val)) {
-                matched = true;
+                isMatch = true;
                 break;
               }
             }
           }
         } else if (rule.type === "amount") {
-          const val = parseFloat(rule.value);
-          if (rule.strict) {
-            matched = transaction.amount === val;
-          } else {
-            // Even when comparing amount, if non strict, still assume exact value. We may add support in the future for ranges.
-            matched = transaction.amount === val;
-          }
+          const amountValue = parseFloat(rule.value);
+          // For amount, strict and non-strict are treated as an exact match for now.
+          isMatch = transaction.amount === amountValue;
         }
 
-        if (matched) {
+        if (isMatch) {
+          // The transaction matches the rule. Update its category.
           transaction.category = rule.category;
           await transaction.update();
-          matches++;
+
+          // Increment the match count for this specific rule.
+          currentRuleMatches++;
+
+          // Add the transaction's ID to our set to mark it as "claimed".
+          matchedTransactionIds.add(transaction.id);
         }
       }
 
-      rule.matches = matches;
+      // Update the rule's match count with the number of transactions it uniquely claimed.
+      rule.matches = currentRuleMatches;
       await rule.update();
     }
   }
