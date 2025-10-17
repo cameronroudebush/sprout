@@ -60,6 +60,14 @@ class _AccountWidgetState extends State<AccountWidget> {
     final chartRange = userProvider.userDefaultChartRange;
     final data = netWorthProvider.historicalAccountData?.firstWhereOrNull((e) => e.connectedId == account.id);
     final accountDataForRange = data?.getValueByFrame(chartRange);
+
+    double accountValChange = accountDataForRange?.valueChange ?? 0;
+    double accountPercentChange = accountDataForRange?.percentChange ?? 0;
+    if (account.isNegativeNetWorth) {
+      accountValChange = -accountValChange;
+      accountPercentChange = -accountPercentChange;
+    }
+
     return SproutScrollView(
       padding: EdgeInsets.zero,
       child: SproutCard(
@@ -75,8 +83,8 @@ class _AccountWidgetState extends State<AccountWidget> {
                     NetWorthTextWidget(
                       chartRange,
                       account.balance,
-                      accountDataForRange.percentChange,
-                      accountDataForRange.valueChange,
+                      accountPercentChange,
+                      accountValChange,
                       title: "Account Value",
                     ),
                     SproutLineChart(
