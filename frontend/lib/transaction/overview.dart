@@ -172,7 +172,11 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     }
 
     if (widget.focusCount != null) {
-      toReturn = toReturn.sublist(0, widget.focusCount);
+      if (toReturn.length < widget.focusCount!) {
+        toReturn = toReturn.sublist(0, toReturn.length);
+      } else {
+        toReturn = toReturn.sublist(0, widget.focusCount);
+      }
     }
 
     /// Null is the "Unknown" category selector
