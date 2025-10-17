@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:sprout/charts/sankey/models/link.dart';
 import 'package:sprout/charts/sankey/models/painter.dart';
 
+const Color _tooltipBackgroundColor = Color(0xFF4A5568); // Dark slate gray
+const Color _tooltipTitleColor = Color(0xFFE2E8F0); // Light gray for title/date
+const Color _tooltipValueColor = Color(0xFF68D391); // Vibrant green for value
+const Color _defaultNodeColor = Color(0xFF38A169); // Main green for nodes/links
+const Color _labelTextColor = Colors.black;
+
 /// The sankey painter is used to render the actual sankey diagram with pre-computed data using the [CustomPainter]
 class SankeyPainter extends CustomPainter {
   final SankeyPainterData data;
@@ -53,8 +59,9 @@ class SankeyPainter extends CustomPainter {
     }
   }
 
+  /// Retrieves the color for a given node, defaulting to the new theme color.
   Color _getColorForNode(SankeyPainterData data, String nodeName) {
-    const defaultColor = Colors.grey;
+    const defaultColor = _defaultNodeColor;
     final colorString = data.sankeyData.colors[nodeName];
     if (colorString == null) return defaultColor;
     try {
@@ -64,7 +71,8 @@ class SankeyPainter extends CustomPainter {
     }
   }
 
-  void _paintLabel(Canvas canvas, String name, Rect rect, {Color textColor = Colors.black87}) {
+  /// Paints the text label inside a node.
+  void _paintLabel(Canvas canvas, String name, Rect rect, {Color textColor = _labelTextColor}) {
     double totalValue = data.nodeValues[name] ?? 0.0;
     String displayVal;
     if (formatter != null) {
@@ -75,49 +83,65 @@ class SankeyPainter extends CustomPainter {
 
     final textSpan = TextSpan(
       text: '$name\n$displayVal',
-      style: TextStyle(
-        color: textColor,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        shadows: [
-          Shadow(
-            blurRadius: 1,
-            color: textColor == Colors.white ? Colors.black.withValues(alpha: 0.5) : Colors.transparent,
-          ),
-        ],
-      ),
+      style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold),
     );
     final textPainter = TextPainter(text: textSpan, textAlign: TextAlign.center, textDirection: ui.TextDirection.ltr)
       ..layout(minWidth: 0, maxWidth: rect.width);
 
-    // The check for height is removed, as the node is now guaranteed to be tall enough.
     final offset = Offset(rect.center.dx - textPainter.width / 2, rect.center.dy - textPainter.height / 2);
     textPainter.paint(canvas, offset);
   }
 
+  /// Paints a styled tooltip that matches the provided image.
   void _paintTooltip(Canvas canvas, Size size) {
-    String tooltipText = '';
+    String tooltipTitle = '';
+    String tooltipValue = '';
+
     if (hoveredNode != null) {
       final value = data.nodeValues[hoveredNode!] ?? 0.0;
-      tooltipText = '$hoveredNode: \$${value.toStringAsFixed(0)}';
+      tooltipTitle = hoveredNode!;
+      tooltipValue = formatter != null ? formatter!(value) : value.toStringAsFixed(0);
     } else if (hoveredLink != null) {
       final link = hoveredLink!;
-      final valueStr = formatter != null ? formatter!(link.value) : '\$${link.value.toStringAsFixed(0)}';
-      tooltipText = '${link.source} → ${link.target}: $valueStr';
-      if (link.description != null && link.description!.isNotEmpty) {
-        tooltipText += '\n${link.description}';
-      }
+      // For this example, we'll use a placeholder date, but you might pass this in.
+      tooltipTitle = '${link.source} to ${link.target}';
+      tooltipValue = formatter != null ? formatter!(link.value) : '\$${link.value.toStringAsFixed(2)}';
     }
-    if (tooltipText.isEmpty) return;
 
-    final textSpan = TextSpan(
-      text: tooltipText,
-      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-    );
-    final textPainter = TextPainter(text: textSpan, textAlign: TextAlign.left, textDirection: ui.TextDirection.ltr)
-      ..layout();
+    if (tooltipTitle.isEmpty && tooltipValue.isEmpty) return;
 
-    final tooltipSize = Size(textPainter.width + 16, textPainter.height + 10);
+    // Define Padding and Spacing
+    const double horizontalPadding = 12.0;
+    const double verticalPadding = 4.0;
+    const double spacing = 4.0;
+
+    // Title Painter (e.g., "Income")
+    final titlePainter = TextPainter(
+      text: TextSpan(
+        text: tooltipTitle,
+        style: const TextStyle(color: _tooltipTitleColor, fontSize: 14),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: ui.TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: size.width);
+
+    // Value Painter (e.g., "$46,122.44")
+    final valuePainter = TextPainter(
+      text: TextSpan(
+        text: tooltipValue,
+        style: const TextStyle(color: _tooltipValueColor, fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: ui.TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: size.width);
+
+    // --- Calculate Tooltip Dimensions ---
+    final double contentWidth = titlePainter.width > valuePainter.width ? titlePainter.width : valuePainter.width;
+    final double tooltipWidth = contentWidth + horizontalPadding * 2;
+    final double tooltipHeight = titlePainter.height + valuePainter.height + spacing + verticalPadding * 2;
+    final tooltipSize = Size(tooltipWidth, tooltipHeight);
+
+    // --- Adjust Position to Keep Tooltip on Screen ---
     double dx = hoverPosition!.dx + 15;
     double dy = hoverPosition!.dy + 15;
 
@@ -128,11 +152,20 @@ class SankeyPainter extends CustomPainter {
       dy = hoverPosition!.dy - tooltipSize.height - 15;
     }
 
+    // --- Draw the Tooltip Background ---
     final rect = Rect.fromLTWH(dx, dy, tooltipSize.width, tooltipSize.height);
-    final paint = Paint()..color = Colors.black.withValues(alpha: 0.75);
+    final paint = Paint()..color = _tooltipBackgroundColor;
     canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), paint);
 
-    textPainter.paint(canvas, Offset(rect.left + 8, rect.top + 5));
+    // --- Paint the Centered Text ---
+    // Center the title horizontally
+    final titleDx = rect.left + (tooltipWidth - titlePainter.width) / 2;
+    titlePainter.paint(canvas, Offset(titleDx, rect.top + verticalPadding));
+
+    // Center the value horizontally, positioned below the title
+    final valueDx = rect.left + (tooltipWidth - valuePainter.width) / 2;
+    final valueDy = rect.top + verticalPadding + titlePainter.height + spacing;
+    valuePainter.paint(canvas, Offset(valueDx, valueDy));
   }
 
   @override
