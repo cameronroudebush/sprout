@@ -7,6 +7,7 @@ import 'package:sprout/account/overview.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/cash-flow/overview.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/info.dart';
@@ -207,6 +208,8 @@ class SproutRouter {
       icon: Icons.subscriptions,
       showOnBottomNav: true,
     ),
+    // Cash Flow
+    SproutPage((context, state) => CashFlowOverview(), 'Cash Flow', icon: Icons.bar_chart, showOnBottomNav: true),
     // Settings
     SproutPage((context, state) => UserPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
   ];

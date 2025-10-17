@@ -25,7 +25,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SproutLayoutBuilder((isDesktop, context) {
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
       final logo = useFullLogo || isDesktop
           ? Image.asset(
               'assets/logo/color-transparent-no-tag.png',

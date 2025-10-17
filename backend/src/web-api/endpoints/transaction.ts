@@ -2,12 +2,11 @@ import { Account } from "@backend/model/account";
 import { RestEndpoints } from "@backend/model/api/endpoint";
 import { RestBody } from "@backend/model/api/rest.request";
 import { TotalTransactions, TransactionRequest } from "@backend/model/api/transaction";
-import { TransactionStats, TransactionStatsRequest } from "@backend/model/api/transaction.stats";
 import { Category } from "@backend/model/category";
 import { Transaction } from "@backend/model/transaction";
 import { User } from "@backend/model/user";
-import { endOfDay, startOfDay, subDays } from "date-fns";
-import { Between, FindOptionsWhere, In, IsNull, LessThan, Like, MoreThan } from "typeorm";
+import { endOfDay, startOfDay } from "date-fns";
+import { Between, In, IsNull, Like } from "typeorm";
 import { RestMetadata } from "../metadata";
 
 export class TransactionAPI {
@@ -70,28 +69,6 @@ export class TransactionAPI {
     }
     const total = await Transaction.count({ where: { account: { user: { id: user.id } } } });
     return new TotalTransactions(map, total);
-  }
-
-  @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.stats, "GET"))
-  async getStats(request: RestBody, user: User) {
-    const parsedRequest = TransactionStatsRequest.fromPlain(request.payload);
-    const startDate = subDays(new Date(), parsedRequest.days);
-    const where = { account: { user: { id: user.id } }, posted: MoreThan(startDate) } as FindOptionsWhere<Transaction>;
-    const totalSpendResult = await Transaction.sum("amount", { ...where, ...{ amount: LessThan(0) } });
-    const totalIncome = await Transaction.sum("amount", { ...where, ...{ amount: MoreThan(0) } });
-    const transactionCount = await Transaction.count({ where: where });
-    const largestExpenseResult = await Transaction.min("amount", where);
-
-    const totalSpend = totalSpendResult || 0;
-    const averageTransactionCost = transactionCount > 0 ? totalSpend / transactionCount : 0;
-    const largestExpense = largestExpenseResult || 0;
-
-    return TransactionStats.fromPlain({
-      totalSpend: totalSpend ?? 0,
-      totalIncome: totalIncome ?? 0,
-      averageTransactionCost: averageTransactionCost,
-      largestExpense: largestExpense,
-    });
   }
 
   @RestMetadata.register(new RestMetadata(RestEndpoints.transaction.subscriptions, "GET"))

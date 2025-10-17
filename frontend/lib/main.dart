@@ -5,6 +5,8 @@ import 'package:sprout/account/api.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/api.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/cash-flow/api.dart';
+import 'package:sprout/cash-flow/provider.dart';
 import 'package:sprout/category/api.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/config/api.dart';
@@ -50,6 +52,7 @@ void main() async {
   ServiceLocator.register<HoldingProvider>(HoldingProvider(HoldingAPI(client)));
   ServiceLocator.register<TransactionRuleProvider>(TransactionRuleProvider(TransactionRuleAPI(client)));
   ServiceLocator.register<CategoryProvider>(CategoryProvider(CategoryAPI(client)));
+  ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowAPI(client)));
 
   runApp(
     MultiProvider(
@@ -65,6 +68,7 @@ void main() async {
         ServiceLocator.createProvider<HoldingProvider>(),
         ServiceLocator.createProvider<TransactionRuleProvider>(),
         ServiceLocator.createProvider<CategoryProvider>(),
+        ServiceLocator.createProvider<CashFlowProvider>(),
 
         // Create a future that waits for all the providers to be initialized, in order
         ChangeNotifierProvider<InitializationNotifier>(

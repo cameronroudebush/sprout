@@ -78,7 +78,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
     final days = _getDaysInMonth(_focusedDate);
     final dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    return SproutLayoutBuilder((isDesktop, context) {
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [

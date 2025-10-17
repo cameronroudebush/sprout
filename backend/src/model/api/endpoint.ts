@@ -37,7 +37,6 @@ export module RestEndpoints {
   export class transaction {
     static get = "/transaction/get";
     static count = "/transaction/count";
-    static stats = "/transaction/stats";
     static getByDescription = "/transaction/get/by/description";
     static subscriptions = "/transaction/subscriptions";
     static edit = "/transaction/edit";
@@ -92,5 +91,11 @@ export module RestEndpoints {
     static get = "/holding/get";
     /// Gets all holding history
     static getHistory = "/holding/history/all";
+  }
+
+  /** Cash flow endpoints for finance data */
+  export class cashFlow {
+    static get = "/cash-flow/get";
+    static stats = "/cash-flow/stats";
   }
 }

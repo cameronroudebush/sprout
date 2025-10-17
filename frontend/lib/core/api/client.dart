@@ -93,7 +93,7 @@ class RESTClient {
       return data["payload"];
     } else {
       _checkUnauth(response);
-      SnackbarProvider.openSnackbar('Request failed: ${response.body}', type: SnackbarType.error);
+      SnackbarProvider.openSnackbar(response.body, type: SnackbarType.error);
       throw Exception('Failed to post to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }
@@ -110,7 +110,7 @@ class RESTClient {
       return data["payload"];
     } else {
       _checkUnauth(response);
-      SnackbarProvider.openSnackbar('Request failed: ${response.body}', type: SnackbarType.error);
+      SnackbarProvider.openSnackbar(response.body, type: SnackbarType.error);
       throw Exception('Failed to get to $endpoint: ${response.statusCode} - ${response.body}');
     }
   }

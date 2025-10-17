@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/auth/provider.dart';
+import 'package:sprout/cash-flow/provider.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/api/base.dart';
@@ -46,6 +47,7 @@ class ServiceLocator {
     CategoryProvider,
     HoldingProvider,
     SetupProvider,
+    CashFlowProvider,
   ];
 
   /// Returns every provider that has been initialized by the app in a list like format
