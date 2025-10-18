@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sprout/core/api/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
+
+/// A global event bus for when all data has been updated.
+final _allDataUpdatedController = StreamController<void>.broadcast();
 
 /// This class provides some basic capability that is required by our data driven providers
 abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
@@ -44,6 +49,9 @@ abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
     notifyListeners();
   }
 
+  /// A stream that emits an event whenever all data has been updated.
+  static Stream<void> get onAllDataUpdated => _allDataUpdatedController.stream;
+
   /// Requests all providers to refresh their data
   static Future<void> updateAllData({bool showSnackbar = false, bool async = true}) async {
     if (async) {
@@ -57,5 +65,6 @@ abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
     if (showSnackbar) {
       SnackbarProvider.openSnackbar("Accounts refreshed");
     }
+    _allDataUpdatedController.add(null);
   }
 }

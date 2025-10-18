@@ -167,7 +167,8 @@ class _TransactionInfoState extends State<TransactionInfo> {
                                   builder: (_) =>
                                       TransactionRuleInfo(null, initialValue: widget.transaction.description),
                                 );
-                                setState(() {});
+                                // Close dialog on rule creation because we probably changed this guy
+                                Navigator.of(context).pop();
                               },
                             ),
                           ),
