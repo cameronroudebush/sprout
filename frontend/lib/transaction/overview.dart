@@ -7,6 +7,7 @@ import 'package:sprout/account/models/account.dart';
 import 'package:sprout/category/models/category.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
+import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
@@ -68,6 +69,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   final _transactionsPerPage = TransactionProvider.initialTransactionCount;
   bool _showBackToTop = false;
   double _lastScrollPosition = 0.0;
+  StreamSubscription? _onAllDataUpdated;
 
   /// The category we are currently filtering on
   Category? _filteredCategory = CategoryDropdown.fakeAllCategory;
@@ -77,6 +79,11 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   @override
   void initState() {
     super.initState();
+    _onAllDataUpdated = BaseProvider.onAllDataUpdated.listen((_) {
+      _currentTransactionIndex = 0;
+      _scrollController.jumpTo(0);
+      _populateInitialTransactions();
+    });
     if (widget.focusCount != null) _currentTransactionIndex = 0;
     _scrollController.addListener(_onScroll);
 
@@ -88,12 +95,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
       _filteredCategory = widget.initialCategoryFilter;
     }
 
-    // If we have less than the expected transactional count, forcibly load more
-    final provider = ServiceLocator.get<TransactionProvider>();
-    final transactionCount = _getFilteredTransactions(provider.transactions).length;
-    if (transactionCount < _transactionsPerPage) {
-      _loadMoreTransactions();
-    }
+    _populateInitialTransactions();
   }
 
   @override
@@ -102,7 +104,18 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     _scrollController.dispose();
     _searchController.dispose();
     _debounce?.cancel();
+    _onAllDataUpdated?.cancel();
     super.dispose();
+  }
+
+  /// Populates the initial transactions so we have up to the amount possible
+  void _populateInitialTransactions() {
+    // If we have less than the expected transactional count, forcibly load more
+    final provider = ServiceLocator.get<TransactionProvider>();
+    final transactionCount = _getFilteredTransactions(provider.transactions).length;
+    if (transactionCount < _transactionsPerPage) {
+      _loadMoreTransactions();
+    }
   }
 
   void _onScroll() {
