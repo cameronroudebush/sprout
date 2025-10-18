@@ -41,6 +41,9 @@ class TransactionsOverview extends StatefulWidget {
   /// If the back to top button should render when scrolling
   final bool showBackToTop;
 
+  /// If we should group each transaction by date versus one long list. True is by date.
+  final bool separateByDate;
+
   const TransactionsOverview({
     super.key,
     this.account,
@@ -51,6 +54,7 @@ class TransactionsOverview extends StatefulWidget {
     this.focusCount,
     this.allowLoadingMore = true,
     this.showBackToTop = true,
+    this.separateByDate = true,
   });
 
   @override
@@ -60,7 +64,7 @@ class TransactionsOverview extends StatefulWidget {
 class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
-  int _currentTransactionIndex = 0;
+  int _currentTransactionIndex = TransactionProvider.initialTransactionCount;
   final _transactionsPerPage = TransactionProvider.initialTransactionCount;
   bool _showBackToTop = false;
   double _lastScrollPosition = 0.0;
@@ -73,6 +77,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   @override
   void initState() {
     super.initState();
+    if (widget.focusCount != null) _currentTransactionIndex = 0;
     _scrollController.addListener(_onScroll);
 
     if (widget.initialCategoryFilter == "unknown") {
@@ -220,11 +225,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     return Consumer2<TransactionProvider, CategoryProvider>(
       builder: (context, provider, categoryProvider, child) {
         final transactions = _getFilteredTransactions(provider.transactions);
-        // Categorize transactions by day.
-        final groupedTransactions = transactions.groupListsBy(
-          (e) => DateTime(e.posted.year, e.posted.month, e.posted.day),
-        );
-        final isLoading = _isLoadingMore || provider.isLoading;
+        final isLoading = provider.isLoading || _isLoadingMore;
 
         return Expanded(
           child: ConstrainedBox(
@@ -302,78 +303,17 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
                           ),
                         ),
 
-                      /// Actual transaction view
-                      ListView.separated(
-                        controller: _scrollController,
-                        itemCount: groupedTransactions.length + 1, // +1 for the loading indicator
-                        separatorBuilder: (context, index) => const SizedBox(height: 4),
-                        itemBuilder: (context, index) {
-                          // If it's the last item, show a loading indicator or an empty box
-                          if (index == groupedTransactions.length) {
-                            return isLoading
-                                ? const Center(
-                                    child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
-                                  )
-                                : const SizedBox.shrink();
-                          }
-
-                          final entry = groupedTransactions.entries.elementAt(index);
-                          final date = entry.key;
-                          // Sort transactions by pending, then posted date, then description.
-                          final transactions = entry.value.sorted((a, b) {
-                            int compare = (a.pending ? 0 : 1).compareTo(b.pending ? 0 : 1);
-                            if (compare != 0) return compare;
-                            compare = b.posted.compareTo(a.posted);
-                            if (compare != 0) return compare;
-                            return a.description.compareTo(b.description);
-                          });
-                          final totalValueChange = transactions.fold(0.0, (prev, element) => prev + element.amount);
-
-                          return SproutCard(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Display grouping info
-                                if (widget.renderHeader) ...[
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        /// Date
-                                        TextWidget(
-                                          text: date.toShortMonth,
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                          referenceSize: 1.15,
-                                        ),
-
-                                        /// Total value change
-                                        TextWidget(
-                                          text: getFormattedCurrency(totalValueChange),
-                                          style: TextStyle(color: getBalanceColor(totalValueChange, theme)),
-                                          referenceSize: 1.15,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Divider(height: 1),
-                                ],
-
-                                // Transactions list
-                                ...transactions.map((t) => TransactionRow(transaction: t, isEvenRow: false)),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                      if (widget.separateByDate)
+                        _buildGroupedByDate(transactions, isLoading, theme)
+                      else
+                        _buildSingleList(transactions, isLoading),
 
                       // Back to top button
                       if (widget.showBackToTop && _showBackToTop)
                         Align(
                           alignment: Alignment.topCenter,
                           child: Padding(
-                            padding: EdgeInsetsGeometry.all(16),
+                            padding: const EdgeInsets.all(16),
                             child: SproutTooltip(
                               message: "Scroll to top",
                               child: FloatingActionButton(onPressed: _scrollToTop, child: Icon(Icons.arrow_upward)),
@@ -385,6 +325,108 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
                 ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Places all transactions in a single list instead of separating by date
+  Widget _buildSingleList(List<Transaction> transactions, bool isLoading) {
+    return SproutCard(
+      child: ListView.separated(
+        controller: _scrollController,
+        itemCount: transactions.length + 1,
+        separatorBuilder: (context, index) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          if (index == transactions.length) {
+            return isLoading
+                ? const Center(
+                    child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
+                  )
+                : const SizedBox.shrink();
+          }
+          final transaction = transactions[index];
+          return TransactionRow(transaction: transaction, isEvenRow: index % 2 == 0);
+        },
+      ),
+    );
+  }
+
+  /// Places all transactions into separate lists by date
+  Widget _buildGroupedByDate(List<Transaction> transactions, bool isLoading, ThemeData theme) {
+    // Categorize transactions by day.
+    final groupedTransactions = transactions.groupListsBy((e) => DateTime(e.posted.year, e.posted.month, e.posted.day));
+
+    return ListView.separated(
+      controller: _scrollController,
+      itemCount: groupedTransactions.length + 1, // +1 for the loading indicator
+      separatorBuilder: (context, index) => const SizedBox(height: 4),
+      itemBuilder: (context, index) {
+        // If it's the last item, show a loading indicator or an empty box
+        if (index == groupedTransactions.length) {
+          return isLoading
+              ? const Center(
+                  child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
+                )
+              : const SizedBox.shrink();
+        }
+
+        final entry = groupedTransactions.entries.elementAt(index);
+        final date = entry.key;
+        // Sort transactions by pending, then posted date, then description.
+        final dailyTransactions = entry.value.sorted((a, b) {
+          int compare = (a.pending ? 0 : 1).compareTo(b.pending ? 0 : 1);
+          if (compare != 0) return compare;
+          compare = b.posted.compareTo(a.posted);
+          if (compare != 0) return compare;
+          return a.description.compareTo(b.description);
+        });
+        final totalValueChange = dailyTransactions.fold(0.0, (prev, element) => prev + element.amount);
+
+        return SproutCard(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Display grouping info
+              if (widget.renderHeader) ...[
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      /// Date
+                      TextWidget(
+                        text: date.toShortMonth,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        referenceSize: 1.15,
+                      ),
+
+                      /// Total value change
+                      TextWidget(
+                        text: getFormattedCurrency(totalValueChange),
+                        style: TextStyle(color: getBalanceColor(totalValueChange, theme)),
+                        referenceSize: 1.15,
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+              ],
+
+              // Transactions list
+              ...dailyTransactions
+                  .mapIndexed((i, t) {
+                    final widgets = <Widget>[TransactionRow(transaction: t, isEvenRow: false)];
+                    // Add a divider if this isn't the last element
+                    if (i != dailyTransactions.length - 1) {
+                      widgets.add(const Divider(height: 1));
+                    }
+                    return widgets;
+                  })
+                  .expand((e) => e),
+            ],
           ),
         );
       },

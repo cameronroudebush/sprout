@@ -172,6 +172,7 @@ class _HomePageState extends State<HomePage> {
                         renderHeader: false,
                         allowLoadingMore: false,
                         showBackToTop: false,
+                        separateByDate: false,
                       ),
                     ],
                   ),
