@@ -18,6 +18,7 @@ class AccountSubTypeSelect extends StatelessWidget {
       "loan" => (subType as LoanAccountType?)?.value,
       "credit" => (subType as CreditAccountType?)?.value,
       "depository" => (subType as DepositoryAccountType?)?.value,
+      "crypto" => (subType as CryptoAccountType?)?.value,
       // Default case for unknown account types
       _ => null,
     };
@@ -30,6 +31,7 @@ class AccountSubTypeSelect extends StatelessWidget {
       "loan" => LoanAccountType.values.firstWhereOrNull((e) => e.value == subType),
       "credit" => CreditAccountType.values.firstWhereOrNull((e) => e.value == subType),
       "depository" => DepositoryAccountType.values.firstWhereOrNull((e) => e.value == subType),
+      "crypto" => CryptoAccountType.values.firstWhereOrNull((e) => e.value == subType),
       // Default case for unknown account types
       _ => null,
     };
@@ -52,6 +54,7 @@ class AccountSubTypeSelect extends StatelessWidget {
       "loan" => LoanAccountType.values.map((e) => e.value).toList(),
       "credit" => CreditAccountType.values.map((e) => e.value).toList(),
       "depository" => DepositoryAccountType.values.map((e) => e.value).toList(),
+      "crypto" => CryptoAccountType.values.map((e) => e.value).toList(),
       // Default case for unknown account types
       _ => const <String>[],
     });
