@@ -38,6 +38,14 @@ enum CreditAccountType {
   final String value;
 }
 
+enum CryptoAccountType {
+  wallet('Wallet'),
+  staking('Staking');
+
+  const CryptoAccountType(this.value);
+  final String value;
+}
+
 /// This account defines what an account should look like from the API
 class Account {
   final String id;
@@ -80,6 +88,8 @@ class Account {
       defaultIcon = Icons.credit_card;
     } else if (json['type'] == 'investment') {
       defaultIcon = Icons.trending_up;
+    } else if (json['type'] == 'crypto') {
+      defaultIcon = Icons.wallet;
     }
 
     return Account(

@@ -34,6 +34,8 @@ export class SimpleFINProvider extends ProviderBase {
         // Try to determine our account type
         let type: Account["type"];
         if (balance <= 0 && (name.toLowerCase().includes("credit") || name.toLowerCase().includes("card"))) type = "credit";
+        else if (name.toLowerCase().includes("wallet") || name.toLowerCase().includes("staked"))
+          type = "crypto"; // Crypto is considered if it contains "wallet" or "staked"
         else if (x.holdings.length !== 0) type = "investment";
         else if (availableBalance !== 0) type = "depository";
         else type = "loan";

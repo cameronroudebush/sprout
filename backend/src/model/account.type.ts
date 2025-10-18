@@ -23,3 +23,8 @@ export enum CreditAccountType {
   travel = "Travel",
   cashBack = "Cash Back",
 }
+
+export enum CryptoAccountType {
+  wallet = "Wallet",
+  staking = "Staking",
+}

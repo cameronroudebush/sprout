@@ -1,6 +1,6 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { AccountHistory } from "@backend/model/account.history";
-import { CreditAccountType, DepositoryAccountType, InvestmentAccountType, LoanAccountType } from "@backend/model/account.type";
+import { CreditAccountType, CryptoAccountType, DepositoryAccountType, InvestmentAccountType, LoanAccountType } from "@backend/model/account.type";
 import { DatabaseBase } from "@backend/model/database.base";
 import { Institution } from "@backend/model/institution";
 import { User } from "@backend/model/user";
@@ -36,11 +36,11 @@ export class Account extends DatabaseBase {
 
   /** The type of this account to better separate it from the others. */
   @DatabaseDecorators.column({ nullable: false, type: "varchar" })
-  type: "depository" | "credit" | "loan" | "investment";
+  type: "depository" | "credit" | "loan" | "investment" | "crypto";
 
   /** The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA. */
   @DatabaseDecorators.column({ nullable: true })
-  subType?: DepositoryAccountType | InvestmentAccountType | LoanAccountType | CreditAccountType;
+  subType?: DepositoryAccountType | InvestmentAccountType | LoanAccountType | CreditAccountType | CryptoAccountType;
 
   /** Any extra data that we want to store as JSON */
   @DatabaseDecorators.jsonColumn({ nullable: true })
@@ -95,6 +95,7 @@ export class Account extends DatabaseBase {
       ...Object.values(InvestmentAccountType),
       ...Object.values(LoanAccountType),
       ...Object.values(CreditAccountType),
+      ...Object.values(CryptoAccountType),
     ];
     if (!allSubTypes.includes(subType as any)) throw new Error(`Invalid subType provided: ${subType}`);
   }

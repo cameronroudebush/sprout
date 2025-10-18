@@ -55,7 +55,7 @@ class AccountGroupsWidget extends StatelessWidget {
     });
 
     // Define the desired order of account types
-    final List<String> accountTypeOrder = ['depository', 'investment', 'credit', 'loan'];
+    final List<String> accountTypeOrder = ['depository', 'investment', 'crypto', 'credit', 'loan'];
 
     // Sort the map entries based on the custom order
     final List<MapEntry<String, List<Account>>> sortedAccountsEntries = accountsByType.entries.toList();

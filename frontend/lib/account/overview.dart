@@ -31,7 +31,7 @@ class _AccountsOverviewState extends State<AccountsOverview> {
   Widget build(BuildContext context) {
     return Consumer3<UserProvider, AccountProvider, NetWorthProvider>(
       builder: (context, userProvider, accountProvider, netWorthProvider, child) {
-        final accountTypes = ["depository", "investment", "loan", "credit"];
+        final accountTypes = ["depository", "investment", "crypto", "loan", "credit"];
         final accountTypesContent = accountTypes.map((a) {
           return _buildTabContent(context, a, userProvider, accountProvider, netWorthProvider);
         }).toList();
@@ -103,9 +103,9 @@ class _AccountsOverviewState extends State<AccountsOverview> {
                   spacing: 12,
                   children: data.isEmpty
                       ? [
-                          const SizedBox(
+                          SizedBox(
                             height: 150,
-                            child: Center(child: TextWidget(text: "No data for accounts")),
+                            child: Center(child: TextWidget(text: "No ${formatAccountType(accountType)} Accounts")),
                           ),
                         ]
                       : [
