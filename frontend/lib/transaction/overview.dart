@@ -84,7 +84,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
       _scrollController.jumpTo(0);
       _populateInitialTransactions();
     });
-    if (widget.focusCount != null) _currentTransactionIndex = 0;
+    if (widget.focusCount != null || widget.account != null) _currentTransactionIndex = 0;
     _scrollController.addListener(_onScroll);
 
     if (widget.initialCategoryFilter == "unknown") {
@@ -350,7 +350,13 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
       child: ListView.separated(
         controller: _scrollController,
         itemCount: transactions.length + 1,
-        separatorBuilder: (context, index) => const Divider(height: 1),
+        separatorBuilder: (context, index) {
+          if (index != transactions.length - 1) {
+            return const Divider(height: 1);
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
         itemBuilder: (context, index) {
           if (index == transactions.length) {
             return isLoading

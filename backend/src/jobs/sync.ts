@@ -60,6 +60,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
           accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
           if (accountInDB == null) throw new Error("Missing account");
         } catch (e) {
+          Logger.error(e as Error);
           // Ignore missing accounts
           continue;
         }

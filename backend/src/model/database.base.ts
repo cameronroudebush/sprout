@@ -49,9 +49,13 @@ export class DatabaseBase extends DBBase {
     return await new this().getRepository().delete(ids);
   }
 
-  /** Inserts the element from `this` into the database */
-  async insert() {
-    this.id = undefined as any; // Make sure no id is set during inserts
+  /**
+   * Inserts the element from `this` into the database
+   *
+   * @param wipeId If we should reset the ID so we don't accidentally upsert. Default is true
+   */
+  async insert(wipeId = true) {
+    if (wipeId) this.id = undefined as any;
     return await this.getRepository().save(this);
   }
 

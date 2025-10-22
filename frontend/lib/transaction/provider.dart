@@ -59,7 +59,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     );
     _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
-    return _transactions;
+    return newTransactions;
   }
 
   /// Populates subscription information built from transactions
