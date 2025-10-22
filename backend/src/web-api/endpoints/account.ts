@@ -56,7 +56,7 @@ export class AccountAPI {
         if (matchingInstitution) matchingAccount.account.institution = matchingInstitution;
         matchingAccount.account.subType = account.subType;
         if (account.subType != null) Account.validateSubType(account.subType);
-        await matchingAccount.account.insert();
+        await matchingAccount.account.insert(false);
         // Insert matching transactions
         matchingAccount.transactions.map((x) => (x.account = matchingAccount.account));
         await Transaction.insertMany(matchingAccount.transactions);

@@ -32,9 +32,12 @@ class _HomePageState extends State<HomePage> {
         final chartRange = provider.userDefaultChartRange;
         final catStats = catProvider.categoryStats?.categoryCount;
 
-        // final transactionsDay = DateTime.now();
         final recentTransactionsCount = 10;
-        final recentTransactions = transactionProvider.transactions.sublist(0, recentTransactionsCount);
+        // Handle case where there are fewer transactions than recentTransactionsCount
+        final recentTransactions = transactionProvider.transactions.length < recentTransactionsCount
+            ? transactionProvider.transactions
+            : transactionProvider.transactions.sublist(0, recentTransactionsCount);
+
         final recentTransactionsDiff = recentTransactions.fold(0.0, (prev, element) => prev + element.amount);
 
         List<HomeNotification> notifications = [];

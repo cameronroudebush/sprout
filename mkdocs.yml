@@ -62,3 +62,5 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 copyright: "&copy; 2025 Sprout. All rights reserved."
+exclude_docs: |
+  *.xcf
