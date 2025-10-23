@@ -1,21 +1,24 @@
-import { Account } from "@backend/account/model/account";
-import { AccountHistory } from "@backend/account/model/account.history";
+import { AccountHistory } from "@backend/account/model/account.history.model";
+import { Account } from "@backend/account/model/account.model";
 import { Configuration } from "@backend/config/core";
-import { Holding } from "@backend/holding/model/holding";
-import { HoldingHistory } from "@backend/holding/model/holding.history";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model";
+import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderService } from "@backend/providers/provider.service";
-import { Transaction } from "@backend/transaction/model/transaction";
-import { TransactionRule } from "@backend/transaction/model/transaction.rule";
-import { User } from "@backend/user/model/user";
+import { Transaction } from "@backend/transaction/model/transaction.model";
+import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
+import { User } from "@backend/user/model/user.model";
 import { subDays } from "date-fns";
 import { merge } from "lodash";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
 export class ProviderSyncJob extends BackgroundJob<Sync> {
-  constructor(private providerService: ProviderService) {
+  constructor(
+    private providerService: ProviderService,
+    private transactionRuleService: TransactionRuleService,
+  ) {
     super("provider-sync", Configuration.providers.updateTime);
   }
 
@@ -90,7 +93,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       }
 
       // Attempt to auto categorize transactions
-      await TransactionRule.applyRulesToTransactions(user, undefined, true);
+      await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
 
       this.logger.log(`Information updated successfully for: ${user.username}`);
     }

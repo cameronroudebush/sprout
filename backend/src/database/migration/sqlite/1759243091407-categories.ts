@@ -1,5 +1,5 @@
-import { Category } from "@backend/category/model/category";
-import { User } from "@backend/user/model/user";
+import { Category } from "@backend/category/model/category.model";
+import { User } from "@backend/user/model/user.model";
 import { MigrationInterface, QueryRunner } from "typeorm";
 import { v4 } from "uuid";
 

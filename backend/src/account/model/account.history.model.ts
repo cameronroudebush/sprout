@@ -1,7 +1,7 @@
-import { Account } from "@backend/account/model/account";
+import { Account } from "@backend/account/model/account.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { User } from "@backend/user/model/user";
+import { User } from "@backend/user/model/user.model";
 import { isSameDay, subYears } from "date-fns";
 import { ManyToOne, MoreThan } from "typeorm";
 

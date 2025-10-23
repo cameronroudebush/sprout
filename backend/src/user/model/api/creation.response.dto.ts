@@ -4,12 +4,8 @@ import { Base } from "@backend/core/model/base";
 export class UserCreationResponse extends Base {
   username: string;
 
-  /** If the creation was a success. If this is filled out, it was not successful and this will be the error. */
-  success: string | undefined;
-
-  constructor(username: string, success: string | undefined) {
+  constructor(username: string) {
     super();
     this.username = username;
-    this.success = success;
   }
 }

@@ -1,9 +1,9 @@
-import { AccountHistory } from "@backend/account/model/account.history";
+import { AccountHistory } from "@backend/account/model/account.history.model";
 import { CreditAccountType, CryptoAccountType, DepositoryAccountType, InvestmentAccountType, LoanAccountType } from "@backend/account/model/account.type";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { Institution } from "@backend/institution/model/institution";
-import { User } from "@backend/user/model/user";
+import { Institution } from "@backend/institution/model/institution.model";
+import { User } from "@backend/user/model/user.model";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()

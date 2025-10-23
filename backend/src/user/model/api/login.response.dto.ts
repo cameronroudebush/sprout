@@ -1,5 +1,5 @@
 import { Base } from "@backend/core/model/base";
-import { User } from "@backend/user/model/user";
+import { User } from "@backend/user/model/user.model";
 
 /** Content that will be responded when the login request occurs */
 export class UserLoginResponse extends Base {

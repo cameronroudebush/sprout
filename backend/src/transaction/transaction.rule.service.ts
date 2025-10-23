@@ -1,53 +1,13 @@
-import { Account } from "@backend/account/model/account";
-import { Category } from "@backend/category/model/category";
-import { DatabaseDecorators } from "@backend/database/decorators";
-import { DatabaseBase } from "@backend/database/model/database.base";
-import { Transaction } from "@backend/transaction/model/transaction";
-import { User } from "@backend/user/model/user";
-import { IsNull, ManyToOne } from "typeorm";
+import { Account } from "@backend/account/model/account.model";
+import { Transaction } from "@backend/transaction/model/transaction.model";
+import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
+import { User } from "@backend/user/model/user.model";
+import { Injectable } from "@nestjs/common";
+import { IsNull, MoreThanOrEqual } from "typeorm";
 
-/** This class defines a rule that allows us to organize transactions based on a rule  */
-@DatabaseDecorators.entity()
-export class TransactionRule extends DatabaseBase {
-  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
-  user: User;
-
-  @DatabaseDecorators.column({ nullable: false })
-  type: "description" | "amount";
-
-  /** This defines the value of the rule. Strings support | to split content */
-  @DatabaseDecorators.column({ nullable: false })
-  value: string;
-
-  /** This defines the category to set the transaction to */
-  @ManyToOne(() => Category, { nullable: true, eager: true, onDelete: "SET NULL" })
-  category?: Category;
-
-  /** If this match should be strict. So if it should be the exact string or the exact number. */
-  @DatabaseDecorators.column({ nullable: false })
-  strict: boolean;
-
-  /** How many transactions have been updated by this transaction rule. */
-  @DatabaseDecorators.column({ nullable: false })
-  matches: number = 0;
-
-  /** The order of priority of this value */
-  @DatabaseDecorators.column({ nullable: false })
-  order: number = 0;
-
-  /** If this rule should be executed */
-  @DatabaseDecorators.column({ nullable: false })
-  enabled: boolean = true;
-
-  constructor(user: User, type: "description" | "amount", value: string, category?: Category, strict: boolean = false) {
-    super();
-    this.user = user;
-    this.type = type;
-    this.value = value;
-    this.category = category;
-    this.strict = strict;
-  }
-
+/** This class provides functions to help with {@link TransactionRule}'s */
+@Injectable()
+export class TransactionRuleService {
   /**
    * Applies transaction rules to a user's transactions.
    *
@@ -62,7 +22,7 @@ export class TransactionRule extends DatabaseBase {
    * @param account Optional account to scope the transactions.
    * @param onlyApplyToEmpty If true, only applies rules to transactions with no category.
    */
-  static async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false) {
+  async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false) {
     // Fetches rules in descending order of priority. Higher `order` values are processed first.
     const rules = await TransactionRule.find({
       where: { user: { id: user.id } },
@@ -129,5 +89,40 @@ export class TransactionRule extends DatabaseBase {
       rule.matches = currentRuleMatches;
       await rule.update();
     }
+  }
+
+  /** Reorders the transaction rules for a given user.
+   * @param user The user whose rules need reordering.
+   * @param ruleIdToMove The ID of the rule that was moved.
+   * @param newOrder The new order for the rule.
+   * @returns The updated list of rules.
+   */
+  async reorderRules(user: User, _ruleIdToMove: string, newOrder: number) {
+    const rules = await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" } });
+
+    // The 'newOrder' from the client is the desired 1-based position.
+    const targetPosition = newOrder;
+
+    // Find if there is a rule in that slot
+    const matchingPriority = rules.findIndex((x) => x.order === targetPosition);
+    if (matchingPriority != -1) {
+      // Slide all down past that element
+      const transactionsToSlide = await TransactionRule.find({
+        where: { order: MoreThanOrEqual(targetPosition!), user: { id: user.id } },
+        order: { order: "ASC" },
+      });
+      await Promise.all(
+        transactionsToSlide.map(async (x, i) => {
+          const expectedIndex = x.order + 1;
+          // Handle a case where we don't need to push elements down if there is a gap in priority order
+          if (expectedIndex === targetPosition + (i + 1)) {
+            x.order = x.order + 1;
+            await x.update();
+          }
+        }),
+      );
+    }
+
+    return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" } });
   }
 }
