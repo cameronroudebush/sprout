@@ -1,8 +1,8 @@
-import { Account } from "@backend/account/model/account";
+import { Account } from "@backend/account/model/account.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { ManyToOne } from "typeorm";
-import { HoldingHistory } from "./holding.history";
+import { HoldingHistory } from "./holding.history.model";
 
 /** This class provides information for a current stock that is associated to an account. */
 @DatabaseDecorators.entity()

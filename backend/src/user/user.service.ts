@@ -1,7 +1,7 @@
-import { UserLoginResponse } from "@backend/user/model/api/login.response";
-import { User } from "@backend/user/model/user";
+import { UserLoginResponse } from "@backend/user/model/api/login.response.dto";
+import { User } from "@backend/user/model/user.model";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { JWTLoginRequest, UsernamePasswordLoginRequest } from "./model/api/login.request";
+import { JWTLoginRequest, UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
 
 @Injectable()
 export class UserService {

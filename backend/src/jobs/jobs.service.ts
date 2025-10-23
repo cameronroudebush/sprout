@@ -1,6 +1,7 @@
 import { Configuration } from "@backend/config/core";
 import { ProviderSyncJob } from "@backend/jobs/sync";
 import { ProviderService } from "@backend/providers/provider.service";
+import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { Injectable } from "@nestjs/common";
 import { DatabaseBackup } from "./backup";
 import { BackgroundJob } from "./base";
@@ -9,7 +10,10 @@ import { PendingTransactionJob } from "./pending.transaction";
 /** A central class that starts background job runners */
 @Injectable()
 export class JobsService {
-  constructor(private providerService: ProviderService) {}
+  constructor(
+    private providerService: ProviderService,
+    private readonly transactionRuleService: TransactionRuleService,
+  ) {}
 
   /** A list of tracking background jobs that are running */
   private jobs: Array<BackgroundJob<any>> = [];
@@ -24,7 +28,7 @@ export class JobsService {
     // Pending transaction
     this.jobs.push(await new PendingTransactionJob().start());
     // Provider syncs
-    this.providerSyncJob = await new ProviderSyncJob(this.providerService).start();
+    this.providerSyncJob = await new ProviderSyncJob(this.providerService, this.transactionRuleService).start();
     this.jobs.push(this.providerSyncJob);
   }
 }

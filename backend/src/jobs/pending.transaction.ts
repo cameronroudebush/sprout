@@ -1,5 +1,5 @@
 import { Configuration } from "@backend/config/core";
-import { Transaction } from "@backend/transaction/model/transaction";
+import { Transaction } from "@backend/transaction/model/transaction.model";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
 import { BackgroundJob } from "./base";

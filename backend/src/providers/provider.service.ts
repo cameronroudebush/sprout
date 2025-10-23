@@ -1,5 +1,5 @@
-import { ProviderConfig } from "@backend/providers/base/config";
 import { ProviderBase } from "@backend/providers/base/core";
+import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { SimpleFINProvider } from "@backend/providers/simple-fin/core";
 import { Injectable } from "@nestjs/common";
 

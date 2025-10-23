@@ -1,10 +1,11 @@
 import { Configuration } from "@backend/config/core";
+import { TimeZone } from "@backend/config/tz";
 import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { JobsService } from "@backend/jobs/jobs.service";
 import { ProviderService } from "@backend/providers/provider.service";
-import { Logger, LogLevel, ValidationPipe } from "@nestjs/common";
-import { NestFactory } from "@nestjs/core";
+import { ClassSerializerInterceptor, Logger, LogLevel, ValidationPipe } from "@nestjs/common";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { startCase } from "lodash";
 import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
@@ -28,22 +29,35 @@ async function main() {
     // Enable validation
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
+    // Enable class-transformer for response serialization
+    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
     logger.log(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
+    logger.log(`Built on ${TimeZone.formatDate(new Date(BUILD_DATE))}`);
 
     // Configure Swagger
-    const theme = new SwaggerTheme();
-    const swaggerTitle = `${startCase(name)} API`;
-    const description = `This documentation contains endpoint information ${name}. Below you will find the various supported API endpoints.`;
-    const version = Configuration.version;
-    const config = new DocumentBuilder()
-      .setTitle(swaggerTitle)
-      .setDescription(description)
-      .setVersion(version)
-      .addBearerAuth()
-      .addTag("User", "Endpoints related to users within the app.")
-      .build();
-    const documentFactory = () => SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup("api", app, documentFactory, { customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK) });
+    if (Configuration.isDevBuild) {
+      const theme = new SwaggerTheme();
+      const swaggerTitle = `${startCase(name)} API`;
+      const description = `This documentation contains endpoint information ${name}. Below you will find the various supported API endpoints.`;
+      const version = Configuration.version;
+      const config = new DocumentBuilder()
+        .setTitle(swaggerTitle)
+        .setDescription(description)
+        .setVersion(version)
+        .addBearerAuth({ type: "http", description: "This authentication utilizes the JWT given during user login." })
+        .addTag("User", "Manage user authentication, creation, and profile information.")
+        .addTag("User Config", "Manage user-specific application settings and configurations.")
+        .addTag("Account", "Manage financial accounts, including retrieval, editing, and linking with financial providers.")
+        .addTag("Transaction", "Access and manage financial transactions, including searching, editing, and analyzing spending patterns.")
+        .addTag("Transaction Rule", "Define and manage rules for automatic transaction categorization during synchronization.")
+        .build();
+      const documentFactory = () => SwaggerModule.createDocument(app, config);
+      SwaggerModule.setup("api", app, documentFactory, {
+        swaggerOptions: { defaultModelsExpandDepth: -1 },
+        customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
+      });
+    }
 
     // Initialize config
     app.get(ConfigurationService).load();
@@ -56,7 +70,7 @@ async function main() {
     // Initialize background jobs
     await app.get(JobsService).start();
     await app.listen(Configuration.server.port);
-    logger.log(`Server ready on ${Configuration.server.port}`);
+    logger.log(`Server ready on port ${Configuration.server.port}`);
   } catch (e) {
     logger.error(e as Error);
     process.exit(1);
