@@ -4,12 +4,17 @@
     "outDir": "./dist",
     "sourceMap": true,
     "paths": {
-      "@backend/logger": ["./src/logger"],
       "@backend/providers/*": ["./src/providers/*"],
       "@backend/config/*": ["./src/config/*"],
-      "@backend/model/*": ["./src/model/*"],
       "@backend/database/*": ["./src/database/*"],
-      "@backend/jobs/*": ["./src/jobs/*"]
+      "@backend/core/*": ["./src/core/*"],
+      "@backend/jobs/*": ["./src/jobs/*"],
+      "@backend/transaction/*": ["./src/transaction/*"],
+      "@backend/account/*": ["./src/account/*"],
+      "@backend/user/*": ["./src/user/*"],
+      "@backend/category/*": ["./src/category/*"],
+      "@backend/institution/*": ["./src/institution/*"],
+      "@backend/holding/*": ["./src/holding/*"]
     }
   },
   "include": ["./src/**/*", "../common/src/**/*"]

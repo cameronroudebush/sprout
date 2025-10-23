@@ -1,4 +1,4 @@
-import { ConfigurationMetadata } from "@backend/config/configuration.metadata";
+import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 
 /** The configuration for the SimpleFIN provider */
 export class SimpleFINConfig {

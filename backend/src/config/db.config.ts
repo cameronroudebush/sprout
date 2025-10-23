@@ -1,4 +1,4 @@
-import { ConfigurationMetadata } from "@backend/config/configuration.metadata";
+import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { registeredEntities } from "@backend/database/decorators";
 import { glob } from "glob";
 import path from "path";

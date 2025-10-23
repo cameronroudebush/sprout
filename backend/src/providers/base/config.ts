@@ -1,4 +1,4 @@
-import { Base } from "@backend/model/base";
+import { Base } from "@backend/core/model/base";
 
 export type PROVIDER_OPTIONS = "simple-fin";
 

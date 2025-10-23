@@ -1,4 +1,4 @@
-import { ConfigurationMetadata } from "@backend/config/configuration.metadata";
+import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 
 /** Contains transaction configuration options */
 export class TransactionConfig {
