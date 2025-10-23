@@ -1,8 +1,8 @@
-import { Account } from "@backend/account/model/account";
-import { Holding } from "@backend/holding/model/holding";
-import { ProviderConfig } from "@backend/providers/base/config";
-import { Transaction } from "@backend/transaction/model/transaction";
-import { User } from "@backend/user/model/user";
+import { Account } from "@backend/account/model/account.model";
+import { Holding } from "@backend/holding/model/holding.model";
+import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { Transaction } from "@backend/transaction/model/transaction.model";
+import { User } from "@backend/user/model/user.model";
 import { ProviderRateLimit } from "./rate-limit";
 
 /**

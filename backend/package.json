@@ -58,13 +58,9 @@
     "tslib": "^2.6.2",
     "typescript": "^5.4.2"
   },
-  "compilerOptions": {
-    "webpack": true,
-    "webpackConfigPath": "./webpack.config.js"
-  },
   "scripts": {
-    "start": "nest start --watch --webpack",
-    "build": "nest build --webpack",
+    "start": "nest start --watch",
+    "build": "nest build",
     "migrate": "cross-var ts-node -r tsconfig-paths/register --project ./tsconfig.json ./node_modules/typeorm/cli.js migration:generate -d ./src/database/migration.ts ./src/database/migration/sqlite/$npm_config_name"
   },
   "pkg": {

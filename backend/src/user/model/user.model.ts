@@ -1,7 +1,8 @@
 import { Configuration } from "@backend/config/core";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { UserConfig } from "@backend/user/model/user.config";
+import { UserConfig } from "@backend/user/model/user.config.model";
+import { ApiHideProperty } from "@nestjs/swagger";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
 import jwt from "jsonwebtoken";
@@ -26,7 +27,8 @@ export class User extends DatabaseBase {
 
   /** Hashed password in the database to compare against */
   @DatabaseDecorators.column()
-  @Exclude({ toClassOnly: true })
+  @Exclude()
+  @ApiHideProperty()
   password!: string;
 
   @OneToOne(() => UserConfig, { eager: true, onDelete: "CASCADE" })

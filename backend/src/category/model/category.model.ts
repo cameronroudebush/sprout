@@ -1,8 +1,9 @@
-import { CategoryStats } from "@backend/category/model/api/category.stats";
+import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { Transaction } from "@backend/transaction/model/transaction";
-import { User } from "@backend/user/model/user";
+import { Transaction } from "@backend/transaction/model/transaction.model";
+import { User } from "@backend/user/model/user.model";
+import { ApiHideProperty } from "@nestjs/swagger";
 import { subDays } from "date-fns";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
@@ -17,6 +18,7 @@ export class Category extends DatabaseBase {
   /** The category this user belongs to */
   @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
+  @ApiHideProperty()
   user: User;
   @DatabaseDecorators.column({ nullable: false })
   userId!: string;
