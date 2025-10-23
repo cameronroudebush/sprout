@@ -1,4 +1,4 @@
-import { ConfigurationMetadata } from "@backend/config/configuration.metadata";
+import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 
 /** Generic configuration across the jobs */
 export class JobsConfig {

@@ -3,7 +3,7 @@ import { ServerConfig } from "@backend/config/server";
 import { TransactionConfig } from "@backend/config/transaction";
 import * as uuid from "uuid";
 import { name } from "../../package.json";
-import { ConfigurationMetadata } from "./configuration.metadata";
+import { ConfigurationMetadata } from "./model/configuration.metadata";
 import { ProvidersConfig } from "./providers";
 
 /**
@@ -23,16 +23,16 @@ export class Configuration {
   @ConfigurationMetadata.assign({ comment: "Settings specific to transactions" })
   static transaction = new TransactionConfig();
 
-  /** This variable contains the application version of this build. This will be replaced by {@link build.ts}. */
-  static version = "APP-VERSION";
+  /** This variable contains the application version of this build. This is replaced by webpack. */
+  static version = APP_VERSION;
 
   /** A secret key that can be used to create JWT's and other relevant info for this app. **This will be regenerated during every restart!** */
-  static secretKey = uuid.v4();
+  static secretKey = SECRET_KEY ?? uuid.v4();
 
   static get appName() {
     return name;
   }
 
-  /** Boolean that states if this is a development build or not. This will be replaced by {@link build.ts}. */
-  static isDevBuild = false;
+  /** Boolean that states if this is a development build or not. This is replaced by webpack. */
+  static isDevBuild = IS_DEV_BUILD;
 }

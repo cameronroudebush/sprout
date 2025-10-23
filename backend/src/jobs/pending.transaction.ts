@@ -1,6 +1,5 @@
 import { Configuration } from "@backend/config/core";
-import { Logger } from "@backend/logger";
-import { Transaction } from "@backend/model/transaction";
+import { Transaction } from "@backend/transaction/model/transaction";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
 import { BackgroundJob } from "./base";
@@ -17,7 +16,7 @@ export class PendingTransactionJob extends BackgroundJob<any> {
   }
 
   protected async update() {
-    Logger.info("Checking for stuck pending transactions...", this.logConfig);
+    this.logger.log("Checking for stuck pending transactions...");
     const oneWeekAgo = subDays(new Date(), 7);
     const stuckTransactions = await Transaction.find({
       where: {
@@ -26,8 +25,8 @@ export class PendingTransactionJob extends BackgroundJob<any> {
       },
     });
     if (stuckTransactions.length > 0) {
-      Logger.warn(`Found ${stuckTransactions.length} stuck pending transactions. Deleting them.`, this.logConfig);
+      this.logger.warn(`Found ${stuckTransactions.length} stuck pending transactions. Deleting them.`);
       await Transaction.deleteMany(stuckTransactions.map((x) => x.id));
-    } else Logger.success("No stuck pending transactions!");
+    } else this.logger.log("No stuck pending transactions!");
   }
 }

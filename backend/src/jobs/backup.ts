@@ -1,6 +1,5 @@
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/tz";
-import { Logger } from "@backend/logger";
 import fs from "fs";
 import path from "path";
 import { BackgroundJob } from "./base";
@@ -8,7 +7,7 @@ import { BackgroundJob } from "./base";
 /** This class defines a background job to execute routinely for backing up the database. */
 export class DatabaseBackup extends BackgroundJob<any> {
   constructor() {
-    super("db-backup", Configuration.database.backup.time);
+    super("db:backup", Configuration.database.backup.time);
   }
 
   override async start() {
@@ -25,9 +24,9 @@ export class DatabaseBackup extends BackgroundJob<any> {
     const backupFileName = `sprout_backup_${nowAsString}.sqlite`;
     const backupPath = path.join(Configuration.database.backup.directory, backupFileName);
 
-    Logger.info(`Creating database backup: ${backupPath}`, this.logConfig);
+    this.logger.log(`Creating database backup: ${backupPath}`);
     fs.copyFileSync(dbPath, backupPath);
-    Logger.success("Database backup created successfully!", this.logConfig);
+    this.logger.log("Database backup created successfully!");
 
     // Clean up old backups
     const backupFiles = fs
@@ -40,7 +39,7 @@ export class DatabaseBackup extends BackgroundJob<any> {
       const filesToDelete = backupFiles.slice(Configuration.database.backup.count);
       for (const file of filesToDelete) {
         const filePath = path.join(Configuration.database.backup.directory, file);
-        Logger.info(`Deleting old backup: ${filePath}`, this.logConfig);
+        this.logger.log(`Deleting old backup: ${filePath}`);
         fs.unlinkSync(filePath);
       }
     }

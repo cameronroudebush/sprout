@@ -1,17 +1,14 @@
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/tz";
+import { Logger } from "@nestjs/common";
 import CronExpressionParser, { CronExpression } from "cron-parser";
 import { addMinutes } from "date-fns";
-import { LogConfig, Logger } from "../logger";
 
 /** A generic class that lets us create background jobs based on a cronjob timeframe. Intended to be used as an extension. */
 export abstract class BackgroundJob<T extends any> {
-  private interval: CronExpression;
+  protected readonly logger: Logger;
 
-  /** Gets some extra configuration for the logger to display better messages for these jobs. */
-  protected get logConfig(): LogConfig {
-    return { header: `[jobs][${this.jobName}]`, shouldPrependLoggerFile: false };
-  }
+  private interval: CronExpression;
 
   /**
    * Creates an instance of a background job
@@ -21,7 +18,8 @@ export abstract class BackgroundJob<T extends any> {
     public jobName: string,
     private cronTime: string,
   ) {
-    Logger.info(`Initializing background job of: ${this.cronTime}`, this.logConfig);
+    this.logger = new Logger(`job:${jobName}`);
+    this.logger.log(`Initializing background job of: ${this.cronTime}`);
     this.interval = CronExpressionParser.parse(this.cronTime, { tz: TimeZone.timeZone });
   }
 
@@ -43,7 +41,7 @@ export abstract class BackgroundJob<T extends any> {
    */
   private scheduleNextUpdate(nextExecutionDate = this.interval.next().toDate(), fromFailed = false) {
     const timeUntilNextExecution = nextExecutionDate.getTime() - Date.now();
-    Logger.info(`Next update time: ${TimeZone.formatDate(nextExecutionDate)}`, this.logConfig);
+    this.logger.log(`Next update time: ${TimeZone.formatDate(nextExecutionDate)}`);
     setTimeout(async () => {
       try {
         await this.update();

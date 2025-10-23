@@ -1,13 +1,13 @@
+import { Account } from "@backend/account/model/account";
+import { Category } from "@backend/category/model/category";
 import { Configuration } from "@backend/config/core";
-import { Logger } from "@backend/logger";
-import { Account } from "@backend/model/account";
-import { Category } from "@backend/model/category";
-import { Holding } from "@backend/model/holding";
-import { Institution } from "@backend/model/institution";
-import { Transaction } from "@backend/model/transaction";
-import { User } from "@backend/model/user";
+import { Holding } from "@backend/holding/model/holding";
+import { Institution } from "@backend/institution/model/institution";
 import { DevFinancialDataGenerator } from "@backend/providers/base/random-data";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
+import { Transaction } from "@backend/transaction/model/transaction";
+import { User } from "@backend/user/model/user";
+import { Logger } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
@@ -16,6 +16,7 @@ import { ProviderRateLimit } from "../base/rate-limit";
  * This provider adds automated account syncing using the SimpleFIN provider.
  */
 export class SimpleFINProvider extends ProviderBase {
+  private readonly logger = new Logger(SimpleFINProvider.name);
   override rateLimit: ProviderRateLimit = new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit);
 
   override async get(user: User, accountsOnly: boolean) {
@@ -110,7 +111,7 @@ export class SimpleFINProvider extends ProviderBase {
     const [user, pass] = url.replace("https://", "").split("@")[0]!.split(":");
     const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
     if (Configuration.isDevBuild) {
-      Logger.warn(`Dev build detected. SimpleFIN will return fake data.`);
+      this.logger.warn(`Dev build detected. SimpleFIN will return fake data.`);
       return new DevFinancialDataGenerator().generateFinancialData(true) as any as SimpleFINReturn.FinancialData;
     } else {
       await this.rateLimit.incrementOrError();

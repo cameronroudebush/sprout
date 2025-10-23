@@ -1,28 +1,27 @@
+import { Account } from "@backend/account/model/account";
+import { AccountHistory } from "@backend/account/model/account.history";
 import { Configuration } from "@backend/config/core";
-import { Logger } from "@backend/logger";
-import { Account } from "@backend/model/account";
-import { AccountHistory } from "@backend/model/account.history";
-import { Holding } from "@backend/model/holding";
-import { HoldingHistory } from "@backend/model/holding.history";
-import { Sync } from "@backend/model/schedule";
-import { Transaction } from "@backend/model/transaction";
-import { TransactionRule } from "@backend/model/transaction.rule";
-import { User } from "@backend/model/user";
+import { Holding } from "@backend/holding/model/holding";
+import { HoldingHistory } from "@backend/holding/model/holding.history";
+import { Sync } from "@backend/jobs/model/sync";
 import { ProviderBase } from "@backend/providers/base/core";
+import { ProviderService } from "@backend/providers/provider.service";
+import { Transaction } from "@backend/transaction/model/transaction";
+import { TransactionRule } from "@backend/transaction/model/transaction.rule";
+import { User } from "@backend/user/model/user";
 import { subDays } from "date-fns";
 import { merge } from "lodash";
-import { Providers } from "../providers";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
 export class ProviderSyncJob extends BackgroundJob<Sync> {
-  constructor() {
+  constructor(private providerService: ProviderService) {
     super("provider-sync", Configuration.providers.updateTime);
   }
 
   protected async update() {
-    Logger.info("Starting sync for all providers.");
-    const providers = Providers.getAll();
+    this.logger.log("Starting sync for all providers.");
+    const providers = this.providerService.getAll();
     const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
     try {
       for (const provider of providers) await this.updateProvider(provider);
@@ -41,26 +40,26 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
 
   /** Starts an update for the given provider. */
   private async updateProvider(provider: ProviderBase) {
-    Logger.info(`Syncing ${provider.config.name}`);
+    this.logger.log(`Syncing ${provider.config.name}`);
     // Handle each user
     const users = await User.find({});
 
     // Handle each users accounts
     for (const user of users) {
-      Logger.info(`Updating information for: ${user.username}`);
+      this.logger.log(`Updating information for: ${user.username}`);
       // Sync transactions and account balances. Only do it for existing accounts.
       const userAccounts = await Account.getForUser(user);
       // If we don't have any user accounts, don't bother querying because we'll have nothing to update
       if (userAccounts.length === 0) continue;
       const accounts = await provider.get(user, false);
       for (const data of accounts) {
-        Logger.info(`Updating account from provider: ${data.account.name}`);
+        this.logger.log(`Updating account from provider: ${data.account.name}`);
         let accountInDB: Account;
         try {
           accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
           if (accountInDB == null) throw new Error("Missing account");
         } catch (e) {
-          Logger.error(e as Error);
+          this.logger.error(e as Error);
           // Ignore missing accounts
           continue;
         }
@@ -93,7 +92,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       // Attempt to auto categorize transactions
       await TransactionRule.applyRulesToTransactions(user, undefined, true);
 
-      Logger.success(`Information updated successfully for: ${user.username}`);
+      this.logger.log(`Information updated successfully for: ${user.username}`);
     }
   }
 

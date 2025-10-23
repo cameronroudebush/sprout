@@ -1,5 +1,5 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
-import { DatabaseBase } from "@backend/model/database.base";
+import { DatabaseBase } from "@backend/database/model/database.base";
 
 /**
  * This class is used to provide a rate limit to different providers. This is required
