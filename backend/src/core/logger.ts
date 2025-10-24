@@ -1,4 +1,4 @@
-import { TimeZone } from "@backend/config/tz";
+import { TimeZone } from "@backend/config/model/tz";
 import { ConsoleLogger, LogLevel } from "@nestjs/common";
 
 /** A custom logger to use with NestJS to improve our logging capabilities */

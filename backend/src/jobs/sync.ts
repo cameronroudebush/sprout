@@ -3,7 +3,7 @@ import { Account } from "@backend/account/model/account.model";
 import { Configuration } from "@backend/config/core";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
-import { Sync } from "@backend/jobs/model/sync";
+import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderService } from "@backend/providers/provider.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
@@ -60,9 +60,11 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         let accountInDB: Account;
         try {
           accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
-          if (accountInDB == null) throw new Error("Missing account");
+          if (accountInDB == null) {
+            this.logger.warn(`The account with the following ID isn't registered: ${data.account.id}`);
+            throw new Error("Missing account");
+          }
         } catch (e) {
-          this.logger.error(e as Error);
           // Ignore missing accounts
           continue;
         }
