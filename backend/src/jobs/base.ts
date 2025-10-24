@@ -1,5 +1,5 @@
 import { Configuration } from "@backend/config/core";
-import { TimeZone } from "@backend/config/tz";
+import { TimeZone } from "@backend/config/model/tz";
 import { Logger } from "@nestjs/common";
 import CronExpressionParser, { CronExpression } from "cron-parser";
 import { addMinutes } from "date-fns";

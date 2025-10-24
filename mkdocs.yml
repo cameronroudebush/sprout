@@ -35,6 +35,11 @@ plugins:
       cards_layout_options:
         background_color: "#1d2127"
         color: "#FFFFFF"
+  - swagger-ui-tag:
+      extra_css: [stylesheets/swagger.css]
+      tryItOutEnabled: false
+      supportedSubmitMethods: []
+      filter: true
 nav:
   - Home: index.md
   - Getting Started:
@@ -48,6 +53,7 @@ nav:
       - Overview: developer/index.md
       - Configuration: developer/configuration.md
       - Known Issues: developer/known-issues.md
+      - API Docs: developer/api.md
   - What's Next?: planned-features.md
   - Privacy Policy: privacy-policy.md
 markdown_extensions:

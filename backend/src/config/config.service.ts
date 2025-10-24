@@ -29,7 +29,7 @@ export class ConfigurationService {
   }
 
   /** Returns the where we should place the config file. */
-  private get configFileLocation() {
+  get configFileLocation() {
     return path.join(process.cwd(), `${Configuration.appName}.config.yml`);
   }
 
@@ -112,19 +112,19 @@ export class ConfigurationService {
   }
 
   /** Loads the configuration file from {@link configFileLocation} */
-  load(path = this.configFileLocation) {
-    this.logger.log(`Loading config file from ${path}`);
+  load(path = this.configFileLocation, log = false) {
+    if (log) this.logger.log(`Loading config file from ${path}`);
     this.updateConfigFromFile();
     // Save the changes so config file is kept up to date with changes.
-    this.save();
+    this.save(undefined, log);
     // Load any env variables
     this.loadEnvVariables();
     return this;
   }
 
   /** Saves the configuration from {@link Configuration} to the file */
-  save(path = this.configFileLocation) {
-    this.logger.log(`Writing config file to ${path}`);
+  save(path = this.configFileLocation, log = false) {
+    if (log) this.logger.log(`Writing config file to ${path}`);
     const configObject = this.objectToYaml(Configuration);
     const output = this.configHeader + configObject + "\n";
     fs.writeFileSync(path, output);
