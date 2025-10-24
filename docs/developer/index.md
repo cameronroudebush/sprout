@@ -7,11 +7,11 @@ hide:
 
 # Development Overview
 
-Sprout is built with a **mobile first** approach using [Flutter](https://flutter.dev/) for its interfaces and a [Node.js](https://nodejs.org/en) backend.
+Sprout is built with a **mobile first** approach using [Flutter](https://flutter.dev/) for its interfaces and a [Nest.js](https://nestjs.com/) backend.
 
 ## Environment
 
-For development, we recommend using [VS Code](https://code.visualstudio.com/). The repository includes a [VS Code workspace file](https://github.com/cameronroudebush/sprout/blob/master/.vscode/sprout.code-workspace) that sets up recommended extensions and debug configurations. You can launch the debuggers directly from VS Code to run and debug both the Flutter frontend and Node.js backend.
+For development, we recommend using [VS Code](https://code.visualstudio.com/). The repository includes a [VS Code workspace file](https://github.com/cameronroudebush/sprout/blob/master/.vscode/sprout.code-workspace) that sets up recommended extensions and debug configurations. You can launch the debuggers directly from VS Code to run and debug both the Flutter frontend and Nest.js backend.
 
 ## Useful Commands
 

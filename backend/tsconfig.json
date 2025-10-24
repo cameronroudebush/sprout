@@ -18,5 +18,5 @@
       "@backend/sse/*": ["./src/sse/*"]
     }
   },
-  "include": ["./src/**/*", "../common/src/**/*"]
+  "include": ["./src/**/*"]
 }

@@ -1,10 +1,7 @@
-import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty } from "@nestjs/swagger";
-import { subDays } from "date-fns";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
 
@@ -75,34 +72,6 @@ export class Category extends DatabaseBase {
   /** Returns the default, unknown, category for transactions that we can't determine the category of. */
   static getUnknownCategory(user: User) {
     return Category.findOne({ where: { user: { id: user.id }, name: "Unknown" } });
-  }
-
-  /** Returns stat information for all categories for the given user */
-  static async getStats(user: User, days?: number) {
-    const results = Transaction.getRepository()
-      .createQueryBuilder("t")
-      // Join account to filter by user
-      .innerJoin("t.account", "account")
-      // Join category for grouping
-      .leftJoin("t.category", "category")
-      // First filter: Must belong to the specified user
-      .where("account.userId = :userId", { userId: user.id });
-
-    // Second filter: Must be within the date range, only if given
-    if (days != null) {
-      results.andWhere("t.posted >= :startDate", { startDate: subDays(new Date(), days) });
-    }
-
-    const finalResults = await results
-      .select(`COALESCE(category.name, '${Category.UNKNOWN_NAME}')`, "category_name")
-      .addSelect("COUNT(t.id)", "total")
-      .groupBy("category_name")
-      .orderBy("category_name", "ASC")
-      .getRawMany();
-
-    const categoryCount: { [name: string]: number } = Object.fromEntries(finalResults.map((x) => [x.category_name, x.total]));
-
-    return CategoryStats.fromPlain({ categoryCount });
   }
 
   /** Get's a category by the given name or returns the existing one if it's found. */

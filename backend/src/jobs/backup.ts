@@ -1,5 +1,5 @@
 import { Configuration } from "@backend/config/core";
-import { TimeZone } from "@backend/config/tz";
+import { TimeZone } from "@backend/config/model/tz";
 import fs from "fs";
 import path from "path";
 import { BackgroundJob } from "./base";

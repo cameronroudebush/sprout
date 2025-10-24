@@ -19,10 +19,10 @@ module.exports = function (options, argv) {
       ...options.plugins,
       // Define relevant variables
       new webpack.DefinePlugin({
-        APP_VERSION: webpack.DefinePlugin.runtimeValue(() => JSON.stringify(getVersion())),
-        BUILD_DATE: webpack.DefinePlugin.runtimeValue(() => JSON.stringify(new Date().toISOString())),
-        IS_DEV_BUILD: !isProduction,
-        SECRET_KEY: isProduction ? undefined : JSON.stringify("DEV-KEY"),
+        "process.env.APP_VERSION": webpack.DefinePlugin.runtimeValue(() => JSON.stringify(getVersion())),
+        "process.env.BUILD_DATE": webpack.DefinePlugin.runtimeValue(() => JSON.stringify(new Date().toISOString())),
+        "process.env.IS_DEV_BUILD": !isProduction,
+        "process.env.SECRET_KEY": isProduction ? undefined : JSON.stringify("DEV-KEY"),
       }),
     ],
   };

@@ -1,0 +1,2285 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/core/heartbeat": {
+      "get": {
+        "description": "Provides a return message if the app is running.",
+        "operationId": "CoreController_heartbeat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Application status retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check application status.",
+        "tags": [
+          "Core"
+        ]
+      }
+    },
+    "/core": {
+      "put": {
+        "description": "Runs a manual sync to update all provider accounts.",
+        "operationId": "CoreController_manualSync",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Manual sync completed successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Run a manual sync.",
+        "tags": [
+          "Core"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "description": "Retrieves a user's information by their ID.",
+        "operationId": "UserController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "User with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user by ID.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/login": {
+      "post": {
+        "description": "Authenticates a user with their username and password, returning user details and a new JWT for session management.",
+        "operationId": "UserController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsernamePasswordLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User login successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials provided."
+          }
+        },
+        "summary": "Login with username and password.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/login/jwt": {
+      "post": {
+        "description": "Validates an existing JWT. If valid, it returns the user details and the same JWT.",
+        "operationId": "UserController_loginWithJWT",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JWTLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User login successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The provided JWT is invalid or has expired."
+          }
+        },
+        "summary": "Login with an existing JWT.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/create": {
+      "post": {
+        "description": "Allows for the creation of a new user. Only works during initial setup of the app.",
+        "operationId": "UserController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The app is not in a setup state or invalid input."
+          }
+        },
+        "summary": "Create a new user.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user-config": {
+      "get": {
+        "description": "Retrieves the current user's configuration.",
+        "operationId": "UserConfigController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User config found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "User couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user config.",
+        "tags": [
+          "User Config"
+        ]
+      },
+      "patch": {
+        "description": "Edits the current users configuration.",
+        "operationId": "UserConfigController_edit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User configuration updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "User configuration couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit user config.",
+        "tags": [
+          "User Config"
+        ]
+      }
+    },
+    "/account/{id}": {
+      "get": {
+        "description": "Retrieves an account by the given ID.",
+        "operationId": "AccountController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Account with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get account by ID.",
+        "tags": [
+          "Account"
+        ]
+      },
+      "delete": {
+        "description": "Deletes an account by the given ID.",
+        "operationId": "AccountController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Account with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete account by ID.",
+        "tags": [
+          "Account"
+        ]
+      },
+      "patch": {
+        "description": "Edits an account by the given ID.",
+        "operationId": "AccountController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountEditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Account with the specified ID not found or does not belong to the user."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit account.",
+        "tags": [
+          "Account"
+        ]
+      }
+    },
+    "/account": {
+      "get": {
+        "description": "Retrieves all accounts for the authenticated user.",
+        "operationId": "AccountController_getAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Accounts found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get accounts.",
+        "tags": [
+          "Account"
+        ]
+      }
+    },
+    "/account/provider/{name}": {
+      "get": {
+        "description": "Retrieves accounts from a specified provider that the user has not yet linked.",
+        "operationId": "AccountController_getProviderAccounts",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider accounts found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Provider with the specified name not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get accounts from a provider that are not yet synced.",
+        "tags": [
+          "Account"
+        ]
+      }
+    },
+    "/account/provider/{name}/link": {
+      "post": {
+        "description": "Given some accounts and the provider info, links new accounts to the current user.",
+        "operationId": "AccountController_linkProviderAccounts",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Provider accounts linked successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link the new given accounts from a provider.",
+        "tags": [
+          "Account"
+        ]
+      }
+    },
+    "/transaction/{id}": {
+      "patch": {
+        "description": "Edits a transaction by the given ID.",
+        "operationId": "TransactionController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Transaction with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit transaction.",
+        "tags": [
+          "Transaction"
+        ]
+      }
+    },
+    "/transaction": {
+      "get": {
+        "description": "Retrieves transactions based on the provided query parameters.",
+        "operationId": "TransactionController_getByQuery",
+        "parameters": [
+          {
+            "name": "startIndex",
+            "required": false,
+            "in": "query",
+            "description": "The starting index for pagination.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "endIndex",
+            "required": false,
+            "in": "query",
+            "description": "The ending index for pagination.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "A specific category id you want data for. If you pass unknown here, we'll return all categories matching 'null'. If this is not populated, we'll simply return all categories.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "description": "A partial description to filter transactions.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "A specific date to filter transactions.",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transactions found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Transaction"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get transactions by query.",
+        "tags": [
+          "Transaction"
+        ]
+      }
+    },
+    "/transaction/subscriptions": {
+      "get": {
+        "description": "Retrieves subscriptions based on historical transactions by guessing if they are reoccurring or not.",
+        "operationId": "TransactionController_subscriptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Subscriptions found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionSubscription"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's subscriptions.",
+        "tags": [
+          "Transaction"
+        ]
+      }
+    },
+    "/transaction/count": {
+      "get": {
+        "description": "Retrieves a count of the total number of transactions available for the current user including a total for each account.",
+        "operationId": "TransactionController_getTotal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Transaction count found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's the total count of transactions across accounts.",
+        "tags": [
+          "Transaction"
+        ]
+      }
+    },
+    "/transaction-rule": {
+      "get": {
+        "description": "Retrieves all transaction rules for the authenticated user.",
+        "operationId": "TransactionRuleController_getAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Transaction rules found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionRule"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get transaction rules.",
+        "tags": [
+          "Transaction Rule"
+        ]
+      },
+      "post": {
+        "description": "Creates a new transaction rule based on the given content and runs a processor so we can organize our current transactions.",
+        "operationId": "TransactionRuleController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionRule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction rule added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionRule"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Failed to locate a matching category for this transaction rule based on given content."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Creates a new transaction rule.",
+        "tags": [
+          "Transaction Rule"
+        ]
+      }
+    },
+    "/transaction-rule/{id}": {
+      "delete": {
+        "description": "Deletes a transaction rule by the given ID then runs a transaction update to re-categorize transactions.",
+        "operationId": "TransactionRuleController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction rule deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Transaction rule with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete transaction rule by ID.",
+        "tags": [
+          "Transaction Rule"
+        ]
+      },
+      "patch": {
+        "description": "Edits a transaction rule by the given ID.",
+        "operationId": "TransactionRuleController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionRule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction rule updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionRule"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Transaction rule with the specified ID not found, does not belong to the user, or doesn't have a matching category."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit transaction rule.",
+        "tags": [
+          "Transaction Rule"
+        ]
+      }
+    },
+    "/sse": {
+      "get": {
+        "operationId": "SSEController_sse",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Connection established. Awaiting events."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Subscribe to real-time server events to allow the server to inform our client of various info.",
+        "tags": [
+          "Core"
+        ]
+      }
+    },
+    "/category": {
+      "get": {
+        "description": "Retrieves all categories for the authenticated user.",
+        "operationId": "CategoryController_getCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Categories found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get categories.",
+        "tags": [
+          "Category"
+        ]
+      },
+      "post": {
+        "description": "Creates a new category that can be used for transactions to associate to.",
+        "operationId": "CategoryController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "409": {
+            "description": "A similar category already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Creates a new category.",
+        "tags": [
+          "Category"
+        ]
+      }
+    },
+    "/category/stats": {
+      "get": {
+        "description": "Retrieves all categories for the authenticated user with the total number of transactions per category.",
+        "operationId": "CategoryController_getCategoryStats",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gets category stats.",
+        "tags": [
+          "Category"
+        ]
+      }
+    },
+    "/category/{id}": {
+      "delete": {
+        "description": "Deletes a category by the given ID and updates references to it to reset them.",
+        "operationId": "CategoryController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Category with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete category by ID.",
+        "tags": [
+          "Category"
+        ]
+      },
+      "patch": {
+        "description": "Edits a category by the given ID.",
+        "operationId": "CategoryController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Category with the specified ID not found or does not belong to the user."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit category.",
+        "tags": [
+          "Category"
+        ]
+      }
+    },
+    "/config": {
+      "get": {
+        "description": "Returns the app configuration for the frontend to be able to reference.",
+        "operationId": "ConfigController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The configuration that external services may want to know about.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get app configuration.",
+        "tags": [
+          "Config"
+        ]
+      }
+    },
+    "/config/unsecure": {
+      "get": {
+        "description": "Returns the unsecure app configuration. This won't contain any sensitive information but tells endpoints if the first time setup needs ran.",
+        "operationId": "ConfigController_getUnsecure",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Unsecure app configuration obtained successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnsecureAppConfiguration"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get unsecure app configuration.",
+        "tags": [
+          "Config"
+        ]
+      }
+    },
+    "/holding": {
+      "get": {
+        "description": "Retrieves all holdings for the authenticated user.",
+        "operationId": "HoldingController_getHoldings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Holdings found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Holding"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get holdings.",
+        "tags": [
+          "Holding"
+        ]
+      }
+    },
+    "/holding/history": {
+      "get": {
+        "description": "Retrieves holding history for all available holdings of the current user. This is useful for displaying the holdings value over time.",
+        "operationId": "HoldingController_getHoldingHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Holding history found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get holding history.",
+        "tags": [
+          "Holding"
+        ]
+      }
+    },
+    "/net-worth": {
+      "get": {
+        "description": "Retrieves the current net worth for the authenticated user.",
+        "operationId": "NetWorthController_getNetWorth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Net worth calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get net worth.",
+        "tags": [
+          "Net Worth"
+        ]
+      }
+    },
+    "/net-worth/ot": {
+      "get": {
+        "description": "Retrieves the net worth overtime of the current user. Useful for displaying in a chart.",
+        "operationId": "NetWorthController_getNetWorthOT",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Net worth over time successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityHistory"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get net worth.",
+        "tags": [
+          "Net Worth"
+        ]
+      }
+    },
+    "/net-worth/account": {
+      "get": {
+        "description": "Retrieves the net worth overtime of each account associated to the current user. Useful for displaying in a chart.",
+        "operationId": "NetWorthController_getNetWorthByAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Net worth over time successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityHistory"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get net worth by accounts.",
+        "tags": [
+          "Net Worth"
+        ]
+      }
+    },
+    "/cash-flow/sankey": {
+      "get": {
+        "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
+        "operationId": "CashFlowController_getSankey",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "description": "The year we want the cash flow data for.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sankey built successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SankeyData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get sankey data by query.",
+        "tags": [
+          "Cash Flow"
+        ]
+      }
+    },
+    "/cash-flow/stats": {
+      "get": {
+        "description": "Retrieves stats for the users cash flow in more basic terms. Tracking how much went out and how much came in.",
+        "operationId": "CashFlowController_getStats",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "description": "The year we want the cash flow data for.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cash flow calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow stats data by query.",
+        "tags": [
+          "Cash Flow"
+        ]
+      }
+    },
+    "/image-proxy": {
+      "get": {
+        "description": "Proxies images from external URLs, handling CORS issues and dynamically fetching images. Supports full image URLs or favicon lookups.",
+        "operationId": "ImageProxyController_handleImageProxy",
+        "parameters": [
+          {
+            "name": "faviconImageUrl",
+            "required": false,
+            "in": "query",
+            "description": "A base URL to fetch a favicon for. Used if fullImageUrl is not provided.",
+            "schema": {}
+          },
+          {
+            "name": "fullImageUrl",
+            "required": false,
+            "in": "query",
+            "description": "A full URL to an image. If provided, faviconImageUrl will be ignored.",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image successfully proxied."
+          },
+          "400": {
+            "description": "Missing required query parameters."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "500": {
+            "description": "Internal server error or upstream image fetch failed."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Proxy images for institutions.",
+        "tags": [
+          "Core"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Sprout API",
+    "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
+    "version": "v0.0.7-20-g607c2cb",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "Core",
+      "description": "Provides essential application functionalities, including manual data synchronization and initial setup checks."
+    },
+    {
+      "name": "Config",
+      "description": "Manages application-wide settings and configurations."
+    },
+    {
+      "name": "User",
+      "description": "Manage user authentication, creation, and profile information."
+    },
+    {
+      "name": "User Config",
+      "description": "Manage user-specific application settings and configurations."
+    },
+    {
+      "name": "Account",
+      "description": "Manage financial accounts, including retrieval, editing, and linking with financial providers."
+    },
+    {
+      "name": "Transaction",
+      "description": "Access and manage financial transactions, including searching, editing, and analyzing spending patterns."
+    },
+    {
+      "name": "Transaction Rule",
+      "description": "Define and manage rules for automatic transaction categorization during synchronization."
+    },
+    {
+      "name": "Category",
+      "description": "Define and manage categories which assist in grouping transactions."
+    },
+    {
+      "name": "Holding",
+      "description": "Define and manage holdings which tracks stock information."
+    },
+    {
+      "name": "Net Worth",
+      "description": "Provides endpoints to track and visualize a user's net worth over time."
+    },
+    {
+      "name": "Cash Flow",
+      "description": "Provides endpoints to analyze and visualize cash flow, showing how money moves between income and expenses using categories."
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "This authentication utilizes the JWT given during user login."
+      }
+    },
+    "schemas": {
+      "UserConfig": {
+        "type": "object",
+        "properties": {
+          "privateMode": {
+            "type": "boolean",
+            "description": "If we should hide balances on the users display"
+          },
+          "netWorthRange": {
+            "type": "string",
+            "description": "The net worth range to display by default"
+          }
+        },
+        "required": [
+          "privateMode",
+          "netWorthRange"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "admin": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/UserConfig"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "username",
+          "admin",
+          "config"
+        ]
+      },
+      "UsernamePasswordLoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "UserLoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "jwt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user",
+          "jwt"
+        ]
+      },
+      "JWTLoginRequest": {
+        "type": "object",
+        "properties": {
+          "jwt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "jwt"
+        ]
+      },
+      "UserCreationRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "UserCreationResponse": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      },
+      "Institution": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL for where this institution is"
+          },
+          "name": {
+            "type": "string"
+          },
+          "hasError": {
+            "type": "boolean",
+            "description": "If this institution has connection errors and needs fixed"
+          }
+        },
+        "required": [
+          "url",
+          "name",
+          "hasError"
+        ]
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Where this account came from"
+          },
+          "institution": {
+            "description": "The institution associated to this account",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Institution"
+              }
+            ]
+          },
+          "user": {
+            "description": "The user this account belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "description": "The currency this account uses"
+          },
+          "balance": {
+            "type": "number",
+            "description": "The current balance of the account"
+          },
+          "availableBalance": {
+            "type": "number",
+            "description": "The available balance to this account"
+          },
+          "type": {
+            "type": "object",
+            "description": "The type of this account to better separate it from the others."
+          },
+          "subType": {
+            "type": "object",
+            "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
+          },
+          "extra": {
+            "type": "object",
+            "description": "Any extra data that we want to store as JSON"
+          }
+        },
+        "required": [
+          "name",
+          "provider",
+          "institution",
+          "user",
+          "currency",
+          "balance",
+          "availableBalance",
+          "type"
+        ]
+      },
+      "AccountEditRequest": {
+        "type": "object",
+        "properties": {
+          "subType": {
+            "type": "string",
+            "description": "The specific subtype of the account",
+            "enum": [
+              "savings",
+              "checking",
+              "hysa",
+              "travel",
+              "cashBack",
+              "401k",
+              "brokerage",
+              "ira",
+              "hsa",
+              "student",
+              "mortgage",
+              "personal",
+              "auto",
+              "wallet",
+              "staking"
+            ],
+            "example": "checking"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of this category"
+          },
+          "type": {
+            "type": "object",
+            "description": "If this account type should be considered an expense or income"
+          },
+          "parentCategory": {
+            "description": "The parent category this category belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ]
+          },
+          "parentCategoryId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "name",
+          "type",
+          "parentCategoryId"
+        ]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "In the currency of the account"
+          },
+          "description": {
+            "type": "string"
+          },
+          "pending": {
+            "type": "boolean"
+          },
+          "category": {
+            "description": "The category this transaction belongs to. A null category signifies an unknown category.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ]
+          },
+          "posted": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date this transaction posted"
+          },
+          "account": {
+            "description": "The account this transaction belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Account"
+              }
+            ]
+          },
+          "extra": {
+            "type": "object",
+            "description": "Any extra data that we want to store as JSON"
+          }
+        },
+        "required": [
+          "amount",
+          "description",
+          "pending",
+          "posted",
+          "account"
+        ]
+      },
+      "TransactionSubscription": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "description": "The account related to this subscription",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Account"
+              }
+            ]
+          },
+          "transaction": {
+            "description": "The transaction that matches the first subscription indication",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of this transaction"
+          },
+          "amount": {
+            "type": "number",
+            "description": "The amount of this transaction"
+          },
+          "count": {
+            "type": "number",
+            "description": "The number of these transactions we have counted"
+          },
+          "period": {
+            "description": "How often this is billed",
+            "enum": [
+              "weekly",
+              "bi-weekly",
+              "monthly",
+              "quarterly",
+              "semi-annually",
+              "yearly",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The day this billing starts"
+          }
+        },
+        "required": [
+          "account",
+          "transaction",
+          "description",
+          "amount",
+          "count",
+          "period",
+          "startDate"
+        ]
+      },
+      "TransactionRule": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "object"
+          },
+          "value": {
+            "type": "string",
+            "description": "This defines the value of the rule. Strings support | to split content"
+          },
+          "category": {
+            "description": "This defines the category to set the transaction to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ]
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "If this match should be strict. So if it should be the exact string or the exact number."
+          },
+          "matches": {
+            "type": "number",
+            "description": "How many transactions have been updated by this transaction rule.",
+            "default": 0
+          },
+          "order": {
+            "type": "number",
+            "description": "The order of priority of this value",
+            "default": 0
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "If this rule should be executed",
+            "default": true
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "strict",
+          "matches",
+          "order",
+          "enabled"
+        ]
+      },
+      "CategoryStats": {
+        "type": "object",
+        "properties": {}
+      },
+      "Sync": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When this was started"
+          },
+          "status": {
+            "type": "object"
+          },
+          "failureReason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "time",
+          "status",
+          "failureReason"
+        ]
+      },
+      "ProviderConfig": {
+        "type": "object",
+        "properties": {
+          "dbType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of this provider"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "An endpoint of where to get this logo"
+          },
+          "accountFixUrl": {
+            "type": "string",
+            "description": "The URL to be able to fix accounts"
+          }
+        },
+        "required": [
+          "dbType",
+          "name",
+          "logoUrl"
+        ]
+      },
+      "APIConfig": {
+        "type": "object",
+        "properties": {
+          "lastSchedulerRun": {
+            "description": "The status of the last sync we ran",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Sync"
+              }
+            ]
+          },
+          "providers": {
+            "description": "List of providers that this application has configured and is supported",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderConfig"
+            }
+          }
+        },
+        "required": [
+          "providers"
+        ]
+      },
+      "UnsecureAppConfiguration": {
+        "type": "object",
+        "properties": {
+          "firstTimeSetupPosition": {
+            "type": "object",
+            "description": "If this is the first time someone has connected to this interface"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the backend"
+          }
+        },
+        "required": [
+          "firstTimeSetupPosition",
+          "version"
+        ]
+      },
+      "Holding": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "description": "The account this holding is associated to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Account"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of what this holding is"
+          },
+          "marketValue": {
+            "type": "number",
+            "description": "The current market value"
+          },
+          "purchasePrice": {
+            "type": "number",
+            "description": "The current purchase price"
+          },
+          "shares": {
+            "type": "number",
+            "description": "Total number of shares, including fractional"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "The symbol for this holding"
+          }
+        },
+        "required": [
+          "account",
+          "currency",
+          "costBasis",
+          "description",
+          "marketValue",
+          "purchasePrice",
+          "shares",
+          "symbol"
+        ]
+      },
+      "EntityHistoryDataPoint": {
+        "type": "object",
+        "properties": {
+          "percentChange": {
+            "type": "number"
+          },
+          "valueChange": {
+            "type": "number"
+          },
+          "history": {
+            "type": "object",
+            "description": "This is the history for this specific data point"
+          }
+        },
+        "required": [
+          "valueChange",
+          "history"
+        ]
+      },
+      "EntityHistory": {
+        "type": "object",
+        "properties": {
+          "last1Day": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "last7Days": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastMonth": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastThreeMonths": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastSixMonths": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastYear": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "allTime": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "historicalData": {
+            "type": "object"
+          },
+          "connectedId": {
+            "type": "string",
+            "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
+          }
+        },
+        "required": [
+          "last1Day",
+          "last7Days",
+          "lastMonth",
+          "lastThreeMonths",
+          "lastSixMonths",
+          "lastYear",
+          "allTime",
+          "historicalData"
+        ]
+      },
+      "SankeyLink": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "description": "A way to help describe what this link is"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "value"
+        ]
+      },
+      "SankeyData": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SankeyLink"
+            }
+          }
+        },
+        "required": [
+          "nodes",
+          "links"
+        ]
+      },
+      "CashFlowStats": {
+        "type": "object",
+        "properties": {
+          "totalExpense": {
+            "type": "number"
+          },
+          "totalIncome": {
+            "type": "number"
+          },
+          "count": {
+            "type": "number",
+            "description": "How many total transactions we have for this query"
+          },
+          "largestExpense": {
+            "description": "The largest expense we had for this time period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            ]
+          }
+        },
+        "required": [
+          "totalExpense",
+          "totalIncome",
+          "count"
+        ]
+      }
+    }
+  }
+}

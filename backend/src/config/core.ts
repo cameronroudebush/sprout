@@ -1,10 +1,10 @@
-import { DatabaseConfig } from "@backend/config/db.config";
-import { ServerConfig } from "@backend/config/server";
-import { TransactionConfig } from "@backend/config/transaction";
+import { ServerConfig } from "@backend/config/model/server";
+import { DatabaseConfig } from "@backend/database/model/db.config";
+import { TransactionConfig } from "@backend/transaction/model/transaction.config";
 import * as uuid from "uuid";
 import { name } from "../../package.json";
+import { ProvidersConfig } from "../providers/model/provider.config";
 import { ConfigurationMetadata } from "./model/configuration.metadata";
-import { ProvidersConfig } from "./providers";
 
 /**
  * The Configuration class that the entire backend utilizes for it's config capabilities. You can
@@ -24,15 +24,15 @@ export class Configuration {
   static transaction = new TransactionConfig();
 
   /** This variable contains the application version of this build. This is replaced by webpack. */
-  static version = APP_VERSION;
+  static version = process.env["APP_VERSION"]!;
 
   /** A secret key that can be used to create JWT's and other relevant info for this app. **This will be regenerated during every restart!** */
-  static secretKey = SECRET_KEY ?? uuid.v4();
+  static secretKey = process.env["SECRET_KEY"]! ?? uuid.v4();
 
   static get appName() {
     return name;
   }
 
   /** Boolean that states if this is a development build or not. This is replaced by webpack. */
-  static isDevBuild = IS_DEV_BUILD;
+  static isDevBuild = process.env["IS_DEV_BUILD"]!;
 }

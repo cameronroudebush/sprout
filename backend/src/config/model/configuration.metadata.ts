@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 /** Class that provides configuration information to Configuration object properties */
 export class ConfigurationMetadata {
   /** If this value should be hidden from the config file */

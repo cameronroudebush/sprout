@@ -7,7 +7,8 @@
     "prettier:write": "prettier . --write",
     "changelog:generate:md": "auto-changelog --template ./docs/changelog-templates/markdown.hbs",
     "changelog:generate:android": "auto-changelog --template ./docs/changelog-templates/android.hbs",
-    "docs:serve": "docker run --rm -it -p 8000:8000 -v \"%cd%\":/docs squidfunk/mkdocs-material"
+    "docs:serve": "docker run --rm -it -p 8000:8000 --entrypoint=/bin/sh -v \"%cd%\":/docs squidfunk/mkdocs-material -c \"pip install mkdocs-swagger-ui-tag && mkdocs serve --dev-addr 0.0.0.0:8000\"",
+    "api:generate:dart": "docker run --rm  -v %cd%:/local --entrypoint=/bin/sh -w /local openapitools/openapi-generator-cli -c \"openapi-generator-cli generate -i /local/docs/assets/openapi-spec.json -g dart -o /local/frontend/api --global-property apiDocs=false,modelDocs=false,apiTests=false,modelTests=false && rm -rf /local/frontend/lib/api && mkdir -p /local/frontend/lib/api && mv /local/frontend/api/lib/* /local/frontend/lib/api/ && rm -rf /local/frontend/api\""
   },
   "devDependencies": {
     "auto-changelog": "^2.5.0",
