@@ -1,6 +1,7 @@
 import { DBBase } from "@backend/core/model/base";
 import { CustomTypes } from "@backend/core/model/utility/custom.types";
 import { DatabaseService } from "@backend/database/database.service";
+import { ApiProperty } from "@nestjs/swagger";
 import { decorate } from "ts-mixer";
 import { FindManyOptions, FindOneOptions, FindOptionsWhere, In, PrimaryGeneratedColumn, Repository } from "typeorm";
 
@@ -10,6 +11,7 @@ export class DatabaseBase extends DBBase {
   static database: DatabaseService;
 
   @decorate(PrimaryGeneratedColumn("uuid"))
+  @ApiProperty()
   declare id: string;
 
   /** Returns the repository from the data source to execute content against */

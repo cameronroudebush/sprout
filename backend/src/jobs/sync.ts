@@ -1,5 +1,6 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -91,7 +92,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
 
         // Sync holdings if investment type
-        if (accountInDB.type === "investment" && data.holdings.length !== 0) await this.updateHoldingData(accountInDB, data.holdings);
+        if (accountInDB.type === AccountType.investment && data.holdings.length !== 0) await this.updateHoldingData(accountInDB, data.holdings);
       }
 
       // Attempt to auto categorize transactions

@@ -1,14 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/category/models/category.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 import 'package:sprout/transaction-rule/provider.dart';
 
 /// A widget that displays the editing capabilities of a [TransactionRule]
@@ -25,7 +24,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
   final _formKey = GlobalKey<FormState>();
   final _valueController = TextEditingController();
   final _priorityController = TextEditingController();
-  TransactionRuleType _type = TransactionRuleType.description;
+  TransactionRuleTypeEnum _type = TransactionRuleTypeEnum.description;
   Category? _category;
   bool _strict = false;
   bool _enabled = true;
@@ -47,7 +46,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
       // Initialize for a new rule
       _valueController.text = widget.initialValue == null ? "" : widget.initialValue.toString();
       _priorityController.text = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
-      _type = TransactionRuleType.description;
+      _type = TransactionRuleTypeEnum.description;
       _category = null;
       _enabled = true;
       _strict = false;
@@ -134,7 +133,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
     String valueHintText = "e.g., 'Starbucks' or '15.50'";
     String valueHelpText = "Enter the specific text or numerical value to match.";
 
-    if (_type == TransactionRuleType.description) {
+    if (_type == TransactionRuleTypeEnum.description) {
       if (_strict) {
         valueHelpText = "Enter the exact text to match the transaction's description.";
         valueHintText = "e.g., 'Starbucks Coffee' for an exact match";
@@ -143,7 +142,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
             "Enter the text you want to match partially in the transaction's description. You can use | for OR statements.";
         valueHintText = "e.g., 'Starbucks' to match 'Starbucks Coffee'";
       }
-    } else if (_type == TransactionRuleType.amount) {
+    } else if (_type == TransactionRuleTypeEnum.amount) {
       if (_strict) {
         valueHelpText = "Enter the exact amount to match the transaction's value.";
         valueHintText = "e.g., '25.50' for an exact match";
@@ -189,7 +188,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                           if (value == null || value.isEmpty) {
                             return "Please enter a value";
                           }
-                          if (_type == TransactionRuleType.amount) {
+                          if (_type == TransactionRuleTypeEnum.amount) {
                             final parsed = int.tryParse(value);
                             if (parsed == null) {
                               return "This value must be an integer";
@@ -212,13 +211,13 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                     spacing: 4,
                     children: [
                       const Text("Rule Type", style: TextStyle(fontWeight: FontWeight.bold)),
-                      DropdownButtonFormField<TransactionRuleType>(
+                      DropdownButtonFormField<TransactionRuleTypeEnum>(
                         dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                         menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
                         value: _type,
                         decoration: const InputDecoration(border: OutlineInputBorder()),
-                        items: TransactionRuleType.values.map((type) {
-                          return DropdownMenuItem(value: type, child: Text(type.name));
+                        items: TransactionRuleTypeEnum.values.map((type) {
+                          return DropdownMenuItem(value: type, child: Text(type.value));
                         }).toList(),
                         onChanged: (newValue) {
                           if (newValue != null) {
@@ -245,7 +244,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                     children: [
                       const Text("Value", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextFormField(
-                        keyboardType: _type == TransactionRuleType.amount
+                        keyboardType: _type == TransactionRuleTypeEnum.amount
                             ? TextInputType.numberWithOptions(decimal: true)
                             : TextInputType.text,
                         controller: _valueController,
@@ -260,7 +259,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                           if (value == null || value.isEmpty) {
                             return "Please enter a value";
                           }
-                          if (_type == TransactionRuleType.amount) {
+                          if (_type == TransactionRuleTypeEnum.amount) {
                             final parsed = double.tryParse(value);
                             if (parsed == null) {
                               return "This value must be numerical";

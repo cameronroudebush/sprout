@@ -6,7 +6,7 @@ import 'package:sprout/account/dialog/add_account.dart';
 import 'package:sprout/account/overview.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account.dart';
-import 'package:sprout/auth/provider.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/overview.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
@@ -23,14 +23,15 @@ import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/connect_fail.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/setup/connection_setup.dart';
 import 'package:sprout/setup/setup.dart';
+import 'package:sprout/setup/widgets/connection_setup.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
 import 'package:sprout/transaction/monthly.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/user/login.dart';
 import 'package:sprout/user/user.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// Router information for our app
 class SproutRouter {
@@ -86,7 +87,10 @@ class SproutRouter {
     // Accounts
     SproutPage(
       (context, state) {
-        final accType = state.uri.queryParameters["acc-type"];
+        final String? accTypeString = state.uri.queryParameters["acc-type"];
+        final AccountTypeEnum? accType = accTypeString != null
+            ? AccountTypeEnum.values.firstWhereOrNull((e) => e.value == accTypeString)
+            : null;
         return AccountsOverview(defaultAccountType: accType);
       },
       'Accounts',
@@ -222,10 +226,10 @@ class SproutRouter {
     initialLocation: '/login',
     redirect: (context, state) {
       final configProvider = ServiceLocator.get<ConfigProvider>();
-      final authProvider = ServiceLocator.get<AuthProvider>();
+      final userProvider = ServiceLocator.get<UserProvider>();
 
       // Check if we don't have a connection url
-      final hasConnectionUrl = configProvider.api.client.hasConnectionUrl();
+      final hasConnectionUrl = configProvider.hasConnectionUrl();
       if (!hasConnectionUrl) return "/connection-setup";
 
       // Check if we failed to connect
@@ -237,11 +241,11 @@ class SproutRouter {
       if (setupPosition == "welcome") return "/setup";
 
       // Check if we're already authenticated (JWT or not)
-      if (!authProvider.isLoggedIn) return "/login";
+      if (!userProvider.isLoggedIn) return "/login";
 
       // If we're already logged in and somehow going back to login, kick them back to home
       final isGoingToLogin = state.matchedLocation == '/login';
-      if (authProvider.isLoggedIn && isGoingToLogin) {
+      if (userProvider.isLoggedIn && isGoingToLogin) {
         return '/';
       }
 

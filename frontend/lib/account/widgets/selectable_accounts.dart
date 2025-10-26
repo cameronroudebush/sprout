@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/account/widgets/account_groups.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 
@@ -49,7 +48,7 @@ class _SelectableAccountsWidgetState extends State<SelectableAccountsWidget> {
         return SproutScrollView(
           padding: const EdgeInsets.all(8.0),
           child: AccountGroupsWidget(
-            netWorthPeriod: ChartRange.sevenDays,
+            netWorthPeriod: ChartRangeEnum.sevenDays,
             accounts: widget.accounts,
             onAccountClick: _toggleSelection,
             displayStats: false,

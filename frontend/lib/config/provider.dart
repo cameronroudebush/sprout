@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:sprout/config/api.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/model/config.dart';
+import 'package:sprout/core/provider/storage.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-class ConfigProvider extends BaseProvider<ConfigAPI> {
+class ConfigProvider extends BaseProvider<ConfigApi> {
+  static String? connectionUrl;
+
   /// The unsecured version of the config that only contains basic information
   UnsecureAppConfiguration? _unsecureConfig;
 
@@ -13,13 +16,13 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   bool _failedToConnect = false;
 
   /// The secured config
-  Configuration? _config;
+  APIConfig? _config;
 
   /// Provides the package info for the flutter app including things like versions
   final PackageInfo _packageInfo;
 
   // Public Getters
-  Configuration? get config => _config;
+  APIConfig? get config => _config;
   UnsecureAppConfiguration? get unsecureConfig => _unsecureConfig;
   PackageInfo get packageInfo => _packageInfo;
   bool get failedToConnect => _failedToConnect;
@@ -28,8 +31,8 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   ConfigProvider(super.api, this._packageInfo);
 
   /// Requests the config from the backend and populates [_config]
-  Future<Configuration?> populateConfig() async {
-    _config = await api.getConfig();
+  Future<APIConfig?> populateConfig() async {
+    _config = await api.configControllerGet();
     notifyListeners();
     return _config;
   }
@@ -38,7 +41,7 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
   Future<UnsecureAppConfiguration?> populateUnsecureConfig() async {
     try {
       _failedToConnect = false;
-      _unsecureConfig = await api.getUnsecure();
+      _unsecureConfig = await api.configControllerGetUnsecure();
     } catch (e) {
       LoggerService.error(e, error: e);
       _failedToConnect = true;
@@ -76,6 +79,24 @@ class ConfigProvider extends BaseProvider<ConfigAPI> {
 
   /// Returns the status of the last account sync
   String getLastSyncStatus() {
-    return config?.lastSchedulerRun?.time != null ? timeago.format(config!.lastSchedulerRun!.time!.toLocal()) : "N/A";
+    return config?.lastSchedulerRun?.time != null ? timeago.format(config!.lastSchedulerRun!.time.toLocal()) : "N/A";
+  }
+
+  /// Gets what the current connection url should be
+  static Future<String> getConnUrl() async {
+    if (kIsWeb) {
+      // Web can base connections on the uri of the current connection
+      Uri uri = Uri.base;
+      final leading = '${uri.scheme}://${uri.host}';
+      return kDebugMode ? '$leading:8001' : leading;
+    } else {
+      // Apps must specify the connection URL so we know where to look
+      return (await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey))!;
+    }
+  }
+
+  /// Returns if we have a connection URL or not
+  bool hasConnectionUrl() {
+    return ConfigProvider.connectionUrl != null;
   }
 }

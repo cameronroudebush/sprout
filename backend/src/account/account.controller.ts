@@ -4,11 +4,13 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
+import { JobsService } from "@backend/jobs/jobs.service";
 import { ProviderService } from "@backend/providers/provider.service";
+import { SSEEventType } from "@backend/sse/model/event.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Post, Put } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { SSEService } from "../sse/sse.service";
 
@@ -23,6 +25,7 @@ export class AccountController {
     private readonly sseService: SSEService,
     private readonly providerService: ProviderService,
     private readonly transactionRuleService: TransactionRuleService,
+    private readonly jobService: JobsService,
   ) {}
 
   @Get(":id")
@@ -50,7 +53,7 @@ export class AccountController {
     if (matchingAccountForUser == null) throw new NotFoundException(`Account with ID ${id} not found or does not belong to the user.`);
     const deleteResult = await Account.deleteById(id);
     if (deleteResult.affected === 0) throw new InternalServerErrorException(`No results when deleting account with ${id}`);
-    this.sseService.sendToUser(user, "sync");
+    this.sseService.sendToUser(user, SSEEventType.SYNC);
     return `Account with ID ${id} deleted successfully.`;
   }
 
@@ -71,7 +74,7 @@ export class AccountController {
     matchingAccount.subType = updatedAccount.subType ?? (matchingAccount.subType as any);
     // Perform the update, return the result.
     const result = await matchingAccount.update();
-    this.sseService.sendToUser(user, "sync");
+    this.sseService.sendToUser(user, SSEEventType.SYNC);
     return result;
   }
 
@@ -135,7 +138,22 @@ export class AccountController {
         addedAccounts.push(matchingAccount.account);
       }
     }
-    this.sseService.sendToUser(user, "sync");
+    this.sseService.sendToUser(user, SSEEventType.SYNC);
     return addedAccounts;
+  }
+
+  @Put("sync")
+  @ApiOperation({
+    summary: "Run a manual sync.",
+    description: "Runs a manual sync to update all provider accounts.",
+  })
+  @ApiOkResponse({ description: "Manual sync completed successfully." })
+  @AuthGuard.attach()
+  async manualSync(@CurrentUser() user: User) {
+    // TODO: This executes all provider syncs for all users which seems excessive.
+    // TODO: Add ability to not run another sync if one is already running.
+    const sync = await this.jobService.providerSyncJob.updateNow();
+    // Inform of the completed sync
+    this.sseService.sendToUser(user, SSEEventType.SYNC, sync);
   }
 }

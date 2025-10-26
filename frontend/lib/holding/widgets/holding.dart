@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/widgets/account_change.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/widgets/holding_logo.dart';
 
 /// Renders a single holding
@@ -93,7 +93,7 @@ class HoldingWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(bool isMobile, double costBasisTotalChange, double costBasisPercentChange) {
+  Widget _buildContent(bool isMobile, num costBasisTotalChange, double costBasisPercentChange) {
     final content = [
       // Amount of shares
       _buildColumnOfContent("Shares", holding.shares.toStringAsFixed(2), row: isMobile),

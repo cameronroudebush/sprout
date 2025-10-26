@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/category/models/category.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/provider.dart';
 
 /// A dropdown that allows category selection
 class CategoryDropdown extends StatelessWidget {
   /// Fake all category used for searching
-  static final fakeAllCategory = const Category(id: "", name: "All Categories", type: CategoryType.expense);
+  static final fakeAllCategory = Category(id: "", name: "All Categories", type: CategoryTypeEnum.expense);
 
   final Category? category;
   final Function(Category? newValue) onChanged;

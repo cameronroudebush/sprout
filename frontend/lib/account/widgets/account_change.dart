@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 
 /// A widget used to display the percentage change of an account with icons and coloring
 class AccountChangeWidget extends StatelessWidget {
-  final double? percentageChange;
-  final double? totalChange;
+  final num? percentageChange;
+  final num? totalChange;
   final MainAxisAlignment mainAxisAlignment;
-  final ChartRange? netWorthPeriod;
+  final ChartRangeEnum? netWorthPeriod;
   final bool showPercentage;
 
   /// If we should use the extended period information for the string (1 month vs 1m)

@@ -3,13 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/dialog/add_account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_groups.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// A widget that displays all accounts
 ///
@@ -17,10 +17,10 @@ import 'package:sprout/user/provider.dart';
 class AccountsWidget extends StatelessWidget {
   /// If the account groups should be collapsible
   final bool allowCollapse;
-  final ChartRange netWorthPeriod;
+  final ChartRangeEnum netWorthPeriod;
 
   /// If provided, allows a specific account type to be loaded only
-  final String? accountType;
+  final AccountTypeEnum? accountType;
 
   /// If this groups should render in a card
   final bool applyCard;

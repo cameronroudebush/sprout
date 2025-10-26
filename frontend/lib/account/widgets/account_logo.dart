@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/account/models/account.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/logo_base.dart';
 
 /// A widget used to display an account logo
@@ -8,11 +8,11 @@ class AccountLogoWidget extends LogoBaseWidget<Account> {
 
   @override
   String getLogoUrl(BuildContext context) {
-    return "${getBackendProxy(context)}?faviconImageUrl=${logoClass.institution.id}";
+    return "${getBackendProxy()}?faviconImageUrl=${logoClass.institution.id}";
   }
 
   @override
   IconData getFallbackIcon(BuildContext context) {
-    return logoClass.fallbackIcon;
+    return Icons.account_balance;
   }
 }

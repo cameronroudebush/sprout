@@ -1,14 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:http/http.dart' as http;
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/auth/provider.dart';
-import 'package:sprout/core/api/sse.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/model/rest.request.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
-class SSEProvider extends BaseProvider<SSEAPI> {
+class SSEProvider extends BaseProvider<CoreApi> {
   StreamSubscription<Map<String, dynamic>>? _sseSubscription;
   bool _isConnecting = false;
   bool _isConnected = false;
@@ -46,11 +48,38 @@ class SSEProvider extends BaseProvider<SSEAPI> {
     await super.onInit();
   }
 
+  /// Builds the SSE stream to the backend and returns it. You can then listen to the return of JSON on that stream.
+  Stream<Map<String, dynamic>> _buildSse() async* {
+    // We have to manually implement this because the openapi client doesn't give us sse capability with the stream.
+    final client = api.apiClient.client;
+    final url = Uri.parse('${api.apiClient.basePath}/sse');
+    final request = http.Request('GET', url);
+
+    request.headers.addAll({'Accept': 'text/event-stream', 'Cache-Control': 'no-cache'});
+
+    final response = await client.send(request);
+
+    if (response.statusCode == 200) {
+      try {
+        await for (var line in response.stream.transform(utf8.decoder).transform(const LineSplitter())) {
+          if (line.startsWith('data: ') && line.length > 6) {
+            final data = line.substring(6);
+            yield json.decode(data);
+          }
+        }
+      } catch (e) {
+        throw Exception('SSE stream disconnected: $e');
+      }
+    } else {
+      throw Exception('Failed to connect to SSE endpoint: ${response.statusCode}');
+    }
+  }
+
   /// Starts the SSE connection.
   /// [forceReconnect] will cancel any existing connection and attempt a new one.
   Future<void> _startSSE({bool forceReconnect = false}) async {
-    final authProvider = ServiceLocator.get<AuthProvider>();
-    if (!authProvider.isLoggedIn) {
+    final userProvider = ServiceLocator.get<UserProvider>();
+    if (!userProvider.isLoggedIn) {
       _handleConnectionLost(null);
     }
     // If a connection is already active and we are not forcing a reconnect, just return.
@@ -74,7 +103,7 @@ class SSEProvider extends BaseProvider<SSEAPI> {
     await _cancelSubscription();
 
     try {
-      final Stream<Map<String, dynamic>> sseStream = api.buildSSE();
+      final Stream<Map<String, dynamic>> sseStream = _buildSse();
       _isConnected = true;
       _reconnectAttempts = 0;
       notifyListeners();
@@ -93,15 +122,15 @@ class SSEProvider extends BaseProvider<SSEAPI> {
         cancelOnError: true,
       );
     } catch (e) {
-      _handleConnectionLost(e);
+      _handleConnectionLost(e, forceReconnect: false);
     }
   }
 
   /// Unified handler for when the SSE connection is lost (error or done).
-  void _handleConnectionLost(dynamic e) {
+  void _handleConnectionLost(dynamic e, {bool forceReconnect = true}) {
     if (e != null && e.message != null && e.message.contains('403')) {
-      final authProvider = ServiceLocator.get<AuthProvider>();
-      authProvider.logout(forced: true);
+      final userProvider = ServiceLocator.get<UserProvider>();
+      userProvider.logout(forced: true);
       return;
     }
     _isConnected = false;
@@ -109,6 +138,11 @@ class SSEProvider extends BaseProvider<SSEAPI> {
     notifyListeners(); // Notify UI about disconnection
 
     _cancelSubscription(); // Ensure subscription is definitively cancelled
+
+    // If we are not forcing a reconnect, just stop here.
+    if (!forceReconnect) {
+      return;
+    }
 
     // Implement exponential back-off for reconnect attempts
     _reconnectAttempts++;

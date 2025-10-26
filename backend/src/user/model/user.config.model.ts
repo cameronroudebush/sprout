@@ -1,8 +1,8 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { IsBoolean, IsEnum } from "class-validator";
-
-const NetWorthRangeValues = ["oneDay", "sevenDays", "oneMonth", "threeMonths", "sixMonths", "oneYear", "allTime"];
+import { ChartRange } from "@backend/user/model/chart.range.model";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsBoolean } from "class-validator";
 
 /**
  * This class defines user configuration options per user
@@ -16,10 +16,8 @@ export class UserConfig extends DatabaseBase {
 
   /** The net worth range to display by default */
   @DatabaseDecorators.column({ nullable: false, default: "oneDay", type: "varchar" })
-  @IsEnum(NetWorthRangeValues, {
-    message: `subType must be one of the following values: ${NetWorthRangeValues.join(", ")}`,
-  })
-  netWorthRange: string;
+  @ApiProperty({ enum: ChartRange, enumName: "ChartRangeEnum" })
+  netWorthRange: ChartRange;
 
   constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"]) {
     super();

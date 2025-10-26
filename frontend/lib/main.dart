@@ -1,70 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/api.dart';
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/auth/api.dart';
-import 'package:sprout/auth/provider.dart';
-import 'package:sprout/cash-flow/api.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/provider.dart';
-import 'package:sprout/category/api.dart';
 import 'package:sprout/category/provider.dart';
-import 'package:sprout/config/api.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/api/client.dart';
-import 'package:sprout/core/api/sse.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
-import 'package:sprout/holding/api.dart';
 import 'package:sprout/holding/provider.dart';
-import 'package:sprout/net-worth/api.dart';
 import 'package:sprout/net-worth/provider.dart';
-import 'package:sprout/setup/api.dart';
-import 'package:sprout/setup/provider.dart';
-import 'package:sprout/transaction-rule/api.dart';
 import 'package:sprout/transaction-rule/provider.dart';
-import 'package:sprout/transaction/api.dart';
 import 'package:sprout/transaction/provider.dart';
-import 'package:sprout/user/api.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  final connectionUrl = await ConfigProvider.getConnUrl();
+  ConfigProvider.connectionUrl = connectionUrl;
 
-  // Create base API client
-  final client = RESTClient();
-  await client.setBaseUrl();
+  // Update the default api client
+  defaultApiClient = ApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
 
   // Register all the providers
-  ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigAPI(client), packageInfo));
-  ServiceLocator.register<AuthProvider>(AuthProvider(AuthAPI(client)));
-  ServiceLocator.register<SSEProvider>(SSEProvider(SSEAPI(client)));
-  ServiceLocator.register<AccountProvider>(AccountProvider(AccountAPI(client)));
-  ServiceLocator.register<SetupProvider>(SetupProvider(SetupAPI(client)));
-  ServiceLocator.register<NetWorthProvider>(NetWorthProvider(NetWorthAPI(client)));
-  ServiceLocator.register<TransactionProvider>(TransactionProvider(TransactionAPI(client)));
-  ServiceLocator.register<UserProvider>(UserProvider(UserAPI(client)));
-  ServiceLocator.register<HoldingProvider>(HoldingProvider(HoldingAPI(client)));
-  ServiceLocator.register<TransactionRuleProvider>(TransactionRuleProvider(TransactionRuleAPI(client)));
-  ServiceLocator.register<CategoryProvider>(CategoryProvider(CategoryAPI(client)));
-  ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowAPI(client)));
+  ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigApi(), packageInfo));
+  ServiceLocator.register<UserProvider>(UserProvider(UserApi()));
+  ServiceLocator.register<SSEProvider>(SSEProvider(CoreApi()));
+  ServiceLocator.register<AccountProvider>(AccountProvider(AccountApi()));
+  ServiceLocator.register<NetWorthProvider>(NetWorthProvider(NetWorthApi()));
+  ServiceLocator.register<TransactionProvider>(TransactionProvider(TransactionApi()));
+  ServiceLocator.register<UserConfigProvider>(UserConfigProvider(UserConfigApi()));
+  ServiceLocator.register<HoldingProvider>(HoldingProvider(HoldingApi()));
+  ServiceLocator.register<TransactionRuleProvider>(TransactionRuleProvider(TransactionRuleApi()));
+  ServiceLocator.register<CategoryProvider>(CategoryProvider(CategoryApi()));
+  ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowApi()));
 
   runApp(
     MultiProvider(
       providers: [
         ServiceLocator.createProvider<ConfigProvider>(),
-        ServiceLocator.createProvider<AuthProvider>(),
+        ServiceLocator.createProvider<UserProvider>(),
         ServiceLocator.createProvider<SSEProvider>(),
         ServiceLocator.createProvider<AccountProvider>(),
-        ServiceLocator.createProvider<SetupProvider>(),
         ServiceLocator.createProvider<NetWorthProvider>(),
         ServiceLocator.createProvider<TransactionProvider>(),
-        ServiceLocator.createProvider<UserProvider>(),
+        ServiceLocator.createProvider<UserConfigProvider>(),
         ServiceLocator.createProvider<HoldingProvider>(),
         ServiceLocator.createProvider<TransactionRuleProvider>(),
         ServiceLocator.createProvider<CategoryProvider>(),

@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/charts/models/line_chart_data.dart';
 
@@ -8,9 +9,9 @@ class LineChartDataProcessor {
   ///
   /// @historicalData The data to process and filter
   /// @selectedChartRange The chart range we want to keep the data within
-  static Map<DateTime, double> filterHistoricalData(
-    Map<DateTime, double>? historicalData,
-    ChartRange selectedChartRange,
+  static Map<DateTime, num> filterHistoricalData(
+    Map<DateTime, num>? historicalData,
+    ChartRangeEnum selectedChartRange,
   ) {
     if (historicalData == null) {
       return {};
@@ -29,12 +30,12 @@ class LineChartDataProcessor {
 
   /// Takes the filtered historical data from @filterHistoricalData and converts it
   ///   into the expected type for the fl_chart library
-  static SproutLineChartData prepareChartData(Map<DateTime, double> filteredHistoricalData) {
+  static SproutLineChartData prepareChartData(Map<DateTime, num> filteredHistoricalData) {
     final sortedChartEntries = filteredHistoricalData.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     final chartSpots = sortedChartEntries
         .asMap()
         .entries
-        .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value))
+        .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value.toDouble()))
         .toList();
     return SproutLineChartData(spots: chartSpots, sortedEntries: sortedChartEntries);
   }

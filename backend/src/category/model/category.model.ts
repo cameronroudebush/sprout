@@ -1,3 +1,4 @@
+import { CategoryType } from "@backend/category/model/category.type";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
@@ -18,6 +19,7 @@ export class Category extends DatabaseBase {
   @ApiHideProperty()
   user: User;
   @DatabaseDecorators.column({ nullable: false })
+  @ApiHideProperty()
   userId!: string;
 
   /** The name of this category */
@@ -26,13 +28,14 @@ export class Category extends DatabaseBase {
 
   /** If this account type should be considered an expense or income */
   @DatabaseDecorators.column({ nullable: false })
-  type: "income" | "expense";
+  type: CategoryType;
 
   /** The parent category this category belongs to */
   @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
   @JoinColumn({ name: "parentCategoryId" })
   parentCategory?: Category;
   @DatabaseDecorators.column({ nullable: true })
+  @ApiHideProperty()
   parentCategoryId!: string;
 
   constructor(user: User, name: string, type: Category["type"], parentCategory?: Category) {
@@ -50,22 +53,22 @@ export class Category extends DatabaseBase {
    */
   static getDefaultCategoriesForUser(user: User) {
     const categoriesToInsert: Category[] = [];
-    const foodAndDrink = new Category(user, "Food & Drink", "expense");
+    const foodAndDrink = new Category(user, "Food & Drink", CategoryType.expense);
     categoriesToInsert.push(foodAndDrink);
-    categoriesToInsert.push(new Category(user, "Groceries", "expense", foodAndDrink));
-    categoriesToInsert.push(new Category(user, "Restaurants", "expense", foodAndDrink));
+    categoriesToInsert.push(new Category(user, "Groceries", CategoryType.expense, foodAndDrink));
+    categoriesToInsert.push(new Category(user, "Restaurants", CategoryType.expense, foodAndDrink));
 
-    const shopping = new Category(user, "Shopping", "expense");
+    const shopping = new Category(user, "Shopping", CategoryType.expense);
     categoriesToInsert.push(shopping);
-    categoriesToInsert.push(new Category(user, "Online Shopping", "expense", shopping));
+    categoriesToInsert.push(new Category(user, "Online Shopping", CategoryType.expense, shopping));
 
-    categoriesToInsert.push(new Category(user, "Utilities", "expense"));
-    categoriesToInsert.push(new Category(user, "Housing", "expense"));
-    categoriesToInsert.push(new Category(user, "Transportation", "expense"));
-    categoriesToInsert.push(new Category(user, "Healthcare", "expense"));
-    categoriesToInsert.push(new Category(user, "Entertainment", "expense"));
-    categoriesToInsert.push(new Category(user, "Pets", "expense"));
-    categoriesToInsert.push(new Category(user, "Income", "income"));
+    categoriesToInsert.push(new Category(user, "Utilities", CategoryType.expense));
+    categoriesToInsert.push(new Category(user, "Housing", CategoryType.expense));
+    categoriesToInsert.push(new Category(user, "Transportation", CategoryType.expense));
+    categoriesToInsert.push(new Category(user, "Healthcare", CategoryType.expense));
+    categoriesToInsert.push(new Category(user, "Entertainment", CategoryType.expense));
+    categoriesToInsert.push(new Category(user, "Pets", CategoryType.expense));
+    categoriesToInsert.push(new Category(user, "Income", CategoryType.income));
     return categoriesToInsert;
   }
 
@@ -75,7 +78,7 @@ export class Category extends DatabaseBase {
   }
 
   /** Get's a category by the given name or returns the existing one if it's found. */
-  static async getOrCreate(category: string | undefined, user: User, type: Category["type"] = "expense") {
+  static async getOrCreate(category: string | undefined, user: User, type: CategoryType.expense = CategoryType.expense) {
     if (category == null) return await this.getUnknownCategory(user);
     else {
       const name = startCase(category);

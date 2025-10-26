@@ -3,6 +3,7 @@ import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
+import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
@@ -83,7 +84,7 @@ export class CategoryController {
       await Category.updateWhere({ parentCategory: { id: matchingCategory.id } }, { parentCategory: matchingCategory.parentCategory });
 
     await Category.deleteById(matchingCategory.id);
-    this.sseService.sendToUser(user, "force-update"); // Tell clients of this user to update so that transactional data is refreshed
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE); // Tell clients of this user to update so that transactional data is refreshed
     return `Category with ID ${id} deleted successfully.`;
   }
 
@@ -99,9 +100,9 @@ export class CategoryController {
     const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to edit.");
     // Update the category object
-    const updatedCategory = Category.fromPlain({ ...update, user: user, userId: user.id, id: matchingCategory.id });
+    const updatedCategory = Category.fromPlain({ ...update, user: user, id: matchingCategory.id });
     await updatedCategory.update();
-    this.sseService.sendToUser(user, "force-update"); // Tell clients of this user to update so that transactional data is refreshed
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE); // Tell clients of this user to update so that transactional data is refreshed
     return updatedCategory;
   }
 }

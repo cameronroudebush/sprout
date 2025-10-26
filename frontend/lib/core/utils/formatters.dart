@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// Converts the given number into a formatted currency. Currently only works with USD.
 ///
 /// @round If we should round this value and drop the decimals
 String getFormattedCurrency(dynamic value, {bool round = false}) {
   if (value == -0.0) value = 0.0;
-  final userProvider = ServiceLocator.get<UserProvider>();
+  final userConfigProvider = ServiceLocator.get<UserConfigProvider>();
   final currencyFormatter = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: round ? 0 : null);
   if (round) value = value.round();
-  return userProvider.currentUserConfig?.privateMode == true ? "***" : currencyFormatter.format(value);
+  return userConfigProvider.currentUserConfig?.privateMode == true ? "***" : currencyFormatter.format(value);
 }
 
 /// Returns the formatted currency but in a short format
 String getShortFormattedCurrency(dynamic number) {
-  final userProvider = ServiceLocator.get<UserProvider>();
+  final userConfigProvider = ServiceLocator.get<UserConfigProvider>();
   String returnVal;
   if (number >= 1000000000) {
     returnVal = '\$${(number / 1000000000).toStringAsFixed(1)}B';
@@ -27,11 +28,11 @@ String getShortFormattedCurrency(dynamic number) {
   } else {
     returnVal = '\$${number.toStringAsFixed(0)}';
   }
-  return userProvider.currentUserConfig?.privateMode == true ? "***" : returnVal;
+  return userConfigProvider.currentUserConfig?.privateMode == true ? "***" : returnVal;
 }
 
 /// Returns the given number as a percentage
-String formatPercentage(double number) {
+String formatPercentage(num number) {
   if (number == -0.0) number = 0.0;
   return "${number.toStringAsFixed(2)}%";
 }
@@ -60,7 +61,7 @@ extension StringCasingExtension on String {
 }
 
 /// Returns the color to display for a balance
-Color getBalanceColor(double balance, ThemeData theme) {
+Color getBalanceColor(num balance, ThemeData theme) {
   final checkVal = num.parse(balance.toStringAsFixed(2));
   return checkVal < 0
       ? Colors.red
@@ -70,7 +71,7 @@ Color getBalanceColor(double balance, ThemeData theme) {
 }
 
 /// Returns the icon for a change in net worth
-IconData getChangeIcon(double percentChange) {
+IconData getChangeIcon(num percentChange) {
   final checkVal = num.parse(percentChange.toStringAsFixed(2));
   return checkVal == 0.0 || checkVal.isNaN
       ? Icons.horizontal_rule
@@ -80,14 +81,14 @@ IconData getChangeIcon(double percentChange) {
 }
 
 /// Formats the given account type string to a prettier name
-String formatAccountType(String accountType) {
+String formatAccountType(AccountTypeEnum accountType) {
   switch (accountType) {
-    case "depository":
+    case AccountTypeEnum.depository:
       return "Cash";
-    case "credit":
+    case AccountTypeEnum.credit:
       return "Credit Card";
     default:
-      return accountType.toTitleCase;
+      return accountType.value.toTitleCase;
   }
 }
 

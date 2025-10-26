@@ -11,7 +11,7 @@ import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
 import 'package:sprout/transaction/overview.dart';
 import 'package:sprout/transaction/provider.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,10 +26,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer4<UserProvider, CategoryProvider, TransactionProvider, ConfigProvider>(
-      builder: (context, provider, catProvider, transactionProvider, configProvider, child) {
+    return Consumer4<UserConfigProvider, CategoryProvider, TransactionProvider, ConfigProvider>(
+      builder: (context, userConfigProvider, catProvider, transactionProvider, configProvider, child) {
         final theme = Theme.of(context);
-        final chartRange = provider.userDefaultChartRange;
+        final chartRange = userConfigProvider.userDefaultChartRange;
         final catStats = catProvider.categoryStats?.categoryCount;
 
         final recentTransactionsCount = 10;
@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
 
         // Check if a sync hasn't ran recently
         final lastSync = configProvider.config?.lastSchedulerRun;
-        if (lastSync != null && (!lastSync.time!.isSameDay(DateTime.now()) || lastSync.status == "in-progress")) {
+        if (lastSync != null && (!lastSync.time.isSameDay(DateTime.now()) || lastSync.status == "in-progress")) {
           notifications.add(
             HomeNotification(
               "An account sync has not yet ran today",
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
           );
         }
 
-        // Check if we have uncategorized transactions so the user can deal wit hthose
+        // Check if we have uncategorized transactions so the user can deal with those
         if (catStats != null && catStats.containsKey("Unknown") && catStats["Unknown"] != 0) {
           final unknownCatCount = catStats["Unknown"];
           notifications.add(
@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
               showCard: true,
               selectedChartRange: chartRange,
               onRangeSelected: (value) {
-                provider.updateChartRange(value);
+                userConfigProvider.updateChartRange(value);
               },
             ),
             // Accounts Section

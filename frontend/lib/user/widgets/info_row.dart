@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/user/model/user_display_info.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// Provides a row of info to display in the card structure of the user page
 class UserInfoRow extends StatelessWidget {
@@ -44,7 +44,7 @@ class UserInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
+    return Consumer<UserConfigProvider>(
       builder: (context, userProvider, child) {
         final mainContent = _renderMainContent(context);
         return Row(

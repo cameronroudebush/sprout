@@ -1,6 +1,7 @@
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
+import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
@@ -24,7 +25,7 @@ export class TransactionRuleController {
     description: "Retrieves all transaction rules for the authenticated user.",
   })
   @ApiOkResponse({ description: "Transaction rules found successfully.", type: [TransactionRule] })
-  async getAccounts(@CurrentUser() user: User) {
+  async get(@CurrentUser() user: User) {
     return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" } });
   }
 
@@ -42,7 +43,7 @@ export class TransactionRuleController {
 
     await TransactionRule.deleteById(ruleInDb?.id);
     await this.transactionRuleService.applyRulesToTransactions(user);
-    this.sseService.sendToUser(user, "force-update");
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
     return `Transaction rule with ID ${id} deleted successfully.`;
   }
 
@@ -74,7 +75,7 @@ export class TransactionRuleController {
 
     // Run the match updates
     await this.transactionRuleService.applyRulesToTransactions(user);
-    this.sseService.sendToUser(user, "force-update");
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
 
     return updatedRule;
   }
@@ -106,7 +107,7 @@ export class TransactionRuleController {
 
     // Run the match updates
     await this.transactionRuleService.applyRulesToTransactions(user);
-    this.sseService.sendToUser(user, "force-update");
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
 
     return rule;
   }

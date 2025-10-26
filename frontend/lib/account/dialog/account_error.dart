@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/dialog/sync.dart';
-import 'package:sprout/account/models/account.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:url_launcher/url_launcher.dart';

@@ -1,10 +1,8 @@
-import 'package:sprout/category/api.dart';
-import 'package:sprout/category/models/category.dart';
-import 'package:sprout/category/models/category_stats.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
 
 /// Class that provides the store of current category info
-class CategoryProvider extends BaseProvider<CategoryAPI> {
+class CategoryProvider extends BaseProvider<CategoryApi> {
   // Data store
   List<Category> _categories = [];
   CategoryStats? _categoryStats;
@@ -16,18 +14,18 @@ class CategoryProvider extends BaseProvider<CategoryAPI> {
   CategoryProvider(super.api);
 
   Future<List<Category>> populateCategories() async {
-    return _categories = await api.get();
+    return _categories = (await api.categoryControllerGetCategories()) ?? [];
   }
 
-  Future<CategoryStats> populateCategoryStats() async {
-    return _categoryStats = await api.getStats();
+  Future<CategoryStats?> populateCategoryStats({int days = 30}) async {
+    return _categoryStats = await api.categoryControllerGetCategoryStats(days);
   }
 
   /// Uses the API to add the given category
-  Future<Category> add(Category c) async {
+  Future<Category?> add(Category c) async {
     notifyListeners();
-    final newCategory = await api.add(c);
-    _categories.add(newCategory);
+    final newCategory = await api.categoryControllerCreate(c);
+    if (newCategory != null) _categories.add(newCategory);
     notifyListeners();
     return newCategory;
   }
@@ -35,15 +33,15 @@ class CategoryProvider extends BaseProvider<CategoryAPI> {
   /// Uses the API to delete the given category
   Future<Category> delete(Category c) async {
     notifyListeners();
-    final deletedCategory = await api.delete(c);
-    _categories.removeWhere((r) => r.id == deletedCategory.id);
+    await api.categoryControllerDelete(c.id);
+    _categories.removeWhere((r) => r.id == c.id);
     notifyListeners();
-    return deletedCategory;
+    return c;
   }
 
   Future<Category> edit(Category c) async {
     notifyListeners();
-    final updatedCategory = await api.edit(c);
+    final updatedCategory = (await api.categoryControllerEdit(c.id, c))!;
     final index = _categories.indexWhere((r) => r.id == updatedCategory.id);
     if (index != -1) _categories[index] = updatedCategory;
     notifyListeners();

@@ -15,7 +15,7 @@ class SankeyChart extends StatefulWidget {
   final Axis direction;
 
   /// A formatter that allows us to customize how the value is displayed
-  final String Function(double val)? formatter;
+  final String Function(num val)? formatter;
 
   const SankeyChart({super.key, required this.sankeyData, this.formatter, this.direction = Axis.horizontal});
 

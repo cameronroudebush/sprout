@@ -1,4 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { EntityHistory } from "@backend/core/model/api/entity.history.dto";
@@ -32,7 +33,7 @@ export class HoldingController {
   @ApiOkResponse({ description: "Holding history found successfully.", type: Object })
   async getHoldingHistory(@CurrentUser() user: User) {
     // Accounts that have holdings
-    const accounts = await Account.find({ where: { user: { id: user.id }, type: "investment" } });
+    const accounts = await Account.find({ where: { user: { id: user.id }, type: AccountType.investment } });
     const historyByAcc = await Promise.all(
       accounts.map(async (a) => {
         const hist = await HoldingHistory.getHistoryForAccount(a);

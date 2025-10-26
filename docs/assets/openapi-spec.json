@@ -24,30 +24,6 @@
         ]
       }
     },
-    "/core": {
-      "put": {
-        "description": "Runs a manual sync to update all provider accounts.",
-        "operationId": "CoreController_manualSync",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Manual sync completed successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Run a manual sync.",
-        "tags": [
-          "Core"
-        ]
-      }
-    },
     "/user/{id}": {
       "get": {
         "description": "Retrieves a user's information by their ID.",
@@ -539,6 +515,33 @@
         ]
       }
     },
+    "/account/sync": {
+      "put": {
+        "description": "Runs a manual sync to update all provider accounts.",
+        "operationId": "AccountController_manualSync",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Manual sync completed successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Run a manual sync.",
+        "tags": [
+          "Account"
+        ]
+      }
+    },
     "/transaction/{id}": {
       "patch": {
         "description": "Edits a transaction by the given ID.",
@@ -727,7 +730,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "number"
+                  "$ref": "#/components/schemas/TotalTransactions"
                 }
               }
             }
@@ -750,7 +753,7 @@
     "/transaction-rule": {
       "get": {
         "description": "Retrieves all transaction rules for the authenticated user.",
-        "operationId": "TransactionRuleController_getAccounts",
+        "operationId": "TransactionRuleController_get",
         "parameters": [],
         "responses": {
           "200": {
@@ -916,7 +919,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Connection established. Awaiting events."
+            "description": "Connection established. Awaiting events.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSEData"
+                }
+              }
+            }
           },
           "401": {
             "description": "Authentication is required."
@@ -1536,7 +1546,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.0.7-20-g607c2cb",
+    "version": "v0.0.7-21-g6b80de4",
     "contact": {}
   },
   "tags": [
@@ -1596,26 +1606,50 @@
       }
     },
     "schemas": {
+      "ChartRangeEnum": {
+        "type": "string",
+        "enum": [
+          "oneDay",
+          "sevenDays",
+          "oneMonth",
+          "threeMonths",
+          "sixMonths",
+          "oneYear",
+          "allTime"
+        ],
+        "description": "The net worth range to display by default"
+      },
       "UserConfig": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
+          "netWorthRange": {
+            "description": "The net worth range to display by default",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChartRangeEnum"
+              }
+            ]
+          },
           "privateMode": {
             "type": "boolean",
             "description": "If we should hide balances on the users display"
-          },
-          "netWorthRange": {
-            "type": "string",
-            "description": "The net worth range to display by default"
           }
         },
         "required": [
-          "privateMode",
-          "netWorthRange"
+          "id",
+          "netWorthRange",
+          "privateMode"
         ]
       },
       "User": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "firstName": {
             "type": "string"
           },
@@ -1633,8 +1667,7 @@
           }
         },
         "required": [
-          "firstName",
-          "lastName",
+          "id",
           "username",
           "admin",
           "config"
@@ -1707,9 +1740,33 @@
           "username"
         ]
       },
+      "AccountSubTypeEnum": {
+        "type": "string",
+        "enum": [
+          "Savings",
+          "Checking",
+          "HYSA",
+          "401K",
+          "Brokerage",
+          "IRA",
+          "HSA",
+          "Student",
+          "Mortgage",
+          "Personal",
+          "Auto",
+          "Travel",
+          "Cash Back",
+          "Wallet",
+          "Staking"
+        ],
+        "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
+      },
       "Institution": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "url": {
             "type": "string",
             "description": "The URL for where this institution is"
@@ -1723,6 +1780,7 @@
           }
         },
         "required": [
+          "id",
           "url",
           "name",
           "hasError"
@@ -1731,6 +1789,17 @@
       "Account": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
+          "subType": {
+            "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountSubTypeEnum"
+              }
+            ]
+          },
           "name": {
             "type": "string"
           },
@@ -1767,12 +1836,15 @@
             "description": "The available balance to this account"
           },
           "type": {
-            "type": "object",
-            "description": "The type of this account to better separate it from the others."
-          },
-          "subType": {
-            "type": "object",
-            "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
+            "description": "The type of this account to better separate it from the others.",
+            "enum": [
+              "depository",
+              "credit",
+              "loan",
+              "investment",
+              "crypto"
+            ],
+            "type": "string"
           },
           "extra": {
             "type": "object",
@@ -1780,6 +1852,7 @@
           }
         },
         "required": [
+          "id",
           "name",
           "provider",
           "institution",
@@ -1797,21 +1870,21 @@
             "type": "string",
             "description": "The specific subtype of the account",
             "enum": [
-              "savings",
-              "checking",
-              "hysa",
-              "travel",
-              "cashBack",
-              "401k",
-              "brokerage",
-              "ira",
-              "hsa",
-              "student",
-              "mortgage",
-              "personal",
-              "auto",
-              "wallet",
-              "staking"
+              "Savings",
+              "Checking",
+              "HYSA",
+              "401K",
+              "Brokerage",
+              "IRA",
+              "HSA",
+              "Student",
+              "Mortgage",
+              "Personal",
+              "Auto",
+              "Travel",
+              "Cash Back",
+              "Wallet",
+              "Staking"
             ],
             "example": "checking"
           },
@@ -1823,7 +1896,7 @@
       "Category": {
         "type": "object",
         "properties": {
-          "userId": {
+          "id": {
             "type": "string"
           },
           "name": {
@@ -1831,8 +1904,12 @@
             "description": "The name of this category"
           },
           "type": {
-            "type": "object",
-            "description": "If this account type should be considered an expense or income"
+            "description": "If this account type should be considered an expense or income",
+            "enum": [
+              "income",
+              "expense"
+            ],
+            "type": "string"
           },
           "parentCategory": {
             "description": "The parent category this category belongs to",
@@ -1841,21 +1918,20 @@
                 "$ref": "#/components/schemas/Category"
               }
             ]
-          },
-          "parentCategoryId": {
-            "type": "string"
           }
         },
         "required": [
-          "userId",
+          "id",
           "name",
-          "type",
-          "parentCategoryId"
+          "type"
         ]
       },
       "Transaction": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "amount": {
             "type": "number",
             "description": "In the currency of the account"
@@ -1893,6 +1969,7 @@
           }
         },
         "required": [
+          "id",
           "amount",
           "description",
           "pending",
@@ -1960,11 +2037,29 @@
           "startDate"
         ]
       },
+      "TotalTransactions": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total"
+        ]
+      },
       "TransactionRule": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "type": {
-            "type": "object"
+            "enum": [
+              "description",
+              "amount"
+            ],
+            "type": "string"
           },
           "value": {
             "type": "string",
@@ -1999,6 +2094,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "value",
           "strict",
@@ -2007,13 +2103,49 @@
           "enabled"
         ]
       },
-      "CategoryStats": {
+      "Base": {
         "type": "object",
         "properties": {}
+      },
+      "SSEData": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "enum": [
+              "sync",
+              "force-update"
+            ],
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Base"
+          }
+        },
+        "required": [
+          "event"
+        ]
+      },
+      "CategoryStats": {
+        "type": "object",
+        "properties": {
+          "categoryCount": {
+            "type": "object",
+            "description": "The number of transactions matching to each category",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "categoryCount"
+        ]
       },
       "Sync": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "time": {
             "format": "date-time",
             "type": "string",
@@ -2027,6 +2159,7 @@
           }
         },
         "required": [
+          "id",
           "time",
           "status",
           "failureReason"
@@ -2100,6 +2233,9 @@
       "Holding": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "account": {
             "description": "The account this holding is associated to",
             "allOf": [
@@ -2136,6 +2272,7 @@
           }
         },
         "required": [
+          "id",
           "account",
           "currency",
           "costBasis",
@@ -2149,25 +2286,34 @@
       "EntityHistoryDataPoint": {
         "type": "object",
         "properties": {
+          "history": {
+            "type": "object",
+            "description": "This is the history for this specific data point",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
           "percentChange": {
             "type": "number"
           },
           "valueChange": {
             "type": "number"
-          },
-          "history": {
-            "type": "object",
-            "description": "This is the history for this specific data point"
           }
         },
         "required": [
-          "valueChange",
-          "history"
+          "history",
+          "valueChange"
         ]
       },
       "EntityHistory": {
         "type": "object",
         "properties": {
+          "historicalData": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
           "last1Day": {
             "$ref": "#/components/schemas/EntityHistoryDataPoint"
           },
@@ -2189,23 +2335,20 @@
           "allTime": {
             "$ref": "#/components/schemas/EntityHistoryDataPoint"
           },
-          "historicalData": {
-            "type": "object"
-          },
           "connectedId": {
             "type": "string",
             "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
           }
         },
         "required": [
+          "historicalData",
           "last1Day",
           "last7Days",
           "lastMonth",
           "lastThreeMonths",
           "lastSixMonths",
           "lastYear",
-          "allTime",
-          "historicalData"
+          "allTime"
         ]
       },
       "SankeyLink": {
@@ -2234,6 +2377,12 @@
       "SankeyData": {
         "type": "object",
         "properties": {
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
           "nodes": {
             "type": "array",
             "items": {
@@ -2248,6 +2397,7 @@
           }
         },
         "required": [
+          "colors",
           "nodes",
           "links"
         ]

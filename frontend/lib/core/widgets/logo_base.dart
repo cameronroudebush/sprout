@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:sprout/auth/api.dart';
-import 'package:sprout/config/provider.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/core/provider/storage.dart';
 
 /// A base class that is used to render a logo based on the given class data
 abstract class LogoBaseWidget<T> extends StatefulWidget {
@@ -13,9 +12,8 @@ abstract class LogoBaseWidget<T> extends StatefulWidget {
   const LogoBaseWidget(this.logoClass, {super.key, this.height = 40, this.width = 40});
 
   /// Returns the backend image proxy url without any query context.
-  String getBackendProxy(BuildContext context) {
-    final configProvider = Provider.of<ConfigProvider>(context);
-    return "${configProvider.api.client.baseUrl}/api/image-proxy";
+  String getBackendProxy() {
+    return "${defaultApiClient.basePath}/api/image-proxy";
   }
 
   /// Returns the logo URL that we wish to render
@@ -39,8 +37,7 @@ class _LogoBaseWidgetState extends State<LogoBaseWidget> {
 
   /// Asynchronously fetches and returns the JWT from secure storage.
   Future<String?> _fetchJwt() {
-    final configProvider = Provider.of<ConfigProvider>(context, listen: false);
-    return configProvider.api.secureStorage.getValue(AuthAPI.jwtKey);
+    return SecureStorageProvider.getValue(SecureStorageProvider.jwtKey);
   }
 
   @override

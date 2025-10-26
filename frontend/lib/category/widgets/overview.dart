@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/category/models/category.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -56,12 +56,12 @@ class CategoryOverview extends StatelessWidget {
                 spacing: 8,
                 children: [
                   CategoryIcon(c),
-                  if (c.type == CategoryType.expense)
+                  if (c.type == CategoryTypeEnum.expense)
                     SproutTooltip(
                       message: "Expense",
                       child: Icon(Icons.arrow_downward, color: Colors.red),
                     ),
-                  if (c.type == CategoryType.income)
+                  if (c.type == CategoryTypeEnum.income)
                     SproutTooltip(
                       message: "Expense",
                       child: Icon(Icons.arrow_upward, color: Colors.green),

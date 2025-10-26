@@ -1,85 +1,59 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:sprout/account/models/account.dart';
+import 'package:sprout/api/api.dart';
 
 /// Class that renders a dropdown allowing for selection of account sub types
 class AccountSubTypeSelect extends StatelessWidget {
   final Account account;
   // Callback to notify the parent widget of a change
-  final void Function(String? newSubType)? onChanged;
+  final void Function(AccountSubTypeEnum? newSubType)? onChanged;
 
   const AccountSubTypeSelect(this.account, {super.key, this.onChanged});
 
-  /// Returns the string value for the account's sub type based on it's type
-  static getValFromType(Account account) {
-    final subType = getTypeFromVal(account.type, account.subType);
-    return switch (account.type) {
-      "investment" => (subType as InvestmentAccountType?)?.value,
-      "loan" => (subType as LoanAccountType?)?.value,
-      "credit" => (subType as CreditAccountType?)?.value,
-      "depository" => (subType as DepositoryAccountType?)?.value,
-      "crypto" => (subType as CryptoAccountType?)?.value,
-      // Default case for unknown account types
-      _ => null,
-    };
-  }
-
-  /// Returns enumed type based on the given string
-  static getTypeFromVal(String type, String? subType) {
-    return switch (type) {
-      "investment" => InvestmentAccountType.values.firstWhereOrNull((e) => e.value == subType),
-      "loan" => LoanAccountType.values.firstWhereOrNull((e) => e.value == subType),
-      "credit" => CreditAccountType.values.firstWhereOrNull((e) => e.value == subType),
-      "depository" => DepositoryAccountType.values.firstWhereOrNull((e) => e.value == subType),
-      "crypto" => CryptoAccountType.values.firstWhereOrNull((e) => e.value == subType),
-      // Default case for unknown account types
-      _ => null,
-    };
-  }
-
-  /// Updates the current account to use the new type
-  void _updateAccountSubType(String? newSubTypeValue) {
-    if (newSubTypeValue == null) {
-      account.subType = null;
-      return;
-    }
-    account.subType = newSubTypeValue;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final selectedValue = AccountSubTypeSelect.getValFromType(account);
-    final List<String> items = (switch (account.type) {
-      "investment" => InvestmentAccountType.values.map((e) => e.value).toList(),
-      "loan" => LoanAccountType.values.map((e) => e.value).toList(),
-      "credit" => CreditAccountType.values.map((e) => e.value).toList(),
-      "depository" => DepositoryAccountType.values.map((e) => e.value).toList(),
-      "crypto" => CryptoAccountType.values.map((e) => e.value).toList(),
-      // Default case for unknown account types
-      _ => const <String>[],
-    });
+    // Define which subtypes belong to which account type.
+    const Map<AccountTypeEnum, List<AccountSubTypeEnum>> typeToSubTypeMap = {
+      AccountTypeEnum.depository: [AccountSubTypeEnum.savings, AccountSubTypeEnum.checking, AccountSubTypeEnum.HYSA],
+      AccountTypeEnum.investment: [
+        AccountSubTypeEnum.n401k,
+        AccountSubTypeEnum.brokerage,
+        AccountSubTypeEnum.IRA,
+        AccountSubTypeEnum.HSA,
+      ],
+      AccountTypeEnum.loan: [
+        AccountSubTypeEnum.student,
+        AccountSubTypeEnum.mortgage,
+        AccountSubTypeEnum.personal,
+        AccountSubTypeEnum.auto,
+      ],
+      AccountTypeEnum.credit: [AccountSubTypeEnum.travel, AccountSubTypeEnum.cashBack],
+      AccountTypeEnum.crypto: [AccountSubTypeEnum.wallet, AccountSubTypeEnum.staking],
+    };
+
+    final items = typeToSubTypeMap[account.type] ?? [];
 
     if (items.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return DropdownButtonFormField<String>(
+    return DropdownButtonFormField<AccountSubTypeEnum>(
       dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
       decoration: const InputDecoration(
         labelText: "Sub-Type",
         border: OutlineInputBorder(),
         isDense: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
-      value: selectedValue,
+      value: account.subType,
       hint: const Text("Sub-Type"),
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(value: value, child: Text(value));
+      items: items.map((AccountSubTypeEnum value) {
+        return DropdownMenuItem<AccountSubTypeEnum>(value: value, child: Text(value.value));
       }).toList(),
       onChanged: (val) {
-        _updateAccountSubType(val);
-        if (onChanged != null) onChanged!(val);
+        if (onChanged != null) {
+          onChanged!(val);
+        }
       },
     );
   }

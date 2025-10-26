@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 import 'package:sprout/transaction-rule/provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
@@ -63,7 +63,7 @@ class TransactionRuleRow extends StatelessWidget {
 
   /// Builds the value pills, handling the 'OR' logic for description types.
   List<Widget> _buildValuePills(BuildContext context) {
-    final bool isDescriptionOr = rule.type == TransactionRuleType.description && rule.value.contains('|');
+    final bool isDescriptionOr = rule.type == TransactionRuleTypeEnum.description && rule.value.contains('|');
 
     if (!isDescriptionOr) {
       return [_buildPill(context, '"${rule.value}"', isValue: true)];
@@ -114,7 +114,7 @@ class TransactionRuleRow extends StatelessWidget {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               TextWidget(text: 'IF', style: textTheme.titleMedium),
-                              _buildPill(context, rule.type.name.toCapitalized),
+                              _buildPill(context, rule.type.value.toCapitalized),
                               _buildPill(context, condition),
                               ..._buildValuePills(context),
                             ],
@@ -123,7 +123,16 @@ class TransactionRuleRow extends StatelessWidget {
                         Switch(
                           value: rule.enabled,
                           onChanged: (bool isEnabled) {
-                            final newRule = rule.copyWith(enabled: isEnabled);
+                            final newRule = TransactionRule(
+                              id: rule.id,
+                              type: rule.type,
+                              value: rule.value,
+                              category: rule.category,
+                              strict: rule.strict,
+                              order: rule.order,
+                              enabled: isEnabled,
+                              matches: rule.matches,
+                            );
                             provider.edit(newRule);
                           },
                         ),

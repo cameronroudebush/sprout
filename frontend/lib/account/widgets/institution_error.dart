@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/account/models/institution.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 
 /// Renders an indicator if the given institution has an error.

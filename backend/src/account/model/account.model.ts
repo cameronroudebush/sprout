@@ -1,9 +1,11 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
-import { CreditAccountType, CryptoAccountType, DepositoryAccountType, InvestmentAccountType, LoanAccountType } from "@backend/account/model/account.type";
+import { AccountSubType } from "@backend/account/model/account.sub.type";
+import { AccountType } from "@backend/account/model/account.type";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { Institution } from "@backend/institution/model/institution.model";
 import { User } from "@backend/user/model/user.model";
+import { ApiProperty } from "@nestjs/swagger";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
@@ -36,11 +38,12 @@ export class Account extends DatabaseBase {
 
   /** The type of this account to better separate it from the others. */
   @DatabaseDecorators.column({ nullable: false, type: "varchar" })
-  type: "depository" | "credit" | "loan" | "investment" | "crypto";
+  type: AccountType;
 
   /** The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA. */
   @DatabaseDecorators.column({ nullable: true, type: "varchar" })
-  subType?: DepositoryAccountType | InvestmentAccountType | LoanAccountType | CreditAccountType | CryptoAccountType;
+  @ApiProperty({ enum: AccountSubType, enumName: "AccountSubTypeEnum", required: false })
+  subType?: AccountSubType;
 
   /** Any extra data that we want to store as JSON */
   @DatabaseDecorators.jsonColumn({ nullable: true })
@@ -84,19 +87,12 @@ export class Account extends DatabaseBase {
 
   /** Returns if this account affects the net worth negativity due to being a loan type. */
   get isNegativeNetWorth() {
-    return this.type === "credit" || this.type === "loan";
+    return this.type === AccountType.credit || this.type === AccountType.loan;
   }
 
   /** Validates that the given sub-type exists in an enum. Throws an error if it doesn't. */
   static validateSubType(subType: string) {
-    // Validate that this sub type exists
-    const allSubTypes = [
-      ...Object.values(DepositoryAccountType),
-      ...Object.values(InvestmentAccountType),
-      ...Object.values(LoanAccountType),
-      ...Object.values(CreditAccountType),
-      ...Object.values(CryptoAccountType),
-    ];
-    if (!allSubTypes.includes(subType as any)) throw new Error(`Invalid subType provided: ${subType}`);
+    const allSubTypes = Object.values(AccountSubType);
+    if (!allSubTypes.includes(subType as AccountSubType)) throw new Error(`Invalid subType provided: ${subType}`);
   }
 }

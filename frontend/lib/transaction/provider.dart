@@ -1,14 +1,10 @@
-import 'package:sprout/account/models/account.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/transaction/api.dart';
-import 'package:sprout/transaction/models/transaction.count.dart';
-import 'package:sprout/transaction/models/transaction.dart';
-import 'package:sprout/transaction/models/transaction.subscriptions.dart';
 
 /// Class that provides the store of current transactions
-class TransactionProvider extends BaseProvider<TransactionAPI> {
+class TransactionProvider extends BaseProvider<TransactionApi> {
   /// How many transactions we should initially pull
   static final initialTransactionCount = 20;
   // Data store
@@ -23,8 +19,8 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
 
   TransactionProvider(super.api);
 
-  Future<TotalTransactions> populateTotalTransactionCount() async {
-    return _totalTransactions = await api.getTransactionCount();
+  Future<TotalTransactions?> populateTotalTransactionCount() async {
+    return _totalTransactions = await api.transactionControllerGetTotal();
   }
 
   /// Adds new transactions to our global list and filters duplicates out
@@ -40,7 +36,7 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
   }
 
   /// Populates transactions based on the parameters given
-  Future<List<Transaction>> populateTransactions({
+  Future<List<Transaction>?> populateTransactions({
     int? startIndex,
     int? endIndex,
     bool shouldNotify = true,
@@ -49,27 +45,27 @@ class TransactionProvider extends BaseProvider<TransactionAPI> {
     String? description,
     DateTime? date,
   }) async {
-    final newTransactions = await api.getTransactions(
+    final newTransactions = await api.transactionControllerGetByQuery(
       startIndex: startIndex,
       endIndex: endIndex,
-      account: account,
+      accountId: account?.id,
       category: category,
       description: description,
       date: date,
     );
-    _addNewTransactions(newTransactions);
+    if (newTransactions != null) _addNewTransactions(newTransactions);
     if (shouldNotify) notifyListeners();
     return newTransactions;
   }
 
   /// Populates subscription information built from transactions
-  Future<List<TransactionSubscription>> populateSubscriptions() async {
-    return _subscriptions = await api.getSubscriptions();
+  Future<List<TransactionSubscription>?> populateSubscriptions() async {
+    return _subscriptions = (await api.transactionControllerSubscriptions()) ?? [];
   }
 
   /// Utilizes the API to edit the given transaction and updates the data store
   Future<Transaction> editTransaction(Transaction t) async {
-    final updatedTransaction = await api.editTransaction(t);
+    final updatedTransaction = (await api.transactionControllerEdit(t.id, t))!;
     final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
     if (index != -1) _transactions[index] = updatedTransaction;
     // Update category info

@@ -4,21 +4,23 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/accounts.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_group.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// The main accounts display that contains the chart along side the actual accounts list
 class AccountsOverview extends StatefulWidget {
   /// The account type tab to go to by default
-  final String? defaultAccountType;
+  final AccountTypeEnum? defaultAccountType;
 
   const AccountsOverview({super.key, this.defaultAccountType});
 
@@ -29,15 +31,13 @@ class AccountsOverview extends StatefulWidget {
 class _AccountsOverviewState extends State<AccountsOverview> {
   @override
   Widget build(BuildContext context) {
-    return Consumer3<UserProvider, AccountProvider, NetWorthProvider>(
-      builder: (context, userProvider, accountProvider, netWorthProvider, child) {
-        final accountTypes = ["depository", "investment", "crypto", "loan", "credit"];
+    return Consumer3<UserConfigProvider, AccountProvider, NetWorthProvider>(
+      builder: (context, userConfigProvider, accountProvider, netWorthProvider, child) {
+        final accountTypes = AccountTypeEnum.values;
         final accountTypesContent = accountTypes.map((a) {
-          return _buildTabContent(context, a, userProvider, accountProvider, netWorthProvider);
+          return _buildTabContent(context, a, userConfigProvider, accountProvider, netWorthProvider);
         }).toList();
-        final initialIndex = widget.defaultAccountType == null
-            ? 0
-            : accountTypes.indexOf(widget.defaultAccountType.toString());
+        final initialIndex = widget.defaultAccountType == null ? 0 : accountTypes.indexOf(widget.defaultAccountType!);
         return Expanded(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: AppTheme.maxDesktopSize),
@@ -59,8 +59,8 @@ class _AccountsOverviewState extends State<AccountsOverview> {
   // Helper method to create the tab content for each account type
   Widget _buildTabContent(
     BuildContext context,
-    String accountType,
-    UserProvider provider,
+    AccountTypeEnum accountType,
+    UserConfigProvider provider,
     AccountProvider accountProvider,
     NetWorthProvider netWorthProvider,
   ) {
@@ -76,9 +76,9 @@ class _AccountsOverviewState extends State<AccountsOverview> {
         .toList();
 
     // Flatten the data so the line chart can display the combined net worth for these accounts
-    final Map<DateTime, double> data = {};
+    final Map<DateTime, num> data = {};
     for (final entityHistory in historyForRange) {
-      final history = entityHistory.getValueByFrame(chartRange).history;
+      final history = entityHistory.getValueByFrame(chartRange).historyDate;
       for (final historyPoint in history.entries) {
         data.update(historyPoint.key, (value) => value + historyPoint.value, ifAbsent: () => historyPoint.value);
       }
@@ -88,7 +88,7 @@ class _AccountsOverviewState extends State<AccountsOverview> {
     final netWorth = groupCalc.totalBalance;
     double totalChange = groupCalc.totalChange;
     final percentageChange = groupCalc.percentageChange;
-    if (accountType == "loan" || accountType == "credit") totalChange *= -1;
+    if (accountType == AccountTypeEnum.loan || accountType == AccountTypeEnum.credit) totalChange *= -1;
 
     return SingleChildScrollView(
       child: Padding(

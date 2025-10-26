@@ -1,16 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/models/account.dart'; // Assuming you have this model
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/account_row.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/net-worth/models/entity.history.dart';
+import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/provider.dart';
 
 /// When we calculate data for a group, we'll return this type
@@ -24,8 +23,8 @@ class GroupCalculatedData {
 /// A widget used to display a grouping of accounts for a specific type
 class AccountGroupWidget extends StatelessWidget {
   final List<Account> accounts;
-  final String type;
-  final ChartRange netWorthPeriod;
+  final AccountTypeEnum type;
+  final ChartRangeEnum netWorthPeriod;
   final double totalNetWorth;
   final void Function(Account)? onAccountClick;
   final Set<Account>? selectedAccounts;
@@ -65,7 +64,11 @@ class AccountGroupWidget extends StatelessWidget {
   });
 
   /// Calculates useful content per group of given accounts with historical data and returns it
-  static GroupCalculatedData calculate(List<EntityHistory>? historical, List<Account> accounts, ChartRange chartRange) {
+  static GroupCalculatedData calculate(
+    List<EntityHistory>? historical,
+    List<Account> accounts,
+    ChartRangeEnum chartRange,
+  ) {
     final totalBalance = accounts.fold(0.0, (sum, account) => sum + account.balance);
     double groupAmountChange = 0;
     // Filter the historical data once.
@@ -112,7 +115,7 @@ class AccountGroupWidget extends StatelessWidget {
 
         // Simplify the types and perform some extra handling on debts
         String simpleType;
-        if (type == "loan" || type == "credit") {
+        if (type == AccountTypeEnum.loan || type == AccountTypeEnum.credit) {
           simpleType = "debts";
           groupAmountChange *= -1;
         } else {
@@ -120,7 +123,7 @@ class AccountGroupWidget extends StatelessWidget {
         }
 
         /// A cleaned up type name for display
-        String adjustedType = formatAccountType(type.toLowerCase());
+        String adjustedType = formatAccountType(type);
 
         final element = Theme(
           data: theme.copyWith(

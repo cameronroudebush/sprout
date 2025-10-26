@@ -18,7 +18,7 @@ class SankeyPainter extends CustomPainter {
   final Offset? hoverPosition;
 
   /// A formatter that allows us to customize how the value is displayed
-  final String Function(double val)? formatter;
+  final String Function(num val)? formatter;
 
   SankeyPainter({required this.data, this.hoveredNode, this.hoveredLink, this.hoverPosition, this.formatter});
 

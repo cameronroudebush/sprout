@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/category/models/category.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -22,7 +22,7 @@ class CategoryInfo extends StatefulWidget {
 class _CategoryInfoState extends State<CategoryInfo> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  CategoryType _type = CategoryType.expense;
+  CategoryTypeEnum _type = CategoryTypeEnum.expense;
   Category? _parentCategory;
 
   @override
@@ -37,7 +37,7 @@ class _CategoryInfoState extends State<CategoryInfo> {
     } else {
       // Initialize for a new category
       _nameController.text = "";
-      _type = CategoryType.expense; // Default value
+      _type = CategoryTypeEnum.expense; // Default value
       _parentCategory = null;
     }
   }
@@ -86,7 +86,7 @@ class _CategoryInfoState extends State<CategoryInfo> {
       } else {
         // Add a new category
         final createdCategory = await provider.add(newCategory);
-        if (widget.onAdd != null) widget.onAdd!(createdCategory);
+        if (widget.onAdd != null && createdCategory != null) widget.onAdd!(createdCategory);
       }
 
       // Close dialog
@@ -162,15 +162,19 @@ class _CategoryInfoState extends State<CategoryInfo> {
                     spacing: 4,
                     children: [
                       const Text("Type", style: TextStyle(fontWeight: FontWeight.bold)),
-                      DropdownButtonFormField<CategoryType>(
+                      DropdownButtonFormField<CategoryTypeEnum>(
                         dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                         menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
                         value: _type,
                         decoration: const InputDecoration(border: OutlineInputBorder()),
-                        items: CategoryType.values.map((type) {
+                        items: CategoryTypeEnum.values.map((type) {
+                          final typeName = type.toString();
                           return DropdownMenuItem(
                             value: type,
-                            child: Text(type.name[0].toUpperCase() + type.name.substring(1)), // Capitalize
+                            // Capitalize
+                            child: Text(
+                              typeName.split('.').last[0].toUpperCase() + typeName.split('.').last.substring(1),
+                            ),
                           );
                         }).toList(),
                         onChanged: (newValue) {

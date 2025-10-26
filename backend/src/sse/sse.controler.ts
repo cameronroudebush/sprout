@@ -1,5 +1,6 @@
+import { SSEData } from "@backend/sse/model/event.model";
 import { Controller, Sse } from "@nestjs/common";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from "@nestjs/swagger";
 import { Observable } from "rxjs";
 import { CurrentUser } from "../core/decorator/current-user.decorator";
 import { AuthGuard } from "../core/guard/auth.guard";
@@ -22,7 +23,15 @@ export class SSEController {
    */
   @Sse()
   @ApiOperation({ summary: "Subscribe to real-time server events to allow the server to inform our client of various info." })
-  @ApiOkResponse({ description: "Connection established. Awaiting events." })
+  @ApiOkResponse({
+    description: "Connection established. Awaiting events.",
+    content: {
+      "text/event-stream": {
+        schema: { $ref: getSchemaPath(SSEData) },
+      },
+    },
+  })
+  @ApiExtraModels(SSEData)
   sse(@CurrentUser() user: User): Observable<MessageEvent> {
     return this.sseService.subscribe(user);
   }

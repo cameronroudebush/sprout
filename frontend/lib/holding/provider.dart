@@ -1,12 +1,10 @@
 import 'dart:async';
 
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/holding/api.dart';
-import 'package:sprout/holding/models/holding.dart';
-import 'package:sprout/net-worth/models/entity.history.dart';
 
 /// Class that provides the store of current holding information for accounts
-class HoldingProvider extends BaseProvider<HoldingAPI> {
+class HoldingProvider extends BaseProvider<HoldingApi> {
   // Data store
   List<Holding> _holdings = [];
   Map<String, List<EntityHistory>> _holdingsOT = {};
@@ -18,11 +16,11 @@ class HoldingProvider extends BaseProvider<HoldingAPI> {
   HoldingProvider(super.api);
 
   Future<List<Holding>> populateHoldings() async {
-    return _holdings = await api.getHoldings();
+    return _holdings = (await api.holdingControllerGetHoldings()) ?? [];
   }
 
   Future<Map<String, List<EntityHistory>>> populateHoldingsOT() async {
-    return _holdingsOT = await api.getOT();
+    return _holdingsOT = (await api.holdingControllerGetHoldingHistory()) as dynamic ?? {};
   }
 
   @override
