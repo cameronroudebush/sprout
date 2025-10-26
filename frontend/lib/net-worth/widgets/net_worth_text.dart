@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/account/widgets/account_change.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 
@@ -8,11 +8,11 @@ import 'package:sprout/core/widgets/text.dart';
 class NetWorthTextWidget extends StatelessWidget {
   final String title;
   final bool renderTitle;
-  final ChartRange chartRange;
+  final ChartRangeEnum chartRange;
 
-  final double netWorth;
-  final double? percentageChange;
-  final double? totalChange;
+  final num netWorth;
+  final num? percentageChange;
+  final num? totalChange;
 
   final bool applyColor;
 

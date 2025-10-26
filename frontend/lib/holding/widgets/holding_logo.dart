@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/logo_base.dart';
-import 'package:sprout/holding/models/holding.dart';
 
 /// A widget used to display an account logo
 class HoldingLogoWidget extends LogoBaseWidget<Holding> {
@@ -9,7 +9,7 @@ class HoldingLogoWidget extends LogoBaseWidget<Holding> {
   @override
   String getLogoUrl(BuildContext context) {
     final url = "https://cdn.nvstly.com/icons/stocks/${logoClass.symbol}.png";
-    return "${getBackendProxy(context)}?fullImageUrl=$url";
+    return "${getBackendProxy()}?fullImageUrl=$url";
   }
 
   @override

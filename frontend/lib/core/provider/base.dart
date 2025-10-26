@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sprout/core/api/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
 
@@ -9,7 +8,7 @@ import 'package:sprout/core/provider/snackbar.dart';
 final _allDataUpdatedController = StreamController<void>.broadcast();
 
 /// This class provides some basic capability that is required by our data driven providers
-abstract class BaseProvider<T extends BaseAPI> with ChangeNotifier {
+abstract class BaseProvider<T> with ChangeNotifier {
   /// The reference to the API this provider uses to get data from the backend.
   final T api;
 

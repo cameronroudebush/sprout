@@ -128,7 +128,7 @@ export class TransactionController {
     summary: "Get's the total count of transactions across accounts.",
     description: "Retrieves a count of the total number of transactions available for the current user including a total for each account.",
   })
-  @ApiOkResponse({ description: "Transaction count found successfully.", type: Number })
+  @ApiOkResponse({ description: "Transaction count found successfully.", type: TotalTransactions })
   async getTotal(@CurrentUser() user: User) {
     const map: TotalTransactions["accounts"] = {};
     const accounts = await Account.getForUser(user);

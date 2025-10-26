@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/widgets/text.dart';
 
 class ChartRangeSelector extends StatelessWidget {
-  final ChartRange selectedChartRange;
-  final ValueChanged<ChartRange>? onRangeSelected;
+  final ChartRangeEnum selectedChartRange;
+  final ValueChanged<ChartRangeEnum>? onRangeSelected;
 
   const ChartRangeSelector({super.key, required this.selectedChartRange, required this.onRangeSelected});
 
@@ -14,7 +15,7 @@ class ChartRangeSelector extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     // Filter out ranges we don't want to show
-    final filteredRanges = ChartRange.values.toList();
+    final filteredRanges = ChartRangeEnum.values.toList();
 
     final isSelectedList = filteredRanges.map((range) => range == selectedChartRange).toList();
 

@@ -31,8 +31,6 @@ export class CategoryService {
       .orderBy("category_name", "ASC")
       .getRawMany();
 
-    const categoryCount: { [name: string]: number } = Object.fromEntries(finalResults.map((x) => [x.category_name, x.total]));
-
-    return CategoryStats.fromPlain({ categoryCount });
+    return CategoryStats.fromPlain({ categoryCount: Object.fromEntries(finalResults.map((x) => [x.category_name, x.total])) });
   }
 }

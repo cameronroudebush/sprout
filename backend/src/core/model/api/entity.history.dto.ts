@@ -3,6 +3,7 @@ import { Account } from "@backend/account/model/account.model";
 import { Base } from "@backend/core/model/base";
 import { CustomTypes } from "@backend/core/model/utility/custom.types";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
+import { ApiProperty } from "@nestjs/swagger";
 import { differenceInDays, eachDayOfInterval, isSameDay, subDays } from "date-fns";
 import { cloneDeep } from "lodash";
 
@@ -11,9 +12,13 @@ export class EntityHistoryDataPoint extends Base {
   percentChange?: number;
   valueChange: number;
   /** This is the history for this specific data point */
-  history: Record<number, number>;
+  @ApiProperty({
+    type: "object",
+    additionalProperties: { type: "number" },
+  })
+  history: Record<string, number>;
 
-  constructor(valueChange: number, history: Record<number, number>, percentChange?: number) {
+  constructor(valueChange: number, history: Record<string, number>, percentChange?: number) {
     super();
     this.valueChange = valueChange;
     this.history = history;
@@ -30,7 +35,11 @@ export class EntityHistory extends Base {
   lastSixMonths: EntityHistoryDataPoint;
   lastYear: EntityHistoryDataPoint;
   allTime: EntityHistoryDataPoint;
-  historicalData: Record<number, number>;
+  @ApiProperty({
+    type: "object",
+    additionalProperties: { type: "number" },
+  })
+  historicalData: Record<string, number>;
 
   /** Some entity history data may have a connected Id of what it relates to. This could be something like an account Id. */
   connectedId?: string;
@@ -43,7 +52,7 @@ export class EntityHistory extends Base {
     lastSixMonths: EntityHistoryDataPoint,
     lastYear: EntityHistoryDataPoint,
     allTime: EntityHistoryDataPoint,
-    historicalData: Record<number, number>,
+    historicalData: Record<string, number>,
   ) {
     super();
     this.last1Day = last1Day;
@@ -145,7 +154,7 @@ export class EntityHistory extends Base {
     }
 
     const frameHistory = filteredSnapshots.reduce((acc, item) => {
-      acc[item.date.getTime()] = item.netWorth;
+      acc[item.date.getTime().toString()] = item.netWorth;
       return acc;
     }, {} as any);
 
@@ -169,7 +178,7 @@ export class EntityHistory extends Base {
     const lastSixMonths = boundCallback(180);
     const lastYear = boundCallback(365);
     // Convert the last year of snapshot into a map
-    const historicalData = lastYear.snapshot.reduce((acc, curr) => ({ ...acc, [curr.date.getTime()]: curr.netWorth }), {});
+    const historicalData = lastYear.snapshot.reduce((acc, curr) => ({ ...acc, [curr.date.getTime().toString()]: curr.netWorth }), {});
     // We must make a separate history so we can show that we started from 0
     const allTimeHistory = cloneDeep(history);
     allTimeHistory.unshift(historyType.fromPlain({ time: subDays(new Date(), sproutAccountLifetime + 1), balance: 0 }));

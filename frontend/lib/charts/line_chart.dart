@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/charts/models/line_chart_data.dart';
 import 'package:sprout/charts/processors/line_chart_processor.dart';
@@ -29,10 +30,10 @@ class SproutLineChart extends StatelessWidget {
   final bool showBorder;
 
   /// The chart range to render of
-  final ChartRange chartRange;
+  final ChartRangeEnum chartRange;
 
   /// The data to render in this line chart
-  final Map<DateTime, double>? data;
+  final Map<DateTime, num>? data;
 
   /// An optional function to format the value displayed in the line chart
   final String Function(num value)? formatValue;
@@ -86,7 +87,7 @@ class SproutLineChart extends StatelessWidget {
   }
 
   /// Builds the widget for our necessary line chart by coordinating helper functions.
-  LineChartData _buildLineChartData(SproutLineChartData chartData, ChartRange selectedChartRange, ThemeData theme) {
+  LineChartData _buildLineChartData(SproutLineChartData chartData, ChartRangeEnum selectedChartRange, ThemeData theme) {
     final spots = chartData.spots;
     final colorScheme = theme.colorScheme;
 
@@ -226,7 +227,7 @@ class SproutLineChart extends StatelessWidget {
   FlTitlesData _buildTitlesData(
     ThemeData theme,
     SproutLineChartData chartData,
-    ChartRange selectedChartRange,
+    ChartRangeEnum selectedChartRange,
     _YAxisBounds yAxisBounds,
   ) {
     final spots = chartData.spots;

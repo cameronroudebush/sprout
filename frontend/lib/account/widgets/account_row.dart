@@ -1,18 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/models/account.dart'; // Assuming you have this model
+import 'package:sprout/account/model/account_extensions.dart';
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/net-worth/models/entity.history.dart';
+import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/provider.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// A widget used to display the given account and information in a row
 class AccountRowWidget extends StatelessWidget {
@@ -20,7 +20,7 @@ class AccountRowWidget extends StatelessWidget {
   final VoidCallback? onClick;
   final bool allowClick;
   final Account account;
-  final ChartRange netWorthPeriod;
+  final ChartRangeEnum netWorthPeriod;
   // If this account should display a "selected" indicator
   final bool isSelected;
 

@@ -6,7 +6,7 @@ import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/setup/connection.dart';
+import 'package:sprout/setup/widgets/connection.dart';
 
 class FailToConnectWidget extends StatelessWidget {
   const FailToConnectWidget({super.key});

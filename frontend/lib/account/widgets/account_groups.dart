@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/widgets/account_group.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 
 /// Uses the AccountGroupWidget to render all of the given accounts after sorting them and migrating them by type.
 class AccountGroupsWidget extends StatelessWidget {
   final List<Account> accounts;
-  final ChartRange netWorthPeriod;
+  final ChartRangeEnum netWorthPeriod;
   final void Function(Account)? onAccountClick;
   final Set<Account>? selectedAccounts;
 
@@ -43,9 +42,9 @@ class AccountGroupsWidget extends StatelessWidget {
   });
 
   /// Given a list of accounts, sorts and groups them for display
-  List<MapEntry<String, List<Account>>> _getSortedGroupedAccounts(List<Account> accounts) {
+  List<MapEntry<AccountTypeEnum, List<Account>>> _getSortedGroupedAccounts(List<Account> accounts) {
     // Group accounts by type
-    final Map<String, List<Account>> accountsByType = {};
+    final Map<AccountTypeEnum, List<Account>> accountsByType = {};
     for (var account in accounts) {
       accountsByType.putIfAbsent(account.type, () => []).add(account);
     }
@@ -58,13 +57,13 @@ class AccountGroupsWidget extends StatelessWidget {
     final List<String> accountTypeOrder = ['depository', 'investment', 'crypto', 'credit', 'loan'];
 
     // Sort the map entries based on the custom order
-    final List<MapEntry<String, List<Account>>> sortedAccountsEntries = accountsByType.entries.toList();
+    final List<MapEntry<AccountTypeEnum, List<Account>>> sortedAccountsEntries = accountsByType.entries.toList();
 
     sortedAccountsEntries.sort((a, b) {
-      final int indexA = accountTypeOrder.indexOf(a.key);
-      final int indexB = accountTypeOrder.indexOf(b.key);
+      final int indexA = accountTypeOrder.indexOf(a.key.value);
+      final int indexB = accountTypeOrder.indexOf(b.key.value);
       if (indexA == -1 && indexB == -1) {
-        return a.key.compareTo(b.key);
+        return a.key.value.compareTo(b.key.value);
       } else if (indexA == -1) {
         return 1;
       } else if (indexB == -1) {
@@ -88,7 +87,7 @@ class AccountGroupsWidget extends StatelessWidget {
           ...sortedAccountEntries.map((entry) {
             double totalNetWorth;
 
-            if (entry.key == "loan" || entry.key == "credit") {
+            if (entry.key == AccountTypeEnum.loan || entry.key == AccountTypeEnum.credit) {
               totalNetWorth = totalDebts;
             } else {
               totalNetWorth = totalAssets;

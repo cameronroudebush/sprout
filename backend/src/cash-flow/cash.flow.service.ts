@@ -1,4 +1,5 @@
 import { Category } from "@backend/category/model/category.model";
+import { CategoryType } from "@backend/category/model/category.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
@@ -54,7 +55,7 @@ export class CashFlowService {
     for (const { category, amount } of netTotals.values()) {
       if (Math.abs(amount) < 0.01) continue;
 
-      if (category.type === "income") {
+      if (category.type === CategoryType.income) {
         if (amount > 0) totalIncome += amount;
         else totalExpense += amount; // Deductions are expenses.
       } else {
@@ -78,7 +79,7 @@ export class CashFlowService {
   async buildSankey(user: User, year: number, month?: number, day?: number, accountId?: string) {
     const { netTotals, totalExpense } = await this.calculateFlows(user, year, month, day, accountId);
 
-    const categories = await Category.find({ where: { userId: user.id }, relations: ["parentCategory"] });
+    const categories = await Category.find({ where: { user: { id: user.id } }, relations: ["parentCategory"] });
     const categoryMap = new Map<string, Category>(categories.map((c) => [c.id, c]));
 
     const incomeHubName = "Income";
@@ -124,7 +125,7 @@ export class CashFlowService {
       const absAmount = Math.abs(amount);
       if (absAmount < 0.01) continue;
 
-      if (category.type === "income") {
+      if (category.type === CategoryType.income) {
         if (amount > 0) {
           let sourceName = category.name;
           if (sourceName.trim() === incomeHubName) sourceName = `${sourceName} (Source)`;

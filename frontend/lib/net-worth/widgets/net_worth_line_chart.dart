@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
-import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/provider.dart';
 
 /// A line chart that displays the given data in a line chart format
 class NetWorthLineChart extends StatelessWidget {
   /// The chart range to render of
-  final ChartRange chartRange;
+  final ChartRangeEnum chartRange;
 
   /// If the y axis number should be shown
   final bool showYAxis;
@@ -22,7 +23,7 @@ class NetWorthLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<NetWorthProvider>(
       builder: (context, provider, child) {
-        final data = provider.historicalNetWorth?.historicalData;
+        final data = provider.historicalNetWorth?.historicalDataDate;
         if (provider.isLoading) {
           return Center(child: CircularProgressIndicator());
         } else {

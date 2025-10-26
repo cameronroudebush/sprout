@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_row.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/holding/widgets/holding.dart';
 import 'package:sprout/net-worth/provider.dart';
@@ -70,7 +68,7 @@ class HoldingAccount extends StatelessWidget {
               if (displayAccountHeader)
                 AccountRowWidget(
                   account: account,
-                  netWorthPeriod: ChartRange.oneDay,
+                  netWorthPeriod: ChartRangeEnum.oneDay,
                   displayStats: true,
                   displayTotals: true,
                   allowClick: false,

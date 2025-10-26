@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/core/models/finance_provider_config.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/logo_base.dart';
 
 /// A widget used to display finance provider logos
-class FinanceProviderLogoWidget extends LogoBaseWidget<FinanceProviderConfig> {
+class FinanceProviderLogoWidget extends LogoBaseWidget<ProviderConfig> {
   @override
   double get height => 30;
 
@@ -14,7 +14,7 @@ class FinanceProviderLogoWidget extends LogoBaseWidget<FinanceProviderConfig> {
 
   @override
   String getLogoUrl(BuildContext context) {
-    return "${getBackendProxy(context)}?fullImageUrl=${logoClass.logoUrl}";
+    return "${getBackendProxy()}?fullImageUrl=${logoClass.logoUrl}";
   }
 
   @override

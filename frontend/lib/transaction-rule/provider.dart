@@ -1,9 +1,8 @@
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/transaction-rule/api.dart';
-import 'package:sprout/transaction-rule/models/transaction_rule.dart';
 
 /// Class that provides the store of current transactions
-class TransactionRuleProvider extends BaseProvider<TransactionRuleAPI> {
+class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
   // Data store
   List<TransactionRule> _rules = [];
   bool _transactionRulesRunning = false;
@@ -15,14 +14,14 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleAPI> {
   TransactionRuleProvider(super.api);
 
   Future<List<TransactionRule>> populateTransactionRules() async {
-    return _rules = await api.get();
+    return _rules = (await api.transactionRuleControllerGet()) ?? [];
   }
 
-  Future<TransactionRule> add(TransactionRule rule) async {
+  Future<TransactionRule?> add(TransactionRule rule) async {
     _transactionRulesRunning = true;
     notifyListeners();
-    final addedRule = await api.add(rule);
-    _rules.add(addedRule);
+    final addedRule = await api.transactionRuleControllerCreate(rule);
+    if (addedRule != null) _rules.add(addedRule);
     notifyListeners();
     return addedRule;
   }
@@ -30,16 +29,16 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleAPI> {
   Future<TransactionRule> delete(TransactionRule rule) async {
     _transactionRulesRunning = true;
     notifyListeners();
-    final deletedRule = await api.delete(rule);
-    _rules.removeWhere((r) => r.id == deletedRule.id);
+    await api.transactionRuleControllerDelete(rule.id);
+    _rules.removeWhere((r) => r.id == rule.id);
     notifyListeners();
-    return deletedRule;
+    return rule;
   }
 
   Future<TransactionRule> edit(TransactionRule rule) async {
     _transactionRulesRunning = true;
     notifyListeners();
-    final updatedRule = await api.edit(rule);
+    final updatedRule = (await api.transactionRuleControllerEdit(rule.id, rule))!;
     final index = _rules.indexWhere((r) => r.id == updatedRule.id);
     if (index != -1) _rules[index] = updatedRule;
     notifyListeners();

@@ -1,12 +1,11 @@
 import 'dart:async';
 
-import 'package:sprout/account/api.dart';
-import 'package:sprout/account/models/account.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/model/rest.request.dart';
 
 /// Class that provides the store of current account information
-class AccountProvider extends BaseProvider<AccountAPI> {
+class AccountProvider extends BaseProvider<AccountApi> {
   // Data store
   List<Account> _linkedAccounts = [];
   StreamSubscription<SSEBody<dynamic>>? _sub;
@@ -18,13 +17,17 @@ class AccountProvider extends BaseProvider<AccountAPI> {
   AccountProvider(super.api);
 
   Future<List<Account>> populateLinkedAccounts() async {
-    return _linkedAccounts = await api.getAccounts();
+    return _linkedAccounts = await api.accountControllerGetAccounts() ?? [];
   }
 
   /// Uses the API and edits the given account
   Future<Account> edit(Account a) async {
     notifyListeners();
-    final updated = await api.edit(a);
+    // TODO: Maybe fix this dynamic?
+    final updated = (await api.accountControllerEdit(
+      a.id,
+      AccountEditRequest(name: a.name, subType: a.subType as dynamic),
+    ))!;
     final index = _linkedAccounts.indexWhere((r) => r.id == updated.id);
     if (index != -1) _linkedAccounts[index] = updated;
     notifyListeners();
@@ -35,7 +38,7 @@ class AccountProvider extends BaseProvider<AccountAPI> {
   Future<void> manualSync() async {
     manualSyncIsRunning = true;
     notifyListeners();
-    await api.runManualSync();
+    await api.accountControllerManualSync();
   }
 
   @override

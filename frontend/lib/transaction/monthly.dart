@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/transaction/models/transaction.subscriptions.dart';
+import 'package:sprout/transaction/model/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 

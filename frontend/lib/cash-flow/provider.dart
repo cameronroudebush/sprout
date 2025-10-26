@@ -1,11 +1,10 @@
-import 'package:sprout/account/models/account.dart';
-import 'package:sprout/cash-flow/api.dart';
-import 'package:sprout/cash-flow/models/cash_flow_stats.dart';
+import 'package:sprout/api/api.dart' hide SankeyData, SankeyLink;
 import 'package:sprout/charts/sankey/models/data.dart';
+import 'package:sprout/charts/sankey/models/link.dart';
 import 'package:sprout/core/provider/base.dart';
 
 /// Class that provides the store of cash flow data
-class CashFlowProvider extends BaseProvider<CashFlowAPI> {
+class CashFlowProvider extends BaseProvider<CashFlowApi> {
   // Data store
   final Map<String, SankeyData> _sankeyDataCache = {};
   final Map<String, CashFlowStats> _statsCache = {};
@@ -24,17 +23,25 @@ class CashFlowProvider extends BaseProvider<CashFlowAPI> {
   /// Populates the sankey data for all accounts
   Future<SankeyData> getSankey(int year, int month, {int? day, Account? account}) async {
     final cacheKey = _generateCacheKey(year, month, day, account);
-    final data = await api.get(year, month, day: day, account: account);
-    _sankeyDataCache[cacheKey] = data;
+    final data = (await api.cashFlowControllerGetSankey(year, month: month, day: day, accountId: account?.id))!;
+
+    final convertedData = SankeyData(
+      nodes: data.nodes,
+      colors: data.colors as dynamic,
+      links: data.links
+          .map((e) => SankeyLink(source: e.source_, target: e.target, value: e.value, description: e.description))
+          .toList(),
+    );
+    _sankeyDataCache[cacheKey] = convertedData;
     notifyListeners();
-    return data;
+    return convertedData;
   }
 
   /// Populates cash flow stats for the given query
-  Future<CashFlowStats> getStats(int year, int month, {int? day, Account? account}) async {
+  Future<CashFlowStats?> getStats(int year, int month, {int? day, Account? account}) async {
     final cacheKey = _generateCacheKey(year, month, day, account);
-    final data = await api.getStats(year, month, day: day, account: account);
-    _statsCache[cacheKey] = data;
+    final data = await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: account?.id);
+    if (data != null) _statsCache[cacheKey] = data;
     notifyListeners();
     return data;
   }

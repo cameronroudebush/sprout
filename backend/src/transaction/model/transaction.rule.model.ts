@@ -1,6 +1,7 @@
 import { Category } from "@backend/category/model/category.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty } from "@nestjs/swagger";
 import { ManyToOne } from "typeorm";
@@ -12,8 +13,8 @@ export class TransactionRule extends DatabaseBase {
   @ApiHideProperty()
   user: User;
 
-  @DatabaseDecorators.column({ nullable: false })
-  type: "description" | "amount";
+  @DatabaseDecorators.column({ nullable: false, type: "varchar" })
+  type: TransactionRuleType;
 
   /** This defines the value of the rule. Strings support | to split content */
   @DatabaseDecorators.column({ nullable: false })
@@ -39,7 +40,7 @@ export class TransactionRule extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   enabled: boolean = true;
 
-  constructor(user: User, type: "description" | "amount", value: string, category?: Category, strict: boolean = false) {
+  constructor(user: User, type: TransactionRuleType, value: string, category?: Category, strict: boolean = false) {
     super();
     this.user = user;
     this.type = type;

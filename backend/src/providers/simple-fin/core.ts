@@ -1,4 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
 import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -34,12 +35,12 @@ export class SimpleFINProvider extends ProviderBase {
         const availableBalance = parseFloat(x["available-balance"]);
         // Try to determine our account type
         let type: Account["type"];
-        if (balance <= 0 && (name.toLowerCase().includes("credit") || name.toLowerCase().includes("card"))) type = "credit";
+        if (balance <= 0 && (name.toLowerCase().includes("credit") || name.toLowerCase().includes("card"))) type = AccountType.credit;
         else if (name.toLowerCase().includes("wallet") || name.toLowerCase().includes("staked"))
-          type = "crypto"; // Crypto is considered if it contains "wallet" or "staked"
-        else if (x.holdings.length !== 0) type = "investment";
-        else if (availableBalance !== 0) type = "depository";
-        else type = "loan";
+          type = AccountType.crypto; // Crypto is considered if it contains "wallet" or "staked"
+        else if (x.holdings.length !== 0) type = AccountType.investment;
+        else if (availableBalance !== 0) type = AccountType.depository;
+        else type = AccountType.loan;
         const account = Account.fromPlain({
           name,
           id: x.id,

@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/dialog/account_delete.dart';
 import 'package:sprout/account/dialog/account_error.dart';
-import 'package:sprout/account/models/account.dart';
+import 'package:sprout/account/model/account_extensions.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
@@ -17,14 +18,14 @@ import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/holding/models/holding.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/holding/widgets/account.dart';
+import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
 import 'package:sprout/transaction/overview.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a holding display for a specific account
 class AccountWidget extends StatefulWidget {
@@ -56,13 +57,17 @@ class _AccountWidgetState extends State<AccountWidget> {
   }
 
   /// Returns the tab content for the overview display
-  Widget _buildOverviewContent(BuildContext context, NetWorthProvider netWorthProvider, UserProvider userProvider) {
-    final chartRange = userProvider.userDefaultChartRange;
+  Widget _buildOverviewContent(
+    BuildContext context,
+    NetWorthProvider netWorthProvider,
+    UserConfigProvider userConfigProvider,
+  ) {
+    final chartRange = userConfigProvider.userDefaultChartRange;
     final data = netWorthProvider.historicalAccountData?.firstWhereOrNull((e) => e.connectedId == account.id);
     final accountDataForRange = data?.getValueByFrame(chartRange);
 
-    double accountValChange = accountDataForRange?.valueChange ?? 0;
-    double accountPercentChange = accountDataForRange?.percentChange ?? 0;
+    num accountValChange = accountDataForRange?.valueChange ?? 0;
+    num accountPercentChange = accountDataForRange?.percentChange ?? 0;
     if (account.isNegativeNetWorth) {
       accountValChange = -accountValChange;
       accountPercentChange = -accountPercentChange;
@@ -88,7 +93,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                       title: "Account Value",
                     ),
                     SproutLineChart(
-                      data: accountDataForRange.history,
+                      data: accountDataForRange.history as Map<DateTime, double>,
                       chartRange: chartRange,
                       formatValue: (value) => getFormattedCurrency(value),
                       showGrid: true,
@@ -98,7 +103,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                     ChartRangeSelector(
                       selectedChartRange: chartRange,
                       onRangeSelected: (value) {
-                        userProvider.updateChartRange(value);
+                        userConfigProvider.updateChartRange(value);
                       },
                     ),
                   ],
@@ -114,8 +119,12 @@ class _AccountWidgetState extends State<AccountWidget> {
   }
 
   /// Returns the tab content for the holdings display
-  Widget _buildHoldingsContent(BuildContext context, HoldingProvider holdingProvider, UserProvider userProvider) {
-    final chartRange = userProvider.userDefaultChartRange;
+  Widget _buildHoldingsContent(
+    BuildContext context,
+    HoldingProvider holdingProvider,
+    UserConfigProvider userConfigProvider,
+  ) {
+    final chartRange = userConfigProvider.userDefaultChartRange;
     final holdingsOT = holdingProvider.holdingsOT[account.id];
     final selectedHoldingOT = holdingsOT?.firstWhereOrNull((ot) => ot.connectedId == _selectedHolding?.id);
     final selectedHolding = holdings.firstWhereOrNull((h) => h.id == _selectedHolding?.id);
@@ -145,7 +154,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                                 title: "${selectedHolding.symbol} Value",
                               ),
                               SproutLineChart(
-                                data: holdingDataForRange.history,
+                                data: holdingDataForRange.history as Map<DateTime, double>,
                                 chartRange: chartRange,
                                 formatValue: (value) => getFormattedCurrency(value),
                                 showGrid: true,
@@ -155,7 +164,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                               ChartRangeSelector(
                                 selectedChartRange: chartRange,
                                 onRangeSelected: (value) {
-                                  userProvider.updateChartRange(value);
+                                  userConfigProvider.updateChartRange(value);
                                 },
                               ),
                             ],
@@ -181,17 +190,17 @@ class _AccountWidgetState extends State<AccountWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer4<UserProvider, AccountProvider, NetWorthProvider, HoldingProvider>(
-      builder: (context, userProvider, accountProvider, netWorthProvider, holdingProvider, child) {
+    return Consumer4<UserConfigProvider, AccountProvider, NetWorthProvider, HoldingProvider>(
+      builder: (context, userConfigProvider, accountProvider, netWorthProvider, holdingProvider, child) {
         final List<String> tabs = ["Overview", "Transactions"];
         final List<Widget> tabContents = [
-          _buildOverviewContent(context, netWorthProvider, userProvider),
+          _buildOverviewContent(context, netWorthProvider, userConfigProvider),
           _buildTransactionContent(context),
         ];
 
-        if (account.type == "investment") {
+        if (account.type == AccountTypeEnum.investment) {
           tabs.add("Holdings");
-          tabContents.add(_buildHoldingsContent(context, holdingProvider, userProvider));
+          tabContents.add(_buildHoldingsContent(context, holdingProvider, userConfigProvider));
         }
 
         return Expanded(

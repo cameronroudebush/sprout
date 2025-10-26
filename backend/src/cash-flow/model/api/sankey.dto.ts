@@ -1,4 +1,5 @@
 import { Base } from "@backend/core/model/base";
+import { ApiProperty } from "@nestjs/swagger";
 
 /** Represents a link in a Sankey diagram, showing the flow of value from a source to a target. */
 export class SankeyLink extends Base {
@@ -21,7 +22,11 @@ export class SankeyLink extends Base {
 export class SankeyData extends Base {
   nodes: string[];
   links: SankeyLink[];
-  colors: { [source: string]: string };
+  @ApiProperty({
+    type: "object",
+    additionalProperties: { type: "string" },
+  })
+  colors: Record<string, string>;
 
   constructor(nodes: string[], links: SankeyLink[], colors: SankeyData["colors"]) {
     super();

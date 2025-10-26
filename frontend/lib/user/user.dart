@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/auth/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/setup/connection.dart';
+import 'package:sprout/setup/widgets/connection.dart';
 import 'package:sprout/user/model/user_display_info.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/user/user_provider.dart';
 import 'package:sprout/user/widgets/info_card.dart';
 
 /// A page that display user account information along with other useful info
@@ -40,9 +40,9 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer5<ConfigProvider, SSEProvider, AuthProvider, AccountProvider, UserProvider>(
-      builder: (context, configProvider, sseProvider, authProvider, accountProvider, userProvider, child) {
-        final userConfig = userProvider.currentUserConfig;
+    return Consumer5<ConfigProvider, SSEProvider, UserConfigProvider, AccountProvider, UserProvider>(
+      builder: (context, configProvider, sseProvider, userConfigProvider, accountProvider, userProvider, child) {
+        final userConfig = userConfigProvider.currentUserConfig;
         if (userConfig == null) return Center(child: CircularProgressIndicator());
         final screenWidth = MediaQuery.of(context).size.width;
         final minButtonSize = screenWidth * .25;
@@ -60,7 +60,7 @@ class _UserPageState extends State<UserPage> {
             UserDisplayInfo(
               title: "Backend connection URL",
               hint: "The URL at which we are connecting to the backend.",
-              settingValue: userConfig.connectionUrl,
+              settingValue: ConfigProvider.connectionUrl,
               settingType: "string",
               icon: Icons.wifi,
               child: Center(
@@ -74,14 +74,14 @@ class _UserPageState extends State<UserPage> {
           "user information": [
             UserDisplayInfo(
               title: "Username",
-              value: authProvider.currentUser?.username ?? "N/A",
+              value: userProvider.currentUser?.username ?? "N/A",
               icon: Icons.account_circle,
               child: Center(
                 child: ButtonWidget(
                   text: "Logout",
                   minSize: minButtonSize,
                   onPressed: () async {
-                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    final authProvider = Provider.of<UserProvider>(context, listen: false);
                     await authProvider.logout();
                   },
                 ),

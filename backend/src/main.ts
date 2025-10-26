@@ -74,6 +74,8 @@ async function main() {
   // Check if we have scripts to run
   if (Configuration.isDevBuild) await checkScript();
 
+  const projName = startCase(name);
+  const swaggerTitle = `${projName} API`;
   const logger = new Logger("main");
   try {
     // Set log levels based on environment
@@ -81,7 +83,7 @@ async function main() {
 
     // Initialize the Nest app
     const app = await NestFactory.create(AppModule, {
-      logger: new SproutLogger(startCase(name), { logLevels }),
+      logger: new SproutLogger(projName, { logLevels }),
       cors: true,
     });
 
@@ -97,6 +99,7 @@ async function main() {
     if (Configuration.isDevBuild) {
       const theme = new SwaggerTheme();
       SwaggerModule.setup("api", app, createSwaggerDoc(app), {
+        customSiteTitle: swaggerTitle,
         swaggerOptions: { defaultModelsExpandDepth: -1 },
         customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
       });

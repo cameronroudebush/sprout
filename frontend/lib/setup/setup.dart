@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/auth/provider.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/setup/provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// This page contains the process for when the application is first started
 class SetupPage extends StatefulWidget {
@@ -68,8 +67,7 @@ class _SetupPageState extends State<SetupPage> {
       _message = 'Creating account...';
     });
 
-    final setupProvider = Provider.of<SetupProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -83,14 +81,14 @@ class _SetupPageState extends State<SetupPage> {
     }
 
     // First, attempt to register the new user
-    final registered = await setupProvider.api.createUser(username, password);
+    final registered = await userProvider.createUser(username, password);
 
-    if (registered) {
+    if (registered != null) {
       setState(() {
         _message = 'Account created successfully! Logging in...';
       });
       // If registration is successful, automatically log in the user
-      final loggedIn = await authProvider.login(username, password);
+      final loggedIn = await userProvider.login(username, password);
 
       if (loggedIn != null) {
         setState(() {

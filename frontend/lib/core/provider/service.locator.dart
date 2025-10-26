@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/provider.dart';
-import 'package:sprout/auth/provider.dart';
 import 'package:sprout/cash-flow/provider.dart';
 import 'package:sprout/category/provider.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/api/base.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/net-worth/provider.dart';
-import 'package:sprout/setup/provider.dart';
 import 'package:sprout/transaction-rule/provider.dart';
 import 'package:sprout/transaction/provider.dart';
-import 'package:sprout/user/provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// This class provides lookups to other providers
 class ServiceLocator {
@@ -29,14 +27,15 @@ class ServiceLocator {
   }
 
   /// Creates a ChangeNotifierProvider for the given type.
-  static ChangeNotifierProvider<T> createProvider<T extends BaseProvider<BaseAPI>>() {
+  static ChangeNotifierProvider<T> createProvider<T extends BaseProvider>() {
     final prov = _sl<T>();
     return ChangeNotifierProvider.value(value: prov);
   }
 
   /// All provider types that are registered with GetIt.
   static const _allProviderTypes = <Type>[
-    AuthProvider,
+    UserProvider,
+    UserConfigProvider,
     ConfigProvider,
     UserProvider,
     AccountProvider,
@@ -46,7 +45,6 @@ class ServiceLocator {
     TransactionRuleProvider,
     CategoryProvider,
     HoldingProvider,
-    SetupProvider,
     CashFlowProvider,
   ];
 

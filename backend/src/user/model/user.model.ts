@@ -14,10 +14,10 @@ type JWTContent = { username: string };
 @DatabaseDecorators.entity()
 export class User extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
-  firstName: string;
+  firstName?: string;
 
   @DatabaseDecorators.column({ nullable: true })
-  lastName: string;
+  lastName?: string;
 
   @DatabaseDecorators.column()
   username: string;

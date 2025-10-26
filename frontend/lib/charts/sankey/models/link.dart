@@ -2,7 +2,7 @@
 class SankeyLink {
   final String source;
   final String target;
-  final double value;
+  final num value;
   final String? description;
 
   SankeyLink({required this.source, required this.target, required this.value, this.description});

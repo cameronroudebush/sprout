@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/auth/provider.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/model/user.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// A stateful widget for the login page.
 class LoginPage extends StatefulWidget {
@@ -37,11 +37,11 @@ class _LoginPageState extends State<LoginPage> {
     _usernameController.addListener(_updateButtonState);
     _passwordController.addListener(_updateButtonState);
     // Attempt initial login
-    final authProvider = ServiceLocator.get<AuthProvider>();
+    final userProvider = ServiceLocator.get<UserProvider>();
     setState(() {
       _loginIsRunning = true;
     });
-    authProvider
+    userProvider
         .checkInitialLoginStatus()
         .then((user) {
           setState(() {
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
 
   /// Handles the login process when the login button is pressed.
   Future<void> _login() async {
-    final authProvider = ServiceLocator.get<AuthProvider>();
+    final userProvider = ServiceLocator.get<UserProvider>();
     TextInput.finishAutofillContext();
     if (_usernameController.text == "" || _passwordController.text == "") {
       return;
@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _loginIsRunning = true;
       });
-      user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
+      user = await userProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
       // Successful login? Request data and go home
       _usernameController.clear();
       _passwordController.clear();

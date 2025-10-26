@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/charts/models/chart_range.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/net-worth/provider.dart';
 import 'package:sprout/net-worth/widgets/current_net_worth.dart';
@@ -13,10 +13,10 @@ class NetWorthOverviewWidget extends StatelessWidget {
   final bool showCard;
 
   /// The current range of data we wish to display
-  final ChartRange selectedChartRange;
+  final ChartRangeEnum selectedChartRange;
 
   /// Whenever we have a new range selected, this will be fired
-  final ValueChanged<ChartRange>? onRangeSelected;
+  final ValueChanged<ChartRangeEnum>? onRangeSelected;
 
   /// If we should clarify what this number is
   final bool showNetWorthText;

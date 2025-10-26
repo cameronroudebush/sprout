@@ -1,22 +1,21 @@
-/// An enum that provides the available chart ranges for the user to select
-enum ChartRange { oneDay, sevenDays, oneMonth, threeMonths, sixMonths, oneYear, allTime }
+import "package:sprout/api/api.dart";
 
-/// Utility class for manipulating data with @ChartRange
+/// Utility class for manipulating data with [ChartRangeEnum]
 class ChartRangeUtility {
   /// Given a chart range, converts it into a duration calculation
-  static Duration getDurationForRange(ChartRange range) {
+  static Duration getDurationForRange(ChartRangeEnum range) {
     switch (range) {
-      case ChartRange.oneDay:
+      case ChartRangeEnum.oneDay:
         return const Duration(days: 2);
-      case ChartRange.sevenDays:
+      case ChartRangeEnum.sevenDays:
         return const Duration(days: 7);
-      case ChartRange.oneMonth:
+      case ChartRangeEnum.oneMonth:
         return const Duration(days: 30);
-      case ChartRange.threeMonths:
+      case ChartRangeEnum.threeMonths:
         return const Duration(days: 90);
-      case ChartRange.sixMonths:
+      case ChartRangeEnum.sixMonths:
         return const Duration(days: 180);
-      case ChartRange.oneYear:
+      case ChartRangeEnum.oneYear:
       default:
         return const Duration(days: 365);
     }
@@ -24,56 +23,58 @@ class ChartRangeUtility {
 
   /// Given a chart range and a number of spots to display, returns how many
   ///   elements should be displayed per N days for that range.
-  static double getChartInterval(ChartRange range, int numberOfSpots) {
+  static double getChartInterval(ChartRangeEnum range, int numberOfSpots) {
     switch (range) {
-      case ChartRange.oneDay:
-      case ChartRange.sevenDays:
+      case ChartRangeEnum.oneDay:
+      case ChartRangeEnum.sevenDays:
         return 1;
-      case ChartRange.oneMonth:
+      case ChartRangeEnum.oneMonth:
         return 7;
-      case ChartRange.threeMonths:
+      case ChartRangeEnum.threeMonths:
       default:
         return 30;
     }
   }
 
   /// Given a chart range, returns the date format to use for displaying that chart data
-  static String getDateFormat(ChartRange chartRange) {
-    switch (chartRange) {
-      case ChartRange.oneDay:
-      case ChartRange.sevenDays:
+  static String getDateFormat(ChartRangeEnum range) {
+    switch (range) {
+      case ChartRangeEnum.oneDay:
+      case ChartRangeEnum.sevenDays:
         return 'EEE';
-      case ChartRange.oneMonth:
-      case ChartRange.threeMonths:
+      case ChartRangeEnum.oneMonth:
+      case ChartRangeEnum.threeMonths:
       default:
         return 'MMM dd';
     }
   }
 
   /// If we have enough data for this chart to be curved for this range
-  static bool shouldBeCurved(ChartRange chartRange) {
+  static bool shouldBeCurved(ChartRangeEnum range) {
     return false;
   }
 
   /// Returns the given chart range as a pretty string
   ///
   /// @useExtendedPeriodString If we should display an extended version of the string (1 month vs 1M)
-  static String asPretty(ChartRange range, {bool useExtendedPeriodString = false}) {
+  static String asPretty(ChartRangeEnum range, {bool useExtendedPeriodString = false}) {
     switch (range) {
-      case ChartRange.oneDay:
+      case ChartRangeEnum.oneDay:
         return useExtendedPeriodString ? "1 day" : "1D";
-      case ChartRange.sevenDays:
+      case ChartRangeEnum.sevenDays:
         return useExtendedPeriodString ? "1 week" : "1W";
-      case ChartRange.oneMonth:
+      case ChartRangeEnum.oneMonth:
         return useExtendedPeriodString ? "1 month" : "1M";
-      case ChartRange.threeMonths:
+      case ChartRangeEnum.threeMonths:
         return useExtendedPeriodString ? "3 months" : "3M";
-      case ChartRange.sixMonths:
+      case ChartRangeEnum.sixMonths:
         return useExtendedPeriodString ? "6 months" : "6M";
-      case ChartRange.oneYear:
+      case ChartRangeEnum.oneYear:
         return useExtendedPeriodString ? "1 year" : "1Y";
-      case ChartRange.allTime:
+      case ChartRangeEnum.allTime:
         return useExtendedPeriodString ? "All time" : "All";
+      default:
+        return "";
     }
   }
 }

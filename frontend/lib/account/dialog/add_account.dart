@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/models/account.dart';
 import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/selectable_accounts.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/models/finance_provider_config.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/dialog.dart';
@@ -22,10 +21,10 @@ class AddAccountDialog extends StatefulWidget {
 
 class _AddAccountDialogState extends State<AddAccountDialog> {
   /// Currently selected provider for options
-  FinanceProviderConfig? _selectedProvider;
+  ProviderConfig? _selectedProvider;
 
   /// A map of provider names to accounts available to add
-  Map<String, List<Account>> _accountsPerProvider = {};
+  final Map<String, List<Account>> _accountsPerProvider = {};
 
   /// Selected accounts that we wish to add
   List<Account> _selectedAccounts = [];
@@ -34,7 +33,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   String? _gettingAccountsError;
   bool _isAddingAccounts = false;
 
-  Future<void> _setProvider(FinanceProviderConfig providerConfig) async {
+  Future<void> _setProvider(ProviderConfig providerConfig) async {
     setState(() {
       _selectedProvider = providerConfig;
     });
@@ -43,14 +42,14 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   }
 
   /// Grabs all accounts for the given provider from the API and adds them to our internal map
-  Future<void> _setAccountsForProvider(FinanceProviderConfig providerConfig) async {
+  Future<void> _setAccountsForProvider(ProviderConfig providerConfig) async {
     setState(() {
       _gettingAccounts = true;
     });
 
     try {
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
-      final accounts = await accountProvider.api.getProviderAccounts(providerConfig);
+      final accounts = (await accountProvider.api.accountControllerGetProviderAccounts(providerConfig.name))!;
       _accountsPerProvider[providerConfig.name] = accounts;
     } catch (e) {
       setState(() {
@@ -94,7 +93,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
         setState(() {
           _isAddingAccounts = true;
         });
-        await accountProvider.api.linkProviderAccounts(_selectedProvider!, _selectedAccounts);
+        await accountProvider.api.accountControllerLinkProviderAccounts(_selectedProvider!.name, _selectedAccounts);
         await accountProvider.populateLinkedAccounts();
         // Close dialog
         Navigator.of(context).pop();
@@ -104,7 +103,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   }
 
   /// Displays the accounts for selection for the given provider
-  Widget _getAccountsForProvider(BuildContext context, FinanceProviderConfig providerConfig) {
+  Widget _getAccountsForProvider(BuildContext context, ProviderConfig providerConfig) {
     final accounts = _accountsPerProvider[providerConfig.name] ?? [];
 
     return Column(
