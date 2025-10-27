@@ -30,6 +30,24 @@ class _LoginPageState extends State<LoginPage> {
   // Message to display login status or errors.
   String _message = '';
   bool _loginIsRunning = false;
+  bool _isLoadingData = false;
+
+  /// Fires after our login is complete
+  Future<void> _loginComplete(User? user) async {
+    if (user != null) {
+      _usernameController.clear();
+      _passwordController.clear();
+      setState(() {
+        _loginIsRunning = false;
+        _isLoadingData = true;
+      });
+      await BaseProvider.updateAllData();
+      setState(() {
+        _isLoadingData = false;
+      });
+      SproutNavigator.redirect("home");
+    }
+  }
 
   @override
   void initState() {
@@ -43,13 +61,8 @@ class _LoginPageState extends State<LoginPage> {
     });
     userProvider
         .checkInitialLoginStatus()
-        .then((user) {
-          setState(() {
-            _loginIsRunning = false;
-          });
-          if (user != null) {
-            SproutNavigator.redirect("home");
-          }
+        .then((user) async {
+          await _loginComplete(user);
         })
         .onError((Object error, StackTrace stackTrace) {
           setState(() {
@@ -78,10 +91,7 @@ class _LoginPageState extends State<LoginPage> {
       });
       user = await userProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
       // Successful login? Request data and go home
-      _usernameController.clear();
-      _passwordController.clear();
-      BaseProvider.updateAllData();
-      SproutNavigator.redirect("home");
+      await _loginComplete(user);
     } finally {
       if (user == null) {
         setState(() {
@@ -92,9 +102,67 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Widget _buildLoginForm(BuildContext context, ConfigProvider configProvider) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        AutofillGroup(
+          child: Column(
+            children: [
+              TextField(
+                controller: _usernameController,
+                keyboardType: TextInputType.text,
+                autofillHints: const [AutofillHints.username],
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
+              ),
+              const SizedBox(height: 20.0),
+              TextField(
+                controller: _passwordController,
+                keyboardType: TextInputType.visiblePassword,
+                autofillHints: const [AutofillHints.password],
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
+                obscureText: true,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (String value) {
+                  _login();
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 30.0),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 640),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * .5,
+            child: ButtonWidget(
+              text: "Login",
+              icon: _loginIsRunning ? Icons.hourglass_full : null,
+              onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
+                  ? null
+                  : _login,
+            ),
+          ),
+        ),
+        if (_message.isNotEmpty) const SizedBox(height: 20.0),
+        if (_message.isNotEmpty)
+          TextWidget(
+            referenceSize: 1.2,
+            style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
+            text: _message,
+          ),
+        const SizedBox(height: 20.0),
+        TextWidget(referenceSize: .9, text: configProvider.unsecureConfig?.version ?? ""),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
         return Center(
@@ -116,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                       padding: EdgeInsets.only(top: 24),
                       child: TextWidget(
                         referenceSize: 2,
-                        text: 'Welcome Back!',
+                        text: !_isLoadingData ? 'Welcome Back!' : "Getting your data ready...",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -125,62 +193,11 @@ class _LoginPageState extends State<LoginPage> {
                       constraints: BoxConstraints(maxWidth: 640),
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * .7,
-                        child: AutofillGroup(
-                          child: Column(
-                            children: [
-                              TextField(
-                                controller: _usernameController,
-                                keyboardType: TextInputType.text,
-                                autofillHints: const [AutofillHints.username],
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                decoration: const InputDecoration(
-                                  labelText: 'Username',
-                                  prefixIcon: Icon(Icons.person),
-                                ),
-                              ),
-                              const SizedBox(height: 20.0),
-                              TextField(
-                                controller: _passwordController,
-                                keyboardType: TextInputType.visiblePassword,
-                                autofillHints: const [AutofillHints.password],
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
-                                obscureText: true,
-                                textInputAction: TextInputAction.done,
-                                onSubmitted: (String value) {
-                                  _login();
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
+                        child: _isLoadingData
+                            ? Center(child: CircularProgressIndicator())
+                            : _buildLoginForm(context, configProvider),
                       ),
                     ),
-                    const SizedBox(height: 30.0),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 640),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * .5,
-                        child: ButtonWidget(
-                          text: "Login",
-                          icon: _loginIsRunning ? Icons.hourglass_full : null,
-                          onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
-                              ? null
-                              : _login,
-                        ),
-                      ),
-                    ),
-                    if (_message.isNotEmpty) const SizedBox(height: 20.0),
-                    if (_message.isNotEmpty)
-                      TextWidget(
-                        referenceSize: 1.2,
-                        style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
-                        text: _message,
-                      ),
-                    const SizedBox(height: 20.0),
-                    TextWidget(referenceSize: .9, text: configProvider.unsecureConfig?.version ?? ""),
                   ],
                 ),
               ),

@@ -51,6 +51,7 @@ part 'model/chart_range_enum.dart';
 part 'model/entity_history.dart';
 part 'model/entity_history_data_point.dart';
 part 'model/holding.dart';
+part 'model/holding_history_by_account.dart';
 part 'model/institution.dart';
 part 'model/jwt_login_request.dart';
 part 'model/model_sync.dart';

@@ -6,7 +6,7 @@ import 'package:sprout/account/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/model/rest.request.dart';
+import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/user/user_provider.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
@@ -16,11 +16,11 @@ class SSEProvider extends BaseProvider<CoreApi> {
   bool _isConnected = false;
   Timer? _reconnectTimer; // Timer for delayed reconnect attempts
   /// Subscription for incoming events
-  StreamSubscription<SSEBody<dynamic>>? _sub;
+  StreamSubscription<SSEData>? _sub;
 
   // Holds what to call when messages come in
-  final StreamController<SSEBody> _eventController = StreamController.broadcast();
-  Stream<SSEBody> get onEvent => _eventController.stream;
+  final StreamController<SSEData> _eventController = StreamController.broadcast();
+  Stream<SSEData> get onEvent => _eventController.stream;
 
   // Back-off strategy variables
   int _reconnectAttempts = 0;
@@ -35,13 +35,13 @@ class SSEProvider extends BaseProvider<CoreApi> {
   @override
   Future<void> onInit() async {
     _sub = onEvent.listen((data) async {
-      if (data.queue == "sync") {
+      if (data.event == SSEDataEventEnum.sync_) {
         await BaseProvider.updateAllData(showSnackbar: true);
         // Update manual tracking incase that's what this was from
         final accountProvider = ServiceLocator.get<AccountProvider>();
         accountProvider.manualSyncIsRunning = false;
         accountProvider.notifyListeners();
-      } else if (data.queue == "force-update") {
+      } else if (data.event == SSEDataEventEnum.forceUpdate) {
         await BaseProvider.updateAllData(showSnackbar: false);
       }
     });
@@ -55,6 +55,8 @@ class SSEProvider extends BaseProvider<CoreApi> {
     final url = Uri.parse('${api.apiClient.basePath}/sse');
     final request = http.Request('GET', url);
 
+    final currentJwt = await SecureStorageProvider.getValue(SecureStorageProvider.jwtKey);
+    if (currentJwt != null) request.headers.addAll({'Authorization': 'Bearer $currentJwt'});
     request.headers.addAll({'Accept': 'text/event-stream', 'Cache-Control': 'no-cache'});
 
     final response = await client.send(request);
@@ -110,7 +112,7 @@ class SSEProvider extends BaseProvider<CoreApi> {
 
       _sseSubscription = sseStream.listen(
         (event) {
-          final outEvent = SSEBody.fromJson(event);
+          final outEvent = SSEData.fromJson(event)!;
           _eventController.add(outEvent);
         },
         onError: (error) {

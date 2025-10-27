@@ -21,8 +21,8 @@ class LineChartDataProcessor {
         .where((entry) => entry.key.isAfter(cutoffDate) || entry.key.isAtSameMomentAs(cutoffDate))
         .map((entry) => MapEntry(entry.key, entry.value))
         .toList()
-        .cast<MapEntry<DateTime, double>>()
-        .fold<Map<DateTime, double>>({}, (map, entry) {
+        .cast<MapEntry<DateTime, num>>()
+        .fold<Map<DateTime, num>>({}, (map, entry) {
           map[entry.key] = double.parse(entry.value.toStringAsFixed(2));
           return map;
         });

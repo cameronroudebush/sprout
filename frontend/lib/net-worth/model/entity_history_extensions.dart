@@ -25,7 +25,11 @@ extension EntityHistoryExtensions on EntityHistory {
 
   /// Returns the history as a Map<DateTime, num>
   Map<DateTime, num> get historicalDataDate {
-    return historicalData.map((key, value) => MapEntry(DateTime.parse(key), value));
+    return historicalData.map((key, value) {
+      final ms = int.parse(key);
+      final date = DateTime.fromMillisecondsSinceEpoch(ms);
+      return MapEntry(date, value);
+    });
   }
 }
 
@@ -33,6 +37,10 @@ extension EntityHistoryExtensions on EntityHistory {
 extension EntityHistoryDataPointExtensions on EntityHistoryDataPoint {
   /// Returns the history as a Map<DateTime, num>
   Map<DateTime, num> get historyDate {
-    return history.map((key, value) => MapEntry(DateTime.parse(key), value));
+    return history.map((key, value) {
+      final ms = int.parse(key);
+      final date = DateTime.fromMillisecondsSinceEpoch(ms);
+      return MapEntry(date, value);
+    });
   }
 }

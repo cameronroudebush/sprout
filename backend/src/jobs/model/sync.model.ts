@@ -12,5 +12,5 @@ export class Sync extends DatabaseBase {
   declare status: "in-progress" | "complete" | "failed";
 
   @DatabaseDecorators.column({ nullable: true })
-  declare failureReason: string;
+  declare failureReason?: string;
 }

@@ -18,7 +18,7 @@ export class NetWorthController {
     summary: "Get net worth.",
     description: "Retrieves the current net worth for the authenticated user.",
   })
-  @ApiOkResponse({ description: "Net worth calculated successfully.", type: Number })
+  @ApiOkResponse({ description: "Net worth calculated successfully.", schema: { type: "number", format: "double" } })
   async getNetWorth(@CurrentUser() user: User) {
     // Calculate net worth from all accounts
     const accounts = await Account.find({ where: { user: { id: user.id } } });

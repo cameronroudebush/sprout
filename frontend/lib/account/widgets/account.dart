@@ -93,7 +93,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                       title: "Account Value",
                     ),
                     SproutLineChart(
-                      data: accountDataForRange.history as Map<DateTime, double>,
+                      data: accountDataForRange.historyDate,
                       chartRange: chartRange,
                       formatValue: (value) => getFormattedCurrency(value),
                       showGrid: true,
@@ -154,7 +154,7 @@ class _AccountWidgetState extends State<AccountWidget> {
                                 title: "${selectedHolding.symbol} Value",
                               ),
                               SproutLineChart(
-                                data: holdingDataForRange.history as Map<DateTime, double>,
+                                data: holdingDataForRange.historyDate,
                                 chartRange: chartRange,
                                 formatValue: (value) => getFormattedCurrency(value),
                                 showGrid: true,

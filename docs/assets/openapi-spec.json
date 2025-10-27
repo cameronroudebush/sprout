@@ -1236,7 +1236,7 @@
     },
     "/holding/history": {
       "get": {
-        "description": "Retrieves holding history for all available holdings of the current user. This is useful for displaying the holdings value over time.",
+        "description": "Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.",
         "operationId": "HoldingController_getHoldingHistory",
         "parameters": [],
         "responses": {
@@ -1245,7 +1245,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/HoldingHistoryByAccount"
                 }
               }
             }
@@ -1276,7 +1276,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "number"
+                  "type": "number",
+                  "format": "double"
                 }
               }
             }
@@ -1546,7 +1547,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.0.7-21-g6b80de4",
+    "version": "v0.0.7-22-g3aa4240",
     "contact": {}
   },
   "tags": [
@@ -1815,14 +1816,6 @@
               }
             ]
           },
-          "user": {
-            "description": "The user this account belongs to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              }
-            ]
-          },
           "currency": {
             "type": "string",
             "description": "The currency this account uses"
@@ -1856,7 +1849,6 @@
           "name",
           "provider",
           "institution",
-          "user",
           "currency",
           "balance",
           "availableBalance",
@@ -1867,26 +1859,11 @@
         "type": "object",
         "properties": {
           "subType": {
-            "type": "string",
-            "description": "The specific subtype of the account",
-            "enum": [
-              "Savings",
-              "Checking",
-              "HYSA",
-              "401K",
-              "Brokerage",
-              "IRA",
-              "HSA",
-              "Student",
-              "Mortgage",
-              "Personal",
-              "Auto",
-              "Travel",
-              "Cash Back",
-              "Wallet",
-              "Staking"
-            ],
-            "example": "checking"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountSubTypeEnum"
+              }
+            ]
           },
           "name": {
             "type": "string"
@@ -2161,8 +2138,7 @@
         "required": [
           "id",
           "time",
-          "status",
-          "failureReason"
+          "status"
         ]
       },
       "ProviderConfig": {
@@ -2281,6 +2257,23 @@
           "purchasePrice",
           "shares",
           "symbol"
+        ]
+      },
+      "HoldingHistoryByAccount": {
+        "type": "object",
+        "properties": {
+          "history": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntityHistory"
+              }
+            }
+          }
+        },
+        "required": [
+          "history"
         ]
       },
       "EntityHistoryDataPoint": {

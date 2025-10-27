@@ -18,7 +18,7 @@ class HoldingApi {
 
   /// Get holding history.
   ///
-  /// Retrieves holding history for all available holdings of the current user. This is useful for displaying the holdings value over time.
+  /// Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo() async {
@@ -48,8 +48,8 @@ class HoldingApi {
 
   /// Get holding history.
   ///
-  /// Retrieves holding history for all available holdings of the current user. This is useful for displaying the holdings value over time.
-  Future<Object?> holdingControllerGetHoldingHistory() async {
+  /// Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.
+  Future<HoldingHistoryByAccount?> holdingControllerGetHoldingHistory() async {
     final response = await holdingControllerGetHoldingHistoryWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -58,7 +58,7 @@ class HoldingApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Object',) as Object;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'HoldingHistoryByAccount',) as HoldingHistoryByAccount;
     
     }
     return null;

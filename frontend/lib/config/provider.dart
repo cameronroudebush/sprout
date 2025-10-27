@@ -88,10 +88,10 @@ class ConfigProvider extends BaseProvider<ConfigApi> {
       // Web can base connections on the uri of the current connection
       Uri uri = Uri.base;
       final leading = '${uri.scheme}://${uri.host}';
-      return kDebugMode ? '$leading:8001' : leading;
+      return "${kDebugMode ? '$leading:8001' : leading}/api";
     } else {
       // Apps must specify the connection URL so we know where to look
-      return (await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey))!;
+      return "${(await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey))!}/api";
     }
   }
 

@@ -18,7 +18,6 @@ class Account {
     required this.name,
     required this.provider,
     required this.institution,
-    required this.user,
     required this.currency,
     required this.balance,
     required this.availableBalance,
@@ -44,9 +43,6 @@ class Account {
 
   /// The institution associated to this account
   Institution institution;
-
-  /// The user this account belongs to
-  User user;
 
   /// The currency this account uses
   String currency;
@@ -76,7 +72,6 @@ class Account {
     other.name == name &&
     other.provider == provider &&
     other.institution == institution &&
-    other.user == user &&
     other.currency == currency &&
     other.balance == balance &&
     other.availableBalance == availableBalance &&
@@ -91,7 +86,6 @@ class Account {
     (name.hashCode) +
     (provider.hashCode) +
     (institution.hashCode) +
-    (user.hashCode) +
     (currency.hashCode) +
     (balance.hashCode) +
     (availableBalance.hashCode) +
@@ -99,7 +93,7 @@ class Account {
     (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, subType=$subType, name=$name, provider=$provider, institution=$institution, user=$user, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
+  String toString() => 'Account[id=$id, subType=$subType, name=$name, provider=$provider, institution=$institution, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -112,7 +106,6 @@ class Account {
       json[r'name'] = this.name;
       json[r'provider'] = this.provider;
       json[r'institution'] = this.institution;
-      json[r'user'] = this.user;
       json[r'currency'] = this.currency;
       json[r'balance'] = this.balance;
       json[r'availableBalance'] = this.availableBalance;
@@ -149,7 +142,6 @@ class Account {
         name: mapValueOfType<String>(json, r'name')!,
         provider: mapValueOfType<String>(json, r'provider')!,
         institution: Institution.fromJson(json[r'institution'])!,
-        user: User.fromJson(json[r'user'])!,
         currency: mapValueOfType<String>(json, r'currency')!,
         balance: num.parse('${json[r'balance']}'),
         availableBalance: num.parse('${json[r'availableBalance']}'),
@@ -206,7 +198,6 @@ class Account {
     'name',
     'provider',
     'institution',
-    'user',
     'currency',
     'balance',
     'availableBalance',

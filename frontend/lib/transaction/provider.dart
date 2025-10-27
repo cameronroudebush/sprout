@@ -41,7 +41,7 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
     int? endIndex,
     bool shouldNotify = true,
     Account? account,
-    dynamic category,
+    String? category,
     String? description,
     DateTime? date,
   }) async {

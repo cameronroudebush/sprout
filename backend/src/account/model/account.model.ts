@@ -5,7 +5,8 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { Institution } from "@backend/institution/model/institution.model";
 import { User } from "@backend/user/model/user.model";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
@@ -23,6 +24,8 @@ export class Account extends DatabaseBase {
 
   /** The user this account belongs to */
   @ManyToOne(() => User, (u) => u.id)
+  @ApiHideProperty()
+  @Exclude()
   user: User;
 
   /** The currency this account uses */
