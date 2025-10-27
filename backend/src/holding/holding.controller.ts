@@ -3,6 +3,7 @@ import { AccountType } from "@backend/account/model/account.type";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { EntityHistory } from "@backend/core/model/api/entity.history.dto";
+import { HoldingHistoryByAccount } from "@backend/holding/model/api/holding.history.acc.dto";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { User } from "@backend/user/model/user.model";
@@ -28,9 +29,10 @@ export class HoldingController {
   @Get("history")
   @ApiOperation({
     summary: "Get holding history.",
-    description: "Retrieves holding history for all available holdings of the current user. This is useful for displaying the holdings value over time.",
+    description:
+      "Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.",
   })
-  @ApiOkResponse({ description: "Holding history found successfully.", type: Object })
+  @ApiOkResponse({ description: "Holding history found successfully.", type: HoldingHistoryByAccount })
   async getHoldingHistory(@CurrentUser() user: User) {
     // Accounts that have holdings
     const accounts = await Account.find({ where: { user: { id: user.id }, type: AccountType.investment } });
@@ -48,8 +50,10 @@ export class HoldingController {
       }),
     );
     // Merge all the account-specific holding histories into a single object
-    return historyByAcc.reduce((acc, current) => {
-      return { ...acc, ...current };
-    }, {});
+    return HoldingHistoryByAccount.fromPlain({
+      history: historyByAcc.reduce((acc, current) => {
+        return { ...acc, ...current };
+      }, {}),
+    });
   }
 }

@@ -16,7 +16,7 @@ class ModelSync {
     required this.id,
     required this.time,
     required this.status,
-    required this.failureReason,
+    this.failureReason,
   });
 
   String id;
@@ -26,7 +26,13 @@ class ModelSync {
 
   Object status;
 
-  String failureReason;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? failureReason;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ModelSync &&
@@ -41,7 +47,7 @@ class ModelSync {
     (id.hashCode) +
     (time.hashCode) +
     (status.hashCode) +
-    (failureReason.hashCode);
+    (failureReason == null ? 0 : failureReason!.hashCode);
 
   @override
   String toString() => 'ModelSync[id=$id, time=$time, status=$status, failureReason=$failureReason]';
@@ -51,7 +57,11 @@ class ModelSync {
       json[r'id'] = this.id;
       json[r'time'] = this.time.toUtc().toIso8601String();
       json[r'status'] = this.status;
+    if (this.failureReason != null) {
       json[r'failureReason'] = this.failureReason;
+    } else {
+      json[r'failureReason'] = null;
+    }
     return json;
   }
 
@@ -77,7 +87,7 @@ class ModelSync {
         id: mapValueOfType<String>(json, r'id')!,
         time: mapDateTime(json, r'time', r'')!,
         status: mapValueOfType<Object>(json, r'status')!,
-        failureReason: mapValueOfType<String>(json, r'failureReason')!,
+        failureReason: mapValueOfType<String>(json, r'failureReason'),
       );
     }
     return null;
@@ -128,7 +138,6 @@ class ModelSync {
     'id',
     'time',
     'status',
-    'failureReason',
   };
 }
 

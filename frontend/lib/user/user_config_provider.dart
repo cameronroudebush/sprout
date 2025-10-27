@@ -6,8 +6,7 @@ class UserConfigProvider extends BaseProvider<UserConfigApi> {
   UserConfig? _currentUserConfig;
 
   UserConfig? get currentUserConfig => _currentUserConfig;
-  ChartRangeEnum get userDefaultChartRange =>
-      ChartRangeEnum.values.firstWhere((e) => e.value == (_currentUserConfig?.netWorthRange ?? "sevenDays"));
+  ChartRangeEnum get userDefaultChartRange => _currentUserConfig!.netWorthRange;
 
   UserConfigProvider(super.api);
 

@@ -43,7 +43,6 @@ abstract class BaseProvider<T> with ChangeNotifier {
 
   /// When this provider is initialized this will be called. Note that no auth will be ready!
   Future<void> onInit() async {
-    await updateData();
     isInitialized = true;
     notifyListeners();
   }

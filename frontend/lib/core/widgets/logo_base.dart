@@ -13,7 +13,7 @@ abstract class LogoBaseWidget<T> extends StatefulWidget {
 
   /// Returns the backend image proxy url without any query context.
   String getBackendProxy() {
-    return "${defaultApiClient.basePath}/api/image-proxy";
+    return "${defaultApiClient.basePath}/image-proxy";
   }
 
   /// Returns the logo URL that we wish to render

@@ -9,7 +9,6 @@ import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/user/user_provider.dart';
 
 /// A widget that displays all accounts
 ///
@@ -39,10 +38,10 @@ class AccountsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AccountProvider, UserProvider>(
-      builder: (context, accountProvider, userProvider, child) {
+    return Consumer<AccountProvider>(
+      builder: (context, accountProvider, child) {
         final mediaQuery = MediaQuery.of(context);
-        if (accountProvider.isLoading || userProvider.isLoading) {
+        if (accountProvider.isLoading) {
           return SizedBox(
             height: mediaQuery.size.height * .8,
             width: double.infinity,

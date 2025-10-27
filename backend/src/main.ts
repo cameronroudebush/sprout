@@ -86,7 +86,8 @@ async function main() {
       logger: new SproutLogger(projName, { logLevels }),
       cors: true,
     });
-
+    // All endpoints live under /api
+    app.setGlobalPrefix("api");
     // Enable validation
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     // Enable class-transformer for response serialization

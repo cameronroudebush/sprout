@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/model/rest.request.dart';
 
 /// Class that provides the store of current account information
 class AccountProvider extends BaseProvider<AccountApi> {
   // Data store
   List<Account> _linkedAccounts = [];
-  StreamSubscription<SSEBody<dynamic>>? _sub;
+  StreamSubscription<SSEData>? _sub;
   bool manualSyncIsRunning = false;
 
   // Getters to not allow editing the internal store
@@ -23,11 +22,7 @@ class AccountProvider extends BaseProvider<AccountApi> {
   /// Uses the API and edits the given account
   Future<Account> edit(Account a) async {
     notifyListeners();
-    // TODO: Maybe fix this dynamic?
-    final updated = (await api.accountControllerEdit(
-      a.id,
-      AccountEditRequest(name: a.name, subType: a.subType as dynamic),
-    ))!;
+    final updated = (await api.accountControllerEdit(a.id, AccountEditRequest(name: a.name, subType: a.subType)))!;
     final index = _linkedAccounts.indexWhere((r) => r.id == updated.id);
     if (index != -1) _linkedAccounts[index] = updated;
     notifyListeners();

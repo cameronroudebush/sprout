@@ -149,13 +149,13 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     setState(() => _isLoadingMore = true);
 
     // Allow the weird way of requesting category data
-    dynamic categoryFilter;
+    String? categoryFilter;
     if (_filteredCategory == CategoryDropdown.fakeAllCategory) {
       categoryFilter = null;
     } else if (_filteredCategory == null) {
       categoryFilter = "Unknown";
     } else {
-      categoryFilter = _filteredCategory;
+      categoryFilter = _filteredCategory?.id;
     }
 
     // Request our data

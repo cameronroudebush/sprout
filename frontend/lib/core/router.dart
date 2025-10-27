@@ -137,7 +137,7 @@ class SproutRouter {
         final state = GoRouter.of(context).state;
         final accountId = state.uri.queryParameters["acc"];
         final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
-        void redirect() => SproutNavigator.redirect("accounts", queryParameters: {"acc-type": account?.type});
+        void redirect() => SproutNavigator.redirect("accounts", queryParameters: {"acc-type": account?.type.value});
         // Back to accounts
         return Expanded(
           child: Padding(

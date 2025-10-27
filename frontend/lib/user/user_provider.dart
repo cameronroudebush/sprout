@@ -15,6 +15,12 @@ class UserProvider extends BaseProvider<UserApi> {
 
   UserProvider(super.api);
 
+  /// Sets the JWT into the API client and saves it to the secure storage for auto re-login
+  Future<void> _applyJWT(String jwt) async {
+    await SecureStorageProvider.saveValue(SecureStorageProvider.jwtKey, jwt);
+    (defaultApiClient.authentication as HttpBearerAuth).accessToken = jwt;
+  }
+
   /// Used to try to auto login if we have a JWT available
   Future<User?> checkInitialLoginStatus() async {
     // Don't try to auto login when in setup if the user reset their db.
@@ -22,11 +28,10 @@ class UserProvider extends BaseProvider<UserApi> {
     if (configProvider.unsecureConfig?.firstTimeSetupPosition == "setup") return null;
     final currentJwt = await SecureStorageProvider.getValue(SecureStorageProvider.jwtKey);
     if (currentJwt != null) {
-      final loginResponse = await api.userControllerLoginWithJWT(JWTLoginRequest(jwt: ""));
+      final loginResponse = await api.userControllerLoginWithJWT(JWTLoginRequest(jwt: currentJwt));
       if (loginResponse != null) {
         _currentUser = loginResponse.user;
-        SecureStorageProvider.saveValue(SecureStorageProvider.jwtKey, loginResponse.jwt);
-        (defaultApiClient.authentication as HttpBearerAuth).accessToken = loginResponse.jwt;
+        await _applyJWT(loginResponse.jwt);
         _isLoggedIn = true;
       }
     }
@@ -40,8 +45,7 @@ class UserProvider extends BaseProvider<UserApi> {
     );
     if (loginResponse != null) {
       _currentUser = loginResponse.user;
-      SecureStorageProvider.saveValue(SecureStorageProvider.jwtKey, loginResponse.jwt);
-      (defaultApiClient.authentication as HttpBearerAuth).accessToken = loginResponse.jwt;
+      await _applyJWT(loginResponse.jwt);
       _isLoggedIn = true;
     }
     notifyListeners();
