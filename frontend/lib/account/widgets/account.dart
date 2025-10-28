@@ -18,7 +18,7 @@ import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/holding/provider.dart';
+import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
@@ -40,20 +40,30 @@ class AccountWidget extends StatefulWidget {
 
 /// A page that displays information about the given account
 class _AccountWidgetState extends State<AccountWidget> {
+  List<Holding> _holdings = [];
+  List<EntityHistory>? _holdingHistory;
   Holding? _selectedHolding;
+  Account get account => widget.account;
+
+  /// Populates holdings information for this account if possible
+  Future<void> _populateHoldingData() async {
+    if (account.type == AccountTypeEnum.investment) {
+      final holdingProvider = ServiceLocator.get<HoldingProvider>();
+      final (holdings, history) = await holdingProvider.getHoldingDataForAccount(account);
+      _holdings = holdings ?? [];
+      _holdingHistory = history;
+    }
+
+    // Set selected holding if we can
+    if (_holdings.isNotEmpty) {
+      _selectedHolding = _holdings[0];
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    if (holdings.isNotEmpty) {
-      _selectedHolding = holdings[0];
-    }
-  }
-
-  Account get account => widget.account;
-  List<Holding> get holdings {
-    final holdingProvider = ServiceLocator.get<HoldingProvider>();
-    return holdingProvider.holdings.where((h) => h.account.id == account.id).toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _populateHoldingData());
   }
 
   /// Returns the tab content for the overview display
@@ -125,9 +135,9 @@ class _AccountWidgetState extends State<AccountWidget> {
     UserConfigProvider userConfigProvider,
   ) {
     final chartRange = userConfigProvider.userDefaultChartRange;
-    final holdingsOT = holdingProvider.holdingsOT[account.id];
+    final holdingsOT = _holdingHistory;
     final selectedHoldingOT = holdingsOT?.firstWhereOrNull((ot) => ot.connectedId == _selectedHolding?.id);
-    final selectedHolding = holdings.firstWhereOrNull((h) => h.id == _selectedHolding?.id);
+    final selectedHolding = _holdings.firstWhereOrNull((h) => h.id == _selectedHolding?.id);
     final holdingDataForRange = selectedHoldingOT?.getValueByFrame(chartRange);
     return SproutScrollView(
       padding: EdgeInsets.zero,
@@ -174,7 +184,7 @@ class _AccountWidgetState extends State<AccountWidget> {
 
           HoldingAccount(
             account,
-            holdings,
+            _holdings,
             displayAccountHeader: false,
             selectedHolding: _selectedHolding,
             onHoldingClick: (holding) {

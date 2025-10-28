@@ -16,12 +16,16 @@ class TransactionRuleOverview extends StatefulWidget {
 }
 
 class _TransactionRuleOverviewState extends State<TransactionRuleOverview> {
-  @override
-  Future<void> initState() async {
-    super.initState();
-    // Request data
+  /// Uses the provider to prepare all the data we'll need
+  Future<void> _prepareData() async {
     final transactionRuleProvider = ServiceLocator.get<TransactionRuleProvider>();
     await transactionRuleProvider.populateTransactionRules();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareData());
   }
 
   @override

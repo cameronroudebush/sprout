@@ -16,12 +16,17 @@ class HoldingApi {
 
   final ApiClient apiClient;
 
-  /// Get holding history.
+  /// Get holding history for a specific account.
   ///
-  /// Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.
+  /// Retrieves holding history for the given account. This is useful for displaying the holdings value over time.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId (required):
+  ///   The ID of the account to retrieve holding history for.
+  Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo(String accountId,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/history';
 
@@ -32,6 +37,8 @@ class HoldingApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+      queryParams.addAll(_queryParams('', 'accountId', accountId));
+
     const contentTypes = <String>[];
 
 
@@ -46,11 +53,16 @@ class HoldingApi {
     );
   }
 
-  /// Get holding history.
+  /// Get holding history for a specific account.
   ///
-  /// Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.
-  Future<HoldingHistoryByAccount?> holdingControllerGetHoldingHistory() async {
-    final response = await holdingControllerGetHoldingHistoryWithHttpInfo();
+  /// Retrieves holding history for the given account. This is useful for displaying the holdings value over time.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId (required):
+  ///   The ID of the account to retrieve holding history for.
+  Future<List<EntityHistory>?> holdingControllerGetHoldingHistory(String accountId,) async {
+    final response = await holdingControllerGetHoldingHistoryWithHttpInfo(accountId,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -58,18 +70,26 @@ class HoldingApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'HoldingHistoryByAccount',) as HoldingHistoryByAccount;
-    
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<EntityHistory>') as List)
+        .cast<EntityHistory>()
+        .toList(growable: false);
+
     }
     return null;
   }
 
-  /// Get holdings.
+  /// Get holdings for a specific account.
   ///
-  /// Retrieves all holdings for the authenticated user.
+  /// Retrieves all holdings for the authenticated user within a specified account.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> holdingControllerGetHoldingsWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId (required):
+  ///   The ID of the account to retrieve holdings for.
+  Future<Response> holdingControllerGetHoldingsWithHttpInfo(String accountId,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding';
 
@@ -80,6 +100,8 @@ class HoldingApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+      queryParams.addAll(_queryParams('', 'accountId', accountId));
+
     const contentTypes = <String>[];
 
 
@@ -94,11 +116,16 @@ class HoldingApi {
     );
   }
 
-  /// Get holdings.
+  /// Get holdings for a specific account.
   ///
-  /// Retrieves all holdings for the authenticated user.
-  Future<List<Holding>?> holdingControllerGetHoldings() async {
-    final response = await holdingControllerGetHoldingsWithHttpInfo();
+  /// Retrieves all holdings for the authenticated user within a specified account.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId (required):
+  ///   The ID of the account to retrieve holdings for.
+  Future<List<Holding>?> holdingControllerGetHoldings(String accountId,) async {
+    final response = await holdingControllerGetHoldingsWithHttpInfo(accountId,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

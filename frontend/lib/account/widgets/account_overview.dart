@@ -35,7 +35,7 @@ class _AccountsOverviewState extends State<AccountsOverview> {
   @override
   void initState() {
     super.initState();
-    accountProvider.populateLinkedAccounts();
+    WidgetsBinding.instance.addPostFrameCallback((_) => accountProvider.populateLinkedAccounts());
   }
 
   @override

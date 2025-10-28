@@ -51,7 +51,7 @@ class _NetWorthOverviewWidgetState extends State<NetWorthOverviewWidget> {
   @override
   void initState() {
     super.initState();
-    _prepareData();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareData());
   }
 
   @override

@@ -25,7 +25,7 @@ class _CategoryOverviewState extends State<CategoryOverview> {
   @override
   void initState() {
     super.initState();
-    categoryProvider.loadUpdatedCategories();
+    WidgetsBinding.instance.addPostFrameCallback((_) => categoryProvider.loadUpdatedCategories());
   }
 
   Future<void> _openInfoDialog(BuildContext context, Category? c) async {

@@ -3,12 +3,11 @@ import { AccountType } from "@backend/account/model/account.type";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { EntityHistory } from "@backend/core/model/api/entity.history.dto";
-import { HoldingHistoryByAccount } from "@backend/holding/model/api/holding.history.acc.dto";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get } from "@nestjs/common";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Controller, Get, NotFoundException, Query } from "@nestjs/common";
+import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { groupBy } from "lodash";
 
 /** This controller contains information about {@link Holding} models which is stock information. */
@@ -17,43 +16,43 @@ import { groupBy } from "lodash";
 @AuthGuard.attach()
 export class HoldingController {
   @Get()
+  @ApiQuery({
+    name: "accountId",
+    description: "The ID of the account to retrieve holdings for.",
+    type: String,
+  })
   @ApiOperation({
-    summary: "Get holdings.",
-    description: "Retrieves all holdings for the authenticated user.",
+    summary: "Get holdings for a specific account.",
+    description: "Retrieves all holdings for the authenticated user within a specified account.",
   })
   @ApiOkResponse({ description: "Holdings found successfully.", type: [Holding] })
-  async getHoldings(@CurrentUser() user: User) {
-    return await Holding.find({ where: { account: { user: { id: user.id } } } });
+  async getHoldings(@CurrentUser() user: User, @Query("accountId") accountId: string) {
+    const account = await Account.findOne({ where: { id: accountId, user: { id: user.id } } });
+    if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
+    return await Holding.find({ where: { account: { id: accountId } } });
   }
 
   @Get("history")
   @ApiOperation({
-    summary: "Get holding history.",
-    description:
-      "Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.",
+    summary: "Get holding history for a specific account.",
+    description: "Retrieves holding history for the given account. This is useful for displaying the holdings value over time.",
   })
-  @ApiOkResponse({ description: "Holding history found successfully.", type: HoldingHistoryByAccount })
-  async getHoldingHistory(@CurrentUser() user: User) {
-    // Accounts that have holdings
-    const accounts = await Account.find({ where: { user: { id: user.id }, type: AccountType.investment } });
-    const historyByAcc = await Promise.all(
-      accounts.map(async (a) => {
-        const hist = await HoldingHistory.getHistoryForAccount(a);
-        const groupedHistory = groupBy(hist, "holding.id");
-        const l = Object.keys(groupedHistory).map((holdingId) => {
-          const holdingHistory = groupedHistory[holdingId]!;
-          const ot = EntityHistory.getForHistory(HoldingHistory, holdingHistory);
-          ot.connectedId = holdingId;
-          return ot;
-        });
-        return { [a.id]: l };
-      }),
-    );
-    // Merge all the account-specific holding histories into a single object
-    return HoldingHistoryByAccount.fromPlain({
-      history: historyByAcc.reduce((acc, current) => {
-        return { ...acc, ...current };
-      }, {}),
+  @ApiQuery({
+    name: "accountId",
+    description: "The ID of the account to retrieve holding history for.",
+    type: String,
+  })
+  @ApiOkResponse({ description: "Holding history found successfully.", type: [EntityHistory] })
+  async getHoldingHistory(@CurrentUser() user: User, @Query("accountId") accountId: string) {
+    const account = await Account.findOne({ where: { id: accountId, user: { id: user.id }, type: AccountType.investment } });
+    if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
+    const hist = await HoldingHistory.getHistoryForAccount(account);
+    const groupedHistory = groupBy(hist, "holding.id");
+    return Object.keys(groupedHistory).map((holdingId) => {
+      const holdingHistory = groupedHistory[holdingId]!;
+      const ot = EntityHistory.getForHistory(HoldingHistory, holdingHistory);
+      ot.connectedId = holdingId;
+      return ot;
     });
   }
 }

@@ -204,8 +204,6 @@ class ApiClient {
           return EntityHistoryDataPoint.fromJson(value);
         case 'Holding':
           return Holding.fromJson(value);
-        case 'HoldingHistoryByAccount':
-          return HoldingHistoryByAccount.fromJson(value);
         case 'Institution':
           return Institution.fromJson(value);
         case 'JWTLoginRequest':
