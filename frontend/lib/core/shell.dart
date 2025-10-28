@@ -9,7 +9,6 @@ import 'package:sprout/core/widgets/exit.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/scroll.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/user/model/user_extensions.dart';
 import 'package:sprout/user/user_provider.dart';
 
@@ -149,9 +148,8 @@ class SproutShell extends StatelessWidget {
                     children: [
                       Icon(Icons.settings, size: 30),
                       Expanded(
-                        child: TextWidget(
-                          referenceSize: .9,
-                          text: userProvider.currentUser?.prettyName ?? "",
+                        child: Text(
+                          userProvider.currentUser?.prettyName ?? "",
                           style: TextStyle(overflow: TextOverflow.ellipsis),
                         ),
                       ),
@@ -181,7 +179,7 @@ class SproutShell extends StatelessWidget {
     final tiles = [
       ListTile(
         leading: Icon(page.icon),
-        title: TextWidget(text: page.label),
+        title: Text(page.label, textAlign: TextAlign.center),
         selected: topLevelPageIsSelected,
         onTap: () => _navigateToPage(context, page, isDesktop),
       ),
@@ -220,7 +218,7 @@ class SproutShell extends StatelessWidget {
                 padding: const EdgeInsets.all(4.0),
                 child: Icon(
                   page.icon,
-                  color: isSelected ? theme.colorScheme.secondaryContainer : theme.colorScheme.onPrimaryContainer,
+                  color: isSelected ? theme.colorScheme.secondary : theme.colorScheme.onPrimaryContainer,
                 ),
               ),
               label: page.label,

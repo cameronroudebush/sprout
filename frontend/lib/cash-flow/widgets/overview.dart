@@ -5,6 +5,7 @@ import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
 import 'package:sprout/cash-flow/widgets/stats_by_month.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
@@ -17,19 +18,21 @@ class CashFlowOverview extends StatefulWidget {
   State<CashFlowOverview> createState() => _CashFlowOverviewState();
 }
 
-class _CashFlowOverviewState extends State<CashFlowOverview> {
+class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
   late DateTime _selectedDate;
+
+  @override
+  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) => _fetchData();
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _selectedDate = DateTime(now.year, now.month + 1, 0);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _fetchData());
   }
 
   /// Fetches data we need for these displays
-  void _fetchData() {
+  Future<void> _fetchData() async {
     final provider = ServiceLocator.get<CashFlowProvider>();
     provider.setLoadingStatus(true);
     if (provider.getSankeyData(_selectedDate.year, _selectedDate.month) == null) {

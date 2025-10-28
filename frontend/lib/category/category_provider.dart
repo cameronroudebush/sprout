@@ -13,15 +13,6 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
 
   CategoryProvider(super.api);
 
-  Future<List<Category>> _populateCategories() async {
-    final catsFromApi = (await api.categoryControllerGetCategories()) ?? [];
-    return _categories = List<Category>.from(catsFromApi);
-  }
-
-  Future<CategoryStats?> populateCategoryStats({int days = 30}) async {
-    return _categoryStats = await api.categoryControllerGetCategoryStats(days);
-  }
-
   /// Uses the API to add the given category
   Future<Category?> add(Category c) async {
     notifyListeners();
@@ -50,10 +41,27 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
   }
 
   /// Loads updated category information, also updates loading status
-  Future<void> loadUpdatedCategories() async {
-    setLoadingStatus(true);
-    await _populateCategories();
-    setLoadingStatus(false);
+  Future<void> loadUpdatedCategories(bool showLoaders) async {
+    final shouldSetLoadingStats = _categories.isEmpty || showLoaders;
+    if (shouldSetLoadingStats) setLoadingStatus(true);
+    await populateAndSetIfChanged(
+      api.categoryControllerGetCategories,
+      _categories,
+      (newValue) => _categories = newValue ?? [],
+    );
+    if (shouldSetLoadingStats) setLoadingStatus(false);
+  }
+
+  /// Loads updated category stats
+  Future<void> loadCategoryStats(bool showLoaders, {int days = 30}) async {
+    final shouldSetLoadingStats = _categoryStats == null || showLoaders;
+    if (shouldSetLoadingStats) setLoadingStatus(true);
+    await populateAndSetIfChanged(
+      () => api.categoryControllerGetCategoryStats(days),
+      _categoryStats,
+      (newValue) => _categoryStats = newValue,
+    );
+    if (shouldSetLoadingStats) setLoadingStatus(false);
   }
 
   @override

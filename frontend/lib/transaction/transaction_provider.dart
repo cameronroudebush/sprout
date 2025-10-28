@@ -69,7 +69,7 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
     final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
     if (index != -1) _transactions[index] = updatedTransaction;
     // Update category info
-    await ServiceLocator.get<CategoryProvider>().populateCategoryStats();
+    await ServiceLocator.get<CategoryProvider>().loadCategoryStats(false);
     notifyListeners();
     return updatedTransaction;
   }

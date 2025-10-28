@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/widgets/accounts.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
+import 'package:sprout/transaction/widgets/category_pie_chart.dart';
 import 'package:sprout/transaction/widgets/overview.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -20,9 +23,12 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends AutoUpdateState<HomePage> {
   /// If we've checked with the user config and already set the default range.
   bool hasSetDefault = false;
+
+  @override
+  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {};
 
   @override
   Widget build(BuildContext context) {
@@ -71,119 +77,139 @@ class _HomePageState extends State<HomePage> {
           );
         }
 
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 4,
-          children: <Widget>[
-            // Render notifications available
-            if (notifications.isNotEmpty)
-              Column(
-                children: notifications.map((n) {
-                  return SproutCard(
-                    bgColor: n.bgColor,
-                    child: Padding(
-                      padding: EdgeInsetsGeometry.all(12),
-                      child: InkWell(
-                        onTap: n.onClick,
-                        child: Row(
-                          spacing: 8,
-                          children: [
-                            if (n.icon != null) Icon(n.icon, color: n.color),
-                            Expanded(
-                              child: Wrap(
-                                alignment: WrapAlignment.center,
-                                children: [
-                                  TextWidget(
-                                    text: n.message,
-                                    referenceSize: 1.15,
-                                    style: TextStyle(color: n.color),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            // Net Worth Section
-            NetWorthOverviewWidget(
-              showCard: true,
-              selectedChartRange: chartRange,
-              onRangeSelected: (value) {
-                userConfigProvider.updateChartRange(value);
-              },
-            ),
-            // Accounts Section
-            SproutCard(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsetsGeometry.directional(start: 12, top: 4, bottom: 4),
-                    child: TextWidget(
-                      referenceSize: 1.25,
-                      text: "Accounts",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  AccountsWidget(allowCollapse: true, netWorthPeriod: chartRange, applyCard: false),
-                ],
-              ),
-            ),
-
-            ConstrainedBox(
-              constraints: BoxConstraints(minHeight: 140, maxHeight: 400),
-              child: SizedBox(
-                height: 65 + (recentTransactions.length * 70),
-                child: SproutCard(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        // Determine the layout structure based on desktop or mobile
+        return SproutLayoutBuilder((isDesktop, context, constraints) {
+          final notificationWidgets = notifications.map((n) {
+            return SproutCard(
+              bgColor: n.bgColor,
+              child: Padding(
+                padding: EdgeInsetsGeometry.all(12),
+                child: InkWell(
+                  onTap: n.onClick,
+                  child: Row(
+                    spacing: 8,
                     children: [
-                      Padding(
-                        padding: EdgeInsetsGeometry.all(12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            TextWidget(
-                              text: "Recent $recentTransactionsCount Transactions",
-                              referenceSize: 1.25,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-
-                            /// Total value change
-                            TextWidget(
-                              text: getFormattedCurrency(recentTransactionsDiff),
-                              style: TextStyle(color: getBalanceColor(recentTransactionsDiff, theme)),
-                              referenceSize: 1.15,
-                            ),
-                          ],
+                      if (n.icon != null) Icon(n.icon, color: n.color),
+                      Expanded(
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [Text(n.message, style: TextStyle(color: n.color, fontSize: 16))],
                         ),
-                      ),
-                      const Divider(height: 1),
-                      TransactionsOverview(
-                        focusCount: recentTransactionsCount,
-                        allowFiltering: false,
-                        renderHeader: false,
-                        allowLoadingMore: false,
-                        showBackToTop: false,
-                        separateByDate: false,
                       ),
                     ],
                   ),
                 ),
               ),
+            );
+          }).toList();
+
+          final netWorthWidget = NetWorthOverviewWidget(
+            showCard: true,
+            selectedChartRange: chartRange,
+            onRangeSelected: (value) {
+              userConfigProvider.updateChartRange(value);
+            },
+            chartHeight: 275,
+          );
+
+          final accountsWidget = SproutCard(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsetsGeometry.directional(start: 12, top: 4, bottom: 4),
+                  child: Text(
+                    "Accounts",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                const Divider(height: 1),
+                AccountsWidget(allowCollapse: true, netWorthPeriod: chartRange, applyCard: false),
+              ],
             ),
-          ],
-        );
+          );
+
+          final transactionsWidget = ConstrainedBox(
+            constraints: BoxConstraints(minHeight: 140, maxHeight: 505),
+            child: SizedBox(
+              height: 65 + (recentTransactions.length * 65),
+              child: SproutCard(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsGeometry.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Recent $recentTransactionsCount Transactions",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+
+                          /// Total value change
+                          Text(
+                            getFormattedCurrency(recentTransactionsDiff),
+                            style: TextStyle(color: getBalanceColor(recentTransactionsDiff, theme)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    TransactionsOverview(
+                      focusCount: recentTransactionsCount,
+                      allowFiltering: false,
+                      renderHeader: false,
+                      allowLoadingMore: false,
+                      showBackToTop: false,
+                      separateByDate: false,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          final pieWidgets = Row(
+            children: [
+              Expanded(child: CategoryPieChart(showLegend: isDesktop)),
+              Expanded(child: CashFlowPieChart(DateTime.now())),
+            ],
+          );
+
+          if (isDesktop) {
+            return Column(
+              children: [
+                if (notifications.isNotEmpty) Column(children: notificationWidgets),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: Column(spacing: 4, children: [netWorthWidget, accountsWidget])),
+                    Expanded(child: Column(spacing: 4, children: [pieWidgets, transactionsWidget])),
+                  ],
+                ),
+              ],
+            );
+          }
+
+          // Mobile layout
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 4,
+            children: <Widget>[
+              if (notifications.isNotEmpty) Column(children: notificationWidgets),
+              netWorthWidget,
+              accountsWidget,
+              transactionsWidget,
+              pieWidgets,
+            ],
+          );
+        });
       },
     );
   }

@@ -5,13 +5,16 @@ import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { JobsService } from "@backend/jobs/jobs.service";
+import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderService } from "@backend/providers/provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Post, Put, Query } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { startOfDay } from "date-fns";
+import { MoreThanOrEqual } from "typeorm";
 import { SSEService } from "../sse/sse.service";
 
 /**
@@ -149,10 +152,19 @@ export class AccountController {
   })
   @ApiOkResponse({ description: "Manual sync completed successfully." })
   @AuthGuard.attach()
-  async manualSync(@CurrentUser() user: User) {
-    // TODO: This executes all provider syncs for all users which seems excessive.
-    // TODO: Add ability to not run another sync if one is already running.
-    const sync = await this.jobService.providerSyncJob.updateNow();
+  async manualSync(@CurrentUser() user: User, @Query("force") force: boolean = false) {
+    const runningSync = await Sync.findOne({
+      where: {
+        status: "in-progress",
+        time: MoreThanOrEqual(startOfDay(new Date())),
+      },
+    });
+
+    if (runningSync && !force) {
+      throw new InternalServerErrorException("A sync is already in progress. Please wait for it to complete.");
+    }
+
+    const sync = await this.jobService.providerSyncJob.updateNow(user);
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC, sync);
   }

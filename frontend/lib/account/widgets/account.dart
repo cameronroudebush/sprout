@@ -13,6 +13,7 @@ import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/tabs.dart';
@@ -39,32 +40,18 @@ class AccountWidget extends StatefulWidget {
 }
 
 /// A page that displays information about the given account
-class _AccountWidgetState extends State<AccountWidget> {
-  List<Holding> _holdings = [];
-  List<EntityHistory>? _holdingHistory;
+class _AccountWidgetState extends AutoUpdateState<AccountWidget> {
   Holding? _selectedHolding;
   Account get account => widget.account;
 
-  /// Populates holdings information for this account if possible
-  Future<void> _populateHoldingData() async {
-    if (account.type == AccountTypeEnum.investment) {
-      final holdingProvider = ServiceLocator.get<HoldingProvider>();
-      final (holdings, history) = await holdingProvider.getHoldingDataForAccount(account);
-      _holdings = holdings ?? [];
-      _holdingHistory = history;
-    }
-
-    // Set selected holding if we can
-    if (_holdings.isNotEmpty) {
-      _selectedHolding = _holdings[0];
-    }
-  }
-
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _populateHoldingData());
-  }
+  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
+    if (account.type == AccountTypeEnum.investment) {
+      return ServiceLocator.get<HoldingProvider>().populateDataForAccount(account, showLoaders);
+    } else {
+      return null;
+    }
+  };
 
   /// Returns the tab content for the overview display
   Widget _buildOverviewContent(
@@ -134,10 +121,20 @@ class _AccountWidgetState extends State<AccountWidget> {
     HoldingProvider holdingProvider,
     UserConfigProvider userConfigProvider,
   ) {
+    final (holdings, holdingsOT) = holdingProvider.getHoldingDataForAccount(account);
+
+    if (holdings == null || holdingsOT == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Set selected holding if we can
+    if (holdings.isNotEmpty) {
+      _selectedHolding = holdings[0];
+    }
+
     final chartRange = userConfigProvider.userDefaultChartRange;
-    final holdingsOT = _holdingHistory;
-    final selectedHoldingOT = holdingsOT?.firstWhereOrNull((ot) => ot.connectedId == _selectedHolding?.id);
-    final selectedHolding = _holdings.firstWhereOrNull((h) => h.id == _selectedHolding?.id);
+    final selectedHoldingOT = holdingsOT.firstWhereOrNull((ot) => ot.connectedId == _selectedHolding?.id);
+    final selectedHolding = holdings.firstWhereOrNull((h) => h.id == _selectedHolding?.id);
     final holdingDataForRange = selectedHoldingOT?.getValueByFrame(chartRange);
     return SproutScrollView(
       padding: EdgeInsets.zero,
@@ -184,7 +181,7 @@ class _AccountWidgetState extends State<AccountWidget> {
 
           HoldingAccount(
             account,
-            _holdings,
+            holdings,
             displayAccountHeader: false,
             selectedHolding: _selectedHolding,
             onHoldingClick: (holding) {

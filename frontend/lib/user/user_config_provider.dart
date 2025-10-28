@@ -30,11 +30,9 @@ class UserConfigProvider extends BaseProvider<UserConfigApi> {
 
   @override
   Future<void> postLogin() async {
-    isLoading = true;
-    notifyListeners();
+    setLoadingStatus(true);
     await populateUserConfig();
-    isLoading = false;
-    notifyListeners();
+    setLoadingStatus(false);
   }
 
   @override

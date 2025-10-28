@@ -1,10 +1,12 @@
 import { Configuration } from "@backend/config/core";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
+import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { SetupService } from "@backend/core/setup.service";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderService } from "@backend/providers/provider.service";
+import { User } from "@backend/user/model/user.model";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
@@ -24,8 +26,13 @@ export class ConfigController {
   })
   @AuthGuard.attach()
   @ApiOkResponse({ description: "The configuration that external services may want to know about.", type: APIConfig })
-  async get() {
-    const lastSync = (await Sync.find({ order: { time: "DESC" } }))[0];
+  async get(@CurrentUser() user: User) {
+    let lastSync = (await Sync.find({ order: { time: "DESC" } }))[0];
+    const lastUserSync = (await Sync.find({ where: { user: { id: user.id } }, order: { time: "DESC" } }))[0];
+    if (lastUserSync != null && (lastSync == null || lastUserSync.time > lastSync.time)) {
+      lastSync = lastUserSync;
+    }
+
     const providers = this.providerService.getAll();
     return new APIConfig(
       lastSync,

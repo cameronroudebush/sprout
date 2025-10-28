@@ -9,6 +9,7 @@ import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
@@ -59,7 +60,7 @@ class TransactionsOverview extends StatefulWidget {
   State<TransactionsOverview> createState() => _TransactionsOverviewPageState();
 }
 
-class _TransactionsOverviewPageState extends State<TransactionsOverview> {
+class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOverview> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   int _currentTransactionIndex = TransactionProvider.initialTransactionCount;
@@ -88,15 +89,16 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
       ),
       // Grab all transactions for today no matter what
       transactionProvider.populateTransactions(date: DateTime.now(), shouldNotify: false),
-      transactionProvider.populateSubscriptions(),
     ]);
     transactionProvider.setLoadingStatus(false);
   }
 
   @override
+  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) => _prepareData();
+
+  @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareData());
     if (widget.focusCount != null || widget.account != null) _currentTransactionIndex = 0;
     _scrollController.addListener(_onScroll);
 

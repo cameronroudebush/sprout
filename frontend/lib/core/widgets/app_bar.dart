@@ -15,7 +15,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   const SproutAppBar({super.key, required this.screenHeight, this.buttonBuilder, this.useFullLogo = false});
 
   static double getHeightFromScreenHeight(double screenHeight) {
-    return screenHeight * .06;
+    return 64;
   }
 
   @override
@@ -29,7 +29,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
       final logo = useFullLogo || isDesktop
           ? Image.asset(
               'assets/logo/color-transparent-no-tag.png',
-              width: screenHeight * .12,
+              width: 128,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
             )

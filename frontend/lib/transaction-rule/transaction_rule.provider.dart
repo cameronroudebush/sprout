@@ -13,12 +13,12 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
 
   TransactionRuleProvider(super.api);
 
-  Future<List<TransactionRule>> populateTransactionRules() async {
-    isLoading = true;
-    final rulesFromApi = (await api.transactionRuleControllerGet()) ?? [];
-    _rules = List<TransactionRule>.from(rulesFromApi);
-    isLoading = false;
-    notifyListeners();
+  /// Populates transaction rules from the API and performs updates if there are changes.
+  Future<List<TransactionRule>> populateTransactionRules(bool showLoaders) async {
+    final shouldSetLoadingStats = _rules.isEmpty || showLoaders;
+    if (shouldSetLoadingStats) setLoadingStatus(true);
+    await populateAndSetIfChanged(api.transactionRuleControllerGet, _rules, (newValue) => _rules = newValue ?? []);
+    if (shouldSetLoadingStats) setLoadingStatus(false);
     return _rules;
   }
 
@@ -46,6 +46,7 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
     final updatedRule = (await api.transactionRuleControllerEdit(rule.id, rule))!;
     final index = _rules.indexWhere((r) => r.id == updatedRule.id);
     if (index != -1) _rules[index] = updatedRule;
+    _transactionRulesRunning = false;
     notifyListeners();
     return updatedRule;
   }
