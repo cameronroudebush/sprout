@@ -82,7 +82,8 @@ export class User extends DatabaseBase {
 
   /** Validates the given plain-text password passes password requirements. Throws an error if it doesn't. */
   static async validatePassword(_password: string) {
-    // TODO
+    if (_password.length < 8) throw new Error("Password must be at least 8 characters long.");
+    if (!/[A-Z]/.test(_password)) throw new Error("Password must contain at least one uppercase letter.");
     return;
   }
 

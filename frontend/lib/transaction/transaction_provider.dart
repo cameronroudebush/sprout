@@ -1,5 +1,5 @@
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 
@@ -75,23 +75,10 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
   }
 
   @override
-  Future<void> updateData() async {
-    isLoading = true;
-    _transactions = []; // Forcible reset so we need to update all transactions
-    notifyListeners();
-    await populateTotalTransactionCount();
-    await populateTransactions(startIndex: 0, endIndex: initialTransactionCount, shouldNotify: false);
-    // Grab all transactions for today no matter what
-    await populateTransactions(date: DateTime.now(), shouldNotify: false);
-    await populateSubscriptions();
-    isLoading = false;
-    notifyListeners();
-  }
-
-  @override
   Future<void> cleanupData() async {
     _totalTransactions = null;
     _transactions = [];
+    _subscriptions = [];
     notifyListeners();
   }
 }

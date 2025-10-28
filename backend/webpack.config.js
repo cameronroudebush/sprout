@@ -1,5 +1,7 @@
 const { gitDescribeSync } = require("git-describe");
+const glob = require("glob");
 const webpack = require("webpack");
+const path = require("path");
 
 /** Determines the version of our app via `git-describe` */
 function getVersion() {
@@ -8,13 +10,33 @@ function getVersion() {
 }
 
 module.exports = function (options, argv) {
-  const isProduction = argv.mode === "production";
+  const isProduction = process.env.NODE_ENV === "prod";
+
+  // Find all migration files and create entry points for them at build time.
+  const migrationFiles = glob.sync("./src/database/migration/**/*.ts").reduce((acc, file) => {
+    const entryName = path.relative("./src", file).replace(/\.ts$/, "");
+    acc[entryName] = path.resolve(__dirname, file);
+    return acc;
+  }, {});
 
   return {
     ...options,
+    output: {
+      ...options.output,
+      filename: "[name].js",
+      library: {
+        // Specify the output type so our migrations are usable during dynamic loading
+        type: "commonjs2",
+      },
+    },
+    entry: {
+      main: options.entry,
+      ...migrationFiles,
+    },
     devServer: {
       hot: false, // Disable Hot Module Replacement (HMR)
     },
+    devtool: "inline-source-map",
     plugins: [
       ...options.plugins,
       // Define relevant variables

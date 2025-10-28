@@ -13,7 +13,8 @@
   "devDependencies": {
     "auto-changelog": "^2.5.0",
     "prettier": "^3.2.5",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "git-describe": "^4.1.1"
   },
   "auto-changelog": {
     "template": "./docs/changelog-template.hbs",

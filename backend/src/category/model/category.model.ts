@@ -2,7 +2,8 @@ import { CategoryType } from "@backend/category/model/category.type";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
 
@@ -23,11 +24,15 @@ export class Category extends DatabaseBase {
   userId!: string;
 
   /** The name of this category */
+  @ApiProperty({ description: "The name of the category", example: "Groceries" })
+  @IsString()
+  @IsNotEmpty()
   @DatabaseDecorators.column({ nullable: false })
   name: string;
 
   /** If this account type should be considered an expense or income */
   @DatabaseDecorators.column({ nullable: false })
+  @IsEnum(CategoryType)
   type: CategoryType;
 
   /** The parent category this category belongs to */

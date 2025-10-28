@@ -6,6 +6,7 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/provider/storage.dart';
 
+/// This provide allows for modification to the users via the API including authentication and creating new users.
 class UserProvider extends BaseProvider<UserApi> {
   bool _isLoggedIn = false;
   User? _currentUser;
@@ -62,7 +63,7 @@ class UserProvider extends BaseProvider<UserApi> {
       SnackbarProvider.openSnackbar("You have been logged out", type: SnackbarType.warning);
     }
     // Wipe the JWT so auto logins are not performed
-    // TODO: Add actual logout tracking to the backend to invalidate the JWT?
+    _currentUser = null;
     await SecureStorageProvider.saveValue(SecureStorageProvider.jwtKey, null);
     _isLoggedIn = false;
     for (final provider in ServiceLocator.getAllProviders()) {

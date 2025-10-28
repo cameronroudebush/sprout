@@ -3,6 +3,7 @@ import { Base } from "@backend/core/model/base";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
+import { IsEnum } from "class-validator";
 
 /** An enum to define how often a subscription is billed. */
 export enum BillingPeriod {
@@ -25,6 +26,7 @@ export class TransactionSubscription extends Base {
   count: number;
 
   /** How often this is billed */
+  @IsEnum(BillingPeriod)
   period: BillingPeriod;
   /** The day this billing starts */
   startDate: Date;

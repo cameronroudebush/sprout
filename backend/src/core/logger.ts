@@ -1,5 +1,6 @@
 import { TimeZone } from "@backend/config/model/tz";
 import { ConsoleLogger, LogLevel } from "@nestjs/common";
+import chalk from "chalk";
 
 /** A custom logger to use with NestJS to improve our logging capabilities */
 export class SproutLogger extends ConsoleLogger {
@@ -21,7 +22,7 @@ export class SproutLogger extends ConsoleLogger {
     contextMessage: string,
     timestampDiff: string,
   ): string {
-    const output = this.stringifyMessage(message, logLevel);
+    let output = this.stringifyMessage(message, logLevel);
     const timestamp = this.getTimestamp();
 
     // Strip ANSI color codes (e.g., `\x1B[33m`) and brackets from the context
@@ -34,7 +35,12 @@ export class SproutLogger extends ConsoleLogger {
 
     // Customize log level
     let printLevel = "";
-    if (logLevel === "error" || logLevel === "warn" || logLevel === "fatal") printLevel = `[${logLevel.toUpperCase()}]`;
+    if (logLevel === "error" || logLevel === "fatal") {
+      output = chalk.red(output);
+      printLevel = `[${chalk.red(logLevel.toUpperCase())}]`;
+    } else if (logLevel === "warn") {
+      printLevel = `[${chalk.yellow(logLevel.toUpperCase())}]`;
+    }
 
     return `[${timestamp}]${contextParts.join("")}${printLevel}: ${output}${timestampDiff}\n`;
   }

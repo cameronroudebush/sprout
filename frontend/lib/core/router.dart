@@ -2,13 +2,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/dialog/add_account.dart';
-import 'package:sprout/account/overview.dart';
-import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account.dart';
+import 'package:sprout/account/widgets/account_overview.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/cash-flow/overview.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/cash-flow/widgets/overview.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/category/widgets/overview.dart';
@@ -27,11 +27,11 @@ import 'package:sprout/setup/setup.dart';
 import 'package:sprout/setup/widgets/connection_setup.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
-import 'package:sprout/transaction/monthly.dart';
-import 'package:sprout/transaction/overview.dart';
-import 'package:sprout/user/login.dart';
-import 'package:sprout/user/user.dart';
+import 'package:sprout/transaction/widgets/monthly.dart';
+import 'package:sprout/transaction/widgets/overview.dart';
 import 'package:sprout/user/user_provider.dart';
+import 'package:sprout/user/widgets/login.dart';
+import 'package:sprout/user/widgets/user_config.dart';
 
 /// Router information for our app
 class SproutRouter {
@@ -215,7 +215,7 @@ class SproutRouter {
     // Cash Flow
     SproutPage((context, state) => CashFlowOverview(), 'Cash Flow', icon: Icons.bar_chart, showOnBottomNav: true),
     // Settings
-    SproutPage((context, state) => UserPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
+    SproutPage((context, state) => UserConfigPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
   ];
 
   /// A list of all pages in order including sub pages

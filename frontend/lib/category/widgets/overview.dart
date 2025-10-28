@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
@@ -12,8 +12,21 @@ import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
 
 /// A widget that displays all of our categories and allows editing and deleting them
-class CategoryOverview extends StatelessWidget {
+class CategoryOverview extends StatefulWidget {
   const CategoryOverview({super.key});
+
+  @override
+  State<CategoryOverview> createState() => _CategoryOverviewState();
+}
+
+class _CategoryOverviewState extends State<CategoryOverview> {
+  final categoryProvider = ServiceLocator.get<CategoryProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+    categoryProvider.loadUpdatedCategories();
+  }
 
   Future<void> _openInfoDialog(BuildContext context, Category? c) async {
     await showDialog(context: context, builder: (_) => CategoryInfo(c));

@@ -6,6 +6,7 @@ import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
 import { CoreController } from "@backend/core/core.controller";
 import { ImageProxyController } from "@backend/core/image.proxy.controller";
+import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { NetWorthController } from "@backend/core/net.worth.controller";
 import { SetupService } from "@backend/core/setup.service";
 import { DatabaseService } from "@backend/database/database.service";
@@ -21,7 +22,7 @@ import { TransactionService } from "@backend/transaction/transaction.service";
 import { UserConfigController } from "@backend/user/user.config.controller";
 import { UserController } from "@backend/user/user.controller";
 import { UserService } from "@backend/user/user.service";
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { CashFlowController } from "./cash-flow/cash.flow.controller";
@@ -70,4 +71,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
   ],
   exports: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestLoggerMiddleware).forRoutes(`*path`);
+  }
+}

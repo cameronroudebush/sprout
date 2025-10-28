@@ -158,6 +158,10 @@ export class EntityHistory extends Base {
       return acc;
     }, {} as any);
 
+    // Correct edge cases on some change values
+    if (isNaN(valueChange)) valueChange = 0;
+    if (percentChange != null && isNaN(percentChange)) percentChange = 0;
+
     return { snapshot: filteredSnapshots, frame: EntityHistoryDataPoint.fromPlain({ percentChange, valueChange, history: frameHistory }) };
   }
 

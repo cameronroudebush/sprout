@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/accounts.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/account/widgets/accounts.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/navigator.dart';
@@ -9,8 +9,8 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
-import 'package:sprout/transaction/overview.dart';
-import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
+import 'package:sprout/transaction/widgets/overview.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 class HomePage extends StatefulWidget {

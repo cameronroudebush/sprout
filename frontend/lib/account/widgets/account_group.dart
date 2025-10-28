@@ -10,7 +10,7 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
-import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 
 /// When we calculate data for a group, we'll return this type
 class GroupCalculatedData {

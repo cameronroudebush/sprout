@@ -2,9 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 
 /// A widget that displays the editing capabilities of a [Category]
@@ -20,6 +21,8 @@ class CategoryInfo extends StatefulWidget {
 }
 
 class _CategoryInfoState extends State<CategoryInfo> {
+  final categoryProvider = ServiceLocator.get<CategoryProvider>();
+
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   CategoryTypeEnum _type = CategoryTypeEnum.expense;
@@ -28,6 +31,7 @@ class _CategoryInfoState extends State<CategoryInfo> {
   @override
   void initState() {
     super.initState();
+    categoryProvider.loadUpdatedCategories();
     final category = widget.category;
     if (category != null) {
       // Initialize for editing an existing category
@@ -73,6 +77,7 @@ class _CategoryInfoState extends State<CategoryInfo> {
   Future<void> _submit() async {
     final isEdit = widget.category != null;
     final provider = ServiceLocator.get<CategoryProvider>();
+    bool success = false;
 
     // Validate the form before proceeding with submission
     if (_formKey.currentState!.validate()) {
@@ -82,15 +87,21 @@ class _CategoryInfoState extends State<CategoryInfo> {
         // Don't submit if no changes, just exit
       } else if (isEdit) {
         // Tell provider to update the category
-        provider.edit(newCategory);
+        await provider.edit(newCategory);
+        success = true;
       } else {
         // Add a new category
-        final createdCategory = await provider.add(newCategory);
-        if (widget.onAdd != null && createdCategory != null) widget.onAdd!(createdCategory);
+        try {
+          final createdCategory = await provider.add(newCategory);
+          if (widget.onAdd != null && createdCategory != null) widget.onAdd!(createdCategory);
+          success = true;
+        } catch (e) {
+          SnackbarProvider.openWithAPIException(e);
+        }
       }
 
       // Close dialog
-      Navigator.of(context).pop();
+      if (success) Navigator.of(context).pop();
     }
   }
 

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
-import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 
 /// A widget that displays the editing capabilities of a [Transaction]
 class TransactionInfo extends StatefulWidget {

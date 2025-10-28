@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/provider.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account_row.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
@@ -8,7 +8,7 @@ import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/holding/widgets/holding.dart';
-import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 
 /// Renders a holding display for a specific account
 class HoldingAccount extends StatelessWidget {

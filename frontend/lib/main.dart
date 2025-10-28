@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/provider.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/cash-flow/provider.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/cash-flow/cash_flow_provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -13,9 +13,9 @@ import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/holding/provider.dart';
-import 'package:sprout/net-worth/provider.dart';
-import 'package:sprout/transaction-rule/provider.dart';
-import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
+import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 

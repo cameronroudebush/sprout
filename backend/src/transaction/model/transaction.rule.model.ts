@@ -4,6 +4,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty } from "@nestjs/swagger";
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
 import { ManyToOne } from "typeorm";
 
 /** This class defines a rule that allows us to organize transactions based on a rule  */
@@ -14,30 +15,39 @@ export class TransactionRule extends DatabaseBase {
   user: User;
 
   @DatabaseDecorators.column({ nullable: false, type: "varchar" })
+  @IsEnum(TransactionRuleType)
   type: TransactionRuleType;
 
   /** This defines the value of the rule. Strings support | to split content */
   @DatabaseDecorators.column({ nullable: false })
+  @IsString()
+  @IsNotEmpty()
   value: string;
 
   /** This defines the category to set the transaction to */
   @ManyToOne(() => Category, { nullable: true, eager: true, onDelete: "SET NULL" })
+  @IsOptional()
+  @IsObject()
   category?: Category;
 
   /** If this match should be strict. So if it should be the exact string or the exact number. */
   @DatabaseDecorators.column({ nullable: false })
+  @IsBoolean()
   strict: boolean;
 
   /** How many transactions have been updated by this transaction rule. */
   @DatabaseDecorators.column({ nullable: false })
+  @IsNumber()
   matches: number = 0;
 
   /** The order of priority of this value */
   @DatabaseDecorators.column({ nullable: false })
+  @IsNumber()
   order: number = 0;
 
   /** If this rule should be executed */
   @DatabaseDecorators.column({ nullable: false })
+  @IsBoolean()
   enabled: boolean = true;
 
   constructor(user: User, type: TransactionRuleType, value: string, category?: Category, strict: boolean = false) {

@@ -20,7 +20,8 @@ class HoldingProvider extends BaseProvider<HoldingApi> {
   }
 
   Future<Map<String, List<EntityHistory>>> populateHoldingsOT() async {
-    return _holdingsOT = (await api.holdingControllerGetHoldingHistory())?.history ?? {};
+    final holdingsOT = (await api.holdingControllerGetHoldingHistory())?.history;
+    return _holdingsOT = holdingsOT ?? {};
   }
 
   @override

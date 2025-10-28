@@ -13,8 +13,9 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
 
   CategoryProvider(super.api);
 
-  Future<List<Category>> populateCategories() async {
-    return _categories = (await api.categoryControllerGetCategories()) ?? [];
+  Future<List<Category>> _populateCategories() async {
+    final catsFromApi = (await api.categoryControllerGetCategories()) ?? [];
+    return _categories = List<Category>.from(catsFromApi);
   }
 
   Future<CategoryStats?> populateCategoryStats({int days = 30}) async {
@@ -48,14 +49,11 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
     return updatedCategory;
   }
 
-  @override
-  Future<void> updateData() async {
-    isLoading = true;
-    notifyListeners();
-    await populateCategories();
-    await populateCategoryStats();
-    isLoading = false;
-    notifyListeners();
+  /// Loads updated category information, also updates loading status
+  Future<void> loadUpdatedCategories() async {
+    setLoadingStatus(true);
+    await _populateCategories();
+    setLoadingStatus(false);
   }
 
   @override

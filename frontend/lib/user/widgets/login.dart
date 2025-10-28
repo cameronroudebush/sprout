@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/button.dart';
@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoadingData = false;
 
   /// Fires after our login is complete
-  Future<void> _loginComplete(User? user) async {
+  Future<void> _loginComplete(User? user, {bool isInitialLogin = false}) async {
     if (user != null) {
       _usernameController.clear();
       _passwordController.clear();
@@ -41,11 +41,25 @@ class _LoginPageState extends State<LoginPage> {
         _loginIsRunning = false;
         _isLoadingData = true;
       });
-      await BaseProvider.updateAllData();
+      // Request our basic data
+      await Future.wait(
+        ServiceLocator.getAllProviders().map((provider) async {
+          try {
+            await provider.postLogin();
+          } catch (e) {
+            LoggerService.error("Failed to load data for provider ${provider.runtimeType}: $e");
+          }
+        }),
+      );
       setState(() {
         _isLoadingData = false;
       });
       SproutNavigator.redirect("home");
+    } else {
+      setState(() {
+        _loginIsRunning = false;
+        _message = !isInitialLogin ? "Login failed. Please check credentials." : "";
+      });
     }
   }
 
@@ -62,13 +76,10 @@ class _LoginPageState extends State<LoginPage> {
     userProvider
         .checkInitialLoginStatus()
         .then((user) async {
-          await _loginComplete(user);
+          await _loginComplete(user, isInitialLogin: true);
         })
-        .onError((Object error, StackTrace stackTrace) {
-          setState(() {
-            _loginIsRunning = false;
-            _message = "Login failed. Please check credentials.";
-          });
+        .onError((Object error, StackTrace stackTrace) async {
+          await _loginComplete(null, isInitialLogin: true);
         });
   }
 

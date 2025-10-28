@@ -52,12 +52,6 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
   }
 
   @override
-  Future<void> updateData() async {
-    isLoading = false;
-    notifyListeners();
-  }
-
-  @override
   Future<void> cleanupData() async {
     _sankeyDataCache.clear();
     notifyListeners();

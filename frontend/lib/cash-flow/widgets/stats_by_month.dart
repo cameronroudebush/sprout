@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/cash-flow/provider.dart';
+import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
