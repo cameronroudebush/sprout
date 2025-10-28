@@ -45,6 +45,7 @@ class SproutRouter {
       renderAppBar: false,
       renderNav: false,
       scrollWrapper: false,
+      pagePadding: 0,
     ),
     // Setup
     SproutPage(

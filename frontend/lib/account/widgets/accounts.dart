@@ -6,10 +6,12 @@ import 'package:sprout/account/widgets/account_groups.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 
 /// The main accounts display that contains the chart along side the actual accounts list
 class AccountsWidget extends StatefulWidget {
@@ -39,23 +41,25 @@ class AccountsWidget extends StatefulWidget {
   State<AccountsWidget> createState() => _AccountsWidgetState();
 }
 
-class _AccountsWidgetState extends State<AccountsWidget> {
-  final accountProvider = ServiceLocator.get<AccountProvider>();
-
+class _AccountsWidgetState extends AutoUpdateState<AccountsWidget> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => accountProvider.populateLinkedAccounts());
-  }
+  Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
+    ServiceLocator.get<AccountProvider>().populateLinkedAccounts(showLoaders);
+    ServiceLocator.get<NetWorthProvider>().loadHomePageData(showLoaders);
+    return null;
+  };
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AccountProvider>(
-      builder: (context, accountProvider, child) {
+    return Consumer2<AccountProvider, NetWorthProvider>(
+      builder: (context, accountProvider, netWorthProvider, child) {
         final mediaQuery = MediaQuery.of(context);
-        if (accountProvider.isLoading) {
+        if (accountProvider.isLoading ||
+            netWorthProvider.isLoading ||
+            netWorthProvider.historicalAccountData == null ||
+            netWorthProvider.historicalAccountData!.isEmpty) {
           return SizedBox(
-            height: mediaQuery.size.height * .8,
+            height: 320,
             width: double.infinity,
             child: Center(child: CircularProgressIndicator()),
           );
