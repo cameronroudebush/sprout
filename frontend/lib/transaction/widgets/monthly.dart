@@ -8,7 +8,7 @@ import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction/model/transaction_subscription_extensions.dart';
-import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
 /// This display shows monthly subscriptions in a calendar like format

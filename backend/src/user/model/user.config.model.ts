@@ -2,7 +2,7 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { ChartRange } from "@backend/user/model/chart.range.model";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean } from "class-validator";
+import { IsBoolean, IsEnum } from "class-validator";
 
 /**
  * This class defines user configuration options per user
@@ -17,6 +17,7 @@ export class UserConfig extends DatabaseBase {
   /** The net worth range to display by default */
   @DatabaseDecorators.column({ nullable: false, default: "oneDay", type: "varchar" })
   @ApiProperty({ enum: ChartRange, enumName: "ChartRangeEnum" })
+  @IsEnum(ChartRange)
   netWorthRange: ChartRange;
 
   constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"]) {

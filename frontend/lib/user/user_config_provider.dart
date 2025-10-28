@@ -6,7 +6,7 @@ class UserConfigProvider extends BaseProvider<UserConfigApi> {
   UserConfig? _currentUserConfig;
 
   UserConfig? get currentUserConfig => _currentUserConfig;
-  ChartRangeEnum get userDefaultChartRange => _currentUserConfig!.netWorthRange;
+  ChartRangeEnum get userDefaultChartRange => _currentUserConfig?.netWorthRange ?? ChartRangeEnum.oneDay;
 
   UserConfigProvider(super.api);
 
@@ -29,7 +29,7 @@ class UserConfigProvider extends BaseProvider<UserConfigApi> {
   }
 
   @override
-  Future<void> updateData() async {
+  Future<void> postLogin() async {
     isLoading = true;
     notifyListeners();
     await populateUserConfig();

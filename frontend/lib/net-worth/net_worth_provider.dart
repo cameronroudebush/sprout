@@ -16,35 +16,25 @@ class NetWorthProvider extends BaseProvider<NetWorthApi> {
   NetWorthProvider(super.api);
 
   /// Populates the single current net worth value.
-  Future<num?> _populateNetWorth() async {
+  Future<num?> populateNetWorth() async {
     return _netWorth = await api.netWorthControllerGetNetWorth();
   }
 
   /// Populates the net worth overtime flow.
-  Future<EntityHistory?> _populateHistoricalNetWorth() async {
+  Future<EntityHistory?> populateHistoricalNetWorth() async {
     return _historicalNetWorth = await api.netWorthControllerGetNetWorthOT();
   }
 
   /// Populates the net worth overtime flow.
-  Future<List<EntityHistory>?> _populateHistoricalAccountData() async {
+  Future<List<EntityHistory>?> populateHistoricalAccountData() async {
     return _historicalAccountData = await api.netWorthControllerGetNetWorthByAccounts();
-  }
-
-  @override
-  Future<void> updateData() async {
-    isLoading = true;
-    notifyListeners();
-    await _populateNetWorth();
-    await _populateHistoricalNetWorth();
-    await _populateHistoricalAccountData();
-    isLoading = false;
-    notifyListeners();
   }
 
   @override
   Future<void> cleanupData() async {
     _netWorth = null;
     _historicalNetWorth = null;
+    _historicalAccountData = [];
     notifyListeners();
   }
 }

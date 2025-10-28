@@ -38,8 +38,8 @@ export class DatabaseConfig {
 
   /** Returns the database configuration used to initialize the data source */
   get dbConfig() {
-    const migrationsDirectory = path.join("..", "database", "migration", this.type);
-    const migrationFiles = glob.sync("/**/*.*[!.map]", { root: path.join(__dirname, migrationsDirectory) });
+    const migrationsDirectory = path.resolve(path.join(__dirname, "database", "migration", this.type));
+    const migrationFiles = glob.sync("/**/*.*[!.map]", { root: path.join(migrationsDirectory) });
     return {
       ...this.sqlite,
       type: this.type,

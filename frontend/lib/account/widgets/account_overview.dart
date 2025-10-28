@@ -1,18 +1,19 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/accounts.dart';
-import 'package:sprout/account/provider.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account_group.dart';
+import 'package:sprout/account/widgets/accounts.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
-import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -29,6 +30,14 @@ class AccountsOverview extends StatefulWidget {
 }
 
 class _AccountsOverviewState extends State<AccountsOverview> {
+  final accountProvider = ServiceLocator.get<AccountProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+    accountProvider.populateLinkedAccounts();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<UserConfigProvider, AccountProvider, NetWorthProvider>(

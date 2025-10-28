@@ -1,14 +1,28 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/transaction-rule/provider.dart';
+import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_row.dart';
 
 /// A widget that displays all of our transaction rules and allows adding more
-class TransactionRuleOverview extends StatelessWidget {
+class TransactionRuleOverview extends StatefulWidget {
   const TransactionRuleOverview({super.key});
+
+  @override
+  State<TransactionRuleOverview> createState() => _TransactionRuleOverviewState();
+}
+
+class _TransactionRuleOverviewState extends State<TransactionRuleOverview> {
+  @override
+  Future<void> initState() async {
+    super.initState();
+    // Request data
+    final transactionRuleProvider = ServiceLocator.get<TransactionRuleProvider>();
+    await transactionRuleProvider.populateTransactionRules();
+  }
 
   @override
   Widget build(BuildContext context) {

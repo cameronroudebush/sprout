@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/cash-flow/provider.dart';
+import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/charts/sankey/models/data.dart';
 import 'package:sprout/charts/sankey/sankey.dart';
 import 'package:sprout/core/provider/service.locator.dart';

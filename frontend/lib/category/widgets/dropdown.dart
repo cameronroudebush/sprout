@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 
 /// A dropdown that allows category selection
-class CategoryDropdown extends StatelessWidget {
+class CategoryDropdown extends StatefulWidget {
   /// Fake all category used for searching
   static final fakeAllCategory = Category(id: "", name: "All Categories", type: CategoryTypeEnum.expense);
 
@@ -23,6 +24,19 @@ class CategoryDropdown extends StatelessWidget {
     this.displayAllCategoryButton = false,
     this.enabled = true,
   });
+
+  @override
+  State<CategoryDropdown> createState() => _CategoryDropdownState();
+}
+
+class _CategoryDropdownState extends State<CategoryDropdown> {
+  final categoryProvider = ServiceLocator.get<CategoryProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+    categoryProvider.loadUpdatedCategories();
+  }
 
   /// Recursively builds the list of dropdown menu items with indentation for children.
   List<DropdownMenuItem<Category>> _buildCategoryItems(
@@ -64,13 +78,13 @@ class CategoryDropdown extends StatelessWidget {
             : DropdownButtonFormField<Category>(
                 menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
                 dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                value: category,
+                value: widget.category,
                 decoration: const InputDecoration(isDense: true, border: OutlineInputBorder()),
                 hint: const Text("Select a category"),
                 selectedItemBuilder: (BuildContext context) {
                   // We use this so we don't have indentation when displaying the options in the button
                   return [
-                    if (displayAllCategoryButton) Text(fakeAllCategory.name),
+                    if (widget.displayAllCategoryButton) Text(CategoryDropdown.fakeAllCategory.name),
                     Text("Unknown"),
 
                     /// Render tree in order
@@ -85,8 +99,11 @@ class CategoryDropdown extends StatelessWidget {
                   ];
                 },
                 items: [
-                  if (displayAllCategoryButton)
-                    DropdownMenuItem<Category>(value: fakeAllCategory, child: Text(fakeAllCategory.name)),
+                  if (widget.displayAllCategoryButton)
+                    DropdownMenuItem<Category>(
+                      value: CategoryDropdown.fakeAllCategory,
+                      child: Text(CategoryDropdown.fakeAllCategory.name),
+                    ),
                   const DropdownMenuItem<Category>(value: null, child: Text("Unknown")),
 
                   // Find top-level categories to start the tree
@@ -97,7 +114,7 @@ class CategoryDropdown extends StatelessWidget {
                     return topLevel.expand((parent) => _buildCategoryItems(provider.categories, parent, 0));
                   }(),
                 ],
-                onChanged: !enabled ? null : onChanged,
+                onChanged: !widget.enabled ? null : widget.onChanged,
               );
       },
     );

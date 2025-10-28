@@ -88,7 +88,7 @@ export class TransactionRuleController {
   @ApiCreatedResponse({ description: "Transaction rule added successfully.", type: TransactionRule })
   @ApiNotFoundResponse({ description: "Failed to locate a matching category for this transaction rule based on given content." })
   @ApiBody({ type: TransactionRule })
-  async create(data: TransactionRule, @CurrentUser() user: User) {
+  async create(@Body() data: TransactionRule, @CurrentUser() user: User) {
     const rule = TransactionRule.fromPlain(data);
     rule.user = user;
 

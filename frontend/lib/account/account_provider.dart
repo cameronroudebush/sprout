@@ -16,7 +16,10 @@ class AccountProvider extends BaseProvider<AccountApi> {
   AccountProvider(super.api);
 
   Future<List<Account>> populateLinkedAccounts() async {
-    return _linkedAccounts = await api.accountControllerGetAccounts() ?? [];
+    setLoadingStatus(true);
+    final apiLinkedAccounts = List<Account>.from(await api.accountControllerGetAccounts() ?? []);
+    setLoadingStatus(false);
+    return _linkedAccounts = apiLinkedAccounts;
   }
 
   /// Uses the API and edits the given account
@@ -34,15 +37,6 @@ class AccountProvider extends BaseProvider<AccountApi> {
     manualSyncIsRunning = true;
     notifyListeners();
     await api.accountControllerManualSync();
-  }
-
-  @override
-  Future<void> updateData() async {
-    isLoading = true;
-    notifyListeners();
-    await populateLinkedAccounts();
-    isLoading = false;
-    notifyListeners();
   }
 
   @override

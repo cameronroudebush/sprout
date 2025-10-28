@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/dialog/add_account.dart';
-import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_groups.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 
-/// A widget that displays all accounts
-///
-/// In the event no accounts are found, it provides a way to add them
-class AccountsWidget extends StatelessWidget {
+/// The main accounts display that contains the chart along side the actual accounts list
+class AccountsWidget extends StatefulWidget {
   /// If the account groups should be collapsible
   final bool allowCollapse;
   final ChartRangeEnum netWorthPeriod;
@@ -35,6 +34,19 @@ class AccountsWidget extends StatelessWidget {
     this.accountType,
     this.showGroupTitles = true,
   });
+
+  @override
+  State<AccountsWidget> createState() => _AccountsWidgetState();
+}
+
+class _AccountsWidgetState extends State<AccountsWidget> {
+  final accountProvider = ServiceLocator.get<AccountProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+    accountProvider.populateLinkedAccounts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,19 +88,19 @@ class AccountsWidget extends StatelessWidget {
               ],
             ),
           );
-          return applyCard ? SproutCard(child: content) : content;
+          return widget.applyCard ? SproutCard(child: content) : content;
         }
 
-        final accounts = accountType == null
+        final accounts = widget.accountType == null
             ? accountProvider.linkedAccounts
-            : accountProvider.linkedAccounts.where((element) => element.type == accountType).toList();
+            : accountProvider.linkedAccounts.where((element) => element.type == widget.accountType).toList();
 
         return AccountGroupsWidget(
           accounts: accounts,
-          allowCollapse: allowCollapse,
-          netWorthPeriod: netWorthPeriod,
-          applyCard: applyCard,
-          showGroupTitles: showGroupTitles,
+          allowCollapse: widget.allowCollapse,
+          netWorthPeriod: widget.netWorthPeriod,
+          applyCard: widget.applyCard,
+          showGroupTitles: widget.showGroupTitles,
           onAccountClick: (account) {
             SproutNavigator.redirect("account", queryParameters: {"acc": account.id});
           },

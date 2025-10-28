@@ -11,7 +11,7 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
-import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
 /// A widget used to display the given account and information in a row

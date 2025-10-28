@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/provider.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/widgets/button.dart';
@@ -12,15 +12,15 @@ import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 import 'package:sprout/user/widgets/info_card.dart';
 
-/// A page that display user account information along with other useful info
-class UserPage extends StatefulWidget {
-  const UserPage({super.key});
+/// A page that display user account information along with configuration settings
+class UserConfigPage extends StatefulWidget {
+  const UserConfigPage({super.key});
 
   @override
-  State<UserPage> createState() => _UserPageState();
+  State<UserConfigPage> createState() => _UserConfigPageState();
 }
 
-class _UserPageState extends State<UserPage> {
+class _UserConfigPageState extends State<UserConfigPage> {
   /// Returns the status of the last account sync
   String _getLastSyncStatus(ConfigProvider provider) {
     final config = provider.config;

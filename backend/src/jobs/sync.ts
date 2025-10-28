@@ -108,7 +108,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       transaction.account = accountInDb;
       let transactionInDb = (await Transaction.find({ where: { id: transaction.id, account: { id: accountInDb.id } } }))[0];
       // If we aren't tracking this transaction yet, go ahead and add it
-      if (transactionInDb == null) transactionInDb = await Transaction.fromPlain(transaction).insert();
+      if (transactionInDb == null) transactionInDb = await Transaction.fromPlain(transaction).insert(false);
       else {
         // Update our related holding
         transactionInDb.amount = transaction.amount;
@@ -130,7 +130,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       holding.account = accountInDb;
       let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol, account: { id: accountInDb.id } } }))[0];
       // If we aren't tracking this holding yet, start tracking it
-      if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert();
+      if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert(false);
       else {
         // Set old holding history
         await HoldingHistory.fromPlain({

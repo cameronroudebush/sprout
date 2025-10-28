@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/cash-flow/provider.dart';
+import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
 import 'package:sprout/cash-flow/widgets/stats_by_month.dart';
 import 'package:sprout/core/provider/service.locator.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/charts/pie_chart.dart';
 import 'package:sprout/core/widgets/card.dart';
 

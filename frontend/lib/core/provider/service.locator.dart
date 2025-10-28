@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/account/provider.dart';
-import 'package:sprout/cash-flow/provider.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/cash-flow/cash_flow_provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/holding/provider.dart';
-import 'package:sprout/net-worth/provider.dart';
-import 'package:sprout/transaction-rule/provider.dart';
-import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
+import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 

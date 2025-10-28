@@ -8,6 +8,9 @@ export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "The port to accept backend requests on." })
   port: number = 8001;
 
+  @ConfigurationMetadata.assign({ comment: "The base path that the API is hosted on.", externalControlDisabled: true })
+  basePath: string = "/api";
+
   @ConfigurationMetadata.assign({ comment: "How long JWT's should stay valid for users." })
   jwtExpirationTime = "30m";
 

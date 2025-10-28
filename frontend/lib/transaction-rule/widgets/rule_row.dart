@@ -7,7 +7,7 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction-rule/provider.dart';
+import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
 

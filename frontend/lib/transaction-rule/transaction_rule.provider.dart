@@ -14,7 +14,12 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
   TransactionRuleProvider(super.api);
 
   Future<List<TransactionRule>> populateTransactionRules() async {
-    return _rules = (await api.transactionRuleControllerGet()) ?? [];
+    isLoading = true;
+    final rulesFromApi = (await api.transactionRuleControllerGet()) ?? [];
+    _rules = List<TransactionRule>.from(rulesFromApi);
+    isLoading = false;
+    notifyListeners();
+    return _rules;
   }
 
   Future<TransactionRule?> add(TransactionRule rule) async {
@@ -43,16 +48,6 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
     if (index != -1) _rules[index] = updatedRule;
     notifyListeners();
     return updatedRule;
-  }
-
-  @override
-  Future<void> updateData() async {
-    isLoading = true;
-    notifyListeners();
-    await populateTransactionRules();
-    isLoading = false;
-    _transactionRulesRunning = false;
-    notifyListeners();
   }
 
   @override

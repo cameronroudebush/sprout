@@ -1,6 +1,6 @@
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 
 /** The minified model of what can be edited in an account */
 export class AccountEditRequest {
@@ -11,5 +11,6 @@ export class AccountEditRequest {
   @IsString()
   @IsOptional()
   @ApiProperty({ enum: AccountSubType, enumName: "AccountSubTypeEnum", required: false })
+  @IsEnum(AccountSubType)
   subType?: AccountSubType;
 }

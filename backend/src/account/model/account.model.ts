@@ -7,6 +7,7 @@ import { Institution } from "@backend/institution/model/institution.model";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
+import { IsEnum } from "class-validator";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
@@ -41,11 +42,13 @@ export class Account extends DatabaseBase {
 
   /** The type of this account to better separate it from the others. */
   @DatabaseDecorators.column({ nullable: false, type: "varchar" })
+  @IsEnum(AccountType)
   type: AccountType;
 
   /** The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA. */
   @DatabaseDecorators.column({ nullable: true, type: "varchar" })
   @ApiProperty({ enum: AccountSubType, enumName: "AccountSubTypeEnum", required: false })
+  @IsEnum(AccountSubType)
   subType?: AccountSubType;
 
   /** Any extra data that we want to store as JSON */

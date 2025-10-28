@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/dialog/account_delete.dart';
 import 'package:sprout/account/dialog/account_error.dart';
 import 'package:sprout/account/model/account_extensions.dart';
-import 'package:sprout/account/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
@@ -21,10 +21,10 @@ import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/holding/provider.dart';
 import 'package:sprout/holding/widgets/account.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
-import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
-import 'package:sprout/transaction/overview.dart';
+import 'package:sprout/transaction/widgets/overview.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a holding display for a specific account

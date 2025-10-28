@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/text.dart';
 
@@ -40,5 +43,21 @@ class SnackbarProvider {
         ),
       );
     }
+  }
+
+  /// Opens a snackbar with an APIException. If it's not an APIException, we just treat it like a normal error.
+  static void openWithAPIException(dynamic e) {
+    String message;
+    if (e is ApiException && e.message != null) {
+      try {
+        final decoded = json.decode(e.message!);
+        message = decoded['message'] ?? e.message;
+      } catch (_) {
+        message = e.message!;
+      }
+    } else {
+      message = e.toString();
+    }
+    SnackbarProvider.openSnackbar(message, type: SnackbarType.error);
   }
 }

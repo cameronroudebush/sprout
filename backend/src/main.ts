@@ -87,7 +87,7 @@ async function main() {
       cors: true,
     });
     // All endpoints live under /api
-    app.setGlobalPrefix("api");
+    app.setGlobalPrefix(Configuration.server.basePath);
     // Enable validation
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     // Enable class-transformer for response serialization
@@ -99,10 +99,11 @@ async function main() {
     // Configure Swagger
     if (Configuration.isDevBuild) {
       const theme = new SwaggerTheme();
-      SwaggerModule.setup("api", app, createSwaggerDoc(app), {
+      SwaggerModule.setup(Configuration.server.basePath, app, createSwaggerDoc(app), {
         customSiteTitle: swaggerTitle,
         swaggerOptions: { defaultModelsExpandDepth: -1 },
         customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
+        customfavIcon: "https://sprout.croudebush.net/assets/favicon-bg.svg",
       });
     }
 
@@ -120,6 +121,7 @@ async function main() {
     logger.log(`Server ready on port ${Configuration.server.port}`);
   } catch (e) {
     logger.error(e as Error);
+    logger.error(`${projName} crashed on startup. Exiting...`);
     process.exit(1);
   }
 }

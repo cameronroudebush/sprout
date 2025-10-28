@@ -4,16 +4,15 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
-import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction/provider.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
 /// An overview component that allows the user to navigate their total transactions
@@ -74,14 +73,30 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
+  /// Uses the provider to prepare all the data we'll need
+  Future<void> _prepareData() async {
+    final transactionProvider = ServiceLocator.get<TransactionProvider>();
+    transactionProvider.setLoadingStatus(true);
+    // Grab all the data at once
+    await Future.wait([
+      transactionProvider.populateTotalTransactionCount(),
+      // Populate initial set
+      transactionProvider.populateTransactions(
+        startIndex: 0,
+        endIndex: TransactionProvider.initialTransactionCount,
+        shouldNotify: false,
+      ),
+      // Grab all transactions for today no matter what
+      transactionProvider.populateTransactions(date: DateTime.now(), shouldNotify: false),
+      transactionProvider.populateSubscriptions(),
+    ]);
+    transactionProvider.setLoadingStatus(false);
+  }
+
   @override
   void initState() {
     super.initState();
-    _onAllDataUpdated = BaseProvider.onAllDataUpdated.listen((_) {
-      _currentTransactionIndex = 0;
-      _scrollController.jumpTo(0);
-      _populateInitialTransactions();
-    });
+    _prepareData();
     if (widget.focusCount != null || widget.account != null) _currentTransactionIndex = 0;
     _scrollController.addListener(_onScroll);
 
@@ -92,7 +107,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
     } else {
       _filteredCategory = widget.initialCategoryFilter;
     }
-
+    // Populate even more transactions if we have less than the recommended amount
     _populateInitialTransactions();
   }
 

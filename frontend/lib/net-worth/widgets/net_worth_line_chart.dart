@@ -4,7 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
-import 'package:sprout/net-worth/provider.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 
 /// A line chart that displays the given data in a line chart format
 class NetWorthLineChart extends StatelessWidget {

@@ -49,7 +49,7 @@ export class CategoryController {
   @ApiCreatedResponse({ description: "Category added successfully.", type: Category })
   @ApiConflictResponse({ description: "A similar category already exists." })
   @ApiBody({ type: Category })
-  async create(data: Category, @CurrentUser() user: User) {
+  async create(@Body() data: Category, @CurrentUser() user: User) {
     const category = Category.fromPlain(data);
     category.user = user;
 

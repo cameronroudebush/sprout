@@ -75,7 +75,7 @@ export class UserController {
   @ApiCreatedResponse({ description: "User created successfully.", type: UserCreationResponse })
   @ApiBadRequestResponse({ description: "The app is not in a setup state or invalid input." })
   @ApiBody({ type: UserCreationRequest })
-  async create(data: UserCreationRequest) {
+  async create(@Body() data: UserCreationRequest) {
     const firstTimeSetupStatus = await this.setupService.firstTimeSetupDetermination();
     if (firstTimeSetupStatus === "welcome") {
       const user = await User.createUser(data.username, data.password, true);
