@@ -1,0 +1,65 @@
+<svg width="100%" height="100%" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"
+    xmlns="http://www.w3.org/2000/svg">
+
+    <defs>
+        <pattern id="dot-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.5" fill="#191c20" />
+        </pattern>
+
+        <linearGradient id="glow-line" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#116383" />
+            <stop offset="100%" stop-color="#6b9ac4" />
+        </linearGradient>
+
+        <linearGradient id="fill-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#001e2c" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#111418" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+
+    <rect width="1920" height="1080" fill="#111418" />
+
+    <rect width="1920" height="1080" fill="url(#dot-grid)" opacity="0.6" />
+
+    <text x="1550" y="500" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="400" font-weight="bold" fill="#c2e8ff" opacity="0.03" transform="rotate(15 1550 500)">
+        $
+    </text>
+
+    <path d="M 0 700
+           C 150 600, 250 850, 400 750
+           S 600 500, 800 650
+           S 1000 780, 1200 680
+           S 1400 550, 1600 680
+           S 1800 800, 1920 750
+           L 1920 1080 L 0 1080 Z" fill="url(#fill-area)" />
+
+    <path d="M 0 700
+           C 150 600, 250 850, 400 750
+           S 600 500, 800 650
+           S 1000 780, 1200 680
+           S 1400 550, 1600 680
+           S 1800 800, 1920 750" fill="none" stroke="url(#glow-line)" stroke-width="6" stroke-linecap="round" />
+
+    <circle cx="400" cy="750" r="8" fill="#d6bee4" />
+    <circle cx="800" cy="650" r="8" fill="#d6bee4" />
+    <circle cx="1200" cy="680" r="8" fill="#d6bee4" />
+    <circle cx="1600" cy="680" r="8" fill="#d6bee4" />
+
+
+    <g transform="translate(0, 400)" opacity="0.7">
+        <rect x="100" y="500" width="80" height="150" fill="#116383" rx="10" ry="10" />
+        <rect x="250" y="550" width="80" height="100" fill="#d6bee4" rx="10" ry="10" />
+        <rect x="400" y="450" width="80" height="200" fill="#116383" rx="10" ry="10" />
+        <rect x="550" y="580" width="80" height="70" fill="#d6bee4" rx="10" ry="10" />
+        <rect x="700" y="520" width="80" height="130" fill="#116383" rx="10" ry="10" />
+        <rect x="850" y="480" width="80" height="170" fill="#116383" rx="10" ry="10" />
+        <rect x="1000" y="590" width="80" height="60" fill="#d6bee4" rx="10" ry="10" />
+        <rect x="1150" y="490" width="80" height="160" fill="#116383" rx="10" ry="10" />
+        <rect x="1300" y="540" width="80" height="110" fill="#d6bee4" rx="10" ry="10" />
+        <rect x="1450" y="470" width="80" height="180" fill="#116383" rx="10" ry="10" />
+        <rect x="1600" y="560" width="80" height="90" fill="#d6bee4" rx="10" ry="10" />
+        <rect x="1750" y="510" width="80" height="140" fill="#116383" rx="10" ry="10" />
+    </g>
+
+</svg>

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/text.dart';
 
 /// A reusable widget that displays a set of scrollable tabs.
 ///
@@ -63,11 +62,7 @@ class _ScrollableTabsWidgetState extends State<ScrollableTabsWidget>
           tabs: widget.tabNames.map((tab) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: TextWidget(
-                text: tab.toTitleCase,
-                referenceSize: 1.15,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              child: Text(tab.toTitleCase, style: const TextStyle(fontWeight: FontWeight.bold)),
             );
           }).toList(),
         ),

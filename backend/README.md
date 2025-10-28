@@ -13,6 +13,7 @@ npm run migrate --name=MY_NAME_HERE
 ```
 
 **Note**: For PR's, you may only have one migration and it must be named relevantly.
+**Note**: Due to webpacks compilation, you'll need to restart the backend after running the migration command so it knows the file exists.
 
 # Open API Spec
 

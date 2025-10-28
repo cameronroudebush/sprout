@@ -6,6 +6,7 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 
 /// A widget that displays the editing capabilities of a [Category]
@@ -20,18 +21,18 @@ class CategoryInfo extends StatefulWidget {
   State<CategoryInfo> createState() => _CategoryInfoState();
 }
 
-class _CategoryInfoState extends State<CategoryInfo> {
-  final categoryProvider = ServiceLocator.get<CategoryProvider>();
-
+class _CategoryInfoState extends AutoUpdateState<CategoryInfo> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   CategoryTypeEnum _type = CategoryTypeEnum.expense;
   Category? _parentCategory;
 
   @override
+  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
+
+  @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => categoryProvider.loadUpdatedCategories());
     final category = widget.category;
     if (category != null) {
       // Initialize for editing an existing category

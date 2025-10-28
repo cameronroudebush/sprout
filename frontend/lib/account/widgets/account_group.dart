@@ -148,11 +148,7 @@ class AccountGroupWidget extends StatelessWidget {
                           spacing: 4,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            TextWidget(
-                              referenceSize: 1.25,
-                              text: adjustedType,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            Text(adjustedType, style: TextStyle(fontWeight: FontWeight.bold)),
                             if (displayStats)
                               AccountChangeWidget(
                                 percentageChange: groupPercentChange,

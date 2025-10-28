@@ -23,12 +23,17 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     super("provider-sync", Configuration.providers.updateTime);
   }
 
-  protected async update() {
+  public override async updateNow(user?: User) {
+    return await this.update(user);
+  }
+
+  protected async update(user?: User) {
     this.logger.log("Starting sync for all providers.");
     const providers = this.providerService.getAll();
     const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
+    schedule.user = user;
     try {
-      for (const provider of providers) await this.updateProvider(provider);
+      for (const provider of providers) await this.updateProvider(provider, user);
     } catch (e) {
       schedule.failureReason = (e as Error).message;
       schedule.status = "failed";
@@ -42,11 +47,15 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     return schedule;
   }
 
-  /** Starts an update for the given provider. */
-  private async updateProvider(provider: ProviderBase) {
+  /**
+   * Starts an update for the given provider.
+   *
+   * @param specificUser If given, will only process this user
+   */
+  private async updateProvider(provider: ProviderBase, specificUser?: User) {
     this.logger.log(`Syncing ${provider.config.name}`);
-    // Handle each user
-    const users = await User.find({});
+    // Handle each user, or only the given user
+    const users = specificUser ? [specificUser] : await User.find({});
 
     // Handle each users accounts
     for (const user of users) {

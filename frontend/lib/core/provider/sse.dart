@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -11,16 +10,18 @@ import 'package:sprout/user/user_provider.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
 class SSEProvider extends BaseProvider<CoreApi> {
+  /// This subscription is used for listening from the built SSE endpoint
   StreamSubscription<Map<String, dynamic>>? _sseSubscription;
   bool _isConnecting = false;
   bool _isConnected = false;
   Timer? _reconnectTimer; // Timer for delayed reconnect attempts
-  /// Subscription for incoming events
+
+  /// Subscription for incoming events so we can clean it up when we're done
   StreamSubscription<SSEData>? _sub;
 
-  // Holds what to call when messages come in
-  final StreamController<SSEData> _eventController = StreamController.broadcast();
-  Stream<SSEData> get onEvent => _eventController.stream;
+  /// This controller allows for listening when SSE events come in from the backend
+  final StreamController<SSEData> _sseInEvent = StreamController.broadcast();
+  late final Stream<SSEData> onSSEEvent;
 
   // Back-off strategy variables
   int _reconnectAttempts = 0;
@@ -30,24 +31,13 @@ class SSEProvider extends BaseProvider<CoreApi> {
   bool get isConnected => _isConnected;
   bool get isConnecting => _isConnecting;
 
-  SSEProvider(super.api);
+  SSEProvider(super.api) {
+    onSSEEvent = _sseInEvent.stream;
+  }
 
-  @override
-  Future<void> onInit() async {
-    _sub = onEvent.listen((data) async {
-      if (data.event == SSEDataEventEnum.sync_) {
-        // TODO
-        // await BaseProvider.updateAllData(showSnackbar: true);
-        // Update manual tracking incase that's what this was from
-        final accountProvider = ServiceLocator.get<AccountProvider>();
-        accountProvider.manualSyncIsRunning = false;
-        accountProvider.notifyListeners();
-      } else if (data.event == SSEDataEventEnum.forceUpdate) {
-        // TODO
-        // await BaseProvider.updateAllData(showSnackbar: false);
-      }
-    });
-    await super.onInit();
+  /// Handles an [SSEData] message from the backend and re-publishes it so we can use it across the app
+  void handleMessage(SSEData data) {
+    _sseInEvent.add(data);
   }
 
   /// Builds the SSE stream to the backend and returns it. You can then listen to the return of JSON on that stream.
@@ -115,7 +105,7 @@ class SSEProvider extends BaseProvider<CoreApi> {
       _sseSubscription = sseStream.listen(
         (event) {
           final outEvent = SSEData.fromJson(event)!;
-          _eventController.add(outEvent);
+          handleMessage(outEvent);
         },
         onError: (error) {
           _handleConnectionLost(error);
@@ -190,7 +180,7 @@ class SSEProvider extends BaseProvider<CoreApi> {
   }
 
   @override
-  Future<void> updateData() async {
+  Future<void> postLogin() async {
     _startSSE();
   }
 

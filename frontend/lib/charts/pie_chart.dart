@@ -16,6 +16,9 @@ class SproutPieChart extends StatefulWidget {
   /// If we should show how the title of that pie slice
   final bool showPieTitle;
 
+  /// If we should show the value of that pie slice
+  final bool showPieValue;
+
   /// An optional mapping of colors to use for specific keys in the data.
   final Map<String, Color>? colorMapping;
 
@@ -30,6 +33,7 @@ class SproutPieChart extends StatefulWidget {
     required this.header,
     this.showLegend = true,
     this.showPieTitle = true,
+    this.showPieValue = false,
     this.colorMapping,
     this.formatValue,
     this.height = 250,
@@ -120,7 +124,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
   /// Generates the sections for the pie chart.
   List<PieChartSectionData> _generatePieSections() {
     int i = 0;
-    return widget.data!.entries.mapIndexed((index, entry) {
+    return widget.data!.entries.sortedBy((entry) => entry.value).mapIndexed((index, entry) {
       final color = widget.colorMapping?[entry.key] ?? colors[i % colors.length];
       i++;
       final isTouched = index == touchedIndex;
@@ -137,7 +141,9 @@ class _SproutPieChartState extends State<SproutPieChart> {
         color: color,
         value: entry.value.toDouble(),
         // Show a detailed tooltip for the touched section, or just the title for others
-        title: isTouched ? '${entry.key}\n(${widget.formatValue?.call(entry.value) ?? entry.value})' : entry.key,
+        title: isTouched || widget.showPieValue
+            ? '${entry.key}\n(${widget.formatValue?.call(entry.value) ?? entry.value})'
+            : entry.key,
 
         radius: radius,
         titleStyle: TextStyle(fontSize: titleFontSize, fontWeight: FontWeight.bold, color: Colors.white),
@@ -148,24 +154,38 @@ class _SproutPieChartState extends State<SproutPieChart> {
   /// Builds the legend for the pie chart.
   Widget _buildLegend() {
     int i = 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: widget.data!.entries.map((entry) {
-        final category = entry.key;
-        final color = colors[i % colors.length];
-        i++;
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Row(
-            children: [
-              Container(width: 12, height: 12, color: color),
-              const SizedBox(width: 8),
-              Text(category),
-            ],
+    return SizedBox(
+      width: 128,
+      child: Row(
+        children: [
+          Expanded(
+            child: ListView(
+              shrinkWrap: true,
+              children: widget.data!.entries.sortedBy((entry) => -entry.value).map((entry) {
+                final category = entry.key;
+                // Find the corresponding color from the generated pie sections
+                final sectionIndex = widget.data!.entries
+                    .sortedBy((e) => e.value)
+                    .indexWhere((e) => e.key == entry.key);
+                final color = sectionIndex != -1
+                    ? _generatePieSections()[sectionIndex].color
+                    : (widget.colorMapping?[entry.key] ?? colors[i % colors.length]);
+                i++;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      Container(width: 12, height: 12, color: color),
+                      Expanded(child: Text(category, softWrap: true)),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        );
-      }).toList(),
+        ],
+      ),
     );
   }
 }

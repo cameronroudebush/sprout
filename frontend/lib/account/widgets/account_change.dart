@@ -28,7 +28,7 @@ class AccountChangeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if (percentageChange != null) {
+    if (percentageChange != null && totalChange != null) {
       final changeColor = getBalanceColor(totalChange!, theme);
       return Row(
         mainAxisAlignment: mainAxisAlignment,

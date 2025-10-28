@@ -5,6 +5,7 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -19,14 +20,11 @@ class CategoryOverview extends StatefulWidget {
   State<CategoryOverview> createState() => _CategoryOverviewState();
 }
 
-class _CategoryOverviewState extends State<CategoryOverview> {
+class _CategoryOverviewState extends AutoUpdateState<CategoryOverview> {
   final categoryProvider = ServiceLocator.get<CategoryProvider>();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => categoryProvider.loadUpdatedCategories());
-  }
+  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
 
   Future<void> _openInfoDialog(BuildContext context, Category? c) async {
     await showDialog(context: context, builder: (_) => CategoryInfo(c));

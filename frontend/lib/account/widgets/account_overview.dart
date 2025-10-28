@@ -9,6 +9,7 @@ import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
@@ -29,14 +30,9 @@ class AccountsOverview extends StatefulWidget {
   State<AccountsOverview> createState() => _AccountsOverviewState();
 }
 
-class _AccountsOverviewState extends State<AccountsOverview> {
-  final accountProvider = ServiceLocator.get<AccountProvider>();
-
+class _AccountsOverviewState extends AutoUpdateState<AccountsOverview> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => accountProvider.populateLinkedAccounts());
-  }
+  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<AccountProvider>().populateLinkedAccounts;
 
   @override
   Widget build(BuildContext context) {

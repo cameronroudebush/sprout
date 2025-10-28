@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/current_net_worth.dart';
@@ -22,37 +23,24 @@ class NetWorthOverviewWidget extends StatefulWidget {
   /// If we should clarify what this number is
   final bool showNetWorthText;
 
+  final double chartHeight;
+
   const NetWorthOverviewWidget({
     super.key,
     this.showCard = false,
     required this.selectedChartRange,
     this.onRangeSelected,
     this.showNetWorthText = true,
+    this.chartHeight = 250,
   });
 
   @override
   State<NetWorthOverviewWidget> createState() => _NetWorthOverviewWidgetState();
 }
 
-class _NetWorthOverviewWidgetState extends State<NetWorthOverviewWidget> {
-  /// Uses the provider to prepare all the data we'll need
-  Future<void> _prepareData() async {
-    final netWorthProvider = ServiceLocator.get<NetWorthProvider>();
-    netWorthProvider.setLoadingStatus(true);
-    // Grab all the data at once
-    await Future.wait([
-      netWorthProvider.populateNetWorth(),
-      netWorthProvider.populateHistoricalNetWorth(),
-      netWorthProvider.populateHistoricalAccountData(),
-    ]);
-    netWorthProvider.setLoadingStatus(false);
-  }
-
+class _NetWorthOverviewWidgetState extends AutoUpdateState<NetWorthOverviewWidget> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareData());
-  }
+  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<NetWorthProvider>().loadHomePageData;
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +50,20 @@ class _NetWorthOverviewWidgetState extends State<NetWorthOverviewWidget> {
         // Build our content to render
         final content = Padding(
           padding: const EdgeInsets.only(top: 12, right: 12, left: 12),
-          child: netWorthProvider.isLoading || netWorthProvider.netWorth == null
-              ? const SizedBox(height: 325, child: Center(child: CircularProgressIndicator()))
+          child:
+              netWorthProvider.isLoading ||
+                  netWorthProvider.netWorth == null ||
+                  netWorthProvider.historicalNetWorth == null
+              ? SizedBox(
+                  height: widget.chartHeight + 75,
+                  child: Center(child: CircularProgressIndicator()),
+                )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CurrentNetWorthDisplay(chartRange: selectedChartRange, showNetWorthText: widget.showNetWorthText),
-                    NetWorthLineChart(chartRange: selectedChartRange),
+                    NetWorthLineChart(chartRange: selectedChartRange, height: widget.chartHeight),
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 12),
                       child: ChartRangeSelector(

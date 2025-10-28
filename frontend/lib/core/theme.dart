@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// Defines themes for use in sprout
 abstract final class AppTheme {
   /// How many pixels display content can max out at on desktops.
-  static final maxDesktopSize = 1024.0;
+  static final maxDesktopSize = double.infinity;
 
   /// Styling for displaying error buttons
   static final errorButton = FilledButton.styleFrom(

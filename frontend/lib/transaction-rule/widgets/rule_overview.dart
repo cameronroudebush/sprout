@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
@@ -15,18 +16,10 @@ class TransactionRuleOverview extends StatefulWidget {
   State<TransactionRuleOverview> createState() => _TransactionRuleOverviewState();
 }
 
-class _TransactionRuleOverviewState extends State<TransactionRuleOverview> {
-  /// Uses the provider to prepare all the data we'll need
-  Future<void> _prepareData() async {
-    final transactionRuleProvider = ServiceLocator.get<TransactionRuleProvider>();
-    await transactionRuleProvider.populateTransactionRules();
-  }
-
+class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverview> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareData());
-  }
+  Future<dynamic> Function(bool showLoaders) loadData =
+      ServiceLocator.get<TransactionRuleProvider>().populateTransactionRules;
 
   @override
   Widget build(BuildContext context) {
