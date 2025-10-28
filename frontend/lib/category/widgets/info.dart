@@ -31,7 +31,7 @@ class _CategoryInfoState extends State<CategoryInfo> {
   @override
   void initState() {
     super.initState();
-    categoryProvider.loadUpdatedCategories();
+    WidgetsBinding.instance.addPostFrameCallback((_) => categoryProvider.loadUpdatedCategories());
     final category = widget.category;
     if (category != null) {
       // Initialize for editing an existing category

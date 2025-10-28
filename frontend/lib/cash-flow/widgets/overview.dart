@@ -31,12 +31,14 @@ class _CashFlowOverviewState extends State<CashFlowOverview> {
   /// Fetches data we need for these displays
   void _fetchData() {
     final provider = ServiceLocator.get<CashFlowProvider>();
+    provider.setLoadingStatus(true);
     if (provider.getSankeyData(_selectedDate.year, _selectedDate.month) == null) {
       context.read<CashFlowProvider>().getSankey(_selectedDate.year, _selectedDate.month);
     }
     if (provider.getStatsData(_selectedDate.year, _selectedDate.month) == null) {
       context.read<CashFlowProvider>().getStats(_selectedDate.year, _selectedDate.month);
     }
+    provider.setLoadingStatus(false);
   }
 
   void _changeMonth(int monthIncrement) {

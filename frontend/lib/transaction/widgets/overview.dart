@@ -96,7 +96,7 @@ class _TransactionsOverviewPageState extends State<TransactionsOverview> {
   @override
   void initState() {
     super.initState();
-    _prepareData();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareData());
     if (widget.focusCount != null || widget.account != null) _currentTransactionIndex = 0;
     _scrollController.addListener(_onScroll);
 

@@ -35,7 +35,7 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
   @override
   void initState() {
     super.initState();
-    categoryProvider.loadUpdatedCategories();
+    WidgetsBinding.instance.addPostFrameCallback((_) => categoryProvider.loadUpdatedCategories());
   }
 
   /// Recursively builds the list of dropdown menu items with indentation for children.

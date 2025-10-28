@@ -7,7 +7,7 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
-import 'package:sprout/holding/provider.dart';
+import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction/transaction_provider.dart';

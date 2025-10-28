@@ -12,7 +12,7 @@ import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
-import 'package:sprout/holding/provider.dart';
+import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction/transaction_provider.dart';

@@ -1202,9 +1202,19 @@
     },
     "/holding": {
       "get": {
-        "description": "Retrieves all holdings for the authenticated user.",
+        "description": "Retrieves all holdings for the authenticated user within a specified account.",
         "operationId": "HoldingController_getHoldings",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "query",
+            "description": "The ID of the account to retrieve holdings for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Holdings found successfully.",
@@ -1228,7 +1238,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get holdings.",
+        "summary": "Get holdings for a specific account.",
         "tags": [
           "Holding"
         ]
@@ -1236,16 +1246,29 @@
     },
     "/holding/history": {
       "get": {
-        "description": "Retrieves holding history for all available holdings of the current user by account. This is useful for displaying the holdings value over time.",
+        "description": "Retrieves holding history for the given account. This is useful for displaying the holdings value over time.",
         "operationId": "HoldingController_getHoldingHistory",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "query",
+            "description": "The ID of the account to retrieve holding history for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Holding history found successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HoldingHistoryByAccount"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityHistory"
+                  }
                 }
               }
             }
@@ -1259,7 +1282,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get holding history.",
+        "summary": "Get holding history for a specific account.",
         "tags": [
           "Holding"
         ]
@@ -1547,7 +1570,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.0.7-22-g3aa4240",
+    "version": "v0.0.7-24-g2d17e50",
     "contact": {}
   },
   "tags": [
@@ -1878,7 +1901,8 @@
           },
           "name": {
             "type": "string",
-            "description": "The name of this category"
+            "description": "The name of the category",
+            "example": "Groceries"
           },
           "type": {
             "description": "If this account type should be considered an expense or income",
@@ -2257,23 +2281,6 @@
           "purchasePrice",
           "shares",
           "symbol"
-        ]
-      },
-      "HoldingHistoryByAccount": {
-        "type": "object",
-        "properties": {
-          "history": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/EntityHistory"
-              }
-            }
-          }
-        },
-        "required": [
-          "history"
         ]
       },
       "EntityHistoryDataPoint": {

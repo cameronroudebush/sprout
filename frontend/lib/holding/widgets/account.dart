@@ -6,7 +6,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/holding/provider.dart';
+import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/holding.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 
@@ -44,7 +44,7 @@ class HoldingAccount extends StatelessWidget {
         final mediaQuery = MediaQuery.of(context).size;
 
         // Loading/no holdings indicator
-        if (holdingProvider.isLoading || holdingProvider.holdings.isEmpty) {
+        if (holdingProvider.isLoading || holdings.isEmpty) {
           return SizedBox(
             height: mediaQuery.height * .7,
             child: Center(

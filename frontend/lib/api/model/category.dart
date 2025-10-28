@@ -21,7 +21,7 @@ class Category {
 
   String id;
 
-  /// The name of this category
+  /// The name of the category
   String name;
 
   /// If this account type should be considered an expense or income
