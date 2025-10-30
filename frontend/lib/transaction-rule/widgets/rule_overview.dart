@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/page_loading.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_row.dart';
@@ -27,6 +28,14 @@ class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverv
       builder: (context, provider, child) {
         final isLoading = provider.isLoading || provider.transactionRulesRunning;
 
+        if (isLoading) {
+          return PageLoadingWidget(
+            loadingText: provider.transactionRulesRunning
+                ? "Organizing transactions..."
+                : PageLoadingWidget.defaultLoadingText,
+          );
+        }
+
         return Column(
           children: [
             /// Explanation
@@ -35,9 +44,10 @@ class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverv
                 padding: EdgeInsetsGeometry.all(12),
                 child: Column(
                   children: [
-                    TextWidget(
-                      referenceSize: 1.25,
-                      text: "Transactions are categorized automatically based on the rules below, in descending order.",
+                    Text(
+                      "Transactions are categorized based on the below rules in descending order.",
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -59,12 +69,6 @@ class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverv
                           text: "No rules found. Add one above to start organizing!",
                         ),
                       ),
-                    ),
-
-                  if (isLoading)
-                    Padding(
-                      padding: EdgeInsetsGeometry.all(16),
-                      child: Center(child: CircularProgressIndicator()),
                     ),
 
                   // Render all the rules

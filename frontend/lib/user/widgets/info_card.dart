@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/widgets/info_row.dart';
 
@@ -18,13 +17,11 @@ class UserInfoCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
-          spacing: 12,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextWidget(
-              text: name.toTitleCase,
-              referenceSize: 1.75,
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              name.toTitleCase,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               textAlign: TextAlign.center,
             ),
             const Divider(height: 32.0, thickness: 1.0),

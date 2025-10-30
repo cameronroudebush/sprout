@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// A class that allows us to display a notification message on the home page
-class HomeNotification {
+class SproutNotification {
   /// The message to display
   String message;
 
@@ -17,5 +17,5 @@ class HomeNotification {
   /// The text color of this notification
   Color color;
 
-  HomeNotification(this.message, this.bgColor, this.color, {this.icon, this.onClick});
+  SproutNotification(this.message, this.bgColor, this.color, {this.icon, this.onClick});
 }

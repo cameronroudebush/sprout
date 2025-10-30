@@ -8,6 +8,8 @@ import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/page_loading.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
@@ -54,80 +56,72 @@ class _CategoryOverviewState extends AutoUpdateState<CategoryOverview> {
     );
   }
 
-  /// Helper method to build the UI for a single category card.
-  Widget _buildCategoryCard(BuildContext context, Category c) {
-    return SproutCard(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Row(
-                spacing: 8,
-                children: [
-                  CategoryIcon(c),
-                  if (c.type == CategoryTypeEnum.expense)
-                    SproutTooltip(
-                      message: "Expense",
-                      child: Icon(Icons.arrow_downward, color: Colors.red),
-                    ),
-                  if (c.type == CategoryTypeEnum.income)
-                    SproutTooltip(
-                      message: "Expense",
-                      child: Icon(Icons.arrow_upward, color: Colors.green),
-                    ),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24), softWrap: true),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Edit buttons
-            Row(
-              spacing: 8,
-              children: [
-                SproutTooltip(
-                  message: "Edit Category",
-                  child: IconButton(
-                    onPressed: () => _openInfoDialog(context, c),
-                    icon: const Icon(Icons.edit_outlined),
-                    style: AppTheme.primaryButton,
-                  ),
-                ),
-                SproutTooltip(
-                  message: "Delete Category",
-                  child: IconButton(
-                    onPressed: () => _delete(context, c),
-                    icon: const Icon(Icons.delete_outline),
-                    style: AppTheme.errorButton,
-                  ),
-                ),
-              ],
-            ),
-          ],
+  /// Helper method to build the UI for a single category list tile.
+  Widget _buildCategoryTile(BuildContext context, Category c, int depth) {
+    final double indentation = 16.0 * depth;
+
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
+      return ListTile(
+        contentPadding: EdgeInsets.only(left: indentation + 16, right: 16),
+        leading: CategoryIcon(c),
+        title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [_buildTypeIndicator(c), const SizedBox(width: 8), _buildActionButtons(context, c, isDesktop)],
         ),
-      ),
+      );
+    });
+  }
+
+  Widget _buildTypeIndicator(Category c) {
+    if (c.type == CategoryTypeEnum.expense) {
+      return const SproutTooltip(
+        message: "Expense",
+        child: Icon(Icons.arrow_downward, color: Colors.red),
+      );
+    }
+    if (c.type == CategoryTypeEnum.income) {
+      return const SproutTooltip(
+        message: "Income",
+        child: Icon(Icons.arrow_upward, color: Colors.green),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildActionButtons(BuildContext context, Category c, bool isDesktop) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
+      children: [
+        SproutTooltip(
+          message: "Edit Category",
+          child: IconButton(
+            onPressed: () => _openInfoDialog(context, c),
+            icon: const Icon(Icons.edit_outlined),
+            style: AppTheme.primaryButton,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+        SproutTooltip(
+          message: "Delete Category",
+          child: IconButton(
+            onPressed: () => _delete(context, c),
+            icon: const Icon(Icons.delete_outline),
+            style: AppTheme.errorButton,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+      ],
     );
   }
 
   /// Recursively builds the list of category widgets.
   List<Widget> _buildCategoryTree(BuildContext context, Category category, List<Category> allCategories, int depth) {
     final List<Widget> widgets = [];
-    final double indentation = 32.0 * depth;
 
     // Add the current category's widget with appropriate indentation
-    widgets.add(
-      Padding(
-        padding: EdgeInsets.only(left: indentation, top: 2.0, bottom: 2.0),
-        child: _buildCategoryCard(context, category),
-      ),
-    );
+    widgets.add(_buildCategoryTile(context, category, depth));
 
     // Find, sort, and recurse for children
     final children = allCategories.where((c) => c.parentCategory == category).toList();
@@ -144,20 +138,10 @@ class _CategoryOverviewState extends AutoUpdateState<CategoryOverview> {
   Widget build(BuildContext context) {
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return const SproutCard(
-            child: Padding(
-              padding: EdgeInsetsGeometry.all(12),
-              child: Center(
-                child: Column(
-                  children: [
-                    Text("Loading Categories", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
-                    CircularProgressIndicator(),
-                  ],
-                ),
-              ),
-            ),
-          );
+        final isLoading = provider.isLoading;
+
+        if (isLoading) {
+          return PageLoadingWidget(loadingText: "Loading Categories...");
         }
 
         // Find only the top-level categories to start the recursion
@@ -175,9 +159,10 @@ class _CategoryOverviewState extends AutoUpdateState<CategoryOverview> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       const Flexible(
-                        child: TextWidget(
-                          referenceSize: 1.25,
-                          text: "Categories allow us to tell Sprout where our money is going.",
+                        child: Text(
+                          "Categories allow us to tell Sprout where our money is going.",
+                          style: TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],
@@ -185,13 +170,23 @@ class _CategoryOverviewState extends AutoUpdateState<CategoryOverview> {
                 ),
               ),
 
-              /// Recursively built list of categories
-              ...topLevelCategories.expand(
-                (parent) => _buildCategoryTree(
-                  context,
-                  parent,
-                  provider.categories, // Pass the full list for searching
-                  0, // Start at depth 0
+              // A single card to hold all categories
+              SproutCard(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: topLevelCategories.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final parent = topLevelCategories[index];
+                    final treeWidgets = _buildCategoryTree(
+                      context,
+                      parent,
+                      provider.categories, // Pass the full list for searching
+                      0, // Start at depth 0
+                    );
+                    return Column(children: treeWidgets);
+                  },
                 ),
               ),
             ],

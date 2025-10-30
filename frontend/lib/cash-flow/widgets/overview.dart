@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
-import 'package:sprout/cash-flow/widgets/stats_by_month.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/scroll.dart';
+import 'package:sprout/core/widgets/tabs.dart';
+import 'package:sprout/transaction/widgets/category_pie_chart.dart';
 
 /// Renders the cash-flow page so the user can see where their money is going based on selected month
 class CashFlowOverview extends StatefulWidget {
@@ -17,6 +20,8 @@ class CashFlowOverview extends StatefulWidget {
   @override
   State<CashFlowOverview> createState() => _CashFlowOverviewState();
 }
+
+enum CashFlowView { monthly, yearly }
 
 class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
   late DateTime _selectedDate;
@@ -31,17 +36,28 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
     _selectedDate = DateTime(now.year, now.month + 1, 0);
   }
 
+  CashFlowView _currentView = CashFlowView.monthly;
+
   /// Fetches data we need for these displays
   Future<void> _fetchData() async {
-    final provider = ServiceLocator.get<CashFlowProvider>();
-    provider.setLoadingStatus(true);
-    if (provider.getSankeyData(_selectedDate.year, _selectedDate.month) == null) {
-      context.read<CashFlowProvider>().getSankey(_selectedDate.year, _selectedDate.month);
+    final cashFlowProvider = ServiceLocator.get<CashFlowProvider>();
+    final categoryProvider = ServiceLocator.get<CategoryProvider>();
+    final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
+
+    cashFlowProvider.setLoadingStatus(true);
+    categoryProvider.setLoadingStatus(true);
+
+    if (cashFlowProvider.getSankeyData(_selectedDate.year, month) == null) {
+      cashFlowProvider.getSankey(_selectedDate.year, month);
     }
-    if (provider.getStatsData(_selectedDate.year, _selectedDate.month) == null) {
-      context.read<CashFlowProvider>().getStats(_selectedDate.year, _selectedDate.month);
+    if (cashFlowProvider.getStatsData(_selectedDate.year, month) == null) {
+      cashFlowProvider.getStats(_selectedDate.year, month);
     }
-    provider.setLoadingStatus(false);
+    if (categoryProvider.getStatsData(_selectedDate.year, month) == null) {
+      categoryProvider.loadCategoryStats(_selectedDate.year, month);
+    }
+    cashFlowProvider.setLoadingStatus(false);
+    categoryProvider.setLoadingStatus(false);
   }
 
   void _changeMonth(int monthIncrement) {
@@ -51,63 +67,87 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
     _fetchData();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      spacing: 4,
-      children: [
-        // Month selector
-        SproutCard(child: _buildMonthSelector()),
-        // Stats
-        SproutCard(child: StatsByMonth(_selectedDate)),
-        // Sankey
-        SproutCard(
-          child: Padding(padding: EdgeInsetsGeometry.all(12), child: SankeyFlowByMonth(_selectedDate)),
+  void _changeYear(int year) {
+    setState(() {
+      // When changing year, we can default to January of that year.
+      _selectedDate = DateTime(year, 2, 0);
+    });
+    _fetchData();
+  }
+
+  Widget _buildStats() {
+    final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
+
+    return SproutScrollView(
+      padding: EdgeInsets.zero,
+      child: Expanded(
+        child: Column(
+          children: [
+            // Render some pie charts for more info
+            SproutLayoutBuilder((isDesktop, context, constraints) {
+              final dateForCharts = DateTime(_selectedDate.year, month ?? 1);
+              final pieCharts = [
+                Expanded(
+                  child: CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 200),
+                ),
+                Expanded(
+                  child: CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 200),
+                ),
+              ];
+              if (isDesktop) {
+                return Row(crossAxisAlignment: CrossAxisAlignment.start, children: pieCharts);
+              }
+              return Column(children: pieCharts.map((e) => e.child).toList());
+            }),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  /// Builds a month selector to allow us to decide what month of data we currently want
-  Widget _buildMonthSelector() {
-    final now = DateTime.now();
-    final currentMonthEnd = DateTime(now.year, now.month + 1, 0);
-    return Padding(
-      padding: EdgeInsetsGeometry.symmetric(vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SproutTooltip(
-            message: "Previous Month",
-            child: IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => _changeMonth(-1)),
-          ),
-          SizedBox(
-            width: 250,
-            child: Center(
-              child: TextWidget(
-                referenceSize: 1.25,
-                text: DateFormat('MMMM yyyy').format(_selectedDate),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  Widget _buildSankey() {
+    final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
+    final dateForSankey = DateTime(_selectedDate.year, month ?? 1);
+    return SproutCard(
+      child: Padding(
+        padding: EdgeInsetsGeometry.all(12),
+        child: SankeyFlowByMonth(dateForSankey, view: _currentView),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tabNames = ["Stats", "Sankey"];
+    final tabContent = [_buildStats(), _buildSankey()];
+    return Expanded(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: AppTheme.maxDesktopSize),
+        child: Column(
+          children: [
+            // Selector
+            SproutCard(
+              child: CashFlowSelector(
+                currentView: _currentView,
+                selectedDate: _selectedDate,
+                onViewChanged: (view) {
+                  setState(() {
+                    _currentView = view;
+                    if (view == CashFlowView.monthly) {
+                      final now = DateTime.now();
+                      _selectedDate = DateTime(now.year, now.month + 1, 0);
+                    }
+                  });
+                  _fetchData();
+                },
+                onMonthIncrementChanged: _changeMonth,
+                onYearChanged: _changeYear,
               ),
             ),
-          ),
-          SproutTooltip(
-            message: "Next Month",
-            child: IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: _selectedDate.isBefore(currentMonthEnd) ? () => _changeMonth(1) : null,
-            ),
-          ),
-          SproutTooltip(
-            message: "This Month",
-            child: IconButton(
-              icon: const Icon(Icons.keyboard_double_arrow_right),
-              onPressed: _selectedDate.month != currentMonthEnd.month || _selectedDate.year != currentMonthEnd.year
-                  ? () => _changeMonth(currentMonthEnd.month - _selectedDate.month)
-                  : null,
-            ),
-          ),
-        ],
+            // Tab view
+            Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
+          ],
+        ),
       ),
     );
   }

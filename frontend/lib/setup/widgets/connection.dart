@@ -78,7 +78,7 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
       builder: (context, provider, userProvider, child) {
         final currentConnectionUrl = defaultApiClient.basePath;
         return Column(
-          spacing: 12,
+          spacing: 0,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Actual input

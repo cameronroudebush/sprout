@@ -214,7 +214,13 @@ class SproutRouter {
       showOnBottomNav: true,
     ),
     // Cash Flow
-    SproutPage((context, state) => CashFlowOverview(), 'Cash Flow', icon: Icons.bar_chart, showOnBottomNav: true),
+    SproutPage(
+      (context, state) => CashFlowOverview(),
+      'Cash Flow',
+      icon: Icons.bar_chart,
+      showOnBottomNav: true,
+      scrollWrapper: false,
+    ),
     // Settings
     SproutPage((context, state) => UserConfigPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
   ];

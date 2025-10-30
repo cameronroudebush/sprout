@@ -22,54 +22,46 @@ class _LoginPageState extends State<LoginPage> {
       builder: (context, configProvider, child) {
         final mediaQuery = MediaQuery.of(context).size;
         return ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 640, maxHeight: isDesktop ? mediaQuery.height : 640),
-          child: SizedBox(
-            height: mediaQuery.height,
-            width: isDesktop ? mediaQuery.width / 3 : mediaQuery.width,
-            child: Padding(
-              padding: const EdgeInsets.all(22.0),
-              child: Card(
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      // Sprout logo
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsetsGeometry.symmetric(horizontal: isDesktop ? 48 : 12),
-                          child: Image.asset(
-                            'assets/logo/color-transparent-no-tag.png',
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
+          constraints: BoxConstraints(maxWidth: isDesktop ? 640 : mediaQuery.width, maxHeight: isDesktop ? 640 : 640),
+          child: Padding(
+            padding: const EdgeInsets.all(22.0),
+            child: Card(
+              child: Padding(
+                padding: EdgeInsetsGeometry.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    // Sprout logo
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: isDesktop ? 48 : 12),
+                      child: Image.asset(
+                        'assets/logo/color-transparent-no-tag.png',
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                      ),
+                    ),
+                    Column(
+                      spacing: 24,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Welcome text
+                        Padding(
+                          padding: EdgeInsets.only(top: 24),
+                          child: TextWidget(
+                            referenceSize: 2,
+                            text: 'Welcome Back!',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                      ),
-                      Column(
-                        spacing: 24,
-                        children: [
-                          // Welcome text
-                          Padding(
-                            padding: EdgeInsets.only(top: 24),
-                            child: TextWidget(
-                              referenceSize: 2,
-                              text: 'Welcome Back!',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          // Render the login form for actual input
-                          LoginForm(),
-                        ],
-                      ),
-                      // Render the app version
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [Text(configProvider.unsecureConfig?.version ?? "")],
-                        ),
-                      ),
-                    ],
-                  ),
+                        // Render the login form for actual input
+                        LoginForm(),
+                      ],
+                    ),
+                    // Render the app version
+                    const SizedBox(height: 24),
+                    Text(configProvider.unsecureConfig?.version ?? ""),
+                  ],
                 ),
               ),
             ),
@@ -83,62 +75,26 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       final form = _buildForm(context, isDesktop);
-      if (isDesktop) {
-        return Container(
+      final mediaQuery = MediaQuery.of(context).size;
+      return SizedBox(
+        height: mediaQuery.height,
+        child: Container(
           decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage('assets/login/login.png'), fit: BoxFit.cover),
+            image: DecorationImage(
+              image: AssetImage(isDesktop ? 'login/login.png' : 'login/login.mobile.png'),
+              fit: BoxFit.fitWidth,
+            ),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Login box
               form,
             ],
           ),
-        );
-      } else {
-        return form;
-      }
+        ),
+      );
     });
   }
 }
-
-
-// Center(
-//             child: Padding(
-//               padding: const EdgeInsets.all(22.0),
-//               child: Card(
-//                 child: Padding(
-//                   padding: EdgeInsetsGeometry.all(20),
-//                   child: Column(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: <Widget>[
-//                       Image.asset(
-//                         'assets/logo/color-transparent-no-tag.png',
-//                         width: MediaQuery.of(context).size.height * .4,
-//                         fit: BoxFit.contain,
-//                         filterQuality: FilterQuality.high,
-//                       ),
-//                       Padding(
-//                         padding: EdgeInsets.only(top: 24),
-//                         child: TextWidget(
-//                           referenceSize: 2,
-//                           text: !_isLoadingData ? 'Welcome Back!' : "Getting your data ready...",
-//                           style: TextStyle(fontWeight: FontWeight.bold),
-//                         ),
-//                       ),
-//                       const SizedBox(height: 40.0),
-//                       ConstrainedBox(
-//                         constraints: BoxConstraints(maxWidth: 640),
-//                         child: SizedBox(
-//                           width: MediaQuery.of(context).size.width * .7,
-//                           child: _isLoadingData
-//                               ? Center(child: CircularProgressIndicator())
-//                               : _buildLoginForm(context, configProvider),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           );

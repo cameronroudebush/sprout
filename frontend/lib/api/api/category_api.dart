@@ -235,14 +235,24 @@ class CategoryApi {
 
   /// Gets category stats.
   ///
-  /// Retrieves all categories for the authenticated user with the total number of transactions per category.
+  /// Retrieves all categories for the authenticated user with the total number of transactions per category for the given query.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [num] days (required):
-  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(num days,) async {
+  /// * [num] year (required):
+  ///   The year we want the stats for.
+  ///
+  /// * [num] month:
+  ///   The month we want the stats for. If not given, assumes we want the whole year.
+  ///
+  /// * [num] day:
+  ///   The day we want the stats for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.
+  ///
+  /// * [String] accountId:
+  ///   The ID of the account to retrieve transactions from.
+  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/stats';
 
@@ -253,7 +263,16 @@ class CategoryApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'days', days));
+      queryParams.addAll(_queryParams('', 'year', year));
+    if (month != null) {
+      queryParams.addAll(_queryParams('', 'month', month));
+    }
+    if (day != null) {
+      queryParams.addAll(_queryParams('', 'day', day));
+    }
+    if (accountId != null) {
+      queryParams.addAll(_queryParams('', 'accountId', accountId));
+    }
 
     const contentTypes = <String>[];
 
@@ -271,13 +290,23 @@ class CategoryApi {
 
   /// Gets category stats.
   ///
-  /// Retrieves all categories for the authenticated user with the total number of transactions per category.
+  /// Retrieves all categories for the authenticated user with the total number of transactions per category for the given query.
   ///
   /// Parameters:
   ///
-  /// * [num] days (required):
-  Future<CategoryStats?> categoryControllerGetCategoryStats(num days,) async {
-    final response = await categoryControllerGetCategoryStatsWithHttpInfo(days,);
+  /// * [num] year (required):
+  ///   The year we want the stats for.
+  ///
+  /// * [num] month:
+  ///   The month we want the stats for. If not given, assumes we want the whole year.
+  ///
+  /// * [num] day:
+  ///   The day we want the stats for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.
+  ///
+  /// * [String] accountId:
+  ///   The ID of the account to retrieve transactions from.
+  Future<CategoryStats?> categoryControllerGetCategoryStats(num year, { num? month, num? day, String? accountId, }) async {
+    final response = await categoryControllerGetCategoryStatsWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

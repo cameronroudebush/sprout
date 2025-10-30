@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/text.dart';
 
 /// A widget used to display the percentage change of an account with icons and coloring
 class AccountChangeWidget extends StatelessWidget {
@@ -38,25 +37,20 @@ class AccountChangeWidget extends StatelessWidget {
           Row(
             spacing: 4,
             children: [
-              TextWidget(
-                text: getFormattedCurrency(totalChange ?? 0),
-                style: TextStyle(color: changeColor),
-              ),
+              Text(getFormattedCurrency(totalChange ?? 0), style: TextStyle(color: changeColor, fontSize: 12)),
               if (showPercentage)
-                TextWidget(
-                  referenceSize: .85,
-                  text: percentageChange == double.infinity
+                Text(
+                  percentageChange == double.infinity
                       ? "(∞)"
                       : percentageChange!.isNaN
                       ? ""
                       : "(${formatPercentage(percentageChange!)})",
-                  style: TextStyle(color: changeColor),
+                  style: TextStyle(color: changeColor, fontSize: 10),
                 ),
               if (netWorthPeriod != null)
-                TextWidget(
-                  referenceSize: .75,
-                  text: ChartRangeUtility.asPretty(netWorthPeriod!, useExtendedPeriodString: useExtendedPeriodString),
-                  style: TextStyle(color: Colors.grey),
+                Text(
+                  ChartRangeUtility.asPretty(netWorthPeriod!, useExtendedPeriodString: useExtendedPeriodString),
+                  style: TextStyle(color: Colors.grey, fontSize: 10),
                 ),
             ],
           ),

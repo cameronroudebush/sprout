@@ -5,11 +5,13 @@ import 'package:sprout/core/provider/base.dart';
 class CategoryProvider extends BaseProvider<CategoryApi> {
   // Data store
   List<Category> _categories = [];
-  CategoryStats? _categoryStats;
+  final Map<String, CategoryStats> _statsCache = {};
 
   // Public getters
   List<Category> get categories => _categories;
-  CategoryStats? get categoryStats => _categoryStats;
+  CategoryStats? getStatsData(int year, int? month, {int? day, Account? account}) {
+    return _statsCache[generateCacheKey(year, month, day, account)];
+  }
 
   CategoryProvider(super.api);
 
@@ -53,21 +55,18 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
   }
 
   /// Loads updated category stats
-  Future<void> loadCategoryStats(bool showLoaders, {int days = 30}) async {
-    final shouldSetLoadingStats = _categoryStats == null || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
-    await populateAndSetIfChanged(
-      () => api.categoryControllerGetCategoryStats(days),
-      _categoryStats,
-      (newValue) => _categoryStats = newValue,
-    );
-    if (shouldSetLoadingStats) setLoadingStatus(false);
+  Future<CategoryStats?> loadCategoryStats(int year, int? month, {int? day, Account? account}) async {
+    final cacheKey = generateCacheKey(year, month, day, account);
+    final data = await api.categoryControllerGetCategoryStats(year, month: month, day: day, accountId: account?.id);
+    if (data != null) _statsCache[cacheKey] = data;
+    notifyListeners();
+    return data;
   }
 
   @override
   Future<void> cleanupData() async {
     _categories = [];
-    _categoryStats = null;
+    _statsCache.clear();
     notifyListeners();
   }
 }

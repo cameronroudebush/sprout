@@ -7,7 +7,7 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
-import { ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { IsNull } from "typeorm";
 
 /** This controller contains endpoints for {@link Category} models which allow us to group transactions. */
@@ -33,12 +33,26 @@ export class CategoryController {
   @Get("stats")
   @ApiOperation({
     summary: "Gets category stats.",
-    description: "Retrieves all categories for the authenticated user with the total number of transactions per category.",
+    description: "Retrieves all categories for the authenticated user with the total number of transactions per category for the given query.",
   })
-  @ApiOkResponse({ description: "Categories found successfully.", type: CategoryStats })
-  async getCategoryStats(@CurrentUser() user: User, @Query("days") days: number = 30) {
-    if (isNaN(days)) throw new Error("The number of days for category stats must be an integer.");
-    return await this.categoryService.getStats(user, days);
+  @ApiQuery({ name: "year", required: true, type: Number, description: "The year we want the stats for." })
+  @ApiQuery({
+    name: "month",
+    required: false,
+    type: Number,
+    description: "The month we want the stats for. If not given, assumes we want the whole year.",
+  })
+  @ApiQuery({
+    name: "day",
+    required: false,
+    type: Number,
+    description:
+      "The day we want the stats for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+  })
+  @ApiQuery({ name: "accountId", required: false, type: String, description: "The ID of the account to retrieve transactions from." })
+  @ApiOkResponse({ description: "Category stats found successfully.", type: CategoryStats })
+  async getCategoryStats(@CurrentUser() user: User, @Query("year") year: number, @Query("month") month?: number, @Query("day") day?: number) {
+    return await this.categoryService.getStats(user, year, month, day);
   }
 
   @Post()

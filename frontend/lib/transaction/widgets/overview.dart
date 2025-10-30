@@ -11,6 +11,7 @@ import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
@@ -264,58 +265,64 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
               children: [
                 // Render the filtering by category
                 if (widget.allowFiltering)
-                  Padding(
-                    padding: EdgeInsetsGeometry.only(top: 4),
-                    child: Row(
-                      children: [
-                        // Description searching
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              labelText: 'Search by description',
-                              prefixIcon: Icon(Icons.search),
-                              border: OutlineInputBorder(),
-                              suffixIcon: _searchController.value.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        FocusScope.of(context).unfocus();
-                                        _searchController.text = "";
-                                      },
-                                    )
-                                  : null,
-                            ),
-                            onChanged: (value) async {
-                              setState(() {
-                                _currentTransactionIndex = 0;
-                              });
-                              await _loadMoreTransactions();
-                            },
-                          ),
-                        ),
+                  SproutLayoutBuilder((isDesktop, context, constraints) {
+                    final descriptionSearch = TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        labelText: 'Search by description',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                        suffixIcon: _searchController.value.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  FocusScope.of(context).unfocus();
+                                  _searchController.text = "";
+                                },
+                              )
+                            : null,
+                      ),
+                      onChanged: (value) async {
+                        setState(() {
+                          _currentTransactionIndex = 0;
+                        });
+                        await _loadMoreTransactions();
+                      },
+                    );
 
-                        // Category searching
-                        Expanded(
-                          child: SproutCard(
-                            clip: false,
-                            child: CategoryDropdown(_filteredCategory, (c) async {
-                              setState(() {
-                                _currentTransactionIndex = 0;
-                                _filteredCategory = c;
-                              });
-                              // Make sure to forcible request more so we have the correct amount of data, even considering filtering
-                              await _loadMoreTransactions();
-                              // Always scroll to the top
-                              _scrollToTop();
-                            }, displayAllCategoryButton: true),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                    final categorySearch = SproutCard(
+                      clip: false,
+                      child: CategoryDropdown(_filteredCategory, (c) async {
+                        setState(() {
+                          _currentTransactionIndex = 0;
+                          _filteredCategory = c;
+                        });
+                        // Make sure to forcible request more so we have the correct amount of data, even considering filtering
+                        await _loadMoreTransactions();
+                        // Always scroll to the top
+                        _scrollToTop();
+                      }, displayAllCategoryButton: true),
+                    );
+
+                    return Padding(
+                      padding: EdgeInsetsGeometry.only(top: 4),
+                      child: isDesktop
+                          ? Row(
+                              children: [
+                                Expanded(child: descriptionSearch),
+                                Expanded(child: categorySearch),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 4), child: descriptionSearch),
+                                categorySearch,
+                              ],
+                            ),
+                    );
+                  }),
 
                 // Render the actual transactions
                 Expanded(

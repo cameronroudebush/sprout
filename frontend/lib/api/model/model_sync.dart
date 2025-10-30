@@ -17,6 +17,7 @@ class ModelSync {
     required this.time,
     required this.status,
     this.failureReason,
+    this.user,
   });
 
   String id;
@@ -34,12 +35,22 @@ class ModelSync {
   ///
   String? failureReason;
 
+  /// This user properly allows us to track if this sync was for a specific user
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  User? user;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is ModelSync &&
     other.id == id &&
     other.time == time &&
     other.status == status &&
-    other.failureReason == failureReason;
+    other.failureReason == failureReason &&
+    other.user == user;
 
   @override
   int get hashCode =>
@@ -47,10 +58,11 @@ class ModelSync {
     (id.hashCode) +
     (time.hashCode) +
     (status.hashCode) +
-    (failureReason == null ? 0 : failureReason!.hashCode);
+    (failureReason == null ? 0 : failureReason!.hashCode) +
+    (user == null ? 0 : user!.hashCode);
 
   @override
-  String toString() => 'ModelSync[id=$id, time=$time, status=$status, failureReason=$failureReason]';
+  String toString() => 'ModelSync[id=$id, time=$time, status=$status, failureReason=$failureReason, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -61,6 +73,11 @@ class ModelSync {
       json[r'failureReason'] = this.failureReason;
     } else {
       json[r'failureReason'] = null;
+    }
+    if (this.user != null) {
+      json[r'user'] = this.user;
+    } else {
+      json[r'user'] = null;
     }
     return json;
   }
@@ -88,6 +105,7 @@ class ModelSync {
         time: mapDateTime(json, r'time', r'')!,
         status: mapValueOfType<Object>(json, r'status')!,
         failureReason: mapValueOfType<String>(json, r'failureReason'),
+        user: User.fromJson(json[r'user']),
       );
     }
     return null;

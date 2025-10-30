@@ -74,4 +74,9 @@ abstract class BaseProvider<T> with ChangeNotifier {
     isInitialized = true;
     notifyListeners();
   }
+
+  /// Generates a key to use for stat information based on the given request data
+  String generateCacheKey(int year, int? month, int? day, Account? account) {
+    return '$year-${month ?? 'all'}-${day ?? 'all'}-${account?.id ?? 'all'}';
+  }
 }

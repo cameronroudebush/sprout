@@ -8,6 +8,8 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/page_loading.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction/model/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
@@ -23,8 +25,8 @@ class TransactionMonthlySubscriptions extends StatefulWidget {
 
 class _TransactionMonthlySubscriptionsState extends AutoUpdateState<TransactionMonthlySubscriptions> {
   @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) =>
-      ServiceLocator.get<TransactionProvider>().populateSubscriptions();
+  late Future<dynamic> Function(bool showLoaders) loadData =
+      ServiceLocator.get<TransactionProvider>().populateSubscriptions;
 
   /// The events for the current day that we have selected
   List<TransactionSubscription> _eventsForCurrentDay = [];
@@ -36,105 +38,166 @@ class _TransactionMonthlySubscriptionsState extends AutoUpdateState<TransactionM
   Widget build(BuildContext context) {
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
-        final mediaQuery = MediaQuery.of(context).size;
-        final iconSize = mediaQuery.height * .02;
+        final isLoading = provider.isLoading;
 
-        if (provider.isLoading || provider.subscriptions.isEmpty) return Center(child: CircularProgressIndicator());
+        if (isLoading) return PageLoadingWidget(loadingText: "Loading Subscriptions...");
 
-        return Column(
-          children: [
-            // Calendar display
-            SproutCard(
-              child: SproutCalendar(
-                provider.subscriptions,
-                (day, event) => event.isBilledOn(day),
-                onDaySelected: (day, events) {
-                  setState(() {
-                    _eventsForCurrentDay = events;
-                    _selectedDay = day;
-                  });
-                },
-                dayDisplay: (context, events) {
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (iconSize <= 0) return const SizedBox.shrink();
-
-                      const counterWidth = 28.0;
-                      final cellWidth = constraints.maxWidth;
-                      int maxLogos;
-
-                      final absoluteMaxLogos = (cellWidth / iconSize).floor();
-
-                      if (events.length <= absoluteMaxLogos) {
-                        // No counter needed, all logos fit.
-                        maxLogos = events.length;
-                      } else {
-                        // A counter is needed, so reserve space for it first.
-                        final availableWidthForLogos = cellWidth - counterWidth;
-                        maxLogos = (availableWidthForLogos / iconSize).floor();
-                        // Ensure maxLogos isn't negative if the cell is tiny.
-                        if (maxLogos < 0) maxLogos = 0;
-                      }
-
-                      final displayedEvents = events.take(maxLogos).toList();
-                      final remainingEventsCount = events.length - displayedEvents.length;
-
-                      return Row(
-                        spacing: 4,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 4,
-                            children: displayedEvents
-                                .map((e) => AccountLogoWidget(e.account, height: iconSize, width: iconSize))
-                                .toList(),
-                          ),
-                          if (remainingEventsCount > 0)
-                            TextWidget(text: "+$remainingEventsCount", style: Theme.of(context).textTheme.bodySmall),
-                        ],
-                      );
-                    },
-                  );
-                },
+        if (provider.subscriptions.isEmpty) {
+          return SproutCard(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                spacing: 12,
+                children: [
+                  TextWidget(
+                    text: "No Subscriptions Found",
+                    referenceSize: 1.5,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const Text(
+                    "Sprout automatically identifies subscriptions by analyzing your transactions over the last year. "
+                    "For a transaction to be considered a subscription, it must meet the following criteria:",
+                    textAlign: TextAlign.center,
+                  ),
+                  _buildSubscriptionCriteria(),
+                  const Text(
+                    "Ensure you have at least a configured number of consistent negative transactions "
+                    "with similar amounts and regular intervals over the past year for them to appear here.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                ],
               ),
             ),
-            // Selected day information
-            SproutCard(
-              child: Padding(
-                padding: EdgeInsetsGeometry.only(top: 12),
-                child: Column(
-                  spacing: 0,
-                  children: [
-                    TextWidget(text: DateFormat.yMMMMd().format(_selectedDay), referenceSize: 1.5),
-                    const SizedBox(height: 12),
-                    const Divider(height: 1),
-                    // No available subscriptions
-                    if (_eventsForCurrentDay.isEmpty)
-                      Padding(
-                        padding: EdgeInsetsGeometry.symmetric(vertical: 24),
-                        child: TextWidget(text: "No available subscriptions for this day", referenceSize: 1.25),
-                      ),
-                    if (_eventsForCurrentDay.isNotEmpty)
-                      ..._eventsForCurrentDay.mapIndexed((i, e) {
-                        // Mock this as a transaction
-                        final transaction = e.toMockTransaction();
-                        return TransactionRow(
-                          transaction: transaction,
-                          isEvenRow: i % 2 == 0,
-                          renderPostedTime: false,
-                          allowDialog: false,
-                        );
-                      }),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
+          );
+        }
+
+        return SproutLayoutBuilder((isDesktop, context, constraints) {
+          final calendarCard = _buildCalendarCard(provider);
+          final selectedDayCard = _buildSelectedDayCard();
+
+          if (isDesktop) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 2, child: calendarCard),
+                Expanded(flex: 3, child: selectedDayCard),
+              ],
+            );
+          }
+
+          // Mobile layout
+          return Column(children: [calendarCard, const SizedBox(height: 8), selectedDayCard]);
+        });
       },
+    );
+  }
+
+  Widget _buildSubscriptionCriteria() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCriterion("• Be a negative amount (an expense)."),
+        _buildCriterion("• Occur at least a configured number of times in the last year."),
+        _buildCriterion("• Have consistent amounts (within a small deviation)."),
+        _buildCriterion("• Have consistent billing periods (e.g., monthly, weekly)."),
+      ],
+    );
+  }
+
+  static Widget _buildCriterion(String text) {
+    return Padding(padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(text));
+  }
+
+  Widget _buildCalendarCard(TransactionProvider provider) {
+    return SproutCard(
+      child: SproutCalendar(
+        provider.subscriptions,
+        (day, event) => event.isBilledOn(day),
+        onDaySelected: (day, events) {
+          setState(() {
+            _eventsForCurrentDay = events;
+            _selectedDay = day;
+          });
+        },
+        dayDisplay: (context, events) {
+          return SproutLayoutBuilder((isDesktop, context, constraints) {
+            final mediaQuery = MediaQuery.of(context).size;
+            final double dynamicIconSize = mediaQuery.height * .02;
+            final double effectiveIconSize = isDesktop ? 18.0 : dynamicIconSize;
+
+            if (effectiveIconSize <= 0) return const SizedBox.shrink();
+
+            const counterWidth = 28.0;
+            final cellWidth = constraints.maxWidth;
+            int maxLogos;
+
+            final absoluteMaxLogos = (cellWidth / effectiveIconSize).floor();
+
+            if (events.length <= absoluteMaxLogos) {
+              maxLogos = events.length;
+            } else {
+              final availableWidthForLogos = cellWidth - counterWidth;
+              maxLogos = (availableWidthForLogos / effectiveIconSize).floor();
+              if (maxLogos < 0) maxLogos = 0;
+            }
+
+            final displayedEvents = events.take(maxLogos).toList();
+            final remainingEventsCount = events.length - displayedEvents.length;
+
+            return Row(
+              spacing: 4,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 4,
+                  children: displayedEvents
+                      .map((e) => AccountLogoWidget(e.account, height: effectiveIconSize, width: effectiveIconSize))
+                      .toList(),
+                ),
+                if (remainingEventsCount > 0)
+                  TextWidget(
+                    text: "+$remainingEventsCount",
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: effectiveIconSize * 0.8),
+                  ),
+              ],
+            );
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildSelectedDayCard() {
+    return SproutCard(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Column(
+          children: [
+            TextWidget(text: DateFormat.yMMMMd().format(_selectedDay), referenceSize: 1.5),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            if (_eventsForCurrentDay.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: TextWidget(text: "No available subscriptions for this day", referenceSize: 1.25),
+              ),
+            if (_eventsForCurrentDay.isNotEmpty)
+              ..._eventsForCurrentDay.mapIndexed((i, e) {
+                final transaction = e.toMockTransaction();
+                return TransactionRow(
+                  transaction: transaction,
+                  isEvenRow: i % 2 == 0,
+                  renderPostedTime: false,
+                  allowDialog: false,
+                );
+              }),
+          ],
+        ),
+      ),
     );
   }
 }

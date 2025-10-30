@@ -519,7 +519,16 @@
       "put": {
         "description": "Runs a manual sync to update all provider accounts.",
         "operationId": "AccountController_manualSync",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "force",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Manual sync completed successfully."
@@ -1021,21 +1030,49 @@
     },
     "/category/stats": {
       "get": {
-        "description": "Retrieves all categories for the authenticated user with the total number of transactions per category.",
+        "description": "Retrieves all categories for the authenticated user with the total number of transactions per category for the given query.",
         "operationId": "CategoryController_getCategoryStats",
         "parameters": [
           {
-            "name": "days",
+            "name": "year",
             "required": true,
             "in": "query",
+            "description": "The year we want the stats for.",
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the stats for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the stats for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Categories found successfully.",
+            "description": "Category stats found successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1570,7 +1607,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.0.7-24-g2d17e50",
+    "version": "v0.0.7-27-g3e8f3ff",
     "contact": {}
   },
   "tags": [
@@ -2157,6 +2194,14 @@
           },
           "failureReason": {
             "type": "string"
+          },
+          "user": {
+            "description": "This user properly allows us to track if this sync was for a specific user",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
           }
         },
         "required": [

@@ -112,9 +112,6 @@ class _SankeyChartState extends State<SankeyChart> {
       nodeParents.putIfAbsent(link.target, () => []).add(link.source);
     }
 
-    // =================================================================
-    // START: Corrected Node Value Calculation
-    // =================================================================
     // The value of a node is the maximum of its total inflows or outflows.
     // This ensures the node is large enough for all links and correctly represents
     // the total flow passing through it.
@@ -123,9 +120,6 @@ class _SankeyChartState extends State<SankeyChart> {
       final outflow = nodeOutgoing[name] ?? 0.0;
       nodeValues[name] = max(inflow, outflow);
     }
-    // =================================================================
-    // END: Corrected Node Value Calculation
-    // =================================================================
 
     // Layering Algorithm
     final Map<String, int> nodeColumns = {};
@@ -184,14 +178,8 @@ class _SankeyChartState extends State<SankeyChart> {
       final List<String> nodesInColumn = columns[i];
       if (nodesInColumn.isEmpty) continue;
 
-      // =================================================================
-      // START: Corrected Column Sizing Logic
-      // =================================================================
       // Use the corrected `nodeValues` for all columns to ensure consistent sizing.
       double totalColumnValue = nodesInColumn.fold(0.0, (sum, node) => sum + (nodeValues[node] ?? 0.0));
-      // =================================================================
-      // END: Corrected Column Sizing Logic
-      // =================================================================
 
       if (totalColumnValue == 0) totalColumnValue = 1.0;
 
@@ -212,14 +200,8 @@ class _SankeyChartState extends State<SankeyChart> {
         }
       } else {
         for (String nodeName in nodesInColumn) {
-          // =================================================================
-          // START: Corrected Node Sizing Logic
-          // =================================================================
           // Use the corrected `nodeValues` for proportional sizing within the column.
           final double nodeFlowValue = nodeValues[nodeName] ?? 0.0;
-          // =================================================================
-          // END: Corrected Node Sizing Logic
-          // =================================================================
           final double proportionalSpace = (nodeFlowValue / totalColumnValue) * distributableSpace;
           final double nodeSpace = minNodeHeight + proportionalSpace;
           nodeRects[nodeName] = isHorizontal
