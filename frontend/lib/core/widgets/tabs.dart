@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/core/widgets/layout.dart';
 
 /// A reusable widget that displays a set of scrollable tabs.
 ///
@@ -54,27 +55,32 @@ class _ScrollableTabsWidgetState extends State<ScrollableTabsWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Column(
-      children: [
-        TabBar(
-          controller: _tabController,
-          labelPadding: EdgeInsets.zero,
-          tabs: widget.tabNames.map((tab) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(tab.toTitleCase, style: const TextStyle(fontWeight: FontWeight.bold)),
-            );
-          }).toList(),
-        ),
-        // Render the tab content for the current tab
-        Expanded(
-          child: TabBarView(
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
+      return Column(
+        children: [
+          TabBar(
             controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(), // Disable swiping
-            children: widget.tabContent,
+            labelPadding: EdgeInsets.zero,
+            tabs: widget.tabNames.map((tab) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  tab.toTitleCase,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: isDesktop ? 16 : 14),
+                ),
+              );
+            }).toList(),
           ),
-        ),
-      ],
-    );
+          // Render the tab content for the current tab
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(), // Disable swiping
+              children: widget.tabContent,
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

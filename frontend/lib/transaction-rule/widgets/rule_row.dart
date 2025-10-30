@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
@@ -43,165 +42,152 @@ class TransactionRuleRow extends StatelessWidget {
     showDialog(context: context, builder: (_) => TransactionRuleInfo(rule));
   }
 
-  Widget _buildPill(BuildContext context, String text, {bool isValue = false}) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final pillColor = isValue ? colorScheme.secondary : colorScheme.tertiary;
+  @override
+  Widget build(BuildContext context) {
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
+      return isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context);
+    });
+  }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: pillColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pillColor, width: 1),
+  Widget _buildCatRow(TextStyle? disabledStyle, TextStyle? effectiveStyle, TextTheme textTheme, Color disabledColor) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
+      children: [
+        const Icon(Icons.arrow_right_alt, size: 16),
+        if (rule.category != null) ...[
+          CategoryIcon(rule.category!, avatarSize: 16),
+          Flexible(
+            child: Text(rule.category!.name, style: effectiveStyle, overflow: TextOverflow.ellipsis),
+          ),
+        ] else
+          Text('Uncategorized', style: disabledStyle),
+        Text('(${rule.matches} matches)', style: textTheme.bodySmall?.copyWith(color: disabledColor)),
+      ],
+    );
+  }
+
+  Widget _buildMatchText(TextStyle? disabledStyle, TextStyle? effectiveStyle) {
+    final value = rule.value.replaceAll('|', ' OR ');
+    final String condition = rule.strict ? 'is' : 'contains';
+    final String type = rule.type.value;
+    return Text.rich(
+      TextSpan(
+        style: effectiveStyle,
+        children: [
+          const TextSpan(
+            text: 'IF ',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(text: '$type $condition '),
+          TextSpan(
+            text: '"$value"',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
-      child: TextWidget(
-        text: text,
-        style: TextStyle(color: pillColor, fontWeight: FontWeight.bold),
+      softWrap: true,
+    );
+  }
+
+  Widget _buildAvatar(ThemeData theme) {
+    final textTheme = theme.textTheme;
+    return CircleAvatar(
+      radius: 15, // Added for consistency
+      backgroundColor: theme.colorScheme.primaryContainer,
+      child: Text(rule.order.toString(), style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    final disabledColor = Colors.grey.shade600;
+    final defaultStyle = textTheme.bodyMedium;
+    final activeStyle = defaultStyle;
+    final disabledStyle = defaultStyle?.copyWith(color: disabledColor, fontStyle: FontStyle.italic);
+    final effectiveStyle = rule.enabled ? activeStyle : disabledStyle;
+
+    return ListTile(
+      leading: _buildAvatar(theme),
+      title: _buildMatchText(disabledStyle, effectiveStyle),
+      subtitle: _buildCatRow(disabledStyle, effectiveStyle, textTheme, disabledColor),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          SproutTooltip(
+            message: "Edit Rule",
+            child: IconButton(
+              onPressed: () => _edit(context),
+              icon: const Icon(Icons.edit_outlined),
+              style: AppTheme.primaryButton,
+            ),
+          ),
+          SproutTooltip(
+            message: "Delete Rule",
+            child: IconButton(
+              onPressed: () => _delete(context),
+              icon: const Icon(Icons.delete_outline),
+              style: AppTheme.errorButton,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Builds the value pills, handling the 'OR' logic for description types.
-  List<Widget> _buildValuePills(BuildContext context) {
-    final bool isDescriptionOr = rule.type == TransactionRuleTypeEnum.description && rule.value.contains('|');
+  Widget _buildMobileLayout(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
-    if (!isDescriptionOr) {
-      return [_buildPill(context, '"${rule.value}"', isValue: true)];
-    }
+    final disabledColor = Colors.grey.shade600;
+    final defaultStyle = textTheme.bodyMedium;
+    final activeStyle = defaultStyle;
+    final disabledStyle = defaultStyle?.copyWith(color: disabledColor, fontStyle: FontStyle.italic);
+    final effectiveStyle = rule.enabled ? activeStyle : disabledStyle;
 
-    final values = rule.value.split('|').map((v) => v.trim()).toList();
-    final List<Widget> pills = [];
-
-    for (int i = 0; i < values.length; i++) {
-      pills.add(_buildPill(context, '"${values[i]}"', isValue: true));
-      if (i < values.length - 1) {
-        pills.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: TextWidget(
-              text: 'OR',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        spacing: 4,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Rule order avatar
+          _buildAvatar(theme),
+          // Text and category organization
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMatchText(disabledStyle, effectiveStyle),
+                _buildCatRow(disabledStyle, effectiveStyle, textTheme, disabledColor),
+              ],
             ),
           ),
-        );
-      }
-    }
-    return pills;
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final String condition = rule.strict ? 'is exactly' : 'contains';
-
-    return Consumer<TransactionRuleProvider>(
-      builder: (context, provider, child) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Row(
+          // Action buttons
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Wrap(
-                            spacing: 6.0,
-                            runSpacing: 4.0,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              TextWidget(text: 'IF', style: textTheme.titleMedium),
-                              _buildPill(context, rule.type.value.toCapitalized),
-                              _buildPill(context, condition),
-                              ..._buildValuePills(context),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: rule.enabled,
-                          onChanged: (bool isEnabled) {
-                            final newRule = TransactionRule(
-                              id: rule.id,
-                              type: rule.type,
-                              value: rule.value,
-                              category: rule.category,
-                              strict: rule.strict,
-                              order: rule.order,
-                              enabled: isEnabled,
-                              matches: rule.matches,
-                            );
-                            provider.edit(newRule);
-                          },
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: Wrap(
-                        spacing: 8.0,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          TextWidget(text: 'THEN categorize as', style: textTheme.titleMedium),
-                          if (rule.category != null) ...[
-                            CategoryIcon(rule.category!, avatarSize: 20),
-                            TextWidget(
-                              text: rule.category!.name,
-                              style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ] else
-                            TextWidget(
-                              text: 'Uncategorized',
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: TextWidget(
-                            text: 'Applied to ${rule.matches} transactions',
-                            style: textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
-                          ),
-                        ),
-                        Row(
-                          spacing: 8,
-                          children: [
-                            SproutTooltip(
-                              message: "Edit Rule",
-                              child: IconButton(
-                                onPressed: () => _edit(context),
-                                icon: const Icon(Icons.edit_outlined),
-                                style: AppTheme.primaryButton,
-                              ),
-                            ),
-                            SproutTooltip(
-                              message: "Delete Rule",
-                              child: IconButton(
-                                onPressed: () => _delete(context),
-                                icon: Icon(Icons.delete_outline),
-                                style: AppTheme.errorButton,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              IconButton(
+                onPressed: () => _edit(context),
+                icon: const Icon(Icons.edit_outlined),
+                style: AppTheme.primaryButton,
+                visualDensity: VisualDensity.compact,
+              ),
+              IconButton(
+                onPressed: () => _delete(context),
+                icon: const Icon(Icons.delete_outline),
+                style: AppTheme.errorButton,
+                visualDensity: VisualDensity.compact,
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

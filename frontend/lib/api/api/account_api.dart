@@ -363,7 +363,11 @@ class AccountApi {
   /// Runs a manual sync to update all provider accounts.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> accountControllerManualSyncWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [bool] force (required):
+  Future<Response> accountControllerManualSyncWithHttpInfo(bool force,) async {
     // ignore: prefer_const_declarations
     final path = r'/account/sync';
 
@@ -373,6 +377,8 @@ class AccountApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'force', force));
 
     const contentTypes = <String>[];
 
@@ -391,8 +397,12 @@ class AccountApi {
   /// Run a manual sync.
   ///
   /// Runs a manual sync to update all provider accounts.
-  Future<void> accountControllerManualSync() async {
-    final response = await accountControllerManualSyncWithHttpInfo();
+  ///
+  /// Parameters:
+  ///
+  /// * [bool] force (required):
+  Future<void> accountControllerManualSync(bool force,) async {
+    final response = await accountControllerManualSyncWithHttpInfo(force,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

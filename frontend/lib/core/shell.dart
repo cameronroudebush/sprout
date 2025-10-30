@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sprout/core/models/page.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -132,29 +133,48 @@ class SproutShell extends StatelessWidget {
 
               // Settings button
               Padding(
-                padding: EdgeInsetsGeometry.all(12),
-                child: FilledButton(
-                  onPressed: () {
-                    final settingsPage = SproutRouter.pages.firstWhereOrNull(
-                      (e) => e.label.toLowerCase() == "settings",
-                    );
-                    if (settingsPage != null) {
-                      _navigateToPage(context, settingsPage, isDesktop);
+                padding: const EdgeInsets.all(12),
+                child: PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'settings') {
+                      final settingsPage = SproutRouter.pages.firstWhereOrNull(
+                        (e) => e.label.toLowerCase() == "settings",
+                      );
+                      if (settingsPage != null) {
+                        _navigateToPage(context, settingsPage, isDesktop);
+                      }
+                    } else if (value == 'logout') {
+                      context.read<UserProvider>().logout();
                     }
                   },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    spacing: 12,
-                    children: [
-                      Icon(Icons.settings, size: 30),
-                      Expanded(
-                        child: Text(
-                          userProvider.currentUser?.prettyName ?? "",
-                          style: TextStyle(overflow: TextOverflow.ellipsis),
-                        ),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'settings',
+                      child: ListTile(leading: Icon(Icons.settings), title: Text('Settings')),
+                    ),
+                    const PopupMenuItem(
+                      value: 'logout',
+                      child: ListTile(leading: Icon(Icons.logout), title: Text('Logout')),
+                    ),
+                  ],
+                  child: IgnorePointer(
+                    child: FilledButton(
+                      onPressed: () {}, // Keep an empty callback to appear enabled
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Icon(Icons.person),
+                          Expanded(
+                            child: Text(
+                              userProvider.currentUser?.prettyName ?? "",
+                              style: const TextStyle(overflow: TextOverflow.ellipsis),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const Icon(Icons.arrow_drop_down),
+                        ],
                       ),
-                      const SizedBox.shrink(),
-                    ],
+                    ),
                   ),
                 ),
               ),

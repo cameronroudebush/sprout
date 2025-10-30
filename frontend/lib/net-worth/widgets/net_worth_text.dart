@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/text.dart';
 
 /// Displays the net worth value for the given data
 class NetWorthTextWidget extends StatelessWidget {
@@ -36,11 +35,14 @@ class NetWorthTextWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (renderTitle) TextWidget(text: title),
-          TextWidget(
-            referenceSize: 2.25,
-            text: getFormattedCurrency(netWorth),
-            style: TextStyle(fontWeight: FontWeight.bold, color: applyColor ? getBalanceColor(netWorth, theme) : null),
+          if (renderTitle) Text(title, style: TextStyle(fontSize: 16)),
+          Text(
+            getFormattedCurrency(netWorth),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: applyColor ? getBalanceColor(netWorth, theme) : null,
+              fontSize: 30,
+            ),
           ),
           Padding(
             padding: EdgeInsetsGeometry.only(left: 12),

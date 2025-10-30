@@ -47,7 +47,7 @@ class AccountProvider extends BaseProvider<AccountApi> {
     try {
       manualSyncIsRunning = true;
       notifyListeners();
-      await api.accountControllerManualSync();
+      await api.accountControllerManualSync(false);
     } catch (e) {
       SnackbarProvider.openWithAPIException(e);
       manualSyncIsRunning = false;

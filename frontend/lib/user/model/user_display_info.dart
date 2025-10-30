@@ -13,6 +13,9 @@ class UserDisplayInfo {
   /// A child to render under this information
   final Widget? child;
 
+  /// If we should render the child content in a row or a column
+  final bool column;
+
   // If this is a setting, you should populate below
   final dynamic settingValue;
   final dynamic settingType;
@@ -25,5 +28,6 @@ class UserDisplayInfo {
     this.child,
     this.settingValue,
     this.settingType,
+    this.column = true,
   });
 }

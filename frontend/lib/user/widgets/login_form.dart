@@ -5,10 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/logger.dart';
+import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/widgets/text.dart';
+import 'package:sprout/core/widgets/notification.dart';
 import 'package:sprout/user/user_provider.dart';
 
 /// A widget that is used to display the login form to allow the user to authenticate with username/password
@@ -123,6 +124,8 @@ class _LoginFormState extends State<LoginForm> {
     return Column(
       spacing: 12,
       children: [
+        if (_message.isNotEmpty)
+          SproutNotificationWidget(SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError)),
         AutofillGroup(
           child: Column(
             spacing: 12,
@@ -151,34 +154,21 @@ class _LoginFormState extends State<LoginForm> {
             ],
           ),
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 640),
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * .5,
-            child: FilledButton(
-              style: AppTheme.primaryButton,
-              onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
-                  ? null
-                  : _login,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 12,
-                children: [
-                  if (_loginIsRunning || _isLoadingData)
-                    SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
-                  Text(_isLoadingData ? "Loading Data" : "Login"),
-                ],
-              ),
-            ),
+        FilledButton(
+          style: AppTheme.primaryButton,
+          onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
+              ? null
+              : _login,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 12,
+            children: [
+              if (_loginIsRunning || _isLoadingData)
+                SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
+              Text(_isLoadingData ? "Loading Data" : "Login"),
+            ],
           ),
         ),
-        if (_message.isNotEmpty) const SizedBox(height: 20.0),
-        if (_message.isNotEmpty)
-          TextWidget(
-            referenceSize: 1.2,
-            style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
-            text: _message,
-          ),
       ],
     );
   }

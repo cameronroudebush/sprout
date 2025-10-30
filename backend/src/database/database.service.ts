@@ -23,7 +23,7 @@ export class DatabaseService {
       this.logger.verbose("Initializing a new database");
       await this.executeMigrations();
     } else {
-      this.logger.verbose("Database already initialized. Checking migrations...");
+      this.logger.verbose("Database already initialized. Preparing data source.");
       const executedMigrations = await this.executeMigrations();
       if (executedMigrations.length > 0) this.logger.verbose(`Executed ${executedMigrations.length} migration(s)`);
       else this.logger.verbose(`No migrations to execute!`);

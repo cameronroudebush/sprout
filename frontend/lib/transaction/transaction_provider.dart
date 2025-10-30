@@ -1,7 +1,5 @@
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/service.locator.dart';
 
 /// Class that provides the store of current transactions
 class TransactionProvider extends BaseProvider<TransactionApi> {
@@ -59,8 +57,16 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
   }
 
   /// Populates subscription information built from transactions
-  Future<List<TransactionSubscription>?> populateSubscriptions() async {
-    return _subscriptions = (await api.transactionControllerSubscriptions()) ?? [];
+  Future<List<TransactionSubscription>?> populateSubscriptions(bool showLoaders) async {
+    final shouldSetLoadingStats = _subscriptions.isEmpty || showLoaders;
+    if (shouldSetLoadingStats) setLoadingStatus(true);
+    await populateAndSetIfChanged(
+      api.transactionControllerSubscriptions,
+      _subscriptions,
+      (newValue) => _subscriptions = newValue ?? [],
+    );
+    if (shouldSetLoadingStats) setLoadingStatus(false);
+    return _subscriptions;
   }
 
   /// Utilizes the API to edit the given transaction and updates the data store
@@ -68,8 +74,6 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
     final updatedTransaction = (await api.transactionControllerEdit(t.id, t))!;
     final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
     if (index != -1) _transactions[index] = updatedTransaction;
-    // Update category info
-    await ServiceLocator.get<CategoryProvider>().loadCategoryStats(false);
     notifyListeners();
     return updatedTransaction;
   }

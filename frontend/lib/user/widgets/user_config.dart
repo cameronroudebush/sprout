@@ -3,14 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/sse.dart';
-import 'package:sprout/core/widgets/button.dart';
-import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/widgets/connection.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 import 'package:sprout/user/widgets/info_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// A page that display user account information along with configuration settings
 class UserConfigPage extends StatefulWidget {
@@ -21,6 +19,7 @@ class UserConfigPage extends StatefulWidget {
 }
 
 class _UserConfigPageState extends State<UserConfigPage> {
+  /// Returns a formatted string for the last background sync status.
   /// Returns the status of the last account sync
   String _getLastSyncStatus(ConfigProvider provider) {
     final config = provider.config;
@@ -41,68 +40,62 @@ class _UserConfigPageState extends State<UserConfigPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer5<ConfigProvider, SSEProvider, UserConfigProvider, AccountProvider, UserProvider>(
-      builder: (context, configProvider, sseProvider, userConfigProvider, accountProvider, userProvider, child) {
+      builder: (context, configProvider, sseProvider, userConfigProvider, accountProvider, userProvider, _) {
         final userConfig = userConfigProvider.currentUserConfig;
-        if (userConfig == null) return Center(child: CircularProgressIndicator());
-        final screenWidth = MediaQuery.of(context).size.width;
-        final minButtonSize = screenWidth * .25;
+        if (userConfig == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final displayInfo = {
-          "user settings": [
+          "User Settings": [
             UserDisplayInfo(
               title: "Hide Account Balances",
               hint: "Toggle to hide balances across the app.",
               settingValue: userConfig.privateMode,
               settingType: "bool",
-              icon: Icons.remove_red_eye,
+              icon: Icons.visibility_off_outlined,
             ),
           ],
-          "app settings": [
-            UserDisplayInfo(
-              title: "Backend connection URL",
-              hint: "The URL at which we are connecting to the backend.",
-              settingValue: ConfigProvider.connectionUrl,
-              settingType: "string",
-              icon: Icons.wifi,
-              child: Center(
-                child: SizedBox(
-                  width: screenWidth / 1.15,
-                  child: ConnectionSetupField(disabled: true, minButtonSize: minButtonSize),
-                ),
-              ),
-            ),
-          ],
-          "user information": [
-            UserDisplayInfo(
-              title: "Username",
-              value: userProvider.currentUser?.username ?? "N/A",
-              icon: Icons.account_circle,
-              child: Center(
-                child: ButtonWidget(
-                  text: "Logout",
-                  minSize: minButtonSize,
-                  onPressed: () async {
-                    final authProvider = Provider.of<UserProvider>(context, listen: false);
-                    await authProvider.logout();
-                  },
-                ),
-              ),
-            ),
-          ],
-          "app details": [
+          "App Information": [
             UserDisplayInfo(
               title: "App Version",
               icon: Icons.info_outline,
-              child: Padding(
-                padding: EdgeInsetsGeometry.directional(start: 12, end: 12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextWidget(text: 'Backend: ${configProvider.unsecureConfig?.version}'),
-                    TextWidget(text: 'Frontend: ${configProvider.packageInfo.version}'),
-                  ],
-                ),
+              value:
+                  'Backend: ${configProvider.unsecureConfig?.version ?? 'N/A'}\nFrontend: ${configProvider.packageInfo.version}',
+              // child: configProvider.unsecureConfig?.version != configProvider.packageInfo.version
+              //     ? Padding(
+              //         padding: const EdgeInsets.only(top: 4.0),
+              //         child: Row(
+              //           children: [
+              //             Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error, size: 16),
+              //             const SizedBox(width: 8),
+              //             const Expanded(
+              //               child: Text(
+              //                 "Backend and Frontend versions do not match. This may cause unexpected behavior.",
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       )
+              //     : null,
+            ),
+            UserDisplayInfo(
+              title: "Help & Documentation",
+              icon: Icons.help_outline,
+              hint: "Need help? Check out our documentation.",
+              column: false,
+              child: IconButton.filled(
+                icon: Icon(Icons.help),
+                onPressed: () => launchUrl(Uri.parse("https://sprout.croudebush.net")),
               ),
+            ),
+          ],
+          "Connection Details": [
+            UserDisplayInfo(
+              title: "Backend Connection URL",
+              hint: "The URL for the backend connection.",
+              icon: Icons.http,
+              child: Center(child: ConnectionSetupField(disabled: true)),
             ),
             UserDisplayInfo(
               title: "Last Background Sync Status",
@@ -110,29 +103,29 @@ class _UserConfigPageState extends State<UserConfigPage> {
               value: _getLastSyncStatus(configProvider),
             ),
             UserDisplayInfo(
-              title: "Backend Connection Status",
-              icon: Icons.event_repeat,
+              title: "Real-time Connection Status",
+              icon: Icons.sync,
               value: sseProvider.isConnected ? "Connected" : "Disconnected",
-              child: Center(
-                child: SproutTooltip(
-                  message: accountProvider.manualSyncIsRunning
-                      ? "Manual Sync is running"
-                      : "Forces an account sync immediately",
-                  child: ButtonWidget(
-                    text: "Manual Account Sync",
-                    minSize: minButtonSize,
-                    onPressed: accountProvider.manualSyncIsRunning ? null : () => accountProvider.manualSync(),
-                  ),
-                ),
+            ),
+            UserDisplayInfo(
+              title: "Manual Account Sync",
+              icon: Icons.sync_problem,
+              hint: "Force an immediate synchronization of your accounts.",
+              column: false,
+              child: FilledButton(
+                onPressed: accountProvider.manualSyncIsRunning ? null : () => accountProvider.manualSync(),
+                child: accountProvider.manualSyncIsRunning
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.sync),
               ),
             ),
           ],
         };
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[...displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value))],
+        return ListView(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          shrinkWrap: true,
+          children: displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value)).toList(),
         );
       },
     );

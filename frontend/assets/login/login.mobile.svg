@@ -1,0 +1,54 @@
+<svg width="100%" height="100%" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"
+    xmlns="http://www.w3.org/2000/svg">
+
+    <defs>
+        <pattern id="dot-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.5" fill="#191c20" />
+        </pattern>
+
+        <linearGradient id="glow-line" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#116383" />
+            <stop offset="100%" stop-color="#6b9ac4" />
+        </linearGradient>
+
+        <linearGradient id="fill-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#001e2c" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#111418" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+
+    <rect width="400" height="900" fill="#111418" />
+
+    <rect width="400" height="900" fill="url(#dot-grid)" opacity="0.6" />
+
+    <text x="175" y="200" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="200" font-weight="bold" fill="#c2e8ff" opacity="0.03" transform="rotate(15 300 400)">
+        $
+    </text>
+
+    <path d="M 0 550
+           C 75 500, 125 700, 200 600
+           S 250 500, 400 550
+           L 400 900 L 0 900 Z" fill="url(#fill-area)" />
+
+    <path d="M 0 550
+           C 75 500, 125 700, 200 600
+           S 250 500, 400 550" fill="none" stroke="url(#glow-line)" stroke-width="6" stroke-linecap="round" />
+
+    <circle cx="100" cy="593" r="8" fill="#d6bee4" />
+    <circle cx="200" cy="600" r="8" fill="#d6bee4" />
+    <circle cx="300" cy="519" r="8" fill="#d6bee4" />
+
+
+    <g transform="translate(0, 420)" opacity="0.7">
+        <rect x="8" y="400" width="30" height="75" fill="#116383" rx="5" ry="5" />
+        <rect x="59" y="425" width="30" height="50" fill="#d6bee4" rx="5" ry="5" />
+        <rect x="110" y="375" width="30" height="100" fill="#116383" rx="5" ry="5" />
+        <rect x="161" y="440" width="30" height="35" fill="#d6bee4" rx="5" ry="5" />
+        <rect x="212" y="410" width="30" height="65" fill="#116383" rx="5" ry="5" />
+        <rect x="263" y="390" width="30" height="85" fill="#116383" rx="5" ry="5" />
+        <rect x="314" y="445" width="30" height="30" fill="#d6bee4" rx="5" ry="5" />
+        <rect x="362" y="375" width="30" height="100" fill="#116383" rx="5" ry="5" />
+    </g>
+
+</svg>

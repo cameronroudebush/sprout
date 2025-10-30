@@ -65,13 +65,15 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-
     if (widget.data == null || widget.data!.isEmpty) {
-      return Center(child: TextWidget(text: "No data available"));
+      return SizedBox(
+        height: widget.height * 1.25,
+        width: double.infinity,
+        child: Center(child: Text("No data available")),
+      );
     }
 
-    final centerSpacingRadius = mediaQuery.size.height > 1200 ? 15 : widget.height / 15;
+    final centerSpacingRadius = widget.height / 5;
 
     return Padding(
       padding: EdgeInsetsGeometry.all(10),
@@ -83,7 +85,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(
-            height: widget.height,
+            height: widget.height * 1.25,
             width: double.infinity,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

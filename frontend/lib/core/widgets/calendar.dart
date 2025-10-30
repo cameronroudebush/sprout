@@ -49,14 +49,14 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
   /// Moves the calendar to the previous month.
   void _previousMonth() {
     setState(() {
-      _focusedDate = DateUtils.addDaysToDate(_focusedDate, -1);
+      _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, -1);
     });
   }
 
   /// Moves the calendar to the next month.
   void _nextMonth() {
     setState(() {
-      _focusedDate = DateUtils.addDaysToDate(_focusedDate, 1);
+      _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, 1);
     });
   }
 
@@ -157,7 +157,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
-              childAspectRatio: isDesktop ? 1.5 : 1, // Adjust aspect ratio for cell height
+              childAspectRatio: isDesktop ? 2.5 : 1, // Adjust aspect ratio for cell height
             ),
             itemCount: days.length,
             itemBuilder: (context, index) {

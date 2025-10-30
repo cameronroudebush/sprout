@@ -10,6 +10,7 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/notification.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/category_pie_chart.dart';
@@ -34,9 +35,10 @@ class _HomePageState extends AutoUpdateState<HomePage> {
   Widget build(BuildContext context) {
     return Consumer4<UserConfigProvider, CategoryProvider, TransactionProvider, ConfigProvider>(
       builder: (context, userConfigProvider, catProvider, transactionProvider, configProvider, child) {
+        final today = DateTime.now();
         final theme = Theme.of(context);
         final chartRange = userConfigProvider.userDefaultChartRange;
-        final catStats = catProvider.categoryStats?.categoryCount;
+        final catStats = catProvider.getStatsData(today.year, today.month)?.categoryCount;
 
         final recentTransactionsCount = 10;
         // Handle case where there are fewer transactions than recentTransactionsCount
@@ -46,13 +48,13 @@ class _HomePageState extends AutoUpdateState<HomePage> {
 
         final recentTransactionsDiff = recentTransactions.fold(0.0, (prev, element) => prev + element.amount);
 
-        List<HomeNotification> notifications = [];
+        List<SproutNotification> notifications = [];
 
         // Check if a sync hasn't ran recently
         final lastSync = configProvider.config?.lastSchedulerRun;
-        if (lastSync != null && (!lastSync.time.isSameDay(DateTime.now()) || lastSync.status == "in-progress")) {
+        if (lastSync != null && (!lastSync.time.isSameDay(today) || lastSync.status == "in-progress")) {
           notifications.add(
-            HomeNotification(
+            SproutNotification(
               "An account sync has not yet ran today",
               theme.colorScheme.error,
               theme.colorScheme.onError,
@@ -65,7 +67,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
         if (catStats != null && catStats.containsKey("Unknown") && catStats["Unknown"] != 0) {
           final unknownCatCount = catStats["Unknown"];
           notifications.add(
-            HomeNotification(
+            SproutNotification(
               "You have ${formatNumber(unknownCatCount)} uncategorized transactions",
               theme.colorScheme.primary,
               theme.colorScheme.onPrimary,
@@ -79,29 +81,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
 
         // Determine the layout structure based on desktop or mobile
         return SproutLayoutBuilder((isDesktop, context, constraints) {
-          final notificationWidgets = notifications.map((n) {
-            return SproutCard(
-              bgColor: n.bgColor,
-              child: Padding(
-                padding: EdgeInsetsGeometry.all(12),
-                child: InkWell(
-                  onTap: n.onClick,
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      if (n.icon != null) Icon(n.icon, color: n.color),
-                      Expanded(
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          children: [Text(n.message, style: TextStyle(color: n.color, fontSize: 16))],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList();
+          final notificationWidgets = notifications.map((n) => SproutNotificationWidget(n)).toList();
 
           final netWorthWidget = NetWorthOverviewWidget(
             showCard: true,
@@ -109,7 +89,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
             onRangeSelected: (value) {
               userConfigProvider.updateChartRange(value);
             },
-            chartHeight: 275,
+            chartHeight: isDesktop ? 275 : 150,
           );
 
           final accountsWidget = SproutCard(
@@ -121,7 +101,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
                   padding: EdgeInsetsGeometry.directional(start: 12, top: 4, bottom: 4),
                   child: Text(
                     "Accounts",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     textAlign: TextAlign.start,
                   ),
                 ),
@@ -132,7 +112,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
           );
 
           final transactionsWidget = ConstrainedBox(
-            constraints: BoxConstraints(minHeight: 140, maxHeight: 505),
+            constraints: BoxConstraints(minHeight: 140),
             child: SizedBox(
               height: 65 + (recentTransactions.length * 65),
               child: SproutCard(
@@ -148,7 +128,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
                         children: [
                           Text(
                             "Recent $recentTransactionsCount Transactions",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
 
                           /// Total value change
@@ -174,22 +154,25 @@ class _HomePageState extends AutoUpdateState<HomePage> {
             ),
           );
 
-          final pieWidgets = Row(
-            children: [
-              Expanded(child: CategoryPieChart(showLegend: isDesktop)),
-              Expanded(child: CashFlowPieChart(DateTime.now())),
-            ],
-          );
+          final categoryPie = CategoryPieChart(today, showLegend: true);
+          final cashPie = CashFlowPieChart(today);
 
           if (isDesktop) {
+            final pieWidgets = Row(
+              children: [
+                Expanded(child: categoryPie),
+                Expanded(child: cashPie),
+              ],
+            );
+
             return Column(
               children: [
                 if (notifications.isNotEmpty) Column(children: notificationWidgets),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Column(spacing: 4, children: [netWorthWidget, accountsWidget])),
-                    Expanded(child: Column(spacing: 4, children: [pieWidgets, transactionsWidget])),
+                    Expanded(child: Column(children: [netWorthWidget, accountsWidget])),
+                    Expanded(child: Column(children: [pieWidgets, transactionsWidget])),
                   ],
                 ),
               ],
@@ -206,7 +189,8 @@ class _HomePageState extends AutoUpdateState<HomePage> {
               netWorthWidget,
               accountsWidget,
               transactionsWidget,
-              pieWidgets,
+              categoryPie,
+              cashPie,
             ],
           );
         });

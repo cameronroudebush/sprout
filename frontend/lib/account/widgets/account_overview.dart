@@ -120,7 +120,7 @@ class _AccountsOverviewState extends AutoUpdateState<AccountsOverview> {
                             percentageChange,
                             totalChange,
                             title: "${formatAccountType(accountType)} Accounts Value",
-                            applyColor: true,
+                            applyColor: false,
                           ),
                           SproutLineChart(
                             data: data,

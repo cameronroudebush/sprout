@@ -10,19 +10,19 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
   final Map<String, CashFlowStats> _statsCache = {};
 
   // Public getters
-  SankeyData? getSankeyData(int year, int month, {int? day, Account? account}) {
-    return _sankeyDataCache[_generateCacheKey(year, month, day, account)];
+  SankeyData? getSankeyData(int year, int? month, {int? day, Account? account}) {
+    return _sankeyDataCache[generateCacheKey(year, month, day, account)];
   }
 
-  CashFlowStats? getStatsData(int year, int month, {int? day, Account? account}) {
-    return _statsCache[_generateCacheKey(year, month, day, account)];
+  CashFlowStats? getStatsData(int year, int? month, {int? day, Account? account}) {
+    return _statsCache[generateCacheKey(year, month, day, account)];
   }
 
   CashFlowProvider(super.api);
 
   /// Populates the sankey data for all accounts
-  Future<SankeyData> getSankey(int year, int month, {int? day, Account? account}) async {
-    final cacheKey = _generateCacheKey(year, month, day, account);
+  Future<SankeyData> getSankey(int year, int? month, {int? day, Account? account}) async {
+    final cacheKey = generateCacheKey(year, month, day, account);
     final data = (await api.cashFlowControllerGetSankey(year, month: month, day: day, accountId: account?.id))!;
 
     final convertedData = SankeyData(
@@ -38,17 +38,12 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
   }
 
   /// Populates cash flow stats for the given query
-  Future<CashFlowStats?> getStats(int year, int month, {int? day, Account? account}) async {
-    final cacheKey = _generateCacheKey(year, month, day, account);
+  Future<CashFlowStats?> getStats(int year, int? month, {int? day, Account? account}) async {
+    final cacheKey = generateCacheKey(year, month, day, account);
     final data = await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: account?.id);
     if (data != null) _statsCache[cacheKey] = data;
     notifyListeners();
     return data;
-  }
-
-  /// Generates the key for the map based on the query
-  String _generateCacheKey(int year, int month, int? day, Account? account) {
-    return '$year-$month-${day ?? 'all'}-${account?.id ?? 'all'}';
   }
 
   @override
