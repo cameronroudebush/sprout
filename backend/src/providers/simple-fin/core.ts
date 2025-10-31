@@ -4,7 +4,6 @@ import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
-import { DevFinancialDataGenerator } from "@backend/providers/base/random-data";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
@@ -112,8 +111,8 @@ export class SimpleFINProvider extends ProviderBase {
     const [user, pass] = url.replace("https://", "").split("@")[0]!.split(":");
     const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
     if (Configuration.isDevBuild) {
-      this.logger.warn(`Dev build detected. SimpleFIN will return fake data.`);
-      return new DevFinancialDataGenerator().generateFinancialData(true) as any as SimpleFINReturn.FinancialData;
+      this.logger.warn(`Dev build detected. SimpleFIN won't return any data.`);
+      return { errors: [], accounts: [] } as SimpleFINReturn.FinancialData;
     } else {
       await this.rateLimit.incrementOrError();
       const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${user}:${pass}`) } });

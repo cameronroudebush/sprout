@@ -69,6 +69,7 @@ export class Account extends DatabaseBase {
     availableBalance: number,
     type: Account["type"],
     currency: string,
+    subType?: AccountSubType,
   ) {
     super();
     this.name = name;
@@ -79,6 +80,7 @@ export class Account extends DatabaseBase {
     this.availableBalance = availableBalance;
     this.type = type;
     this.currency = currency;
+    this.subType = subType;
   }
 
   /** Turns this account to act like account history for today */

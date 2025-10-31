@@ -24,3 +24,13 @@ npm run export:api:spec
 ```
 
 **Note**: You'll want to run this whenever you make changes to the backend client. This will allow us to update the dart client and any documentation required.
+
+# Generate Demo Data
+
+To generate demo data for the database, please run the following:
+
+```sh
+npm run populate:demo:data
+```
+
+**Note**: The login credentials will then be `username`: `demo`, `password`: `Demodemo`

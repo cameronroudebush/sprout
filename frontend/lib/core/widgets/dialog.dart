@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/scroll.dart';
-import 'package:sprout/core/widgets/text.dart';
 
 /// A reusable widget for displaying dialogs in Sprout
 class SproutDialogWidget extends StatelessWidget {
@@ -58,11 +57,7 @@ class SproutDialogWidget extends StatelessWidget {
                 children: [
                   // Flex holder
                   Expanded(child: const SizedBox(width: 1)),
-                  TextWidget(
-                    referenceSize: 2.25,
-                    text: dialogTitleText,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  Text(dialogTitleText, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28)),
                   // Close button
                   Expanded(
                     child: Column(
@@ -115,7 +110,7 @@ class SproutDialogWidget extends StatelessWidget {
                               : () {
                                   Navigator.of(context).pop();
                                 },
-                          child: TextWidget(text: closeButtonText),
+                          child: Text(closeButtonText),
                         ),
                       ),
                     if (showSubmitButton)
@@ -123,7 +118,7 @@ class SproutDialogWidget extends StatelessWidget {
                         child: FilledButton(
                           style: submitButtonStyle,
                           onPressed: !allowSubmitClick ? null : onSubmitClick,
-                          child: TextWidget(text: submitButtonText),
+                          child: Text(submitButtonText),
                         ),
                       ),
                   ],

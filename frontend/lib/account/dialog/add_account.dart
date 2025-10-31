@@ -108,13 +108,14 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
 
     return Column(
       children: [
-        Text(
-          "Select the accounts you would like to add from ${providerConfig.name}",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+        if (accounts.isNotEmpty)
+          Text(
+            "Select the accounts you would like to add from ${providerConfig.name}",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         if (accounts.isEmpty)
           Padding(
-            padding: EdgeInsetsGeometry.only(left: 12, right: 12, top: 36, bottom: 12),
+            padding: EdgeInsetsGeometry.only(left: 12, right: 12, top: 0, bottom: 12),
             child: Column(
               spacing: 24,
               children: [
@@ -122,8 +123,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
 
                 // Button to go directly to your endpoint to register new accounts
                 if (providerConfig.accountFixUrl != null)
-                  ButtonWidget(
-                    text: "Go to ${providerConfig.name}",
+                  FilledButton(
                     onPressed: () async {
                       final Uri url = Uri.parse(providerConfig.accountFixUrl!);
                       if (!await launchUrl(url)) {
@@ -132,6 +132,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
                       // Close dialog
                       Navigator.of(context).pop();
                     },
+                    child: Text("Go to ${providerConfig.name}"),
                   ),
               ],
             ),
