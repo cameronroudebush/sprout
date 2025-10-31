@@ -12,12 +12,13 @@ import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
 import { name } from "../package.json";
 import { ConfigurationService } from "./config/config.service";
 import { SproutLogger } from "./core/logger";
+import { generateOpenApiSpec } from "./scripts/generate.api-spec";
+import { populateDemoData } from "./scripts/populate.demo.data";
 
 // Manually load configuration before the app module is loaded so we can use the config within the app module.
 new ConfigurationService().load();
 // Now import the app module since we've got that ready to go
 import { AppModule } from "./app.module";
-import { generateOpenApiSpec } from "./scripts/generate.api-spec";
 
 /**
  * This allows us to run this app and then execute a specific script
@@ -25,10 +26,18 @@ import { generateOpenApiSpec } from "./scripts/generate.api-spec";
  */
 export async function checkScript() {
   const scriptName = process.argv[2];
-  switch (scriptName) {
-    case "generate.api-spec":
-      await generateOpenApiSpec(process.argv[3]);
-      process.exit(0);
+  try {
+    switch (scriptName) {
+      case "generate.api-spec":
+        await generateOpenApiSpec(process.argv[3]);
+        process.exit(0);
+      case "populate.demo.data":
+        await populateDemoData(parseInt(process.argv[3] ?? "90"));
+        process.exit(0);
+    }
+  } catch (e) {
+    Logger.error(e);
+    process.exit(1);
   }
 }
 

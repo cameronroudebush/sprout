@@ -35,7 +35,7 @@ export class DatabaseService {
   }
 
   /** Returns if the current database exists or not in our installed database */
-  private async databaseExists(databaseName = Configuration.database.dbConfig.database, source = this.source) {
+  async databaseExists(databaseName = Configuration.database.dbConfig.database, source = this.source) {
     this.validateSource(source);
     if (Configuration.database.type === "sqlite") return (await source.query("SELECT name FROM sqlite_master WHERE type='table'")).length >= 1;
     else return (await source.query("SHOW DATABASES LIKE ?", [databaseName])).length >= 1;
@@ -46,7 +46,7 @@ export class DatabaseService {
     if (source == null) throw new Error("Database not initialized. Did you forget to call `init`?");
   }
 
-  // /** Using the current data source, checks if any migrations are required and throws an error if they are. */
+  /** Using the current data source, checks if any migrations are required and throws an error if they are. */
   private async checkForMigrations(source = this.source) {
     this.logger.log("Checking for migrations...");
     this.validateSource(source);
@@ -58,8 +58,8 @@ export class DatabaseService {
     else this.logger.log("No migration required!");
   }
 
-  //   /** Executes any available migrations */
-  private async executeMigrations(source = this.source) {
+  /** Executes any available migrations */
+  async executeMigrations(source = this.source) {
     this.validateSource(source);
     await this.setSQLitePRAGMA(false);
     const resolvedMigrations = await source.runMigrations({ transaction: "all" });

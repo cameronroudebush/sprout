@@ -64,7 +64,8 @@
     "start": "nest start --watch",
     "build": "cross-env NODE_ENV=prod nest build && pkg package.json",
     "migrate": "cross-var ts-node -r tsconfig-paths/register --project ./tsconfig.json ./node_modules/typeorm/cli.js migration:generate -d ./src/scripts/generate.migration.ts ./src/database/migration/sqlite/$npm_config_name",
-    "export:api:spec": "nest start -- generate.api-spec ../docs/assets/openapi-spec.json"
+    "export:api:spec": "nest start -- generate.api-spec ../docs/assets/openapi-spec.json",
+    "populate:demo:data": "nest start -- populate.demo.data"
   },
   "pkg": {
     "assets": [
