@@ -61,6 +61,7 @@ class UserInfoRow extends StatelessWidget {
         } else if (!info.column) {
           rowContent = Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 4,
             children: [
               Expanded(child: mainContent),
               if (info.child != null) info.child!,

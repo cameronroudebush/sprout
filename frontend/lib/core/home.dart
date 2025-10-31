@@ -114,7 +114,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
           final transactionsWidget = ConstrainedBox(
             constraints: BoxConstraints(minHeight: 140),
             child: SizedBox(
-              height: 65 + (recentTransactions.length * 65),
+              height: 65 + (recentTransactions.length * 68),
               child: SproutCard(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,

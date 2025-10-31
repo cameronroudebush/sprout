@@ -81,27 +81,25 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
 
     return SproutScrollView(
       padding: EdgeInsets.zero,
-      child: Expanded(
-        child: Column(
-          children: [
-            // Render some pie charts for more info
-            SproutLayoutBuilder((isDesktop, context, constraints) {
-              final dateForCharts = DateTime(_selectedDate.year, month ?? 1);
-              final pieCharts = [
-                Expanded(
-                  child: CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 200),
-                ),
-                Expanded(
-                  child: CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 200),
-                ),
-              ];
-              if (isDesktop) {
-                return Row(crossAxisAlignment: CrossAxisAlignment.start, children: pieCharts);
-              }
-              return Column(children: pieCharts.map((e) => e.child).toList());
-            }),
-          ],
-        ),
+      child: Column(
+        children: [
+          // Render some pie charts for more info
+          SproutLayoutBuilder((isDesktop, context, constraints) {
+            final dateForCharts = DateTime(_selectedDate.year, month ?? 1);
+            final pieCharts = [
+              Expanded(
+                child: CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 175),
+              ),
+              Expanded(
+                child: CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 175),
+              ),
+            ];
+            if (isDesktop) {
+              return Row(crossAxisAlignment: CrossAxisAlignment.start, children: pieCharts);
+            }
+            return Column(children: pieCharts.map((e) => e.child).toList());
+          }),
+        ],
       ),
     );
   }

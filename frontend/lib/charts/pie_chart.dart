@@ -90,6 +90,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                if (widget.showLegend) _buildLegend(),
                 Expanded(
                   child: SizedBox(
                     height: widget.height,
@@ -114,7 +115,6 @@ class _SproutPieChartState extends State<SproutPieChart> {
                     ),
                   ),
                 ),
-                if (widget.showLegend) _buildLegend(),
               ],
             ),
           ),

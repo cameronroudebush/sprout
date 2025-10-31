@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/extended_api_client.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/user/user_provider.dart';
@@ -19,7 +20,7 @@ class ConnectionSetupField extends StatefulWidget {
     final configProvider = ServiceLocator.get<ConfigProvider>();
     ConfigProvider.connectionUrl = url;
     await SecureStorageProvider.saveValue(SecureStorageProvider.connectionUrlKey, url);
-    if (url != null) defaultApiClient = ApiClient(basePath: url);
+    if (url != null) (defaultApiClient as ExtendedApiClient).basePath = "$url/api";
     // Tell the configProvider to re-attempt a connection
     await configProvider.populateUnsecureConfig();
   }
@@ -31,6 +32,7 @@ class ConnectionSetupField extends StatefulWidget {
 class _ConnectionSetupState extends State<ConnectionSetupField> {
   final TextEditingController _connectionUrlController = TextEditingController();
   String _message = '';
+  bool _isAttemptingConnection = false;
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
   Future<void> _saveConnectionUrl() async {
     setState(() {
       _message = '';
+      _isAttemptingConnection = true;
     });
 
     final url = _connectionUrlController.text.trim();
@@ -68,6 +71,10 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
       setState(() {
         _message = 'Failed to save connection URL: $e';
       });
+    } finally {
+      setState(() {
+        _isAttemptingConnection = false;
+      });
     }
   }
 
@@ -75,7 +82,6 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
   Widget build(BuildContext context) {
     return Consumer2<ConfigProvider, UserProvider>(
       builder: (context, provider, userProvider, child) {
-        final currentConnectionUrl = defaultApiClient.basePath;
         return Column(
           spacing: widget.disabled ? 0 : 12,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -103,11 +109,15 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
             // Button for saving the connection url
             if (!widget.disabled)
               FilledButton(
-                onPressed: currentConnectionUrl != _connectionUrlController.text ? _saveConnectionUrl : null,
+                onPressed: _isAttemptingConnection ? null : _saveConnectionUrl,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
-                  children: [Icon(Icons.send), Text("Connect")],
+                  children: [
+                    if (_isAttemptingConnection) SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
+                    Icon(Icons.send),
+                    Text("Connect"),
+                  ],
                 ),
               ),
             // Error messages for the input
