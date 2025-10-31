@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
@@ -74,12 +75,13 @@ class _UserConfigPageState extends State<UserConfigPage> {
             ),
           ],
           "Connection Details": [
-            UserDisplayInfo(
-              title: "Backend Connection URL",
-              hint: "The URL for the backend connection.",
-              icon: Icons.http,
-              child: Center(child: ConnectionSetupField(disabled: true)),
-            ),
+            if (!kIsWeb)
+              UserDisplayInfo(
+                title: "Backend Connection URL",
+                hint: "The URL for the backend connection.",
+                icon: Icons.http,
+                child: Center(child: ConnectionSetupField(disabled: true)),
+              ),
             UserDisplayInfo(
               title: "Last Background Sync Status",
               icon: Icons.schedule,
@@ -105,9 +107,7 @@ class _UserConfigPageState extends State<UserConfigPage> {
           ],
         };
 
-        return ListView(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          shrinkWrap: true,
+        return Column(
           children: displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value)).toList(),
         );
       },

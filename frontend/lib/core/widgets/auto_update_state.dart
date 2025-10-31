@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -11,7 +12,7 @@ import 'package:sprout/core/provider/sse.dart';
 ///   a [loadData] function that is then used to initialize data after the first frame is
 ///   loaded. Then we also subscribe to SSE events and when forced data is requested, this
 ///   callback is re-used.
-abstract class AutoUpdateState<T extends StatefulWidget> extends State<T> {
+abstract class AutoUpdateState<T extends StatefulWidget> extends State<T> with WidgetsBindingObserver {
   final _sseProvider = ServiceLocator.get<SSEProvider>();
   StreamSubscription<SSEData>? _sseSubscription;
 
@@ -34,12 +35,25 @@ abstract class AutoUpdateState<T extends StatefulWidget> extends State<T> {
   @override
   void initState() {
     super.initState();
+    if (!kIsWeb) WidgetsBinding.instance.addObserver(this);
     _setupData();
   }
 
   @override
   void dispose() {
     _sseSubscription?.cancel();
+    if (!kIsWeb) WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // We use this function to determine when the mobile app has resumed it's state. This
+    //  allows us to re-request data for any component using the auto state updater.
+    if (state == AppLifecycleState.resumed) {
+      // This means the app has resumed after being woken up from the background. So refresh our data.
+      loadData(true);
+    }
   }
 }

@@ -18,7 +18,7 @@ class ConnectionSetup extends StatelessWidget {
           children: [
             Text("Connection Setup", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36)),
             Text(
-              "Due to Sprouts nature of being self hosted, you must provide a URL to connect to your instance. Please enter the URL below. You will be able to change this later if the connection fails.",
+              "Due to Sprouts nature of being self hosted, you must provide a URL to connect to your instance. Please enter the URL below. You will be able to change this later if the connection fails. Do not include the ending '/api'.",
               style: TextStyle(fontSize: 14),
               textAlign: TextAlign.center,
             ),

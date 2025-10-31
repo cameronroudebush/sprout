@@ -10,6 +10,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/extended_api_client.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
@@ -29,13 +30,13 @@ void main() async {
   final connectionUrl = await ConfigProvider.getConnUrl();
   ConfigProvider.connectionUrl = connectionUrl;
 
-  // Update the default api client
-  defaultApiClient = ApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
+  // Create an extended ApiClient that allows changing the base path
+  defaultApiClient = ExtendedApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
   // Mobile has a really long timeout so replace it if it's not web
   if (!kIsWeb) {
     final client = HttpClient();
     client.connectionTimeout = const Duration(seconds: 10);
-    defaultApiClient.client = IOClient(client);
+    (defaultApiClient as ExtendedApiClient).client = IOClient(client);
   }
 
   // Register all the providers

@@ -6,8 +6,15 @@ import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/widgets/connection.dart';
 
-class FailToConnectWidget extends StatelessWidget {
+class FailToConnectWidget extends StatefulWidget {
   const FailToConnectWidget({super.key});
+
+  @override
+  State<FailToConnectWidget> createState() => _FailToConnectWidgetState();
+}
+
+class _FailToConnectWidgetState extends State<FailToConnectWidget> {
+  bool _isAttemptingConnection = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +43,28 @@ class FailToConnectWidget extends StatelessWidget {
                     child: SproutTooltip(
                       message: "Resets the connection URL so you can specify a different server",
                       child: FilledButton(
-                        onPressed: () async {
-                          await ConnectionSetupField.setUrl(null);
-                          // Try to go to home again
-                          SproutNavigator.redirect("home");
-                        },
-                        child: Text("Reset connection"),
+                        onPressed: _isAttemptingConnection
+                            ? null
+                            : () async {
+                                setState(() {
+                                  _isAttemptingConnection = true;
+                                });
+                                await ConnectionSetupField.setUrl(null);
+                                setState(() {
+                                  _isAttemptingConnection = false;
+                                });
+                                // Try to go to home again
+                                SproutNavigator.redirect("home");
+                              },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 8,
+                          children: [
+                            if (_isAttemptingConnection)
+                              SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
+                            Text("Reset connection"),
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -43,6 +43,7 @@ flutter:
     - assets/
     - assets/logo/
     - assets/icon/
+    - assets/login/
 
 flutter_launcher_icons:
   android: "launcher_icon"
