@@ -33,7 +33,8 @@ export class NetWorthController {
   @ApiOkResponse({ description: "Net worth over time successfully.", type: EntityHistory })
   async getNetWorthOT(@CurrentUser() user: User) {
     const accountHistory = await AccountHistory.getHistoryForUser(user);
-    return EntityHistory.getForHistory(AccountHistory, accountHistory);
+    const val = EntityHistory.getForHistory(AccountHistory, accountHistory);
+    return val;
   }
 
   @Get("account")

@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/io_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
@@ -27,6 +31,12 @@ void main() async {
 
   // Update the default api client
   defaultApiClient = ApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
+  // Mobile has a really long timeout so replace it if it's not web
+  if (!kIsWeb) {
+    final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 10);
+    defaultApiClient.client = IOClient(client);
+  }
 
   // Register all the providers
   ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigApi(), packageInfo));

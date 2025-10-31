@@ -5,7 +5,6 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/page_loading.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_row.dart';
 
@@ -24,6 +23,7 @@ class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverv
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context).size;
     return Consumer<TransactionRuleProvider>(
       builder: (context, provider, child) {
         final isLoading = provider.isLoading || provider.transactionRulesRunning;
@@ -33,6 +33,22 @@ class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverv
             loadingText: provider.transactionRulesRunning
                 ? "Organizing transactions..."
                 : PageLoadingWidget.defaultLoadingText,
+          );
+        }
+
+        if (provider.rules.isEmpty && !isLoading) {
+          return SizedBox(
+            height: mediaQuery.height * .75,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsetsGeometry.all(16),
+                child: Text(
+                  "No rules found. Add one above to start organizing!",
+                  style: TextStyle(fontSize: 24),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           );
         }
 
@@ -60,17 +76,6 @@ class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverv
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (provider.rules.isEmpty && !isLoading)
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsetsGeometry.all(16),
-                        child: TextWidget(
-                          referenceSize: 1.25,
-                          text: "No rules found. Add one above to start organizing!",
-                        ),
-                      ),
-                    ),
-
                   // Render all the rules
                   if (!isLoading)
                     ...provider.rules

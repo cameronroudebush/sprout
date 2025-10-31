@@ -5,6 +5,7 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/holding/holding_provider.dart';
@@ -57,5 +58,19 @@ class ServiceLocator {
   /// Returns a single provider from the service locator.
   static T get<T extends BaseProvider>() {
     return _sl.get<T>();
+  }
+
+  /// Calls post login on all available providers
+  static Future<void> postLogin() async {
+    // Request our basic data
+    await Future.wait(
+      ServiceLocator.getAllProviders().map((provider) async {
+        try {
+          await provider.postLogin();
+        } catch (e) {
+          LoggerService.error("Failed to load data for provider ${provider.runtimeType}: $e");
+        }
+      }),
+    );
   }
 }

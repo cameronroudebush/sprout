@@ -7,9 +7,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
-import 'package:sprout/core/widgets/button.dart';
 import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 
@@ -54,10 +52,7 @@ class _AccountsWidgetState extends AutoUpdateState<AccountsWidget> {
     return Consumer2<AccountProvider, NetWorthProvider>(
       builder: (context, accountProvider, netWorthProvider, child) {
         final mediaQuery = MediaQuery.of(context);
-        if (accountProvider.isLoading ||
-            netWorthProvider.isLoading ||
-            netWorthProvider.historicalAccountData == null ||
-            netWorthProvider.historicalAccountData!.isEmpty) {
+        if (accountProvider.isLoading || netWorthProvider.isLoading) {
           return SizedBox(
             height: 320,
             width: double.infinity,
@@ -68,25 +63,28 @@ class _AccountsWidgetState extends AutoUpdateState<AccountsWidget> {
             height: mediaQuery.size.height * .2,
             width: double.infinity,
             child: Column(
+              spacing: 12,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextWidget(
-                  referenceSize: 1.5,
-                  text: "Link an account to get started!",
+                Text(
+                  "Link an account to get started!",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                const SizedBox(height: 20),
                 SproutTooltip(
                   message: "Add an account",
-                  child: ButtonWidget(
-                    text: "Add Account",
-                    icon: Icons.add,
-                    minSize: mediaQuery.size.width * .2,
-                    onPressed: () async {
-                      // Open the add account dialog
-                      await showDialog(context: context, builder: (_) => AddAccountDialog());
-                    },
+                  child: SizedBox(
+                    width: 256,
+                    child: FilledButton(
+                      onPressed: () async {
+                        // Open the add account dialog
+                        await showDialog(context: context, builder: (_) => AddAccountDialog());
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [Icon(Icons.add), Text("Add Account")],
+                      ),
+                    ),
                   ),
                 ),
               ],

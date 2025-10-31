@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
@@ -41,15 +40,7 @@ class _LoginFormState extends State<LoginForm> {
         _isLoadingData = true;
       });
       // Request our basic data
-      await Future.wait(
-        ServiceLocator.getAllProviders().map((provider) async {
-          try {
-            await provider.postLogin();
-          } catch (e) {
-            LoggerService.error("Failed to load data for provider ${provider.runtimeType}: $e");
-          }
-        }),
-      );
+      await ServiceLocator.postLogin();
       setState(() {
         _isLoadingData = false;
       });

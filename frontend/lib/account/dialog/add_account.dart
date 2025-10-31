@@ -108,10 +108,9 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
 
     return Column(
       children: [
-        TextWidget(
-          text: "Select the accounts you would like to add from ${providerConfig.name}",
-          referenceSize: 1.15,
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          "Select the accounts you would like to add from ${providerConfig.name}",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         if (accounts.isEmpty)
           Padding(
@@ -119,7 +118,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
             child: Column(
               spacing: 24,
               children: [
-                TextWidget(text: "No accounts available. You may need to link some from ${providerConfig.name}."),
+                Text("No accounts available. You may need to link some from ${providerConfig.name}."),
 
                 // Button to go directly to your endpoint to register new accounts
                 if (providerConfig.accountFixUrl != null)
@@ -155,36 +154,44 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   /// Returns the display that allows us to select our provider type
   Widget _getProvidersDisplay(BuildContext context) {
     final configProvider = ServiceLocator.get<ConfigProvider>();
-    final providers = configProvider.config!.providers;
-    return Column(
-      spacing: 12,
-      children: [
-        TextWidget(
-          text: "Select the provider you would like to add the account from",
-          referenceSize: 1.05,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        // Render the buttons
-        Column(
-          children: providers.map((provider) {
-            // final accounts = entry.value; // If you need to use the accounts list for this provider
-            return ButtonWidget(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              height: 60,
-              text: provider.name,
-              image: Expanded(
-                child: Row(
-                  children: [Padding(padding: EdgeInsetsGeometry.all(12), child: FinanceProviderLogoWidget(provider))],
+    final providers = configProvider.config?.providers;
+    if (providers == null) {
+      return Text(
+        "No providers were configured properly.",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      );
+    } else {
+      return Column(
+        spacing: 12,
+        children: [
+          Text(
+            "Select the provider you would like to add the account from",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          // Render the buttons
+          Column(
+            children: providers.map((provider) {
+              // final accounts = entry.value; // If you need to use the accounts list for this provider
+              return ButtonWidget(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                height: 60,
+                text: provider.name,
+                image: Expanded(
+                  child: Row(
+                    children: [
+                      Padding(padding: EdgeInsetsGeometry.all(12), child: FinanceProviderLogoWidget(provider)),
+                    ],
+                  ),
                 ),
-              ),
-              child: Expanded(child: SizedBox(width: 1)),
-              onPressed: () {
-                _setProvider(provider);
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
+                child: Expanded(child: SizedBox(width: 1)),
+                onPressed: () {
+                  _setProvider(provider);
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
   }
 }

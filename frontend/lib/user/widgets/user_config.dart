@@ -20,7 +20,6 @@ class UserConfigPage extends StatefulWidget {
 
 class _UserConfigPageState extends State<UserConfigPage> {
   /// Returns a formatted string for the last background sync status.
-  /// Returns the status of the last account sync
   String _getLastSyncStatus(ConfigProvider provider) {
     final config = provider.config;
     final lastScheduleTime = provider.getLastSyncStatus();
@@ -62,22 +61,6 @@ class _UserConfigPageState extends State<UserConfigPage> {
               icon: Icons.info_outline,
               value:
                   'Backend: ${configProvider.unsecureConfig?.version ?? 'N/A'}\nFrontend: ${configProvider.packageInfo.version}',
-              // child: configProvider.unsecureConfig?.version != configProvider.packageInfo.version
-              //     ? Padding(
-              //         padding: const EdgeInsets.only(top: 4.0),
-              //         child: Row(
-              //           children: [
-              //             Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error, size: 16),
-              //             const SizedBox(width: 8),
-              //             const Expanded(
-              //               child: Text(
-              //                 "Backend and Frontend versions do not match. This may cause unexpected behavior.",
-              //               ),
-              //             ),
-              //           ],
-              //         ),
-              //       )
-              //     : null,
             ),
             UserDisplayInfo(
               title: "Help & Documentation",

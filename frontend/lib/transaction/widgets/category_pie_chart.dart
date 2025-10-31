@@ -30,8 +30,9 @@ class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart> {
   bool hasSetDefault = false;
   bool _catDataLoading = true;
 
-  /// Fetches data we need for the display of the given selected date
-  Future<void> _fetchData() async {
+  /// Fetches data we need for the display of the given selected date.
+  ///   We use [showLoaders] as a way to forcibly say we need updated data.
+  Future<void> _fetchData(bool showLoaders) async {
     final provider = ServiceLocator.get<CategoryProvider>();
     final selectedDate = widget.selectedDate;
     final month = widget.view == CashFlowView.monthly ? selectedDate.month : null;
@@ -39,7 +40,7 @@ class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart> {
     setState(() {
       _catDataLoading = true;
     });
-    if (provider.getStatsData(selectedDate.year, month) == null) {
+    if (showLoaders || provider.getStatsData(selectedDate.year, month) == null) {
       provider.loadCategoryStats(selectedDate.year, month);
     }
     provider.setLoadingStatus(false);
@@ -49,7 +50,7 @@ class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart> {
   }
 
   @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) => _fetchData();
+  late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
 
   @override
   Widget build(BuildContext context) {

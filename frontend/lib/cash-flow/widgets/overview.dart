@@ -27,7 +27,7 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
   late DateTime _selectedDate;
 
   @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) => _fetchData();
+  late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
 
   @override
   void initState() {
@@ -39,7 +39,8 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
   CashFlowView _currentView = CashFlowView.monthly;
 
   /// Fetches data we need for these displays
-  Future<void> _fetchData() async {
+  ///   We use [showLoaders] as a way to forcibly say we need updated data.
+  Future<void> _fetchData(bool showLoaders) async {
     final cashFlowProvider = ServiceLocator.get<CashFlowProvider>();
     final categoryProvider = ServiceLocator.get<CategoryProvider>();
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
@@ -47,13 +48,13 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
     cashFlowProvider.setLoadingStatus(true);
     categoryProvider.setLoadingStatus(true);
 
-    if (cashFlowProvider.getSankeyData(_selectedDate.year, month) == null) {
+    if (showLoaders || cashFlowProvider.getSankeyData(_selectedDate.year, month) == null) {
       cashFlowProvider.getSankey(_selectedDate.year, month);
     }
-    if (cashFlowProvider.getStatsData(_selectedDate.year, month) == null) {
+    if (showLoaders || cashFlowProvider.getStatsData(_selectedDate.year, month) == null) {
       cashFlowProvider.getStats(_selectedDate.year, month);
     }
-    if (categoryProvider.getStatsData(_selectedDate.year, month) == null) {
+    if (showLoaders || categoryProvider.getStatsData(_selectedDate.year, month) == null) {
       categoryProvider.loadCategoryStats(_selectedDate.year, month);
     }
     cashFlowProvider.setLoadingStatus(false);
@@ -64,7 +65,7 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
     setState(() {
       _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + monthIncrement + 1, 0);
     });
-    _fetchData();
+    _fetchData(false);
   }
 
   void _changeYear(int year) {
@@ -72,7 +73,7 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
       // When changing year, we can default to January of that year.
       _selectedDate = DateTime(year, 2, 0);
     });
-    _fetchData();
+    _fetchData(false);
   }
 
   Widget _buildStats() {
@@ -138,7 +139,7 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
                       _selectedDate = DateTime(now.year, now.month + 1, 0);
                     }
                   });
-                  _fetchData();
+                  _fetchData(false);
                 },
                 onMonthIncrementChanged: _changeMonth,
                 onYearChanged: _changeYear,

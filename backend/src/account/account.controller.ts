@@ -142,6 +142,7 @@ export class AccountController {
       }
     }
     this.sseService.sendToUser(user, SSEEventType.SYNC);
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
     return addedAccounts;
   }
 

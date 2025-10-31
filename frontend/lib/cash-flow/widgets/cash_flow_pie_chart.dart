@@ -27,17 +27,21 @@ class CashFlowPieChart extends StatefulWidget {
 }
 
 class _CashFlowPieChartState extends AutoUpdateState<CashFlowPieChart> {
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
+  /// Fetches data we need for the display of the given selected date.
+  ///   We use [showLoaders] as a way to forcibly say we need updated data.
+  Future<void> _fetchData(bool showLoaders) async {
     final date = widget.selectedDate;
     final provider = ServiceLocator.get<CashFlowProvider>();
     final month = widget.view == CashFlowView.monthly ? date.month : null;
     provider.setLoadingStatus(true);
-    if (provider.getStatsData(date.year, month) == null) {
+    if (showLoaders || provider.getStatsData(date.year, month) == null) {
       context.read<CashFlowProvider>().getStats(date.year, month);
     }
     provider.setLoadingStatus(false);
-  };
+  }
+
+  @override
+  late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
 
   @override
   Widget build(BuildContext context) {

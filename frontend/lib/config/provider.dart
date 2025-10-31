@@ -89,7 +89,9 @@ class ConfigProvider extends BaseProvider<ConfigApi> {
       return "${kDebugMode ? '$leading:8001' : leading}/api";
     } else {
       // Apps must specify the connection URL so we know where to look
-      return "${(await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey))!}/api";
+      String? storedUrl = await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey);
+      if (storedUrl == null || storedUrl.isEmpty) storedUrl = "http://localhost";
+      return "$storedUrl/api";
     }
   }
 

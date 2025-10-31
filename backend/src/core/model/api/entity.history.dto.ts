@@ -103,7 +103,8 @@ export class EntityHistory extends Base {
   private static generateNetWorthOverTime<T extends AccountHistory | HoldingHistory>(history: T[], relatedAccount: Account | undefined, days: number) {
     const getHistoryVal = (h: T) => (h instanceof AccountHistory ? h.balance : h.marketValue);
 
-    if (history.length === 0) return { snapshot: [], frame: EntityHistoryDataPoint.fromPlain({ percentChange: 0, valueChange: 0 }) };
+    if (history.length === 0)
+      return { snapshot: [], frame: EntityHistoryDataPoint.fromPlain({ percentChange: 0, valueChange: 0, history: { [new Date().getTime().toString()]: 0 } }) };
     const today = new Date();
 
     const netWorthSnapshots: Array<{ date: Date; netWorth: number }> = [];
@@ -159,8 +160,8 @@ export class EntityHistory extends Base {
     }, {} as any);
 
     // Correct edge cases on some change values
-    if (isNaN(valueChange)) valueChange = 0;
-    if (percentChange != null && isNaN(percentChange)) percentChange = 0;
+    if (valueChange == null || isNaN(valueChange)) valueChange = 0;
+    if (percentChange == null || isNaN(percentChange)) percentChange = 0;
 
     return { snapshot: filteredSnapshots, frame: EntityHistoryDataPoint.fromPlain({ percentChange, valueChange, history: frameHistory }) };
   }
