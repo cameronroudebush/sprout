@@ -4,8 +4,6 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
-import 'package:sprout/core/widgets/button.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/user/user_provider.dart';
 
 /// Renders a field that allows setting the current setup connection
@@ -19,6 +17,7 @@ class ConnectionSetupField extends StatefulWidget {
   /// Sets the connection url to the given value and re-attempts a connection
   static Future<void> setUrl(String? url) async {
     final configProvider = ServiceLocator.get<ConfigProvider>();
+    ConfigProvider.connectionUrl = url;
     await SecureStorageProvider.saveValue(SecureStorageProvider.connectionUrlKey, url);
     if (url != null) defaultApiClient = ApiClient(basePath: url);
     // Tell the configProvider to re-attempt a connection
@@ -78,7 +77,7 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
       builder: (context, provider, userProvider, child) {
         final currentConnectionUrl = defaultApiClient.basePath;
         return Column(
-          spacing: 0,
+          spacing: widget.disabled ? 0 : 12,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Actual input
@@ -103,15 +102,17 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
             ),
             // Button for saving the connection url
             if (!widget.disabled)
-              ButtonWidget(
-                icon: Icons.send,
-                text: 'Connect',
-                minSize: 400,
+              FilledButton(
                 onPressed: currentConnectionUrl != _connectionUrlController.text ? _saveConnectionUrl : null,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [Icon(Icons.send), Text("Connect")],
+                ),
               ),
             // Error messages for the input
-            TextWidget(
-              text: _message,
+            Text(
+              _message,
               style: TextStyle(
                 color: _message.contains('Failed') ? Colors.red[700] : Colors.green[700],
                 fontWeight: FontWeight.bold,

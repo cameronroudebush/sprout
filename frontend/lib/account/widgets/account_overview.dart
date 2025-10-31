@@ -12,7 +12,6 @@ import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/tabs.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
@@ -110,7 +109,7 @@ class _AccountsOverviewState extends AutoUpdateState<AccountsOverview> {
                       ? [
                           SizedBox(
                             height: 150,
-                            child: Center(child: TextWidget(text: "No ${formatAccountType(accountType)} Accounts")),
+                            child: Center(child: Text("No ${formatAccountType(accountType)} Accounts")),
                           ),
                         ]
                       : [

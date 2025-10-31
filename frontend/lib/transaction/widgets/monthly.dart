@@ -10,7 +10,6 @@ import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/page_loading.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/transaction/model/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
@@ -43,30 +42,23 @@ class _TransactionMonthlySubscriptionsState extends AutoUpdateState<TransactionM
         if (isLoading) return PageLoadingWidget(loadingText: "Loading Subscriptions...");
 
         if (provider.subscriptions.isEmpty) {
-          return SproutCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                spacing: 12,
-                children: [
-                  TextWidget(
-                    text: "No Subscriptions Found",
-                    referenceSize: 1.5,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    "Sprout automatically identifies subscriptions by analyzing your transactions over the last year. "
-                    "For a transaction to be considered a subscription, it must meet the following criteria:",
-                    textAlign: TextAlign.center,
-                  ),
-                  _buildSubscriptionCriteria(),
-                  const Text(
-                    "Ensure you have at least a configured number of consistent negative transactions "
-                    "with similar amounts and regular intervals over the past year for them to appear here.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ],
+          return SizedBox(
+            width: 640,
+            child: SproutCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  spacing: 12,
+                  children: [
+                    Text("No Subscriptions Found", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+                    const Text(
+                      "Sprout automatically identifies subscriptions by analyzing your transactions over the last year. "
+                      "For a transaction to be considered a subscription, it must meet the following criteria:",
+                      textAlign: TextAlign.center,
+                    ),
+                    _buildSubscriptionCriteria(),
+                  ],
+                ),
               ),
             ),
           );
@@ -159,8 +151,8 @@ class _TransactionMonthlySubscriptionsState extends AutoUpdateState<TransactionM
                       .toList(),
                 ),
                 if (remainingEventsCount > 0)
-                  TextWidget(
-                    text: "+$remainingEventsCount",
+                  Text(
+                    "+$remainingEventsCount",
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: effectiveIconSize * 0.8),
                   ),
               ],
@@ -177,13 +169,13 @@ class _TransactionMonthlySubscriptionsState extends AutoUpdateState<TransactionM
         padding: const EdgeInsets.only(top: 12),
         child: Column(
           children: [
-            TextWidget(text: DateFormat.yMMMMd().format(_selectedDay), referenceSize: 1.5),
+            Text(DateFormat.yMMMMd().format(_selectedDay), style: TextStyle(fontSize: 16)),
             const SizedBox(height: 12),
             const Divider(height: 1),
             if (_eventsForCurrentDay.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
-                child: TextWidget(text: "No available subscriptions for this day", referenceSize: 1.25),
+                child: Text("No available subscriptions for this day", style: TextStyle(fontSize: 14)),
               ),
             if (_eventsForCurrentDay.isNotEmpty)
               ..._eventsForCurrentDay.mapIndexed((i, e) {

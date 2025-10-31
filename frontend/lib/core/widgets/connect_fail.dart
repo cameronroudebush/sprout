@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/navigator.dart';
-import 'package:sprout/core/widgets/button.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/widgets/connection.dart';
 
@@ -15,7 +13,6 @@ class FailToConnectWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ConfigProvider>(
       builder: (context, configProvider, child) {
-        final screenWidth = MediaQuery.of(context).size.width;
         return Padding(
           padding: EdgeInsets.all(24),
           child: Center(
@@ -27,10 +24,10 @@ class FailToConnectWidget extends StatelessWidget {
                   width: MediaQuery.of(context).size.height * .6,
                 ),
                 SizedBox(height: 12),
-                TextWidget(
-                  referenceSize: 1.5,
-                  text: "Failed to connect to the backend. Please ensure the backend is running and accessible.",
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                Text(
+                  "Failed to connect to the backend. Please ensure the backend is running and accessible.",
+                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 20),
+                  textAlign: TextAlign.center,
                 ),
 
                 if (!kIsWeb)
@@ -38,14 +35,13 @@ class FailToConnectWidget extends StatelessWidget {
                     padding: EdgeInsetsGeometry.directional(top: 24),
                     child: SproutTooltip(
                       message: "Resets the connection URL so you can specify a different server",
-                      child: ButtonWidget(
-                        text: "Reset connection",
-                        minSize: screenWidth / 2,
+                      child: FilledButton(
                         onPressed: () async {
                           await ConnectionSetupField.setUrl(null);
                           // Try to go to home again
                           SproutNavigator.redirect("home");
                         },
+                        child: Text("Reset connection"),
                       ),
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/widgets/layout.dart';
 
 /// The bar at the top of the screen we wish to render
@@ -54,7 +55,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
         centerTitle: true,
         elevation: 0, // Remove shadow for a flat design
         backgroundColor: theme.colorScheme.primaryContainer,
-        automaticallyImplyLeading: kIsWeb && isDesktop ? false : true,
+        automaticallyImplyLeading: (kIsWeb && isDesktop) || ConfigProvider.connectionUrl == null ? false : true,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(8.0),
           child: Container(color: theme.colorScheme.secondary, height: 8.0),

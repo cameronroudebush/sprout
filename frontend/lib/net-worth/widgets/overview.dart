@@ -47,13 +47,13 @@ class _NetWorthOverviewWidgetState extends AutoUpdateState<NetWorthOverviewWidge
     return Consumer<NetWorthProvider>(
       builder: (context, netWorthProvider, child) {
         final selectedChartRange = widget.selectedChartRange;
+
         // Build our content to render
         final content = Padding(
           padding: const EdgeInsets.only(top: 12, right: 12, left: 12),
           child:
-              netWorthProvider.isLoading ||
-                  netWorthProvider.netWorth == null ||
-                  netWorthProvider.historicalNetWorth == null
+              // Data is loading
+              netWorthProvider.isLoading
               ? SizedBox(
                   height: widget.chartHeight + 75,
                   child: Center(child: CircularProgressIndicator()),

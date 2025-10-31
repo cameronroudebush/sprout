@@ -44,7 +44,7 @@ class SankeyFlowByMonth extends StatelessWidget {
             final period = view == CashFlowView.monthly
                 ? DateFormat('MMMM yyyy').format(selectedDate)
                 : selectedDate.year.toString();
-            return Center(child: Text("No cash flow data for $period."));
+            return Center(child: Text("No data for $period."));
           }
           final linkCount = data.links.length;
           // Height scales based on the number of links

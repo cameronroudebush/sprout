@@ -338,10 +338,11 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
                           ),
                         ),
 
-                      if (widget.separateByDate)
-                        _buildGroupedByDate(transactions, isLoading, theme)
-                      else
-                        _buildSingleList(transactions, isLoading),
+                      if (transactions.isNotEmpty)
+                        if (widget.separateByDate)
+                          _buildGroupedByDate(transactions, isLoading, theme)
+                        else
+                          _buildSingleList(transactions, isLoading),
 
                       // Back to top button
                       if (widget.showBackToTop && _showBackToTop)

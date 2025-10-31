@@ -1,3 +1,4 @@
+import { Category } from "@backend/category/model/category.model";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { SetupService } from "@backend/core/setup.service";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
@@ -78,9 +79,15 @@ export class UserController {
   async create(@Body() data: UserCreationRequest) {
     const firstTimeSetupStatus = await this.setupService.firstTimeSetupDetermination();
     if (firstTimeSetupStatus === "welcome") {
-      const user = await User.createUser(data.username, data.password, true);
-      this.logger.log(`Admin account created with name ${data.username}`);
-      return UserCreationResponse.fromPlain({ username: user.username });
+      try {
+        const user = await User.createUser(data.username.toLowerCase(), data.password, true);
+        this.logger.log(`Admin account created with name ${data.username}`);
+        // Insert some default data
+        await Category.insertMany(Category.getDefaultCategoriesForUser(user));
+        return UserCreationResponse.fromPlain({ username: user.username });
+      } catch (e) {
+        throw new BadRequestException((e as Error).message);
+      }
     } else throw new BadRequestException("The app is not in a setup state.");
   }
 }

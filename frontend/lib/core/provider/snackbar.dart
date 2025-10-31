@@ -45,8 +45,10 @@ class SnackbarProvider {
     }
   }
 
-  /// Opens a snackbar with an APIException. If it's not an APIException, we just treat it like a normal error.
-  static void openWithAPIException(dynamic e) {
+  /// Given an error, attempts to determine a error message
+  ///   from it if it's an openAPI exception by parsing the JSON. If it's
+  ///   not, it just toString's the error and returns it.
+  static String parseOpenAPIException(dynamic e) {
     String message;
     if (e is ApiException && e.message != null) {
       try {
@@ -58,6 +60,12 @@ class SnackbarProvider {
     } else {
       message = e.toString();
     }
+    return message;
+  }
+
+  /// Opens a snackbar with an APIException. If it's not an APIException, we just treat it like a normal error.
+  static void openWithAPIException(dynamic e) {
+    final message = parseOpenAPIException(e);
     SnackbarProvider.openSnackbar(message, type: SnackbarType.error);
   }
 }
