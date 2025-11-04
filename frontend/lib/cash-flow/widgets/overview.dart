@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
+import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
@@ -21,10 +22,11 @@ class CashFlowOverview extends StatefulWidget {
   State<CashFlowOverview> createState() => _CashFlowOverviewState();
 }
 
-enum CashFlowView { monthly, yearly }
-
-class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
+class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowProvider> {
   late DateTime _selectedDate;
+
+  @override
+  CashFlowProvider provider = ServiceLocator.get<CashFlowProvider>();
 
   @override
   late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
@@ -41,23 +43,22 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview> {
   /// Fetches data we need for these displays
   ///   We use [showLoaders] as a way to forcibly say we need updated data.
   Future<void> _fetchData(bool showLoaders) async {
-    final cashFlowProvider = ServiceLocator.get<CashFlowProvider>();
     final categoryProvider = ServiceLocator.get<CategoryProvider>();
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
 
-    cashFlowProvider.setLoadingStatus(true);
+    provider.setLoadingStatus(true);
     categoryProvider.setLoadingStatus(true);
 
-    if (showLoaders || cashFlowProvider.getSankeyData(_selectedDate.year, month) == null) {
-      cashFlowProvider.getSankey(_selectedDate.year, month);
+    if (showLoaders || provider.getSankeyData(_selectedDate.year, month) == null) {
+      provider.getSankey(_selectedDate.year, month);
     }
-    if (showLoaders || cashFlowProvider.getStatsData(_selectedDate.year, month) == null) {
-      cashFlowProvider.getStats(_selectedDate.year, month);
+    if (showLoaders || provider.getStatsData(_selectedDate.year, month) == null) {
+      provider.getStats(_selectedDate.year, month);
     }
     if (showLoaders || categoryProvider.getStatsData(_selectedDate.year, month) == null) {
       categoryProvider.loadCategoryStats(_selectedDate.year, month);
     }
-    cashFlowProvider.setLoadingStatus(false);
+    provider.setLoadingStatus(false);
     categoryProvider.setLoadingStatus(false);
   }
 

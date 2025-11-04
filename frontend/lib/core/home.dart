@@ -6,6 +6,7 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
@@ -24,12 +25,15 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends AutoUpdateState<HomePage> {
+class _HomePageState extends AutoUpdateState<HomePage, CategoryProvider> {
   /// If we've checked with the user config and already set the default range.
   bool hasSetDefault = false;
 
   @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {};
+  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
+  @override
+  Future<dynamic> Function(bool showLoaders) loadData = (bool showLoaders) =>
+      ServiceLocator.get<CategoryProvider>().loadUnknownCategoryCount();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,6 @@ class _HomePageState extends AutoUpdateState<HomePage> {
         final today = DateTime.now();
         final theme = Theme.of(context);
         final chartRange = userConfigProvider.userDefaultChartRange;
-        final catStats = catProvider.getStatsData(today.year, today.month)?.categoryCount;
 
         final recentTransactionsCount = 10;
         // Handle case where there are fewer transactions than recentTransactionsCount
@@ -63,9 +66,9 @@ class _HomePageState extends AutoUpdateState<HomePage> {
           );
         }
 
+        final unknownCatCount = provider.unknownCategoryCount;
         // Check if we have uncategorized transactions so the user can deal with those
-        if (catStats != null && catStats.containsKey("Unknown") && catStats["Unknown"] != 0) {
-          final unknownCatCount = catStats["Unknown"];
+        if (unknownCatCount != 0) {
           notifications.add(
             SproutNotification(
               "You have ${formatNumber(unknownCatCount)} uncategorized transactions",
@@ -147,6 +150,7 @@ class _HomePageState extends AutoUpdateState<HomePage> {
                       allowLoadingMore: false,
                       showBackToTop: false,
                       separateByDate: false,
+                      showLoadingMore: false,
                     ),
                   ],
                 ),
@@ -154,8 +158,8 @@ class _HomePageState extends AutoUpdateState<HomePage> {
             ),
           );
 
-          final categoryPie = CategoryPieChart(today, showLegend: true);
-          final cashPie = CashFlowPieChart(today);
+          final categoryPie = CategoryPieChart(today, showLegend: true, height: 300);
+          final cashPie = CashFlowPieChart(today, height: 300);
 
           if (isDesktop) {
             final pieWidgets = Row(

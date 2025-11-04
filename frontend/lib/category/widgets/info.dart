@@ -21,12 +21,14 @@ class CategoryInfo extends StatefulWidget {
   State<CategoryInfo> createState() => _CategoryInfoState();
 }
 
-class _CategoryInfoState extends AutoUpdateState<CategoryInfo> {
+class _CategoryInfoState extends AutoUpdateState<CategoryInfo, CategoryProvider> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   CategoryTypeEnum _type = CategoryTypeEnum.expense;
   Category? _parentCategory;
 
+  @override
+  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
   @override
   Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
 

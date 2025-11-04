@@ -39,7 +39,9 @@ class AccountsWidget extends StatefulWidget {
   State<AccountsWidget> createState() => _AccountsWidgetState();
 }
 
-class _AccountsWidgetState extends AutoUpdateState<AccountsWidget> {
+class _AccountsWidgetState extends AutoUpdateState<AccountsWidget, AccountProvider> {
+  @override 
+  AccountProvider provider = ServiceLocator.get<AccountProvider>();
   @override
   Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
     ServiceLocator.get<AccountProvider>().populateLinkedAccounts(showLoaders);

@@ -16,7 +16,10 @@ class TransactionRuleOverview extends StatefulWidget {
   State<TransactionRuleOverview> createState() => _TransactionRuleOverviewState();
 }
 
-class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverview> {
+class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverview, TransactionRuleProvider> {
+    @override 
+  TransactionRuleProvider provider = ServiceLocator.get<TransactionRuleProvider>();
+
   @override
   Future<dynamic> Function(bool showLoaders) loadData =
       ServiceLocator.get<TransactionRuleProvider>().populateTransactionRules;

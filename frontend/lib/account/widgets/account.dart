@@ -40,14 +40,17 @@ class AccountWidget extends StatefulWidget {
 }
 
 /// A page that displays information about the given account
-class _AccountWidgetState extends AutoUpdateState<AccountWidget> {
+class _AccountWidgetState extends AutoUpdateState<AccountWidget, HoldingProvider> {
   Holding? _selectedHolding;
   Account get account => widget.account;
 
   @override
+  HoldingProvider provider = ServiceLocator.get<HoldingProvider>();
+
+  @override
   late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
     if (account.type == AccountTypeEnum.investment) {
-      return ServiceLocator.get<HoldingProvider>().populateDataForAccount(account, showLoaders);
+      return provider.populateDataForAccount(account, showLoaders);
     } else {
       return null;
     }

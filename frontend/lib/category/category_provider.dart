@@ -6,9 +6,11 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
   // Data store
   List<Category> _categories = [];
   final Map<String, CategoryStats> _statsCache = {};
+  int _unknownCategoryCount = 0;
 
   // Public getters
   List<Category> get categories => _categories;
+  int get unknownCategoryCount => _unknownCategoryCount;
   CategoryStats? getStatsData(int year, int? month, {int? day, Account? account}) {
     return _statsCache[generateCacheKey(year, month, day, account)];
   }
@@ -61,6 +63,12 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
     if (data != null) _statsCache[cacheKey] = data;
     notifyListeners();
     return data;
+  }
+
+  Future<int?> loadUnknownCategoryCount({Account? account}) async {
+    _unknownCategoryCount = await api.categoryControllerGetUnknownCategoryStats(accountId: account?.id) ?? 0;
+    notifyListeners();
+    return _unknownCategoryCount;
   }
 
   @override

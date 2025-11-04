@@ -22,8 +22,9 @@ class CategoryOverview extends StatefulWidget {
   State<CategoryOverview> createState() => _CategoryOverviewState();
 }
 
-class _CategoryOverviewState extends AutoUpdateState<CategoryOverview> {
-  final categoryProvider = ServiceLocator.get<CategoryProvider>();
+class _CategoryOverviewState extends AutoUpdateState<CategoryOverview, CategoryProvider> {
+  @override
+  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
 
   @override
   Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;

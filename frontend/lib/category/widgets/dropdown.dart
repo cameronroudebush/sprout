@@ -30,7 +30,9 @@ class CategoryDropdown extends StatefulWidget {
   State<CategoryDropdown> createState() => _CategoryDropdownState();
 }
 
-class _CategoryDropdownState extends AutoUpdateState<CategoryDropdown> {
+class _CategoryDropdownState extends AutoUpdateState<CategoryDropdown, CategoryProvider> {
+  @override
+  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
   @override
   Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
 
