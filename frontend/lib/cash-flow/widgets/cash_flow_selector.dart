@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sprout/cash-flow/widgets/overview.dart';
+import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 
 import '../../core/widgets/layout.dart';

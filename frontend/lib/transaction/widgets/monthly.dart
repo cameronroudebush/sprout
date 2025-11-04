@@ -22,10 +22,12 @@ class TransactionMonthlySubscriptions extends StatefulWidget {
   State<TransactionMonthlySubscriptions> createState() => _TransactionMonthlySubscriptionsState();
 }
 
-class _TransactionMonthlySubscriptionsState extends AutoUpdateState<TransactionMonthlySubscriptions> {
+class _TransactionMonthlySubscriptionsState
+    extends AutoUpdateState<TransactionMonthlySubscriptions, TransactionProvider> {
   @override
-  late Future<dynamic> Function(bool showLoaders) loadData =
-      ServiceLocator.get<TransactionProvider>().populateSubscriptions;
+  TransactionProvider provider = ServiceLocator.get<TransactionProvider>();
+  @override
+  late Future<dynamic> Function(bool showLoaders) loadData = provider.populateSubscriptions;
 
   /// The events for the current day that we have selected
   List<TransactionSubscription> _eventsForCurrentDay = [];

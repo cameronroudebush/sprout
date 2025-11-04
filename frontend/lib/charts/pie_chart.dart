@@ -65,15 +65,16 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final height = widget.height - 50;
     if (widget.data == null || widget.data!.isEmpty) {
       return SizedBox(
-        height: widget.height * 1.25,
+        height: height * 1.25,
         width: double.infinity,
         child: Center(child: Text("No data available")),
       );
     }
 
-    final centerSpacingRadius = widget.height / 5;
+    final centerSpacingRadius = height / 5;
 
     return Padding(
       padding: EdgeInsetsGeometry.all(10),
@@ -85,7 +86,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(
-            height: widget.height * 1.25,
+            height: height * 1.25,
             width: double.infinity,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -93,7 +94,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
                 if (widget.showLegend) _buildLegend(),
                 Expanded(
                   child: SizedBox(
-                    height: widget.height,
+                    height: height,
                     child: PieChart(
                       PieChartData(
                         sections: _generatePieSections(),

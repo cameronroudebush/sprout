@@ -5,6 +5,7 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
+import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
@@ -53,6 +54,17 @@ export class CategoryController {
   @ApiOkResponse({ description: "Category stats found successfully.", type: CategoryStats })
   async getCategoryStats(@CurrentUser() user: User, @Query("year") year: number, @Query("month") month?: number, @Query("day") day?: number) {
     return await this.categoryService.getStats(user, year, month, day);
+  }
+
+  @Get("stats/unknown")
+  @ApiOperation({
+    summary: "Gets unknown category stats.",
+    description: "Retrieves the count of transactions with unknown categories for the authenticated user. This includes all possible transactions.",
+  })
+  @ApiQuery({ name: "accountId", required: false, type: String, description: "The ID of the account to retrieve transactions from." })
+  @ApiOkResponse({ description: "Unknown category stats found successfully.", schema: { type: "integer", format: "int32" } })
+  async getUnknownCategoryStats(@CurrentUser() user: User, @Query("accountId") accountId?: string) {
+    return await Transaction.count({ where: { category: IsNull(), account: { id: accountId, user: { id: user.id } } } });
   }
 
   @Post()

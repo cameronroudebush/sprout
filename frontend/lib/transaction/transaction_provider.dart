@@ -78,6 +78,13 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
     return updatedTransaction;
   }
 
+  /// Wipes all currently loaded transaction data. You'll normally do this if you're about to request more.
+  void wipeData() {
+    _totalTransactions = null;
+    _transactions = [];
+    _subscriptions = [];
+  }
+
   @override
   Future<void> cleanupData() async {
     _totalTransactions = null;

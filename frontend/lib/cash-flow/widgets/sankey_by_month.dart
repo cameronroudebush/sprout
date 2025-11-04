@@ -1,10 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
-import 'package:sprout/cash-flow/widgets/overview.dart';
+import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/charts/sankey/models/data.dart';
 import 'package:sprout/charts/sankey/sankey.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -41,10 +40,7 @@ class SankeyFlowByMonth extends StatelessWidget {
             return const Center(child: Text("Failed to load Cash Flow data."));
           }
           if (data.links.isEmpty) {
-            final period = view == CashFlowView.monthly
-                ? DateFormat('MMMM yyyy').format(selectedDate)
-                : selectedDate.year.toString();
-            return Center(child: Text("No data for $period."));
+            return Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)));
           }
           final linkCount = data.links.length;
           // Height scales based on the number of links

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/config/provider.dart';
@@ -82,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage((kIsWeb ? "" : "assets/") + (isDesktop ? 'login/login.png' : 'login/login.mobile.png')),
+              image: AssetImage('assets/${isDesktop ? 'login/login.png' : 'login/login.mobile.png'}'),
               fit: BoxFit.fill,
             ),
           ),

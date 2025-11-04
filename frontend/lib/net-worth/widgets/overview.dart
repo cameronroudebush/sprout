@@ -38,7 +38,9 @@ class NetWorthOverviewWidget extends StatefulWidget {
   State<NetWorthOverviewWidget> createState() => _NetWorthOverviewWidgetState();
 }
 
-class _NetWorthOverviewWidgetState extends AutoUpdateState<NetWorthOverviewWidget> {
+class _NetWorthOverviewWidgetState extends AutoUpdateState<NetWorthOverviewWidget, NetWorthProvider> {
+  @override
+  NetWorthProvider provider = ServiceLocator.get<NetWorthProvider>();
   @override
   Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<NetWorthProvider>().loadHomePageData;
 

@@ -38,6 +38,9 @@ class TransactionsOverview extends StatefulWidget {
   /// If scrolling down the widget should automatically load more where applicable
   final bool allowLoadingMore;
 
+  /// If we should render the loading indicator when we are loading more content. We will always render when loading the initial count
+  final bool showLoadingMore;
+
   /// If the back to top button should render when scrolling
   final bool showBackToTop;
 
@@ -55,13 +58,14 @@ class TransactionsOverview extends StatefulWidget {
     this.allowLoadingMore = true,
     this.showBackToTop = true,
     this.separateByDate = true,
+    this.showLoadingMore = true,
   });
 
   @override
   State<TransactionsOverview> createState() => _TransactionsOverviewPageState();
 }
 
-class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOverview> {
+class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOverview, TransactionProvider> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   int _currentTransactionIndex = TransactionProvider.initialTransactionCount;
@@ -77,21 +81,29 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
 
   /// Uses the provider to prepare all the data we'll need
   Future<void> _prepareData() async {
-    final transactionProvider = ServiceLocator.get<TransactionProvider>();
-    transactionProvider.setLoadingStatus(true);
+    provider.setLoadingStatus(true);
     // Grab all the data at once
     await Future.wait([
-      transactionProvider.populateTotalTransactionCount(),
+      provider.populateTotalTransactionCount(),
       // Populate initial set
-      transactionProvider.populateTransactions(
+      provider.populateTransactions(
         startIndex: 0,
         endIndex: TransactionProvider.initialTransactionCount,
         shouldNotify: false,
       ),
       // Grab all transactions for today no matter what
-      transactionProvider.populateTransactions(date: DateTime.now(), shouldNotify: false),
+      provider.populateTransactions(date: DateTime.now(), shouldNotify: false),
     ]);
-    transactionProvider.setLoadingStatus(false);
+    provider.setLoadingStatus(false);
+  }
+
+  @override
+  TransactionProvider provider = ServiceLocator.get<TransactionProvider>();
+
+  @override
+  void onForceSync() {
+    // Wipe out all transactions to forcible reset them
+    provider.wipeData();
   }
 
   @override
@@ -328,6 +340,9 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
                 Expanded(
                   child: Stack(
                     children: [
+                      // Only show this one if we're loading the initial data set
+                      if (provider.isLoading) Center(child: CircularProgressIndicator()),
+
                       /// In the event we don't find a match
                       if (transactions.isEmpty && !isLoading)
                         Center(
@@ -382,7 +397,7 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
         },
         itemBuilder: (context, index) {
           if (index == transactions.length) {
-            return isLoading
+            return isLoading && widget.showLoadingMore
                 ? const Center(
                     child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
                   )
@@ -407,7 +422,7 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
       itemBuilder: (context, index) {
         // If it's the last item, show a loading indicator or an empty box
         if (index == groupedTransactions.length) {
-          return isLoading
+          return isLoading && widget.showLoadingMore
               ? const Center(
                   child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
                 )
