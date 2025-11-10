@@ -89,10 +89,10 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowP
             final dateForCharts = DateTime(_selectedDate.year, month ?? 1);
             final pieCharts = [
               Expanded(
-                child: CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 175),
+                child: CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 250),
               ),
               Expanded(
-                child: CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 175),
+                child: CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 450 : 250),
               ),
             ];
             if (isDesktop) {

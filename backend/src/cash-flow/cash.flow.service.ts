@@ -77,12 +77,12 @@ export class CashFlowService {
    * This function, given some parameters, generates the sankey diagram data utilizing {@link calculateFlows}
    */
   async buildSankey(user: User, year: number, month?: number, day?: number, accountId?: string) {
-    const { netTotals, totalExpense } = await this.calculateFlows(user, year, month, day, accountId);
+    const { netTotals } = await this.calculateFlows(user, year, month, day, accountId);
 
     const categories = await Category.find({ where: { user: { id: user.id } }, relations: ["parentCategory"] });
     const categoryMap = new Map<string, Category>(categories.map((c) => [c.id, c]));
 
-    const incomeHubName = "Income";
+    const incomeHubName = "Inflows";
     const linksMap = new Map<string, SankeyLink>();
     const colors: SankeyData["colors"] = {
       [incomeHubName]: SankeyData.incomeColor,
@@ -103,7 +103,8 @@ export class CashFlowService {
       else {
         linksMap.set(key, new SankeyLink(cleanSource, cleanTarget, value));
         if (!colors[cleanSource]) colors[cleanSource] = getNextColor();
-        if (!colors[cleanTarget]) colors[cleanTarget] = getNextColor();
+        // Only set color for target if it's not the incomeHub (to preserve its fixed color)
+        if (cleanTarget !== incomeHubName && !colors[cleanTarget]) colors[cleanTarget] = getNextColor();
       }
     };
 
@@ -120,7 +121,47 @@ export class CashFlowService {
       return path;
     };
 
-    // Build the links for the diagram from the net totals.
+    // Calculate the total actual inflow and outflow of the Income hub
+    let totalInflow = 0;
+    let totalOutflow = 0;
+
+    for (const { category, amount } of netTotals.values()) {
+      const absAmount = Math.abs(amount);
+      if (absAmount < 0.01) continue;
+
+      if (category.type === CategoryType.income) {
+        if (amount > 0) {
+          // Positive Income (flows IN to Income Hub)
+          totalInflow += absAmount;
+        } else {
+          // Income Deduction (flows OUT from Income Hub)
+          totalOutflow += absAmount;
+        }
+      } else {
+        // Expense Category
+        if (amount < 0) {
+          // Expense (flows OUT from Income Hub)
+          totalOutflow += absAmount;
+        } else {
+          // Refund/Reimbursement (flows IN to Income Hub)
+          totalInflow += absAmount;
+        }
+      }
+    }
+
+    const netDifference = totalInflow - totalOutflow;
+    const deficit = netDifference < 0 ? Math.abs(netDifference) : 0;
+
+    // Inject Deficit Link if necessary
+    if (deficit > 0) {
+      const deficitSourceName = "Deficit";
+      // Add the deficit as a new source flow into the Income hub
+      addOrUpdateLink(deficitSourceName, incomeHubName, deficit);
+      // Set a distinct color for the deficit source node (e.g., red/orange)
+      colors[deficitSourceName] = "#F56565";
+    }
+
+    // Build the links for the diagram from the net totals
     for (const { category, amount } of netTotals.values()) {
       const absAmount = Math.abs(amount);
       if (absAmount < 0.01) continue;
@@ -128,7 +169,7 @@ export class CashFlowService {
       if (category.type === CategoryType.income) {
         if (amount > 0) {
           let sourceName = category.name;
-          if (sourceName.trim() === incomeHubName) sourceName = `${sourceName} (Source)`;
+          if (sourceName.trim() === incomeHubName) sourceName = `${sourceName}`;
           addOrUpdateLink(sourceName, incomeHubName, absAmount);
         } else {
           const adjustedCatName = `${category.name} (Deduction)`;
@@ -149,9 +190,6 @@ export class CashFlowService {
         }
       }
     }
-
-    const totalExpenseAbs = Math.abs(totalExpense);
-    if (totalExpenseAbs > 0) addOrUpdateLink(incomeHubName, incomeHubName, totalExpenseAbs);
 
     const links = Array.from(linksMap.values());
     // Derive the nodes directly from the links for perfect accuracy
