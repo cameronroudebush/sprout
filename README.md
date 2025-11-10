@@ -17,7 +17,7 @@ Sprout is a financial management app designed to give you a clear, simple view o
 Want to to see more? Check out our **[overview site!](https://sprout.croudebush.net)**
 
 <p align="center">
-  <img width=50%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/horizontal.png" alt="Transactions Page"/>
+  <img width="75%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/horizontal.png" alt="Transactions Page"/>
 </p>
 
 # Getting Started
