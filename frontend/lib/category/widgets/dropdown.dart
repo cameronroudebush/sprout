@@ -71,8 +71,18 @@ class _CategoryDropdownState extends AutoUpdateState<CategoryDropdown, CategoryP
   Widget build(BuildContext context) {
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
-        return provider.isLoading
-            ? const Center(child: CircularProgressIndicator())
+        return provider.isLoading || provider.categories.isEmpty
+            ? const Padding(
+                padding: EdgeInsetsGeometry.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 12,
+                  children: [
+                    SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
+                    Text("Loading categories"),
+                  ],
+                ),
+              )
             : DropdownButtonFormField<Category>(
                 menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
                 dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,

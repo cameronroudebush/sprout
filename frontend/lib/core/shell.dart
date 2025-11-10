@@ -135,6 +135,7 @@ class SproutShell extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: PopupMenuButton<String>(
+                  menuPadding: EdgeInsetsGeometry.zero,
                   onSelected: (value) {
                     if (value == 'settings') {
                       final settingsPage = SproutRouter.pages.firstWhereOrNull(
@@ -212,6 +213,15 @@ class SproutShell extends StatelessWidget {
     final theme = Theme.of(context);
     double fontSize = 8;
     final bottomNavButtons = SproutRouter.pages.where((e) => e.canNavigateTo && e.showOnBottomNav).toList();
+
+    // Place "home" page in the middle
+    final homePageIndex = bottomNavButtons.indexWhere((page) => page.label.toLowerCase() == 'home');
+    if (homePageIndex != -1) {
+      final homePage = bottomNavButtons.removeAt(homePageIndex);
+      final middleIndex = (bottomNavButtons.length / 2).ceil();
+      bottomNavButtons.insert(middleIndex, homePage);
+    }
+
     return BottomNavigationBar(
       iconSize: 24,
       selectedFontSize: fontSize,
@@ -238,7 +248,7 @@ class SproutShell extends StatelessWidget {
                 padding: const EdgeInsets.all(4.0),
                 child: Icon(
                   page.icon,
-                  color: isSelected ? theme.colorScheme.secondary : theme.colorScheme.onPrimaryContainer,
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onPrimaryContainer,
                 ),
               ),
               label: page.label,

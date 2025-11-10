@@ -85,7 +85,7 @@ abstract class AutoUpdateState<T extends StatefulWidget, Z extends BaseProvider>
     //  allows us to re-request data for any component using the auto state updater.
     if (state == AppLifecycleState.resumed) {
       // This means the app has resumed after being woken up from the background. So refresh our data.
-      loadData(true);
+      _loadDataWrapper(true);
     }
   }
 }

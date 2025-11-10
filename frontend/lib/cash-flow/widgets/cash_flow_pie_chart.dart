@@ -35,12 +35,12 @@ class _CashFlowPieChartState extends AutoUpdateState<CashFlowPieChart, CashFlowP
     final month = widget.view == CashFlowView.monthly ? date.month : null;
     provider.setLoadingStatus(true);
     if (showLoaders || provider.getStatsData(date.year, month) == null) {
-      context.read<CashFlowProvider>().getStats(date.year, month);
+      await context.read<CashFlowProvider>().getStats(date.year, month);
     }
     provider.setLoadingStatus(false);
   }
 
-  @override 
+  @override
   CashFlowProvider provider = ServiceLocator.get<CashFlowProvider>();
 
   @override
@@ -52,12 +52,19 @@ class _CashFlowPieChartState extends AutoUpdateState<CashFlowPieChart, CashFlowP
       builder: (context, provider, child) {
         final month = widget.view == CashFlowView.monthly ? widget.selectedDate.month : null;
         final stats = provider.getStatsData(widget.selectedDate.year, month);
-        if (stats == null || provider.isLoading) {
+        if (isLoading) {
           return SproutCard(
             child: SizedBox(
-              height: widget.height,
+              height: widget.height + 50,
               child: Center(child: CircularProgressIndicator()),
             ),
+          );
+        }
+
+        if (stats == null) {
+          return SproutCard(
+            height: widget.height + 50,
+            child: Center(child: Text(CashFlowViewFormatter.getNoDataText(widget.view, widget.selectedDate))),
           );
         }
 

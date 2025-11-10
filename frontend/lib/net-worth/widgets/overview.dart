@@ -55,7 +55,7 @@ class _NetWorthOverviewWidgetState extends AutoUpdateState<NetWorthOverviewWidge
           padding: const EdgeInsets.only(top: 12, right: 12, left: 12),
           child:
               // Data is loading
-              netWorthProvider.isLoading
+              isLoading
               ? SizedBox(
                   height: widget.chartHeight + 75,
                   child: Center(child: CircularProgressIndicator()),

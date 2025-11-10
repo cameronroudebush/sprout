@@ -37,7 +37,7 @@ class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart, CategoryP
     final month = widget.view == CashFlowView.monthly ? selectedDate.month : null;
     provider.setLoadingStatus(true);
     if (showLoaders || provider.getStatsData(selectedDate.year, month) == null) {
-      provider.loadCategoryStats(selectedDate.year, month);
+      await provider.loadCategoryStats(selectedDate.year, month);
     }
     provider.setLoadingStatus(false);
   }
@@ -54,7 +54,7 @@ class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart, CategoryP
         if (isLoading) {
           return SproutCard(
             child: SizedBox(
-              height: widget.height,
+              height: widget.height + 50,
               child: Center(child: CircularProgressIndicator()),
             ),
           );

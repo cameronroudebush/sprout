@@ -49,15 +49,19 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowP
     provider.setLoadingStatus(true);
     categoryProvider.setLoadingStatus(true);
 
+    final futures = <Future<dynamic>>[];
+
     if (showLoaders || provider.getSankeyData(_selectedDate.year, month) == null) {
-      provider.getSankey(_selectedDate.year, month);
+      futures.add(provider.getSankey(_selectedDate.year, month));
     }
     if (showLoaders || provider.getStatsData(_selectedDate.year, month) == null) {
-      provider.getStats(_selectedDate.year, month);
+      futures.add(provider.getStats(_selectedDate.year, month));
     }
     if (showLoaders || categoryProvider.getStatsData(_selectedDate.year, month) == null) {
-      categoryProvider.loadCategoryStats(_selectedDate.year, month);
+      futures.add(categoryProvider.loadCategoryStats(_selectedDate.year, month));
     }
+
+    await Future.wait(futures);
     provider.setLoadingStatus(false);
     categoryProvider.setLoadingStatus(false);
   }
