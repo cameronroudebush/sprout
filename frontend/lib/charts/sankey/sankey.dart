@@ -191,6 +191,8 @@ class _SankeyChartState extends State<SankeyChart> {
       final double distributableSpace = availableSpace - totalMinHeight;
 
       if (distributableSpace < 0) {
+        // Not enough space for minimum heights.
+        // Squeeze nodes by dividing available space equally.
         final double equalSpace = availableSpace / nodesInColumn.length;
         for (String nodeName in nodesInColumn) {
           nodeRects[nodeName] = isHorizontal
@@ -199,15 +201,32 @@ class _SankeyChartState extends State<SankeyChart> {
           currentPos += equalSpace + nodePadding;
         }
       } else {
-        for (String nodeName in nodesInColumn) {
-          // Use the corrected `nodeValues` for proportional sizing within the column.
-          final double nodeFlowValue = nodeValues[nodeName] ?? 0.0;
-          final double proportionalSpace = (nodeFlowValue / totalColumnValue) * distributableSpace;
-          final double nodeSpace = minNodeHeight + proportionalSpace;
-          nodeRects[nodeName] = isHorizontal
-              ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, nodeSpace)
-              : Rect.fromLTWH(currentPos, fixedPos, nodeSpace, nodeThickness);
-          currentPos += nodeSpace + nodePadding;
+        // Enough space for minimum heights.
+
+        if (totalColumnValue == 0) {
+          // Enough space, but NO flow value in this column.
+          // Instead of defaulting to minHeight (which leaves gaps),
+          // distribute the *total available space* equally to fill the container.
+          final double equalSpace = availableSpace / nodesInColumn.length;
+          for (String nodeName in nodesInColumn) {
+            nodeRects[nodeName] = isHorizontal
+                ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, max(0, equalSpace))
+                : Rect.fromLTWH(currentPos, fixedPos, max(0, equalSpace), nodeThickness);
+            currentPos += equalSpace + nodePadding;
+          }
+        } else {
+          // Enough space AND flow value exists.
+          // This is the standard proportional scaling logic.
+          // Each node gets its min height + a proportional share of the *extra* space.
+          for (String nodeName in nodesInColumn) {
+            final double nodeFlowValue = nodeValues[nodeName] ?? 0.0;
+            final double proportionalSpace = (nodeFlowValue / totalColumnValue) * distributableSpace;
+            final double nodeSpace = minNodeHeight + proportionalSpace;
+            nodeRects[nodeName] = isHorizontal
+                ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, nodeSpace)
+                : Rect.fromLTWH(currentPos, fixedPos, nodeSpace, nodeThickness);
+            currentPos += nodeSpace + nodePadding;
+          }
         }
       }
     }

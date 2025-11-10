@@ -32,13 +32,17 @@ abstract class AutoUpdateState<T extends StatefulWidget, Z extends BaseProvider>
 
   /// Wraps the load data call from the implementor with state setting for loading status
   Future<void> _loadDataWrapper(bool showProviderLoaders) async {
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
     await loadData(showProviderLoaders);
-    setState(() {
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   /// Set's up when we should call data loading capabilities

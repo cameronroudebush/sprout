@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
@@ -42,18 +40,15 @@ class SankeyFlowByMonth extends StatelessWidget {
           if (data.links.isEmpty) {
             return Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)));
           }
-          final linkCount = data.links.length;
-          // Height scales based on the number of links
-          double height = min(linkCount * 40.0, isDesktop ? 700 : 600);
           return SizedBox(
-            height: height,
+            height: constraints.maxHeight,
             child: InteractiveViewer(
               scaleEnabled: !isDesktop,
               constrained: false,
               minScale: 0.1,
               maxScale: 5.0,
               child: SizedBox(
-                height: height,
+                height: constraints.maxHeight,
                 width: !isDesktop ? 640 : (AppTheme.maxDesktopSize * .85),
                 child: Center(
                   child: SankeyChart(sankeyData: data, formatter: (val) => getFormattedCurrency(val)),
