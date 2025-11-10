@@ -136,7 +136,7 @@ class AccountGroupWidget extends StatelessWidget {
             initiallyExpanded: !allowCollapse,
             showTrailingIcon: false,
             minTileHeight: !showTitle ? 0 : null,
-            tilePadding: !showTitle ? EdgeInsets.zero : null,
+            tilePadding: !showTitle ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 12),
             title: !showTitle
                 ? SizedBox.shrink()
                 : Row(

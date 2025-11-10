@@ -14,12 +14,10 @@
 
 Sprout is a financial management app designed to give you a clear, simple view of your money. We specialize in providing a daily snapshot of your financial data by automatically tracking your accounts using financial APIs. This allows you to easily view things like account balances and stock holdings, helping you stay on top of your financial health.
 
-Want to to see more? Check out our **[overview site](https://sprout.croudebush.net)**
+Want to to see more? Check out our **[overview site!](https://sprout.croudebush.net)**
 
 <p align="center">
-  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/accounts.png" alt="Transactions Page" width="250"/>
-  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/main.png" alt="Home Page" width="250"/>
-  <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/transactions.png" alt="Holdings Page" width="250"/>
+  <img width=50%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/horizontal.png" alt="Transactions Page"/>
 </p>
 
 # Getting Started
@@ -48,4 +46,4 @@ You can review the [documentation](https://sprout.croudebush.net/getting-started
 
 # Additional Information
 
-[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/getting-started) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)
+[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [📸 Screenshots](https://sprout.croudebush.net/images/mobile) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/getting-started) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)

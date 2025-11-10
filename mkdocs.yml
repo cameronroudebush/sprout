@@ -42,6 +42,9 @@ plugins:
       filter: true
 nav:
   - Home: index.md
+  - Screenshots:
+      - Desktop: images/desktop/README.md
+      - Mobile: images/mobile/README.md
   - Getting Started:
       - Overview: getting-started/index.md
       - Installation: getting-started/installation.md

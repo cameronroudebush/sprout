@@ -17,7 +17,7 @@ export class Configuration {
   @ConfigurationMetadata.assign({ comment: "Core server config options" })
   static server = new ServerConfig();
 
-  @ConfigurationMetadata.assign({ comment: "Database specific optioons" })
+  @ConfigurationMetadata.assign({ comment: "Database specific options" })
   static database = new DatabaseConfig();
 
   @ConfigurationMetadata.assign({ comment: "Settings specific to transactions" })
