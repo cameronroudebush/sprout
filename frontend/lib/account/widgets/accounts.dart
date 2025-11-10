@@ -26,6 +26,9 @@ class AccountsWidget extends StatefulWidget {
   /// If group titles should be shown for each account group
   final bool showGroupTitles;
 
+  /// If we should request new data when this widget loads
+  final bool shouldRequestNewData;
+
   const AccountsWidget({
     super.key,
     required this.netWorthPeriod,
@@ -33,6 +36,7 @@ class AccountsWidget extends StatefulWidget {
     this.applyCard = true,
     this.accountType,
     this.showGroupTitles = true,
+    this.shouldRequestNewData = true,
   });
 
   @override
@@ -40,12 +44,14 @@ class AccountsWidget extends StatefulWidget {
 }
 
 class _AccountsWidgetState extends AutoUpdateState<AccountsWidget, AccountProvider> {
-  @override 
+  @override
   AccountProvider provider = ServiceLocator.get<AccountProvider>();
   @override
-  Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
-    ServiceLocator.get<AccountProvider>().populateLinkedAccounts(showLoaders);
-    ServiceLocator.get<NetWorthProvider>().loadHomePageData(showLoaders);
+  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
+    if (widget.shouldRequestNewData) {
+      await ServiceLocator.get<AccountProvider>().populateLinkedAccounts(showLoaders);
+      await ServiceLocator.get<NetWorthProvider>().loadHomePageData(showLoaders);
+    }
     return null;
   };
 
@@ -54,7 +60,7 @@ class _AccountsWidgetState extends AutoUpdateState<AccountsWidget, AccountProvid
     return Consumer2<AccountProvider, NetWorthProvider>(
       builder: (context, accountProvider, netWorthProvider, child) {
         final mediaQuery = MediaQuery.of(context);
-        if (accountProvider.isLoading || netWorthProvider.isLoading) {
+        if (accountProvider.isLoading || netWorthProvider.isLoading || isLoading) {
           return SizedBox(
             height: 320,
             width: double.infinity,

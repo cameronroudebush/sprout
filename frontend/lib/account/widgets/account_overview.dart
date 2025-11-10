@@ -149,6 +149,8 @@ class _AccountsOverviewState extends AutoUpdateState<AccountsOverview, AccountPr
               netWorthPeriod: chartRange,
               accountType: accountType,
               showGroupTitles: false,
+              // We should already have the data we need
+              shouldRequestNewData: false,
             ),
           ],
         ),

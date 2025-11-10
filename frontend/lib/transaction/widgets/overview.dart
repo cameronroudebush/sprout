@@ -341,7 +341,7 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
                   child: Stack(
                     children: [
                       // Only show this one if we're loading the initial data set
-                      if (provider.isLoading) Center(child: CircularProgressIndicator()),
+                      if (isLoading) Center(child: CircularProgressIndicator()),
 
                       /// In the event we don't find a match
                       if (transactions.isEmpty && !isLoading)

@@ -5,8 +5,10 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/info.dart';
+import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/core/widgets/notification.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
@@ -140,10 +142,15 @@ class _TransactionInfoState extends State<TransactionInfo> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.transaction.pending)
-                    Center(
-                      child: Text(
-                        "Pending transactions cannot be edited",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: theme.colorScheme.error),
+                    SizedBox(
+                      width: 300,
+                      height: 60,
+                      child: SproutNotificationWidget(
+                        SproutNotification(
+                          "Pending transactions cannot be edited",
+                          theme.colorScheme.error,
+                          Colors.white,
+                        ),
                       ),
                     ),
                   // Description
