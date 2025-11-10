@@ -27,6 +27,11 @@ strong {
 }
 
 /* Cards */
+.cards {
+  display: flex;
+  gap: 1rem;
+}
+
 .card {
   display: flex;
   justify-content: center;

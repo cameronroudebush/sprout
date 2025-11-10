@@ -10,6 +10,9 @@ class SproutPieChart extends StatefulWidget {
   /// The header to display with this pie chart
   final String header;
 
+  /// Text to display below the header, if necessary
+  final String? subheader;
+
   /// If we should wrap this in a card
   final bool showLegend;
 
@@ -37,6 +40,7 @@ class SproutPieChart extends StatefulWidget {
     this.colorMapping,
     this.formatValue,
     this.height = 250,
+    this.subheader,
   });
 
   @override
@@ -85,6 +89,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             text: widget.header,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
+          if (widget.subheader != null) Text(widget.subheader!, style: TextStyle()),
           SizedBox(
             height: height * 1.25,
             width: double.infinity,

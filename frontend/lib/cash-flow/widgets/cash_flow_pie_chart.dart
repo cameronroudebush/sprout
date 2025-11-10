@@ -14,6 +14,7 @@ class CashFlowPieChart extends StatefulWidget {
   final DateTime selectedDate;
   final double height;
   final CashFlowView view;
+  final bool showSubheader;
 
   const CashFlowPieChart(
     this.selectedDate, {
@@ -21,6 +22,7 @@ class CashFlowPieChart extends StatefulWidget {
     this.showLegend = false,
     required this.height,
     this.view = CashFlowView.monthly,
+    this.showSubheader = true,
   });
 
   @override
@@ -51,6 +53,7 @@ class _CashFlowPieChartState extends AutoUpdateState<CashFlowPieChart, CashFlowP
     return Consumer<CashFlowProvider>(
       builder: (context, provider, child) {
         final month = widget.view == CashFlowView.monthly ? widget.selectedDate.month : null;
+        final periodText = CashFlowViewFormatter.getPeriodText(widget.view, widget.selectedDate);
         final stats = provider.getStatsData(widget.selectedDate.year, month);
         if (isLoading) {
           return SproutCard(
@@ -88,6 +91,7 @@ class _CashFlowPieChartState extends AutoUpdateState<CashFlowPieChart, CashFlowP
             data: data,
             colorMapping: {"Income": Colors.green, "Spent": Colors.red[700]!},
             header: "Cash Flow",
+            subheader: widget.showSubheader ? periodText : null,
             showLegend: widget.showLegend,
             showPieValue: true,
             formatValue: (value) => getFormattedCurrency(value),

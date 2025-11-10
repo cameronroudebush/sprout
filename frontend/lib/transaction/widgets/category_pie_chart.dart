@@ -13,12 +13,15 @@ class CategoryPieChart extends StatefulWidget {
   final double height;
   final DateTime selectedDate;
   final CashFlowView view;
+  final bool showSubheader;
+
   const CategoryPieChart(
     this.selectedDate, {
     super.key,
     this.showLegend = true,
     required this.height,
     this.view = CashFlowView.monthly,
+    this.showSubheader = true,
   });
 
   @override
@@ -68,12 +71,14 @@ class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart, CategoryP
             child: Center(child: Text(CashFlowViewFormatter.getNoDataText(widget.view, widget.selectedDate))),
           );
         }
+        final periodText = CashFlowViewFormatter.getPeriodText(widget.view, widget.selectedDate);
 
         return SproutCard(
           applySizedBox: false,
           child: SproutPieChart(
             data: data,
             header: "Categories",
+            subheader: widget.showSubheader ? periodText : null,
             showLegend: widget.showLegend,
             showPieTitle: false,
             height: widget.height,
