@@ -6,6 +6,7 @@ theme:
   name: material
   logo: assets/favicon-bg.svg
   favicon: assets/favicon-bg.svg
+  custom_dir: docs/overrides/
   features:
     - header.autohide
     - navigation.tabs
@@ -28,6 +29,9 @@ extra:
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/croudebush/sprout
   generator: false
+  analytics:
+    provider: custom
+    property: foobar
 plugins:
   - search
   - social:
