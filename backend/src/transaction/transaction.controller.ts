@@ -34,10 +34,17 @@ export class TransactionController {
     if (matchingTransaction == null) throw new NotFoundException("Failed to locate a matching transaction to assign update.");
     if (matchingTransaction.pending) throw new BadRequestException("Pending transactions cannot be edited.");
 
-    // Currently, we only allow category updating
-    const matchingCategory = await Category.findOne({ where: { id: transaction.category?.id, user: { id: user.id } } });
-    if (matchingCategory == null) throw new NotFoundException("Failed to locate a matching category to assign the transaction to.");
-    matchingTransaction.category = matchingCategory;
+    // Allow updating the various fields
+
+    // Category
+    if (transaction.category != null) {
+      const matchingCategory = await Category.findOne({ where: { id: transaction.category?.id, user: { id: user.id } } });
+      if (matchingCategory == null) throw new NotFoundException("Failed to locate a matching category to assign the transaction to.");
+      matchingTransaction.category = matchingCategory;
+    }
+
+    // Description
+    matchingTransaction.description = transaction.description ?? matchingTransaction.description;
 
     return await matchingTransaction.update();
   }

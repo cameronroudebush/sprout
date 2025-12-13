@@ -181,7 +181,7 @@ class _TransactionInfoState extends State<TransactionInfo> {
                         ],
                       ),
                       TextFormField(
-                        enabled: !widget.disableNonEditable && !widget.transaction.pending,
+                        enabled: !widget.transaction.pending,
                         controller: _descriptionController,
                         decoration: const InputDecoration(
                           hintText: "e.g., 'Coffee Shop'",
