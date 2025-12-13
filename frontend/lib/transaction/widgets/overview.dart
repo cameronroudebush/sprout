@@ -118,7 +118,9 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
   @override
   void initState() {
     super.initState();
-    if (widget.focusCount != null || widget.account != null) _currentTransactionIndex = 0;
+    if (widget.focusCount != null || widget.account != null || widget.initialCategoryFilter != null) {
+      _currentTransactionIndex = 0;
+    }
     _scrollController.addListener(_onScroll);
 
     if (widget.initialCategoryFilter == "unknown") {
@@ -346,9 +348,6 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
                 Expanded(
                   child: Stack(
                     children: [
-                      // Only show this one if we're loading the initial data set
-                      if (isLoading) Center(child: CircularProgressIndicator()),
-
                       /// In the event we don't find a match
                       if (transactions.isEmpty && !isLoading)
                         Center(
