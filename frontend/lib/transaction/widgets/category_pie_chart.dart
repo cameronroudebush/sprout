@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/charts/pie_chart.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 
 /// This renders a pie chart for the transaction category mapping
 class CategoryPieChart extends StatefulWidget {
@@ -28,27 +27,24 @@ class CategoryPieChart extends StatefulWidget {
   State<CategoryPieChart> createState() => _CategoryPieChartState();
 }
 
-class _CategoryPieChartState extends AutoUpdateState<CategoryPieChart, CategoryProvider> {
+class _CategoryPieChartState extends StateTracker<CategoryPieChart> {
   /// If we've checked with the user config and already set the default range.
   bool hasSetDefault = false;
 
-  /// Fetches data we need for the display of the given selected date.
-  ///   We use [showLoaders] as a way to forcibly say we need updated data.
-  Future<void> _fetchData(bool showLoaders) async {
-    final provider = ServiceLocator.get<CategoryProvider>();
-    final selectedDate = widget.selectedDate;
-    final month = widget.view == CashFlowView.monthly ? selectedDate.month : null;
-    provider.setLoadingStatus(true);
-    if (showLoaders || provider.getStatsData(selectedDate.year, month) == null) {
-      await provider.loadCategoryStats(selectedDate.year, month);
-    }
-    provider.setLoadingStatus(false);
-  }
+  @override
+  Map<dynamic, DataRequest> get requests {
+    final date = widget.selectedDate;
+    final month = widget.view == CashFlowView.monthly ? date.month : null;
+    final provider = context.read<CategoryProvider>();
 
-  @override
-  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
+    return {
+      'stats': DataRequest<CategoryProvider, dynamic>(
+        provider: provider,
+        onLoad: (p, force) => p.loadCategoryStats(date.year, month),
+        getFromProvider: (p) => p.getStatsData(date.year, month),
+      ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {

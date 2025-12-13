@@ -64,9 +64,7 @@ class ConfigProvider extends BaseProvider<ConfigApi> {
 
   @override
   Future<void> postLogin() async {
-    setLoadingStatus(true);
     await populateConfig();
-    setLoadingStatus(false);
   }
 
   @override

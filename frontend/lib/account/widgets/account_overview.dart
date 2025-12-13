@@ -9,8 +9,8 @@ import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
@@ -29,11 +29,15 @@ class AccountsOverview extends StatefulWidget {
   State<AccountsOverview> createState() => _AccountsOverviewState();
 }
 
-class _AccountsOverviewState extends AutoUpdateState<AccountsOverview, AccountProvider> {
+class _AccountsOverviewState extends StateTracker<AccountsOverview> {
   @override
-  AccountProvider provider = ServiceLocator.get<AccountProvider>();
-  @override
-  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<AccountProvider>().populateLinkedAccounts;
+  Map<dynamic, DataRequest> get requests => {
+    'accounts': DataRequest<AccountProvider, List<Account>>(
+      provider: ServiceLocator.get<AccountProvider>(),
+      onLoad: (p, force) => p.populateLinkedAccounts(),
+      getFromProvider: (p) => p.linkedAccounts,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {

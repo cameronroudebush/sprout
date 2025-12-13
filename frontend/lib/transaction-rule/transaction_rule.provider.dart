@@ -14,11 +14,8 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
   TransactionRuleProvider(super.api);
 
   /// Populates transaction rules from the API and performs updates if there are changes.
-  Future<List<TransactionRule>> populateTransactionRules(bool showLoaders) async {
-    final shouldSetLoadingStats = _rules.isEmpty || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
+  Future<List<TransactionRule>> populateTransactionRules() async {
     await populateAndSetIfChanged(api.transactionRuleControllerGet, _rules, (newValue) => _rules = newValue ?? []);
-    if (shouldSetLoadingStats) setLoadingStatus(false);
     return _rules;
   }
 

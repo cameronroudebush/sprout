@@ -94,7 +94,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
           _isAddingAccounts = true;
         });
         await accountProvider.api.accountControllerLinkProviderAccounts(_selectedProvider!.name, _selectedAccounts);
-        await accountProvider.populateLinkedAccounts(true);
+        await accountProvider.populateLinkedAccounts();
         // Close dialog
         Navigator.of(context).pop();
       },

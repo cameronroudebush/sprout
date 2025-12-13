@@ -6,8 +6,8 @@ import 'package:sprout/account/widgets/account_groups.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 
@@ -43,16 +43,19 @@ class AccountsWidget extends StatefulWidget {
   State<AccountsWidget> createState() => _AccountsWidgetState();
 }
 
-class _AccountsWidgetState extends AutoUpdateState<AccountsWidget, AccountProvider> {
+class _AccountsWidgetState extends StateTracker<AccountsWidget> {
   @override
-  AccountProvider provider = ServiceLocator.get<AccountProvider>();
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
-    if (widget.shouldRequestNewData) {
-      await ServiceLocator.get<AccountProvider>().populateLinkedAccounts(showLoaders);
-      await ServiceLocator.get<NetWorthProvider>().loadHomePageData(showLoaders);
-    }
-    return null;
+  Map<dynamic, DataRequest> get requests => {
+    'accounts': DataRequest<AccountProvider, List<Account>>(
+      provider: ServiceLocator.get<AccountProvider>(),
+      onLoad: (p, force) => p.populateLinkedAccounts(),
+      getFromProvider: (p) => p.linkedAccounts,
+    ),
+    'historicalAccData': DataRequest<NetWorthProvider, List<EntityHistory>?>(
+      provider: ServiceLocator.get<NetWorthProvider>(),
+      onLoad: (p, force) => p.populateHistoricalAccountData(),
+      getFromProvider: (p) => p.historicalAccountData,
+    ),
   };
 
   @override
@@ -60,7 +63,7 @@ class _AccountsWidgetState extends AutoUpdateState<AccountsWidget, AccountProvid
     return Consumer2<AccountProvider, NetWorthProvider>(
       builder: (context, accountProvider, netWorthProvider, child) {
         final mediaQuery = MediaQuery.of(context);
-        if (accountProvider.isLoading || netWorthProvider.isLoading || isLoading) {
+        if (isLoading) {
           return SizedBox(
             height: 320,
             width: double.infinity,

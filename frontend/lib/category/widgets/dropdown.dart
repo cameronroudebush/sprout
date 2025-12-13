@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 
 /// A dropdown that allows category selection
 class CategoryDropdown extends StatefulWidget {
@@ -30,11 +30,15 @@ class CategoryDropdown extends StatefulWidget {
   State<CategoryDropdown> createState() => _CategoryDropdownState();
 }
 
-class _CategoryDropdownState extends AutoUpdateState<CategoryDropdown, CategoryProvider> {
+class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
   @override
-  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
-  @override
-  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
+  Map<dynamic, DataRequest> get requests => {
+    'cats': DataRequest<CategoryProvider, dynamic>(
+      provider: ServiceLocator.get<CategoryProvider>(),
+      onLoad: (p, force) => p.loadUpdatedCategories(),
+      getFromProvider: (p) => p.categories,
+    ),
+  };
 
   /// Recursively builds the list of dropdown menu items with indentation for children.
   List<DropdownMenuItem<Category>> _buildCategoryItems(
@@ -71,7 +75,7 @@ class _CategoryDropdownState extends AutoUpdateState<CategoryDropdown, CategoryP
   Widget build(BuildContext context) {
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
-        return provider.isLoading || provider.categories.isEmpty
+        return isLoading || provider.categories.isEmpty
             ? const Padding(
                 padding: EdgeInsetsGeometry.all(8),
                 child: Row(

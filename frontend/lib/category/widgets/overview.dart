@@ -5,11 +5,11 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/page_loading.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/widgets/category_icon.dart';
@@ -22,12 +22,15 @@ class CategoryOverview extends StatefulWidget {
   State<CategoryOverview> createState() => _CategoryOverviewState();
 }
 
-class _CategoryOverviewState extends AutoUpdateState<CategoryOverview, CategoryProvider> {
+class _CategoryOverviewState extends StateTracker<CategoryOverview> {
   @override
-  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
-
-  @override
-  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
+  Map<dynamic, DataRequest> get requests => {
+    'cats': DataRequest<CategoryProvider, dynamic>(
+      provider: ServiceLocator.get<CategoryProvider>(),
+      onLoad: (p, force) => p.loadUpdatedCategories(),
+      getFromProvider: (p) => p.categories,
+    ),
+  };
 
   Future<void> _openInfoDialog(BuildContext context, Category? c) async {
     await showDialog(context: context, builder: (_) => CategoryInfo(c));
@@ -139,7 +142,7 @@ class _CategoryOverviewState extends AutoUpdateState<CategoryOverview, CategoryP
   Widget build(BuildContext context) {
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
-        final isLoading = provider.isLoading;
+        final isLoading = this.isLoading;
 
         if (isLoading) {
           return PageLoadingWidget(loadingText: "Loading Categories...");

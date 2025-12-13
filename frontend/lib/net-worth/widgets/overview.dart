@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/current_net_worth.dart';
 import 'package:sprout/net-worth/widgets/net_worth_line_chart.dart';
@@ -38,11 +38,20 @@ class NetWorthOverviewWidget extends StatefulWidget {
   State<NetWorthOverviewWidget> createState() => _NetWorthOverviewWidgetState();
 }
 
-class _NetWorthOverviewWidgetState extends AutoUpdateState<NetWorthOverviewWidget, NetWorthProvider> {
+class _NetWorthOverviewWidgetState extends StateTracker<NetWorthOverviewWidget> {
   @override
-  NetWorthProvider provider = ServiceLocator.get<NetWorthProvider>();
-  @override
-  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<NetWorthProvider>().loadHomePageData;
+  Map<dynamic, DataRequest> get requests => {
+    'netWorth': DataRequest<NetWorthProvider, num?>(
+      provider: ServiceLocator.get<NetWorthProvider>(),
+      onLoad: (p, force) => p.populateNetWorth(),
+      getFromProvider: (p) => p.netWorth,
+    ),
+    'historical': DataRequest<NetWorthProvider, EntityHistory?>(
+      provider: ServiceLocator.get<NetWorthProvider>(),
+      onLoad: (p, force) => p.populateHistoricalNetWorth(),
+      getFromProvider: (p) => p.historicalNetWorth,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {

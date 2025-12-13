@@ -57,15 +57,12 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
   }
 
   /// Populates subscription information built from transactions
-  Future<List<TransactionSubscription>?> populateSubscriptions(bool showLoaders) async {
-    final shouldSetLoadingStats = _subscriptions.isEmpty || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
+  Future<List<TransactionSubscription>?> populateSubscriptions() async {
     await populateAndSetIfChanged(
       api.transactionControllerSubscriptions,
       _subscriptions,
       (newValue) => _subscriptions = newValue ?? [],
     );
-    if (shouldSetLoadingStats) setLoadingStatus(false);
     return _subscriptions;
   }
 

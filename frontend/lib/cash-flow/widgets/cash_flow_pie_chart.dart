@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/charts/pie_chart.dart';
-import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 
 /// This renders a pie chart for cash flow on how much money came in versus went out
 class CashFlowPieChart extends StatefulWidget {
@@ -29,24 +28,21 @@ class CashFlowPieChart extends StatefulWidget {
   State<CashFlowPieChart> createState() => _CashFlowPieChartState();
 }
 
-class _CashFlowPieChartState extends AutoUpdateState<CashFlowPieChart, CashFlowProvider> {
-  /// Fetches data we need for the display of the given selected date.
-  ///   We use [showLoaders] as a way to forcibly say we need updated data.
-  Future<void> _fetchData(bool showLoaders) async {
+class _CashFlowPieChartState extends StateTracker<CashFlowPieChart> {
+  @override
+  Map<dynamic, DataRequest> get requests {
     final date = widget.selectedDate;
     final month = widget.view == CashFlowView.monthly ? date.month : null;
-    provider.setLoadingStatus(true);
-    if (showLoaders || provider.getStatsData(date.year, month) == null) {
-      await context.read<CashFlowProvider>().getStats(date.year, month);
-    }
-    provider.setLoadingStatus(false);
+    final cashFlowProvider = context.read<CashFlowProvider>();
+
+    return {
+      'stats': DataRequest<CashFlowProvider, dynamic>(
+        provider: cashFlowProvider,
+        onLoad: (p, force) => p.getStats(date.year, month),
+        getFromProvider: (p) => p.getStatsData(date.year, month),
+      ),
+    };
   }
-
-  @override
-  CashFlowProvider provider = ServiceLocator.get<CashFlowProvider>();
-
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
 
   @override
   Widget build(BuildContext context) {

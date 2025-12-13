@@ -38,16 +38,6 @@ class NetWorthProvider extends BaseProvider<NetWorthApi> {
     );
   }
 
-  /// Loads any necessary data for the home page, only updating if the content is different
-  Future<void> loadHomePageData(bool showLoaders) async {
-    final shouldSetLoadingStats =
-        _netWorth == null || _historicalNetWorth == null || _historicalAccountData == null || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
-    // Grab all the data at once
-    await Future.wait([populateNetWorth(), populateHistoricalNetWorth(), populateHistoricalAccountData()]);
-    if (shouldSetLoadingStats) setLoadingStatus(false);
-  }
-
   @override
   Future<void> cleanupData() async {
     _netWorth = null;

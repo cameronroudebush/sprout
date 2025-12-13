@@ -8,10 +8,10 @@ import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/notification.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/category_pie_chart.dart';
@@ -25,15 +25,18 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends AutoUpdateState<HomePage, CategoryProvider> {
+class _HomePageState extends StateTracker<HomePage> {
   /// If we've checked with the user config and already set the default range.
   bool hasSetDefault = false;
 
   @override
-  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
-  @override
-  Future<dynamic> Function(bool showLoaders) loadData = (bool showLoaders) =>
-      ServiceLocator.get<CategoryProvider>().loadUnknownCategoryCount();
+  Map<dynamic, DataRequest> get requests => {
+    'catCount': DataRequest<CategoryProvider, dynamic>(
+      provider: ServiceLocator.get<CategoryProvider>(),
+      onLoad: (p, force) => p.loadUnknownCategoryCount(),
+      getFromProvider: (p) => p.unknownCategoryCount,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +69,7 @@ class _HomePageState extends AutoUpdateState<HomePage, CategoryProvider> {
           );
         }
 
-        final unknownCatCount = provider.unknownCategoryCount;
+        final unknownCatCount = catProvider.unknownCategoryCount;
         // Check if we have uncategorized transactions so the user can deal with those
         if (unknownCatCount != 0) {
           notifications.add(
