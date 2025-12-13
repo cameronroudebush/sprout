@@ -50,6 +50,10 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
       provider: ServiceLocator.get<HoldingProvider>(),
       onLoad: (p, force) => p.populateDataForAccount(account),
       getFromProvider: (p) {
+        // Trick the loading so we don't load holding data for non holding accounts
+        if (account.type != AccountTypeEnum.investment) {
+          return ([], []);
+        }
         final val = p.getHoldingDataForAccount(account);
         if (val.$1 == null || val.$2 == null) return null;
         return val;
