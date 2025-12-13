@@ -33,8 +33,10 @@ class NetWorthLineChart extends StatelessWidget {
     return Consumer<NetWorthProvider>(
       builder: (context, provider, child) {
         final data = provider.historicalNetWorth?.historicalDataDate;
-        if (!provider.isInitialized) {
-          return Center(child: CircularProgressIndicator());
+        if (data == null) {
+          return Center(
+            child: Text("No data found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          );
         } else {
           return SproutLineChart(
             data: data,

@@ -5,11 +5,6 @@
   <img href="https://github.com/cameronroudebush/sprout/releases/latest" src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github" alt="GitHub Tag">
 </p>
 
-> [!caution]
-> This application is in **_active_** development. We do not make any guarantees about capability, or security.
->
-> **_Use at your own risk_**
-
 # What is Sprout?
 
 Sprout is a financial management app designed to give you a clear, simple view of your money. We specialize in providing a daily snapshot of your financial data by automatically tracking your accounts using financial APIs. This allows you to easily view things like account balances and stock holdings, helping you stay on top of your financial health.

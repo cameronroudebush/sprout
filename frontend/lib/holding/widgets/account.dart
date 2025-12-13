@@ -44,7 +44,7 @@ class HoldingAccount extends StatelessWidget {
         final mediaQuery = MediaQuery.of(context).size;
 
         // Loading/no holdings indicator
-        if (!holdingProvider.isInitialized || holdings.isEmpty) {
+        if (holdings.isEmpty) {
           return SizedBox(
             height: mediaQuery.height * .7,
             child: Center(

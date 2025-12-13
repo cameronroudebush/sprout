@@ -29,11 +29,6 @@ class SankeyFlowByMonth extends StatelessWidget {
       return Consumer<CashFlowProvider>(
         builder: (context, provider, child) {
           final data = _getSankeyData();
-          if (!provider.isInitialized) {
-            return const Center(
-              child: Padding(padding: EdgeInsetsGeometry.all(12), child: CircularProgressIndicator()),
-            );
-          }
           if (data == null) {
             return const Center(child: Text("Failed to load Cash Flow data."));
           }
