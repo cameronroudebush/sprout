@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/charts/pie_chart.dart';
+import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 
@@ -78,6 +79,9 @@ class _CategoryPieChartState extends StateTracker<CategoryPieChart> {
             showLegend: widget.showLegend,
             showPieTitle: false,
             height: widget.height,
+            onSliceTap: (slice, val) {
+              SproutNavigator.redirectToCatFilter(slice);
+            },
           ),
         );
       },

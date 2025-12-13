@@ -135,13 +135,13 @@ class SankeyPainter extends CustomPainter {
       textDirection: ui.TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: size.width);
 
-    // --- Calculate Tooltip Dimensions ---
+    // Calculate Tooltip Dimensions
     final double contentWidth = titlePainter.width > valuePainter.width ? titlePainter.width : valuePainter.width;
     final double tooltipWidth = contentWidth + horizontalPadding * 2;
     final double tooltipHeight = titlePainter.height + valuePainter.height + spacing + verticalPadding * 2;
     final tooltipSize = Size(tooltipWidth, tooltipHeight);
 
-    // --- Adjust Position to Keep Tooltip on Screen ---
+    // Adjust Position to Keep Tooltip on Screen
     double dx = hoverPosition!.dx + 15;
     double dy = hoverPosition!.dy + 15;
 
@@ -152,12 +152,12 @@ class SankeyPainter extends CustomPainter {
       dy = hoverPosition!.dy - tooltipSize.height - 15;
     }
 
-    // --- Draw the Tooltip Background ---
+    // Draw the Tooltip Background
     final rect = Rect.fromLTWH(dx, dy, tooltipSize.width, tooltipSize.height);
     final paint = Paint()..color = _tooltipBackgroundColor;
     canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), paint);
 
-    // --- Paint the Centered Text ---
+    // Paint the Centered Text
     // Center the title horizontally
     final titleDx = rect.left + (tooltipWidth - titlePainter.width) / 2;
     titlePainter.paint(canvas, Offset(titleDx, rect.top + verticalPadding));

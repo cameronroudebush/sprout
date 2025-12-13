@@ -116,6 +116,9 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
   Widget _buildSankey() {
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
     final dateForSankey = DateTime(_selectedDate.year, month ?? 1);
+
+    if (isLoading) return Center(child: CircularProgressIndicator());
+
     return SproutCard(
       child: Padding(
         padding: EdgeInsetsGeometry.all(12),

@@ -17,7 +17,17 @@ class SankeyChart extends StatefulWidget {
   /// A formatter that allows us to customize how the value is displayed
   final String Function(num val)? formatter;
 
-  const SankeyChart({super.key, required this.sankeyData, this.formatter, this.direction = Axis.horizontal});
+  final void Function(String node, double value)? onNodeTap;
+  final void Function(SankeyLink link)? onLinkTap;
+
+  const SankeyChart({
+    super.key,
+    required this.sankeyData,
+    this.formatter,
+    this.onNodeTap,
+    this.onLinkTap,
+    this.direction = Axis.horizontal,
+  });
 
   @override
   State<SankeyChart> createState() => _SankeyChartState();
@@ -62,27 +72,56 @@ class _SankeyChartState extends State<SankeyChart> {
     }
   }
 
+  /// Handles tap events by checking if the position intersects with nodes or links
+  void _handleTap(Offset position) {
+    if (_painterData == null) return;
+    final data = _painterData!;
+
+    // Check Nodes (Prioritize nodes over links as they are usually on top)
+    for (var entry in data.nodeRects.entries) {
+      if (entry.value.contains(position)) {
+        if (widget.onNodeTap != null) {
+          widget.onNodeTap!(entry.key, data.nodeValues[entry.key] ?? 0);
+        }
+        return;
+      }
+    }
+
+    // Check Links
+    for (var entry in data.linkPaths.entries) {
+      if (entry.value.contains(position)) {
+        if (widget.onLinkTap != null) {
+          widget.onLinkTap!(entry.key);
+        }
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         _painterData = _prepareData(constraints.biggest);
 
-        return MouseRegion(
-          onHover: (event) => _updateHover(event.localPosition, constraints.biggest),
-          onExit: (_) => setState(() {
-            _hoverPosition = null;
-            _hoveredNode = null;
-            _hoveredLink = null;
-          }),
-          child: CustomPaint(
-            size: constraints.biggest,
-            painter: SankeyPainter(
-              data: _painterData!,
-              hoveredNode: _hoveredNode,
-              hoveredLink: _hoveredLink,
-              hoverPosition: _hoverPosition,
-              formatter: widget.formatter,
+        return GestureDetector(
+          onTapUp: (details) => _handleTap(details.localPosition),
+          child: MouseRegion(
+            onHover: (event) => _updateHover(event.localPosition, constraints.biggest),
+            onExit: (_) => setState(() {
+              _hoverPosition = null;
+              _hoveredNode = null;
+              _hoveredLink = null;
+            }),
+            child: CustomPaint(
+              size: constraints.biggest,
+              painter: SankeyPainter(
+                data: _painterData!,
+                hoveredNode: _hoveredNode,
+                hoveredLink: _hoveredLink,
+                hoverPosition: _hoverPosition,
+                formatter: widget.formatter,
+              ),
             ),
           ),
         );
@@ -171,7 +210,7 @@ class _SankeyChartState extends State<SankeyChart> {
       textAlign: TextAlign.center,
       textDirection: ui.TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: nodeThickness);
-    const double labelPadding = 8.0;
+    const double labelPadding = 16.0;
     final double minNodeHeight = textPainter.height + labelPadding;
 
     for (int i = 0; i < columns.length; i++) {
@@ -180,7 +219,6 @@ class _SankeyChartState extends State<SankeyChart> {
 
       // Use the corrected `nodeValues` for all columns to ensure consistent sizing.
       double totalColumnValue = nodesInColumn.fold(0.0, (sum, node) => sum + (nodeValues[node] ?? 0.0));
-
       if (totalColumnValue == 0) totalColumnValue = 1.0;
 
       final double availableSpace =
@@ -188,46 +226,35 @@ class _SankeyChartState extends State<SankeyChart> {
       double currentPos = 0;
       final double fixedPos = i * (nodeThickness + gap);
       final double totalMinHeight = minNodeHeight * nodesInColumn.length;
-      final double distributableSpace = availableSpace - totalMinHeight;
 
-      if (distributableSpace < 0) {
-        // Not enough space for minimum heights.
-        // Squeeze nodes by dividing available space equally.
-        final double equalSpace = availableSpace / nodesInColumn.length;
-        for (String nodeName in nodesInColumn) {
-          nodeRects[nodeName] = isHorizontal
-              ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, max(0, equalSpace))
-              : Rect.fromLTWH(currentPos, fixedPos, max(0, equalSpace), nodeThickness);
-          currentPos += equalSpace + nodePadding;
-        }
-      } else {
-        // Enough space for minimum heights.
+      // Determine the height we will actually use.
+      // If availableSpace is too small, we force the column to be taller (totalMinHeight).
+      final double effectiveHeight = max(availableSpace, totalMinHeight);
 
-        if (totalColumnValue == 0) {
-          // Enough space, but NO flow value in this column.
-          // Instead of defaulting to minHeight (which leaves gaps),
-          // distribute the *total available space* equally to fill the container.
-          final double equalSpace = availableSpace / nodesInColumn.length;
-          for (String nodeName in nodesInColumn) {
-            nodeRects[nodeName] = isHorizontal
-                ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, max(0, equalSpace))
-                : Rect.fromLTWH(currentPos, fixedPos, max(0, equalSpace), nodeThickness);
-            currentPos += equalSpace + nodePadding;
-          }
+      // Calculate how much *extra* space we can distribute proportionally
+      // If we are forcing the height (effective == totalMin), this will be 0.
+      final double distributableSpace = effectiveHeight - totalMinHeight;
+
+      for (String nodeName in nodesInColumn) {
+        final double nodeFlowValue = nodeValues[nodeName] ?? 0.0;
+
+        double nodeSize;
+
+        if (totalColumnValue == 0 && distributableSpace > 0) {
+          // Edge case: No flow values, but we have extra space -> distribute evenly
+          nodeSize = effectiveHeight / nodesInColumn.length;
         } else {
-          // Enough space AND flow value exists.
-          // This is the standard proportional scaling logic.
-          // Each node gets its min height + a proportional share of the *extra* space.
-          for (String nodeName in nodesInColumn) {
-            final double nodeFlowValue = nodeValues[nodeName] ?? 0.0;
-            final double proportionalSpace = (nodeFlowValue / totalColumnValue) * distributableSpace;
-            final double nodeSpace = minNodeHeight + proportionalSpace;
-            nodeRects[nodeName] = isHorizontal
-                ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, nodeSpace)
-                : Rect.fromLTWH(currentPos, fixedPos, nodeSpace, nodeThickness);
-            currentPos += nodeSpace + nodePadding;
-          }
+          // Standard logic: Base Minimum + Proportional Share of the Extra Space
+          // If distributableSpace is 0, this simplifies to just minNodeHeight.
+          final double proportionalShare = (nodeFlowValue / totalColumnValue) * distributableSpace;
+          nodeSize = minNodeHeight + proportionalShare;
         }
+
+        nodeRects[nodeName] = isHorizontal
+            ? Rect.fromLTWH(fixedPos, currentPos, nodeThickness, nodeSize)
+            : Rect.fromLTWH(currentPos, fixedPos, nodeSize, nodeThickness);
+
+        currentPos += nodeSize + nodePadding;
       }
     }
 
