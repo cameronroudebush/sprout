@@ -101,7 +101,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
 
         // Sync holdings if investment type
-        if (accountInDB.type === AccountType.investment && data.holdings.length !== 0) await this.updateHoldingData(accountInDB, data.holdings);
+        if (accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
       }
 
       // Attempt to auto categorize transactions
@@ -137,9 +137,12 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
    * Updates holding data for the given account and holding information set.
    */
   private async updateHoldingData(accountInDb: Account, holdings: Holding[]) {
+    const holdingsInDb = await Holding.getForAccount(accountInDb);
+    // Process any of the holding info as given by the provider
     for (const holding of holdings) {
       holding.account = accountInDb;
-      let holdingInDB = (await Holding.find({ where: { symbol: holding.symbol, account: { id: accountInDb.id } } }))[0];
+      let holdingInDBIndex = holdingsInDb.findIndex((x) => x.symbol === holding.symbol);
+      let holdingInDB = holdingsInDb[holdingInDBIndex];
       // If we aren't tracking this holding yet, start tracking it
       if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert(false);
       else {
@@ -159,6 +162,25 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         holdingInDB.purchasePrice = holding.purchasePrice;
         holdingInDB.shares = holding.shares;
         await holdingInDB.update();
+
+        // Remove it from the list so we don't process it later
+        holdingsInDb.splice(holdingInDBIndex, 1);
+      }
+    }
+
+    // Any holdings that we're not processed are probably removed (or the provider is having an error) so handle them below
+    for (const remainingHolding of holdingsInDb) {
+      // WARN: This will remove holdings history completely.
+      if (Configuration.holding.cleanupRemovedHoldings) {
+        this.logger.warn(`Removing holding with ID ${remainingHolding.id} because it was not found in the provider info.`);
+        await remainingHolding.remove();
+      } else {
+        // Cleanup the holding but keep it just so we still have the history
+        remainingHolding.marketValue = 0;
+        remainingHolding.costBasis = 0;
+        remainingHolding.purchasePrice = 0;
+        remainingHolding.shares = 0;
+        await remainingHolding.update();
       }
     }
   }

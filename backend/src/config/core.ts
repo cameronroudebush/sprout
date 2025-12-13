@@ -1,5 +1,6 @@
 import { ServerConfig } from "@backend/config/model/server";
 import { DatabaseConfig } from "@backend/database/model/db.config";
+import { HoldingConfig } from "@backend/holding/model/holding.config";
 import { TransactionConfig } from "@backend/transaction/model/transaction.config";
 import * as uuid from "uuid";
 import { name } from "../../package.json";
@@ -22,6 +23,9 @@ export class Configuration {
 
   @ConfigurationMetadata.assign({ comment: "Settings specific to transactions" })
   static transaction = new TransactionConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Settings specific to holdings" })
+  static holding = new HoldingConfig();
 
   /** This variable contains the application version of this build. This is replaced by webpack. */
   static version = process.env["APP_VERSION"]!;

@@ -37,6 +37,11 @@ class _AccountsOverviewState extends StateTracker<AccountsOverview> {
       onLoad: (p, force) => p.populateLinkedAccounts(),
       getFromProvider: (p) => p.linkedAccounts,
     ),
+    'history': DataRequest<NetWorthProvider, List<EntityHistory>?>(
+      provider: ServiceLocator.get<NetWorthProvider>(),
+      onLoad: (p, force) => p.populateHistoricalAccountData(),
+      getFromProvider: (p) => p.historicalAccountData,
+    ),
   };
 
   @override
@@ -111,7 +116,9 @@ class _AccountsOverviewState extends StateTracker<AccountsOverview> {
                 padding: const EdgeInsets.only(top: 0, right: 12, left: 12, bottom: 12),
                 child: Column(
                   spacing: 12,
-                  children: data.isEmpty
+                  children: isLoading
+                      ? [SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))]
+                      : data.isEmpty
                       ? [
                           SizedBox(
                             height: 150,

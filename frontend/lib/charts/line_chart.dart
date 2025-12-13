@@ -11,9 +11,6 @@ import 'package:sprout/charts/processors/line_chart_processor.dart';
 // A record to hold the calculated min and max Y-axis values.
 typedef _YAxisBounds = ({double minY, double maxY});
 
-// A record to hold the calculated gradients for the line and the area below it.
-typedef _ChartGradients = ({LinearGradient line, LinearGradient belowBar});
-
 /// A line chart that displays the given data in a line chart format
 class SproutLineChart extends StatelessWidget {
   /// If the y axis number should be shown
@@ -90,20 +87,18 @@ class SproutLineChart extends StatelessWidget {
   LineChartData _buildLineChartData(SproutLineChartData chartData, ChartRangeEnum selectedChartRange, ThemeData theme) {
     final spots = chartData.spots;
     final colorScheme = theme.colorScheme;
-
     final positiveColor = applyPosNegColors ? Colors.green : colorScheme.primary;
     final negativeColor = applyPosNegColors ? colorScheme.error : colorScheme.primary;
 
-    // 1. Calculate Y-axis boundaries
+    // 1. Calculate Bounds
     final yAxisBounds = _calculateYAxisBounds(spots);
 
-    // 2. Create color gradients based on the data
-    final gradients = _buildLineGradients(theme, yAxisBounds.minY, yAxisBounds.maxY, positiveColor, negativeColor);
+    // 2. SPLIT THE DATA
+    // Instead of gradients, we physically split the line into two parts.
+    final segments = _splitDataIntoSegments(spots);
 
-    // 3. Configure the titles (axis labels)
+    // 3. Build Titles & Touch Data (same as before)
     final titlesData = _buildTitlesData(theme, chartData, selectedChartRange, yAxisBounds);
-
-    // 4. Configure the interactive tooltip
     final touchData = _buildLineTouchData(theme, chartData, positiveColor, negativeColor);
 
     return LineChartData(
@@ -116,29 +111,53 @@ class SproutLineChart extends StatelessWidget {
       gridData: FlGridData(
         show: showGrid,
         drawVerticalLine: drawVerticalGrid,
-        getDrawingHorizontalLine: (value) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
-        getDrawingVerticalLine: (value) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
+        getDrawingHorizontalLine: (_) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
+        getDrawingVerticalLine: (_) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
       ),
       borderData: FlBorderData(
         show: showBorder,
         border: Border.all(color: colorScheme.outline, width: 1),
       ),
       lineBarsData: [
+        // GREEN LINE (Positive)
         LineChartBarData(
-          spots: spots,
-          isCurved: ChartRangeUtility.shouldBeCurved(selectedChartRange),
-          gradient: gradients.line,
+          spots: segments.green,
+          color: positiveColor, // Solid Green
           barWidth: 3,
           isStrokeCapRound: true,
           dotData: const FlDotData(show: false),
-          belowBarData: BarAreaData(show: true, gradient: gradients.belowBar),
+          belowBarData: BarAreaData(
+            show: true,
+            color: positiveColor.withValues(alpha: .3),
+            cutOffY: 0, // Stop filling at Y=0
+            applyCutOffY: true,
+          ),
+        ),
+        // RED LINE (Negative)
+        LineChartBarData(
+          spots: segments.red,
+          color: negativeColor, // Solid Red
+          barWidth: 3,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          aboveBarData: BarAreaData(
+            show: true,
+            color: negativeColor.withValues(alpha: .3),
+            cutOffY: 0,
+            applyCutOffY: true,
+          ),
         ),
       ],
       extraLinesData: !showZeroLine
           ? null
           : ExtraLinesData(
               horizontalLines: [
-                HorizontalLine(y: 0, color: colorScheme.outline.withOpacity(0.5), strokeWidth: 1, dashArray: [5, 5]),
+                HorizontalLine(
+                  y: 0,
+                  color: colorScheme.outline.withValues(alpha: .5),
+                  strokeWidth: 1,
+                  dashArray: [5, 5],
+                ),
               ],
             ),
     );
@@ -174,53 +193,68 @@ class SproutLineChart extends StatelessWidget {
     return (minY: paddedMinY, maxY: paddedMaxY);
   }
 
-  /// Creates the LinearGradients for the line and the area below it.
-  _ChartGradients _buildLineGradients(
-    ThemeData theme,
-    double minY,
-    double maxY,
-    Color positiveColor,
-    Color negativeColor,
-  ) {
-    List<Color> lineGradientColors;
-    List<double>? lineGradientStops;
+  /// Splits a list of spots into two lists: one for positive values (Green)
+  /// and one for negative values (Red).
+  /// Automatically calculates intersection points at Y=0 to ensure seamless connections.
+  ({List<FlSpot> green, List<FlSpot> red}) _splitDataIntoSegments(List<FlSpot> spots) {
+    if (spots.isEmpty) return (green: [], red: []);
 
-    if (minY >= 0) {
-      // If all values are positive, use only the positive color.
-      lineGradientColors = [positiveColor, positiveColor];
-      lineGradientStops = null;
-    } else if (maxY <= 0) {
-      // If all values are negative, use only the negative color.
-      lineGradientColors = [negativeColor, negativeColor];
-      lineGradientStops = null;
-    } else {
-      // For mixed values, create a sharp transition at y=0.
-      // Calculate the proportional position of y=0 on the axis.
-      final zeroStop = -minY / (maxY - minY);
+    final List<FlSpot> greenSpots = [];
+    final List<FlSpot> redSpots = [];
 
-      lineGradientColors = [negativeColor, positiveColor];
+    for (int i = 0; i < spots.length - 1; i++) {
+      final p1 = spots[i];
+      final p2 = spots[i + 1];
 
-      // By setting both stops to the same value, we create an instantaneous
-      // color switch from negative to positive at the precise zero point.
-      // This is a more robust way to prevent rendering artifacts like color bleeding.
-      lineGradientStops = [zeroStop, zeroStop];
+      // Both points are Positive (or Zero)
+      if (p1.y >= 0 && p2.y >= 0) {
+        greenSpots.add(p1);
+        greenSpots.add(p2);
+        // Add null to break the other line so it doesn't connect disparate segments
+        redSpots.add(FlSpot.nullSpot);
+      }
+      // Both points are Negative
+      else if (p1.y < 0 && p2.y < 0) {
+        redSpots.add(p1);
+        redSpots.add(p2);
+        greenSpots.add(FlSpot.nullSpot);
+      }
+      // Line crosses Zero (Positive to Negative)
+      else if (p1.y >= 0 && p2.y < 0) {
+        // Calculate the exact X where Y=0
+        final t = p1.y / (p1.y - p2.y);
+        final xZero = p1.x + (p2.x - p1.x) * t;
+        final zeroPoint = FlSpot(xZero, 0);
+
+        // Finish Green Segment
+        greenSpots.add(p1);
+        greenSpots.add(zeroPoint);
+        greenSpots.add(FlSpot.nullSpot); // End Green line here
+
+        // Start Red Segment
+        redSpots.add(FlSpot.nullSpot); // Start Red line here
+        redSpots.add(zeroPoint);
+        redSpots.add(p2);
+      }
+      // Line crosses Zero (Negative to Positive)
+      else if (p1.y < 0 && p2.y >= 0) {
+        final t = p1.y / (p1.y - p2.y); // p1.y is negative, this math still works
+        final xZero = p1.x + (p2.x - p1.x) * t;
+        final zeroPoint = FlSpot(xZero, 0);
+
+        // Finish Red Segment
+        redSpots.add(p1);
+        redSpots.add(zeroPoint);
+        redSpots.add(FlSpot.nullSpot);
+
+        // Start Green Segment
+        greenSpots.add(FlSpot.nullSpot);
+        greenSpots.add(zeroPoint);
+        greenSpots.add(p2);
+      }
     }
 
-    final lineGradient = LinearGradient(
-      colors: lineGradientColors,
-      stops: lineGradientStops,
-      begin: Alignment.bottomCenter,
-      end: Alignment.topCenter,
-    );
-
-    final belowBarGradient = LinearGradient(
-      colors: lineGradientColors.map((color) => color.withOpacity(0.3)).toList(),
-      stops: lineGradientStops,
-      begin: Alignment.bottomCenter,
-      end: Alignment.topCenter,
-    );
-
-    return (line: lineGradient, belowBar: belowBarGradient);
+    return (green: greenSpots, red: redSpots);
   }
 
   /// Configures the titles (labels) for the X and Y axes.

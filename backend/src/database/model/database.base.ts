@@ -72,6 +72,12 @@ export class DatabaseBase extends DBBase {
     else return await this.getRepository().save(this);
   }
 
+  /** Remove's this element in the database */
+  async remove() {
+    if (!this.id) throw new Error("Failed to update, no ID provided");
+    else return await this.getRepository().remove(this);
+  }
+
   /** Given a condition and a field partial object to update, updates all elements that match this condition to include the partial object. */
   static async updateWhere<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, where: FindOptionsWhere<T>, partial: Partial<T>) {
     return await new this().getRepository().update(where, partial as any);
