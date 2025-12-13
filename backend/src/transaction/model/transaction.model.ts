@@ -2,7 +2,7 @@ import { Account } from "@backend/account/model/account.model";
 import { Category } from "@backend/category/model/category.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { IsObject, IsOptional } from "class-validator";
+import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
@@ -12,6 +12,8 @@ export class Transaction extends DatabaseBase {
   amount: number;
 
   @DatabaseDecorators.column({ nullable: false })
+  @IsString()
+  @IsNotEmpty()
   description: string;
   @DatabaseDecorators.column()
   pending: boolean;

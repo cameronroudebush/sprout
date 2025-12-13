@@ -163,11 +163,10 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
     }
 
     final pixels = _scrollController.position.pixels;
-    final nearBottom = pixels >= _scrollController.position.maxScrollExtent - 200;
-    final scrolledEnough = (pixels - _lastScrollPosition).abs() > 500;
+    final nearBottom = pixels >= _scrollController.position.maxScrollExtent - 50;
 
     // If we're near the bottom of the list or have scrolled a significant amount, load more.
-    if (widget.allowLoadingMore && (nearBottom || scrolledEnough)) {
+    if (widget.allowLoadingMore && (nearBottom)) {
       _lastScrollPosition = pixels;
       _loadMoreTransactions();
     }
@@ -182,8 +181,6 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
   Future<void> _loadMoreTransactions() async {
     if (_isLoadingMore) return;
     final provider = ServiceLocator.get<TransactionProvider>();
-    final totalTransactions = provider.totalTransactions?.total ?? 0;
-    if (_currentTransactionIndex >= totalTransactions) return;
     setState(() => _isLoadingMore = true);
 
     // Allow the weird way of requesting category data
@@ -348,6 +345,9 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
                 Expanded(
                   child: Stack(
                     children: [
+                      // Only show this spinner if we're loading but don't have any matches as the trailing indicator won't show
+                      if (transactions.isEmpty && isLoading) Center(child: CircularProgressIndicator()),
+
                       /// In the event we don't find a match
                       if (transactions.isEmpty && !isLoading)
                         Center(
