@@ -4,6 +4,7 @@ import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/charts/sankey/models/data.dart';
 import 'package:sprout/charts/sankey/sankey.dart';
+import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
@@ -43,10 +44,16 @@ class SankeyFlowByMonth extends StatelessWidget {
               minScale: 0.1,
               maxScale: 5.0,
               child: SizedBox(
-                height: constraints.maxHeight,
-                width: !isDesktop ? 640 : (AppTheme.maxDesktopSize * .85),
+                height: 1024,
+                width: !isDesktop ? 760 : (AppTheme.maxDesktopSize * .85),
                 child: Center(
-                  child: SankeyChart(sankeyData: data, formatter: (val) => getFormattedCurrency(val)),
+                  child: SankeyChart(
+                    sankeyData: data,
+                    formatter: (val) => getFormattedCurrency(val),
+                    onNodeTap: (node, value) {
+                      SproutNavigator.redirectToCatFilter(node);
+                    },
+                  ),
                 ),
               ),
             ),

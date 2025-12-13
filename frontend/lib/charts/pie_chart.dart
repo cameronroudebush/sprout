@@ -28,6 +28,9 @@ class SproutPieChart extends StatefulWidget {
   /// An optional function to format the value displayed in the pie chart section title.
   final String Function(num value)? formatValue;
 
+  /// Fired when a slice is clicked
+  final void Function(String slice, double value)? onSliceTap;
+
   final double height;
 
   const SproutPieChart({
@@ -39,6 +42,7 @@ class SproutPieChart extends StatefulWidget {
     this.showPieValue = false,
     this.colorMapping,
     this.formatValue,
+    this.onSliceTap,
     this.height = 250,
     this.subheader,
   });
@@ -115,6 +119,17 @@ class _SproutPieChartState extends State<SproutPieChart> {
                               }
                               touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
                             });
+
+                            // Handle the tap event
+                            if (event is FlTapUpEvent && pieTouchResponse?.touchedSection != null) {
+                              final index = pieTouchResponse!.touchedSection!.touchedSectionIndex;
+                              if (index >= 0 && index < widget.data!.length) {
+                                final sortedEntries = widget.data!.entries.sortedBy((entry) => entry.value).toList();
+
+                                final entry = sortedEntries[index];
+                                widget.onSliceTap?.call(entry.key, entry.value.toDouble());
+                              }
+                            }
                           },
                         ),
                       ),

@@ -71,7 +71,6 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
   int _currentTransactionIndex = TransactionProvider.initialTransactionCount;
   final _transactionsPerPage = TransactionProvider.initialTransactionCount;
   bool _showBackToTop = false;
-  double _lastScrollPosition = 0.0;
   StreamSubscription? _onAllDataUpdated;
 
   /// The category we are currently filtering on
@@ -167,7 +166,7 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
 
     // If we're near the bottom of the list or have scrolled a significant amount, load more.
     if (widget.allowLoadingMore && (nearBottom)) {
-      _lastScrollPosition = pixels;
+      // _lastScrollPosition = pixels;
       _loadMoreTransactions();
     }
   }
