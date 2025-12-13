@@ -13,12 +13,6 @@ description: Learn how to start using Sprout today.
 
 Welcome to Sprout! This guide will walk you through setting up, configuring, and using the application.
 
-!!! Danger "Caution"
-
-    This application is in active development. We do not make any guarantees about capability, or security.
-
-    **Use at your own risk**
-
 To get started, follow these guides in order:
 
 1.  **[Installation](./installation.md)**: Set up Sprout using the recommended Docker method.
