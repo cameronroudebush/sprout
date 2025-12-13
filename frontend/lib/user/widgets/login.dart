@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: EdgeInsetsGeometry.symmetric(horizontal: isDesktop ? 48 : 12),
                       child: Image.asset(
+                        width: isDesktop ? 600 : 400,
                         'assets/logo/color-transparent-no-tag.png',
                         fit: BoxFit.contain,
                         filterQuality: FilterQuality.high,
