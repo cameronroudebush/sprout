@@ -76,6 +76,11 @@ transaction:
     stuckTransactionTime: 0 3 * * *
     # How many occurrences of similar transactions counts as a subscription.
     subscriptionCount: 3
+
+# Settings specific to holdings
+holding:
+    # If we should clean-up holdings from the database as we no longer find them on the provider. Warning, this will remove all history for these holdings if set to true.
+    cleanupRemovedHoldings: false
 ```
 
 ## Environment Variables

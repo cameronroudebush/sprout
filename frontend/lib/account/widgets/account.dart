@@ -153,7 +153,9 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
       child: Column(
         children: [
           /// Overtime value of the selected account
-          selectedHolding == null
+          holdings.isEmpty
+              ? SizedBox.shrink()
+              : selectedHolding == null
               ? TextWidget(text: "No Holding Selected")
               : SproutCard(
                   child: Padding(
