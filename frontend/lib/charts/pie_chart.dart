@@ -184,7 +184,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
           Expanded(
             child: ListView(
               shrinkWrap: true,
-              children: widget.data!.entries.sortedBy((entry) => -entry.value).map((entry) {
+              children: widget.data!.entries.sortedBy((entry) => entry.value).reversed.map((entry) {
                 final category = entry.key;
                 // Find the corresponding color from the generated pie sections
                 final sectionIndex = widget.data!.entries
