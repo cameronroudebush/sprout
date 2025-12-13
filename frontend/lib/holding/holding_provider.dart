@@ -12,10 +12,7 @@ class HoldingProvider extends BaseProvider<HoldingApi> {
   HoldingProvider(super.api);
 
   /// Given an account, grabs holdings and holdings over time and returns that information
-  Future<(List<Holding>?, List<EntityHistory>?)> populateDataForAccount(Account account, bool showLoaders) async {
-    final shouldSetLoadingStats = (_holdings[account.id]?.isEmpty ?? true) || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
-
+  Future<(List<Holding>?, List<EntityHistory>?)> populateDataForAccount(Account account) async {
     await Future.wait([
       populateAndSetIfChanged(
         () => api.holdingControllerGetHoldings(account.id),
@@ -29,7 +26,6 @@ class HoldingProvider extends BaseProvider<HoldingApi> {
       ),
     ]);
 
-    if (shouldSetLoadingStats) setLoadingStatus(false);
     return (_holdings[account.id], _holdingsHistory[account.id]);
   }
 

@@ -13,9 +13,9 @@ import 'package:sprout/charts/line_chart.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/scroll.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
@@ -40,20 +40,21 @@ class AccountWidget extends StatefulWidget {
 }
 
 /// A page that displays information about the given account
-class _AccountWidgetState extends AutoUpdateState<AccountWidget, HoldingProvider> {
+class _AccountWidgetState extends StateTracker<AccountWidget> {
   Holding? _selectedHolding;
   Account get account => widget.account;
 
   @override
-  HoldingProvider provider = ServiceLocator.get<HoldingProvider>();
-
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) async {
-    if (account.type == AccountTypeEnum.investment) {
-      return provider.populateDataForAccount(account, showLoaders);
-    } else {
-      return null;
-    }
+  Map<dynamic, DataRequest> get requests => {
+    'holdings': DataRequest<HoldingProvider, (List<Holding>?, List<EntityHistory>?)>(
+      provider: ServiceLocator.get<HoldingProvider>(),
+      onLoad: (p, force) => p.populateDataForAccount(account),
+      getFromProvider: (p) {
+        final val = p.getHoldingDataForAccount(account);
+        if (val.$1 == null || val.$2 == null) return null;
+        return val;
+      },
+    ),
   };
 
   /// Returns the tab content for the overview display
@@ -126,12 +127,16 @@ class _AccountWidgetState extends AutoUpdateState<AccountWidget, HoldingProvider
   ) {
     final (holdings, holdingsOT) = holdingProvider.getHoldingDataForAccount(account);
 
-    if (holdings == null || holdingsOT == null) {
+    if (isLoading) {
       return Center(child: CircularProgressIndicator());
+    } else if (holdings == null || holdingsOT == null) {
+      return Center(
+        child: Text("No holdings found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+      );
     }
 
     // Set selected holding if we can
-    if (holdings.isNotEmpty) {
+    if (holdings.isNotEmpty && _selectedHolding == null) {
       _selectedHolding = holdings[0];
     }
 

@@ -45,15 +45,12 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
   }
 
   /// Loads updated category information, also updates loading status
-  Future<void> loadUpdatedCategories(bool showLoaders) async {
-    final shouldSetLoadingStats = _categories.isEmpty || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
+  Future<void> loadUpdatedCategories() async {
     await populateAndSetIfChanged(
       api.categoryControllerGetCategories,
       _categories,
       (newValue) => _categories = newValue ?? [],
     );
-    if (shouldSetLoadingStats) setLoadingStatus(false);
   }
 
   /// Loads updated category stats

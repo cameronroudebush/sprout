@@ -9,9 +9,9 @@ import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
@@ -65,7 +65,7 @@ class TransactionsOverview extends StatefulWidget {
   State<TransactionsOverview> createState() => _TransactionsOverviewPageState();
 }
 
-class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOverview, TransactionProvider> {
+class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   int _currentTransactionIndex = TransactionProvider.initialTransactionCount;
@@ -79,35 +79,41 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  /// Uses the provider to prepare all the data we'll need
-  Future<void> _prepareData() async {
-    provider.setLoadingStatus(true);
-    // Grab all the data at once
-    await Future.wait([
-      provider.populateTotalTransactionCount(),
-      // Populate initial set
-      provider.populateTransactions(
-        startIndex: 0,
-        endIndex: TransactionProvider.initialTransactionCount,
-        shouldNotify: false,
-      ),
-      // Grab all transactions for today no matter what
-      provider.populateTransactions(date: DateTime.now(), shouldNotify: false),
-    ]);
-    provider.setLoadingStatus(false);
-  }
-
   @override
-  TransactionProvider provider = ServiceLocator.get<TransactionProvider>();
+  Map<dynamic, DataRequest> get requests {
+    final provider = ServiceLocator.get<TransactionProvider>();
+
+    return {
+      'totalCount': DataRequest<TransactionProvider, dynamic>(
+        provider: provider,
+        onLoad: (p, force) => p.populateTotalTransactionCount(),
+        getFromProvider: (p) => p.totalTransactions,
+      ),
+      'initialTransactions': DataRequest<TransactionProvider, dynamic>(
+        provider: provider,
+        onLoad: (p, force) => p.populateTransactions(
+          startIndex: 0,
+          endIndex: TransactionProvider.initialTransactionCount,
+          shouldNotify: false,
+        ),
+        getFromProvider: (p) => p.transactions,
+      ),
+      'todaysTransactions': DataRequest<TransactionProvider, dynamic>(
+        provider: provider,
+        onLoad: (p, force) => p.populateTransactions(date: DateTime.now(), shouldNotify: false),
+        // We purposefully omit 'getFromProvider' here.
+        // This forces the "no matter what" behavior (always fetches on mount),
+        // regardless of what is currently in the provider.
+        getFromProvider: null,
+      ),
+    };
+  }
 
   @override
   void onForceSync() {
     // Wipe out all transactions to forcible reset them
-    provider.wipeData();
+    ServiceLocator.get<TransactionProvider>().wipeData();
   }
-
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = (showLoaders) => _prepareData();
 
   @override
   void initState() {
@@ -266,7 +272,7 @@ class _TransactionsOverviewPageState extends AutoUpdateState<TransactionsOvervie
     return Consumer2<TransactionProvider, CategoryProvider>(
       builder: (context, provider, categoryProvider, child) {
         final transactions = _getFilteredTransactions(provider.transactions);
-        final isLoading = provider.isLoading || _isLoadingMore;
+        final isLoading = this.isLoading || _isLoadingMore;
 
         return Expanded(
           child: ConstrainedBox(

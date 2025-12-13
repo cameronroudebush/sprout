@@ -6,8 +6,8 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/dialog.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 
 /// A widget that displays the editing capabilities of a [Category]
 class CategoryInfo extends StatefulWidget {
@@ -21,16 +21,20 @@ class CategoryInfo extends StatefulWidget {
   State<CategoryInfo> createState() => _CategoryInfoState();
 }
 
-class _CategoryInfoState extends AutoUpdateState<CategoryInfo, CategoryProvider> {
+class _CategoryInfoState extends StateTracker<CategoryInfo> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   CategoryTypeEnum _type = CategoryTypeEnum.expense;
   Category? _parentCategory;
 
   @override
-  CategoryProvider provider = ServiceLocator.get<CategoryProvider>();
-  @override
-  Future<dynamic> Function(bool showLoaders) loadData = ServiceLocator.get<CategoryProvider>().loadUpdatedCategories;
+  Map<dynamic, DataRequest> get requests => {
+    'cats': DataRequest<CategoryProvider, dynamic>(
+      provider: ServiceLocator.get<CategoryProvider>(),
+      onLoad: (p, force) => p.loadUpdatedCategories(),
+      getFromProvider: (p) => p.categories,
+    ),
+  };
 
   @override
   void initState() {

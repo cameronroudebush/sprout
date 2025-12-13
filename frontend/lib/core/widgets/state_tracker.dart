@@ -1,0 +1,189 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/sse.dart';
+
+/// A configuration object that binds a Provider to a specific data fetch request.
+/// [P] is the type of the Provider (e.g., UserProvider).
+/// [T] is the type of the data expected (e.g., UserProfile).
+class DataRequest<P extends BaseProvider, T> {
+  final P provider;
+
+  /// The function that actually gets the data.
+  final Future<T?> Function(P provider, bool forceUpdate) onLoad;
+
+  /// [Optional] A function to synchronously check if the provider already has the data.
+  /// If this returns a non-null value, [onLoad] will be SKIPPED (unless forced),
+  /// and the spinner will not show.
+  final T? Function(P provider)? getFromProvider;
+
+  /// If true, [StateTracker.hasValidData] will return false if this data is null.
+  final bool isRequired;
+
+  /// The current value of this data point.
+  T? value;
+
+  DataRequest({required this.provider, required this.onLoad, this.getFromProvider, this.isRequired = true});
+}
+
+/// This widget provides functionality to automatically populate multiple data sets
+/// from different providers. It aggregates loading states and data validity.
+abstract class StateTracker<T extends StatefulWidget> extends State<T> with WidgetsBindingObserver {
+  final _sseProvider = ServiceLocator.get<SSEProvider>();
+  StreamSubscription<SSEData>? _sseSubscription;
+
+  /// Internal loading state
+  bool _isLoading = false;
+
+  /// Subclasses must implement this getter to define which data points to load.
+  /// Keys can be Strings, Enums, or any unique identifier.
+  ///
+  /// Example:
+  /// ```dart
+  /// @override
+  /// Map<String, DataRequest> get requests => {
+  ///   'user': DataRequest<UserProvider, User>(
+  ///      provider: userProvider,
+  ///      onLoad: (p, force) => p.fetchUser(force: force)
+  ///   ),
+  /// };
+  /// ```
+  Map<dynamic, DataRequest> get requests;
+
+  /// Returns true if the component is currently fetching any data.
+  bool get isLoading => _isLoading;
+
+  /// Returns true only if ALL [DataRequest]s marked as [isRequired]
+  /// have non-null [value]s.
+  bool get hasValidData {
+    return requests.values.where((req) => req.isRequired).every((req) => req.value != null);
+  }
+
+  /// Sets the current loading status and triggers a rebuild
+  void setLoadingStatus(bool status) {
+    if (mounted && _isLoading != status) {
+      setState(() {
+        _isLoading = status;
+      });
+    }
+  }
+
+  /// Iterates through all registered [requests], executes their onLoad functions,
+  /// and updates their local values.
+  /// [showLoaders] If we should show the loaders when required that we are loading data
+  /// [forceUpdate] If we should trigger a force update to our requests to tell them to grab new data
+  Future<void> loadData({bool forceUpdate = false, bool showLoaders = true}) async {
+    if (requests.isEmpty) return;
+
+    // Identify which requests actually need fetching
+    List<MapEntry<dynamic, DataRequest>> needsFetching = [];
+
+    for (var entry in requests.entries) {
+      final req = entry.value;
+
+      // Try to get cached data first
+      final cachedData = (req as dynamic).getFromProvider?.call(req.provider);
+      bool isCacheEmpty =
+          cachedData == null || (cachedData is List && cachedData.isEmpty) || (cachedData is num && cachedData == 0);
+
+      if (!forceUpdate && !isCacheEmpty) {
+        // Data exists and we aren't forced to update: Use cached, skip load.
+        req.value = cachedData;
+      } else {
+        // Data is missing OR we are forced to update: Mark for fetch.
+        needsFetching.add(entry);
+      }
+    }
+
+    // If nothing needs fetching, just update UI with cached values and exit
+    if (needsFetching.isEmpty) {
+      if (mounted) setState(() {});
+      return;
+    }
+
+    // Only show loader if we have actual work to do
+    if (mounted && showLoaders) {
+      setLoadingStatus(true);
+    }
+
+    try {
+      // Run onLoad ONLY for the requests that need it
+      final futures = needsFetching.map((entry) async {
+        final request = entry.value;
+        try {
+          final result = await (request as dynamic).onLoad(request.provider, forceUpdate);
+          request.value = result;
+        } catch (e) {
+          debugPrint("Error loading data for key ${entry.key}: $e");
+          request.value = null;
+        }
+      });
+
+      await Future.wait(futures);
+    } finally {
+      if (mounted) {
+        setLoadingStatus(false);
+      }
+    }
+  }
+
+  /// Sets up when we should call data loading capabilities
+  void _setupData() {
+    // After the first frame is rendered, load our initial data set
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Check if providers are initialized if necessary, or just load
+      await loadData();
+    });
+
+    // Listen to the SSE events to track when data needs to be reloaded
+    _sseSubscription?.cancel();
+    _sseSubscription = _sseProvider.onSSEEvent.listen((data) async {
+      // If this is a force update, load new data and show spinners
+      if (data.event == SSEDataEventEnum.forceUpdate) {
+        onForceSync();
+        await loadData(forceUpdate: true);
+      }
+    });
+  }
+
+  /// When force sync is called via the SSE provider, this method will be called
+  /// before the load data in-case you have any special handling
+  void onForceSync() {}
+
+  /// Helper to get data type-safely
+  D? getData<D>(dynamic key) {
+    final req = requests[key];
+    if (req != null && req.value is D) {
+      return req.value as D;
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) WidgetsBinding.instance.addObserver(this);
+    _setupData();
+  }
+
+  @override
+  void dispose() {
+    _sseSubscription?.cancel();
+    if (!kIsWeb) WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // This means the app has resumed after being woken up from the background.
+      // Refresh our data.
+      loadData(forceUpdate: true);
+    }
+  }
+}

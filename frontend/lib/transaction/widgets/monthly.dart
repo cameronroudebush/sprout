@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/page_loading.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/transaction/model/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
@@ -22,12 +22,15 @@ class TransactionMonthlySubscriptions extends StatefulWidget {
   State<TransactionMonthlySubscriptions> createState() => _TransactionMonthlySubscriptionsState();
 }
 
-class _TransactionMonthlySubscriptionsState
-    extends AutoUpdateState<TransactionMonthlySubscriptions, TransactionProvider> {
+class _TransactionMonthlySubscriptionsState extends StateTracker<TransactionMonthlySubscriptions> {
   @override
-  TransactionProvider provider = ServiceLocator.get<TransactionProvider>();
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = provider.populateSubscriptions;
+  Map<dynamic, DataRequest> get requests => {
+    'subs': DataRequest<TransactionProvider, dynamic>(
+      provider: ServiceLocator.get<TransactionProvider>(),
+      onLoad: (p, force) => p.populateSubscriptions(),
+      getFromProvider: (p) => p.subscriptions,
+    ),
+  };
 
   /// The events for the current day that we have selected
   List<TransactionSubscription> _eventsForCurrentDay = [];
@@ -39,7 +42,7 @@ class _TransactionMonthlySubscriptionsState
   Widget build(BuildContext context) {
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
-        final isLoading = provider.isLoading;
+        final isLoading = this.isLoading;
 
         if (isLoading) return PageLoadingWidget(loadingText: "Loading Subscriptions...");
 

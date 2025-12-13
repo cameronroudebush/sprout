@@ -2,9 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/page_loading.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_row.dart';
 
@@ -16,20 +16,22 @@ class TransactionRuleOverview extends StatefulWidget {
   State<TransactionRuleOverview> createState() => _TransactionRuleOverviewState();
 }
 
-class _TransactionRuleOverviewState extends AutoUpdateState<TransactionRuleOverview, TransactionRuleProvider> {
-    @override 
-  TransactionRuleProvider provider = ServiceLocator.get<TransactionRuleProvider>();
-
+class _TransactionRuleOverviewState extends StateTracker<TransactionRuleOverview> {
   @override
-  Future<dynamic> Function(bool showLoaders) loadData =
-      ServiceLocator.get<TransactionRuleProvider>().populateTransactionRules;
+  Map<dynamic, DataRequest> get requests => {
+    'rules': DataRequest<TransactionRuleProvider, dynamic>(
+      provider: ServiceLocator.get<TransactionRuleProvider>(),
+      onLoad: (p, force) => p.populateTransactionRules(),
+      getFromProvider: (p) => p.rules,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
     return Consumer<TransactionRuleProvider>(
       builder: (context, provider, child) {
-        final isLoading = provider.isLoading || provider.transactionRulesRunning;
+        final isLoading = provider.transactionRulesRunning || this.isLoading;
 
         if (isLoading) {
           return PageLoadingWidget(

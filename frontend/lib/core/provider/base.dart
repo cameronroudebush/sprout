@@ -13,9 +13,6 @@ abstract class BaseProvider<T> with ChangeNotifier {
   /// Tracks our disposal state to handle notification listener errors.
   bool _disposed = false;
 
-  /// Used to track if we are loading data so the interfaces know this provider isn't ready.
-  bool isLoading = true;
-
   /// Tracks if this provider has been initialized.
   bool isInitialized = false;
 
@@ -38,19 +35,11 @@ abstract class BaseProvider<T> with ChangeNotifier {
     }
   }
 
-  /// Sets the loading status to the given bool and notifies any listeners of this provider
-  void setLoadingStatus(bool isLoading) {
-    this.isLoading = isLoading;
-    notifyListeners();
-  }
-
   /// Populates the given property based on an api call only if the value has changed. If the value has changed, we will notify.
   Future<Z?> populateAndSetIfChanged<Z>(Future<Z?> Function() apiCall, Z? currentValue, Function(Z?) setter) async {
     final newValue = await apiCall();
     if (newValue != currentValue) {
-      setLoadingStatus(true);
       setter(newValue);
-      setLoadingStatus(false);
       return newValue;
     } else {
       return currentValue;

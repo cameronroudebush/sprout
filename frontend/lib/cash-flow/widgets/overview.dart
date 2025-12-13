@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
@@ -7,10 +8,10 @@ import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/widgets/auto_update_state.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/scroll.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/transaction/widgets/category_pie_chart.dart';
 
@@ -22,14 +23,33 @@ class CashFlowOverview extends StatefulWidget {
   State<CashFlowOverview> createState() => _CashFlowOverviewState();
 }
 
-class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowProvider> {
+class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
   late DateTime _selectedDate;
 
   @override
-  CashFlowProvider provider = ServiceLocator.get<CashFlowProvider>();
+  Map<dynamic, DataRequest> get requests {
+    final date = _selectedDate;
+    final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
+    final cashFlowProvider = context.read<CashFlowProvider>();
 
-  @override
-  late Future<dynamic> Function(bool showLoaders) loadData = _fetchData;
+    return {
+      'sankey': DataRequest<CashFlowProvider, dynamic>(
+        provider: cashFlowProvider,
+        onLoad: (p, force) => p.getSankey(date.year, month),
+        getFromProvider: (p) => p.getSankeyData(date.year, month),
+      ),
+      'stats': DataRequest<CashFlowProvider, dynamic>(
+        provider: cashFlowProvider,
+        onLoad: (p, force) => p.getStats(date.year, month),
+        getFromProvider: (p) => p.getStatsData(date.year, month),
+      ),
+      'catStats': DataRequest<CategoryProvider, dynamic>(
+        provider: ServiceLocator.get<CategoryProvider>(),
+        onLoad: (p, force) => p.loadCategoryStats(date.year, month),
+        getFromProvider: (p) => p.getStatsData(date.year, month),
+      ),
+    };
+  }
 
   @override
   void initState() {
@@ -40,37 +60,11 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowP
 
   CashFlowView _currentView = CashFlowView.monthly;
 
-  /// Fetches data we need for these displays
-  ///   We use [showLoaders] as a way to forcibly say we need updated data.
-  Future<void> _fetchData(bool showLoaders) async {
-    final categoryProvider = ServiceLocator.get<CategoryProvider>();
-    final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
-
-    provider.setLoadingStatus(true);
-    categoryProvider.setLoadingStatus(true);
-
-    final futures = <Future<dynamic>>[];
-
-    if (showLoaders || provider.getSankeyData(_selectedDate.year, month) == null) {
-      futures.add(provider.getSankey(_selectedDate.year, month));
-    }
-    if (showLoaders || provider.getStatsData(_selectedDate.year, month) == null) {
-      futures.add(provider.getStats(_selectedDate.year, month));
-    }
-    if (showLoaders || categoryProvider.getStatsData(_selectedDate.year, month) == null) {
-      futures.add(categoryProvider.loadCategoryStats(_selectedDate.year, month));
-    }
-
-    await Future.wait(futures);
-    provider.setLoadingStatus(false);
-    categoryProvider.setLoadingStatus(false);
-  }
-
   void _changeMonth(int monthIncrement) {
     setState(() {
       _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + monthIncrement + 1, 0);
     });
-    _fetchData(false);
+    loadData();
   }
 
   void _changeYear(int year) {
@@ -78,7 +72,7 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowP
       // When changing year, we can default to January of that year.
       _selectedDate = DateTime(year, 2, 0);
     });
-    _fetchData(false);
+    loadData();
   }
 
   Widget _buildStats() {
@@ -152,7 +146,7 @@ class _CashFlowOverviewState extends AutoUpdateState<CashFlowOverview, CashFlowP
                       _selectedDate = DateTime(now.year, now.month + 1, 0);
                     }
                   });
-                  _fetchData(false);
+                  loadData();
                 },
                 onMonthIncrementChanged: _changeMonth,
                 onYearChanged: _changeYear,

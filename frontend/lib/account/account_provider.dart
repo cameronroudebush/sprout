@@ -20,15 +20,12 @@ class AccountProvider extends BaseProvider<AccountApi> {
   AccountProvider(super.api);
 
   /// Populates link account information for the initial load and handles double checking if the data has actually changed
-  Future<List<Account>> populateLinkedAccounts(bool showLoaders) async {
-    final shouldSetLoadingStats = _linkedAccounts.isEmpty || showLoaders;
-    if (shouldSetLoadingStats) setLoadingStatus(true);
+  Future<List<Account>> populateLinkedAccounts() async {
     await populateAndSetIfChanged(
       api.accountControllerGetAccounts,
       _linkedAccounts,
       (newValue) => _linkedAccounts = newValue ?? [],
     );
-    if (shouldSetLoadingStats) setLoadingStatus(false);
     return _linkedAccounts;
   }
 
