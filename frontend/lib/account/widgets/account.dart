@@ -278,7 +278,7 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
                               ),
                             ),
                             // Institution error fix
-                            if (account.institution.hasError)
+                            if (true)
                               SproutTooltip(
                                 message: "Opens a dialog to fix this account.",
                                 child: FilledButton(

@@ -8,6 +8,7 @@ import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/theme.dart';
+import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/notification.dart';
 import 'package:sprout/user/user_provider.dart';
 
@@ -112,55 +113,65 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      spacing: 12,
-      children: [
-        if (_message.isNotEmpty)
-          SproutNotificationWidget(SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError)),
-        AutofillGroup(
-          child: Column(
-            spacing: 12,
-            children: [
-              TextField(
-                controller: _usernameController,
-                keyboardType: TextInputType.text,
-                autofillHints: const [AutofillHints.username],
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
+      return SizedBox(
+        width: 480,
+        child: Column(
+          spacing: 12,
+          children: [
+            if (_message.isNotEmpty)
+              SproutNotificationWidget(
+                SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError),
               ),
-              TextField(
-                controller: _passwordController,
-                keyboardType: TextInputType.visiblePassword,
-                autofillHints: const [AutofillHints.password],
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (String value) {
-                  _login();
-                },
+            AutofillGroup(
+              child: Column(
+                spacing: 12,
+                children: [
+                  TextField(
+                    controller: _usernameController,
+                    keyboardType: TextInputType.text,
+                    autofillHints: const [AutofillHints.username],
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
+                  ),
+                  TextField(
+                    controller: _passwordController,
+                    keyboardType: TextInputType.visiblePassword,
+                    autofillHints: const [AutofillHints.password],
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (String value) {
+                      _login();
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            SizedBox(
+              width: 240,
+              child: FilledButton(
+                style: AppTheme.primaryButton,
+                onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
+                    ? null
+                    : _login,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 12,
+                  children: [
+                    if (_loginIsRunning || _isLoadingData)
+                      SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
+                    Text(_isLoadingData ? "Loading Data" : "Login"),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-        FilledButton(
-          style: AppTheme.primaryButton,
-          onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
-              ? null
-              : _login,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 12,
-            children: [
-              if (_loginIsRunning || _isLoadingData)
-                SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
-              Text(_isLoadingData ? "Loading Data" : "Login"),
-            ],
-          ),
-        ),
-      ],
-    );
+      );
+    });
   }
 }

@@ -42,14 +42,18 @@ class _AccountErrorDialogState extends State<AccountErrorDialog> with WidgetsBin
   /// Function to launch the URL in a browser.
   Future<void> _launchSimpleFinUrl() async {
     final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
+    _launchedUrl = true;
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-    } else {
-      _launchedUrl = true;
+      _launchedUrl = false;
     }
   }
 
   /// This function is called when the user returns to the app.
   Future<void> _onUserReturn() async {
+    // CLose the old dialog
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
     // Open another dialog asking if we want to resync
     await showDialog(context: context, builder: (_) => SyncDialog());
   }
@@ -63,7 +67,6 @@ class _AccountErrorDialogState extends State<AccountErrorDialog> with WidgetsBin
       showSubmitButton: true,
       submitButtonText: "Navigate to fix",
       onSubmitClick: () {
-        Navigator.of(context).pop();
         _launchSimpleFinUrl();
       },
       child: TextWidget(

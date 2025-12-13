@@ -35,7 +35,7 @@ class _ExitWidgetState extends State<ExitWidget> {
 
         // Go back a page
         if (SproutRouter.router.canPop()) {
-          SproutRouter.router.pop();
+          return SproutRouter.router.pop();
         }
 
         final allowExit = !SproutRouter.router.canPop();
