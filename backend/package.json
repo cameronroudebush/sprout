@@ -78,7 +78,8 @@
       "node_modules/@img/sharp-win32-x64/**/*",
       "node_modules/@img/sharp-linuxmusl-x64/**/*",
       "node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
-      "node_modules/swagger-themes/**/*"
+      "node_modules/swagger-themes/**/*",
+      "node_modules/ansis/**/*"
     ],
     "targets": [
       "node20"
