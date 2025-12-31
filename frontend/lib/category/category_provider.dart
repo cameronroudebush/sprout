@@ -49,7 +49,7 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
     await populateAndSetIfChanged(
       api.categoryControllerGetCategories,
       _categories,
-      (newValue) => _categories = newValue ?? [],
+      (newValue) => newValue == null ? [] : _categories = [...newValue],
     );
   }
 

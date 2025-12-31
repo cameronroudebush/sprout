@@ -90,7 +90,7 @@ export class CategoryController {
       },
     });
     if (similarCategories.length > 0) throw new ConflictException("A similar category already exists.");
-
+    category.name = category.name.trim();
     return await category.insert();
   }
 
@@ -126,7 +126,7 @@ export class CategoryController {
     const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to edit.");
     // Update the category object
-    const updatedCategory = Category.fromPlain({ ...update, user: user, id: matchingCategory.id });
+    const updatedCategory = Category.fromPlain({ ...update, name: (update.name ?? matchingCategory.name).trim(), user: user, id: matchingCategory.id });
     await updatedCategory.update();
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE); // Tell clients of this user to update so that transactional data is refreshed
     return updatedCategory;
