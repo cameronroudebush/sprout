@@ -16,6 +16,60 @@ class TransactionRuleApi {
 
   final ApiClient apiClient;
 
+  /// Re-apply all transaction rules
+  ///
+  /// Triggers a manual synchronization process that evaluates all transaction rules against the user's existing transactions and updates their categories or metadata accordingly. If matches could not be found, those transactions will not be updated.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [bool] force:
+  ///   If true, resets categories to null for transactions that do not match any current rules.
+  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({ bool? force, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/transaction-rule/apply';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (force != null) {
+      queryParams.addAll(_queryParams('', 'force', force));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Re-apply all transaction rules
+  ///
+  /// Triggers a manual synchronization process that evaluates all transaction rules against the user's existing transactions and updates their categories or metadata accordingly. If matches could not be found, those transactions will not be updated.
+  ///
+  /// Parameters:
+  ///
+  /// * [bool] force:
+  ///   If true, resets categories to null for transactions that do not match any current rules.
+  Future<void> transactionRuleControllerApplyRules({ bool? force, }) async {
+    final response = await transactionRuleControllerApplyRulesWithHttpInfo( force: force, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Creates a new transaction rule.
   ///
   /// Creates a new transaction rule based on the given content and runs a processor so we can organize our current transactions.

@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
@@ -37,5 +38,10 @@ class SproutNavigator {
     if (id != null) {
       SproutNavigator.redirect("transactions", queryParameters: {'cat': id});
     }
+  }
+
+  /// Redirects to the specific account
+  static Future<void> redirectToAccount(Account account) async {
+    SproutNavigator.redirect("account", queryParameters: {'acc': account.id});
   }
 }

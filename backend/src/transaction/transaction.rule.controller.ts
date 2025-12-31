@@ -6,8 +6,8 @@ import { SSEService } from "@backend/sse/sse.service";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseBoolPipe, Patch, Post, Query } from "@nestjs/common";
+import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all Transaction rules content */
 @Controller("transaction-rule")
@@ -26,7 +26,7 @@ export class TransactionRuleController {
   })
   @ApiOkResponse({ description: "Transaction rules found successfully.", type: [TransactionRule] })
   async get(@CurrentUser() user: User) {
-    return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" } });
+    return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" }, relations: ["category.parentCategory"] });
   }
 
   @Delete(":id")
@@ -68,6 +68,7 @@ export class TransactionRuleController {
     }
     // Validate type
     if (newRule.type !== "amount" && newRule.type !== "description") throw new BadRequestException("Given type is not valid.");
+    newRule.value = newRule.value.trim();
     const updatedRule = await newRule.update();
 
     // Perform validation on editing the order. If the order has changed, we need to re-organize the other rules.
@@ -77,7 +78,7 @@ export class TransactionRuleController {
     await this.transactionRuleService.applyRulesToTransactions(user);
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
 
-    return updatedRule;
+    return TransactionRule.findOne({ where: { id: updatedRule.id }, relations: ["category.parentCategory"] });
   }
 
   @Post()
@@ -90,6 +91,7 @@ export class TransactionRuleController {
   @ApiBody({ type: TransactionRule })
   async create(@Body() data: TransactionRule, @CurrentUser() user: User) {
     const rule = TransactionRule.fromPlain(data);
+    rule.value = rule.value.trim();
     rule.user = user;
 
     if (rule.category) {
@@ -110,5 +112,24 @@ export class TransactionRuleController {
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
 
     return rule;
+  }
+
+  @Post("apply")
+  @ApiOperation({
+    summary: "Re-apply all transaction rules",
+    description:
+      "Triggers a manual synchronization process that evaluates all transaction rules against the user's existing transactions and updates their categories or metadata accordingly. If matches could not be found, those transactions will not be updated.",
+  })
+  @ApiQuery({
+    name: "force",
+    type: Boolean,
+    required: false,
+    description: "If true, resets categories to null for transactions that do not match any current rules.",
+  })
+  @ApiOkResponse({
+    description: "Rules were successfully processed and applied to transactions.",
+  })
+  async applyRules(@CurrentUser() user: User, @Query("force", new ParseBoolPipe({ optional: true })) force: boolean = false): Promise<void> {
+    await this.transactionRuleService.applyRulesToTransactions(user, undefined, undefined, force);
   }
 }

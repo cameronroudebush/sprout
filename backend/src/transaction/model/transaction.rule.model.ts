@@ -1,9 +1,10 @@
+import { Account } from "@backend/account/model/account.model";
 import { Category } from "@backend/category/model/category.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
 import { User } from "@backend/user/model/user.model";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
 import { ManyToOne } from "typeorm";
 
@@ -49,6 +50,13 @@ export class TransactionRule extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   @IsBoolean()
   enabled: boolean = true;
+
+  /** An account that this rule should ony apply to. */
+  @ManyToOne(() => Account, (a) => a.id, { nullable: true, eager: true, onDelete: "SET NULL" })
+  @IsOptional()
+  @IsObject()
+  @ApiProperty({ type: Account })
+  account?: Account;
 
   constructor(user: User, type: TransactionRuleType, value: string, category?: Category, strict: boolean = false) {
     super();

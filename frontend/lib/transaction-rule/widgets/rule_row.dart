@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
+import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/dialog.dart';
@@ -79,6 +81,22 @@ class TransactionRuleRow extends StatelessWidget {
             text: 'IF ',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
+          if (rule.account != null) ...[
+            const TextSpan(text: 'account is '),
+            TextSpan(
+              text: rule.account!.name,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.dark.colorScheme.primary,
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  SproutNavigator.redirectToAccount(rule.account!);
+                },
+            ),
+            const TextSpan(text: ' and '),
+          ],
           TextSpan(text: '$type $condition '),
           TextSpan(
             text: '"$value"',

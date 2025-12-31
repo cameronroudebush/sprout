@@ -26,6 +26,14 @@ class AccountProvider extends BaseProvider<AccountApi> {
       _linkedAccounts,
       (newValue) => _linkedAccounts = newValue ?? [],
     );
+
+    // Sort the accounts by their type
+    _linkedAccounts.sort((a, b) {
+      final aIsLoan = a.type == AccountTypeEnum.loan;
+      final bIsLoan = b.type == AccountTypeEnum.loan;
+      if (aIsLoan != bIsLoan) return aIsLoan ? 1 : -1;
+      return (b.balance).compareTo(a.balance);
+    });
     return _linkedAccounts;
   }
 

@@ -79,8 +79,9 @@ class _TransactionInfoState extends State<TransactionInfo> {
   }
 
   /// Validates and submits the form changes
-  void _submit() {
+  Future<void> _submit() async {
     final transactionProvider = ServiceLocator.get<TransactionProvider>();
+    final catProvider = ServiceLocator.get<CategoryProvider>();
 
     // Validate the form before proceeding with submission
     if (_formKey.currentState!.validate()) {
@@ -88,7 +89,9 @@ class _TransactionInfoState extends State<TransactionInfo> {
 
       if (_valHasChanged()) {
         // Tell provider to update the transaction
-        transactionProvider.editTransaction(newTransaction);
+        await transactionProvider.editTransaction(newTransaction);
+        // Ask the category provider to update our stats
+        await catProvider.loadUnknownCategoryCount();
       }
 
       // Close dialog

@@ -15,17 +15,15 @@ class Category {
   Category({
     required this.id,
     required this.name,
-    required this.type,
     this.parentCategory,
+    this.icon,
+    required this.type,
   });
 
   String id;
 
   /// The name of the category
   String name;
-
-  /// If this account type should be considered an expense or income
-  CategoryTypeEnum type;
 
   /// The parent category this category belongs to
   ///
@@ -36,34 +34,53 @@ class Category {
   ///
   Category? parentCategory;
 
+  /// The icon to use for this category. If one is not given, we'll use the default.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? icon;
+
+  /// If this account type should be considered an expense or income
+  CategoryTypeEnum type;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is Category &&
     other.id == id &&
     other.name == name &&
-    other.type == type &&
-    other.parentCategory == parentCategory;
+    other.parentCategory == parentCategory &&
+    other.icon == icon &&
+    other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (name.hashCode) +
-    (type.hashCode) +
-    (parentCategory == null ? 0 : parentCategory!.hashCode);
+    (parentCategory == null ? 0 : parentCategory!.hashCode) +
+    (icon == null ? 0 : icon!.hashCode) +
+    (type.hashCode);
 
   @override
-  String toString() => 'Category[id=$id, name=$name, type=$type, parentCategory=$parentCategory]';
+  String toString() => 'Category[id=$id, name=$name, parentCategory=$parentCategory, icon=$icon, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
       json[r'name'] = this.name;
-      json[r'type'] = this.type;
     if (this.parentCategory != null) {
       json[r'parentCategory'] = this.parentCategory;
     } else {
       json[r'parentCategory'] = null;
     }
+    if (this.icon != null) {
+      json[r'icon'] = this.icon;
+    } else {
+      json[r'icon'] = null;
+    }
+      json[r'type'] = this.type;
     return json;
   }
 
@@ -88,8 +105,9 @@ class Category {
       return Category(
         id: mapValueOfType<String>(json, r'id')!,
         name: mapValueOfType<String>(json, r'name')!,
-        type: CategoryTypeEnum.fromJson(json[r'type'])!,
         parentCategory: Category.fromJson(json[r'parentCategory']),
+        icon: mapValueOfType<String>(json, r'icon'),
+        type: CategoryTypeEnum.fromJson(json[r'type'])!,
       );
     }
     return null;
