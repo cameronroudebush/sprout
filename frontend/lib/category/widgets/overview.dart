@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
@@ -12,7 +13,6 @@ import 'package:sprout/core/widgets/page_loading.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction/widgets/category_icon.dart';
 
 /// A widget that displays all of our categories and allows editing and deleting them
 class CategoryOverview extends StatefulWidget {

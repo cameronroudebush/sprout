@@ -36,6 +36,10 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
   final _sseProvider = ServiceLocator.get<SSEProvider>();
   StreamSubscription<SSEData>? _sseSubscription;
 
+  /// The last time we preformed an update request per component name. Used to debounce how often we request data.
+  ///   We use a static map so we can reference each widget across contexts.
+  static Map<String, DateTime> lastUpdateTimes = <String, DateTime>{};
+
   /// Internal loading state
   bool _isLoading = false;
 
@@ -63,6 +67,11 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
     return requests.values.where((req) => req.isRequired).every((req) => req.value != null);
   }
 
+  /// Returns a name for the current widget
+  get widgetName {
+    return "$runtimeType";
+  }
+
   /// Sets the current loading status and triggers a rebuild
   void setLoadingStatus(bool status) {
     if (mounted && _isLoading != status) {
@@ -75,9 +84,17 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
   /// Iterates through all registered [requests], executes their onLoad functions,
   /// and updates their local values.
   /// [showLoaders] If we should show the loaders when required that we are loading data
-  /// [forceUpdate] If we should trigger a force update to our requests to tell them to grab new data
-  Future<void> loadData({bool forceUpdate = false, bool showLoaders = true}) async {
+  /// [forceUpdate] If we should trigger a force update to our requests to tell them to grab new data even if we already have data for them
+  /// [checkLastUpdateTime] If we should check the last time we requested data to determine if we should grab new data. Enabled by default.
+  Future<void> loadData({bool forceUpdate = false, bool showLoaders = true, bool checkLastUpdateTime = true}) async {
     if (requests.isEmpty) return;
+    final lastUpdateTime = lastUpdateTimes[widgetName];
+    // If we haven't waited long enough since the last update, or we don't care about the last update time, ignore this request
+    if (lastUpdateTime != null && checkLastUpdateTime) {
+      final timeDiffMil = DateTime.now().millisecondsSinceEpoch - lastUpdateTime.millisecondsSinceEpoch;
+      // If we have less than a 20 minute difference, ignore the fetch request
+      if (timeDiffMil < (20 * 60000)) return;
+    }
 
     // Identify which requests actually need fetching
     List<MapEntry<dynamic, DataRequest>> needsFetching = [];
@@ -112,6 +129,7 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
 
     try {
       // Run onLoad ONLY for the requests that need it
+      lastUpdateTimes[widgetName] = DateTime.now();
       final futures = needsFetching.map((entry) async {
         final request = entry.value;
         try {

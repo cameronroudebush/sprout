@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
@@ -70,21 +71,27 @@ class _TransactionMonthlySubscriptionsState extends StateTracker<TransactionMont
         }
 
         return SproutLayoutBuilder((isDesktop, context, constraints) {
+          final totalCard = _buildTotal(provider);
           final calendarCard = _buildCalendarCard(provider);
           final selectedDayCard = _buildSelectedDayCard();
 
           if (isDesktop) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            return Column(
               children: [
-                Expanded(flex: 2, child: calendarCard),
-                Expanded(flex: 3, child: selectedDayCard),
+                totalCard,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 2, child: calendarCard),
+                    Expanded(flex: 3, child: selectedDayCard),
+                  ],
+                ),
               ],
             );
           }
 
           // Mobile layout
-          return Column(children: [calendarCard, const SizedBox(height: 8), selectedDayCard]);
+          return Column(children: [totalCard, calendarCard, const SizedBox(height: 8), selectedDayCard]);
         });
       },
     );
@@ -104,6 +111,11 @@ class _TransactionMonthlySubscriptionsState extends StateTracker<TransactionMont
 
   static Widget _buildCriterion(String text) {
     return Padding(padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(text));
+  }
+
+  Widget _buildTotal(TransactionProvider provider) {
+    num total = provider.subscriptions.map((e) => e.amount).reduce((a, b) => a + b);
+    return SproutCard(child: Row(children: [Text(getFormattedCurrency(total))]));
   }
 
   Widget _buildCalendarCard(TransactionProvider provider) {

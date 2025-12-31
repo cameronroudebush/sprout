@@ -13,7 +13,7 @@ class CategoryIcon extends StatelessWidget {
     }
 
     final categoryName = category.name.toLowerCase();
-
+    // TODO: Update category icon to be selectable
     switch (categoryName) {
       case 'food & drink':
         return Icons.fastfood;
@@ -55,6 +55,8 @@ class CategoryIcon extends StatelessWidget {
         return Icons.payment;
       case 'income':
         return Icons.attach_money;
+      // case 'christmas':
+      //   return Icons.christm;
       default:
         return Icons.category;
     }
