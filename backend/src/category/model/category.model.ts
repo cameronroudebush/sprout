@@ -3,7 +3,7 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
 
@@ -38,6 +38,9 @@ export class Category extends DatabaseBase {
   /** The parent category this category belongs to */
   @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
   @JoinColumn({ name: "parentCategoryId" })
+  @IsOptional()
+  @IsObject()
+  @ApiProperty({ type: Category })
   parentCategory?: Category;
   @DatabaseDecorators.column({ nullable: true })
   @ApiHideProperty()
