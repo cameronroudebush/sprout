@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/calendar.dart';
 import 'package:sprout/core/widgets/card.dart';
@@ -115,7 +116,31 @@ class _TransactionMonthlySubscriptionsState extends StateTracker<TransactionMont
 
   Widget _buildTotal(TransactionProvider provider) {
     num total = provider.subscriptions.map((e) => e.amount).reduce((a, b) => a + b);
-    return SproutCard(child: Row(children: [Text(getFormattedCurrency(total))]));
+    return SproutCard(
+      child: Padding(
+        padding: EdgeInsetsGeometry.all(8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Column(
+              children: [
+                Text("Total Subscriptions", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(provider.subscriptions.length.toString(), style: TextStyle(fontSize: 14)),
+              ],
+            ),
+            Column(
+              children: [
+                Text("Total Monthly Subscription Cost", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  getFormattedCurrency(total),
+                  style: TextStyle(color: AppTheme.dark.colorScheme.error, fontSize: 14),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildCalendarCard(TransactionProvider provider) {
