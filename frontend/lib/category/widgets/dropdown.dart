@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 
@@ -40,6 +41,20 @@ class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
     ),
   };
 
+  /// Returns how to display the given category info
+  Widget _getDisplay(Category? category) {
+    return Row(
+      spacing: 4,
+      children: [
+        CategoryIcon(
+          category ?? Category(id: "", name: "", type: CategoryTypeEnum.income, icon: "unknown"),
+          avatarSize: 16,
+        ),
+        Text(category?.name ?? 'Unknown', overflow: TextOverflow.ellipsis, maxLines: 1),
+      ],
+    );
+  }
+
   /// Recursively builds the list of dropdown menu items with indentation for children.
   List<DropdownMenuItem<Category>> _buildCategoryItems(
     List<Category> allCategories,
@@ -56,7 +71,7 @@ class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
         value: category,
         child: Padding(
           padding: applyPadding ? EdgeInsets.only(left: indentation) : EdgeInsets.zero,
-          child: Text(category.name, overflow: TextOverflow.ellipsis, maxLines: 1),
+          child: _getDisplay(category),
         ),
       ),
     );
@@ -97,7 +112,7 @@ class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
                   // We use this so we don't have indentation when displaying the options in the button
                   return [
                     if (widget.displayAllCategoryButton) Text(CategoryDropdown.fakeAllCategory.name),
-                    Text("Unknown"),
+                    _getDisplay(null),
 
                     /// Render tree in order
                     ...() {
@@ -116,7 +131,7 @@ class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
                       value: CategoryDropdown.fakeAllCategory,
                       child: Text(CategoryDropdown.fakeAllCategory.name),
                     ),
-                  const DropdownMenuItem<Category>(value: null, child: Text("Unknown")),
+                  DropdownMenuItem<Category>(value: null, child: _getDisplay(null)),
 
                   // Find top-level categories to start the tree
                   ...() {

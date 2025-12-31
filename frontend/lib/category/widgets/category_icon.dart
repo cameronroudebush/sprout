@@ -7,63 +7,65 @@ class CategoryIcon extends StatelessWidget {
   final double avatarSize;
   const CategoryIcon(this.category, {super.key, this.avatarSize = 20});
 
-  IconData _getIconForCategory(Category? category) {
-    if (category == null) {
-      return Icons.category;
-    }
+  /// Icons that we support for our category display
+  static const Map<String, IconData> iconLibrary = {
+    'food_drink': Icons.fastfood,
+    'groceries': Icons.local_grocery_store,
+    'restaurants': Icons.restaurant,
+    'shopping': Icons.shopping_bag,
+    'online_shopping': Icons.web,
+    'utilities': Icons.lightbulb,
+    'housing': Icons.home,
+    'transportation': Icons.directions_car,
+    'healthcare': Icons.local_hospital,
+    'entertainment': Icons.movie,
+    'pets': Icons.pets,
+    'travel': Icons.flight,
+    'service': Icons.room_service,
+    'recreation': Icons.sports_baseball,
+    'warning': Icons.warning,
+    'loan': Icons.money,
+    'interest': Icons.money_off,
+    'payment': Icons.payment,
+    'income': Icons.attach_money,
+    'holiday': Icons.celebration,
+    'savings': Icons.savings,
+    'investments': Icons.trending_up,
+    'bank': Icons.account_balance,
+    'credit_card': Icons.credit_card,
+    'cash': Icons.payments,
+    'tax': Icons.description,
+    'insurance': Icons.shield,
+    'subscription': Icons.subscriptions,
+    'gift': Icons.redeem,
+    'education': Icons.school,
+    'fitness': Icons.fitness_center,
+    'personal_care': Icons.content_cut,
+    'laundry': Icons.local_laundry_service,
+    'coffee': Icons.coffee,
+    'gas': Icons.local_gas_station,
+    'maintenance': Icons.build,
+    'child_care': Icons.child_care,
+    'charity': Icons.volunteer_activism,
+    'phone': Icons.smartphone,
+    'internet': Icons.router,
+    'work': Icons.work,
+    'hobby': Icons.palette,
+    'print': Icons.print,
+    'help': Icons.help_outline,
+    'unknown': Icons.question_mark_rounded,
+  };
 
-    final categoryName = category.name.toLowerCase();
-    // TODO: Update category icon to be selectable
-    switch (categoryName) {
-      case 'food & drink':
-        return Icons.fastfood;
-      case 'groceries':
-        return Icons.local_grocery_store;
-      case 'restaurants':
-        return Icons.restaurant;
-      case 'shopping':
-        return Icons.shopping_bag;
-      case 'online shopping':
-        return Icons.web;
-      case 'utilities':
-        return Icons.lightbulb;
-      case 'housing':
-        return Icons.home;
-      case 'transportation':
-        return Icons.directions_car;
-      case 'healthcare':
-        return Icons.local_hospital;
-      case 'entertainment':
-        return Icons.movie;
-      case 'pets':
-        return Icons.pets;
-      case 'travel':
-        return Icons.flight;
-      case 'service':
-        return Icons.room_service;
-      case 'recreation':
-        return Icons.sports_baseball;
-      case 'shops':
-        return Icons.shopping_bag;
-      case 'unauthorized':
-        return Icons.warning;
-      case 'loan':
-        return Icons.money;
-      case 'interest':
-        return Icons.money_off;
-      case 'payment':
-        return Icons.payment;
-      case 'income':
-        return Icons.attach_money;
-      // case 'christmas':
-      //   return Icons.christm;
-      default:
-        return Icons.category;
-    }
+  /// Attempts to load the icon from the library, else defaults to the category icon
+  IconData _getIconForCategory(Category? category) {
+    return iconLibrary[category?.icon] ?? Icons.category;
   }
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(radius: avatarSize, child: Icon(_getIconForCategory(category)));
+    return CircleAvatar(
+      radius: avatarSize,
+      child: Icon(_getIconForCategory(category), size: avatarSize),
+    );
   }
 }

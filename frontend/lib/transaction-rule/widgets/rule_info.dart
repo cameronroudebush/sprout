@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/widgets/dropdown.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
@@ -26,6 +27,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
   final _priorityController = TextEditingController();
   TransactionRuleTypeEnum _type = TransactionRuleTypeEnum.description;
   Category? _category;
+  Account? _account;
   bool _strict = false;
   bool _enabled = true;
 
@@ -40,6 +42,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
       _priorityController.text = rule.order.toString();
       _type = rule.type;
       _category = rule.category;
+      _account = rule.account;
       _strict = rule.strict;
       _enabled = rule.enabled;
     } else {
@@ -48,6 +51,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
       _priorityController.text = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
       _type = TransactionRuleTypeEnum.description;
       _category = null;
+      _account = null;
       _enabled = true;
       _strict = false;
     }
@@ -72,6 +76,7 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
       type: _type,
       value: _valueController.text,
       category: _category,
+      account: _account,
       strict: _strict,
       order: int.tryParse(_priorityController.text) ?? 1,
       enabled: _enabled,
@@ -312,6 +317,25 @@ class _TransactionRuleInfoState extends State<TransactionRuleInfo> {
                         });
                       }),
                       Text("This is the category that will be applied when the rule is met.", style: helpStyle),
+                    ],
+                  ),
+
+                  // Account to assign to for the rule
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
+                    children: [
+                      const Text("Account", style: TextStyle(fontWeight: FontWeight.bold)),
+                      AccountDropdown(_account, (acc) {
+                        setState(() {
+                          _account = acc;
+                        });
+                      }),
+                      Text(
+                        "This is the account that will only be affected by this rule if selected.",
+                        style: helpStyle,
+                      ),
                     ],
                   ),
 

@@ -14,6 +14,7 @@ class TransactionRule {
   /// Returns a new [TransactionRule] instance.
   TransactionRule({
     required this.id,
+    this.account,
     required this.type,
     required this.value,
     this.category,
@@ -24,6 +25,15 @@ class TransactionRule {
   });
 
   String id;
+
+  /// An account that this rule should ony apply to.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  Account? account;
 
   TransactionRuleTypeEnum type;
 
@@ -54,6 +64,7 @@ class TransactionRule {
   @override
   bool operator ==(Object other) => identical(this, other) || other is TransactionRule &&
     other.id == id &&
+    other.account == account &&
     other.type == type &&
     other.value == value &&
     other.category == category &&
@@ -66,6 +77,7 @@ class TransactionRule {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (account == null ? 0 : account!.hashCode) +
     (type.hashCode) +
     (value.hashCode) +
     (category == null ? 0 : category!.hashCode) +
@@ -75,11 +87,16 @@ class TransactionRule {
     (enabled.hashCode);
 
   @override
-  String toString() => 'TransactionRule[id=$id, type=$type, value=$value, category=$category, strict=$strict, matches=$matches, order=$order, enabled=$enabled]';
+  String toString() => 'TransactionRule[id=$id, account=$account, type=$type, value=$value, category=$category, strict=$strict, matches=$matches, order=$order, enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+    if (this.account != null) {
+      json[r'account'] = this.account;
+    } else {
+      json[r'account'] = null;
+    }
       json[r'type'] = this.type;
       json[r'value'] = this.value;
     if (this.category != null) {
@@ -114,6 +131,7 @@ class TransactionRule {
 
       return TransactionRule(
         id: mapValueOfType<String>(json, r'id')!,
+        account: Account.fromJson(json[r'account']),
         type: TransactionRuleTypeEnum.fromJson(json[r'type'])!,
         value: mapValueOfType<String>(json, r'value')!,
         category: Category.fromJson(json[r'category']),

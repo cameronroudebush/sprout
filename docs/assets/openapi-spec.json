@@ -922,6 +922,43 @@
         ]
       }
     },
+    "/transaction-rule/apply": {
+      "post": {
+        "description": "Triggers a manual synchronization process that evaluates all transaction rules against the user's existing transactions and updates their categories or metadata accordingly. If matches could not be found, those transactions will not be updated.",
+        "operationId": "TransactionRuleController_applyRules",
+        "parameters": [
+          {
+            "name": "force",
+            "required": false,
+            "in": "query",
+            "description": "If true, resets categories to null for transactions that do not match any current rules.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rules were successfully processed and applied to transactions."
+          },
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Re-apply all transaction rules",
+        "tags": [
+          "Transaction Rule"
+        ]
+      }
+    },
     "/sse": {
       "get": {
         "operationId": "SSEController_sse",
@@ -1649,7 +1686,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.0.7-31-gb401e38",
+    "version": "v0.1.0-16-g63cd4a0",
     "contact": {}
   },
   "tags": [
@@ -1983,14 +2020,6 @@
             "description": "The name of the category",
             "example": "Groceries"
           },
-          "type": {
-            "description": "If this account type should be considered an expense or income",
-            "enum": [
-              "income",
-              "expense"
-            ],
-            "type": "string"
-          },
           "parentCategory": {
             "description": "The parent category this category belongs to",
             "allOf": [
@@ -1998,6 +2027,18 @@
                 "$ref": "#/components/schemas/Category"
               }
             ]
+          },
+          "icon": {
+            "type": "string",
+            "description": "The icon to use for this category. If one is not given, we'll use the default."
+          },
+          "type": {
+            "description": "If this account type should be considered an expense or income",
+            "enum": [
+              "income",
+              "expense"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -2133,6 +2174,14 @@
         "properties": {
           "id": {
             "type": "string"
+          },
+          "account": {
+            "description": "An account that this rule should ony apply to.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Account"
+              }
+            ]
           },
           "type": {
             "enum": [

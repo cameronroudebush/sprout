@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/category/widgets/category_icon_dropdown.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
@@ -26,6 +27,7 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
   final _nameController = TextEditingController();
   CategoryTypeEnum _type = CategoryTypeEnum.expense;
   Category? _parentCategory;
+  String? _icon;
 
   @override
   Map<dynamic, DataRequest> get requests => {
@@ -45,6 +47,7 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
       _nameController.text = category.name;
       _type = category.type;
       _parentCategory = category.parentCategory;
+      _icon = category.icon;
     } else {
       // Initialize for a new category
       _nameController.text = "";
@@ -66,6 +69,7 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
       name: _nameController.text,
       type: _type,
       parentCategory: _parentCategory,
+      icon: _icon,
     );
   }
 
@@ -189,9 +193,13 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
                           final typeName = type.toString();
                           return DropdownMenuItem(
                             value: type,
-                            // Capitalize
-                            child: Text(
-                              typeName.split('.').last[0].toUpperCase() + typeName.split('.').last.substring(1),
+                            child: Row(
+                              spacing: 4,
+                              children: [
+                                if (type == CategoryTypeEnum.expense) Icon(Icons.arrow_downward, color: Colors.red),
+                                if (type == CategoryTypeEnum.income) Icon(Icons.arrow_upward, color: Colors.green),
+                                Text(typeName.split('.').last[0].toUpperCase() + typeName.split('.').last.substring(1)),
+                              ],
                             ),
                           );
                         }).toList(),
@@ -218,6 +226,22 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
                         });
                       }),
                       Text("Assign a parent to create a sub-category.", style: helpStyle),
+                    ],
+                  ),
+
+                  // Icon
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 4,
+                    children: [
+                      const Text("Icon", style: TextStyle(fontWeight: FontWeight.bold)),
+                      CategoryIconDropdown(_icon, (icon) {
+                        setState(() {
+                          _icon = icon;
+                        });
+                      }),
+                      Text("The icon to display for this category.", style: helpStyle),
                     ],
                   ),
                 ],

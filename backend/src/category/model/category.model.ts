@@ -30,6 +30,12 @@ export class Category extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   name: string;
 
+  /** The icon to use for this category. If one is not given, we'll use the default. */
+  @IsString()
+  @IsOptional()
+  @DatabaseDecorators.column({ nullable: true })
+  icon?: string;
+
   /** If this account type should be considered an expense or income */
   @DatabaseDecorators.column({ nullable: false })
   @IsEnum(CategoryType)
@@ -46,12 +52,13 @@ export class Category extends DatabaseBase {
   @ApiHideProperty()
   parentCategoryId!: string;
 
-  constructor(user: User, name: string, type: Category["type"], parentCategory?: Category) {
+  constructor(user: User, name: string, type: Category["type"], parentCategory?: Category, icon?: string) {
     super();
     this.user = user;
     this.name = name;
     this.type = type;
     this.parentCategory = parentCategory;
+    this.icon = icon;
   }
 
   /**
@@ -61,22 +68,27 @@ export class Category extends DatabaseBase {
    */
   static getDefaultCategoriesForUser(user: User) {
     const categoriesToInsert: Category[] = [];
-    const foodAndDrink = new Category(user, "Food & Drink", CategoryType.expense);
+
+    // Food & Drink Section
+    const foodAndDrink = new Category(user, "Food & Drink", CategoryType.expense, undefined, "food_drink");
     categoriesToInsert.push(foodAndDrink);
-    categoriesToInsert.push(new Category(user, "Groceries", CategoryType.expense, foodAndDrink));
-    categoriesToInsert.push(new Category(user, "Restaurants", CategoryType.expense, foodAndDrink));
+    categoriesToInsert.push(new Category(user, "Groceries", CategoryType.expense, foodAndDrink, "groceries"));
+    categoriesToInsert.push(new Category(user, "Restaurants", CategoryType.expense, foodAndDrink, "restaurants"));
 
-    const shopping = new Category(user, "Shopping", CategoryType.expense);
+    // Shopping Section
+    const shopping = new Category(user, "Shopping", CategoryType.expense, undefined, "shopping");
     categoriesToInsert.push(shopping);
-    categoriesToInsert.push(new Category(user, "Online Shopping", CategoryType.expense, shopping));
+    categoriesToInsert.push(new Category(user, "Online Shopping", CategoryType.expense, shopping, "online_shopping"));
 
-    categoriesToInsert.push(new Category(user, "Utilities", CategoryType.expense));
-    categoriesToInsert.push(new Category(user, "Housing", CategoryType.expense));
-    categoriesToInsert.push(new Category(user, "Transportation", CategoryType.expense));
-    categoriesToInsert.push(new Category(user, "Healthcare", CategoryType.expense));
-    categoriesToInsert.push(new Category(user, "Entertainment", CategoryType.expense));
-    categoriesToInsert.push(new Category(user, "Pets", CategoryType.expense));
-    categoriesToInsert.push(new Category(user, "Income", CategoryType.income));
+    // Individual Categories
+    categoriesToInsert.push(new Category(user, "Utilities", CategoryType.expense, undefined, "utilities"));
+    categoriesToInsert.push(new Category(user, "Housing", CategoryType.expense, undefined, "housing"));
+    categoriesToInsert.push(new Category(user, "Transportation", CategoryType.expense, undefined, "transportation"));
+    categoriesToInsert.push(new Category(user, "Healthcare", CategoryType.expense, undefined, "healthcare"));
+    categoriesToInsert.push(new Category(user, "Entertainment", CategoryType.expense, undefined, "entertainment"));
+    categoriesToInsert.push(new Category(user, "Pets", CategoryType.expense, undefined, "pets"));
+    categoriesToInsert.push(new Category(user, "Income", CategoryType.income, undefined, "income"));
+
     return categoriesToInsert;
   }
 

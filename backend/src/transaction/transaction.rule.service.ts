@@ -21,8 +21,9 @@ export class TransactionRuleService {
    * @param user The user for whom to apply the rules.
    * @param account Optional account to scope the transactions.
    * @param onlyApplyToEmpty If true, only applies rules to transactions with no category.
+   * @param force If true, transactions that match no rules will have their categories set to null.
    */
-  async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false) {
+  async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false, force = false) {
     // Fetches rules in descending order of priority. Higher `order` values are processed first.
     const rules = await TransactionRule.find({
       where: { user: { id: user.id } },
@@ -50,6 +51,9 @@ export class TransactionRuleService {
       for (const transaction of transactions) {
         // If this transaction has already been claimed by a rule with higher priority, skip it.
         if (matchedTransactionIds.has(transaction.id)) continue;
+
+        // Handle requirements where certain rules only apply to certain accounts
+        if (rule.account != null && transaction.account.id !== rule.account.id) continue;
 
         let isMatch = false;
 
@@ -89,6 +93,15 @@ export class TransactionRuleService {
       rule.matches = currentRuleMatches;
       await rule.update();
     }
+
+    // If force is enabled, find transactions that were not "claimed" by any rule
+    // and ensure their category is set to null.
+    if (force)
+      for (const transaction of transactions)
+        if (!matchedTransactionIds.has(transaction.id) && transaction.category !== null) {
+          transaction.category = undefined;
+          await transaction.update();
+        }
   }
 
   /** Reorders the transaction rules for a given user.
