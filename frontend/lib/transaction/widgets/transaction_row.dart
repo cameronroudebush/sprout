@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction/widgets/category_icon.dart';
 import 'package:sprout/transaction/widgets/transaction_info.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
