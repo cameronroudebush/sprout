@@ -101,7 +101,14 @@ class CashFlowSelector extends StatelessWidget {
                       icon: const Icon(Icons.keyboard_double_arrow_right),
                       onPressed: isMonthly
                           ? (selectedDate.month != currentMonthEnd.month || selectedDate.year != currentMonthEnd.year
-                                ? () => onMonthIncrementChanged(currentMonthEnd.month - selectedDate.month)
+                                ? () {
+                                    var month = currentMonthEnd.month - selectedDate.month;
+                                    if (currentMonthEnd.year != selectedDate.year) {
+                                      month += (currentMonthEnd.year - selectedDate.year) * 12;
+                                    }
+
+                                    onMonthIncrementChanged(month);
+                                  }
                                 : null)
                           : (selectedDate.year != now.year ? () => onYearChanged(now.year) : null),
                     ),

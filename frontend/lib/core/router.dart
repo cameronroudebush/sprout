@@ -21,10 +21,12 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/connect_fail.dart';
+import 'package:sprout/core/widgets/dialog.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/setup/widgets/connection_setup.dart';
+import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
 import 'package:sprout/transaction/widgets/monthly.dart';
@@ -179,15 +181,49 @@ class SproutRouter {
       'Rules',
       icon: Icons.rule,
       buttonBuilder: (context, isDesktop) {
-        return
-        // Add button
-        SproutTooltip(
-          message: "Add a new transaction rule",
-          child: IconButton(
-            onPressed: () => showDialog(context: context, builder: (_) => TransactionRuleInfo(null)),
-            icon: Icon(Icons.add),
-            style: AppTheme.primaryButton,
-          ),
+        return Row(
+          spacing: 4,
+          children: [
+            // Add new rule button
+            SproutTooltip(
+              message: "Add a new transaction rule",
+              child: IconButton(
+                onPressed: () => showDialog(context: context, builder: (_) => TransactionRuleInfo(null)),
+                icon: Icon(Icons.add),
+                style: AppTheme.primaryButton,
+              ),
+            ),
+            // Manual Refresh
+            SproutTooltip(
+              message: "Manually re-run all rules",
+              child: IconButton(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => SproutDialogWidget(
+                    'Re-apply Transaction Rules',
+                    showCloseDialogButton: true,
+                    closeButtonText: "Cancel",
+                    closeButtonStyle: AppTheme.primaryButton,
+                    showSubmitButton: true,
+                    submitButtonText: "Continue",
+                    submitButtonStyle: AppTheme.secondaryButton,
+                    onSubmitClick: () async {
+                      final transactionRuleProvider = ServiceLocator.get<TransactionRuleProvider>();
+                      transactionRuleProvider.manualRefresh();
+                      // Close dialog
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Pressing confirm will re-run rule application against all historical transactions. Be warned, this will overwrite anything that applies to a rule. Would you like to continue?',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                icon: Icon(Icons.refresh),
+                style: AppTheme.secondaryButton,
+              ),
+            ),
+          ],
         );
       },
     ),

@@ -131,5 +131,7 @@ export class TransactionRuleController {
   })
   async applyRules(@CurrentUser() user: User, @Query("force", new ParseBoolPipe({ optional: true })) force: boolean = false): Promise<void> {
     await this.transactionRuleService.applyRulesToTransactions(user, undefined, undefined, force);
+    // Inform of refresh required
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
   }
 }

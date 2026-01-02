@@ -130,7 +130,7 @@ class _TransactionMonthlySubscriptionsState extends StateTracker<TransactionMont
             ),
             Column(
               children: [
-                Text("Total Monthly Subscription Cost", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text("Total Monthly Cost", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 Text(
                   getFormattedCurrency(total),
                   style: TextStyle(color: AppTheme.dark.colorScheme.error, fontSize: 14),
