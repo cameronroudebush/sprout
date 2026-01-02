@@ -10,6 +10,7 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/page_loading.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
@@ -64,7 +65,7 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
     setState(() {
       _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + monthIncrement + 1, 0);
     });
-    loadData();
+    loadData(checkLastUpdateTime: false);
   }
 
   void _changeYear(int year) {
@@ -72,7 +73,7 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
       // When changing year, we can default to January of that year.
       _selectedDate = DateTime(year, 2, 0);
     });
-    loadData();
+    loadData(checkLastUpdateTime: false);
   }
 
   Widget _buildStats() {
@@ -149,14 +150,17 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
                       _selectedDate = DateTime(now.year, now.month + 1, 0);
                     }
                   });
-                  loadData();
+                  loadData(checkLastUpdateTime: false);
                 },
                 onMonthIncrementChanged: _changeMonth,
                 onYearChanged: _changeYear,
               ),
             ),
-            // Tab view
-            Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
+            isLoading
+                ? PageLoadingWidget()
+                :
+                  // Tab view
+                  Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
           ],
         ),
       ),

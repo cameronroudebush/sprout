@@ -48,6 +48,15 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
     return updatedRule;
   }
 
+  /// Manually runs a refresh to update all transaction rules
+  manualRefresh({force = false}) async {
+    _transactionRulesRunning = true;
+    notifyListeners();
+    await api.transactionRuleControllerApplyRules(force: force);
+    _transactionRulesRunning = false;
+    notifyListeners();
+  }
+
   @override
   Future<void> cleanupData() async {
     _rules = [];

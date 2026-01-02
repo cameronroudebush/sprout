@@ -72,7 +72,7 @@ class _CashFlowPieChartState extends StateTracker<CashFlowPieChart> {
         // Create our mapping
         final data = totalIncome == 0 || totalExpense == 0
             ? null
-            : {"Income": totalIncome, "Spent": totalExpense.abs()};
+            : {"Income": totalIncome, "Expense": totalExpense.abs()};
 
         if (data == null) {
           return SproutCard(
@@ -85,7 +85,7 @@ class _CashFlowPieChartState extends StateTracker<CashFlowPieChart> {
           applySizedBox: false,
           child: SproutPieChart(
             data: data,
-            colorMapping: {"Income": Colors.green, "Spent": Colors.red[700]!},
+            colorMapping: {"Income": Colors.green, "Expense": Colors.red[700]!},
             header: "Cash Flow",
             subheader: widget.showSubheader ? periodText : null,
             showLegend: widget.showLegend,

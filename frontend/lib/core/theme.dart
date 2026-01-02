@@ -22,7 +22,7 @@ abstract final class AppTheme {
   /// Styling for displaying primary buttons
   static final secondaryButton = FilledButton.styleFrom(
     backgroundColor: dark.colorScheme.secondary,
-    foregroundColor: dark.colorScheme.secondary,
+    foregroundColor: dark.colorScheme.onSecondary,
   );
 
   /// Dark theme design
