@@ -2,6 +2,7 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
+import { Utility } from "@backend/core/model/utility/utility";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
@@ -112,6 +113,7 @@ export class SimpleFINProvider extends ProviderBase {
     const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
     if (Configuration.isDevBuild) {
       this.logger.warn(`Dev build detected. SimpleFIN won't return any data.`);
+      await Utility.delay(2000);
       return { errors: [], accounts: [] } as SimpleFINReturn.FinancialData;
     } else {
       await this.rateLimit.incrementOrError();

@@ -49,6 +49,15 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
   @override
   Future<void> cleanupData() async {
     _sankeyDataCache.clear();
+    _statsCache.clear();
     notifyListeners();
+  }
+
+  @override
+  Future<void> onSSE(SSEData sse) async {
+    super.onSSE(sse);
+    if (sse.event == SSEDataEventEnum.forceUpdate) {
+      cleanupData();
+    }
   }
 }

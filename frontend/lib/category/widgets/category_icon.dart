@@ -9,49 +9,107 @@ class CategoryIcon extends StatelessWidget {
 
   /// Icons that we support for our category display
   static const Map<String, IconData> iconLibrary = {
+    // Food & Drink
     'food_drink': Icons.fastfood,
     'groceries': Icons.local_grocery_store,
     'restaurants': Icons.restaurant,
+    'coffee': Icons.coffee,
+    'alcohol': Icons.local_bar,
+    'bakery': Icons.bakery_dining,
+
+    // Shopping & Personal
     'shopping': Icons.shopping_bag,
     'online_shopping': Icons.web,
-    'utilities': Icons.lightbulb,
+    'clothing': Icons.checkroom,
+    'jewelry': Icons.diamond,
+    'electronics': Icons.devices,
+    'personal_care': Icons.content_cut,
+    'hair': Icons.face_retouching_natural,
+    'cosmetics': Icons.brush,
+
+    // Housing & Utilities
     'housing': Icons.home,
+    'mortgage': Icons.domain,
+    'rent': Icons.house,
+    'home_improvement': Icons.construction,
+    'utilities': Icons.lightbulb,
+    'internet': Icons.router,
+    'phone': Icons.smartphone,
+    'water': Icons.water_drop,
+    'maintenance': Icons.build,
+    'furniture': Icons.chair,
+    'laundry': Icons.local_laundry_service,
+
+    // Transportation
     'transportation': Icons.directions_car,
-    'healthcare': Icons.local_hospital,
-    'entertainment': Icons.movie,
-    'pets': Icons.pets,
+    'gas': Icons.local_gas_station,
+    'parking': Icons.local_parking,
+    'auto_loan': Icons.car_rental,
+    'auto_repair': Icons.car_repair,
+    'taxi': Icons.local_taxi,
+    'public_transit': Icons.directions_bus,
+
+    // Travel
     'travel': Icons.flight,
-    'service': Icons.room_service,
+    'airfare': Icons.airplane_ticket,
+    'hotel': Icons.hotel,
+    'vacation': Icons.beach_access,
+    'luggage': Icons.luggage,
+
+    // Entertainment & Hobbies
+    'entertainment': Icons.movie,
+    'video_games': Icons.videogame_asset,
+    'hobby': Icons.palette,
+    '3d_printing': Icons.layers,
+    'music': Icons.music_note,
     'recreation': Icons.sports_baseball,
-    'warning': Icons.warning,
-    'loan': Icons.money,
-    'interest': Icons.money_off,
-    'payment': Icons.payment,
+    'fitness': Icons.fitness_center,
+    'events': Icons.confirmation_number,
+
+    // Financial & Income
     'income': Icons.attach_money,
-    'holiday': Icons.celebration,
+    'paycheck': Icons.work_history,
+    'bonus': Icons.star,
     'savings': Icons.savings,
     'investments': Icons.trending_up,
+    'stocks': Icons.show_chart,
+    'dividend': Icons.currency_exchange,
+    'crypto': Icons.currency_bitcoin,
     'bank': Icons.account_balance,
-    'credit_card': Icons.credit_card,
-    'cash': Icons.payments,
+    'transfer': Icons.swap_horiz,
+    'withdrawal': Icons.money_off,
+    'fee': Icons.price_change,
     'tax': Icons.description,
+    'loan': Icons.money,
+
+    // Credit & Payments
+    'payment': Icons.payment,
+    'credit_card': Icons.credit_card,
+    'cc_payment': Icons.credit_score,
+    'debt': Icons.money_off_csred,
+    'cash': Icons.payments,
+
+    // Health & Life
+    'healthcare': Icons.local_hospital,
+    'pharmacy': Icons.medication,
     'insurance': Icons.shield,
-    'subscription': Icons.subscriptions,
-    'gift': Icons.redeem,
-    'education': Icons.school,
-    'fitness': Icons.fitness_center,
-    'personal_care': Icons.content_cut,
-    'laundry': Icons.local_laundry_service,
-    'coffee': Icons.coffee,
-    'gas': Icons.local_gas_station,
-    'maintenance': Icons.build,
+    'pets': Icons.pets,
+    'vet': Icons.healing,
     'child_care': Icons.child_care,
+    'education': Icons.school,
+
+    // Occasions & Gifts
+    'gift': Icons.redeem,
+    'christmas': Icons.ac_unit,
+    'holiday': Icons.celebration,
     'charity': Icons.volunteer_activism,
-    'phone': Icons.smartphone,
-    'internet': Icons.router,
+    'subscription': Icons.subscriptions,
+
+    // Misc
+    'service': Icons.room_service,
     'work': Icons.work,
-    'hobby': Icons.palette,
     'print': Icons.print,
+    'warning': Icons.warning,
     'help': Icons.help_outline,
     'unknown': Icons.question_mark_rounded,
   };

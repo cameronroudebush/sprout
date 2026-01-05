@@ -233,42 +233,51 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
                 // Top Bar of Account info
                 SproutCard(
                   child: Padding(
-                    padding: EdgeInsetsGeometry.all(12),
-                    child: Column(
-                      spacing: 12,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: Row(
+                      spacing: 16,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Account information
-                        Row(
-                          spacing: 24,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // Logo
-                            AccountLogoWidget(account),
-                            // Account names
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextWidget(text: account.name, referenceSize: 1.5),
-                                TextWidget(
-                                  text: account.institution.name,
-                                  referenceSize: 1,
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                            InstitutionError(institution: account.institution),
-                          ],
+                        // Logo
+                        AccountLogoWidget(account),
+
+                        // Name and Institution
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                spacing: 4,
+                                children: [
+                                  Flexible(
+                                    child: TextWidget(
+                                      text: account.name,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  if (account.institution.hasError) ...[
+                                    InstitutionError(institution: account.institution),
+                                  ],
+                                ],
+                              ),
+                              TextWidget(
+                                text: account.institution.name,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                              ),
+                            ],
+                          ),
                         ),
-                        const Divider(height: 1),
-                        // End buttons
-                        Wrap(
-                          spacing: 24,
-                          runSpacing: 12,
-                          alignment: WrapAlignment.center,
+
+                        // Controls
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          spacing: 12,
                           children: [
-                            // Account sub type
+                            // Subtype Selector
                             SizedBox(
-                              width: 240,
+                              width: 200,
                               child: AccountSubTypeSelect(
                                 account,
                                 onChanged: (newSubType) {
@@ -277,33 +286,46 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
                                 },
                               ),
                             ),
-                            // Institution error fix
-                            if (true)
-                              SproutTooltip(
-                                message: "Opens a dialog to fix this account.",
-                                child: FilledButton(
+
+                            // Action Buttons
+                            Wrap(
+                              spacing: 8,
+                              alignment: WrapAlignment.end,
+                              children: [
+                                // Fix Account Button
+                                if (true)
+                                  SproutTooltip(
+                                    message: "Opens a dialog to fix this account via the provider.",
+                                    child: FilledButton.icon(
+                                      icon: const Icon(Icons.build_circle_outlined, size: 16),
+                                      label: const Text("Fix"),
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: Theme.of(context).colorScheme.error,
+                                        foregroundColor: Theme.of(context).colorScheme.onError,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      ),
+                                      onPressed: () async {
+                                        await showDialog(
+                                          context: context,
+                                          builder: (_) => AccountErrorDialog(account: account),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                // Delete Button
+                                FilledButton.icon(
+                                  icon: Icon(Icons.delete_outline, size: 16),
+                                  label: Text("Delete"),
+                                  style: AppTheme.errorButton,
                                   onPressed: () async {
                                     await showDialog(
                                       context: context,
-                                      builder: (_) => AccountErrorDialog(account: account),
+                                      builder: (_) => AccountDeleteDialog(account: account),
                                     );
                                   },
-                                  child: TextWidget(text: "Fix Account"),
                                 ),
-                              ),
-                            // Delete account
-                            SproutTooltip(
-                              message: "Opens a dialog to delete this account.",
-                              child: FilledButton(
-                                style: AppTheme.errorButton,
-                                onPressed: () async {
-                                  await showDialog(
-                                    context: context,
-                                    builder: (_) => AccountDeleteDialog(account: account),
-                                  );
-                                },
-                                child: TextWidget(text: "Delete"),
-                              ),
+                              ],
                             ),
                           ],
                         ),

@@ -77,7 +77,7 @@ class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
     );
 
     // Find, sort, and recurse for children
-    final children = allCategories.where((c) => c.parentCategory == category).toList();
+    final children = allCategories.where((c) => c.parentCategory?.id == category.id).toList();
     children.sort((a, b) => a.name.compareTo(b.name));
 
     for (final child in children) {

@@ -51,11 +51,13 @@ class AccountProvider extends BaseProvider<AccountApi> {
   Future<void> manualSync() async {
     try {
       manualSyncIsRunning = true;
+      SnackbarProvider.openSnackbar("A data sync is running...");
       notifyListeners();
       await api.accountControllerManualSync(false);
     } catch (e) {
-      SnackbarProvider.openWithAPIException(e);
       manualSyncIsRunning = false;
+      SnackbarProvider.clearSnackBars();
+      SnackbarProvider.openWithAPIException(e);
       notifyListeners();
     }
   }
@@ -71,6 +73,7 @@ class AccountProvider extends BaseProvider<AccountApi> {
     await super.onSSE(data);
     // Reset status of manual sync button
     if (data.event == SSEDataEventEnum.sync_) {
+      SnackbarProvider.clearSnackBars();
       manualSyncIsRunning = false;
       notifyListeners();
       final configProvider = ServiceLocator.get<ConfigProvider>();

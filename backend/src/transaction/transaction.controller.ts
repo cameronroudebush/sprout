@@ -2,6 +2,8 @@ import { Account } from "@backend/account/model/account.model";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { AuthGuard } from "@backend/core/guard/auth.guard";
+import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
 import { TotalTransactions } from "@backend/transaction/model/api/total.transaction.dto";
 import { TransactionSubscription } from "@backend/transaction/model/api/transaction.subscription.dto";
 import { Transaction } from "@backend/transaction/model/transaction.model";
@@ -19,7 +21,10 @@ import { Between, In, IsNull, Like } from "typeorm";
 @ApiTags("Transaction")
 @AuthGuard.attach()
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly sseService: SSEService,
+  ) {}
 
   @Patch(":id")
   @ApiOperation({
@@ -46,7 +51,11 @@ export class TransactionController {
     // Description
     matchingTransaction.description = transaction.description ?? matchingTransaction.description;
 
-    return await matchingTransaction.update();
+    const updated = await matchingTransaction.update();
+    // Updating a transaction has a lot of effect on reports and other locations. Tell the frontend to update all data.
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+
+    return updated;
   }
 
   @Get()

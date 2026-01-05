@@ -166,4 +166,10 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    StateTracker.lastUpdateTimes.remove(widgetName);
+  }
 }

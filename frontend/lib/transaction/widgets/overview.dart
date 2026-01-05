@@ -112,6 +112,7 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
   void onForceSync() {
     // Wipe out all transactions to forcible reset them
     ServiceLocator.get<TransactionProvider>().wipeData();
+    _populateInitialTransactions(); // Pop more transactions
   }
 
   @override
