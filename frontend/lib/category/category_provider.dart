@@ -74,4 +74,12 @@ class CategoryProvider extends BaseProvider<CategoryApi> {
     _statsCache.clear();
     notifyListeners();
   }
+
+  @override
+  Future<void> onSSE(SSEData sse) async {
+    super.onSSE(sse);
+    if (sse.event == SSEDataEventEnum.forceUpdate) {
+      cleanupData();
+    }
+  }
 }

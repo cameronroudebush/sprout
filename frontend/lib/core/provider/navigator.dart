@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
@@ -16,12 +15,13 @@ class SproutNavigator {
     final currentRoute = SproutRouter.router.state.topRoute?.name;
     final targetRoute = page.toLowerCase();
     if (currentRoute != targetRoute) {
-      if (kIsWeb) {
-        SproutRouter.router.goNamed(targetRoute, queryParameters: queryParameters ?? {});
-      } else {
-        SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
-      }
+      SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
     }
+  }
+
+  /// Redirects to the last page we were on.
+  static void back(BuildContext context) {
+    Navigator.pop(context);
   }
 
   /// Redirects to the transaction page with the given category name. If the category name is invalid, no redirect is completed.

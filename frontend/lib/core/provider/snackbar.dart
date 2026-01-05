@@ -45,6 +45,11 @@ class SnackbarProvider {
     }
   }
 
+  /// Clears all open snackbar's
+  static void clearSnackBars() {
+    ServiceLocator.scaffoldMessengerKey.currentState?.clearSnackBars();
+  }
+
   /// Given an error, attempts to determine a error message
   ///   from it if it's an openAPI exception by parsing the JSON. If it's
   ///   not, it just toString's the error and returns it.

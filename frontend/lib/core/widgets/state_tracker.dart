@@ -162,8 +162,8 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
     _sseSubscription = _sseProvider.onSSEEvent.listen((data) async {
       // If this is a force update, load new data and show spinners
       if (data.event == SSEDataEventEnum.forceUpdate) {
+        await loadData(forceUpdate: true, checkLastUpdateTime: false);
         onForceSync();
-        await loadData(forceUpdate: true);
       }
     });
   }

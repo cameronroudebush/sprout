@@ -22,7 +22,6 @@ import 'package:sprout/core/shell.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/connect_fail.dart';
 import 'package:sprout/core/widgets/dialog.dart';
-import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/setup/widgets/connection_setup.dart';
@@ -136,11 +135,7 @@ class SproutRouter {
       canNavigateTo: false,
       scrollWrapper: false,
       buttonBuilder: (context, isDesktop) {
-        final accountProvider = ServiceLocator.get<AccountProvider>();
-        final state = GoRouter.of(context).state;
-        final accountId = state.uri.queryParameters["acc"];
-        final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
-        void redirect() => SproutNavigator.redirect("accounts", queryParameters: {"acc-type": account?.type.value});
+        void redirect() => SproutNavigator.back(context);
         // Back to accounts
         return Expanded(
           child: Padding(
@@ -152,7 +147,7 @@ class SproutRouter {
                     icon: Icon(Icons.arrow_back),
                     style: AppTheme.primaryButton,
                     onPressed: redirect,
-                    label: TextWidget(text: "Back to accounts"),
+                    label: SizedBox.shrink(),
                   ),
                 if (!isDesktop) IconButton(onPressed: redirect, icon: Icon(Icons.arrow_back)),
               ],

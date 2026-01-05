@@ -11,46 +11,33 @@ class CategoryIconDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SearchAnchor(
-      builder: (BuildContext context, SearchController controller) {
-        return InputDecorator(
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
-          child: InkWell(
-            onTap: () => controller.openView(),
-            child: Row(
-              spacing: 12,
-              children: [
-                CategoryIcon(
-                  Category(id: "", name: "", type: CategoryTypeEnum.income, icon: icon ?? "help"),
-                  avatarSize: 16,
-                ),
-                Text(icon ?? 'Select an icon'),
-                const Spacer(),
-                const Icon(Icons.arrow_drop_down),
-              ],
+    final media = MediaQuery.of(context).size;
+    return DropdownMenu<String>(
+      initialSelection: icon,
+      menuHeight: media.height * .4,
+      expandedInsets: EdgeInsets.zero,
+      enableFilter: true,
+      requestFocusOnTap: true,
+      leadingIcon: Padding(
+        padding: EdgeInsetsGeometry.directional(start: 18, end: 4),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CategoryIcon(
+              Category(id: "", name: "", type: CategoryTypeEnum.income, icon: icon ?? "help"),
+              avatarSize: 14,
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+      onSelected: (String? value) {
+        if (value != null) {
+          onChanged(value);
+        }
       },
-      suggestionsBuilder: (BuildContext context, SearchController controller) {
-        final String searchTerm = controller.text.toLowerCase();
-
-        // Filter icons based on search text
-        final filteredIcons = CategoryIcon.iconLibrary.entries.where((entry) {
-          return entry.key.contains(searchTerm);
-        }).toList();
-
-        return filteredIcons.map((entry) {
-          return ListTile(
-            leading: Icon(entry.value),
-            title: Text(entry.key),
-            onTap: () {
-              onChanged(entry.key);
-              controller.closeView(entry.key);
-            },
-          );
-        });
-      },
+      dropdownMenuEntries: CategoryIcon.iconLibrary.entries.map((entry) {
+        return DropdownMenuEntry<String>(value: entry.key, label: entry.key, leadingIcon: Icon(entry.value));
+      }).toList(),
     );
   }
 }
