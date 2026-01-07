@@ -31,6 +31,8 @@ class _AccountPercentageWidgetState extends StateTracker<AccountPercentageWidget
       builder: (context, provider, child) {
         final accounts = provider.linkedAccounts;
 
+        if (isLoading) return Center(child: CircularProgressIndicator());
+
         if (accounts.isEmpty) return const SizedBox(height: 100, child: Center(child: Text("No accounts found")));
 
         // Get assets vs debt accounts
@@ -154,7 +156,7 @@ class _AccountPercentageWidgetState extends StateTracker<AccountPercentageWidget
     final s = label.toLowerCase();
 
     return switch (s) {
-      _ when s == 'depository' => Colors.green,
+      _ when s == 'cash' => Colors.green,
       _ when s == 'credit' => Colors.redAccent,
       _ when s == 'loan' => Colors.orangeAccent,
       _ when s == 'investment' => Colors.teal,
