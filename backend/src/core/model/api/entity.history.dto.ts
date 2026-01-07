@@ -124,8 +124,7 @@ export class EntityHistory extends Base {
         const furtherHistory = history.filter((x) => isSameDay(x.time, subDays(day, 1)));
         netWorth = furtherHistory.reduce((prev, curr) => (prev += getHistoryVal(curr)), 0);
       } else if (historyForDay.length === 0 && daysInArray.length > 7) {
-        // If there's no data and it's not within the last 7 days, skip this day to avoid skewing with zero-value days
-        continue;
+        netWorth = 0;
       }
 
       netWorthSnapshots.push({ date: day, netWorth });
@@ -140,11 +139,10 @@ export class EntityHistory extends Base {
     let percentChange: number | null = null;
     let valueChange = 0;
     if (firstNetWorth != null && lastNetWorth != null && firstNetWorth !== 0) {
-      // Note: Changed denominator to firstNetWorth for a standard percentage change calculation
       percentChange = ((lastNetWorth - firstNetWorth) / Math.abs(firstNetWorth)) * 100;
       valueChange = lastNetWorth - firstNetWorth;
     } else if (firstNetWorth === 0 && lastNetWorth != null) {
-      percentChange = lastNetWorth > 0 ? 100 : lastNetWorth < 0 ? -100 : 0; // or Infinity, depending on desired behavior
+      percentChange = lastNetWorth > 0 ? 100 : lastNetWorth < 0 ? -100 : 0;
       valueChange = lastNetWorth;
     }
 
