@@ -77,22 +77,12 @@ class AccountGroupsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sortedAccountEntries = _getSortedGroupedAccounts(accounts);
-    final totalAssets = accounts.fold(0.0, (sum, account) => sum + (account.balance > 0 ? account.balance : 0));
-    final totalDebts = accounts.fold(0.0, (sum, account) => sum + (account.balance < 0 ? account.balance : 0));
 
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ...sortedAccountEntries.map((entry) {
-            double totalNetWorth;
-
-            if (entry.key == AccountTypeEnum.loan || entry.key == AccountTypeEnum.credit) {
-              totalNetWorth = totalDebts;
-            } else {
-              totalNetWorth = totalAssets;
-            }
-
             return Column(
               children: [
                 Padding(
@@ -101,7 +91,6 @@ class AccountGroupsWidget extends StatelessWidget {
                     netWorthPeriod: netWorthPeriod,
                     accounts: entry.value,
                     type: entry.key,
-                    totalNetWorth: totalNetWorth,
                     onAccountClick: onAccountClick,
                     displayStats: displayStats,
                     displayTotals: displayTotals,

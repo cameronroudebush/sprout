@@ -5,6 +5,7 @@ import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { Between } from "typeorm";
+import { Colors } from "../cash-flow/model/colors";
 
 /** This class contains re-usable functions for the {@link Category} model */
 @Injectable()
@@ -44,13 +45,17 @@ export class CategoryService {
       });
     }
 
-    const finalResults = await results
+    const finalResults = (await results
       .select(`COALESCE(category.name, '${Category.UNKNOWN_NAME}')`, "category_name")
       .addSelect("COUNT(t.id)", "total")
       .groupBy("category_name")
       .orderBy("category_name", "ASC")
-      .getRawMany();
+      .getRawMany()) as Array<{ category_name: string; total: number }>;
+    const categoryCount = Object.fromEntries(finalResults.map((x) => [x.category_name, x.total]));
 
-    return CategoryStats.fromPlain({ categoryCount: Object.fromEntries(finalResults.map((x) => [x.category_name, x.total])) });
+    // Create our color mapping for our categories
+    const colorMapping = Object.fromEntries(finalResults.map((x) => [x.category_name, Colors.getColorForFeature(x.category_name)]));
+
+    return CategoryStats.fromPlain({ categoryCount, colorMapping });
   }
 }

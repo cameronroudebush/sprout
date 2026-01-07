@@ -25,7 +25,6 @@ class AccountGroupWidget extends StatelessWidget {
   final List<Account> accounts;
   final AccountTypeEnum type;
   final ChartRangeEnum netWorthPeriod;
-  final double totalNetWorth;
   final void Function(Account)? onAccountClick;
   final Set<Account>? selectedAccounts;
 
@@ -52,7 +51,6 @@ class AccountGroupWidget extends StatelessWidget {
     required this.netWorthPeriod,
     required this.accounts,
     required this.type,
-    required this.totalNetWorth,
     this.onAccountClick,
     required this.displayStats,
     required this.displayTotals,
@@ -107,20 +105,10 @@ class AccountGroupWidget extends StatelessWidget {
         final totalBalance = groupCalc.totalBalance;
 
         /// The percent of total net worth
-        final percentOfType = (totalBalance / totalNetWorth) * 100;
         final theme = Theme.of(context);
         final balanceColor = getBalanceColor(totalBalance, theme);
 
         final accountWithInstitutionError = accounts.firstWhereOrNull((x) => x.institution.hasError);
-
-        // Simplify the types and perform some extra handling on debts
-        String simpleType;
-        if (type == AccountTypeEnum.loan || type == AccountTypeEnum.credit) {
-          simpleType = "debts";
-          groupAmountChange *= -1;
-        } else {
-          simpleType = "assets";
-        }
 
         /// A cleaned up type name for display
         String adjustedType = formatAccountType(type);
@@ -171,25 +159,22 @@ class AccountGroupWidget extends StatelessWidget {
                               overrideMessage: "An account within this group contains an error",
                             ),
                             // Asset information
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              spacing: 4,
-                              children: [
-                                // Group balance
-                                if (displayTotals)
-                                  TextWidget(
-                                    referenceSize: 1.15,
-                                    text: getFormattedCurrency(totalBalance),
-                                    style: TextStyle(fontWeight: FontWeight.bold, color: balanceColor),
-                                  ),
-                                // Percent of total net worth
-                                if (displayStats)
-                                  TextWidget(
-                                    referenceSize: .9,
-                                    text: "${formatPercentage(percentOfType)} of $simpleType",
-                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                                  ),
-                              ],
+                            SizedBox(
+                              height: 45,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 4,
+                                children: [
+                                  // Group balance
+                                  if (displayTotals)
+                                    TextWidget(
+                                      referenceSize: 1.15,
+                                      text: getFormattedCurrency(totalBalance),
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: balanceColor),
+                                    ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

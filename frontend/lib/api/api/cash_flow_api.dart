@@ -103,6 +103,69 @@ class CashFlowApi {
     return null;
   }
 
+  /// Get cash flow spending stats per month.
+  ///
+  /// Returns monthly spending breakdown for the requested look-back period, isolating top N categories.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [num] months (required):
+  ///
+  /// * [num] categories (required):
+  Future<Response> cashFlowControllerGetSpendingWithHttpInfo(num months, num categories,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/cash-flow/spending';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'months', months));
+      queryParams.addAll(_queryParams('', 'categories', categories));
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get cash flow spending stats per month.
+  ///
+  /// Returns monthly spending breakdown for the requested look-back period, isolating top N categories.
+  ///
+  /// Parameters:
+  ///
+  /// * [num] months (required):
+  ///
+  /// * [num] categories (required):
+  Future<CashFlowSpending?> cashFlowControllerGetSpending(num months, num categories,) async {
+    final response = await cashFlowControllerGetSpendingWithHttpInfo(months, categories,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CashFlowSpending',) as CashFlowSpending;
+    
+    }
+    return null;
+  }
+
   /// Get cash flow stats data by query.
   ///
   /// Retrieves stats for the users cash flow in more basic terms. Tracking how much went out and how much came in.

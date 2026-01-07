@@ -1637,6 +1637,54 @@
         ]
       }
     },
+    "/cash-flow/spending": {
+      "get": {
+        "description": "Returns monthly spending breakdown for the requested look-back period, isolating top N categories.",
+        "operationId": "CashFlowController_getSpending",
+        "parameters": [
+          {
+            "name": "months",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "categories",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Spending calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowSpending"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow spending stats per month.",
+        "tags": [
+          "Cash Flow"
+        ]
+      }
+    },
     "/image-proxy": {
       "get": {
         "description": "Proxies images from external URLs, handling CORS issues and dynamically fetching images. Supports full image URLs or favicon lookups.",
@@ -1686,7 +1734,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.0-16-g63cd4a0",
+    "version": "v0.1.0-19-gcbaa874",
     "contact": {}
   },
   "tags": [
@@ -2263,10 +2311,18 @@
             "additionalProperties": {
               "type": "number"
             }
+          },
+          "colorMapping": {
+            "type": "object",
+            "description": "Color information for each category, in hex codes",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "categoryCount"
+          "categoryCount",
+          "colorMapping"
         ]
       },
       "Sync": {
@@ -2564,6 +2620,86 @@
           "totalExpense",
           "totalIncome",
           "count"
+        ]
+      },
+      "MonthlyCategoryData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Total amount spent in this category for this month"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color for the category. Will be a hex code."
+          }
+        },
+        "required": [
+          "name",
+          "amount",
+          "color"
+        ]
+      },
+      "MonthlySpendingStats": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "description": "A breakdown of the top categories for the month based on the request",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyCategoryData"
+            }
+          },
+          "monthLabel": {
+            "type": "string",
+            "description": "Month label"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date, just used for sorting"
+          },
+          "totalSpending": {
+            "type": "number",
+            "description": "Total spending for the month"
+          },
+          "periodAverage": {
+            "type": "number",
+            "description": "Average spending across the requested period (for the trend line)"
+          }
+        },
+        "required": [
+          "categories",
+          "monthLabel",
+          "date",
+          "totalSpending",
+          "periodAverage"
+        ]
+      },
+      "CashFlowSpending": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlySpendingStats"
+            }
+          },
+          "topCategoryNames": {
+            "description": "The list of top categories identified across the months.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "data",
+          "topCategoryNames"
         ]
       }
     }

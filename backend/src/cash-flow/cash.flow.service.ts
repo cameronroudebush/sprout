@@ -3,9 +3,11 @@ import { CategoryType } from "@backend/category/model/category.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
-import { endOfDay, endOfMonth, startOfDay, startOfMonth } from "date-fns";
-import { Between, FindOptionsWhere } from "typeorm";
+import { endOfDay, endOfMonth, format, startOfDay, startOfMonth, subMonths } from "date-fns";
+import { Between, FindOptionsWhere, LessThan } from "typeorm";
+import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
+import { Colors } from "./model/colors";
 
 /** This service contains re-usable functions for calculating cash flow. */
 @Injectable()
@@ -85,11 +87,8 @@ export class CashFlowService {
     const incomeHubName = "Inflows";
     const linksMap = new Map<string, SankeyLink>();
     const colors: SankeyData["colors"] = {
-      [incomeHubName]: SankeyData.incomeColor,
+      [incomeHubName]: Colors.incomeColor,
     };
-
-    let colorIndex = 0;
-    const getNextColor = () => SankeyData.colors[colorIndex++ % SankeyData.colors.length]!;
 
     const addOrUpdateLink = (source: string, target: string, value: number) => {
       const cleanSource = source.trim();
@@ -102,9 +101,9 @@ export class CashFlowService {
       if (existingLink) existingLink.value += value;
       else {
         linksMap.set(key, new SankeyLink(cleanSource, cleanTarget, value));
-        if (!colors[cleanSource]) colors[cleanSource] = getNextColor();
+        if (!colors[cleanSource]) colors[cleanSource] = Colors.getColorForFeature(cleanSource);
         // Only set color for target if it's not the incomeHub (to preserve its fixed color)
-        if (cleanTarget !== incomeHubName && !colors[cleanTarget]) colors[cleanTarget] = getNextColor();
+        if (cleanTarget !== incomeHubName && !colors[cleanTarget]) colors[cleanTarget] = Colors.getColorForFeature(cleanTarget);
       }
     };
 
@@ -202,5 +201,105 @@ export class CashFlowService {
     const nodes = Array.from(nodesSet);
 
     return new SankeyData(nodes, links, colors);
+  }
+
+  /**
+   * This function calculates the monthly spending for the given information within the date range provided. This allows
+   *  us to see how the users spending tracks over time
+   *
+   * @param user The user we want the spending data for.
+   * @param months How many months back to calculate for, assuming the current date as a starting pont.
+   * @param categoriesLimit How many categories to include in the category separation. We will always provide +1 of this number for "other" categories.
+   */
+  async calculateMonthlySpending(user: User, months: number, categoriesLimit: number) {
+    // Calc date range of what data we are looking for
+    const today = new Date();
+    const startDate = startOfMonth(subMonths(today, months - 1));
+    const endDate = endOfMonth(today);
+
+    // Fetch Transactions, only include expenses
+    const transactions = await Transaction.find({
+      where: {
+        account: { user: { id: user.id } },
+        posted: Between(startDate, endDate),
+        amount: LessThan(0),
+      },
+      relations: ["category"], // Load category data info
+    });
+
+    // Calculate Global Category Totals
+    const categoryTotals = new Map<string, number>();
+    /** The total spending for all expenses within this range */
+    let totalPeriodSpending = 0;
+
+    transactions.forEach((t) => {
+      const catName = t.category?.name || "Uncategorized";
+      const amount = Math.abs(t.amount); // Convert to positive for display
+
+      categoryTotals.set(catName, (categoryTotals.get(catName) || 0) + amount);
+      totalPeriodSpending += amount;
+    });
+
+    // Sort to find Top N categories
+    const sortedCategories = Array.from(categoryTotals.entries()).sort((a, b) => b[1] - a[1]);
+    const topCategoryNames = sortedCategories.slice(0, categoriesLimit).map((entry) => entry[0]);
+    const topCategoriesSet = new Set(topCategoryNames);
+
+    const averagePerMonth = totalPeriodSpending / months;
+
+    // Group by Month
+    const monthlyMap = new Map<string, MonthlySpendingStats>();
+    for (let i = 0; i < months; i++) {
+      const d = subMonths(today, i);
+      const key = format(d, "yyyy-MM");
+      monthlyMap.set(key, {
+        monthLabel: format(d, "MMM").toUpperCase(), // "JAN", "FEB", etc.
+        date: d,
+        categories: [],
+        totalSpending: 0,
+        periodAverage: averagePerMonth,
+      });
+    }
+
+    // Aggregate monthly data
+    const monthCatTracker = new Map<string, Map<string, number>>();
+    transactions.forEach((t) => {
+      const monthKey = format(t.posted, "yyyy-MM");
+      const rawCatName = t.category?.name || "Uncategorized";
+      // If it's a top category, keep name. Otherwise, group into "Other".
+      const displayCatName = topCategoriesSet.has(rawCatName) ? rawCatName : "Other";
+      const amount = Math.abs(t.amount);
+      // Add to month total
+      const monthStat = monthlyMap.get(monthKey)!;
+      monthStat.totalSpending += amount;
+      // Add to category breakdown
+      if (!monthCatTracker.has(monthKey)) monthCatTracker.set(monthKey, new Map<string, number>());
+      const catMap = monthCatTracker.get(monthKey)!;
+      catMap.set(displayCatName, (catMap.get(displayCatName) || 0) + amount);
+    });
+
+    // Convert back to DTO
+    const results = Array.from(monthlyMap.entries())
+      .map(([key, stats]) => {
+        const catMap = monthCatTracker.get(key);
+        if (catMap)
+          stats.categories = Array.from(catMap.entries()).map(([name, amount]) => ({
+            name,
+            amount,
+            color: Colors.getColorForFeature(name),
+          }));
+        else stats.categories = [];
+
+        // Sort categories so "Other" is always last
+        stats.categories.sort((a, b) => {
+          if (a.name === "Other") return 1;
+          if (b.name === "Other") return -1;
+          return b.amount - a.amount;
+        });
+
+        return stats;
+      })
+      .sort((a, b) => a.date.getTime() - b.date.getTime()); // Ensure chronological order
+    return new CashFlowSpending(results, topCategoryNames);
   }
 }

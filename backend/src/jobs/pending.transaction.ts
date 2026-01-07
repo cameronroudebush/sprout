@@ -17,7 +17,7 @@ export class PendingTransactionJob extends BackgroundJob<any> {
 
   protected async update() {
     this.logger.log("Checking for stuck pending transactions...");
-    const oneWeekAgo = subDays(new Date(), 7);
+    const oneWeekAgo = subDays(new Date(), Configuration.transaction.stuckTransactionDays);
     const stuckTransactions = await Transaction.find({
       where: {
         pending: true,

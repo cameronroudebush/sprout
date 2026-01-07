@@ -190,6 +190,8 @@ class ApiClient {
           return AccountEditRequest.fromJson(value);
         case 'AccountSubTypeEnum':
           return AccountSubTypeEnumTypeTransformer().decode(value);
+        case 'CashFlowSpending':
+          return CashFlowSpending.fromJson(value);
         case 'CashFlowStats':
           return CashFlowStats.fromJson(value);
         case 'Category':
@@ -210,6 +212,10 @@ class ApiClient {
           return JWTLoginRequest.fromJson(value);
         case 'ModelSync':
           return ModelSync.fromJson(value);
+        case 'MonthlyCategoryData':
+          return MonthlyCategoryData.fromJson(value);
+        case 'MonthlySpendingStats':
+          return MonthlySpendingStats.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
         case 'SSEData':

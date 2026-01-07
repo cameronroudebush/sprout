@@ -88,7 +88,7 @@ String formatAccountType(AccountTypeEnum accountType) {
     case AccountTypeEnum.credit:
       return "Credit";
     case AccountTypeEnum.investment:
-      return "Holding";
+      return "Investment";
     default:
       return accountType.value.toTitleCase;
   }

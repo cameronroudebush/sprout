@@ -4,6 +4,7 @@ import { User } from "@backend/user/model/user.model";
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { CashFlowService } from "./cash.flow.service";
+import { CashFlowSpending } from "./model/api/cash.flow.spending.dto";
 import { CashFlowStats } from "./model/api/cash.flow.stats.dto";
 import { SankeyData } from "./model/api/sankey.dto";
 
@@ -72,5 +73,21 @@ export class CashFlowController {
   ) {
     const { totalIncome, totalExpense, transactionCount, largestExpense } = await this.cashFlowService.calculateFlows(user, year, month, day, accountId);
     return new CashFlowStats(totalExpense, totalIncome, transactionCount, largestExpense ?? undefined);
+  }
+
+  @Get("spending")
+  @ApiOperation({
+    summary: "Get cash flow spending stats per month.",
+    description: "Returns monthly spending breakdown for the requested look-back period, isolating top N categories.",
+  })
+  @ApiOkResponse({ description: "Spending calculated successfully.", type: CashFlowSpending })
+  async getSpending(
+    @CurrentUser() user: User,
+    @Query("months") monthsQuery?: number,
+    @Query("categories") categoriesLimitQuery?: number,
+  ): Promise<CashFlowSpending> {
+    const months = monthsQuery || 6; // Default to 6 months
+    const categoriesLimit = categoriesLimitQuery || 4; // Default to top 4
+    return this.cashFlowService.calculateMonthlySpending(user, months, categoriesLimit);
   }
 }

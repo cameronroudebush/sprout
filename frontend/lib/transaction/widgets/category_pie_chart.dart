@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
@@ -60,9 +61,10 @@ class _CategoryPieChartState extends StateTracker<CategoryPieChart> {
           );
         }
         final month = widget.view == CashFlowView.monthly ? widget.selectedDate.month : null;
-        final data = provider.getStatsData(widget.selectedDate.year, month)?.categoryCount;
+        final data = provider.getStatsData(widget.selectedDate.year, month);
+        final categoryCount = data?.categoryCount;
 
-        if (data == null || data.isEmpty) {
+        if (categoryCount == null || categoryCount.isEmpty) {
           return SproutCard(
             height: widget.height,
             child: Center(child: Text(CashFlowViewFormatter.getNoDataText(widget.view, widget.selectedDate))),
@@ -73,7 +75,8 @@ class _CategoryPieChartState extends StateTracker<CategoryPieChart> {
         return SproutCard(
           applySizedBox: false,
           child: SproutPieChart(
-            data: data,
+            data: categoryCount,
+            colorMapping: data!.colorMapping.map((a, b) => MapEntry(a, b.toColor)),
             header: "Categories",
             subheader: widget.showSubheader ? periodText : null,
             showLegend: widget.showLegend,
