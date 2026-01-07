@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
@@ -6,7 +7,6 @@ import 'package:sprout/charts/sankey/models/data.dart';
 import 'package:sprout/charts/sankey/sankey.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/layout.dart';
 
@@ -38,22 +38,26 @@ class SankeyFlowByMonth extends StatelessWidget {
           }
           return SizedBox(
             height: constraints.maxHeight,
-            child: InteractiveViewer(
-              scaleEnabled: !isDesktop,
-              constrained: false,
-              minScale: 0.1,
-              maxScale: 5.0,
-              child: SizedBox(
-                height: 1024,
-                // TODO: Tune this
-                width: !isDesktop ? 760 : (AppTheme.maxDesktopSize * .85),
-                child: Center(
-                  child: SankeyChart(
-                    sankeyData: data,
-                    formatter: (val) => getFormattedCurrency(val),
-                    onNodeTap: (node, value) {
-                      SproutNavigator.redirectToCatFilter(node);
-                    },
+            width: constraints.maxWidth,
+            child: ClipRect(
+              child: InteractiveViewer(
+                scaleEnabled: !isDesktop,
+                constrained: false,
+                boundaryMargin: const EdgeInsets.all(20),
+                minScale: 0.1,
+                maxScale: 5.0,
+                child: SizedBox(
+                  height: constraints.maxHeight,
+                  // We need a min width for mobile else we'll overlap very easily
+                  width: !kIsWeb ? 760 : constraints.maxWidth,
+                  child: Center(
+                    child: SankeyChart(
+                      sankeyData: data,
+                      formatter: (val) => getFormattedCurrency(val),
+                      onNodeTap: (node, value) {
+                        SproutNavigator.redirectToCatFilter(node);
+                      },
+                    ),
                   ),
                 ),
               ),
