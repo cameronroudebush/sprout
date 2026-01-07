@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sprout/api/api.dart' hide SankeyData, SankeyLink;
 import 'package:sprout/charts/sankey/models/data.dart';
 import 'package:sprout/charts/sankey/models/link.dart';
@@ -48,7 +49,7 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
     return data;
   }
 
-  Future<CashFlowSpending?> loadMonthlySpending({months = 4, categories = 3}) async {
+  Future<CashFlowSpending?> loadMonthlySpending({months = 4, categories = kIsWeb ? 5 : 3}) async {
     _monthlySpending = await api.cashFlowControllerGetSpending(months, categories);
     notifyListeners();
     return _monthlySpending;

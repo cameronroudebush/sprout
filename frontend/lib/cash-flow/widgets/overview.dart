@@ -7,6 +7,7 @@ import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/charts/combo.dart';
+import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/card.dart';
@@ -146,7 +147,15 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
           children: [
             SizedBox(
               height: size.height * .5,
-              child: SproutCard(child: ComboChart(provider.monthlySpending!, title: "Spending Over Time")),
+              child: SproutCard(
+                child: ComboChart(
+                  provider.monthlySpending!,
+                  title: "Spending Over Time",
+                  onNodeTap: (node) {
+                    SproutNavigator.redirectToCatFilter(node, navigateOnUnknown: true);
+                  },
+                ),
+              ),
             ),
           ],
         );

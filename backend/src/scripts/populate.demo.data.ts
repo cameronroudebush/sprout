@@ -3,7 +3,6 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
 import { Category } from "@backend/category/model/category.model";
-import { CategoryType } from "@backend/category/model/category.type";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -225,8 +224,7 @@ async function createTransactions(user: User, accounts: Account[], days: number)
       }
 
       if (!categoryCache.has(categoryName)) {
-        const type = parent?.type ?? (categoryName === "Paycheck" ? CategoryType.income : CategoryType.expense);
-        const newCategory = Category.fromPlain({ name: categoryName, user, type, parent });
+        const newCategory = Category.fromPlain({ name: categoryName, user, parent });
         categoriesToCreate.push(newCategory);
         categoryCache.set(categoryName, newCategory);
       }

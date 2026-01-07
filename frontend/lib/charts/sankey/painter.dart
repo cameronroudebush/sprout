@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/charts/sankey/models/link.dart';
 import 'package:sprout/charts/sankey/models/painter.dart';
@@ -94,78 +95,87 @@ class SankeyPainter extends CustomPainter {
 
   /// Paints a styled tooltip that matches the provided image.
   void _paintTooltip(Canvas canvas, Size size) {
-    String tooltipTitle = '';
-    String tooltipValue = '';
+    if (hoverPosition == null) return;
+
+    String title = '';
+    String value = '';
+    String? description;
 
     if (hoveredNode != null) {
-      final value = data.nodeValues[hoveredNode!] ?? 0.0;
-      tooltipTitle = hoveredNode!;
-      tooltipValue = formatter != null ? formatter!(value) : value.toStringAsFixed(0);
+      final val = data.nodeValues[hoveredNode!] ?? 0.0;
+      title = hoveredNode!;
+      value = formatter != null ? formatter!(val) : val.toStringAsFixed(0);
+      description = data.links.firstWhereOrNull((e) => e.source == hoveredNode || e.target == hoveredNode)?.description;
     } else if (hoveredLink != null) {
       final link = hoveredLink!;
-      // For this example, we'll use a placeholder date, but you might pass this in.
-      tooltipTitle = '${link.source} to ${link.target}';
-      tooltipValue = formatter != null ? formatter!(link.value) : '\$${link.value.toStringAsFixed(2)}';
+      title = '${link.source} to ${link.target}';
+      value = formatter != null ? formatter!(link.value) : '\$${link.value.toStringAsFixed(2)}';
+      description = link.description;
     }
 
-    if (tooltipTitle.isEmpty && tooltipValue.isEmpty) return;
+    if (title.isEmpty && value.isEmpty) return;
 
-    // Define Padding and Spacing
-    const double horizontalPadding = 12.0;
-    const double verticalPadding = 4.0;
+    const double hPadding = 12.0;
+    const double vPadding = 4.0;
     const double spacing = 4.0;
 
-    // Title Painter (e.g., "Income")
-    final titlePainter = TextPainter(
-      text: TextSpan(
-        text: tooltipTitle,
-        style: const TextStyle(color: _tooltipTitleColor, fontSize: 14),
-      ),
-      textAlign: TextAlign.center,
-      textDirection: ui.TextDirection.ltr,
-    )..layout(minWidth: 0, maxWidth: size.width);
+    // Define styles here to keep code clean
+    const titleStyle = TextStyle(color: _tooltipTitleColor, fontSize: 14);
+    const valueStyle = TextStyle(color: _tooltipValueColor, fontSize: 14, fontWeight: FontWeight.bold);
+    const descStyle = TextStyle(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic);
 
-    // Value Painter (e.g., "$46,122.44")
-    final valuePainter = TextPainter(
-      text: TextSpan(
-        text: tooltipValue,
-        style: const TextStyle(color: _tooltipValueColor, fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-      textAlign: TextAlign.center,
-      textDirection: ui.TextDirection.ltr,
-    )..layout(minWidth: 0, maxWidth: size.width);
+    TextPainter createPainter(String text, TextStyle style) {
+      return TextPainter(
+        text: TextSpan(text: text, style: style),
+        textAlign: TextAlign.center,
+        textDirection: ui.TextDirection.ltr,
+      )..layout(minWidth: 0, maxWidth: size.width);
+    }
 
-    // Calculate Tooltip Dimensions
-    final double contentWidth = titlePainter.width > valuePainter.width ? titlePainter.width : valuePainter.width;
-    final double tooltipWidth = contentWidth + horizontalPadding * 2;
-    final double tooltipHeight = titlePainter.height + valuePainter.height + spacing + verticalPadding * 2;
-    final tooltipSize = Size(tooltipWidth, tooltipHeight);
+    // Build the list of active painters dynamically
+    final painters = [
+      createPainter(title, titleStyle),
+      createPainter(value, valueStyle),
+      if (description != null && description.isNotEmpty) createPainter(description, descStyle),
+    ];
 
-    // Adjust Position to Keep Tooltip on Screen
+    // Calculate Dimensions using the List
+    double maxContentWidth = 0;
+    double totalContentHeight = 0;
+
+    for (var p in painters) {
+      if (p.width > maxContentWidth) maxContentWidth = p.width;
+      totalContentHeight += p.height;
+    }
+
+    // Add spacing only between items (count - 1)
+    final totalSpacing = (painters.length - 1) * spacing;
+    final tooltipWidth = maxContentWidth + (hPadding * 2);
+    final tooltipHeight = totalContentHeight + totalSpacing + (vPadding * 2);
+
+    // Adjust Position (Boundary Checks)
     double dx = hoverPosition!.dx + 15;
     double dy = hoverPosition!.dy + 15;
 
-    if (dx + tooltipSize.width > size.width) {
-      dx = hoverPosition!.dx - tooltipSize.width - 15;
+    if (dx + tooltipWidth > size.width) dx = hoverPosition!.dx - tooltipWidth - 15;
+    if (dy + tooltipHeight > size.height) dy = hoverPosition!.dy - tooltipHeight - 15;
+
+    // Draw Background
+    final rect = Rect.fromLTWH(dx, dy, tooltipWidth, tooltipHeight);
+    final bgPaint = Paint()..color = _tooltipBackgroundColor;
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), bgPaint);
+
+    // Paint Text Stack
+    double currentDy = rect.top + vPadding;
+
+    for (var p in painters) {
+      // Center horizontally
+      final pDx = rect.left + (tooltipWidth - p.width) / 2;
+      p.paint(canvas, Offset(pDx, currentDy));
+
+      // Move cursor down for next item
+      currentDy += p.height + spacing;
     }
-    if (dy + tooltipSize.height > size.height) {
-      dy = hoverPosition!.dy - tooltipSize.height - 15;
-    }
-
-    // Draw the Tooltip Background
-    final rect = Rect.fromLTWH(dx, dy, tooltipSize.width, tooltipSize.height);
-    final paint = Paint()..color = _tooltipBackgroundColor;
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), paint);
-
-    // Paint the Centered Text
-    // Center the title horizontally
-    final titleDx = rect.left + (tooltipWidth - titlePainter.width) / 2;
-    titlePainter.paint(canvas, Offset(titleDx, rect.top + verticalPadding));
-
-    // Center the value horizontally, positioned below the title
-    final valueDx = rect.left + (tooltipWidth - valuePainter.width) / 2;
-    final valueDy = rect.top + verticalPadding + titlePainter.height + spacing;
-    valuePainter.paint(canvas, Offset(valueDx, valueDy));
   }
 
   @override

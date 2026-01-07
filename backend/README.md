@@ -9,7 +9,7 @@
 To generate a database migration, use the following command:
 
 ```sh
-npm run migrate --name=MY_NAME_HERE
+npm run migrate --name=MY-NAME-HERE
 ```
 
 **Note**: For PR's, you may only have one migration and it must be named relevantly.

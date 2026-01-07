@@ -25,7 +25,8 @@ class SproutNavigator {
   }
 
   /// Redirects to the transaction page with the given category name. If the category name is invalid, no redirect is completed.
-  static Future<void> redirectToCatFilter(String cat) async {
+  static Future<void> redirectToCatFilter(String cat, {bool navigateOnUnknown = false}) async {
+    cat = cat.trim();
     final catProvider = ServiceLocator.get<CategoryProvider>();
     final cats = catProvider.categories;
     // If we are missing categories, go ahead and try to request them
@@ -35,7 +36,7 @@ class SproutNavigator {
     if (cat == "Unknown") {
       id = "unknown";
     }
-    if (id != null) {
+    if (id != null || navigateOnUnknown) {
       SproutNavigator.redirect("transactions", queryParameters: {'cat': id});
     }
   }

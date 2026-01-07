@@ -10,8 +10,9 @@ class ComboChart extends StatelessWidget {
   final String? title;
   final CashFlowSpending spendingData;
   final Color lineColor;
+  final void Function(String node)? onNodeTap;
 
-  const ComboChart(this.spendingData, {super.key, this.lineColor = Colors.red, this.title});
+  const ComboChart(this.spendingData, {super.key, this.lineColor = Colors.red, this.title, this.onNodeTap});
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +74,25 @@ class ComboChart extends StatelessWidget {
                     borderData: FlBorderData(show: false),
                     barTouchData: BarTouchData(
                       enabled: true,
+                      touchCallback: (FlTouchEvent event, barTouchResponse) {
+                        // Ensure we have a valid interaction and a touched bar
+                        if (!event.isInterestedForInteractions ||
+                            barTouchResponse == null ||
+                            barTouchResponse.spot == null) {
+                          return;
+                        }
+
+                        // Check specifically for a 'Click' (TapUp)
+                        if (event is FlTapUpEvent) {
+                          final groupIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+                          final rodIndex = barTouchResponse.spot!.touchedRodDataIndex;
+
+                          final cat = spendingData.data[groupIndex].categories[rodIndex].name;
+                          if (onNodeTap != null) {
+                            onNodeTap!(cat);
+                          }
+                        }
+                      },
                       touchTooltipData: BarTouchTooltipData(
                         getTooltipColor: (group) => Colors.blueGrey,
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
