@@ -85,6 +85,8 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
   Widget _buildStats() {
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
 
+    if (isLoading) return Center(child: PageLoadingWidget());
+
     return SproutScrollView(
       padding: EdgeInsets.zero,
       child: Column(
@@ -124,7 +126,7 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
     final dateForSankey = DateTime(_selectedDate.year, month ?? 1);
 
-    if (isLoading) return Center(child: CircularProgressIndicator());
+    if (isLoading) return Center(child: PageLoadingWidget());
 
     return SproutCard(
       child: Padding(
@@ -177,11 +179,7 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
             onYearChanged: _changeYear,
           ),
         ),
-        isLoading
-            ? Expanded(child: PageLoadingWidget())
-            :
-              // Tab view
-              Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
+        Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
       ],
     );
   }
