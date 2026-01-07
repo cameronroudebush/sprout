@@ -10,8 +10,16 @@ export class CategoryStats extends Base {
   })
   categoryCount: Record<string, number>;
 
-  constructor(categoryCount: CategoryStats["categoryCount"]) {
+  /** Color information for each category, in hex codes */
+  @ApiProperty({
+    type: "object",
+    additionalProperties: { type: "string" },
+  })
+  colorMapping: Record<string, string>;
+
+  constructor(categoryCount: CategoryStats["categoryCount"], colorMapping: CategoryStats["colorMapping"]) {
     super();
     this.categoryCount = categoryCount;
+    this.colorMapping = colorMapping;
   }
 }

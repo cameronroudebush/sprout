@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/account/widgets/account_percentage.dart';
 import 'package:sprout/account/widgets/accounts.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/category/category_provider.dart';
@@ -96,6 +97,10 @@ class _HomePageState extends StateTracker<HomePage> {
               userConfigProvider.updateChartRange(value);
             },
             chartHeight: isDesktop ? 275 : 150,
+          );
+
+          final accountPercentageWidget = SproutCard(
+            child: Padding(padding: EdgeInsetsGeometry.all(12), child: AccountPercentageWidget()),
           );
 
           final accountsWidget = SproutCard(
@@ -195,6 +200,7 @@ class _HomePageState extends StateTracker<HomePage> {
               if (notifications.isNotEmpty) Column(children: notificationWidgets),
               netWorthWidget,
               accountsWidget,
+              accountPercentageWidget,
               transactionsWidget,
               categoryPie,
               cashPie,

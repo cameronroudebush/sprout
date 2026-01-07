@@ -34,49 +34,4 @@ export class SankeyData extends Base {
     this.links = links;
     this.colors = colors;
   }
-
-  /** The color to use for deficits */
-  static deficitColor = "#E31A1C";
-  /** Color to use only for income main column */
-  static incomeColor = "#A6CEE3";
-  /** Color to use only for excess money of net flow */
-  static excessColor = "#33A02C";
-
-  /** Color options that can be used for the links */
-  static colors = [
-    "#1F78B4",
-    "#B2DF8A",
-    "#FB9A99",
-    "#FDBF6F",
-    "#FF7F00",
-    "#CAB2D6",
-    "#6A3D9A",
-    "#FFFF99",
-    "#B15928",
-    "#3F51B5",
-    "#009688",
-    "#FF9800",
-    "#E91E63",
-    "#8BC34A",
-    "#9C27B0",
-    "#795548",
-    "#CDDC39",
-    "#A52A2A",
-    "#800000",
-    "#FFD700",
-    "#DAA520",
-    "#ADFF2F",
-    "#7FFF00",
-    "#20B2AA",
-    "#008B8B",
-    "#4682B4",
-    "#6A5ACD",
-    "#8A2BE2",
-    "#BA55D3",
-    "#FF69B4",
-    "#FF1493",
-    "#FF4500",
-    "#FF8C00",
-    "#FFDAB9",
-  ];
 }

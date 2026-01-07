@@ -6,6 +6,7 @@ import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
 import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/charts/combo.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/card.dart';
@@ -48,6 +49,11 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
         provider: ServiceLocator.get<CategoryProvider>(),
         onLoad: (p, force) => p.loadCategoryStats(date.year, month),
         getFromProvider: (p) => p.getStatsData(date.year, month),
+      ),
+      'monthlySpending': DataRequest<CashFlowProvider, dynamic>(
+        provider: ServiceLocator.get<CashFlowProvider>(),
+        onLoad: (p, force) => p.loadMonthlySpending(),
+        getFromProvider: (p) => p.monthlySpending,
       ),
     };
   }
@@ -128,39 +134,68 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Constructs the overview of what will be displayed
+  Widget _buildOverview() {
+    final size = MediaQuery.of(context).size;
+    return Consumer<CashFlowProvider>(
+      builder: (context, provider, child) {
+        if (isLoading || provider.monthlySpending == null) return Center(child: PageLoadingWidget());
+        return Column(
+          children: [
+            SizedBox(
+              height: size.height * .5,
+              child: SproutCard(child: ComboChart(provider.monthlySpending!, title: "Spending Over Time")),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Builds a display that allows you to get more cash flow information by a time frame (monthly, yearly)
+  Widget _buildByTimeFrame() {
     final tabNames = ["Stats", "Sankey"];
     final tabContent = [_buildStats(), _buildSankey()];
+    return Column(
+      children: [
+        // Selector
+        SproutCard(
+          child: CashFlowSelector(
+            currentView: _currentView,
+            selectedDate: _selectedDate,
+            onViewChanged: (view) {
+              setState(() {
+                _currentView = view;
+                if (view == CashFlowView.monthly) {
+                  final now = DateTime.now();
+                  _selectedDate = DateTime(now.year, now.month + 1, 0);
+                }
+              });
+              loadData(checkLastUpdateTime: false);
+            },
+            onMonthIncrementChanged: _changeMonth,
+            onYearChanged: _changeYear,
+          ),
+        ),
+        isLoading
+            ? Expanded(child: PageLoadingWidget())
+            :
+              // Tab view
+              Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: AppTheme.maxDesktopSize),
         child: Column(
           children: [
-            // Selector
-            SproutCard(
-              child: CashFlowSelector(
-                currentView: _currentView,
-                selectedDate: _selectedDate,
-                onViewChanged: (view) {
-                  setState(() {
-                    _currentView = view;
-                    if (view == CashFlowView.monthly) {
-                      final now = DateTime.now();
-                      _selectedDate = DateTime(now.year, now.month + 1, 0);
-                    }
-                  });
-                  loadData(checkLastUpdateTime: false);
-                },
-                onMonthIncrementChanged: _changeMonth,
-                onYearChanged: _changeYear,
-              ),
+            Expanded(
+              child: ScrollableTabsWidget(["Overview", "By Time Frame"], [_buildOverview(), _buildByTimeFrame()]),
             ),
-            isLoading
-                ? PageLoadingWidget()
-                :
-                  // Tab view
-                  Expanded(child: ScrollableTabsWidget(tabNames, tabContent)),
           ],
         ),
       ),

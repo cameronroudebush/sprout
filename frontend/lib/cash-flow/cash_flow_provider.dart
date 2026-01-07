@@ -8,8 +8,10 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
   // Data store
   final Map<String, SankeyData> _sankeyDataCache = {};
   final Map<String, CashFlowStats> _statsCache = {};
+  CashFlowSpending? _monthlySpending;
 
   // Public getters
+  CashFlowSpending? get monthlySpending => _monthlySpending;
   SankeyData? getSankeyData(int year, int? month, {int? day, Account? account}) {
     return _sankeyDataCache[generateCacheKey(year, month, day, account)];
   }
@@ -44,6 +46,12 @@ class CashFlowProvider extends BaseProvider<CashFlowApi> {
     if (data != null) _statsCache[cacheKey] = data;
     notifyListeners();
     return data;
+  }
+
+  Future<CashFlowSpending?> loadMonthlySpending({months = 4, categories = 3}) async {
+    _monthlySpending = await api.cashFlowControllerGetSpending(months, categories);
+    notifyListeners();
+    return _monthlySpending;
   }
 
   @override

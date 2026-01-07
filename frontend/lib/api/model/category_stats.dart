@@ -14,26 +14,33 @@ class CategoryStats {
   /// Returns a new [CategoryStats] instance.
   CategoryStats({
     this.categoryCount = const {},
+    this.colorMapping = const {},
   });
 
   /// The number of transactions matching to each category
   Map<String, num> categoryCount;
 
+  /// Color information for each category, in hex codes
+  Map<String, String> colorMapping;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is CategoryStats &&
-    _deepEquality.equals(other.categoryCount, categoryCount);
+    _deepEquality.equals(other.categoryCount, categoryCount) &&
+    _deepEquality.equals(other.colorMapping, colorMapping);
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (categoryCount.hashCode);
+    (categoryCount.hashCode) +
+    (colorMapping.hashCode);
 
   @override
-  String toString() => 'CategoryStats[categoryCount=$categoryCount]';
+  String toString() => 'CategoryStats[categoryCount=$categoryCount, colorMapping=$colorMapping]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'categoryCount'] = this.categoryCount;
+      json[r'colorMapping'] = this.colorMapping;
     return json;
   }
 
@@ -57,6 +64,7 @@ class CategoryStats {
 
       return CategoryStats(
         categoryCount: mapCastOfType<String, num>(json, r'categoryCount')!,
+        colorMapping: mapCastOfType<String, String>(json, r'colorMapping')!,
       );
     }
     return null;
@@ -105,6 +113,7 @@ class CategoryStats {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'categoryCount',
+    'colorMapping',
   };
 }
 
