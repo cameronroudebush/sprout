@@ -234,98 +234,84 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
                 SproutCard(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Row(
-                      spacing: 16,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 12,
                       children: [
-                        // Logo
-                        AccountLogoWidget(account),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 16,
+                          children: [
+                            AccountLogoWidget(account),
 
-                        // Name and Institution
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                spacing: 4,
+                            // Name and Institution
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Flexible(
-                                    child: TextWidget(
-                                      text: account.name,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                                    ),
+                                  Text(
+                                    account.name,
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (account.institution.hasError) ...[
-                                    InstitutionError(institution: account.institution),
-                                  ],
+                                  Text(
+                                    account.institution.name,
+                                    style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 16),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ],
                               ),
-                              TextWidget(
-                                text: account.institution.name,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
 
-                        // Controls
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 12,
+                        // Sub-type Selector
+                        AccountSubTypeSelect(
+                          account,
+                          onChanged: (newSubType) {
+                            account.subType = newSubType;
+                            accountProvider.edit(account);
+                          },
+                        ),
+
+                        // Buttons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          spacing: 24,
                           children: [
-                            // Subtype Selector
-                            SizedBox(
-                              width: 200,
-                              child: AccountSubTypeSelect(
-                                account,
-                                onChanged: (newSubType) {
-                                  account.subType = newSubType;
-                                  accountProvider.edit(account);
-                                },
-                              ),
-                            ),
-
-                            // Action Buttons
-                            Wrap(
-                              spacing: 8,
-                              alignment: WrapAlignment.end,
-                              children: [
-                                // Fix Account Button
-                                if (true)
-                                  SproutTooltip(
-                                    message: "Opens a dialog to fix this account via the provider.",
-                                    child: FilledButton.icon(
-                                      icon: const Icon(Icons.build_circle_outlined, size: 16),
-                                      label: const Text("Fix"),
-                                      style: FilledButton.styleFrom(
-                                        backgroundColor: Theme.of(context).colorScheme.error,
-                                        foregroundColor: Theme.of(context).colorScheme.onError,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      ),
-                                      onPressed: () async {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (_) => AccountErrorDialog(account: account),
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-                                // Delete Button
-                                FilledButton.icon(
-                                  icon: Icon(Icons.delete_outline, size: 16),
-                                  label: Text("Delete"),
+                            // Error Status & Fix Button
+                            if (account.institution.hasError) ...[
+                              SproutTooltip(
+                                message: "Opens a dialog to fix this account via the provider.",
+                                child: FilledButton.icon(
+                                  icon: const Icon(Icons.build_circle_outlined, size: 16),
+                                  label: const Text("Fix"),
                                   style: AppTheme.errorButton,
                                   onPressed: () async {
                                     await showDialog(
                                       context: context,
-                                      builder: (_) => AccountDeleteDialog(account: account),
+                                      builder: (_) => AccountErrorDialog(account: account),
                                     );
                                   },
                                 ),
-                              ],
+                              ),
+                              InstitutionError(institution: account.institution),
+                            ],
+
+                            // Delete Button
+                            FilledButton.icon(
+                              icon: const Icon(Icons.delete_outline, size: 16),
+                              label: const Text("Delete"),
+                              style: AppTheme.errorButton,
+                              onPressed: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (_) => AccountDeleteDialog(account: account),
+                                );
+                              },
                             ),
                           ],
                         ),
