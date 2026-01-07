@@ -71,26 +71,10 @@ class _CategoryOverviewState extends StateTracker<CategoryOverview> {
         title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [_buildTypeIndicator(c), const SizedBox(width: 8), _buildActionButtons(context, c, isDesktop)],
+          children: [const SizedBox(width: 8), _buildActionButtons(context, c, isDesktop)],
         ),
       );
     });
-  }
-
-  Widget _buildTypeIndicator(Category c) {
-    if (c.type == CategoryTypeEnum.expense) {
-      return const SproutTooltip(
-        message: "Expense",
-        child: Icon(Icons.arrow_downward, color: Colors.red),
-      );
-    }
-    if (c.type == CategoryTypeEnum.income) {
-      return const SproutTooltip(
-        message: "Income",
-        child: Icon(Icons.arrow_upward, color: Colors.green),
-      );
-    }
-    return const SizedBox.shrink();
   }
 
   Widget _buildActionButtons(BuildContext context, Category c, bool isDesktop) {

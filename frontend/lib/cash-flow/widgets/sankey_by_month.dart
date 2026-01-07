@@ -45,6 +45,7 @@ class SankeyFlowByMonth extends StatelessWidget {
               maxScale: 5.0,
               child: SizedBox(
                 height: 1024,
+                // TODO: Tune this
                 width: !isDesktop ? 760 : (AppTheme.maxDesktopSize * .85),
                 child: Center(
                   child: SankeyChart(

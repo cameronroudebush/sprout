@@ -11,7 +11,7 @@ export class Categories1759243091407 implements MigrationInterface {
         // Used so we can recursively call it for parent categories if defined
         const insertCategory = async (user: User, category: Category) => {
             category.id = v4();
-            await queryRunner.query(`INSERT INTO "category" (id, name, type, "userId", "parentCategoryId") VALUES ('${category.id}', '${category.name}', '${category.type}', '${user.id}', ${category.parentCategory ? `'${category.parentCategory.id}'` : "NULL"})`);
+            await queryRunner.query(`INSERT INTO "category" (id, name, type, "userId", "parentCategoryId") VALUES ('${category.id}', '${category.name}', 'expense', '${user.id}', ${category.parentCategory ? `'${category.parentCategory.id}'` : "NULL"})`);
             return category;
         }
 

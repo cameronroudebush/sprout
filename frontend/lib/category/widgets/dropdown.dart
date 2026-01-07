@@ -9,7 +9,7 @@ import 'package:sprout/core/widgets/state_tracker.dart';
 /// A dropdown that allows category selection
 class CategoryDropdown extends StatefulWidget {
   /// Fake all category used for searching
-  static final fakeAllCategory = Category(id: "", name: "All Categories", type: CategoryTypeEnum.expense);
+  static final fakeAllCategory = Category(id: "", name: "All Categories");
 
   final Category? category;
   final Function(Category? newValue) onChanged;
@@ -46,10 +46,7 @@ class _CategoryDropdownState extends StateTracker<CategoryDropdown> {
     return Row(
       spacing: 4,
       children: [
-        CategoryIcon(
-          category ?? Category(id: "", name: "", type: CategoryTypeEnum.income, icon: "unknown"),
-          avatarSize: 16,
-        ),
+        CategoryIcon(category ?? Category(id: "", name: "", icon: "unknown"), avatarSize: 16),
         Text(category?.name ?? 'Unknown', overflow: TextOverflow.ellipsis, maxLines: 1),
       ],
     );

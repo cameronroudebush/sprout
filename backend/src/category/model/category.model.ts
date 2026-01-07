@@ -1,9 +1,8 @@
-import { CategoryType } from "@backend/category/model/category.type";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
 
@@ -36,11 +35,6 @@ export class Category extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
   icon?: string;
 
-  /** If this account type should be considered an expense or income */
-  @DatabaseDecorators.column({ nullable: false })
-  @IsEnum(CategoryType)
-  type: CategoryType;
-
   /** The parent category this category belongs to */
   @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
   @JoinColumn({ name: "parentCategoryId" })
@@ -52,11 +46,10 @@ export class Category extends DatabaseBase {
   @ApiHideProperty()
   parentCategoryId!: string;
 
-  constructor(user: User, name: string, type: Category["type"], parentCategory?: Category, icon?: string) {
+  constructor(user: User, name: string, parentCategory?: Category, icon?: string) {
     super();
     this.user = user;
     this.name = name;
-    this.type = type;
     this.parentCategory = parentCategory;
     this.icon = icon;
   }
@@ -70,24 +63,24 @@ export class Category extends DatabaseBase {
     const categoriesToInsert: Category[] = [];
 
     // Food & Drink Section
-    const foodAndDrink = new Category(user, "Food & Drink", CategoryType.expense, undefined, "food_drink");
+    const foodAndDrink = new Category(user, "Food & Drink", undefined, "food_drink");
     categoriesToInsert.push(foodAndDrink);
-    categoriesToInsert.push(new Category(user, "Groceries", CategoryType.expense, foodAndDrink, "groceries"));
-    categoriesToInsert.push(new Category(user, "Restaurants", CategoryType.expense, foodAndDrink, "restaurants"));
+    categoriesToInsert.push(new Category(user, "Groceries", foodAndDrink, "groceries"));
+    categoriesToInsert.push(new Category(user, "Restaurants", foodAndDrink, "restaurants"));
 
     // Shopping Section
-    const shopping = new Category(user, "Shopping", CategoryType.expense, undefined, "shopping");
+    const shopping = new Category(user, "Shopping", undefined, "shopping");
     categoriesToInsert.push(shopping);
-    categoriesToInsert.push(new Category(user, "Online Shopping", CategoryType.expense, shopping, "online_shopping"));
+    categoriesToInsert.push(new Category(user, "Online Shopping", shopping, "online_shopping"));
 
     // Individual Categories
-    categoriesToInsert.push(new Category(user, "Utilities", CategoryType.expense, undefined, "utilities"));
-    categoriesToInsert.push(new Category(user, "Housing", CategoryType.expense, undefined, "housing"));
-    categoriesToInsert.push(new Category(user, "Transportation", CategoryType.expense, undefined, "transportation"));
-    categoriesToInsert.push(new Category(user, "Healthcare", CategoryType.expense, undefined, "healthcare"));
-    categoriesToInsert.push(new Category(user, "Entertainment", CategoryType.expense, undefined, "entertainment"));
-    categoriesToInsert.push(new Category(user, "Pets", CategoryType.expense, undefined, "pets"));
-    categoriesToInsert.push(new Category(user, "Income", CategoryType.income, undefined, "income"));
+    categoriesToInsert.push(new Category(user, "Utilities", undefined, "utilities"));
+    categoriesToInsert.push(new Category(user, "Housing", undefined, "housing"));
+    categoriesToInsert.push(new Category(user, "Transportation", undefined, "transportation"));
+    categoriesToInsert.push(new Category(user, "Healthcare", undefined, "healthcare"));
+    categoriesToInsert.push(new Category(user, "Entertainment", undefined, "entertainment"));
+    categoriesToInsert.push(new Category(user, "Pets", undefined, "pets"));
+    categoriesToInsert.push(new Category(user, "Income", undefined, "income"));
 
     return categoriesToInsert;
   }
@@ -98,13 +91,13 @@ export class Category extends DatabaseBase {
   }
 
   /** Get's a category by the given name or returns the existing one if it's found. */
-  static async getOrCreate(category: string | undefined, user: User, type: CategoryType.expense = CategoryType.expense) {
+  static async getOrCreate(category: string | undefined, user: User) {
     if (category == null) return await this.getUnknownCategory(user);
     else {
       const name = startCase(category);
-      const matchingCategory = Category.findOne({ where: { name: name, user: { id: user.id }, type: type } });
+      const matchingCategory = Category.findOne({ where: { name: name, user: { id: user.id } } });
       if (matchingCategory) return matchingCategory;
-      else return await Category.fromPlain({ name, user, type }).insert();
+      else return await Category.fromPlain({ name, user }).insert();
     }
   }
 }

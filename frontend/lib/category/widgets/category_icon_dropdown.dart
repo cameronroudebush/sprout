@@ -22,12 +22,7 @@ class CategoryIconDropdown extends StatelessWidget {
         padding: EdgeInsetsGeometry.directional(start: 18, end: 4),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CategoryIcon(
-              Category(id: "", name: "", type: CategoryTypeEnum.income, icon: icon ?? "help"),
-              avatarSize: 14,
-            ),
-          ],
+          children: [CategoryIcon(Category(id: "", name: "", icon: icon ?? "help"), avatarSize: 14)],
         ),
       ),
       onSelected: (String? value) {

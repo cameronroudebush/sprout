@@ -25,7 +25,6 @@ class CategoryInfo extends StatefulWidget {
 class _CategoryInfoState extends StateTracker<CategoryInfo> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  CategoryTypeEnum _type = CategoryTypeEnum.expense;
   Category? _parentCategory;
   String? _icon;
 
@@ -45,13 +44,11 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
     if (category != null) {
       // Initialize for editing an existing category
       _nameController.text = category.name;
-      _type = category.type;
       _parentCategory = category.parentCategory;
       _icon = category.icon;
     } else {
       // Initialize for a new category
       _nameController.text = "";
-      _type = CategoryTypeEnum.expense; // Default value
       _parentCategory = null;
     }
   }
@@ -67,7 +64,6 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
     return Category(
       id: widget.category?.id ?? "",
       name: _nameController.text,
-      type: _type,
       parentCategory: _parentCategory,
       icon: _icon,
     );
@@ -174,42 +170,6 @@ class _CategoryInfoState extends StateTracker<CategoryInfo> {
                           _submit();
                         },
                       ),
-                    ],
-                  ),
-
-                  // Category Type
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      const Text("Type", style: TextStyle(fontWeight: FontWeight.bold)),
-                      DropdownButtonFormField<CategoryTypeEnum>(
-                        dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
-                        value: _type,
-                        decoration: const InputDecoration(border: OutlineInputBorder()),
-                        items: CategoryTypeEnum.values.map((type) {
-                          final typeName = type.toString();
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Row(
-                              spacing: 4,
-                              children: [
-                                if (type == CategoryTypeEnum.expense) Icon(Icons.arrow_downward, color: Colors.red),
-                                if (type == CategoryTypeEnum.income) Icon(Icons.arrow_upward, color: Colors.green),
-                                Text(typeName.split('.').last[0].toUpperCase() + typeName.split('.').last.substring(1)),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          if (newValue != null) {
-                            setState(() => _type = newValue);
-                          }
-                        },
-                      ),
-                      Text("Choose whether this is an income or expense category.", style: helpStyle),
                     ],
                   ),
 
