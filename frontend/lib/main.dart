@@ -1,8 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/io_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
@@ -10,9 +6,11 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/auto_logout_client.dart';
 import 'package:sprout/core/extended_api_client.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
@@ -32,12 +30,17 @@ void main() async {
 
   // Create an extended ApiClient that allows changing the base path
   defaultApiClient = ExtendedApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
-  // Mobile has a really long timeout so replace it if it's not web
-  if (!kIsWeb) {
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 10);
-    (defaultApiClient as ExtendedApiClient).client = IOClient(client);
-  }
+  // Inject a client that automatically logs us out if we start experiencing 401/403's
+  final autoLogoutClient = AutoLogoutClient(
+    onLogout: () async {
+      final userProvider = ServiceLocator.get<UserProvider>();
+      if (userProvider.isLoggedIn) {
+        await userProvider.logout(forced: true);
+        SnackbarProvider.openSnackbar("Session expired", type: SnackbarType.warning);
+      }
+    },
+  );
+  (defaultApiClient as ExtendedApiClient).client = autoLogoutClient;
 
   // Register all the providers
   ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigApi(), packageInfo));
