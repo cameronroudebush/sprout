@@ -5,6 +5,7 @@ import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/provider/storage.dart';
+import 'package:sprout/core/widgets/state_tracker.dart';
 
 /// This provide allows for modification to the users via the API including authentication and creating new users.
 class UserProvider extends BaseProvider<UserApi> {
@@ -69,6 +70,7 @@ class UserProvider extends BaseProvider<UserApi> {
     for (final provider in ServiceLocator.getAllProviders()) {
       await provider.cleanupData();
     }
+    StateTracker.lastUpdateTimes = {};
     SproutNavigator.redirect("login");
     notifyListeners();
   }
