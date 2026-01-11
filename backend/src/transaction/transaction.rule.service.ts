@@ -21,9 +21,10 @@ export class TransactionRuleService {
    * @param user The user for whom to apply the rules.
    * @param account Optional account to scope the transactions.
    * @param onlyApplyToEmpty If true, only applies rules to transactions with no category.
-   * @param force If true, transactions that match no rules will have their categories set to null.
+   * @param force If true, will overwrite manually edited transactions. By default, this is false.
+   * @param resetCategories If true, transactions that match no rules will have their categories set to null.
    */
-  async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false, force = false) {
+  async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false, force = false, resetCategories = false) {
     // Fetches rules in descending order of priority. Higher `order` values are processed first.
     const rules = await TransactionRule.find({
       where: { user: { id: user.id } },
@@ -76,9 +77,10 @@ export class TransactionRuleService {
           isMatch = transaction.amount === amountValue;
         }
 
-        if (isMatch) {
-          // The transaction matches the rule. Update its category.
+        // The transaction matches the rule. Update its info only if we're allowed based on manually edited status.
+        if (isMatch && (!transaction.manuallyEdited || (transaction.manuallyEdited && force))) {
           transaction.category = rule.category;
+          transaction.manuallyEdited = false; // Reset this in the case it's set
           await transaction.update();
 
           // Increment the match count for this specific rule.
@@ -96,7 +98,7 @@ export class TransactionRuleService {
 
     // If force is enabled, find transactions that were not "claimed" by any rule
     // and ensure their category is set to null.
-    if (force)
+    if (resetCategories)
       for (const transaction of transactions)
         if (!matchedTransactionIds.has(transaction.id) && transaction.category !== null) {
           transaction.category = undefined;

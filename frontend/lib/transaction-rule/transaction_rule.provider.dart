@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/transaction-rule/dialog/rule_manual.dart';
 
 /// Class that provides the store of current transactions
 class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
@@ -46,6 +48,12 @@ class TransactionRuleProvider extends BaseProvider<TransactionRuleApi> {
     _transactionRulesRunning = false;
     notifyListeners();
     return updatedRule;
+  }
+
+  /// Opens a dialog that asks the user if they want to manually refresh their transactions
+  ///   based on their rules.
+  openManualRefreshDialog(BuildContext context) {
+    showDialog(context: context, builder: (_) => TransactionRuleManualDialog());
   }
 
   /// Manually runs a refresh to update all transaction rules

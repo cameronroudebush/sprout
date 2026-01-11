@@ -89,4 +89,12 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
     _subscriptions = [];
     notifyListeners();
   }
+
+  @override
+  Future<void> onSSE(SSEData data) async {
+    super.onSSE(data);
+    if (data.event == SSEDataEventEnum.forceUpdate) {
+      wipeData();
+    }
+  }
 }

@@ -6,7 +6,20 @@ import { SSEService } from "@backend/sse/sse.service";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseBoolPipe, Patch, Post, Query } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  ParseBoolPipe,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all Transaction rules content */
@@ -124,13 +137,23 @@ export class TransactionRuleController {
     name: "force",
     type: Boolean,
     required: false,
+    description: "If true, also overwrites manually edited transactions. By default this is disabled so a users category changes are preserved.",
+  })
+  @ApiQuery({
+    name: "resetCategories",
+    type: Boolean,
+    required: false,
     description: "If true, resets categories to null for transactions that do not match any current rules.",
   })
   @ApiOkResponse({
     description: "Rules were successfully processed and applied to transactions.",
   })
-  async applyRules(@CurrentUser() user: User, @Query("force", new ParseBoolPipe({ optional: true })) force: boolean = false): Promise<void> {
-    await this.transactionRuleService.applyRulesToTransactions(user, undefined, undefined, force);
+  async applyRules(
+    @CurrentUser() user: User,
+    @Query("force", new DefaultValuePipe(false), ParseBoolPipe) force: boolean,
+    @Query("resetCategories", new DefaultValuePipe(false), ParseBoolPipe) resetCategories: boolean,
+  ): Promise<void> {
+    await this.transactionRuleService.applyRulesToTransactions(user, undefined, undefined, force, resetCategories);
     // Inform of refresh required
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
   }
