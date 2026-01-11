@@ -19,6 +19,9 @@ class SSEProvider extends BaseProvider<CoreApi> {
   /// Subscription for incoming events so we can clean it up when we're done
   StreamSubscription<SSEData>? _sub;
 
+  /// Tracks the last event that came in for each type
+  final _lastEvents = <SSEDataEventEnum, ({SSEData data, DateTime timestamp})>{};
+
   /// This controller allows for listening when SSE events come in from the backend
   final StreamController<SSEData> _sseInEvent = StreamController.broadcast();
   late final Stream<SSEData> onSSEEvent;
@@ -30,6 +33,7 @@ class SSEProvider extends BaseProvider<CoreApi> {
 
   bool get isConnected => _isConnected;
   bool get isConnecting => _isConnecting;
+  Map<SSEDataEventEnum, ({SSEData data, DateTime timestamp})> get lastEvents => _lastEvents;
 
   SSEProvider(super.api) {
     onSSEEvent = _sseInEvent.stream;
@@ -37,6 +41,7 @@ class SSEProvider extends BaseProvider<CoreApi> {
 
   /// Handles an [SSEData] message from the backend and re-publishes it so we can use it across the app
   void handleMessage(SSEData data) {
+    _lastEvents[data.event] = (data: data, timestamp: DateTime.now());
     _sseInEvent.add(data);
   }
 

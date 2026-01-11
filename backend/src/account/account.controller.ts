@@ -168,5 +168,7 @@ export class AccountController {
     const sync = await this.jobService.providerSyncJob.updateNow(user);
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC, sync);
+    // Tell to re-request data
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
   }
 }

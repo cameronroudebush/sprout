@@ -62,6 +62,7 @@ class _AccountPercentageWidgetState extends StateTracker<AccountPercentageWidget
 
   /// Builds a progress section for the type of account
   Widget _buildProgressSection(BuildContext context, String title, List<Account> accounts) {
+    final theme = Theme.of(context);
     // Calculate Total
     final total = accounts.fold(0.0, (sum, acc) => sum + (acc.balance.abs()));
 
@@ -92,8 +93,11 @@ class _AccountPercentageWidgetState extends StateTracker<AccountPercentageWidget
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            Text(getFormattedCurrency(total), style: Theme.of(context).textTheme.titleMedium),
+            Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(
+              getFormattedCurrency(total),
+              style: TextStyle(color: getBalanceColor(title == "Debts" ? -total : total, theme), fontSize: 16),
+            ),
           ],
         ),
         const SizedBox(height: 8),

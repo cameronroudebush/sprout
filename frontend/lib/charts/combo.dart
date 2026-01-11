@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -7,12 +8,14 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/core/utils/formatters.dart';
 
 class ComboChart extends StatelessWidget {
+  Timer? _debounce;
+
   final String? title;
   final CashFlowSpending spendingData;
   final Color lineColor;
   final void Function(String node)? onNodeTap;
 
-  const ComboChart(this.spendingData, {super.key, this.lineColor = Colors.red, this.title, this.onNodeTap});
+  ComboChart(this.spendingData, {super.key, this.lineColor = Colors.red, this.title, this.onNodeTap});
 
   @override
   Widget build(BuildContext context) {
@@ -75,22 +78,26 @@ class ComboChart extends StatelessWidget {
                     barTouchData: BarTouchData(
                       enabled: true,
                       touchCallback: (FlTouchEvent event, barTouchResponse) {
-                        // Ensure we have a valid interaction and a touched bar
                         if (!event.isInterestedForInteractions ||
                             barTouchResponse == null ||
                             barTouchResponse.spot == null) {
                           return;
                         }
+                        if (event is FlLongPressStart && _debounce != null && _debounce!.isActive) _debounce!.cancel();
 
-                        // Check specifically for a 'Click' (TapUp)
-                        if (event is FlTapUpEvent) {
-                          final groupIndex = barTouchResponse.spot!.touchedBarGroupIndex;
-                          final rodIndex = barTouchResponse.spot!.touchedRodDataIndex;
+                        if (event is FlTapUpEvent || event is FlPanDownEvent) {
+                          if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-                          final cat = spendingData.data[groupIndex].categories[rodIndex].name;
-                          if (onNodeTap != null) {
-                            onNodeTap!(cat);
-                          }
+                          _debounce = Timer(const Duration(seconds: 1), () {
+                            final groupIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+                            final rodIndex = barTouchResponse.spot!.touchedRodDataIndex;
+
+                            final cat = spendingData.data[groupIndex].categories[rodIndex].name;
+
+                            if (onNodeTap != null) {
+                              onNodeTap!(cat);
+                            }
+                          });
                         }
                       },
                       touchTooltipData: BarTouchTooltipData(

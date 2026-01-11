@@ -88,7 +88,17 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
   /// [checkLastUpdateTime] If we should check the last time we requested data to determine if we should grab new data. Enabled by default.
   Future<void> loadData({bool forceUpdate = false, bool showLoaders = true, bool checkLastUpdateTime = true}) async {
     if (requests.isEmpty) return;
-    final lastUpdateTime = lastUpdateTimes[widgetName];
+    DateTime? lastUpdateTime = lastUpdateTimes[widgetName];
+
+    // If the last update time is < the last force update, require new data to load
+    final lastForceEvent = _sseProvider.lastEvents[SSEDataEventEnum.forceUpdate]?.timestamp;
+    if (lastUpdateTime != null &&
+        lastForceEvent != null &&
+        lastUpdateTime.millisecondsSinceEpoch < lastForceEvent.millisecondsSinceEpoch) {
+      lastUpdateTime = null;
+      forceUpdate = true;
+    }
+
     // If we haven't waited long enough since the last update, or we don't care about the last update time, ignore this request
     if (lastUpdateTime != null && checkLastUpdateTime) {
       final timeDiffMil = DateTime.now().millisecondsSinceEpoch - lastUpdateTime.millisecondsSinceEpoch;
