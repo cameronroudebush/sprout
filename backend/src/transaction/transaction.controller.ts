@@ -51,6 +51,8 @@ export class TransactionController {
     // Description
     matchingTransaction.description = transaction.description ?? matchingTransaction.description;
 
+    matchingTransaction.manuallyEdited = true;
+
     const updated = await matchingTransaction.update();
     // Updating a transaction has a lot of effect on reports and other locations. Tell the frontend to update all data.
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);

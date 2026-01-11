@@ -89,9 +89,9 @@ class _TransactionInfoState extends State<TransactionInfo> {
 
       if (_valHasChanged()) {
         // Tell provider to update the transaction
-        await transactionProvider.editTransaction(newTransaction);
+        transactionProvider.editTransaction(newTransaction);
         // Ask the category provider to update our stats
-        await catProvider.loadUnknownCategoryCount();
+        catProvider.loadUnknownCategoryCount();
       }
 
       // Close dialog
