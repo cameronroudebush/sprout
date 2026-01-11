@@ -3,14 +3,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/dialog/add_account.dart';
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/account/widgets/account_overview.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/widgets/overview.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
-import 'package:sprout/category/widgets/info.dart';
 import 'package:sprout/category/widgets/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
@@ -19,13 +17,9 @@ import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/shell.dart';
-import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/connect_fail.dart';
-import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/setup/setup.dart';
 import 'package:sprout/setup/widgets/connection_setup.dart';
-import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
-import 'package:sprout/transaction-rule/widgets/rule_info.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
 import 'package:sprout/transaction/widgets/monthly.dart';
 import 'package:sprout/transaction/widgets/overview.dart';
@@ -99,24 +93,6 @@ class SproutRouter {
       showOnBottomNav: true,
       pagePadding: 0,
       scrollWrapper: false,
-      buttonBuilder: (BuildContext context, bool isDesktop) {
-        return Row(
-          children: [
-            // Add account button
-            SproutTooltip(
-              message: "Add an account",
-              child: IconButton(
-                style: isDesktop ? AppTheme.primaryButton : null,
-                onPressed: () async {
-                  // Open the add account dialog
-                  await showDialog(context: context, builder: (_) => const AddAccountDialog());
-                },
-                icon: Icon(Icons.add),
-              ),
-            ),
-          ],
-        );
-      },
     ),
     // Singular account
     SproutPage(
@@ -133,27 +109,6 @@ class SproutRouter {
       icon: Icons.account_balance_wallet,
       canNavigateTo: false,
       scrollWrapper: false,
-      buttonBuilder: (context, isDesktop) {
-        void redirect() => SproutNavigator.back(context);
-        // Back to accounts
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsetsGeometry.only(left: isDesktop ? 24 : 0),
-            child: Row(
-              children: [
-                if (isDesktop)
-                  FilledButton.icon(
-                    icon: Icon(Icons.arrow_back),
-                    style: AppTheme.primaryButton,
-                    onPressed: redirect,
-                    label: SizedBox.shrink(),
-                  ),
-                if (!isDesktop) IconButton(onPressed: redirect, icon: Icon(Icons.arrow_back)),
-              ],
-            ),
-          ),
-        );
-      },
     ),
     // Transactions
     SproutPage(
@@ -170,51 +125,8 @@ class SproutRouter {
       showOnBottomNav: true,
       scrollWrapper: false,
     ),
-    SproutPage(
-      (context, state) => TransactionRuleOverview(),
-      'Rules',
-      icon: Icons.rule,
-      buttonBuilder: (context, isDesktop) {
-        return Row(
-          spacing: 4,
-          children: [
-            // Add new rule button
-            SproutTooltip(
-              message: "Add a new transaction rule",
-              child: IconButton(
-                onPressed: () => showDialog(context: context, builder: (_) => TransactionRuleInfo(null)),
-                icon: Icon(Icons.add),
-                style: AppTheme.primaryButton,
-              ),
-            ),
-            // Manual Refresh
-            SproutTooltip(
-              message: "Manually re-run all rules",
-              child: IconButton(
-                onPressed: () => ServiceLocator.get<TransactionRuleProvider>().openManualRefreshDialog(context),
-                icon: Icon(Icons.refresh),
-                style: AppTheme.secondaryButton,
-              ),
-            ),
-          ],
-        );
-      },
-    ),
-    SproutPage(
-      (context, state) => CategoryOverview(),
-      'Categories',
-      icon: Icons.category,
-      buttonBuilder: (context, isDesktop) {
-        return SproutTooltip(
-          message: "Add Category",
-          child: IconButton(
-            onPressed: () => showDialog(context: context, builder: (_) => CategoryInfo(null)),
-            icon: const Icon(Icons.add),
-            style: AppTheme.primaryButton,
-          ),
-        );
-      },
-    ),
+    SproutPage((context, state) => TransactionRuleOverview(), 'Rules', icon: Icons.rule),
+    SproutPage((context, state) => CategoryOverview(), 'Categories', icon: Icons.category),
     // Subscriptions
     SproutPage(
       (context, state) => TransactionMonthlySubscriptions(),

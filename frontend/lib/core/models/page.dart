@@ -13,9 +13,6 @@ class SproutPage {
   /// The name of this page
   final String label;
 
-  /// Custom buttons to display on the app bar
-  final Widget Function(BuildContext context, bool isDesktop)? buttonBuilder;
-
   /// If we want to display the full logo on the app bar. Directly conflicts with [buttonBuilder]
   final bool useFullLogo;
 
@@ -53,7 +50,6 @@ class SproutPage {
     this.page,
     this.label, {
     required this.icon,
-    this.buttonBuilder,
     bool? renderNav,
     this.renderAppBar = true,
     bool? canNavigateTo,

@@ -10,10 +10,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// If true, we'll use the full logo and center it and ignore other button requests
   final bool useFullLogo;
 
-  /// Buttons we should show on the app bar
-  final Widget Function(BuildContext context, bool isDesktop)? buttonBuilder;
-
-  const SproutAppBar({super.key, required this.screenHeight, this.buttonBuilder, this.useFullLogo = false});
+  const SproutAppBar({super.key, required this.screenHeight, this.useFullLogo = false});
 
   static double getHeightFromScreenHeight(double screenHeight) {
     return 64;
@@ -36,15 +33,13 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
             )
           : Image.asset('assets/icon/color.png', width: 48, fit: BoxFit.contain, filterQuality: FilterQuality.high);
 
-      final buttons = buttonBuilder != null ? buttonBuilder!(context, isDesktop) : null;
-
       final content = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: useFullLogo
             ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [logo])
             : isDesktop
-            ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [logo, ?buttons])
-            : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [buttons ?? SizedBox.shrink(), logo]),
+            ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [logo])
+            : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [SizedBox.shrink(), logo]),
       );
 
       return AppBar(
