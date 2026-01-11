@@ -15,7 +15,7 @@ class SproutNavigator {
     final currentRoute = SproutRouter.router.state.topRoute?.name;
     final targetRoute = page.toLowerCase();
     if (currentRoute != targetRoute) {
-      SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
+      SproutRouter.router.pushReplacementNamed(targetRoute, queryParameters: queryParameters ?? {});
     }
   }
 

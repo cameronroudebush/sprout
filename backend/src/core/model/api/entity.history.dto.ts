@@ -123,8 +123,9 @@ export class EntityHistory extends Base {
         // No previous data, try further back if this is a small days of change
         const furtherHistory = history.filter((x) => isSameDay(x.time, subDays(day, 1)));
         netWorth = furtherHistory.reduce((prev, curr) => (prev += getHistoryVal(curr)), 0);
-      } else if (historyForDay.length === 0 && daysInArray.length > 7) {
-        netWorth = 0;
+      } else if (historyForDay.length === 0 && daysInArray.length > 30) {
+        // If there's no data and it's not within the last 30 days, skip this day to avoid skewing with zero-value days
+        continue;
       }
 
       netWorthSnapshots.push({ date: day, netWorth });

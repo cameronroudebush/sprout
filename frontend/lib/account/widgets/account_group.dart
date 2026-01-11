@@ -81,9 +81,8 @@ class AccountGroupWidget extends StatelessWidget {
         groupAmountChange += valueByFrame.valueChange;
       }
     }
-    final groupPercentChange = groupAmountChange == totalBalance
-        ? double.infinity
-        : (groupAmountChange / totalBalance) * 100;
+    double groupPercentChange = (groupAmountChange / totalBalance) * 100;
+    if (totalBalance == 0 && groupAmountChange != 0) groupPercentChange = 100;
     return GroupCalculatedData(
       percentageChange: groupPercentChange,
       totalBalance: totalBalance,
@@ -101,7 +100,7 @@ class AccountGroupWidget extends StatelessWidget {
           netWorthPeriod,
         );
         double groupAmountChange = groupCalc.totalChange;
-        final groupPercentChange = groupCalc.percentageChange;
+        double groupPercentChange = groupCalc.percentageChange;
         final totalBalance = groupCalc.totalBalance;
 
         /// The percent of total net worth
@@ -109,6 +108,9 @@ class AccountGroupWidget extends StatelessWidget {
         final balanceColor = getBalanceColor(totalBalance, theme);
 
         final accountWithInstitutionError = accounts.firstWhereOrNull((x) => x.institution.hasError);
+
+        // If this is a liability, adjust the value
+        if (type == AccountTypeEnum.loan || type == AccountTypeEnum.credit) groupAmountChange *= -1;
 
         /// A cleaned up type name for display
         String adjustedType = formatAccountType(type);

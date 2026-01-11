@@ -372,10 +372,17 @@ class SproutLineChart extends StatelessWidget {
         fitInsideHorizontally: true,
         fitInsideVertically: true,
         getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-          return touchedBarSpots.map((barSpot) {
+          return touchedBarSpots.asMap().entries.map((entry) {
+            final index = entry.key;
+            final barSpot = entry.value;
+
+            // Only show the tooltip for the very first touched spot
+            if (index != 0) return null;
+
             final flSpot = barSpot.bar.spots[barSpot.spotIndex];
             if (flSpot.x.toInt() < chartData.sortedEntries.length) {
               final date = chartData.sortedEntries[flSpot.x.toInt()].key;
+
               return LineTooltipItem(
                 '${DateFormat('MMM dd, yyyy').format(date)}\n',
                 TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),

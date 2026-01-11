@@ -98,21 +98,33 @@ class _SankeyChartState extends State<SankeyChart> {
     }
   }
 
+  // Helper to reset mouse state
+  void _clearHover() {
+    setState(() {
+      _hoverPosition = null;
+      _hoveredNode = null;
+      _hoveredLink = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         _painterData = _prepareData(constraints.biggest);
 
-        return GestureDetector(
-          onTapUp: (details) => _handleTap(details.localPosition),
-          child: MouseRegion(
-            onHover: (event) => _updateHover(event.localPosition, constraints.biggest),
-            onExit: (_) => setState(() {
-              _hoverPosition = null;
-              _hoveredNode = null;
-              _hoveredLink = null;
-            }),
+        return MouseRegion(
+          // Desktop/Web hover support
+          onHover: (event) => _updateHover(event.localPosition, constraints.biggest),
+          onExit: (_) => _clearHover(),
+          child: GestureDetector(
+            onTapUp: (details) => _handleTap(details.localPosition),
+
+            // Mobile "Hold" logic
+            onLongPressStart: (details) => _updateHover(details.localPosition, constraints.biggest),
+            onLongPressMoveUpdate: (details) => _updateHover(details.localPosition, constraints.biggest),
+            onLongPressEnd: (_) => _clearHover(),
+
             child: CustomPaint(
               size: constraints.biggest,
               painter: SankeyPainter(

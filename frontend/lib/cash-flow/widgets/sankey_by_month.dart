@@ -47,7 +47,7 @@ class SankeyFlowByMonth extends StatelessWidget {
                 minScale: 0.1,
                 maxScale: 5.0,
                 child: SizedBox(
-                  height: constraints.maxHeight,
+                  height: 1024,
                   // We need a min width for mobile else we'll overlap very easily
                   width: !kIsWeb ? 760 : constraints.maxWidth,
                   child: Center(
