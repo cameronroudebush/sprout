@@ -1,9 +1,11 @@
 import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { BillingPeriod, TransactionSubscription } from "@backend/transaction/model/api/transaction.subscription.dto";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
+import { subMonths } from "date-fns";
 
 /**
  * This service provides injectable capabilities for handling data involving Transactions.
@@ -17,68 +19,60 @@ export class TransactionService {
    * amount with tolerance, and billing day.
    *
    * @param user The user to find subscriptions for.
-   * @param deviationTolerance The tolerance we allow in-case subscriptions go up in cost.
-   * @param requiredCount How many transactions are required to be a recurring.
+   * @param requiredCount How many transactions are required to recurring to be considered a sub.
    * @returns An array of potential subscriptions with their details.
    */
-  async findSubscriptions(user: User, deviationTolerance = 0.1, requiredCount = Configuration.transaction.subscriptionCount) {
-    const repository = Transaction.getRepository();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  async findSubscriptions(user: User, requiredCount = Configuration.transaction.subscriptionCount) {
+    const range = subMonths(new Date(), 6);
 
-    const potentialSubscriptions = await repository
+    // Get our data from the db
+    const potentialSubs = (await Transaction.getRepository()
       .createQueryBuilder("transaction")
-      .select("transaction.description", "normalizedDescription")
-      .addSelect("AVG(transaction.amount)", "averageAmount")
+      .select("transaction.description", "description")
+      .addSelect("transaction.amount", "amount")
+      .addSelect("transaction.accountId", "accountId")
+      // Aggregates
       .addSelect("COUNT(*)", "count")
-      .addSelect("GROUP_CONCAT(transaction.posted)", "postedDates")
-      .addSelect("GROUP_CONCAT(transaction.amount)", "amounts")
-      .addSelect("account.id", "accountId") // Select account ID
-      .innerJoin(Account, "account", "transaction.accountId = account.id")
+      .addSelect("MIN(transaction.posted)", "startDate")
+      .addSelect("MAX(transaction.id)", "latestTransactionId")
+      .addSelect("(julianday(MAX(transaction.posted)) - julianday(MIN(transaction.posted))) / (COUNT(*) - 1)", "avgIntervalDays")
+      // Joins & Filters
+      .innerJoin("transaction.account", "account")
       .where("account.userId = :userId", { userId: user.id })
-      .andWhere("transaction.posted >= :oneYearAgo", { oneYearAgo })
-      .andWhere("transaction.amount < 0")
-      .groupBy("normalizedDescription")
-      .having(`COUNT(*) >= ${requiredCount}`)
-      .getRawMany();
+      .andWhere("transaction.posted >= :range", { range })
+      .andWhere("transaction.amount < 0") // Expenses only
+      // Grouping
+      .groupBy("transaction.accountId")
+      // .addGroupBy("transaction.description")
+      .addGroupBy("transaction.amount")
+      // Frequency Filter
+      .having("count >= :requiredCount", { requiredCount })
+      // Consistency Filter: Must appear in at least N distinct months to be a sub
+      .andHaving("COUNT(DISTINCT strftime('%Y-%m', transaction.posted)) >= :requiredCount", { requiredCount })
+      // Filter out if 'Days Since Last Transaction' > 'Avg Interval' as this sub may be cancelled
+      .andHaving("(julianday('now') - julianday(MAX(transaction.posted))) <= (avgIntervalDays + 10)")
+      .getRawMany()) as (TransactionSubscription & { avgIntervalDays: number; latestTransactionId: string; accountId: string })[];
 
-    const subscriptions = (
-      await Promise.all(
-        potentialSubscriptions.map(async (row) => {
-          const postedDates = row.postedDates
-            .split(",")
-            .map((d: string) => new Date(d))
-            .sort((a: Date, b: Date) => a.getTime() - b.getTime());
-          const amounts = row.amounts.split(",").map(Number);
-          const startDate = postedDates[0];
-          const timeDifferences = [];
-          for (let i = 1; i < postedDates.length; i++) timeDifferences.push(postedDates[i].getTime() - postedDates[i - 1].getTime());
-          if (timeDifferences.length === 0) return null;
-          const averagePeriodMs = timeDifferences.reduce((sum, diff) => sum + diff, 0) / timeDifferences.length;
-          const averagePeriodDays = Math.round(averagePeriodMs / (1000 * 60 * 60 * 24));
-          const period = TransactionSubscription.classifyPeriod(averagePeriodDays);
-          const arePeriodsConsistent = timeDifferences.every((diff) => Math.abs(diff - averagePeriodMs) / averagePeriodMs < deviationTolerance);
-          const areAmountsConsistent = amounts.every(
-            (amount: number) => Math.abs(amount - row.averageAmount) / Math.abs(row.averageAmount) < deviationTolerance,
-          );
-          if (arePeriodsConsistent && areAmountsConsistent && period !== BillingPeriod.UNKNOWN) {
-            const account = await Account.findOne({ where: { id: row.accountId } });
-            const transaction = await Transaction.findOne({ where: { description: row.normalizedDescription, account: { id: row.accountId } } });
-            if (account)
-              return new TransactionSubscription(
-                row.normalizedDescription,
-                Math.abs(row.averageAmount),
-                parseInt(row.count),
-                period,
-                startDate,
-                account,
-                transaction!,
-              );
-          }
-          return null;
-        }),
-      )
-    ).filter(Boolean); // Filter out any null values
-    return subscriptions as TransactionSubscription[];
+    // Convert subs to the type
+    const typedPotentialSubs = await Promise.all(
+      potentialSubs.map(async (p) => {
+        return TransactionSubscription.fromPlain({
+          ...p,
+          startDate: new Date(p.startDate),
+          period: TransactionSubscription.classifyPeriod(p.avgIntervalDays),
+          transaction: await Transaction.findOne({ where: { id: p.latestTransactionId } }),
+          account: await Account.findOne({ where: { id: p.accountId } }),
+        });
+      }),
+    );
+
+    // Cleanup to see what's valid
+    const subs = typedPotentialSubs.filter((sub) => {
+      if (sub.period === BillingPeriod.UNKNOWN) return false;
+      if (sub.account.type === AccountType.investment) return false; // Don't consider the stock purchases
+      return true;
+    });
+
+    return subs;
   }
 }

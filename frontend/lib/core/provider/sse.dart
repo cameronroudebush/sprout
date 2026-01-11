@@ -20,7 +20,7 @@ class SSEProvider extends BaseProvider<CoreApi> {
   StreamSubscription<SSEData>? _sub;
 
   /// Tracks the last event that came in for each type
-  final _lastEvents = <SSEDataEventEnum, ({SSEData data, DateTime timestamp})>{};
+  var _lastEvents = <SSEDataEventEnum, ({SSEData data, DateTime timestamp})>{};
 
   /// This controller allows for listening when SSE events come in from the backend
   final StreamController<SSEData> _sseInEvent = StreamController.broadcast();
@@ -193,5 +193,6 @@ class SSEProvider extends BaseProvider<CoreApi> {
   Future<void> cleanupData() async {
     _stopSSE();
     _sub?.cancel();
+    _lastEvents = {};
   }
 }

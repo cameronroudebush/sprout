@@ -54,12 +54,12 @@ export class TransactionSubscription extends Base {
 
   /** A helper function to classify the period based on average days. */
   static classifyPeriod(days: number): BillingPeriod {
-    if (days >= 6 && days <= 8) return BillingPeriod.WEEKLY;
-    if (days >= 13 && days <= 16) return BillingPeriod.BI_WEEKLY;
-    if (days >= 27 && days <= 32) return BillingPeriod.MONTHLY;
-    if (days >= 88 && days <= 94) return BillingPeriod.QUARTERLY;
-    if (days >= 178 && days <= 186) return BillingPeriod.SEMI_ANNUALLY;
-    if (days >= 360 && days <= 370) return BillingPeriod.YEARLY;
+    if (days >= 5.5 && days <= 8.5) return BillingPeriod.WEEKLY;
+    if (days >= 12 && days <= 20) return BillingPeriod.BI_WEEKLY;
+    if (days >= 24 && days <= 45) return BillingPeriod.MONTHLY;
+    if (days >= 83 && days <= 97) return BillingPeriod.QUARTERLY;
+    if (days >= 170 && days <= 190) return BillingPeriod.SEMI_ANNUALLY;
+    if (days >= 350 && days <= 380) return BillingPeriod.YEARLY;
     return BillingPeriod.UNKNOWN;
   }
 }
