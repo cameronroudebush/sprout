@@ -7,6 +7,7 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/core/widgets/exit.dart';
+import 'package:sprout/core/widgets/fab.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/scroll.dart';
@@ -43,29 +44,29 @@ class SproutShell extends StatelessWidget {
       /// The app bar we want, if necessary
       final appBar = !renderAppBar
           ? null
-          : SproutAppBar(
-              screenHeight: mediaQuery.height,
-              buttonBuilder: currentPage.buttonBuilder,
-              useFullLogo: currentPage.useFullLogo,
-            );
+          : SproutAppBar(screenHeight: mediaQuery.height, useFullLogo: currentPage.useFullLogo);
 
-      // The page to render, considering scroll-ability
+      // The page to render, considering scroll-ability, and some padding
+      final padding = EdgeInsets.only(
+        left: currentPage.pagePadding,
+        right: currentPage.pagePadding,
+        // This 80 pixels reserves space for the [FloatingActionButtonWidget]
+        bottom: 80,
+      );
       final page = currentPage.scrollWrapper
           ? SizedBox(
               width: mediaQuery.width,
               height: mediaQuery.height - (appBar?.preferredSize.height ?? 0),
-              child: SproutScrollView(
-                padding: EdgeInsets.symmetric(horizontal: currentPage.pagePadding),
-                child: child,
-              ),
+              child: SproutScrollView(padding: padding, child: child),
             )
           : Padding(
-              padding: EdgeInsets.symmetric(horizontal: currentPage.pagePadding),
+              padding: padding,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [child]),
             );
 
       return ExitWidget(
         child: SproutScaffold(
+          fab: FloatingActionButtonWidget(currentPage),
           appBar: appBar,
           bottomNavigation: !renderNav
               ? null
@@ -222,7 +223,10 @@ class SproutShell extends StatelessWidget {
       bottomNavButtons.insert(middleIndex, homePage);
     }
 
+    final activeIndex = bottomNavButtons.indexWhere((page) => page.label == currentPage.label);
+
     return BottomNavigationBar(
+      currentIndex: activeIndex != -1 ? activeIndex : 0,
       iconSize: 24,
       selectedFontSize: fontSize,
       unselectedFontSize: fontSize,
@@ -242,15 +246,8 @@ class SproutShell extends StatelessWidget {
       items: bottomNavButtons
           .mapIndexed((i, page) {
             if (!page.canNavigateTo) return null;
-            final isSelected = page.label == currentPage.label;
             return BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Icon(
-                  page.icon,
-                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onPrimaryContainer,
-                ),
-              ),
+              icon: Padding(padding: const EdgeInsets.all(4.0), child: Icon(page.icon)),
               label: page.label,
             );
           })

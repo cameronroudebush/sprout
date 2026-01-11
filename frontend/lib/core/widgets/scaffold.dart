@@ -15,13 +15,22 @@ class SproutScaffold extends StatelessWidget {
   /// Drawer to display a sidenav
   final Widget? drawer;
 
-  const SproutScaffold({super.key, required this.child, this.appBar, this.bottomNavigation, this.drawer});
+  /// A floating action button to display if available
+  final Widget? fab;
+
+  const SproutScaffold({super.key, required this.child, this.appBar, this.bottomNavigation, this.drawer, this.fab});
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(systemNavigationBarColor: const Color(0xFF001e2c)),
-      child: Scaffold(appBar: appBar, body: child, bottomNavigationBar: bottomNavigation, drawer: drawer),
+      child: Scaffold(
+        appBar: appBar,
+        body: child,
+        bottomNavigationBar: bottomNavigation,
+        drawer: drawer,
+        floatingActionButton: fab,
+      ),
     );
   }
 }
