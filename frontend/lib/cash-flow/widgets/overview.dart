@@ -139,14 +139,12 @@ class _CashFlowOverviewState extends StateTracker<CashFlowOverview> {
 
   /// Constructs the overview of what will be displayed
   Widget _buildOverview() {
-    final size = MediaQuery.of(context).size;
     return Consumer<CashFlowProvider>(
       builder: (context, provider, child) {
         if (isLoading || provider.monthlySpending == null) return Center(child: PageLoadingWidget());
         return Column(
           children: [
-            SizedBox(
-              height: size.height * .5,
+            Expanded(
               child: SproutCard(
                 child: ComboChart(
                   provider.monthlySpending!,

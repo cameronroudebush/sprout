@@ -10,6 +10,7 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/fab.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
@@ -50,7 +51,10 @@ class _AccountsOverviewState extends StateTracker<AccountsOverview> {
       builder: (context, userConfigProvider, accountProvider, netWorthProvider, child) {
         final accountTypes = AccountTypeEnum.values;
         final accountTypesContent = accountTypes.map((a) {
-          return _buildTabContent(context, a, userConfigProvider, accountProvider, netWorthProvider);
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: FloatingActionButtonWidget.padding),
+            child: _buildTabContent(context, a, userConfigProvider, accountProvider, netWorthProvider),
+          );
         }).toList();
         final initialIndex = widget.defaultAccountType == null ? 0 : accountTypes.indexOf(widget.defaultAccountType!);
         return Expanded(

@@ -41,7 +41,7 @@ export class CashFlowService {
       between = day == null ? Between(startOfMonth(queryDate), endOfMonth(queryDate)) : Between(startOfDay(queryDate), endOfDay(queryDate));
     }
 
-    // Fetch Transactions (Include 'account' to check for liabilities)
+    // Fetch Transactions
     const where = {
       account: { id: accountId, user: { id: user.id } },
       posted: between,
@@ -50,10 +50,7 @@ export class CashFlowService {
 
     const transactions = await Transaction.find({ where, relations: ["category", "account"] });
 
-    // Process Data
     const categoryStats = new Map<string, { category: Category; inflow: number; outflow: number }>();
-    let totalIncome = 0;
-    let totalExpense = 0;
 
     for (const transaction of transactions) {
       if (!transaction.category) continue;
@@ -63,29 +60,42 @@ export class CashFlowService {
         categoryStats.set(catId, { category: transaction.category, inflow: 0, outflow: 0 });
       }
       const stats = categoryStats.get(catId)!;
-
       const amount = transaction.amount;
 
       if (amount > 0) {
-        // If money flows into an account, it is NOT income. It is ignored here.
+        // Liability check: Inflows to liability accounts (e.g. credit card payments) are ignored here.
         if (transaction.account && this.isLiabilityAccount(transaction.account)) continue;
-
         stats.inflow += amount;
-        totalIncome += amount;
       } else {
-        // Money leaving ANY account is treated as activity/expense
-        const absAmount = Math.abs(amount);
-        stats.outflow += absAmount;
-        totalExpense += amount; // Keep negative for consistency if needed, or track abs
+        stats.outflow += Math.abs(amount);
       }
     }
 
-    // Find largest single expense (for insights)
-    let largestExpense: Transaction | undefined;
-    for (const transaction of transactions)
-      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) largestExpense = transaction;
+    // We calculate totals based on the NET result of each category.
+    let totalIncome = 0;
+    let totalExpense = 0;
 
-    return { totalIncome, totalExpense: Math.abs(totalExpense), categoryStats, transactionCount: transactions.length, largestExpense };
+    for (const { inflow, outflow } of categoryStats.values()) {
+      const net = inflow - outflow;
+
+      if (net > 0) {
+        // Net Income (e.g. Salary, or Refunds > Spending)
+        totalIncome += net;
+      } else {
+        // Net Expense (e.g. Groceries, Rent)
+        totalExpense += Math.abs(net);
+      }
+    }
+
+    // Find largest single expense (for insights) - remains purely transaction-based
+    let largestExpense: Transaction | undefined;
+    for (const transaction of transactions) {
+      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) {
+        largestExpense = transaction;
+      }
+    }
+
+    return { totalIncome, totalExpense, categoryStats, transactionCount: transactions.length, largestExpense };
   }
 
   /**
