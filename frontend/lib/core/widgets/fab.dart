@@ -18,6 +18,9 @@ class FABAction {
 
 /// This widget is a reusable component that is injected within the shell to provide floating action buttons based on the current route context.
 class FloatingActionButtonWidget extends StatefulWidget {
+  /// How much padding to apply for the FAB
+  static const padding = 80.0;
+
   /// The current page we are on
   final SproutPage currentPage;
 

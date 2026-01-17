@@ -2,7 +2,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account.dart';
 import 'package:sprout/account/widgets/account_overview.dart';
 import 'package:sprout/api/api.dart';
@@ -97,13 +96,9 @@ class SproutRouter {
     // Singular account
     SproutPage(
       (context, state) {
-        final accountProvider = ServiceLocator.get<AccountProvider>();
         final accountId = state.uri.queryParameters["acc"];
-        final account = accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == accountId);
-        if (account == null) {
-          return const Text('Error: Account not found');
-        }
-        return AccountWidget(account);
+        if (accountId == null) return const Text('Error: Account not found');
+        return AccountWidget(accountId);
       },
       'Account',
       icon: Icons.account_balance_wallet,

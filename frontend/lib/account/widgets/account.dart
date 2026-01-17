@@ -14,6 +14,7 @@ import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/core/widgets/page_loading.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
@@ -30,10 +31,10 @@ import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a holding display for a specific account
 class AccountWidget extends StatefulWidget {
-  /// The account we must have data from
-  final Account account;
+  /// The ID of the account we want to display data for
+  final String accountId;
 
-  const AccountWidget(this.account, {super.key});
+  const AccountWidget(this.accountId, {super.key});
 
   @override
   State<AccountWidget> createState() => _AccountWidgetState();
@@ -42,10 +43,22 @@ class AccountWidget extends StatefulWidget {
 /// A page that displays information about the given account
 class _AccountWidgetState extends StateTracker<AccountWidget> {
   Holding? _selectedHolding;
-  Account get account => widget.account;
+
+  /// Returns the account based on our current Id
+  Account get account {
+    return ServiceLocator.get<AccountProvider>().linkedAccounts.firstWhereOrNull((x) => x.id == widget.accountId)!;
+  }
 
   @override
   Map<dynamic, DataRequest> get requests => {
+    'account': DataRequest<AccountProvider, Account>(
+      provider: ServiceLocator.get<AccountProvider>(),
+      onLoad: (p, force) async {
+        await p.populateLinkedAccounts(); // Populate accounts
+        return account;
+      },
+      getFromProvider: (p) => account,
+    ),
     'holdings': DataRequest<HoldingProvider, (List<Holding>?, List<EntityHistory>?)>(
       provider: ServiceLocator.get<HoldingProvider>(),
       onLoad: (p, force) => p.populateDataForAccount(account),
@@ -68,7 +81,7 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
     UserConfigProvider userConfigProvider,
   ) {
     final chartRange = userConfigProvider.userDefaultChartRange;
-    final data = netWorthProvider.historicalAccountData?.firstWhereOrNull((e) => e.connectedId == account.id);
+    final data = netWorthProvider.historicalAccountData?.firstWhereOrNull((e) => e.connectedId == widget.accountId);
     final accountDataForRange = data?.getValueByFrame(chartRange);
 
     num accountValChange = accountDataForRange?.valueChange ?? 0;
@@ -213,6 +226,8 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
   Widget build(BuildContext context) {
     return Consumer4<UserConfigProvider, AccountProvider, NetWorthProvider, HoldingProvider>(
       builder: (context, userConfigProvider, accountProvider, netWorthProvider, holdingProvider, child) {
+        if (isLoading) return PageLoadingWidget();
+
         final List<String> tabs = ["Overview", "Transactions"];
         final List<Widget> tabContents = [
           _buildOverviewContent(context, netWorthProvider, userConfigProvider),

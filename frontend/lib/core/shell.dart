@@ -51,7 +51,7 @@ class SproutShell extends StatelessWidget {
         left: currentPage.pagePadding,
         right: currentPage.pagePadding,
         // This 80 pixels reserves space for the [FloatingActionButtonWidget]
-        bottom: currentPage.scrollWrapper ? 80 : 0,
+        bottom: currentPage.scrollWrapper ? FloatingActionButtonWidget.padding : 0,
       );
       final page = currentPage.scrollWrapper
           ? SizedBox(
