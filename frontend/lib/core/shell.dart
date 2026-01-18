@@ -1,8 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/core/models/page.dart';
-import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
@@ -146,7 +145,7 @@ class SproutShell extends StatelessWidget {
                         _navigateToPage(context, settingsPage, isDesktop);
                       }
                     } else if (value == 'logout') {
-                      context.read<AuthProvider>().logout();
+                      ServiceLocator.get<AuthProvider>().logout();
                     }
                   },
                   itemBuilder: (context) => [

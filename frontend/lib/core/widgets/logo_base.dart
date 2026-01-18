@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/auth.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 
 /// A base class that is used to render a logo based on the given class data

@@ -5,10 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
-import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/layout.dart';
@@ -35,11 +36,13 @@ class _LoginFormState extends State<LoginForm> {
 
   /// Fires after our login is complete
   Future<void> _loginComplete(User? user, {String failureMessage = _LoginFormState.failedLoginMessage}) async {
+    setState(() {
+      _loginIsRunning = false;
+    });
     if (user != null) {
       _usernameController.clear();
       _passwordController.clear();
       setState(() {
-        _loginIsRunning = false;
         _isLoadingData = true;
       });
       // Request our basic data
@@ -69,20 +72,30 @@ class _LoginFormState extends State<LoginForm> {
     setState(() {
       _loginIsRunning = false;
     });
-    authProvider
-        .tryInitialLogin()
-        .then((user) async {
-          await _loginComplete(user, failureMessage: user == null ? "" : _LoginFormState.failedLoginMessage);
-        })
-        .onError((ApiException error, StackTrace stackTrace) async {
-          final isSessionExpiration = error.code == 401;
-          // Reset the JWT as the auto login has expired
-          if (isSessionExpiration) {
-            await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
-            await SecureStorageProvider.saveValue(SecureStorageProvider.accessToken, null);
-          }
-          await _loginComplete(null, failureMessage: isSessionExpiration ? error.message ?? 'Session Expired' : "");
-        });
+
+    // Only try to auto login if we didn't just come from logout
+    if (!authProvider.consumeLogoutEvent) {
+      setState(() {
+        _loginIsRunning = true;
+      });
+      authProvider
+          .tryInitialLogin()
+          .then((user) async {
+            await _loginComplete(user, failureMessage: user == null ? "" : _LoginFormState.failedLoginMessage);
+          })
+          .onError((ApiException error, StackTrace stackTrace) async {
+            final isSessionExpiration = error.code == 401;
+            // Reset the JWT as the auto login has expired
+            if (isSessionExpiration) {
+              await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
+              await SecureStorageProvider.saveValue(SecureStorageProvider.accessToken, null);
+            }
+            await _loginComplete(
+              null,
+              failureMessage: isSessionExpiration ? SnackbarProvider.parseOpenAPIException(error) : "",
+            );
+          });
+    }
   }
 
   /// Forces a rerender
@@ -170,9 +183,11 @@ class _LoginFormState extends State<LoginForm> {
                   width: 240,
                   child: FilledButton(
                     style: AppTheme.primaryButton,
-                    onPressed: provider.unsecureConfig?.oidcConfig != null
+                    onPressed: _loginIsRunning
+                        ? null
+                        : provider.unsecureConfig?.oidcConfig != null
                         ? _login
-                        : (_passwordController.text == "" || _usernameController.text == "" || _loginIsRunning)
+                        : (_passwordController.text == "" || _usernameController.text == "")
                         ? null
                         : _login,
                     child: Row(

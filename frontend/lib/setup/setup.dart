@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/core/models/notification.dart';
-import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/theme.dart';
