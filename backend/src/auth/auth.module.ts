@@ -1,7 +1,7 @@
 import { AuthController } from "@backend/auth/auth.controller";
 import { AuthService } from "@backend/auth/auth.service";
-import { LocalStrategy } from "@backend/auth/local.strategy";
-import { OIDCStrategy } from "@backend/auth/oidc.strategy";
+import { LocalStrategy } from "@backend/auth/strategy/local.strategy";
+import { OIDCStrategy } from "@backend/auth/strategy/oidc.strategy";
 import { Configuration } from "@backend/config/core";
 import { HttpModule } from "@nestjs/axios";
 import { CacheModule } from "@nestjs/cache-manager";

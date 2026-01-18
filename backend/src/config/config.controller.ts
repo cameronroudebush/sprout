@@ -1,4 +1,4 @@
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
