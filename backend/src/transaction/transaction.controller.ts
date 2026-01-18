@@ -1,5 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";

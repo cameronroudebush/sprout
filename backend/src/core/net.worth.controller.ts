@@ -1,6 +1,6 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { EntityHistory } from "@backend/core/model/api/entity.history.dto";
 import { User } from "@backend/user/model/user.model";

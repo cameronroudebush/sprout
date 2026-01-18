@@ -1,4 +1,4 @@
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Controller, Get, Query, Res, StreamableFile } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";

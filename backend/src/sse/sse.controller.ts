@@ -1,4 +1,4 @@
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { SSEData } from "@backend/sse/model/event.model";
 import { Controller, Sse } from "@nestjs/common";
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from "@nestjs/swagger";

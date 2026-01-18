@@ -1,4 +1,4 @@
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";

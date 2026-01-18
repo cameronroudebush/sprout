@@ -1,4 +1,4 @@
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CategoryService } from "@backend/category/category.service";
 import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { Category } from "@backend/category/model/category.model";

@@ -1,6 +1,6 @@
 import { Account } from "@backend/account/model/account.model";
 import { AccountEditRequest } from "@backend/account/model/api/edit.request.dto";
-import { AuthGuard } from "@backend/auth/auth.guard";
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
