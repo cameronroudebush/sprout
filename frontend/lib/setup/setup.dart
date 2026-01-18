@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/models/notification.dart';
+import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/theme.dart';
@@ -72,6 +73,7 @@ class _SetupPageState extends State<SetupPage> {
     });
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final authProvider = ServiceLocator.get<AuthProvider>();
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -94,7 +96,7 @@ class _SetupPageState extends State<SetupPage> {
           _isFailureMessage = false;
         });
         // If registration is successful, automatically log in the user
-        final loggedIn = await userProvider.login(username, password);
+        final loggedIn = await authProvider.login(username, password);
 
         if (loggedIn != null) {
           setState(() {

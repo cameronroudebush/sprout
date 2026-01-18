@@ -3,14 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
+import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/notification.dart';
-import 'package:sprout/user/user_provider.dart';
 
 /// A widget that is used to display the login form to allow the user to authenticate with username/password
 class LoginForm extends StatefulWidget {
@@ -63,20 +65,23 @@ class _LoginFormState extends State<LoginForm> {
     _usernameController.addListener(_updateButtonState);
     _passwordController.addListener(_updateButtonState);
     // Attempt initial login
-    final userProvider = ServiceLocator.get<UserProvider>();
+    final authProvider = ServiceLocator.get<AuthProvider>();
     setState(() {
       _loginIsRunning = false;
     });
-    userProvider
-        .checkInitialLoginStatus()
+    authProvider
+        .tryInitialLogin()
         .then((user) async {
           await _loginComplete(user, failureMessage: user == null ? "" : _LoginFormState.failedLoginMessage);
         })
         .onError((ApiException error, StackTrace stackTrace) async {
           final isSessionExpiration = error.code == 401;
           // Reset the JWT as the auto login has expired
-          if (isSessionExpiration) await SecureStorageProvider.saveValue(SecureStorageProvider.jwtKey, null);
-          await _loginComplete(null, failureMessage: isSessionExpiration ? "Session Expired" : "");
+          if (isSessionExpiration) {
+            // TODO
+            await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
+          }
+          await _loginComplete(null, failureMessage: isSessionExpiration ? error.message ?? 'Session Expired' : "");
         });
   }
 
@@ -87,25 +92,32 @@ class _LoginFormState extends State<LoginForm> {
 
   /// Handles the login process when the login button is pressed.
   Future<void> _login() async {
-    final userProvider = ServiceLocator.get<UserProvider>();
-    TextInput.finishAutofillContext();
-    if (_usernameController.text == "" || _passwordController.text == "") {
-      return;
-    }
-    User? user;
-    try {
-      setState(() {
-        _loginIsRunning = true;
-      });
-      user = await userProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
-      // Successful login? Request data and go home
-      await _loginComplete(user);
-    } finally {
-      if (user == null) {
+    final authProvider = ServiceLocator.get<AuthProvider>();
+    final configProvider = ServiceLocator.get<ConfigProvider>();
+
+    if (configProvider.unsecureConfig?.oidcConfig != null) {
+      // OIDC login
+      await authProvider.loginOIDC();
+    } else {
+      TextInput.finishAutofillContext();
+      if (_usernameController.text == "" || _passwordController.text == "") {
+        return;
+      }
+      User? user;
+      try {
         setState(() {
-          _message = _LoginFormState.failedLoginMessage;
-          _loginIsRunning = false;
+          _loginIsRunning = true;
         });
+        user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
+        // Successful login? Request data and go home
+        await _loginComplete(user);
+      } finally {
+        if (user == null) {
+          setState(() {
+            _message = _LoginFormState.failedLoginMessage;
+            _loginIsRunning = false;
+          });
+        }
       }
     }
   }
@@ -114,63 +126,76 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SproutLayoutBuilder((isDesktop, context, constraints) {
-      return SizedBox(
-        width: 480,
-        child: Column(
-          spacing: 12,
-          children: [
-            if (_message.isNotEmpty)
-              SproutNotificationWidget(
-                SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError),
-              ),
-            AutofillGroup(
-              child: Column(
-                spacing: 12,
-                children: [
-                  TextField(
-                    controller: _usernameController,
-                    keyboardType: TextInputType.text,
-                    autofillHints: const [AutofillHints.username],
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
+      return Consumer<ConfigProvider>(
+        builder: (context, provider, child) {
+          return SizedBox(
+            width: 480,
+            child: Column(
+              spacing: 12,
+              children: [
+                if (_message.isNotEmpty)
+                  SproutNotificationWidget(
+                    SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError),
                   ),
-                  TextField(
-                    controller: _passwordController,
-                    keyboardType: TextInputType.visiblePassword,
-                    autofillHints: const [AutofillHints.password],
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
-                    obscureText: true,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (String value) {
-                      _login();
-                    },
+                if (provider.unsecureConfig?.oidcConfig == null)
+                  AutofillGroup(
+                    child: Column(
+                      spacing: 12,
+                      children: [
+                        TextField(
+                          controller: _usernameController,
+                          keyboardType: TextInputType.text,
+                          autofillHints: const [AutofillHints.username],
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
+                        ),
+                        TextField(
+                          controller: _passwordController,
+                          keyboardType: TextInputType.visiblePassword,
+                          autofillHints: const [AutofillHints.password],
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (String value) {
+                            _login();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: 240,
-              child: FilledButton(
-                style: AppTheme.primaryButton,
-                onPressed: _passwordController.text == "" || _usernameController.text == "" || _loginIsRunning
-                    ? null
-                    : _login,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 12,
-                  children: [
-                    if (_loginIsRunning || _isLoadingData)
-                      SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
-                    Text(_isLoadingData ? "Loading Data" : "Login"),
-                  ],
+                SizedBox(
+                  width: 240,
+                  child: FilledButton(
+                    style: AppTheme.primaryButton,
+                    onPressed: provider.unsecureConfig?.oidcConfig != null
+                        ? _login
+                        : (_passwordController.text == "" || _usernameController.text == "" || _loginIsRunning)
+                        ? null
+                        : _login,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 12,
+                      children: [
+                        if (_loginIsRunning || _isLoadingData)
+                          SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
+                        Text(
+                          _isLoadingData
+                              ? "Loading Data"
+                              : provider.unsecureConfig?.oidcConfig == null
+                              ? "Login"
+                              : "Login with OIDC",
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       );
     });
   }

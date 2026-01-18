@@ -1,15 +1,10 @@
-import { Configuration } from "@backend/config/core";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { ApiHideProperty } from "@nestjs/swagger";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
-import jwt from "jsonwebtoken";
 import { JoinColumn, OneToOne } from "typeorm";
-
-/** JWT object content that will be included */
-type JWTContent = { username: string };
 
 @DatabaseDecorators.entity()
 export class User extends DatabaseBase {
@@ -57,22 +52,6 @@ export class User extends DatabaseBase {
   /** Given a password to verify, compares our hashed password from {@link password} to the given one */
   verifyPassword(passToCheck: string) {
     return bcrypt.compareSync(passToCheck, this.password);
-  }
-
-  /** Returns a fresh JWT for the current user */
-  get JWT() {
-    return jwt.sign({ username: this.username } as JWTContent, Configuration.secretKey, { expiresIn: Configuration.server.jwtExpirationTime as any });
-  }
-
-  /** Decodes the given JWT to get relevant content from it */
-  static decodeJWT(token: string) {
-    return jwt.decode(token) as JWTContent;
-  }
-
-  /** Verifies the given JWT. Throws an error if it is not valid */
-  static verifyJWT(jwtString?: string) {
-    if (!jwtString) throw new Error("Invalid JWT");
-    return jwt.verify(jwtString, Configuration.secretKey) as JWTContent;
   }
 
   /** Checks the database to see if the username is in use and throws an error if so. */

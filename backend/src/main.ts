@@ -1,3 +1,11 @@
+import { ConfigurationService } from "./config/config.service";
+
+/**
+ *  Manually load configuration before any of the rest of the app is loaded. This is because we reference the config
+ *    very early in a lot of class construction.
+ */
+new ConfigurationService().load();
+
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { DatabaseService } from "@backend/database/database.service";
@@ -10,15 +18,10 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { startCase } from "lodash";
 import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
 import { name } from "../package.json";
-import { ConfigurationService } from "./config/config.service";
+import { AppModule } from "./app.module";
 import { SproutLogger } from "./core/logger";
 import { generateOpenApiSpec } from "./scripts/generate.api-spec";
 import { populateDemoData } from "./scripts/populate.demo.data";
-
-// Manually load configuration before the app module is loaded so we can use the config within the app module.
-new ConfigurationService().load();
-// Now import the app module since we've got that ready to go
-import { AppModule } from "./app.module";
 
 /**
  * This allows us to run this app and then execute a specific script
@@ -104,6 +107,10 @@ async function main() {
 
     logger.log(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
     logger.log(`Built on ${TimeZone.formatDate(new Date(process.env["BUILD_DATE"]!))}`);
+
+    // Inform of auth information
+    logger.log(`Authentication Strategy: ${Configuration.server.auth.type}`);
+    if (Configuration.server.auth.type === "oidc") Configuration.server.auth.oidc.validate();
 
     // Configure Swagger
     if (Configuration.isDevBuild) {

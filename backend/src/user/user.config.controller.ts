@@ -1,5 +1,5 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Body, Controller, Get, NotFoundException, Patch } from "@nestjs/common";

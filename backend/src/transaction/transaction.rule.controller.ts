@@ -1,6 +1,6 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";

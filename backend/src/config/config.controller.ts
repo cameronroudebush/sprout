@@ -1,8 +1,8 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { Configuration } from "@backend/config/core";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { SetupService } from "@backend/core/setup.service";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderService } from "@backend/providers/provider.service";
@@ -50,6 +50,7 @@ export class ConfigController {
     return UnsecureAppConfiguration.fromPlain({
       firstTimeSetupPosition: await this.setupService.firstTimeSetupDetermination(),
       version: Configuration.version,
+      oidcConfig: Configuration.server.auth.type === "oidc" ? Configuration.server.auth.oidc.toUnsecure() : undefined,
     });
   }
 }

@@ -1,5 +1,5 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";

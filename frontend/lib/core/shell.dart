@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/models/page.dart';
+import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
@@ -12,7 +13,6 @@ import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/user/model/user_extensions.dart';
-import 'package:sprout/user/user_provider.dart';
 
 /// A wrapper around the scaffold that renders the navigation selection options as well as the current page
 class SproutShell extends StatelessWidget {
@@ -97,7 +97,7 @@ class SproutShell extends StatelessWidget {
   // This is the widget for the side navigation menu.
   Widget _buildSideNav(BuildContext context, bool isDesktop) {
     final theme = Theme.of(context);
-    final userProvider = ServiceLocator.get<UserProvider>();
+    final authProvider = ServiceLocator.get<AuthProvider>();
     final buttons = SproutRouter.pages
         .where((e) => e.canNavigateTo && e.showOnSideNav)
         .mapIndexed((i, page) {
@@ -146,7 +146,7 @@ class SproutShell extends StatelessWidget {
                         _navigateToPage(context, settingsPage, isDesktop);
                       }
                     } else if (value == 'logout') {
-                      context.read<UserProvider>().logout();
+                      context.read<AuthProvider>().logout();
                     }
                   },
                   itemBuilder: (context) => [
@@ -168,7 +168,7 @@ class SproutShell extends StatelessWidget {
                           const Icon(Icons.person),
                           Expanded(
                             child: Text(
-                              userProvider.currentUser?.prettyName ?? "",
+                              authProvider.currentUser?.prettyName ?? "",
                               style: const TextStyle(overflow: TextOverflow.ellipsis),
                               textAlign: TextAlign.center,
                             ),

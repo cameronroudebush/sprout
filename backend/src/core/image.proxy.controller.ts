@@ -1,10 +1,10 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { Controller, Get, Query, Res, StreamableFile } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import sharp, { Sharp } from "sharp";
 import ico from "sharp-ico";
 import { Readable } from "stream";
-import { AuthGuard } from "./guard/auth.guard";
 
 /**
  * This controller is used to proxy images from given requests with required user

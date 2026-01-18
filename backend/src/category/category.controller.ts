@@ -1,8 +1,8 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { CategoryService } from "@backend/category/category.service";
 import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { AuthGuard } from "@backend/core/guard/auth.guard";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";

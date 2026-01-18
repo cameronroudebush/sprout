@@ -129,32 +129,28 @@ class UserApi {
     return null;
   }
 
-  /// Login with username and password.
+  /// Get's current user info.
   ///
-  /// Authenticates a user with their username and password, returning user details and a new JWT for session management.
+  /// Returns the current user from the database.
   ///
   /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
-  Future<Response> userControllerLoginWithHttpInfo(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
+  Future<Response> userControllerMeWithHttpInfo() async {
     // ignore: prefer_const_declarations
-    final path = r'/user/login';
+    final path = r'/user/me';
 
     // ignore: prefer_final_locals
-    Object? postBody = usernamePasswordLoginRequest;
+    Object? postBody;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>['application/json'];
+    const contentTypes = <String>[];
 
 
     return apiClient.invokeAPI(
       path,
-      'POST',
+      'GET',
       queryParams,
       postBody,
       headerParams,
@@ -163,15 +159,11 @@ class UserApi {
     );
   }
 
-  /// Login with username and password.
+  /// Get's current user info.
   ///
-  /// Authenticates a user with their username and password, returning user details and a new JWT for session management.
-  ///
-  /// Parameters:
-  ///
-  /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
-  Future<UserLoginResponse?> userControllerLogin(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
-    final response = await userControllerLoginWithHttpInfo(usernamePasswordLoginRequest,);
+  /// Returns the current user from the database.
+  Future<User?> userControllerMe() async {
+    final response = await userControllerMeWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -179,63 +171,7 @@ class UserApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserLoginResponse',) as UserLoginResponse;
-    
-    }
-    return null;
-  }
-
-  /// Login with an existing JWT.
-  ///
-  /// Validates an existing JWT. If valid, it returns the user details and the same JWT.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [JWTLoginRequest] jWTLoginRequest (required):
-  Future<Response> userControllerLoginWithJWTWithHttpInfo(JWTLoginRequest jWTLoginRequest,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/user/login/jwt';
-
-    // ignore: prefer_final_locals
-    Object? postBody = jWTLoginRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Login with an existing JWT.
-  ///
-  /// Validates an existing JWT. If valid, it returns the user details and the same JWT.
-  ///
-  /// Parameters:
-  ///
-  /// * [JWTLoginRequest] jWTLoginRequest (required):
-  Future<UserLoginResponse?> userControllerLoginWithJWT(JWTLoginRequest jWTLoginRequest,) async {
-    final response = await userControllerLoginWithJWTWithHttpInfo(jWTLoginRequest,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserLoginResponse',) as UserLoginResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
     
     }
     return null;

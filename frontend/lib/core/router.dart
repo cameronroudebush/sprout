@@ -12,6 +12,7 @@ import 'package:sprout/category/widgets/overview.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/models/page.dart';
+import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
@@ -22,7 +23,6 @@ import 'package:sprout/setup/widgets/connection_setup.dart';
 import 'package:sprout/transaction-rule/widgets/rule_overview.dart';
 import 'package:sprout/transaction/widgets/monthly.dart';
 import 'package:sprout/transaction/widgets/overview.dart';
-import 'package:sprout/user/user_provider.dart';
 import 'package:sprout/user/widgets/login.dart';
 import 'package:sprout/user/widgets/user_config.dart';
 
@@ -149,7 +149,7 @@ class SproutRouter {
     initialLocation: '/login',
     redirect: (context, state) {
       final configProvider = ServiceLocator.get<ConfigProvider>();
-      final userProvider = ServiceLocator.get<UserProvider>();
+      final authProvider = ServiceLocator.get<AuthProvider>();
 
       // Check if we don't have a connection url
       final hasConnectionUrl = configProvider.hasConnectionUrl();
@@ -164,11 +164,11 @@ class SproutRouter {
       if (setupPosition == "welcome") return "/setup";
 
       // Check if we're already authenticated (JWT or not)
-      if (!userProvider.isLoggedIn) return "/login";
+      if (!authProvider.isLoggedIn) return "/login";
 
       // If we're already logged in and somehow going back to login, kick them back to home
       final isGoingToLogin = state.matchedLocation == '/login';
-      if (userProvider.isLoggedIn && isGoingToLogin) {
+      if (authProvider.isLoggedIn && isGoingToLogin) {
         return '/';
       }
 

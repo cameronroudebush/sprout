@@ -15,6 +15,7 @@ class UnsecureAppConfiguration {
   UnsecureAppConfiguration({
     required this.firstTimeSetupPosition,
     required this.version,
+    this.oidcConfig,
   });
 
   /// If this is the first time someone has connected to this interface
@@ -23,24 +24,40 @@ class UnsecureAppConfiguration {
   /// Version of the backend
   String version;
 
+  /// The OIDC configuration if the server is instead setup to do that.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  UnsecureOIDCConfig? oidcConfig;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UnsecureAppConfiguration &&
     other.firstTimeSetupPosition == firstTimeSetupPosition &&
-    other.version == version;
+    other.version == version &&
+    other.oidcConfig == oidcConfig;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (firstTimeSetupPosition.hashCode) +
-    (version.hashCode);
+    (version.hashCode) +
+    (oidcConfig == null ? 0 : oidcConfig!.hashCode);
 
   @override
-  String toString() => 'UnsecureAppConfiguration[firstTimeSetupPosition=$firstTimeSetupPosition, version=$version]';
+  String toString() => 'UnsecureAppConfiguration[firstTimeSetupPosition=$firstTimeSetupPosition, version=$version, oidcConfig=$oidcConfig]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'firstTimeSetupPosition'] = this.firstTimeSetupPosition;
       json[r'version'] = this.version;
+    if (this.oidcConfig != null) {
+      json[r'oidcConfig'] = this.oidcConfig;
+    } else {
+      json[r'oidcConfig'] = null;
+    }
     return json;
   }
 
@@ -65,6 +82,7 @@ class UnsecureAppConfiguration {
       return UnsecureAppConfiguration(
         firstTimeSetupPosition: mapValueOfType<Object>(json, r'firstTimeSetupPosition')!,
         version: mapValueOfType<String>(json, r'version')!,
+        oidcConfig: UnsecureOIDCConfig.fromJson(json[r'oidcConfig']),
       );
     }
     return null;

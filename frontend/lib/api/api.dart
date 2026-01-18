@@ -29,6 +29,7 @@ part 'auth/http_basic_auth.dart';
 part 'auth/http_bearer_auth.dart';
 
 part 'api/account_api.dart';
+part 'api/auth_api.dart';
 part 'api/cash_flow_api.dart';
 part 'api/category_api.dart';
 part 'api/config_api.dart';
@@ -66,6 +67,7 @@ part 'model/transaction.dart';
 part 'model/transaction_rule.dart';
 part 'model/transaction_subscription.dart';
 part 'model/unsecure_app_configuration.dart';
+part 'model/unsecure_oidc_config.dart';
 part 'model/user.dart';
 part 'model/user_config.dart';
 part 'model/user_creation_request.dart';
