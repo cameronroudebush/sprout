@@ -32,6 +32,21 @@ class AuthProvider extends BaseProvider<AuthApi> {
 
   AuthProvider(super.api);
 
+  /// Asynchronously fetches both the ID Token and Access Token and places them into a header object
+  ///   as required by the authentication in the backend. Handles both local and OIDC strategies.
+  Future<Map<String, String>> getHeaders() async {
+    final tokens = await Future.wait([
+      SecureStorageProvider.getValue(SecureStorageProvider.idToken),
+      SecureStorageProvider.getValue(SecureStorageProvider.accessToken),
+    ]);
+    Map<String, String> map = {};
+    // Id token
+    if (tokens[0] != null) map["Authorization"] = 'Bearer ${tokens[0]}';
+    // Access token
+    if (tokens[1] != null) map["x-access-token"] = tokens[1]!;
+    return map;
+  }
+
   /// Given some params, sets the auth information into the secure storage and into the API client
   /// [idToken] The JWT that should be used as the bearer for API auth
   /// [accessToken] The token used for OIDC lookups

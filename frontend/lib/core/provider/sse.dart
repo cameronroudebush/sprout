@@ -6,7 +6,6 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/storage.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
 class SSEProvider extends BaseProvider<CoreApi> {
@@ -53,11 +52,8 @@ class SSEProvider extends BaseProvider<CoreApi> {
     final request = http.Request('GET', url);
 
     // Add our tokens
-    final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
-    if (idToken != null) request.headers.addAll({'Authorization': 'Bearer $idToken'});
-
-    final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken);
-    if (accessToken != null) request.headers.addAll({'x-access-token': accessToken});
+    final headers = await ServiceLocator.get<AuthProvider>().getHeaders();
+    request.headers.addAll(headers);
 
     // Specify this is an SSE
     request.headers.addAll({'Accept': 'text/event-stream', 'Cache-Control': 'no-cache'});
