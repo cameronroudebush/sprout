@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/storage.dart';
+import 'package:sprout/core/provider/auth.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 
 /// A base class that is used to render a logo based on the given class data
 abstract class LogoBaseWidget<T> extends StatefulWidget {
@@ -27,18 +28,7 @@ abstract class LogoBaseWidget<T> extends StatefulWidget {
 }
 
 class _LogoBaseWidgetState extends State<LogoBaseWidget> {
-  late Future<String?> _jwtFuture; // Store the Future itself
-
-  @override
-  void initState() {
-    super.initState();
-    _jwtFuture = _fetchJwt();
-  }
-
-  /// Asynchronously fetches and returns the JWT from secure storage.
-  Future<String?> _fetchJwt() {
-    return SecureStorageProvider.getValue(SecureStorageProvider.idToken);
-  }
+  final _tokenFuture = ServiceLocator.get<AuthProvider>().getHeaders();
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +39,8 @@ class _LogoBaseWidgetState extends State<LogoBaseWidget> {
       child: SizedBox(
         width: widget.height,
         height: widget.width,
-        child: FutureBuilder<String?>(
-          future: _jwtFuture,
+        child: FutureBuilder<Map<String, String>>(
+          future: _tokenFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator(strokeWidth: 2.0));
@@ -60,11 +50,10 @@ class _LogoBaseWidgetState extends State<LogoBaseWidget> {
               return Icon(widget.getFallbackIcon(context), size: 30.0);
             }
 
-            final jwt = snapshot.data!;
             return Image.network(
               url,
               fit: BoxFit.cover,
-              headers: {'Authorization': 'Bearer $jwt'},
+              headers: snapshot.data,
               errorBuilder: (context, url, error) {
                 return Icon(widget.getFallbackIcon(context), size: 30.0);
               },

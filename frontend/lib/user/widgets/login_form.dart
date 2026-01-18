@@ -78,8 +78,8 @@ class _LoginFormState extends State<LoginForm> {
           final isSessionExpiration = error.code == 401;
           // Reset the JWT as the auto login has expired
           if (isSessionExpiration) {
-            // TODO
             await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
+            await SecureStorageProvider.saveValue(SecureStorageProvider.accessToken, null);
           }
           await _loginComplete(null, failureMessage: isSessionExpiration ? error.message ?? 'Session Expired' : "");
         });
