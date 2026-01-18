@@ -21,7 +21,7 @@ providers:
         # This access token is acquired from SimpleFIN that allows us to authenticate and grab your data.
         # You'll need to go to this link to get one configured:
         # https://beta-bridge.simplefin.org/info/developers
-        accessToken:
+        accessToken: MY-ACCESS-TOKEN
         # How many days to look back for transactional data.
         lookBackDays: 7
         # How many API calls we allow per day for this provider.
@@ -49,6 +49,19 @@ server:
     jobs:
         # How many minutes to wait to re-try failed jobs automatically.
         autoRetryTime: 60
+    # Configuration for how we want to use authentication for this app.
+    auth:
+        # The type of authentication strategy we want to use.
+        # local: Uses a local JWT authentication strategy where we sign JWT's with the backend. Only supports one user! Uses a randomly generated secret every startup.
+        # oidc: Uses the configured OIDC authentication to use a remote provider for validation. This will support multiple users.
+        # Must be one of: [local, oidc]
+        type: local
+        # Configuration OIDC authentication capability.
+        oidc:
+            # The issuer URL for who is issuing the JWT's for this OIDC. Do not include trailing slashes.
+            issuer: https://auth.mydomain.com
+            # The client ID of your OIDC configuration so we can verify the audience.
+            clientId: sprout
 
 # Database specific options
 database:
@@ -74,6 +87,8 @@ database:
 transaction:
     # When to check for stuck transactions. This includes things like stuck pending.
     stuckTransactionTime: 0 3 * * *
+    # How many days old a transaction has to be stuck for it to be auto deleted.
+    stuckTransactionDays: 7
     # How many occurrences of similar transactions counts as a subscription.
     subscriptionCount: 3
 
