@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/auth.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 
