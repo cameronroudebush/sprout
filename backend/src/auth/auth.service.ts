@@ -47,6 +47,8 @@ export class AuthService {
 
   /** Signs a JWT for the given user */
   private generateJWT(user: User) {
-    return jwt.sign({ username: user.username } as LocalJWTContent, Configuration.server.auth.secretKey, { expiresIn: Configuration.server.jwtExpirationTime });
+    return jwt.sign({ username: user.username } as LocalJWTContent, Configuration.server.auth.secretKey, {
+      expiresIn: Configuration.server.jwtExpirationTime,
+    } as any);
   }
 }
