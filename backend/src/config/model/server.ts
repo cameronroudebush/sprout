@@ -1,3 +1,4 @@
+import { AuthenticationConfig } from "@backend/auth/model/authentication.config";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
 import { JobsConfig } from "@backend/jobs/model/jobs.config";
@@ -22,4 +23,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration for the various jobs." })
   jobs = new JobsConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for how we want to use authentication for this app." })
+  auth = new AuthenticationConfig();
 }

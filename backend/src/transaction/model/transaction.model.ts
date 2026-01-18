@@ -2,6 +2,7 @@ import { Account } from "@backend/account/model/account.model";
 import { Category } from "@backend/category/model/category.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { Optional } from "@nestjs/common";
 import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { ManyToOne } from "typeorm";
 
@@ -38,7 +39,8 @@ export class Transaction extends DatabaseBase {
 
   /** Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it. */
   @DatabaseDecorators.jsonColumn({ nullable: true })
-  manuallyEdited: boolean = false;
+  @Optional()
+  manuallyEdited?: boolean = false;
 
   constructor(amount: number, posted: Date, description: string, category: Category | undefined, pending: boolean, account: Account) {
     super();

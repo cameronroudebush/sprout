@@ -1,23 +1,12 @@
+import { AuthGuard } from "@backend/auth/auth.guard";
 import { Category } from "@backend/category/model/category.model";
-import { AuthGuard } from "@backend/core/guard/auth.guard";
+import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SetupService } from "@backend/core/setup.service";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
-import { UserLoginResponse } from "@backend/user/model/api/login.response.dto";
 import { User } from "@backend/user/model/user.model";
-import { UserService } from "@backend/user/user.service";
 import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Post } from "@nestjs/common";
-import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from "@nestjs/swagger";
-import { JWTLoginRequest, UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
+import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all User related content */
 @Controller("user")
@@ -25,10 +14,18 @@ import { JWTLoginRequest, UsernamePasswordLoginRequest } from "./model/api/login
 export class UserController {
   private readonly logger = new Logger();
 
-  constructor(
-    private readonly userService: UserService,
-    private setupService: SetupService,
-  ) {}
+  constructor(private setupService: SetupService) {}
+
+  @Get("me")
+  @ApiOperation({
+    summary: "Get's current user info.",
+    description: "Returns the current user from the database.",
+  })
+  @ApiOkResponse({ description: "User found successfully.", type: User })
+  @AuthGuard.attach()
+  async me(@CurrentUser() user: User) {
+    return await User.findOne({ where: { id: user.id } });
+  }
 
   @Get(":id")
   @ApiOperation({
@@ -42,30 +39,6 @@ export class UserController {
     const user = await User.findOne({ where: { id: id } });
     if (user == null) throw new NotFoundException();
     else return user;
-  }
-
-  @Post("login")
-  @ApiOperation({
-    summary: "Login with username and password.",
-    description: "Authenticates a user with their username and password, returning user details and a new JWT for session management.",
-  })
-  @ApiCreatedResponse({ description: "User login successful.", type: UserLoginResponse })
-  @ApiUnauthorizedResponse({ description: "Invalid credentials provided." })
-  @ApiBody({ type: UsernamePasswordLoginRequest })
-  async login(@Body() userLoginRequest: UsernamePasswordLoginRequest): Promise<UserLoginResponse> {
-    return this.userService.login(userLoginRequest);
-  }
-
-  @Post("login/jwt")
-  @ApiOperation({
-    summary: "Login with an existing JWT.",
-    description: "Validates an existing JWT. If valid, it returns the user details and the same JWT.",
-  })
-  @ApiCreatedResponse({ description: "User login successful.", type: UserLoginResponse })
-  @ApiUnauthorizedResponse({ description: "The provided JWT is invalid or has expired." })
-  @ApiBody({ type: JWTLoginRequest })
-  async loginWithJWT(@Body() userLoginRequest: JWTLoginRequest): Promise<UserLoginResponse> {
-    return this.userService.loginWithJWT(userLoginRequest);
   }
 
   @Post("create")

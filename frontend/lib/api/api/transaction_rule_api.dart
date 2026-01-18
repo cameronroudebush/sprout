@@ -25,8 +25,11 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [bool] force:
+  ///   If true, also overwrites manually edited transactions. By default this is disabled so a users category changes are preserved.
+  ///
+  /// * [bool] resetCategories:
   ///   If true, resets categories to null for transactions that do not match any current rules.
-  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({ bool? force, }) async {
+  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({ bool? force, bool? resetCategories, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule/apply';
 
@@ -39,6 +42,9 @@ class TransactionRuleApi {
 
     if (force != null) {
       queryParams.addAll(_queryParams('', 'force', force));
+    }
+    if (resetCategories != null) {
+      queryParams.addAll(_queryParams('', 'resetCategories', resetCategories));
     }
 
     const contentTypes = <String>[];
@@ -62,9 +68,12 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [bool] force:
+  ///   If true, also overwrites manually edited transactions. By default this is disabled so a users category changes are preserved.
+  ///
+  /// * [bool] resetCategories:
   ///   If true, resets categories to null for transactions that do not match any current rules.
-  Future<void> transactionRuleControllerApplyRules({ bool? force, }) async {
-    final response = await transactionRuleControllerApplyRulesWithHttpInfo( force: force, );
+  Future<void> transactionRuleControllerApplyRules({ bool? force, bool? resetCategories, }) async {
+    final response = await transactionRuleControllerApplyRulesWithHttpInfo( force: force, resetCategories: resetCategories, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

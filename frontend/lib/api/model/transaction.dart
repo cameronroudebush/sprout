@@ -21,6 +21,7 @@ class Transaction {
     required this.posted,
     required this.account,
     this.extra,
+    this.manuallyEdited = false,
   });
 
   String id;
@@ -56,6 +57,9 @@ class Transaction {
   ///
   Object? extra;
 
+  /// Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it.
+  bool manuallyEdited;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is Transaction &&
     other.id == id &&
@@ -65,7 +69,8 @@ class Transaction {
     other.category == category &&
     other.posted == posted &&
     other.account == account &&
-    other.extra == extra;
+    other.extra == extra &&
+    other.manuallyEdited == manuallyEdited;
 
   @override
   int get hashCode =>
@@ -77,10 +82,11 @@ class Transaction {
     (category == null ? 0 : category!.hashCode) +
     (posted.hashCode) +
     (account.hashCode) +
-    (extra == null ? 0 : extra!.hashCode);
+    (extra == null ? 0 : extra!.hashCode) +
+    (manuallyEdited.hashCode);
 
   @override
-  String toString() => 'Transaction[id=$id, amount=$amount, description=$description, pending=$pending, category=$category, posted=$posted, account=$account, extra=$extra]';
+  String toString() => 'Transaction[id=$id, amount=$amount, description=$description, pending=$pending, category=$category, posted=$posted, account=$account, extra=$extra, manuallyEdited=$manuallyEdited]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -100,6 +106,7 @@ class Transaction {
     } else {
       json[r'extra'] = null;
     }
+      json[r'manuallyEdited'] = this.manuallyEdited;
     return json;
   }
 
@@ -130,6 +137,7 @@ class Transaction {
         posted: mapDateTime(json, r'posted', r'')!,
         account: Account.fromJson(json[r'account'])!,
         extra: mapValueOfType<Object>(json, r'extra'),
+        manuallyEdited: mapValueOfType<bool>(json, r'manuallyEdited') ?? false,
       );
     }
     return null;

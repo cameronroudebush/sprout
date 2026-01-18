@@ -37,7 +37,7 @@ class _LogoBaseWidgetState extends State<LogoBaseWidget> {
 
   /// Asynchronously fetches and returns the JWT from secure storage.
   Future<String?> _fetchJwt() {
-    return SecureStorageProvider.getValue(SecureStorageProvider.jwtKey);
+    return SecureStorageProvider.getValue(SecureStorageProvider.idToken);
   }
 
   @override

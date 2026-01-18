@@ -1,4 +1,5 @@
 import { AccountController } from "@backend/account/account.controller";
+import { AuthModule } from "@backend/auth/auth.module";
 import { CategoryController } from "@backend/category/category.controller";
 import { CategoryService } from "@backend/category/category.service";
 import { ConfigController } from "@backend/config/config.controller";
@@ -13,7 +14,7 @@ import { DatabaseService } from "@backend/database/database.service";
 import { HoldingController } from "@backend/holding/holding.controller";
 import { JobsService } from "@backend/jobs/jobs.service";
 import { ProviderService } from "@backend/providers/provider.service";
-import { SSEController } from "@backend/sse/sse.controler";
+import { SSEController } from "@backend/sse/sse.controller";
 import { SSEService } from "@backend/sse/sse.service";
 import { TransactionController } from "@backend/transaction/transaction.controller";
 import { TransactionRuleController } from "@backend/transaction/transaction.rule.controller";
@@ -30,6 +31,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
 
 @Module({
   imports: [
+    AuthModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,

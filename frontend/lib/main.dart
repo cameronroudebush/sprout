@@ -8,6 +8,7 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/auto_logout_client.dart';
 import 'package:sprout/core/extended_api_client.dart';
+import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
@@ -33,9 +34,9 @@ void main() async {
   // Inject a client that automatically logs us out if we start experiencing 401/403's
   final autoLogoutClient = AutoLogoutClient(
     onLogout: () async {
-      final userProvider = ServiceLocator.get<UserProvider>();
-      if (userProvider.isLoggedIn) {
-        await userProvider.logout(forced: true);
+      final authProvider = ServiceLocator.get<AuthProvider>();
+      if (authProvider.isLoggedIn) {
+        await authProvider.logout(forced: true);
         SnackbarProvider.openSnackbar("Session expired", type: SnackbarType.warning);
       }
     },
@@ -44,6 +45,7 @@ void main() async {
 
   // Register all the providers
   ServiceLocator.register<ConfigProvider>(ConfigProvider(ConfigApi(), packageInfo));
+  ServiceLocator.register<AuthProvider>(AuthProvider(AuthApi()));
   ServiceLocator.register<UserProvider>(UserProvider(UserApi()));
   ServiceLocator.register<SSEProvider>(SSEProvider(CoreApi()));
   ServiceLocator.register<AccountProvider>(AccountProvider(AccountApi()));

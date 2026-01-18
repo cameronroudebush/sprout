@@ -15,7 +15,8 @@
       "@backend/category/*": ["./src/category/*"],
       "@backend/institution/*": ["./src/institution/*"],
       "@backend/holding/*": ["./src/holding/*"],
-      "@backend/sse/*": ["./src/sse/*"]
+      "@backend/sse/*": ["./src/sse/*"],
+      "@backend/auth/*": ["./src/auth/*"]
     }
   },
   "include": ["./src/**/*"]

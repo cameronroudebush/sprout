@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:sprout/api/api.dart';
+import 'package:sprout/core/provider/auth.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
-import 'package:sprout/user/user_provider.dart';
 
 /// This provider handles setup for creating a listener for a stream of Server Sent Events
 class SSEProvider extends BaseProvider<CoreApi> {
@@ -52,8 +52,14 @@ class SSEProvider extends BaseProvider<CoreApi> {
     final url = Uri.parse('${api.apiClient.basePath}/sse');
     final request = http.Request('GET', url);
 
-    final currentJwt = await SecureStorageProvider.getValue(SecureStorageProvider.jwtKey);
-    if (currentJwt != null) request.headers.addAll({'Authorization': 'Bearer $currentJwt'});
+    // Add our tokens
+    final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
+    if (idToken != null) request.headers.addAll({'Authorization': 'Bearer $idToken'});
+
+    final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken);
+    if (accessToken != null) request.headers.addAll({'x-access-token': accessToken});
+
+    // Specify this is an SSE
     request.headers.addAll({'Accept': 'text/event-stream', 'Cache-Control': 'no-cache'});
 
     final response = await client.send(request);
@@ -77,8 +83,8 @@ class SSEProvider extends BaseProvider<CoreApi> {
   /// Starts the SSE connection.
   /// [forceReconnect] will cancel any existing connection and attempt a new one.
   Future<void> _startSSE({bool forceReconnect = false}) async {
-    final userProvider = ServiceLocator.get<UserProvider>();
-    if (!userProvider.isLoggedIn) {
+    final authProvider = ServiceLocator.get<AuthProvider>();
+    if (!authProvider.isLoggedIn) {
       _handleConnectionLost(null);
     }
     // If a connection is already active and we are not forcing a reconnect, just return.
@@ -128,8 +134,8 @@ class SSEProvider extends BaseProvider<CoreApi> {
   /// Unified handler for when the SSE connection is lost (error or done).
   void _handleConnectionLost(dynamic e, {bool forceReconnect = true}) {
     if (e != null && e.message != null && e.message.contains('403')) {
-      final userProvider = ServiceLocator.get<UserProvider>();
-      userProvider.logout(forced: true);
+      final authProvider = ServiceLocator.get<AuthProvider>();
+      authProvider.logout(forced: true);
       return;
     }
     _isConnected = false;
