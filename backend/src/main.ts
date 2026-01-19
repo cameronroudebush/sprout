@@ -8,6 +8,7 @@ new ConfigurationService().load();
 
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
+import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
 import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { JobsService } from "@backend/jobs/jobs.service";
@@ -57,7 +58,8 @@ export function createSwaggerDoc(app: INestApplication) {
     .addBearerAuth({ type: "http", description: "This authentication utilizes the JWT given during user login." })
     .addTag("Core", `Provides essential application functionalities, including manual data synchronization and initial setup checks.`)
     .addTag("Config", `Manages application-wide settings and configurations.`)
-    .addTag("User", "Manage user authentication, creation, and profile information.")
+    .addTag("Auth", "Manage user authentication.")
+    .addTag("User", "Manage user creation, and profile information.")
     .addTag("User Config", "Manage user-specific application settings and configurations.")
     .addTag("Account", "Manage financial accounts, including retrieval, editing, and linking with financial providers.")
     .addTag("Transaction", "Access and manage financial transactions, including searching, editing, and analyzing spending patterns.")
@@ -107,6 +109,13 @@ async function main() {
 
     logger.log(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
     logger.log(`Built on ${TimeZone.formatDate(new Date(process.env["BUILD_DATE"]!))}`);
+
+    // Validate encryption code status
+    if (!Configuration.encryptionKey || Configuration.encryptionKey.length / 2 !== EncryptionTransformer.REQUIRED_KEY_LENGTH)
+      throw new Error(
+        `An encryption key must be specified for Sprout to start and must be exactly ${EncryptionTransformer.REQUIRED_KEY_LENGTH} bytes (${EncryptionTransformer.REQUIRED_KEY_LENGTH * 2} hex characters). See the configuration guide for more info.\n` +
+          `Here is a randomly generated key you might want to use: ${EncryptionTransformer.generateRandomEncryptionKey()}`,
+      );
 
     // Inform of auth information
     logger.log(`Authentication Strategy: ${Configuration.server.auth.type}`);

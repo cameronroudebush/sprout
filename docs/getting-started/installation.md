@@ -25,11 +25,13 @@ To get started, choose either the Docker Compose or Docker Run method below.
         restart: unless-stopped
         environment:
           TZ: America/New_York
+          sprout_encryptionKey: ${SPROUT_ENCRYPTION_KEY} #(2)!
           sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
           sprout_server_jwtExpirationTime: 7d
     ```
 
     1.  Sprout's configuration and database is under `/sprout`.
+    2.  See [configuration](./configuration.md) for more info
 
 === "Docker Run"
 
@@ -40,12 +42,18 @@ To get started, choose either the Docker Compose or Docker Run method below.
       -p 80:80 \
       -e TZ=America/New_York \
       -e sprout_providers_simpleFIN_accessToken=${SIMPLE_FIN_ACCESS_URL} \
+      -e sprout_encryptionKey=${SPROUT_ENCRYPTION_KEY} \ # (2)!
       -e sprout_server_jwtExpirationTime=7d \
       --restart unless-stopped \
       croudebush/sprout:stable
     ```
 
     1.  Sprout's configuration and database is under `/sprout`.
+    2.  See [configuration](./configuration.md) for more info
+
+!!! warning
+
+    You must configure an encryption key or Sprout will fail to start. You should check out [configuration](./configuration.md) for more info on how to configure Sprout.
 
 ## Docker Images
 

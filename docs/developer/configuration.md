@@ -12,6 +12,9 @@ The configuration file, `sprout.config.yml`, is generated dynamically and placed
 ## Full Configuration
 
 ```yaml linenums="1" title="sprout.config.yml"
+# The encryption key to protect certain content within sprout. DO NOT LOSE THIS.
+encryptionKey:
+
 # Configuration for the various providers
 providers:
     # How often to perform data queries for data from providers. Default is once a day at 8am.
