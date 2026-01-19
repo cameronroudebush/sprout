@@ -34,8 +34,6 @@ providers:
 server:
     # The port to accept backend requests on.
     port: 8001
-    # How long JWT's should stay valid for users.
-    jwtExpirationTime: 30m
     # The log levels we want to render content for.
     # Must be one of: [verbose, debug, log, warn, error, fatal]
     logLevels:
@@ -65,6 +63,9 @@ server:
             issuer: https://auth.mydomain.com
             # The client ID of your OIDC configuration so we can verify the audience.
             clientId: sprout
+        local:
+            # How long JWT's should stay valid for users.
+            jwtExpirationTime: 30m
 
 # Database specific options
 database:
@@ -108,8 +109,8 @@ Environment variables are supported to make it easier to not have to keep track 
 ```yaml
 TZ: America/New_York
 sprout_server_port: 9000
-sprout_server_jwtExpirationTime: 7d
-sprout_providers_simpleFIN_accessToken: MY_ACCESS_TOKEN
+sprout_encryptionKey: ${SPROUT_ENCRYPTION_KEY}
+sprout_database_backup_enabled: true
 ```
 
 You can see more of these examples in the [setup guide](../getting-started/configuration.md).
