@@ -18,7 +18,7 @@ class AuthApi {
 
   /// Login with username and password.
   ///
-  /// Authenticates a user with their username and password, returning user details and a new JWT for session management.
+  /// Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -52,7 +52,7 @@ class AuthApi {
 
   /// Login with username and password.
   ///
-  /// Authenticates a user with their username and password, returning user details and a new JWT for session management.
+  /// Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.
   ///
   /// Parameters:
   ///
@@ -74,7 +74,7 @@ class AuthApi {
 
   /// Login with an existing JWT.
   ///
-  /// Validates an existing JWT. If valid, it returns the user details and the same JWT.
+  /// Validates an existing JWT. If valid, it returns the user details and the same JWT. Only available on local strategy auth.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -108,7 +108,7 @@ class AuthApi {
 
   /// Login with an existing JWT.
   ///
-  /// Validates an existing JWT. If valid, it returns the user details and the same JWT.
+  /// Validates an existing JWT. If valid, it returns the user details and the same JWT. Only available on local strategy auth.
   ///
   /// Parameters:
   ///

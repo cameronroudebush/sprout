@@ -10,7 +10,7 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class ProviderService {
   /** Providers available to the backend, defined by {@link init} */
-  providers: Array<ProviderBase> = [];
+  providers: { simpleFin: SimpleFINProvider } = {} as any;
 
   constructor() {}
 
@@ -20,16 +20,13 @@ export class ProviderService {
      * SimpleFIN
      * @link https://beta-bridge.simplefin.org/
      */
-    const simpleFIN = new SimpleFINProvider(
+    this.providers.simpleFin = new SimpleFINProvider(
       new ProviderConfig("SimpleFIN", "simple-fin", "https://beta-bridge.simplefin.org/static/logo.svg", "https://beta-bridge.simplefin.org/my-account"),
     );
-
-    // Initialize the providers from above
-    this.providers = [simpleFIN];
   }
 
-  /** Returns all currently registered providers */
-  getAll() {
-    return this.providers;
+  /** Returns all currently registered providers as an array */
+  getAll(): Array<ProviderBase> {
+    return Object.values(this.providers);
   }
 }

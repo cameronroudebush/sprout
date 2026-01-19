@@ -7,7 +7,7 @@ description: Learn about the providers of Sprout.
 
 # Providers
 
-Providers are how Sprout get's it's financial data. We use various providers and those are listed below.
+Providers are how Sprout get's it's financial data so you don't have to hand jam data. Below is a list of supported providers.
 
 ## SimpleFIN
 
@@ -17,4 +17,4 @@ Providers are how Sprout get's it's financial data. We use various providers and
 
 For more information, visit the [Simple FIN website](https://www.simplefin.org/).
 
-To configure the API, you must set the required environment variable or specify them in a configuration file. For detailed instructions, please refer to the [quick configuration](./configuration.md).
+To use SimpleFIN, you must update your user settings and provide the API key. The API key can be located at the [SimpleFIN Bridge Website](https://beta-bridge.simplefin.org/my-account/tokens/create). Follow the steps to connect an application and place this key into your user settings and Sprout will take care of the rest.

@@ -101,7 +101,7 @@ export class AccountController {
   async getProviderAccounts(@Param("name") name: string, @CurrentUser() user: User) {
     const matchingProvider = this.providerService.getAll().find((x) => x.config.name === name);
     if (matchingProvider == null) throw new NotFoundException(`Failed to locate matching provider for ${name}`);
-    const existingAccounts = await Account.find({ where: { user: user } });
+    const existingAccounts = await Account.find({ where: { user: { id: user.id } } });
     const providerAccounts = (await matchingProvider.get(user, true)).map((x) => x.account);
     return providerAccounts.filter((providerAccount) => !existingAccounts.some((existingAccount) => existingAccount.id === providerAccount.id));
   }

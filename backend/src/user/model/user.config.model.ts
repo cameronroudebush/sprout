@@ -21,6 +21,7 @@ export class UserConfig extends DatabaseBase {
   @IsEnum(ChartRange)
   netWorthRange: ChartRange;
 
+  /** This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database. */
   @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
   @EncryptionTransformer.decorateAPIProperty()
   @IsString()

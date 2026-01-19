@@ -28,7 +28,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
   }
 
   protected async update(user?: User) {
-    this.logger.log("Starting sync for all providers.");
+    this.logger.log("Starting sync for all providers." + (user ? ` Only for user: ${user?.username}` : ""));
     const providers = this.providerService.getAll();
     const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
     schedule.user = user;
@@ -66,13 +66,14 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       if (userAccounts.length === 0) continue;
       const accounts = await provider.get(user, false);
       for (const data of accounts) {
-        this.logger.log(`Updating account from provider: ${data.account.name}`);
         let accountInDB: Account;
         try {
           accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
           if (accountInDB == null) {
-            this.logger.warn(`The account with the following ID isn't registered: ${data.account.id}`);
+            this.logger.warn(`The account with the following name isn't registered: ${data.account.name}`);
             throw new Error("Missing account");
+          } else {
+            this.logger.log(`Updating account from provider: ${data.account.name}`);
           }
         } catch (e) {
           // Ignore missing accounts

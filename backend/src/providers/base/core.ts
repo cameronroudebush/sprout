@@ -13,7 +13,7 @@ export abstract class ProviderBase {
   constructor(public config: ProviderConfig) {}
 
   /** The rate limit class for this provider */
-  abstract readonly rateLimit: ProviderRateLimit;
+  abstract readonly rateLimit: { (user?: User): ProviderRateLimit };
 
   /**
    * Returns data from the provider to satisfy updated transaction, holdings, and accounts

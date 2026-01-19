@@ -2,13 +2,11 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
-import { Utility } from "@backend/core/model/utility/utility";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
-import { Logger } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
@@ -17,11 +15,10 @@ import { ProviderRateLimit } from "../base/rate-limit";
  * This provider adds automated account syncing using the SimpleFIN provider.
  */
 export class SimpleFINProvider extends ProviderBase {
-  private readonly logger = new Logger(SimpleFINProvider.name);
-  override rateLimit: ProviderRateLimit = new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit);
+  override rateLimit = (user?: User) => new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit, user);
 
   override async get(user: User, accountsOnly: boolean) {
-    return this.convertData(await this.fetchData(undefined, undefined, accountsOnly), user);
+    return this.convertData(await this.fetchData(undefined, undefined, accountsOnly, user), user);
   }
 
   /** Converts the given SimpleFIN typed data to our own local models */
@@ -104,21 +101,39 @@ export class SimpleFINProvider extends ProviderBase {
       pending: true,
     },
     balancesOnly: boolean,
+    user: User,
   ) {
-    if (Configuration.providers.simpleFIN.accessToken == null) throw new Error("SimpleFIN access token is not properly configured within your configuration.");
+    const accessToken = user.config.simpleFinToken;
+
+    if (accessToken == null) throw new Error("SimpleFIN access token is not properly configured. Make sure one is set within the user settings.");
     const startDateEpoch = Math.round(params.transactionStartDate.getTime() / 1000);
-    const url = `${Configuration.providers.simpleFIN.accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${startDateEpoch}&balances-only=${balancesOnly ? 1 : 0}`;
+    const url = `${accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${startDateEpoch}&balances-only=${balancesOnly ? 1 : 0}`;
     // Pull out the authorization header
-    const [user, pass] = url.replace("https://", "").split("@")[0]!.split(":");
-    const cleanURL = url.replace(user!, "").replace(pass!, "").replace(":@", "");
-    if (Configuration.isDevBuild) {
-      this.logger.warn(`Dev build detected. SimpleFIN won't return any data.`);
-      await Utility.delay(2000);
-      return { errors: [], accounts: [] } as SimpleFINReturn.FinancialData;
-    } else {
-      await this.rateLimit.incrementOrError();
-      const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${user}:${pass}`) } });
-      return (await result.json()) as SimpleFINReturn.FinancialData;
-    }
+    const [username, pass] = url.replace("https://", "").split("@")[0]!.split(":");
+    const cleanURL = url.replace(username!, "").replace(pass!, "").replace(":@", "");
+    await this.rateLimit(user).incrementOrError();
+    const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${username}:${pass}`) } });
+    return (await result.json()) as SimpleFINReturn.FinancialData;
+  }
+
+  /**
+   * Given the setup token from SimpleFIN, converts it into an API token that will be used for accessing the
+   *  API for the user.
+   *
+   * This can only ever be done once per setupToken.
+   */
+  async convertSetupToken(setupToken: string) {
+    // Base64 decode the setup token to get the Claim URL
+    const claimUrl = Buffer.from(setupToken, "base64").toString("utf-8");
+    // Issue a POST request to the Claim URLs
+    const claimResponse = await fetch(claimUrl, {
+      method: "POST",
+      headers: {
+        "Content-Length": "0",
+      },
+    });
+    if (!claimResponse.ok) throw new Error(`Failed to exchange token. Status: ${claimResponse.status}. Remember: Setup tokens are one-time use.`);
+    // The response body is the access token
+    return await claimResponse.text();
   }
 }

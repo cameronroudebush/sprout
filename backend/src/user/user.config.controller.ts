@@ -1,5 +1,7 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
+import { ProviderService } from "@backend/providers/provider.service";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Body, Controller, Get, NotFoundException, Patch } from "@nestjs/common";
@@ -10,6 +12,8 @@ import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } fr
 @ApiTags("User Config")
 @AuthGuard.attach()
 export class UserConfigController {
+  constructor(private providerService: ProviderService) {}
+
   @Get()
   @ApiOperation({
     summary: "Get user config.",
@@ -37,6 +41,12 @@ export class UserConfigController {
     if (existingConfig == null) throw new NotFoundException(); // This shouldn't be possible
     const userConfig = UserConfig.fromPlain(conf);
     userConfig.id = existingConfig.id;
+
+    // Set the simpleFinToken if it has changed. In the event it hasn't, keep the existing db config property as it's probably encrypted
+    if (userConfig.simpleFinToken !== EncryptionTransformer.HIDDEN_VALUE) {
+      userConfig.simpleFinToken = await this.providerService.providers.simpleFin.convertSetupToken(userConfig.simpleFinToken!);
+    } else userConfig.simpleFinToken = existingConfig.simpleFinToken;
+
     return await userConfig.update();
   }
 }
