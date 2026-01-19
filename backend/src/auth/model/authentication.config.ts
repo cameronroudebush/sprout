@@ -25,6 +25,12 @@ class OIDCConfig {
   }
 }
 
+/** This class represents configuration for the local authentication strategy */
+class LocalConfig {
+  @ConfigurationMetadata.assign({ comment: "How long JWT's should stay valid for users." })
+  jwtExpirationTime = "30m";
+}
+
 /** Configuration class for controlling how authentication works in this app */
 export class AuthenticationConfig {
   /** A secret key that can be used to create JWT's and other relevant info for this app. **This will be regenerated during every restart!** */
@@ -42,4 +48,7 @@ export class AuthenticationConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration OIDC authentication capability." })
   oidc = new OIDCConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration local authentication capability." })
+  local = new LocalConfig();
 }

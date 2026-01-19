@@ -27,7 +27,6 @@ To get started, choose either the Docker Compose or Docker Run method below.
           TZ: America/New_York
           sprout_encryptionKey: ${SPROUT_ENCRYPTION_KEY} #(2)!
           sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
-          sprout_server_jwtExpirationTime: 7d
     ```
 
     1.  Sprout's configuration and database is under `/sprout`.
@@ -43,7 +42,6 @@ To get started, choose either the Docker Compose or Docker Run method below.
       -e TZ=America/New_York \
       -e sprout_providers_simpleFIN_accessToken=${SIMPLE_FIN_ACCESS_URL} \
       -e sprout_encryptionKey=${SPROUT_ENCRYPTION_KEY} \ # (2)!
-      -e sprout_server_jwtExpirationTime=7d \
       --restart unless-stopped \
       croudebush/sprout:stable
     ```

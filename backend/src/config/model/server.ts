@@ -12,9 +12,6 @@ export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "The base path that the API is hosted on.", externalControlDisabled: true })
   basePath: string = "/api";
 
-  @ConfigurationMetadata.assign({ comment: "How long JWT's should stay valid for users." })
-  jwtExpirationTime = "30m";
-
   @ConfigurationMetadata.assign({ comment: "The log levels we want to render content for.", restrictedValues: LOG_LEVELS })
   logLevels: LogLevel[] = ["log", "error", "warn"];
 
