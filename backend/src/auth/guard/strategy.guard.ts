@@ -16,11 +16,9 @@ export class StrategyGuard implements CanActivate {
   /** Dynamically attaches the strategy guard based on the configuration you give. For more info see {@link StrategyGuard} */
   static attach(method: typeof OIDCStrategyName | typeof LocalStrategyName) {
     return applyDecorators(
-      // Give the info to the guard so the endpoint can't even fire
       SetMetadata(StrategyGuard.METADATA_KEY, method),
       UseGuards(StrategyGuard),
-      // Tell swagger to exclude this as well
-      ApiExcludeEndpoint(),
+      Configuration.server.auth.type !== method ? ApiExcludeEndpoint() : () => {},
     );
   }
 

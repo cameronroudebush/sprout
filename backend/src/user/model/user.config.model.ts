@@ -1,8 +1,9 @@
+import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { ChartRange } from "@backend/user/model/chart.range.model";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsEnum } from "class-validator";
+import { IsBoolean, IsEnum, IsString } from "class-validator";
 
 /**
  * This class defines user configuration options per user
@@ -19,6 +20,11 @@ export class UserConfig extends DatabaseBase {
   @ApiProperty({ enum: ChartRange, enumName: "ChartRangeEnum" })
   @IsEnum(ChartRange)
   netWorthRange: ChartRange;
+
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  simpleFinToken?: string;
 
   constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"]) {
     super();

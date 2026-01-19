@@ -21,8 +21,40 @@ For a complete list of all available options, please see the **[Advanced Configu
 | Variable                                 | Required |    Default    | Description                                                                                                                                               |
 | ---------------------------------------- | :------: | :-----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sprout_providers_simpleFIN_accessToken` |   Yes    |               | Your access token URL for [SimpleFIN Bridge](https://beta-bridge.simplefin.org/), which is used to connect to your bank accounts securely.                |
+| `sprout_encryptionKey`                   |   Yes    |               | A 64-character hex string used to encrypt sensitive database fields. See [generating an encryption key](#generating-an-encryption-key) below.             |
 | `sprout_server_jwtExpirationTime`        |    No    |     `30m`     | The duration for which a login session remains valid. Examples: `24h`, `30d`.                                                                             |
 | `TZ`                                     |    No    | `TZ/New_York` | Sets the timezone for the container. A [list of valid TZ values](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is available on Wikipedia. |
 | `sprout_server_auth_type`                |   Yes    |    `local`    | Set to `oidc` to enable OpenID Connect authentication                                                                                                     |
 | `sprout_server_auth_oidc_issuer`         |    No    |               | The base URL of your OIDC provider (e.g., https://auth.example.com)                                                                                       |
 | `sprout_server_auth_oidc_clientId`       |    No    |               | The Client ID configured in your OIDC provider.                                                                                                           |
+
+# Generating an Encryption Key
+
+Sprout uses `AES-256-GCM` encryption to protect various fields within the database, including your API keys to your finance providers. You must provide a valid `32-byte` key represented as a `64-character` hexadecimal string.
+
+One complete, you can either place it in your [`configuration.yml`](../developer/configuration.md) file or use the environment variable listed above.
+
+You can generate this key using one of the methods below.
+
+## Option 1: Automatic Generation (Easiest)
+
+If you start Sprout without providing an encryption key, the application will generate a secure random key for you, print it to the logs, and then exit (or fail to start).
+
+Check the logs of the container and look for the following info:
+
+```
+Error: An encryption key must be specified for Sprout to start and must be exactly 32 characters. See the configuration guide for more info.
+Here is a randomly generated key you might want to use: RANDOM_KEY_HERE
+```
+
+## Option 2: Linux / macOS
+
+```bash
+openssl rand -hex 32
+```
+
+## Option 3: Windows (PowerShell)
+
+```powershell
+-join ((1..32) | ForEach-Object { "{0:x2}" -f (Get-Random -Min 0 -Max 256) })
+```

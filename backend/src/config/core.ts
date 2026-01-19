@@ -11,6 +11,9 @@ import { ConfigurationMetadata } from "./model/configuration.metadata";
  *  call any Configuration value statically and these will be loaded from the file on startup.
  */
 export class Configuration {
+  @ConfigurationMetadata.assign({ comment: "The encryption key to protect certain content within sprout. DO NOT LOSE THIS." })
+  static encryptionKey = process.env["ENCRYPTION_KEY"] ?? "";
+
   @ConfigurationMetadata.assign({ comment: "Configuration for the various providers" })
   static providers = new ProvidersConfig();
 
