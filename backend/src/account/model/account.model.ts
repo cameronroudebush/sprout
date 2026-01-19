@@ -57,7 +57,7 @@ export class Account extends DatabaseBase {
 
   /** Given a user, returns all accounts in the database for that user */
   static getForUser(user: User) {
-    return Account.find({ where: { user } });
+    return Account.find({ where: { user: { id: user.id } } });
   }
 
   constructor(

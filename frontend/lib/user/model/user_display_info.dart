@@ -5,6 +5,8 @@ class UserDisplayInfo {
   /// What to call this info
   final String title;
   final IconData? icon;
+
+  /// Intended only if we want to display a string, non-editable
   final String? value;
 
   /// Help text to display for this
@@ -19,6 +21,7 @@ class UserDisplayInfo {
   // If this is a setting, you should populate below
   final dynamic settingValue;
   final dynamic settingType;
+  final void Function(dynamic val)? onSettingUpdate;
 
   const UserDisplayInfo({
     required this.title,
@@ -29,5 +32,6 @@ class UserDisplayInfo {
     this.settingValue,
     this.settingType,
     this.column = true,
+    this.onSettingUpdate,
   });
 }

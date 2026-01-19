@@ -16,6 +16,7 @@ class UserConfig {
     required this.id,
     required this.netWorthRange,
     required this.privateMode,
+    this.simpleFinToken,
   });
 
   String id;
@@ -26,27 +27,42 @@ class UserConfig {
   /// If we should hide balances on the users display
   bool privateMode;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? simpleFinToken;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
     other.id == id &&
     other.netWorthRange == netWorthRange &&
-    other.privateMode == privateMode;
+    other.privateMode == privateMode &&
+    other.simpleFinToken == simpleFinToken;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (netWorthRange.hashCode) +
-    (privateMode.hashCode);
+    (privateMode.hashCode) +
+    (simpleFinToken == null ? 0 : simpleFinToken!.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
       json[r'netWorthRange'] = this.netWorthRange;
       json[r'privateMode'] = this.privateMode;
+    if (this.simpleFinToken != null) {
+      json[r'simpleFinToken'] = this.simpleFinToken;
+    } else {
+      json[r'simpleFinToken'] = null;
+    }
     return json;
   }
 
@@ -72,6 +88,7 @@ class UserConfig {
         id: mapValueOfType<String>(json, r'id')!,
         netWorthRange: ChartRangeEnum.fromJson(json[r'netWorthRange'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
+        simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
       );
     }
     return null;

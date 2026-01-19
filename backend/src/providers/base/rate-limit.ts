@@ -1,5 +1,7 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { User } from "@backend/user/model/user.model";
+import { ManyToOne } from "typeorm";
 
 /**
  * This class is used to provide a rate limit to different providers. This is required
@@ -22,15 +24,20 @@ export class ProviderRateLimit extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   count: number = 0;
 
-  constructor(name: string, maxCallsPerDay: number) {
+  /** The user this rate limit is linked to */
+  @ManyToOne(() => User, (a) => a.id, { onDelete: "CASCADE", nullable: true })
+  user?: User;
+
+  constructor(name: string, maxCallsPerDay: number, user?: User) {
     super();
     this.name = name;
     this.MAX_CALLS_PER_DAY = maxCallsPerDay;
+    this.user = user;
   }
 
   /** Either increments the current count and last updated date or throws an error if there will be too many calls. */
   async incrementOrError() {
-    const inDb = (await this.get()) as this | undefined;
+    const inDb = await ProviderRateLimit.findOne({ where: { name: this.name, user: { id: this.user?.id } } });
     const today = new Date();
     // No limit tracked in the db? Create one.
     if (inDb == null) {

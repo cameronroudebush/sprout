@@ -10,13 +10,13 @@ Sprout supports two methods of authentication to ensure your data remains secure
 ## Local Authentication (local)
 
 -   The Local strategy is the **default** and simplest method. It is designed for **single-user** instances (typically the administrator).
+    -   When I say simple, I mean simple. It's really intended just for first time setup. We highly recommend using [OIDC](#oidc-authentication-oidc) which offloads most auth implementation to a project who's only job is authentication.
 -   How it works: Sprout issues and signs its own JSON Web Tokens (JWTs) internally.
 -   Access: This mode only allows for a single user account and utilizes the API endpoints for login.
 
 ## OIDC Authentication (oidc)
 
-The OpenID Connect (OIDC) strategy is recommended for power users or organizations that want to allow **multiple users** to access Sprout using an existing identity provider (like Authelia, Keycloak, or Google).
-Understanding OIDC Security
+The OpenID Connect (OIDC) strategy is **recommended** for all deployments. This method adds support to access Sprout using an existing identity provider (like Authelia, Keycloak, or Google).
 
 -   OAuth2 / OIDC: These are industry-standard protocols that allow Sprout to verify your identity without ever seeing your password. Sprout "trusts" your identity provider to handle the login.
 -   JWKS (JSON Web Key Set): Sprout uses the jwks_uri endpoint from your provider to cryptographically verify that the login token is legitimate and hasn't been tampered with.

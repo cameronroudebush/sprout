@@ -1,13 +1,31 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Provides a row of info to display in the card structure of the user page
+// ignore: must_be_immutable
 class UserInfoRow extends StatelessWidget {
   final UserDisplayInfo info;
+  final TextEditingController _textController = TextEditingController();
+  Timer? _debounce;
 
-  const UserInfoRow({super.key, required this.info});
+  UserInfoRow({super.key, required this.info}) {
+    if (info.settingValue is String) _textController.text = info.settingValue ?? '';
+  }
+
+  void _updateVal(dynamic val) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    // Don't allow too often of updates
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final provider = ServiceLocator.get<UserConfigProvider>();
+      if (info.onSettingUpdate != null) info.onSettingUpdate!(val);
+      provider.updateConfig(provider.currentUserConfig!);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +67,27 @@ class UserInfoRow extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(child: mainContent),
-              Switch(
-                value: info.settingValue,
-                onChanged: (value) {
-                  userProvider.currentUserConfig!.privateMode = value;
-                  userProvider.updateConfig(userProvider.currentUserConfig!);
-                },
+              Switch(value: info.settingValue, onChanged: _updateVal),
+            ],
+          );
+        } else if (info.settingType == "string" && info.settingValue is String) {
+          rowContent = Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 36,
+            children: [
+              mainContent,
+              Expanded(
+                child: TextField(
+                  controller: _textController,
+                  keyboardType: TextInputType.text,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  ),
+                  onChanged: _updateVal,
+                ),
               ),
             ],
           );

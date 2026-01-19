@@ -20,7 +20,6 @@ For a complete list of all available options, please see the **[Advanced Configu
 
 | Variable                                     | Required |    Default    | Description                                                                                                                                               |
 | -------------------------------------------- | :------: | :-----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sprout_providers_simpleFIN_accessToken`     |   Yes    |               | Your access token URL for [SimpleFIN Bridge](https://beta-bridge.simplefin.org/), which is used to connect to your bank accounts securely.                |
 | `sprout_encryptionKey`                       |   Yes    |               | A 64-character hex string used to encrypt sensitive database fields. See [generating an encryption key](#generating-an-encryption-key) below.             |
 | `TZ`                                         |    No    | `TZ/New_York` | Sets the timezone for the container. A [list of valid TZ values](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is available on Wikipedia. |
 | `sprout_server_auth_type`                    |   Yes    |    `local`    | Set to `oidc` to enable OpenID Connect authentication                                                                                                     |

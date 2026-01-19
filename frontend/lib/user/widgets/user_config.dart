@@ -52,8 +52,19 @@ class _UserConfigPageState extends State<UserConfigPage> {
               title: "Hide Account Balances",
               hint: "Toggle to hide balances across the app.",
               settingValue: userConfig.privateMode,
+              onSettingUpdate: (val) => userConfig.privateMode = val,
               settingType: "bool",
               icon: Icons.visibility_off_outlined,
+            ),
+          ],
+          "Finance Provider Settings": [
+            UserDisplayInfo(
+              title: "SimpleFIN API Token",
+              hint: "The SimpleFIN API token used to get finance data automatically.",
+              settingValue: userConfig.simpleFinToken,
+              onSettingUpdate: (val) => userConfig.simpleFinToken = val,
+              settingType: "string",
+              icon: Icons.api,
             ),
           ],
           "App Information": [

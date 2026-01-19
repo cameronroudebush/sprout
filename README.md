@@ -31,7 +31,6 @@ sprout:
     restart: unless-stopped
     environment:
         TZ: America/New_York
-        sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
         sprout_encryptionKey: ${SPROUT_ENCRYPTION_KEY}
 ```
 

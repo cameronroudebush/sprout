@@ -1700,7 +1700,7 @@
     },
     "/auth/login": {
       "post": {
-        "description": "Authenticates a user with their username and password, returning user details and a new JWT for session management.",
+        "description": "Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.",
         "operationId": "AuthController_login",
         "parameters": [],
         "requestBody": {
@@ -1736,7 +1736,7 @@
     },
     "/auth/login/jwt": {
       "post": {
-        "description": "Validates an existing JWT. If valid, it returns the user details and the same JWT.",
+        "description": "Validates an existing JWT. If valid, it returns the user details and the same JWT. Only available on local strategy auth.",
         "operationId": "AuthController_loginWithJWT",
         "parameters": [],
         "requestBody": {
@@ -1774,7 +1774,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-1-g8b64afe",
+    "version": "v0.1.1-9-g35d4773",
     "contact": {}
   },
   "tags": [
@@ -1787,8 +1787,12 @@
       "description": "Manages application-wide settings and configurations."
     },
     {
+      "name": "Auth",
+      "description": "Manage user authentication."
+    },
+    {
       "name": "User",
-      "description": "Manage user authentication, creation, and profile information."
+      "description": "Manage user creation, and profile information."
     },
     {
       "name": "User Config",
@@ -1864,6 +1868,9 @@
           "privateMode": {
             "type": "boolean",
             "description": "If we should hide balances on the users display"
+          },
+          "simpleFinToken": {
+            "type": "string"
           }
         },
         "required": [

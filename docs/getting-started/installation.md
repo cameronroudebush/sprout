@@ -26,7 +26,6 @@ To get started, choose either the Docker Compose or Docker Run method below.
         environment:
           TZ: America/New_York
           sprout_encryptionKey: ${SPROUT_ENCRYPTION_KEY} #(2)!
-          sprout_providers_simpleFIN_accessToken: ${SIMPLE_FIN_ACCESS_URL}
     ```
 
     1.  Sprout's configuration and database is under `/sprout`.
@@ -40,7 +39,6 @@ To get started, choose either the Docker Compose or Docker Run method below.
       -v /appdata/sprout:/sprout \ # (1)!
       -p 80:80 \
       -e TZ=America/New_York \
-      -e sprout_providers_simpleFIN_accessToken=${SIMPLE_FIN_ACCESS_URL} \
       -e sprout_encryptionKey=${SPROUT_ENCRYPTION_KEY} \ # (2)!
       --restart unless-stopped \
       croudebush/sprout:stable
