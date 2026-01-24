@@ -2,20 +2,27 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
+import { TimeZone } from "@backend/config/model/tz";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
+import { NotificationType } from "@backend/notification/model/notification.type";
+import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderService } from "@backend/providers/provider.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
+import { Inject } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { merge } from "lodash";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
 export class ProviderSyncJob extends BackgroundJob<Sync> {
+  @Inject()
+  private readonly notificationService!: NotificationService;
+
   constructor(
     private providerService: ProviderService,
     private transactionRuleService: TransactionRuleService,
@@ -35,15 +42,23 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     try {
       for (const provider of providers) await this.updateProvider(provider, user);
     } catch (e) {
-      schedule.failureReason = (e as Error).message;
+      const msg = (e as Error).message;
+      schedule.failureReason = msg;
       schedule.status = "failed";
       await schedule.update();
+      // If this is specific to a user, notify them of the failure
+      if (user) await this.notificationService.notifyUser(user, `Failed to sync user accounts: ${msg}`, "Sync Failure", NotificationType.error);
       // Don't fail graceful, let the jobs base handle this
       throw e;
     }
     // Make sure to track that the update is complete with no errors
     schedule.status = "complete";
     await schedule.update();
+    // If this is specific to a user, notify them of the success
+    if (user)
+      // TODO: Better success message
+      await this.notificationService.notifyUser(user, `New data is available for ${TimeZone.formatDate(new Date())}`, "Sync Success", NotificationType.success);
+
     return schedule;
   }
 

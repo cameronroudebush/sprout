@@ -13,6 +13,8 @@ import { SetupService } from "@backend/core/setup.service";
 import { DatabaseService } from "@backend/database/database.service";
 import { HoldingController } from "@backend/holding/holding.controller";
 import { JobsService } from "@backend/jobs/jobs.service";
+import { NotificationController } from "@backend/notification/notification.controller";
+import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderService } from "@backend/providers/provider.service";
 import { SSEController } from "@backend/sse/sse.controller";
 import { SSEService } from "@backend/sse/sse.service";
@@ -53,6 +55,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     NetWorthController,
     CashFlowController,
     ImageProxyController,
+    NotificationController,
   ],
   providers: [
     UserService,
@@ -66,6 +69,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     SSEService,
     CategoryService,
     CashFlowService,
+    NotificationService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

@@ -204,6 +204,10 @@ class ApiClient {
           return EntityHistory.fromJson(value);
         case 'EntityHistoryDataPoint':
           return EntityHistoryDataPoint.fromJson(value);
+        case 'FirebaseConfigDTO':
+          return FirebaseConfigDTO.fromJson(value);
+        case 'FirebaseNotificationDTO':
+          return FirebaseNotificationDTO.fromJson(value);
         case 'Holding':
           return Holding.fromJson(value);
         case 'Institution':
@@ -216,8 +220,12 @@ class ApiClient {
           return MonthlyCategoryData.fromJson(value);
         case 'MonthlySpendingStats':
           return MonthlySpendingStats.fromJson(value);
+        case 'Notification':
+          return Notification.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
+        case 'RegisterDeviceDto':
+          return RegisterDeviceDto.fromJson(value);
         case 'SSEData':
           return SSEData.fromJson(value);
         case 'SankeyData':

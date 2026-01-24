@@ -60,6 +60,15 @@ class AuthProvider extends BaseProvider<AuthApi> {
     _currentUser = user;
   }
 
+  /// Grabs the tokens from the secure storage and tries to setup authentication using only those tokens.
+  Future<void> applyDefaultAuth() async {
+    final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
+    final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken);
+    if (idToken != null) {
+      await _applyAuth(idToken, null, accessToken);
+    }
+  }
+
   /// Used to try our initial login requirements
   Future<User?> tryInitialLogin() async {
     if (_pendingLoginFuture != null) {

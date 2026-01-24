@@ -7,5 +7,6 @@ import { createParamDecorator, ExecutionContext } from "@nestjs/common";
  */
 export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext): User => {
   const request = ctx.switchToHttp().getRequest();
+  if (request.user == null) throw new Error("User must be defined for request");
   return request.user;
 });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
@@ -10,6 +11,7 @@ import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/transaction-rule/transaction_rule.provider.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -35,10 +37,11 @@ class ServiceLocator {
 
   /// All provider types that are registered with GetIt.
   static const _allProviderTypes = <Type>[
+    AuthProvider,
+    NotificationProvider,
     UserProvider,
     UserConfigProvider,
     ConfigProvider,
-    UserProvider,
     AccountProvider,
     SSEProvider,
     NetWorthProvider,
@@ -62,15 +65,14 @@ class ServiceLocator {
 
   /// Calls post login on all available providers
   static Future<void> postLogin() async {
-    // Request our basic data
-    await Future.wait(
-      ServiceLocator.getAllProviders().map((provider) async {
-        try {
-          await provider.postLogin();
-        } catch (e) {
-          LoggerService.error("Failed to load data for provider ${provider.runtimeType}: $e");
-        }
-      }),
-    );
+    final providers = ServiceLocator.getAllProviders();
+    // Order does matter on these so execute in order.
+    for (final provider in providers) {
+      try {
+        await provider.postLogin();
+      } catch (e) {
+        LoggerService.error("Failed to load data for provider ${provider.runtimeType}: $e");
+      }
+    }
   }
 }

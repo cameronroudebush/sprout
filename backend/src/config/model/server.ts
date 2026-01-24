@@ -2,6 +2,7 @@ import { AuthenticationConfig } from "@backend/auth/model/authentication.config"
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
 import { JobsConfig } from "@backend/jobs/model/jobs.config";
+import { NotificationConfig } from "@backend/notification/model/notification.config";
 import { LOG_LEVELS, LogLevel } from "@nestjs/common";
 
 /** Options that should be provided to the core of the web server */
@@ -23,4 +24,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration for how we want to use authentication for this app." })
   auth = new AuthenticationConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for automated notifications." })
+  notification = new NotificationConfig();
 }

@@ -37,7 +37,7 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
   @override
   void initState() {
     super.initState();
-    _connectionUrlController.text = defaultApiClient.basePath;
+    _connectionUrlController.text = defaultApiClient.basePath.replaceAll("/api", "");
   }
 
   @override

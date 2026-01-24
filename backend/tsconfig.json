@@ -16,7 +16,8 @@
       "@backend/institution/*": ["./src/institution/*"],
       "@backend/holding/*": ["./src/holding/*"],
       "@backend/sse/*": ["./src/sse/*"],
-      "@backend/auth/*": ["./src/auth/*"]
+      "@backend/auth/*": ["./src/auth/*"],
+      "@backend/notification/*": ["./src/notification/*"]
     }
   },
   "include": ["./src/**/*"]
