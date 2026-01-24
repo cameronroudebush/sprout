@@ -5,8 +5,12 @@ import { IsEnum } from "class-validator";
 
 /** This enum represents the different types of SSE events that can be sent to clients. */
 export enum SSEEventType {
+  /** Used to tell the app when a manual sync has completed */
   SYNC = "sync",
+  /** Tells the app to forcible update all of it's data */
   FORCE_UPDATE = "force-update",
+  /** Used to inform that the app needs to grab updated notification info */
+  NOTIFICATION = "notification",
 }
 
 /** This represents the SSE data that will be sent to clients */

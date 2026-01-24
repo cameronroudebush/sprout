@@ -61,6 +61,7 @@ export function createSwaggerDoc(app: INestApplication) {
     .addTag("Auth", "Manage user authentication.")
     .addTag("User", "Manage user creation, and profile information.")
     .addTag("User Config", "Manage user-specific application settings and configurations.")
+    .addTag("Notification", "Retrieve notification information intended for a specific user.")
     .addTag("Account", "Manage financial accounts, including retrieval, editing, and linking with financial providers.")
     .addTag("Transaction", "Access and manage financial transactions, including searching, editing, and analyzing spending patterns.")
     .addTag("Transaction Rule", "Define and manage rules for automatic transaction categorization during synchronization.")

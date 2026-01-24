@@ -24,6 +24,7 @@
     "cron-parser": "^5.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "firebase-admin": "^13.6.0",
     "glob": "^10.3.10",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.2.1",

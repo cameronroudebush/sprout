@@ -32,6 +32,10 @@ dependencies:
   go_router: ^16.2.0
   app_links: ^6.4.1
   openid_client: ^0.4.9+2
+  firebase_messaging: "^15.1.5"
+  firebase_core: "^3.8.0"
+  flutter_local_notifications: ^19.5.0
+  device_info_plus: ^12.3.0
 
 dev_dependencies:
   flutter_test:

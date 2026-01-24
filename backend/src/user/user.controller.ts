@@ -2,8 +2,13 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SetupService } from "@backend/core/setup.service";
+import { NotificationType } from "@backend/notification/model/notification.type";
+import { NotificationService } from "@backend/notification/notification.service";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
+import { RegisterDeviceDto } from "@backend/user/model/api/register.device.dto";
+import { UserDevice } from "@backend/user/model/user.device.model";
+import { DevicePlatform } from "@backend/user/model/user.device.type";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Post } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -14,7 +19,10 @@ import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse
 export class UserController {
   private readonly logger = new Logger();
 
-  constructor(private setupService: SetupService) {}
+  constructor(
+    private setupService: SetupService,
+    private notificationService: NotificationService,
+  ) {}
 
   @Get("me")
   @ApiOperation({
@@ -62,5 +70,39 @@ export class UserController {
         throw new BadRequestException((e as Error).message);
       }
     } else throw new BadRequestException("The app is not in a setup state.");
+  }
+
+  @Post("device/register")
+  @ApiOperation({
+    summary: "Register a device to a user.",
+    description: "Registers a device to the current authenticated user so we can reference it in notification handlers.",
+  })
+  @ApiOkResponse({ description: "Device registered" })
+  @AuthGuard.attach()
+  async registerDevice(@CurrentUser() user: User, @Body() data: RegisterDeviceDto) {
+    // Check if this specific token is already registered
+    let device = await UserDevice.findOne({ where: { fcmToken: data.token } });
+
+    if (device) {
+      // Update existing device info
+      device.deviceName = data.deviceName ?? device.deviceName;
+      device.lastSeenAt = new Date();
+      device.user = user; // Re-associate in case the user switched accounts
+      device = await device.update();
+    } else {
+      // Create a new device entry
+      device = await new UserDevice(user, data.token, data.platform ?? DevicePlatform.ANDROID, data.deviceName).insert();
+    }
+
+    return { success: true, deviceId: device.id };
+  }
+
+  // TODO: Remove
+  @Post("notification/test")
+  async test() {
+    const user = await User.find({});
+    for (const device of await UserDevice.find({})) {
+      this.notificationService.notifyUser(user[0]!, `Device registered, ${device.id}`, "TEST", NotificationType.info);
+    }
   }
 }

@@ -52,8 +52,10 @@ nav:
   - Getting Started:
       - Overview: getting-started/index.md
       - Installation: getting-started/installation.md
-      - Configuration: getting-started/configuration.md
-      - Authentication: getting-started/auth.md
+      - Configuration:
+          - Overview: getting-started/configuration.md
+          - Authentication: getting-started/auth.md
+          - Notification: getting-started/notification.md
       - Providers: getting-started/providers.md
       - Accessing Sprout: getting-started/access.md
       - Backups: getting-started/backups.md

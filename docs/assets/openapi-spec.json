@@ -134,6 +134,57 @@
         ]
       }
     },
+    "/user/device/register": {
+      "post": {
+        "description": "Registers a device to the current authenticated user so we can reference it in notification handlers.",
+        "operationId": "UserController_registerDevice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device registered"
+          },
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register a device to a user.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/notification/test": {
+      "post": {
+        "operationId": "UserController_test",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/user-config": {
       "get": {
         "description": "Retrieves the current user's configuration.",
@@ -1698,6 +1749,111 @@
         ]
       }
     },
+    "/notification": {
+      "get": {
+        "description": "Returns all the notifications for the currently authenticated user.",
+        "operationId": "NotificationController_getNotifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Notification"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's the notifications",
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
+    "/notification/{id}": {
+      "get": {
+        "description": "Returns a specific notification for the specific user by it's ID.",
+        "operationId": "NotificationController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Notification"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's a notification by it's id.",
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
+    "/notification/config/firebase": {
+      "get": {
+        "description": "Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.",
+        "operationId": "NotificationController_getFirebaseConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Firebase configuration retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirebaseConfigDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns the firebase configuration.",
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "description": "Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.",
@@ -1774,7 +1930,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-9-g35d4773",
+    "version": "v0.1.1-10-g04766af",
     "contact": {}
   },
   "tags": [
@@ -1797,6 +1953,10 @@
     {
       "name": "User Config",
       "description": "Manage user-specific application settings and configurations."
+    },
+    {
+      "name": "Notification",
+      "description": "Retrieve notification information intended for a specific user."
     },
     {
       "name": "Account",
@@ -1870,7 +2030,8 @@
             "description": "If we should hide balances on the users display"
           },
           "simpleFinToken": {
-            "type": "string"
+            "type": "string",
+            "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
           }
         },
         "required": [
@@ -1932,6 +2093,28 @@
         },
         "required": [
           "username"
+        ]
+      },
+      "RegisterDeviceDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "platform": {
+            "enum": [
+              "android",
+              "ios",
+              "web"
+            ],
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
         ]
       },
       "AccountSubTypeEnum": {
@@ -2292,7 +2475,8 @@
           "event": {
             "enum": [
               "sync",
-              "force-update"
+              "force-update",
+              "notification"
             ],
             "type": "string"
           },
@@ -2732,6 +2916,106 @@
         "required": [
           "data",
           "topCategoryNames"
+        ]
+      },
+      "FirebaseNotificationDTO": {
+        "type": "object",
+        "properties": {
+          "notificationId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "default": "secure_message"
+          },
+          "importance": {
+            "type": "string",
+            "default": "low",
+            "enum": [
+              "max",
+              "high",
+              "default",
+              "low"
+            ],
+            "description": "Notification importance level"
+          }
+        },
+        "required": [
+          "notificationId",
+          "type",
+          "importance"
+        ]
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title for our notification"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message that this notification intended to show the user"
+          },
+          "type": {
+            "description": "The type of notification this is",
+            "enum": [
+              "info",
+              "success",
+              "warning",
+              "error"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date that this notification occurs on",
+            "default": "2026-01-23T22:56:34.339Z"
+          },
+          "isRead": {
+            "type": "boolean",
+            "description": "Tracks if the user has interacted with this notification yet.",
+            "default": false
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "message",
+          "type",
+          "createdAt",
+          "isRead"
+        ]
+      },
+      "FirebaseConfigDTO": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "apiKey",
+          "appId",
+          "projectNumber",
+          "projectId"
         ]
       },
       "UsernamePasswordLoginRequest": {

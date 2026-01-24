@@ -46,6 +46,11 @@ export class DatabaseBase extends DBBase {
     return await new this().getRepository().delete(id);
   }
 
+  /** Given a search value, deletes by that. */
+  static async delete<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, opts: FindOptionsWhere<T>) {
+    return await new this().getRepository().delete(opts);
+  }
+
   /** Given the ID's of many objects, removes them from the database. */
   static async deleteMany<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, ids: Array<string>) {
     return await new this().getRepository().delete(ids);

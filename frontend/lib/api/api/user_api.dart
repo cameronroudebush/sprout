@@ -176,4 +176,85 @@ class UserApi {
     }
     return null;
   }
+
+  /// Register a device to a user.
+  ///
+  /// Registers a device to the current authenticated user so we can reference it in notification handlers.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [RegisterDeviceDto] registerDeviceDto (required):
+  Future<Response> userControllerRegisterDeviceWithHttpInfo(RegisterDeviceDto registerDeviceDto,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/user/device/register';
+
+    // ignore: prefer_final_locals
+    Object? postBody = registerDeviceDto;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Register a device to a user.
+  ///
+  /// Registers a device to the current authenticated user so we can reference it in notification handlers.
+  ///
+  /// Parameters:
+  ///
+  /// * [RegisterDeviceDto] registerDeviceDto (required):
+  Future<void> userControllerRegisterDevice(RegisterDeviceDto registerDeviceDto,) async {
+    final response = await userControllerRegisterDeviceWithHttpInfo(registerDeviceDto,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// Performs an HTTP 'POST /user/notification/test' operation and returns the [Response].
+  Future<Response> userControllerTestWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/user/notification/test';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  Future<void> userControllerTest() async {
+    final response = await userControllerTestWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

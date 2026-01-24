@@ -27,6 +27,7 @@ class UserConfig {
   /// If we should hide balances on the users display
   bool privateMode;
 
+  /// This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database.
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
