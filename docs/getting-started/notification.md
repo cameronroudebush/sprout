@@ -115,3 +115,17 @@ sprout_server_notification_firebase_projectNumber=123456789
 sprout_server_notification_firebase_clientEmail=firebase-adminsdk-xxxxx@sprout-selfhosted.iam.gserviceaccount.com
 sprout_server_notification_firebase_privateKey="-----BEGIN PRIVATE KEY-----\nMIIEvQIBA...\n-----END PRIVATE KEY-----\n"
 ```
+
+## Troubleshooting
+
+### Client: 403 Forbidden Error
+
+If the app logs show "**Permission Denied**" or "**403**" when registering, your API Key is missing the Firebase Installations API permission.
+
+-   Fix: Go to Google Cloud Console → API Library and **enable** "**Firebase Installations API**".
+
+### Backend: Error parsing private key
+
+If the Sprout backend fails to start while parsing the private key:
+
+-   Fix: Check **sprout_server_notification_firebase_privateKey**. It must include the header `-----BEGIN PRIVATE KEY-----` and footer `-----END PRIVATE KEY-----`. Ensure the newlines are represented as `\n` characters if using a single-line string.
