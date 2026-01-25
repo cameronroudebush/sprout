@@ -62,6 +62,7 @@ part 'model/model_sync.dart';
 part 'model/monthly_category_data.dart';
 part 'model/monthly_spending_stats.dart';
 part 'model/notification.dart';
+part 'model/notification_ssedto.dart';
 part 'model/provider_config.dart';
 part 'model/register_device_dto.dart';
 part 'model/sse_data.dart';

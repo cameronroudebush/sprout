@@ -1,5 +1,6 @@
 import { Configuration } from "@backend/config/core";
 import { FirebaseNotificationDTO } from "@backend/notification/model/api/firebase.notification.dto";
+import { NotificationSSEDTO } from "@backend/notification/model/api/notification.sse.dto";
 import { Notification } from "@backend/notification/model/notification.model";
 import { NotificationType } from "@backend/notification/model/notification.type";
 import { SSEEventType } from "@backend/sse/model/event.model";
@@ -28,15 +29,19 @@ export class NotificationService implements OnModuleInit {
     }
   }
 
-  /** Notifies the user with the given information */
-  async notifyUser(user: User, message: string, title: string, type: NotificationType) {
+  /**
+   * Notifies the user with the given information by adding notifications related to them and telling the
+   *  frontend's about the new notification.
+   *
+   * @param notifyDevices If true, attempts to use firebase to inform their sleeping app of the notification via secure methods.
+   */
+  async notifyUser(user: User, message: string, title: string, type: NotificationType, notifyDevices = true) {
     const n = new Notification(user, title, message, type);
     await n.insert();
     await this.cleanupUserMax(user);
     // Tell user devices of new notifications that should be requested.
-    this.sseService.sendToUser(user, SSEEventType.NOTIFICATION);
-    // TODO: Should we always notify the app?
-    await this.notifyApp(user, n);
+    this.sseService.sendToUser(user, SSEEventType.NOTIFICATION, new NotificationSSEDTO(true));
+    if (notifyDevices) await this.notifyApp(user, n);
     return n;
   }
 

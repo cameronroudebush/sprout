@@ -146,6 +146,7 @@ class SproutRouter {
 
   /// The router for navigation around Sprout
   static final router = GoRouter(
+    navigatorKey: SproutNavigator.key,
     initialLocation: '/login',
     redirect: (context, state) {
       final configProvider = ServiceLocator.get<ConfigProvider>();

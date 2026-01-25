@@ -1823,6 +1823,63 @@
         ]
       }
     },
+    "/notification/read/{id}": {
+      "get": {
+        "description": "Marks the given ID's notification read.",
+        "operationId": "NotificationController_markRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked read successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marks a specific notification read.",
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
+    "/notification/read/all": {
+      "get": {
+        "description": "Used for when the user opens their notification shade.",
+        "operationId": "NotificationController_markAllRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications marked read successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marks all notifications read.",
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
     "/notification/config/firebase": {
       "get": {
         "description": "Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.",
@@ -1930,7 +1987,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-10-g04766af",
+    "version": "v0.1.1-14-g20f4df7",
     "contact": {}
   },
   "tags": [
@@ -2930,20 +2987,32 @@
           },
           "importance": {
             "type": "string",
+            "description": "Notification importance level",
             "default": "low",
             "enum": [
               "max",
               "high",
               "default",
               "low"
-            ],
-            "description": "Notification importance level"
+            ]
           }
         },
         "required": [
           "notificationId",
           "type",
           "importance"
+        ]
+      },
+      "NotificationSSEDTO": {
+        "type": "object",
+        "properties": {
+          "popupLatest": {
+            "type": "boolean",
+            "description": "If we should render the latest notification or not"
+          }
+        },
+        "required": [
+          "popupLatest"
         ]
       },
       "Notification": {
@@ -2974,7 +3043,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-01-23T22:56:34.339Z"
+            "default": "2026-01-25T18:01:49.972Z"
           },
           "isRead": {
             "type": "boolean",
