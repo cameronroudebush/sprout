@@ -2,6 +2,7 @@ import { ServerConfig } from "@backend/config/model/server";
 import { DatabaseConfig } from "@backend/database/model/db.config";
 import { HoldingConfig } from "@backend/holding/model/holding.config";
 import { TransactionConfig } from "@backend/transaction/model/transaction.config";
+import { UserConfig } from "@backend/user/model/user.config.backend.model";
 import { name } from "../../package.json";
 import { ProvidersConfig } from "../providers/model/provider.config";
 import { ConfigurationMetadata } from "./model/configuration.metadata";
@@ -28,6 +29,9 @@ export class Configuration {
 
   @ConfigurationMetadata.assign({ comment: "Settings specific to holdings" })
   static holding = new HoldingConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Settings specific to how we control users" })
+  static user = new UserConfig();
 
   /** This variable contains the application version of this build. This is replaced by webpack. */
   static version = process.env["APP_VERSION"]!;

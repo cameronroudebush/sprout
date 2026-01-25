@@ -165,7 +165,7 @@ export class AccountController {
       throw new InternalServerErrorException("A sync is already in progress. Please wait for it to complete.");
     }
 
-    const sync = await this.jobService.providerSyncJob.updateNow(user);
+    const sync = await this.jobService.jobs.providerSync.updateNow(user);
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC, sync);
     // Tell to re-request data
