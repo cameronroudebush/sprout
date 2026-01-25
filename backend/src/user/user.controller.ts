@@ -2,8 +2,6 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SetupService } from "@backend/core/setup.service";
-import { NotificationType } from "@backend/notification/model/notification.type";
-import { NotificationService } from "@backend/notification/notification.service";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
 import { RegisterDeviceDto } from "@backend/user/model/api/register.device.dto";
@@ -19,10 +17,7 @@ import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse
 export class UserController {
   private readonly logger = new Logger();
 
-  constructor(
-    private setupService: SetupService,
-    private notificationService: NotificationService,
-  ) {}
+  constructor(private setupService: SetupService) {}
 
   @Get("me")
   @ApiOperation({
@@ -95,33 +90,5 @@ export class UserController {
     }
 
     return { success: true, deviceId: device.id };
-  }
-
-  // TODO: Remove
-  @Post("notification/test")
-  async test() {
-    const users = await User.find({});
-    const devices = await UserDevice.find({});
-    const currentUser = users[0];
-
-    if (!currentUser) return;
-
-    const templates = [
-      { title: "Financial Sync", body: "Your daily overview is ready for review.", type: NotificationType.success },
-      { title: "New Device Linked", body: "A new login was detected on your account.", type: NotificationType.warning },
-      { title: "Budget Alert", body: "You've spent 80% of your entertainment budget this month.", type: NotificationType.info },
-      { title: "System Update", body: "We've optimized your dashboard performance.", type: NotificationType.info },
-      { title: "Security Check", body: "Please verify your recent activity.", type: NotificationType.error },
-    ];
-
-    for (const device of devices) {
-      // Pick a random template
-      const template = templates[Math.floor(Math.random() * templates.length)]!;
-
-      // Mix in some dynamic data to make the test data look unique
-      const finalBody = `${template.body} (Device: ${device.deviceName ?? device.id.substring(0, 8)})`;
-
-      await this.notificationService.notifyUser(currentUser, finalBody, template.title, template.type);
-    }
   }
 }

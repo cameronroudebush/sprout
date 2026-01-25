@@ -121,13 +121,14 @@ class _ConnectionSetupState extends State<ConnectionSetupField> {
                 ),
               ),
             // Error messages for the input
-            Text(
-              _message,
-              style: TextStyle(
-                color: _message.contains('Failed') ? Colors.red[700] : Colors.green[700],
-                fontWeight: FontWeight.bold,
+            if (_message != "")
+              Text(
+                _message,
+                style: TextStyle(
+                  color: _message.contains('Failed') ? Colors.red[700] : Colors.green[700],
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
           ],
         );
       },

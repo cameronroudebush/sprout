@@ -27,79 +27,81 @@ class UserInfoRow extends StatelessWidget {
     });
   }
 
+  /// Builds the main content for display with hint and text
+  Widget _buildMainContent(BuildContext context, {Widget? separator}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          info.title,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 16,
+          ),
+        ),
+        if (separator != null) separator,
+        if (info.child != null && info.column) info.child!,
+        if (info.hint != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0, left: 6, right: 6),
+            child: Text(
+              info.hint!,
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        if (info.value != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(info.value!, style: const TextStyle()),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<UserConfigProvider>(
       builder: (context, userProvider, child) {
-        final mainContent = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              info.title,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 16,
-              ),
-            ),
-            if (info.hint != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(
-                  info.hint!,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                  textAlign: TextAlign.start,
-                ),
-              ),
-            if (info.value != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(info.value!, style: const TextStyle()),
-              ),
-            if (info.child != null && info.column)
-              Padding(padding: const EdgeInsets.only(top: 8.0), child: info.child!),
-          ],
-        );
-
-        Widget rowContent = mainContent;
+        Widget rowContent;
         if (info.settingType == "bool" && info.settingValue is bool) {
           rowContent = Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: mainContent),
+              Expanded(child: _buildMainContent(context)),
               Switch(value: info.settingValue, onChanged: _updateVal),
             ],
           );
         } else if (info.settingType == "string" && info.settingValue is String) {
-          rowContent = Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            spacing: 36,
-            children: [
-              mainContent,
-              Expanded(
-                child: TextField(
-                  controller: _textController,
-                  keyboardType: TextInputType.text,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  ),
-                  onChanged: _updateVal,
+          rowContent = _buildMainContent(
+            context,
+            separator: Padding(
+              padding: const EdgeInsetsGeometry.symmetric(horizontal: 6),
+              child: TextField(
+                controller: _textController,
+                keyboardType: TextInputType.text,
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 ),
+                onChanged: _updateVal,
               ),
-            ],
+            ),
           );
         } else if (!info.column) {
           rowContent = Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 4,
             children: [
-              Expanded(child: mainContent),
+              Expanded(child: _buildMainContent(context)),
               if (info.child != null) info.child!,
             ],
           );
+        } else {
+          rowContent = _buildMainContent(context);
         }
 
         return ListTile(

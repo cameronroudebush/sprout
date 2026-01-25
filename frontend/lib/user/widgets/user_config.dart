@@ -91,7 +91,10 @@ class _UserConfigPageState extends State<UserConfigPage> {
                 title: "Backend Connection URL",
                 hint: "The URL for the backend connection.",
                 icon: Icons.http,
-                child: Center(child: ConnectionSetupField(disabled: true)),
+                child: Padding(
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 6),
+                  child: ConnectionSetupField(disabled: true),
+                ),
               ),
             UserDisplayInfo(
               title: "Last Background Sync Status",
