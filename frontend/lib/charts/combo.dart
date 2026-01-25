@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/utils/formatters.dart';
 
+// ignore: must_be_immutable
 class ComboChart extends StatelessWidget {
   Timer? _debounce;
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/widgets/layout.dart';
@@ -39,6 +40,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
               : Image.asset('assets/icon/color.png', width: 48, fit: BoxFit.contain);
 
           return AppBar(
+            automaticallyImplyLeading: kIsWeb ? false : true,
             toolbarHeight: preferredSize.height,
             scrolledUnderElevation: 0,
             backgroundColor: theme.colorScheme.primaryContainer,
