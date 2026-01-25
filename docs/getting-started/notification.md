@@ -13,7 +13,7 @@ description: Learn about the notification capabilities of Sprout.
 
 By default, Sprout retrieves notifications from the server API whenever you open the app or view the notification menu.
 
-**Configuring Firebase is optional**. You only need to follow these steps if you want to receive instant Push Notifications on your Android device while the app is running in the background or closed.
+**Configuring Firebase is optional**. You only need to follow these steps if you want to receive instant Push Notifications on your device while the app is running in the background or closed.
 
 !!! note "Optional Configuration"
 
@@ -45,7 +45,7 @@ Because Sprout initializes Firebase manually on the client, you must configure a
 
 !!! warning "Do not use the default Web API Key"
 
-    The default "Web API Key" found in Firebase settings often lacks the permissions required for Android device registration. You must follow the steps below to create a compatible key.
+    The default "Web API Key" found in Firebase settings often lacks the permissions required for device registration. You must follow the steps below to create a compatible key.
 
 1. Go to the [Google Cloud Console Credentials Page](https://console.cloud.google.com/apis/credentials).
 2. Ensure your Firebase project is selected in the top dropdown.
