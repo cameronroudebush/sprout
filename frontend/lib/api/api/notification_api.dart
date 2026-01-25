@@ -171,4 +171,93 @@ class NotificationApi {
     }
     return null;
   }
+
+  /// Marks all notifications read.
+  ///
+  /// Used for when the user opens their notification shade.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> notificationControllerMarkAllReadWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/notification/read/all';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Marks all notifications read.
+  ///
+  /// Used for when the user opens their notification shade.
+  Future<void> notificationControllerMarkAllRead() async {
+    final response = await notificationControllerMarkAllReadWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// Marks a specific notification read.
+  ///
+  /// Marks the given ID's notification read.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<Response> notificationControllerMarkReadWithHttpInfo(String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/notification/read/{id}'
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Marks a specific notification read.
+  ///
+  /// Marks the given ID's notification read.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<void> notificationControllerMarkRead(String id,) async {
+    final response = await notificationControllerMarkReadWithHttpInfo(id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

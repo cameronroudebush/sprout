@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -20,6 +21,7 @@ import 'package:sprout/user/user_provider.dart';
 class FirebaseNotificationProvider {
   /// Initializes firebase for our app. We have to wait after login so we can grab the configuration from the backend, encrypted, that contains the firebase tokens
   static Future<void> configure(NotificationApi? api) async {
+    if (kIsWeb) return; // Don't even bother with firebase on web
     /// Key used to store firebase config received from the backend.
     const firebaseConfigKey = 'firebase_config';
     FirebaseConfigDTO? config;

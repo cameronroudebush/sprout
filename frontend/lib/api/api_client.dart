@@ -222,6 +222,8 @@ class ApiClient {
           return MonthlySpendingStats.fromJson(value);
         case 'Notification':
           return Notification.fromJson(value);
+        case 'NotificationSSEDTO':
+          return NotificationSSEDTO.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
         case 'RegisterDeviceDto':

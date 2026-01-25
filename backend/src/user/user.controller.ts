@@ -100,9 +100,28 @@ export class UserController {
   // TODO: Remove
   @Post("notification/test")
   async test() {
-    const user = await User.find({});
-    for (const device of await UserDevice.find({})) {
-      this.notificationService.notifyUser(user[0]!, `Device registered, ${device.id}`, "TEST", NotificationType.info);
+    const users = await User.find({});
+    const devices = await UserDevice.find({});
+    const currentUser = users[0];
+
+    if (!currentUser) return;
+
+    const templates = [
+      { title: "Financial Sync", body: "Your daily overview is ready for review.", type: NotificationType.success },
+      { title: "New Device Linked", body: "A new login was detected on your account.", type: NotificationType.warning },
+      { title: "Budget Alert", body: "You've spent 80% of your entertainment budget this month.", type: NotificationType.info },
+      { title: "System Update", body: "We've optimized your dashboard performance.", type: NotificationType.info },
+      { title: "Security Check", body: "Please verify your recent activity.", type: NotificationType.error },
+    ];
+
+    for (const device of devices) {
+      // Pick a random template
+      const template = templates[Math.floor(Math.random() * templates.length)]!;
+
+      // Mix in some dynamic data to make the test data look unique
+      const finalBody = `${template.body} (Device: ${device.deviceName ?? device.id.substring(0, 8)})`;
+
+      await this.notificationService.notifyUser(currentUser, finalBody, template.title, template.type);
     }
   }
 }

@@ -6,7 +6,6 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/navigator.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/user/user_provider.dart';
@@ -154,7 +153,6 @@ class AuthProvider extends BaseProvider<AuthApi> {
   /// Fires the logout, no matter what login flow we have
   Future<void> logout({bool forced = false}) async {
     _isLoggingOut = true;
-    if (forced) SnackbarProvider.openSnackbar("You have been logged out", type: SnackbarType.warning);
 
     // Wipe data
     _currentUser = null;

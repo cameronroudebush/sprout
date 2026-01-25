@@ -8,7 +8,7 @@ export class TimeZone {
   }
 
   /** Given a date, returns a string formatted in the timezone as configured. */
-  static formatDate(date: Date) {
-    return formatInTimeZone(date, this.timeZone, "yyyy-MM-dd HH:mm:ss zzz");
+  static formatDate(date: Date, format = "yyyy-MM-dd HH:mm:ss zzz") {
+    return formatInTimeZone(date, this.timeZone, format);
   }
 }

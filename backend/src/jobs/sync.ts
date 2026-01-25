@@ -3,6 +3,7 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
+import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
@@ -47,7 +48,13 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       schedule.status = "failed";
       await schedule.update();
       // If this is specific to a user, notify them of the failure
-      if (user) await this.notificationService.notifyUser(user, `Failed to sync user accounts: ${msg}`, "Sync Failure", NotificationType.error);
+      if (user)
+        await this.notificationService.notifyUser(
+          user,
+          `Failed to sync your data for ${TimeZone.formatDate(new Date(), "PPP")}. Please review the logs.`,
+          "Sync Failure",
+          NotificationType.error,
+        );
       // Don't fail graceful, let the jobs base handle this
       throw e;
     }
@@ -55,9 +62,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     schedule.status = "complete";
     await schedule.update();
     // If this is specific to a user, notify them of the success
-    if (user)
-      // TODO: Better success message
-      await this.notificationService.notifyUser(user, `New data is available for ${TimeZone.formatDate(new Date())}`, "Sync Success", NotificationType.success);
+    if (user) await this.logSuccess(user);
 
     return schedule;
   }
@@ -198,6 +203,20 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
         remainingHolding.shares = 0;
         await remainingHolding.update();
       }
+    }
+  }
+
+  /** Informs the user via the notification service that new data is available for their account. */
+  private async logSuccess(user: User) {
+    if (user) {
+      const successMessages = [
+        { title: "Sync Success", body: `Your financial overview is now up to date for ${TimeZone.formatDate(new Date(), "PPP")}.` },
+        { title: "Data Refreshed", body: "We've pulled in your latest transactions. Take a look at your updated balances!" },
+        { title: "You're All Caught Up", body: "Your accounts have been synced. Your dashboard is now current." },
+        { title: "Financial Pulse Update", body: "New data is ready! See how your finances look today." },
+      ];
+      const message = Utility.randomFromArray(successMessages);
+      await this.notificationService.notifyUser(user, message.body, message.title, NotificationType.success);
     }
   }
 }
