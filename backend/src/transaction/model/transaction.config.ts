@@ -2,8 +2,8 @@ import { ConfigurationMetadata } from "@backend/config/model/configuration.metad
 
 /** Contains transaction configuration options */
 export class TransactionConfig {
-  @ConfigurationMetadata.assign({ comment: "When to check for stuck transactions. This includes things like stuck pending." })
-  stuckTransactionTime: string = "15 8 * * *";
+  @ConfigurationMetadata.assign({ comment: "When to check for stuck pending transactions that didn't get cleaned up by the provider." })
+  stuckTransactionTime: string = "0 * * * *";
 
   @ConfigurationMetadata.assign({ comment: "How many days old a transaction has to be stuck for it to be auto deleted." })
   stuckTransactionDays: number = 7;

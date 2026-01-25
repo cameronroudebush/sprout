@@ -7,7 +7,7 @@ import { BackgroundJob } from "./base";
 /** This class defines a background job that executes to check things like stuck pending transactions */
 export class PendingTransactionJob extends BackgroundJob<any> {
   constructor() {
-    super("pending-transaction", Configuration.transaction.stuckTransactionTime);
+    super("transaction:pending", Configuration.transaction.stuckTransactionTime);
   }
 
   override async start() {
@@ -25,7 +25,7 @@ export class PendingTransactionJob extends BackgroundJob<any> {
       },
     });
     if (stuckTransactions.length > 0) {
-      this.logger.warn(`Found ${stuckTransactions.length} stuck pending transactions. Deleting them.`);
+      this.logger.warn(`Removing ${stuckTransactions.length} stuck pending transactions.`);
       await Transaction.deleteMany(stuckTransactions.map((x) => x.id));
     } else this.logger.log("No stuck pending transactions!");
   }
