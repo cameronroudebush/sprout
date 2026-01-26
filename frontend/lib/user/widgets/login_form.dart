@@ -107,30 +107,29 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _login() async {
     final authProvider = ServiceLocator.get<AuthProvider>();
     final configProvider = ServiceLocator.get<ConfigProvider>();
-
-    if (configProvider.unsecureConfig?.oidcConfig != null) {
-      // OIDC login
-      await authProvider.loginOIDC();
-    } else {
-      TextInput.finishAutofillContext();
-      if (_usernameController.text == "" || _passwordController.text == "") {
-        return;
-      }
-      User? user;
-      try {
-        setState(() {
-          _loginIsRunning = true;
-        });
-        user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
-        // Successful login? Request data and go home
-        await _loginComplete(user);
-      } finally {
-        if (user == null) {
-          setState(() {
-            _message = _LoginFormState.failedLoginMessage;
-            _loginIsRunning = false;
-          });
+    User? user;
+    try {
+      setState(() {
+        _loginIsRunning = true;
+      });
+      if (configProvider.unsecureConfig?.oidcConfig != null) {
+        // OIDC login
+        user = await authProvider.loginOIDC();
+      } else {
+        TextInput.finishAutofillContext();
+        if (_usernameController.text == "" || _passwordController.text == "") {
+          return;
         }
+        user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
+      }
+      // Successful login? Request data and go home
+      await _loginComplete(user);
+    } finally {
+      if (user == null) {
+        setState(() {
+          _message = _LoginFormState.failedLoginMessage;
+          _loginIsRunning = false;
+        });
       }
     }
   }

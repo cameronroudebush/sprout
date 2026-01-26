@@ -7,9 +7,9 @@ class HoldingLogoWidget extends LogoBaseWidget<Holding> {
   const HoldingLogoWidget(super.logoClass, {super.key});
 
   @override
-  String getLogoUrl(BuildContext context) {
+  ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context) {
     final url = "https://cdn.nvstly.com/icons/stocks/${logoClass.symbol}.png";
-    return "${getBackendProxy()}?fullImageUrl=$url";
+    return (faviconImageUrl: null, fullImageUrl: url);
   }
 
   @override

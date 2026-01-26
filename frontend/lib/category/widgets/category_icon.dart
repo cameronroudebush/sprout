@@ -48,6 +48,9 @@ class CategoryIcon extends StatelessWidget {
     'auto_repair': Icons.car_repair,
     'taxi': Icons.local_taxi,
     'public_transit': Icons.directions_bus,
+    'charging': Icons.ev_station,
+    'bridge_toll': Icons.toll,
+    'bicycle': Icons.pedal_bike,
 
     // Travel
     'travel': Icons.flight,
@@ -65,6 +68,12 @@ class CategoryIcon extends StatelessWidget {
     'recreation': Icons.sports_baseball,
     'fitness': Icons.fitness_center,
     'events': Icons.confirmation_number,
+    'computer': Icons.computer,
+    'photography': Icons.camera_alt,
+    'sports': Icons.sports_soccer,
+    'books': Icons.menu_book,
+    'news': Icons.newspaper,
+    'gaming': Icons.sports_esports,
 
     // Financial & Income
     'income': Icons.attach_money,
@@ -81,6 +90,11 @@ class CategoryIcon extends StatelessWidget {
     'fee': Icons.price_change,
     'tax': Icons.description,
     'loan': Icons.money,
+    'refund': Icons.settings_backup_restore,
+    'interest': Icons.percent,
+    'reimbursement': Icons.assignment_return,
+    'atm': Icons.atm,
+    'pension': Icons.account_balance_wallet,
 
     // Credit & Payments
     'payment': Icons.payment,
@@ -104,6 +118,30 @@ class CategoryIcon extends StatelessWidget {
     'holiday': Icons.celebration,
     'charity': Icons.volunteer_activism,
     'subscription': Icons.subscriptions,
+
+    // Professional Services
+    'legal': Icons.gavel,
+    'accounting': Icons.calculate,
+    'consulting': Icons.handshake,
+    'shipping': Icons.local_shipping,
+    'software': Icons.code,
+
+    // Specific Bills & Subscriptions
+    'streaming': Icons.play_circle_fill,
+    'security': Icons.security,
+    'storage': Icons.inventory_2,
+
+    // Family & Household
+    'tuition': Icons.history_edu,
+    'baby_supplies': Icons.child_friendly,
+    'toys': Icons.toys,
+    'garden': Icons.yard,
+    'home_insurance': Icons.home_repair_service,
+
+    // Social & Occasions
+    'party': Icons.party_mode,
+    'flowers': Icons.local_florist,
+    'donations': Icons.favorite,
 
     // Misc
     'service': Icons.room_service,

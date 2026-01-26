@@ -226,7 +226,7 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
   Widget build(BuildContext context) {
     return Consumer4<UserConfigProvider, AccountProvider, NetWorthProvider, HoldingProvider>(
       builder: (context, userConfigProvider, accountProvider, netWorthProvider, holdingProvider, child) {
-        if (isLoading) return PageLoadingWidget();
+        if (isLoading) return Center(child: PageLoadingWidget());
 
         final List<String> tabs = ["Overview", "Transactions"];
         final List<Widget> tabContents = [

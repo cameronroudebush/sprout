@@ -7,8 +7,8 @@ class AccountLogoWidget extends LogoBaseWidget<Account> {
   const AccountLogoWidget(super.logoClass, {super.key, super.height, super.width});
 
   @override
-  String getLogoUrl(BuildContext context) {
-    return "${getBackendProxy()}?faviconImageUrl=${logoClass.institution.id}";
+  ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context) {
+    return (faviconImageUrl: logoClass.institution.id, fullImageUrl: null);
   }
 
   @override
