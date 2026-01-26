@@ -7,7 +7,7 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/extended_api_client.dart';
+import 'package:sprout/core/client/extended_api_client.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
@@ -45,8 +45,6 @@ void main() async {
   ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowApi()));
 
   await FirebaseNotificationProvider.configure(null);
-  // Try and parse OIDC auth for web if applicable
-  await AuthProvider.handleAuthReturn();
 
   runApp(
     MultiProvider(

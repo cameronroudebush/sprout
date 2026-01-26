@@ -233,6 +233,46 @@ class AuthApi {
     return null;
   }
 
+  /// Logout the user
+  ///
+  /// Clears the session cookies any authentication that has happened.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> authControllerLogoutWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/auth/logout';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Logout the user
+  ///
+  /// Clears the session cookies any authentication that has happened.
+  Future<void> authControllerLogout() async {
+    final response = await authControllerLogoutWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Proxy OIDC refresh requests.
   ///
   /// Proxies OIDC token refresh to the destination server of the OIDC issuer.  Only available on OIDC strategy auth.

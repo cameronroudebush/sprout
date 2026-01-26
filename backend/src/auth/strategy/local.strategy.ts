@@ -1,4 +1,5 @@
 import { LocalJWTContent } from "@backend/auth/auth.service";
+import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
@@ -12,7 +13,7 @@ export const LocalStrategyName = "local";
 export class LocalStrategy extends PassportStrategy(Strategy, "local") {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromHeaderOrCookie]),
       secretOrKey: Configuration.server.auth.secretKey,
       ignoreExpiration: false,
     });

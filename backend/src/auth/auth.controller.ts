@@ -1,6 +1,7 @@
 import { StrategyGuard } from "@backend/auth/guard/strategy.guard";
 import { RefreshRequestDTO } from "@backend/auth/model/api/refresh.request.dto";
 import { RefreshResponseDTO } from "@backend/auth/model/api/refresh.response.dto";
+import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { PublicURL } from "@backend/core/decorator/public.url.decorator";
 import { HttpService } from "@nestjs/axios";
@@ -34,8 +35,15 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: "Invalid credentials provided." })
   @ApiBody({ type: UsernamePasswordLoginRequest })
   @StrategyGuard.attach("local")
-  async login(@Body() userLoginRequest: UsernamePasswordLoginRequest): Promise<UserLoginResponse> {
-    return this.authService.login(userLoginRequest);
+  async login(@Body() body: UsernamePasswordLoginRequest, @Res({ passthrough: true }) res: Response, @Req() req: Request): Promise<UserLoginResponse> {
+    const platform = req.headers["x-client-platform"] as "mobile" | "web";
+    const response = await this.authService.login(body);
+    // Exclude the JWT from the response on web to prevent XSS with the JWT. We use cookies instead.
+    if (platform === "web") {
+      this.setCookieTokens(res, response.jwt!);
+      response.jwt = undefined;
+    }
+    return response;
   }
 
   @Post("login/jwt")
@@ -47,8 +55,25 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: "The provided JWT is invalid or has expired." })
   @ApiBody({ type: JWTLoginRequest })
   @StrategyGuard.attach("local")
-  async loginWithJWT(@Body() userLoginRequest: JWTLoginRequest): Promise<UserLoginResponse> {
-    return this.authService.loginWithJWT(userLoginRequest);
+  async loginWithJWT(@Body() body: JWTLoginRequest, @Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<UserLoginResponse> {
+    const platform = req.headers["x-client-platform"] as "mobile" | "web";
+    const token = extractJwtFromHeaderOrCookie(req) || body.jwt;
+    if (token == null) throw new UnauthorizedException();
+    const response = await this.authService.loginWithJWT(token);
+    // Exclude the JWT from the response on web. Update the cookie.
+    if (platform === "web") {
+      this.setCookieTokens(res, response.jwt!);
+      response.jwt = undefined;
+    }
+    return response;
+  }
+
+  /** Sets tokens into the cookies based on what tokens you can provide */
+  private setCookieTokens(res: Response, idToken: string, accessToken?: string, refreshToken?: string) {
+    const secure = !Configuration.isDevBuild;
+    res.cookie("id_token", idToken, { httpOnly: true, secure });
+    if (accessToken) res.cookie("access_token", accessToken, { httpOnly: true, secure });
+    if (refreshToken) res.cookie("refresh_token", refreshToken, { httpOnly: true, secure, path: "/auth/oidc/refresh" });
   }
 
   @Post("oidc/refresh")
@@ -58,8 +83,12 @@ export class AuthController {
   })
   @ApiOkResponse({ type: RefreshResponseDTO })
   @StrategyGuard.attach("oidc")
-  async refresh(@Body() dto: RefreshRequestDTO) {
+  async refresh(@Body() dto: RefreshRequestDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { issuer, clientId } = Configuration.server.auth.oidc;
+    // Grab token from cookie and fallback to DTO
+    const refreshToken = req.cookies["refresh_token"] || dto.refreshToken;
+
+    if (!refreshToken) throw new UnauthorizedException("No refresh token provided");
 
     try {
       const response = await firstValueFrom(
@@ -67,15 +96,21 @@ export class AuthController {
           `${issuer}/api/oidc/token`,
           new URLSearchParams({
             grant_type: "refresh_token",
-            refresh_token: dto.refreshToken,
+            refresh_token: refreshToken,
             client_id: clientId,
           }).toString(),
-          {
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          },
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
         ),
       );
 
+      // If the token was in the cookie, go ahead and update them. This means web so we don't need to send info back
+      if (req.cookies["refresh_token"]) {
+        const { access_token, refresh_token, id_token } = response.data;
+        this.setCookieTokens(res, id_token, access_token, refresh_token);
+        return new RefreshResponseDTO("", "", "");
+      }
+
+      // If Mobile, return tokens in Body
       return new RefreshResponseDTO(response.data.id_token, response.data.access_token, response.data.refresh_token);
     } catch (e: any) {
       throw new UnauthorizedException("Session could not be refreshed.");
@@ -151,17 +186,35 @@ export class AuthController {
       );
 
       const { id_token, access_token, refresh_token } = response.data;
-
       // Clear the temporary cookie
       res.clearCookie("oidc_pending");
-      // Redirect back with the tokens
-      const finalUrl = new URL(targetUrl);
-      finalUrl.hash = `id_token=${id_token}&access_token=${access_token}&refresh_token=${refresh_token}`;
 
-      return res.redirect(finalUrl.toString());
+      // Detect if this is a Mobile Deep Link or a Web URL
+      const isMobileScheme = targetUrl.startsWith("net.croudebush.sprout");
+
+      if (isMobileScheme) {
+        // Mobile - Fragments
+        const finalUrl = new URL(targetUrl);
+        // Mobile apps need the tokens in the URL to capture them
+        finalUrl.hash = `id_token=${id_token}&access_token=${access_token}&refresh_token=${refresh_token}`;
+        return res.redirect(finalUrl.toString());
+      } else {
+        // Web - Cookies
+        this.setCookieTokens(res, id_token, access_token, refresh_token);
+        return res.redirect(targetUrl);
+      }
     } catch (e) {
       this.logger.error(e);
       throw new UnauthorizedException("Auth failed");
     }
+  }
+
+  @Post("logout")
+  @ApiOperation({ summary: "Logout the user", description: "Clears the session cookies any authentication that has happened." })
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("id_token");
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    return { success: true };
   }
 }

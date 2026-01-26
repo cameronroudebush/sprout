@@ -35,50 +35,52 @@ class AuthProvider extends BaseProvider<AuthApi> {
   /// Asynchronously fetches both the ID Token and Access Token and places them into a header object
   ///   as required by the authentication in the backend. Handles both local and OIDC strategies.
   Future<Map<String, String>> getHeaders() async {
-    final tokens = await Future.wait([
-      SecureStorageProvider.getValue(SecureStorageProvider.idToken),
-      SecureStorageProvider.getValue(SecureStorageProvider.accessToken),
-    ]);
-    Map<String, String> map = {};
-    if (tokens[0] != null) map["Authorization"] = 'Bearer ${tokens[0]}';
-    if (tokens[1] != null) map["x-access-token"] = tokens[1]!;
-    return map;
+    // Web uses cookies
+    if (kIsWeb) return {'x-client-platform': 'web'};
+
+    final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken) ?? '';
+    final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken) ?? '';
+    return {"Authorization": 'Bearer $idToken', 'x-access-token': accessToken, 'x-client-platform': 'mobile'};
   }
 
   /// Given some params, sets the auth information into the secure storage and into the API client
-  /// [idToken] The JWT that should be used as the bearer for API auth
-  /// [accessToken] The token used for OIDC lookups
-  /// [user] Our current user that should be tracked
-  Future<User?> _applyAuth(String idToken, User? user, {String? accessToken, String? refreshToken}) async {
-    await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, idToken);
-    (defaultApiClient.authentication as HttpBearerAuth).accessToken = idToken;
-    if (accessToken != null) {
-      await SecureStorageProvider.saveValue(SecureStorageProvider.accessToken, accessToken);
-      defaultApiClient.addDefaultHeader('x-access-token', accessToken);
-    }
-    if (refreshToken != null && refreshToken.isNotEmpty) {
-      await SecureStorageProvider.saveValue(SecureStorageProvider.refreshToken, refreshToken);
-    }
+  Future<User?> _applyAuth({String? idToken, String? accessToken, String? refreshToken, User? user}) async {
+    try {
+      // Web never saves tokens as we only use cookies
+      if (kIsWeb) {
+        _isLoggedIn = true;
+        // Just ensure we have the user
+        user ??= await ServiceLocator.get<UserProvider>().api.userControllerMe();
+        _currentUser = user;
+        return _currentUser;
+      }
 
-    _isLoggedIn = true;
-    // Populate user based on API endpoint, if we're not given the user
-    user ??= await ServiceLocator.get<UserProvider>().api.userControllerMe();
-    _currentUser = user;
-    return _currentUser;
-  }
+      // Mobile always save tokens so populate them
+      if (idToken != null) {
+        await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, idToken);
+        (defaultApiClient.authentication as HttpBearerAuth).accessToken = idToken;
+      }
+      if (accessToken != null) await SecureStorageProvider.saveValue(SecureStorageProvider.accessToken, accessToken);
+      if (refreshToken != null) await SecureStorageProvider.saveValue(SecureStorageProvider.refreshToken, refreshToken);
 
-  /// Public wrapper to manually set tokens
-  Future<User?> setTokensInternal({required String idToken, String? accessToken, String? refreshToken}) async {
-    return await _applyAuth(idToken, null, accessToken: accessToken, refreshToken: refreshToken);
+      _isLoggedIn = true;
+      _currentUser = user ?? await ServiceLocator.get<UserProvider>().api.userControllerMe();
+      return _currentUser;
+    } catch (e) {
+      // Logout on errors
+      await logout(forced: true);
+      return null;
+    }
   }
 
   /// Grabs the tokens from the secure storage and tries to setup authentication using only those tokens.
+  ///   This is intended to be used via mobile for OIDC strategy
   Future<void> applyDefaultAuth() async {
     final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
     final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken);
     final refreshToken = await SecureStorageProvider.getValue(SecureStorageProvider.refreshToken);
     if (idToken != null) {
-      await _applyAuth(idToken, null, accessToken: accessToken, refreshToken: refreshToken);
+      await _applyAuth(idToken: idToken, accessToken: accessToken, refreshToken: refreshToken);
     }
   }
 
@@ -87,101 +89,62 @@ class AuthProvider extends BaseProvider<AuthApi> {
 
     _pendingLoginFuture = () async {
       final configProvider = ServiceLocator.get<ConfigProvider>();
-      // Check to make sure we aren't setting up the app.
       if (configProvider.unsecureConfig?.firstTimeSetupPosition == "setup") return null;
 
-      // Grab the token info that is saved in the secure storage
+      // Load Tokens
       final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
-      final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken);
 
+      // OIDC
       if (configProvider.unsecureConfig?.oidcConfig != null) {
-        // OIDC Auth Strategy
-        final oidcConfig = configProvider.unsecureConfig!.oidcConfig!;
-
-        // Check if we just came back from a Web Redirect to grab the tokens
-        final webTokens = await _oidcHelper.getWebCallbackTokens(
-          issuerUrl: oidcConfig.issuer,
-          clientId: oidcConfig.clientId,
-        );
-
-        if (webTokens != null) {
-          // We are returning from login, apply tokens immediately
-          await _applyAuth(
-            webTokens['id_token']!,
-            null,
-            accessToken: webTokens['access_token'],
-            refreshToken: webTokens['refresh_token'],
-          );
-          notifyListeners();
-          return _currentUser;
-        }
-
-        // Standard Session Check
-        if (idToken != null) {
-          try {
-            if (JwtDecoder.isExpired(idToken)) {
-              // Token expired: Attempt silent refresh
-              final success = await silentRefresh();
-              if (success) return _currentUser;
+        // Mobile - Restore
+        if (!kIsWeb && idToken != null) {
+          final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken); // OIDC Mobile
+          final refreshToken = await SecureStorageProvider.getValue(SecureStorageProvider.refreshToken); // OIDC Mobile
+          if (JwtDecoder.isExpired(idToken)) {
+            final user = await loginOIDC();
+            if (user != null) {
+              return user;
             } else {
-              // Token valid: Restore session
-              await _applyAuth(idToken, null, accessToken: accessToken);
-              return _currentUser;
+              return null;
             }
+          } else {
+            return await _applyAuth(idToken: idToken, accessToken: accessToken, refreshToken: refreshToken);
+          }
+        } else if (kIsWeb) {
+          // Web - Restore
+          try {
+            // Attempt to fetch 'me'. If we have a cookie, this succeeds.
+            final user = await ServiceLocator.get<UserProvider>().api.userControllerMe();
+            _isLoggedIn = true;
+            _currentUser = user;
+            return user;
           } catch (e) {
-            await logout();
+            // No cookie, no headers -> Not logged in.
           }
         }
 
         // Didn't return from above? Try to hit the login again for OIDC.
-        await loginOIDC();
-      } else {
-        // Local Auth Strategy
-        if (idToken != null) {
-          try {
-            final loginResponse = await api.authControllerLoginWithJWT(JWTLoginRequest(jwt: idToken));
-            if (loginResponse != null) await _applyAuth(loginResponse.jwt, loginResponse.user);
-          } catch (e) {
-            await logout();
-          }
-        }
+        return await loginOIDC();
       }
 
-      notifyListeners();
-      return _currentUser;
+      // Local Auth Restore (Mobile & Web)
+      try {
+        final loginResponse = await api.authControllerLoginWithJWT(JWTLoginRequest(jwt: idToken ?? ''));
+        if (loginResponse != null) return await _applyAuth(idToken: loginResponse.jwt, user: loginResponse.user);
+      } catch (e) {
+        // Either no cookie so not logged in, or an invalid JWT
+      }
+
+      return null;
     }();
 
     return _pendingLoginFuture!.whenComplete(() => _pendingLoginFuture = null);
   }
 
-  /// Handles the authentication return from OIDC provider to strip out our tokens we need
-  static Future<void> handleAuthReturn() async {
-    if (kIsWeb) {
-      final configProvider = ServiceLocator.get<ConfigProvider>();
-      await configProvider.populateUnsecureConfig();
-      final oidcConfig = configProvider.unsecureConfig?.oidcConfig;
-
-      if (oidcConfig != null) {
-        final helper = OIDCHelper();
-        final tokens = await helper.getWebCallbackTokens(issuerUrl: oidcConfig.issuer, clientId: oidcConfig.clientId);
-
-        if (tokens != null) {
-          final authProvider = ServiceLocator.get<AuthProvider>();
-          final user = await authProvider.setTokensInternal(
-            idToken: tokens['id_token']!,
-            accessToken: tokens['access_token'],
-            refreshToken: tokens['refresh_token'],
-          );
-          if (user != null) await ServiceLocator.postLogin();
-        }
-      }
-    }
-  }
-
   Future<User?> loginOIDC() async {
     return _pendingLoginFuture = () async {
       final unsecureConfig = ServiceLocator.get<ConfigProvider>().unsecureConfig;
-      if (unsecureConfig?.oidcConfig == null) throw "OIDC is improperly configured.";
+      if (unsecureConfig?.oidcConfig == null) throw "OIDC Config missing";
 
       final tokens = await _oidcHelper.authenticate(
         issuerUrl: unsecureConfig!.oidcConfig!.issuer,
@@ -189,14 +152,19 @@ class AuthProvider extends BaseProvider<AuthApi> {
         scopes: unsecureConfig.oidcConfig!.scopes,
       );
 
-      if (tokens != null) {
+      // On Web, tokens is null (Cookie flow).
+      // On Mobile, tokens contains data.
+      if (!kIsWeb && tokens != null) {
         await _applyAuth(
-          tokens['id_token']!,
-          null,
+          idToken: tokens['id_token'],
           accessToken: tokens['access_token'],
           refreshToken: tokens['refresh_token'],
         );
+      } else if (kIsWeb) {
+        // We assume cookies are set. Just fetch user.
+        await _applyAuth();
       }
+
       return _currentUser;
     }();
   }
@@ -206,7 +174,7 @@ class AuthProvider extends BaseProvider<AuthApi> {
     final loginResponse = await api.authControllerLogin(
       UsernamePasswordLoginRequest(username: username, password: password),
     );
-    if (loginResponse != null) await _applyAuth(loginResponse.jwt, loginResponse.user);
+    if (loginResponse != null) await _applyAuth(idToken: loginResponse.jwt, user: loginResponse.user);
 
     notifyListeners();
     return _currentUser;
@@ -214,32 +182,42 @@ class AuthProvider extends BaseProvider<AuthApi> {
 
   /// Handles trying to refresh the tokens with the refresh token
   Future<bool> silentRefresh() async {
-    // Make sure we don't run these back to back
     if (_refreshCompleter != null) return _refreshCompleter!.future;
     _refreshCompleter = Completer<bool>();
-    final refreshToken = await SecureStorageProvider.getValue(SecureStorageProvider.refreshToken);
-    if (refreshToken == null) {
-      _refreshCompleter!.complete(false);
-      return false;
-    }
 
     try {
-      // Use the backend to refresh our access with the refresh token
-      final response = await api.authControllerRefresh(RefreshRequestDTO(refreshToken: refreshToken));
+      final configProvider = ServiceLocator.get<ConfigProvider>();
+      // Not OIDC? Then just complete. We can't refresh with local strategy
+      if (configProvider.unsecureConfig?.oidcConfig == null) {
+        _refreshCompleter!.complete(false);
+        return false;
+      }
+
+      // Mobile: Load from storage. Web: Send empty string (Backend checks cookie).
+      final refreshToken = kIsWeb ? "" : await SecureStorageProvider.getValue(SecureStorageProvider.refreshToken);
+
+      if (!kIsWeb && refreshToken == null) {
+        _refreshCompleter!.complete(false);
+        return false;
+      }
+
+      final response = await api.authControllerRefresh(RefreshRequestDTO(refreshToken: refreshToken ?? ""));
+
       if (response != null) {
-        await _applyAuth(
-          response.idToken,
-          null,
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-        );
+        if (!kIsWeb) {
+          await _applyAuth(accessToken: response.accessToken, refreshToken: response.refreshToken);
+        } else {
+          // Web cookies updated automatically
+          _isLoggedIn = true;
+        }
         _refreshCompleter!.complete(true);
         return true;
       }
+
       _refreshCompleter!.complete(false);
       return false;
     } catch (e) {
-      LoggerService.error("Refresh token failed: $e");
+      LoggerService.error("Refresh failed: $e");
       await logout();
       _refreshCompleter!.complete(false);
       return false;
@@ -252,9 +230,15 @@ class AuthProvider extends BaseProvider<AuthApi> {
   Future<void> logout({bool forced = false}) async {
     _isLoggingOut = true;
     _currentUser = null;
+
+    // Tell the backend about the logout
+    await api.authControllerLogout();
+
+    // Cleanup storage
     await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
     await SecureStorageProvider.saveValue(SecureStorageProvider.accessToken, null);
     await SecureStorageProvider.saveValue(SecureStorageProvider.refreshToken, null);
+
     _isLoggedIn = false;
     for (final provider in ServiceLocator.getAllProviders()) {
       await provider.cleanupData();

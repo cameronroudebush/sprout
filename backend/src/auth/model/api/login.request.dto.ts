@@ -1,4 +1,5 @@
 import { Base } from "@backend/core/model/base";
+import { Optional } from "@nestjs/common";
 import { IsNotEmpty, IsString } from "class-validator";
 
 /** Required content to be sent when a user tries to login. Can use username/password. */
@@ -20,11 +21,12 @@ export class UsernamePasswordLoginRequest extends Base {
 
 /** Required content to be sent when a user tries to login with JWT.*/
 export class JWTLoginRequest extends Base {
+  /** The JWT to authenticate as. This is optional because */
   @IsString()
-  @IsNotEmpty()
-  jwt: string;
+  @Optional()
+  jwt?: string;
 
-  constructor(jwt: string) {
+  constructor(jwt?: string) {
     super();
     this.jwt = jwt;
   }

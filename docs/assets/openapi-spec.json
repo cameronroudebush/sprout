@@ -2069,12 +2069,28 @@
           "Auth"
         ]
       }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Clears the session cookies any authentication that has happened.",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Logout the user",
+        "tags": [
+          "Auth"
+        ]
+      }
     }
   },
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-16-g6a39560",
+    "version": "v0.1.1-17-ga98fb60",
     "contact": {}
   },
   "tags": [
@@ -3130,7 +3146,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-01-26T00:44:16.393Z"
+            "default": "2026-01-26T18:49:21.125Z"
           },
           "isRead": {
             "type": "boolean",
@@ -3200,20 +3216,17 @@
           }
         },
         "required": [
-          "user",
-          "jwt"
+          "user"
         ]
       },
       "JWTLoginRequest": {
         "type": "object",
         "properties": {
           "jwt": {
-            "type": "string"
+            "type": "string",
+            "description": "The JWT to authenticate as. This is optional because"
           }
-        },
-        "required": [
-          "jwt"
-        ]
+        }
       },
       "RefreshRequestDTO": {
         "type": "object",

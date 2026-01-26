@@ -2,7 +2,7 @@ import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import jwt from "jsonwebtoken";
-import { JWTLoginRequest, UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
+import { UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
 import { UserLoginResponse } from "./model/api/login.response.dto";
 
 /** JWT object content that will be included when we create the JWT's in local authentication mode. */
@@ -21,8 +21,7 @@ export class AuthService {
   }
 
   /** Given a login request from an endpoint, requests a login by validating the JWT. */
-  async loginWithJWT(loginRequest: JWTLoginRequest): Promise<UserLoginResponse> {
-    const jwt = loginRequest.jwt!;
+  async loginWithJWT(jwt: string): Promise<UserLoginResponse> {
     try {
       this.verifyJWT(jwt);
     } catch {

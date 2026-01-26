@@ -47,13 +47,13 @@ class _LoginFormState extends State<LoginForm> {
       });
       // Request our basic data
       await ServiceLocator.postLogin();
-      setState(() {
-        _isLoadingData = false;
-      });
       // After login, check if we were sent from a specific page.
       final from = GoRouterState.of(context).uri.queryParameters['from'];
       // If 'from' exists, go there. Otherwise, go to the home page.
       GoRouter.of(context).go(from ?? '/');
+      setState(() {
+        _isLoadingData = false;
+      });
     } else {
       setState(() {
         _loginIsRunning = false;
@@ -183,7 +183,7 @@ class _LoginFormState extends State<LoginForm> {
                   width: 240,
                   child: FilledButton(
                     style: AppTheme.primaryButton,
-                    onPressed: _loginIsRunning
+                    onPressed: _loginIsRunning || _isLoadingData
                         ? null
                         : provider.unsecureConfig?.oidcConfig != null
                         ? _login

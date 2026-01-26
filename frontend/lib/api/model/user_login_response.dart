@@ -14,12 +14,18 @@ class UserLoginResponse {
   /// Returns a new [UserLoginResponse] instance.
   UserLoginResponse({
     required this.user,
-    required this.jwt,
+    this.jwt,
   });
 
   User user;
 
-  String jwt;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? jwt;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserLoginResponse &&
@@ -30,7 +36,7 @@ class UserLoginResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (user.hashCode) +
-    (jwt.hashCode);
+    (jwt == null ? 0 : jwt!.hashCode);
 
   @override
   String toString() => 'UserLoginResponse[user=$user, jwt=$jwt]';
@@ -38,7 +44,11 @@ class UserLoginResponse {
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'user'] = this.user;
+    if (this.jwt != null) {
       json[r'jwt'] = this.jwt;
+    } else {
+      json[r'jwt'] = null;
+    }
     return json;
   }
 
@@ -62,7 +72,7 @@ class UserLoginResponse {
 
       return UserLoginResponse(
         user: User.fromJson(json[r'user'])!,
-        jwt: mapValueOfType<String>(json, r'jwt')!,
+        jwt: mapValueOfType<String>(json, r'jwt'),
       );
     }
     return null;
@@ -111,7 +121,6 @@ class UserLoginResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'user',
-    'jwt',
   };
 }
 
