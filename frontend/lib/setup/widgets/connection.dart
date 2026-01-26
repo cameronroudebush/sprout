@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/extended_api_client.dart';
+import 'package:sprout/core/client/extended_api_client.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/user/user_provider.dart';

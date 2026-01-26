@@ -7,12 +7,14 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { User } from "@backend/user/model/user.model";
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import * as admin from "firebase-admin";
 
 /** This service provides re-usable capability to notify users of specific interactions. */
 @Injectable()
 export class NotificationService implements OnModuleInit {
+  private readonly logger = new Logger();
+
   constructor(private sseService: SSEService) {}
 
   onModuleInit() {
@@ -75,6 +77,7 @@ export class NotificationService implements OnModuleInit {
       try {
         await admin.messaging().send(message);
       } catch (error) {
+        this.logger.error(error);
         // If the token is invalid (app uninstalled), clean it up immediately
         if ((error as any).code === "messaging/registration-token-not-registered") {
           await UserDevice.delete({ fcmToken: device.fcmToken });

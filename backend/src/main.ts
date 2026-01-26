@@ -104,7 +104,7 @@ async function main() {
     // Initialize the Nest app
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
       logger: new SproutLogger(projName, { logLevels }),
-      cors: true,
+      cors: !Configuration.isDevBuild,
     });
     // All endpoints live under /api
     app.setGlobalPrefix(Configuration.server.basePath);
@@ -116,6 +116,12 @@ async function main() {
     app.use(cookieParser(Configuration.encryptionKey));
     // Trust proxy headers
     app.set("trust proxy", 1);
+    if (Configuration.isDevBuild)
+      app.enableCors({
+        origin: ["http://localhost:8989", "http://localhost:8001"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        credentials: true,
+      });
 
     logger.log(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
     logger.log(`Built on ${TimeZone.formatDate(new Date(process.env["BUILD_DATE"]!))}`);

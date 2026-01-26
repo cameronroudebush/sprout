@@ -59,8 +59,7 @@ class ConfigProvider extends BaseProvider<ConfigApi> {
 
   @override
   Future<void> onInit() async {
-    // We use this to determine connection ability on mobile. Web does it in the auth callback.
-    if (!kIsWeb) await populateUnsecureConfig();
+    await populateUnsecureConfig();
     await super.onInit();
   }
 

@@ -9,7 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/extended_api_client.dart';
+import 'package:sprout/core/client/extended_api_client.dart';
 import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';

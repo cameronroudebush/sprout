@@ -4,7 +4,9 @@ import 'package:sprout/core/provider/service.locator.dart';
 
 /// An interceptor that attempts to refresh access tokens as needed on failures.
 class AuthInterceptor extends http.BaseClient {
-  final http.Client _inner = http.Client();
+  final http.Client _inner;
+
+  AuthInterceptor({required http.Client innerClient}) : _inner = innerClient;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {

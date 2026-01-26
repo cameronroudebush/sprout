@@ -1,3 +1,4 @@
+import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
@@ -24,8 +25,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     const issuer = config.issuer || "temp";
     const audience = config.clientId || "temp";
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-
+      jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromHeaderOrCookie]),
       secretOrKeyProvider: passportJwtSecret({
         cache: true,
         rateLimit: true,
@@ -42,8 +42,8 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
   async validate(req: Request, profileData: { preferred_username: string }) {
     // Sometimes the JWT may be minified which means it excludes all profile info. So go ahead and look that up manually.
     if (!profileData.preferred_username) {
-      // Need the access token to request data from OIDC provider
-      const accessToken = req.headers["x-access-token"];
+      // Need the access token to request data from OIDC provider. Try and find it from either cookies or the header
+      const accessToken = req.cookies["access_token"] || req.headers["x-access-token"];
 
       if (accessToken) {
         const cacheKey = `oidc_user_${accessToken}`;
