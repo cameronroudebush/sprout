@@ -18,7 +18,7 @@ export class StrategyGuard implements CanActivate {
     return applyDecorators(
       SetMetadata(StrategyGuard.METADATA_KEY, method),
       UseGuards(StrategyGuard),
-      Configuration.server.auth.type !== method ? ApiExcludeEndpoint() : () => {},
+      Configuration.server.auth.type !== method && Configuration.isRunningScript === false ? ApiExcludeEndpoint() : () => {},
     );
   }
 

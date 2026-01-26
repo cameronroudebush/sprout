@@ -11,6 +11,9 @@ class SecureStorageProvider {
   /// Key used to store the JWT that contains the ID for either local or OAUTH strategy.
   static const String idToken = 'id_token';
 
+  /// Key used to store the refresh token to be able to silently refresh the other tokens.
+  static const String refreshToken = 'refresh_token';
+
   // Secure storage instance for storing the JWT token.
   static final _storage = const FlutterSecureStorage();
 

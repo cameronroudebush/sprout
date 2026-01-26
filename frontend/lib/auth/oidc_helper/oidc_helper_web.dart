@@ -1,22 +1,32 @@
+import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:openid_client/openid_client.dart';
-import 'package:openid_client/openid_client_browser.dart' as browser;
+import 'package:sprout/api/api.dart';
 
 import 'oidc_helper_stub.dart' as stub;
 
 class OIDCHelper implements stub.OIDCHelper {
   @override
-  Map<String, String>? getWebCallbackTokens() {
-    final callbackAT = html.window.sessionStorage['access_token'];
-    final callbackID = html.window.sessionStorage['id_token'];
+  Future<Map<String, String>?> getWebCallbackTokens({required String issuerUrl, required String clientId}) async {
+    final fragment = html.window.location.hash;
 
-    if (callbackID != null) {
-      // Clean up storage
-      html.window.sessionStorage.remove('access_token');
-      html.window.sessionStorage.remove('id_token');
-      return {'id_token': callbackID, 'access_token': callbackAT ?? ''};
+    if (fragment.isEmpty) return null;
+
+    // Remove the leading '#' and parse query string format
+    final cleanFragment = fragment.startsWith('#') ? fragment.substring(1) : fragment;
+    final params = Uri.splitQueryString(cleanFragment);
+
+    if (params.containsKey('access_token')) {
+      // Clear the URL so tokens don't linger in the address bar
+      html.window.history.replaceState(null, '', html.window.location.pathname);
+
+      return {
+        'id_token': params['id_token'] ?? '',
+        'access_token': params['access_token'] ?? '',
+        'refresh_token': params['refresh_token'] ?? '',
+      };
     }
+
     return null;
   }
 
@@ -26,19 +36,10 @@ class OIDCHelper implements stub.OIDCHelper {
     required String clientId,
     required List<String> scopes,
   }) async {
-    // Discover
-    final issuer = await browser.Issuer.discover(Uri.parse(issuerUrl));
-    final client = Client(issuer, clientId);
-
-    // Create Flow
-    final flow = Flow.implicit(client)
-      ..scopes.addAll(scopes)
-      ..redirectUri = Uri.parse('${html.window.location.origin}/auth_callback.html');
-
-    // Execute
-    html.window.location.href = flow.authenticationUri.toString();
-
-    // Web flow ends here as page redirects
+    final currentUrl = html.window.location.href.split('#').first;
+    final path = "${defaultApiClient.basePath}/auth/oidc/login";
+    final loginUri = Uri.parse(path).replace(queryParameters: {'target_url': currentUrl});
+    html.window.location.assign(loginUri.toString());
     return null;
   }
 }

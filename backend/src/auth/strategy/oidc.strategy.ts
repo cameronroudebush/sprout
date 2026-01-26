@@ -9,10 +9,10 @@ import { passportJwtSecret } from "jwks-rsa";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { firstValueFrom } from "rxjs";
 
-export const OIDCStrategyName = "jwt-oidc";
+export const OIDCStrategyName = "oidc";
 
 @Injectable()
-export class OIDCStrategy extends PassportStrategy(Strategy, "jwt-oidc") {
+export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
   private readonly logger = new Logger();
 
   constructor(

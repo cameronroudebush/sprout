@@ -224,37 +224,4 @@ class UserApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
-
-  /// Performs an HTTP 'POST /user/notification/test' operation and returns the [Response].
-  Future<Response> userControllerTestWithHttpInfo() async {
-    // ignore: prefer_const_declarations
-    final path = r'/user/notification/test';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  Future<void> userControllerTest() async {
-    final response = await userControllerTestWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-  }
 }

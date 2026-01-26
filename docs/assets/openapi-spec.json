@@ -171,20 +171,6 @@
         ]
       }
     },
-    "/user/notification/test": {
-      "post": {
-        "operationId": "UserController_test",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "User"
-        ]
-      }
-    },
     "/user-config": {
       "get": {
         "description": "Retrieves the current user's configuration.",
@@ -1823,6 +1809,30 @@
         ]
       }
     },
+    "/notification/read/all": {
+      "get": {
+        "description": "Used for when the user opens their notification shade.",
+        "operationId": "NotificationController_markAllRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications marked read successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marks all notifications read.",
+        "tags": [
+          "Notification"
+        ]
+      }
+    },
     "/notification/read/{id}": {
       "get": {
         "description": "Marks the given ID's notification read.",
@@ -1851,30 +1861,6 @@
           }
         ],
         "summary": "Marks a specific notification read.",
-        "tags": [
-          "Notification"
-        ]
-      }
-    },
-    "/notification/read/all": {
-      "get": {
-        "description": "Used for when the user opens their notification shade.",
-        "operationId": "NotificationController_markAllRead",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Notifications marked read successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Marks all notifications read.",
         "tags": [
           "Notification"
         ]
@@ -1982,12 +1968,113 @@
           "Auth"
         ]
       }
+    },
+    "/auth/oidc/refresh": {
+      "post": {
+        "description": "Proxies OIDC token refresh to the destination server of the OIDC issuer.  Only available on OIDC strategy auth.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponseDTO"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Proxy OIDC refresh requests.",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/oidc/login": {
+      "get": {
+        "description": "Authenticates to our OIDC server that is configured and handles redirecting the authentication capability back to API to complete the login request.",
+        "operationId": "AuthController_loginOIDC",
+        "parameters": [
+          {
+            "name": "target_url",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Authenticates using the OIDC configuration.",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/oidc/callback": {
+      "get": {
+        "description": "Handles the redirect back from the OIDC server and handles state control to get the authentication response back to the original requester.",
+        "operationId": "AuthController_loginCallbackOIDC",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Callback handler for the OIDC login.",
+        "tags": [
+          "Auth"
+        ]
+      }
     }
   },
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-14-g20f4df7",
+    "version": "v0.1.1-16-g6a39560",
     "contact": {}
   },
   "tags": [
@@ -3043,7 +3130,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-01-25T18:01:49.972Z"
+            "default": "2026-01-26T00:44:16.393Z"
           },
           "isRead": {
             "type": "boolean",
@@ -3126,6 +3213,36 @@
         },
         "required": [
           "jwt"
+        ]
+      },
+      "RefreshRequestDTO": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "The current refresh token"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "RefreshResponseDTO": {
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "idToken",
+          "accessToken"
         ]
       }
     }

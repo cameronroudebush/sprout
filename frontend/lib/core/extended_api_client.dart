@@ -1,7 +1,8 @@
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_interceptor.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/auto_logout_client.dart';
 import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/auto_logout_client.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
 
@@ -9,10 +10,16 @@ import 'package:sprout/core/provider/snackbar.dart';
 Future<void> applyDefaultAPI() async {
   final connectionUrl = await ConfigProvider.getConnUrl();
   ConfigProvider.connectionUrl = connectionUrl;
-  // Create an extended ApiClient that allows changing the base path
-  defaultApiClient = ExtendedApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
-  // Inject a client that automatically logs us out if we start experiencing 401/403's
+
+  // Create the ExtendedApiClient
+  final extendedClient = ExtendedApiClient(basePath: connectionUrl, authentication: HttpBearerAuth());
+
+  // Create the inner interceptor that handles refreshing OIDC if required
+  final interceptor = AuthInterceptor();
+
+  // Create the outer interceptor so we can configure to auto logout if the refresh doesn't fix our 401/403 issues
   final autoLogoutClient = AutoLogoutClient(
+    innerClient: interceptor,
     onLogout: () async {
       final authProvider = ServiceLocator.get<AuthProvider>();
       if (authProvider.isLoggedIn) {
@@ -21,10 +28,14 @@ Future<void> applyDefaultAPI() async {
       }
     },
   );
-  (defaultApiClient as ExtendedApiClient).client = autoLogoutClient;
+
+  // Use the setter to inject the entire stack into the ApiClient
+  extendedClient.client = autoLogoutClient;
+
+  // Assign to the global client reference
+  defaultApiClient = extendedClient;
 }
 
-/// An extended ApiClient that allows for changing the base path dynamically.
 class ExtendedApiClient extends ApiClient {
   String _basePath;
 

@@ -1,12 +1,19 @@
-/// Helper stub for authenticating via OIDC for the login process
+/// The "stub" implementation.
+/// This file is used by the compiler to check types, but it is swapped out
+/// at runtime for the _web.dart or _io.dart versions.
 class OIDCHelper {
-  /// Checks if the current session was started by a Web OIDC callback and grabs the tokens.
-  Map<String, String>? getWebCallbackTokens() => throw UnimplementedError();
+  /// Helper to get tokens from a web redirect.
+  /// Throws an error if called directly on the stub (which should never happen at runtime).
+  Future<Map<String, String>?> getWebCallbackTokens({required String issuerUrl, required String clientId}) {
+    throw UnimplementedError('getWebCallbackTokens() has not been implemented.');
+  }
 
-  /// Initiates the full OIDC login flow
+  /// Helper to start the authentication flow.
   Future<Map<String, String>?> authenticate({
     required String issuerUrl,
     required String clientId,
     required List<String> scopes,
-  }) async => throw UnimplementedError();
+  }) {
+    throw UnimplementedError('authenticate() has not been implemented.');
+  }
 }

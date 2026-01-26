@@ -29,7 +29,7 @@ For a complete list of all available options, please see the **[Advanced Configu
 
 # Generating an Encryption Key
 
-Sprout uses `AES-256-GCM` encryption to protect various fields within the database, including your API keys to your finance providers. You must provide a valid `32-byte` key represented as a `64-character` hexadecimal string.
+Sprout uses `AES-256-GCM` encryption to protect various fields within the database, as well as cookie encryption. You must provide a valid `32-byte` key represented as a `64-character` hexadecimal string.
 
 One complete, you can either place it in your [`configuration.yml`](../developer/configuration.md) file or use the environment variable listed above.
 

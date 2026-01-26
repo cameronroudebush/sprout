@@ -19,6 +19,10 @@ By default, Sprout retrieves notifications from the server API whenever you open
 
     If you skip this section, notifications will still work perfectly fine inside the app. You just won't get the buzz/ding on your phone when the app is closed.
 
+!!! note "Authentication"
+
+    Sprout has to be logged in at-least once to obtain the necessary firebase configuration. Additionally, if your token ever expires (for either `OIDC` or `Local`), notifications will not be gathered.
+
 ## Prerequisite: Firebase Project
 
 To enable push notifications, you must link your self-hosted Sprout instance to Google Firebase.

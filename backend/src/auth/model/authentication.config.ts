@@ -11,7 +11,7 @@ class OIDCConfig {
   clientId = "";
 
   @ConfigurationMetadata.assign({ comment: "The scopes we use for our information.", externalControlDisabled: true })
-  scopes = ["openid", "profile", "email"];
+  scopes = ["openid", "profile", "email", "offline_access"];
 
   /** Validates the config is usable */
   validate() {

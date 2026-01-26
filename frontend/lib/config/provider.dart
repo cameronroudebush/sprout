@@ -7,6 +7,7 @@ import 'package:sprout/core/provider/storage.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ConfigProvider extends BaseProvider<ConfigApi> {
+  /// The URL we are connecting to on the backend including any trailing base path
   static String? connectionUrl;
 
   /// The unsecured version of the config that only contains basic information
@@ -58,7 +59,8 @@ class ConfigProvider extends BaseProvider<ConfigApi> {
 
   @override
   Future<void> onInit() async {
-    await populateUnsecureConfig();
+    // We use this to determine connection ability on mobile. Web does it in the auth callback.
+    if (!kIsWeb) await populateUnsecureConfig();
     await super.onInit();
   }
 

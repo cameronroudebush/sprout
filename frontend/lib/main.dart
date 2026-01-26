@@ -45,6 +45,8 @@ void main() async {
   ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowApi()));
 
   await FirebaseNotificationProvider.configure(null);
+  // Try and parse OIDC auth for web if applicable
+  await AuthProvider.handleAuthReturn();
 
   runApp(
     MultiProvider(

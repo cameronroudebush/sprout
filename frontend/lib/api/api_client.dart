@@ -226,6 +226,10 @@ class ApiClient {
           return NotificationSSEDTO.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
+        case 'RefreshRequestDTO':
+          return RefreshRequestDTO.fromJson(value);
+        case 'RefreshResponseDTO':
+          return RefreshResponseDTO.fromJson(value);
         case 'RegisterDeviceDto':
           return RegisterDeviceDto.fromJson(value);
         case 'SSEData':
