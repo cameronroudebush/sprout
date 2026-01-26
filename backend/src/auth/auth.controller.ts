@@ -84,7 +84,7 @@ export class AuthController {
   @ApiOkResponse({ type: RefreshResponseDTO })
   @StrategyGuard.attach("oidc")
   async refresh(@Body() dto: RefreshRequestDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const { issuer, clientId } = Configuration.server.auth.oidc;
+    const { issuer, authHeader } = Configuration.server.auth.oidc;
     // Grab token from cookie and fallback to DTO
     const refreshToken = req.cookies["refresh_token"] || dto.refreshToken;
 
@@ -97,9 +97,8 @@ export class AuthController {
           new URLSearchParams({
             grant_type: "refresh_token",
             refresh_token: refreshToken,
-            client_id: clientId,
           }).toString(),
-          { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
+          { headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: `Basic ${authHeader}` } },
         ),
       );
 
@@ -160,7 +159,7 @@ export class AuthController {
   })
   @StrategyGuard.attach("oidc")
   async loginCallbackOIDC(@Query("code") code: string, @Query("state") state: string, @Req() req: Request, @Res() res: Response) {
-    const { issuer, clientId } = Configuration.server.auth.oidc;
+    const { issuer, authHeader } = Configuration.server.auth.oidc;
 
     // Validate Cookie
     const pendingCookie = req.signedCookies["oidc_pending"];
@@ -176,12 +175,11 @@ export class AuthController {
           `${issuer}/api/oidc/token`,
           new URLSearchParams({
             grant_type: "authorization_code",
-            client_id: clientId,
             code: code,
             redirect_uri: redirectUri,
             code_verifier: codeVerifier,
           }).toString(),
-          { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
+          { headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: `Basic ${authHeader}` } },
         ),
       );
 
