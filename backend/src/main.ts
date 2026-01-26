@@ -1,3 +1,4 @@
+import { Configuration } from "@backend/config/core";
 import { ConfigurationService } from "./config/config.service";
 
 /**
@@ -5,8 +6,8 @@ import { ConfigurationService } from "./config/config.service";
  *    very early in a lot of class construction.
  */
 new ConfigurationService().load();
+Configuration.isRunningScript = (Configuration.isDevBuild as any) && process.argv[2] != null;
 
-import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
 import { DatabaseService } from "@backend/database/database.service";
@@ -15,7 +16,9 @@ import { JobsService } from "@backend/jobs/jobs.service";
 import { ProviderService } from "@backend/providers/provider.service";
 import { ClassSerializerInterceptor, INestApplication, Logger, LogLevel, ValidationPipe } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import cookieParser from "cookie-parser";
 import { startCase } from "lodash";
 import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
 import { name } from "../package.json";
@@ -38,6 +41,8 @@ export async function checkScript() {
       case "populate.demo.data":
         await populateDemoData(parseInt(process.argv[3] ?? "90"));
         process.exit(0);
+      default:
+        throw new Error("Failed to locate matching script to execute");
     }
   } catch (e) {
     Logger.error(e);
@@ -87,7 +92,7 @@ export function createSwaggerDoc(app: INestApplication) {
 /** Main function for kicking off the application */
 async function main() {
   // Check if we have scripts to run
-  if (Configuration.isDevBuild) await checkScript();
+  if (Configuration.isRunningScript) await checkScript();
 
   const projName = startCase(name);
   const swaggerTitle = `${projName} API`;
@@ -97,7 +102,7 @@ async function main() {
     const logLevels: LogLevel[] = Configuration.isDevBuild ? ["verbose"] : Configuration.server.logLevels;
 
     // Initialize the Nest app
-    const app = await NestFactory.create(AppModule, {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
       logger: new SproutLogger(projName, { logLevels }),
       cors: true,
     });
@@ -107,6 +112,10 @@ async function main() {
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     // Enable class-transformer for response serialization
     app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+    // Enable cookie handling
+    app.use(cookieParser(Configuration.encryptionKey));
+    // Trust proxy headers
+    app.set("trust proxy", 1);
 
     logger.log(`Starting ${Configuration.appName} ${Configuration.version} in ${Configuration.isDevBuild ? "development" : "production"} mode`);
     logger.log(`Built on ${TimeZone.formatDate(new Date(process.env["BUILD_DATE"]!))}`);

@@ -36,17 +36,16 @@ identity_providers:
               public: true
               authorization_policy: two_factor
               redirect_uris:
-                  - net.croudebush.sprout://auth_callback # Mobile
-                  - http://sprout.mydomain.com/auth_callback.html # Web (Change to your production URL)
+                  - http://sprout.mydomain.com/api/auth/oidc/callback # Web (Change to your production URL)
               scopes:
                   - openid
                   - email
                   - profile
+                  - offline_access
               response_types:
                   - code
-                  - id_token token
               grant_types:
-                  - implicit
+                  - refresh_token
                   - authorization_code
 ```
 

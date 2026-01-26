@@ -42,4 +42,7 @@ export class Configuration {
 
   /** Boolean that states if this is a development build or not. This is replaced by webpack. */
   static isDevBuild = process.env["IS_DEV_BUILD"]!;
+
+  /** If this is just running a script to then execute, this acknowledges that. */
+  static isRunningScript = false;
 }

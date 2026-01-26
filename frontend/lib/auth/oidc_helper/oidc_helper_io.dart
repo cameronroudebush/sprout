@@ -1,15 +1,14 @@
 import 'dart:async';
 
-import 'package:app_links/app_links.dart';
-import 'package:openid_client/openid_client.dart';
-import 'package:openid_client/openid_client_io.dart' as io;
-import 'package:sprout/auth/oidc_helper/oidc_helper_stub.dart' as stub;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/core/logger.dart';
+
+import 'oidc_helper_stub.dart' as stub;
 
 class OIDCHelper implements stub.OIDCHelper {
   @override
-  Map<String, String>? getWebCallbackTokens() {
-    // Android doesn't use session storage for callbacks
+  Future<Map<String, String>?> getWebCallbackTokens({required String issuerUrl, required String clientId}) async {
     return null;
   }
 
@@ -19,43 +18,31 @@ class OIDCHelper implements stub.OIDCHelper {
     required String clientId,
     required List<String> scopes,
   }) async {
-    // Create the client
-    final issuer = await io.Issuer.discover(Uri.parse(issuerUrl));
-    final client = Client(issuer, clientId);
-    final redirectUri = Uri.parse('net.croudebush.sprout://auth_callback');
+    try {
+      final backendLoginUrl = "${defaultApiClient.basePath}/auth/oidc/login";
+      final callbackScheme = 'net.croudebush.sprout'; // Our own custom callback as defined from the manifest
 
-    final flow = Flow.authorizationCodeWithPKCE(client)
-      ..scopes.addAll(scopes)
-      ..redirectUri = redirectUri;
+      final loginUrl = Uri.parse(
+        backendLoginUrl,
+      ).replace(queryParameters: {'target_url': '$callbackScheme://callback'});
 
-    // Set up the listener *before* launching the browser
-    final appLinks = AppLinks();
-    final completer = Completer<Map<String, String>?>();
-    StreamSubscription? sub;
+      // Open the Browser and Wait for Result
+      final result = await FlutterWebAuth2.authenticate(url: loginUrl.toString(), callbackUrlScheme: callbackScheme);
+      final uri = Uri.parse(result);
 
-    sub = appLinks.uriLinkStream.listen((Uri? uri) async {
-      if (uri != null && uri.toString().startsWith(redirectUri.toString())) {
-        try {
-          // Exchange the code for the actual tokens
-          final credential = await flow.callback(uri.queryParameters);
-          final tokens = await credential.getTokenResponse();
-
-          completer.complete({
-            'id_token': tokens.idToken.toCompactSerialization(),
-            'access_token': tokens.accessToken ?? '',
-          });
-        } catch (e) {
-          completer.completeError(e);
-        } finally {
-          // Stop listening once we have the tokens
-          sub?.cancel();
-        }
+      // Pull out our tokens
+      String? fragment = uri.fragment;
+      final params = Uri.splitQueryString(fragment);
+      if (params.containsKey('access_token')) {
+        return {
+          'id_token': params['id_token'] ?? '',
+          'access_token': params['access_token'] ?? '',
+          'refresh_token': params['refresh_token'] ?? '',
+        };
       }
-    });
-
-    // Launch the System Browser
-    await launchUrl(flow.authenticationUri, mode: LaunchMode.externalApplication);
-    // Wait for the user to return from the login
-    return completer.future;
+    } catch (e) {
+      LoggerService.error('OIDC Auth Error: $e');
+    }
+    return null;
   }
 }

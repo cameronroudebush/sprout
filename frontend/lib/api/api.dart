@@ -64,6 +64,8 @@ part 'model/monthly_spending_stats.dart';
 part 'model/notification.dart';
 part 'model/notification_ssedto.dart';
 part 'model/provider_config.dart';
+part 'model/refresh_request_dto.dart';
+part 'model/refresh_response_dto.dart';
 part 'model/register_device_dto.dart';
 part 'model/sse_data.dart';
 part 'model/sankey_data.dart';
