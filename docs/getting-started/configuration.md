@@ -25,6 +25,7 @@ For a complete list of all available options, please see the **[Advanced Configu
 | `sprout_server_auth_type`                    |   Yes    |    `local`    | Set to `oidc` to enable OpenID Connect authentication                                                                                                     |
 | `sprout_server_auth_oidc_issuer`             |    No    |               | The base URL of your OIDC provider (e.g., https://auth.example.com)                                                                                       |
 | `sprout_server_auth_oidc_clientId`           |    No    |               | The Client ID configured in your OIDC provider.                                                                                                           |
+| `sprout_server_auth_oidc_secret`             |    No    |               | The secret string used to generate the private client hash. See [auth](./auth.md#configuration) for more info                                             |
 | `sprout_server_auth_local_jwtExpirationTime` |    No    |     `30m`     | The duration for which a login session remains valid for the local authentication strategy. Examples: `24h`, `30d`.                                       |
 
 # Generating an Encryption Key
