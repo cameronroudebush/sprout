@@ -40,7 +40,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
               : Image.asset('assets/icon/color.png', width: 48, fit: BoxFit.contain);
 
           return AppBar(
-            automaticallyImplyLeading: kIsWeb ? false : true,
+            automaticallyImplyLeading: kIsWeb && isDesktop ? false : true,
             toolbarHeight: preferredSize.height,
             scrolledUnderElevation: 0,
             backgroundColor: theme.colorScheme.primaryContainer,
@@ -59,9 +59,11 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   icon: NotificationItem.buildNotificationIcon(provider.hasUnread),
                   itemBuilder: (context) {
-                    return provider.notifications
-                        .map((n) => PopupMenuItem<String>(padding: EdgeInsets.zero, child: NotificationItem(n)))
-                        .toList();
+                    return provider.notifications.isEmpty
+                        ? [const PopupMenuItem<String>(enabled: false, child: Center(child: Text('No notifications')))]
+                        : provider.notifications
+                              .map((n) => PopupMenuItem<String>(padding: EdgeInsets.zero, child: NotificationItem(n)))
+                              .toList();
                   },
                 ),
             ],

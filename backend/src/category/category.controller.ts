@@ -64,7 +64,7 @@ export class CategoryController {
   @ApiQuery({ name: "accountId", required: false, type: String, description: "The ID of the account to retrieve transactions from." })
   @ApiOkResponse({ description: "Unknown category stats found successfully.", schema: { type: "integer", format: "int32" } })
   async getUnknownCategoryStats(@CurrentUser() user: User, @Query("accountId") accountId?: string) {
-    return await Transaction.count({ where: { category: IsNull(), account: { id: accountId, user: { id: user.id } } } });
+    return await Transaction.count({ where: { category: IsNull(), pending: false, account: { id: accountId, user: { id: user.id } } } });
   }
 
   @Post()

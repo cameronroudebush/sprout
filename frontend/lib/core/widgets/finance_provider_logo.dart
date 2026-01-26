@@ -13,8 +13,8 @@ class FinanceProviderLogoWidget extends LogoBaseWidget<ProviderConfig> {
   const FinanceProviderLogoWidget(super.logoClass, {super.key});
 
   @override
-  String getLogoUrl(BuildContext context) {
-    return "${getBackendProxy()}?fullImageUrl=${logoClass.logoUrl}";
+  ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context) {
+    return (faviconImageUrl: null, fullImageUrl: logoClass.logoUrl);
   }
 
   @override
