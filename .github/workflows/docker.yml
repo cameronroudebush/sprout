@@ -37,6 +37,8 @@ jobs:
           files: |
             frontend/**
             backend/**
+            dockerfile
+            .dockerignore
 
       - name: Decide whether to proceed
         id: decision
