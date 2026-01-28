@@ -55,5 +55,5 @@ To get started, choose either the Docker Compose or Docker Run method below.
 
 Sprout offers [Docker images](https://hub.docker.com/r/croudebush/sprout) to suit different needs.
 
--   `croudebush/sprout:stable`: **(Recommended)** This is the image for most users. It is only updated with tagged, stable releases from the `main` branch.
--   `croudebush/sprout:dev`: This image is tied directly to the `main` branch and updates with every commit. Use this for testing the latest features, but expect potential instability.
+- `croudebush/sprout:stable`: **(Recommended)** This is the image for most users. It is only updated with tagged, stable releases from the `main` branch.
+- `croudebush/sprout:dev`: This image is tied directly to the `main` branch and updates with every commit. Use this for testing the latest features, but expect potential instability.

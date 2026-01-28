@@ -11,10 +11,10 @@ Sprout is designed to be accessible wherever you are. You can use it on your mob
 
 This is the primary way to interact with Sprout. Once the Docker container is running, you can connect to the web UI using one of two methods:
 
--   **Local Access**: If you are on the same machine that is running Docker, you can access Sprout by navigating your web browser to [`http://localhost`](http://localhost).
-    -   If you mapped the container to a different port (e.g., you used `-p 8080:80`), you would use that port instead (e.g., `http://localhost:8080`).
--   **Reverse Proxy Access**: If you've set up a reverse proxy to make Sprout available outside your home network or to use a custom domain with SSL, simply navigate to the URL you configured (e.g., `https://sprout.yourdomain.com`).
-    -   This is the **recommended** way to access Sprout for daily use, especially for setting up the PWA.
+- **Local Access**: If you are on the same machine that is running Docker, you can access Sprout by navigating your web browser to [`http://localhost`](http://localhost).
+    - If you mapped the container to a different port (e.g., you used `-p 8080:80`), you would use that port instead (e.g., `http://localhost:8080`).
+- **Reverse Proxy Access**: If you've set up a reverse proxy to make Sprout available outside your home network or to use a custom domain with SSL, simply navigate to the URL you configured (e.g., `https://sprout.yourdomain.com`).
+    - This is the **recommended** way to access Sprout for daily use, especially for setting up the PWA.
 
 ## Progressive Web App (PWA)
 

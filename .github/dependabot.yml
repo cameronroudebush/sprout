@@ -20,7 +20,7 @@ updates:
         patterns:
           - "*"
 
-  # 3. Frontend
+  # Frontend
   - package-ecosystem: "pub"
     directory: "/frontend"
     schedule:
@@ -30,7 +30,7 @@ updates:
         patterns:
           - "*"
 
-  # 4. Docker
+  # Docker
   - package-ecosystem: "docker"
     directory: "/"
     schedule:

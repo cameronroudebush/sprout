@@ -81,7 +81,6 @@ To send notifications, your **Sprout** needs **Admin Access**. This requires a S
     The Service Account Key contains a Private Key. Never expose this to anyone else. Keep it secure. Sprout will not make this available. It is purely used in the backend.
 
 1. **Generate Service Account**
-
     1. Go to the [Firebase Console](https://console.firebase.google.com/).
     2. Click the **Gear Icon** -> **Project Settings**.
     3. Go to the **Service Accounts** tab.
@@ -126,10 +125,10 @@ sprout_server_notification_firebase_privateKey="-----BEGIN PRIVATE KEY-----\nMII
 
 If the app logs show "**Permission Denied**" or "**403**" when registering, your API Key is missing the Firebase Installations API permission.
 
--   Fix: Go to Google Cloud Console → API Library and **enable** "**Firebase Installations API**".
+- Fix: Go to Google Cloud Console → API Library and **enable** "**Firebase Installations API**".
 
 ### Backend: Error parsing private key
 
 If the Sprout backend fails to start while parsing the private key:
 
--   Fix: Check **sprout_server_notification_firebase_privateKey**. It must include the header `-----BEGIN PRIVATE KEY-----` and footer `-----END PRIVATE KEY-----`. Ensure the newlines are represented as `\n` characters if using a single-line string.
+- Fix: Check **sprout_server_notification_firebase_privateKey**. It must include the header `-----BEGIN PRIVATE KEY-----` and footer `-----END PRIVATE KEY-----`. Ensure the newlines are represented as `\n` characters if using a single-line string.
