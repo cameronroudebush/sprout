@@ -111,7 +111,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       // Initialize local notification settings
       const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@drawable/ic_notification');
       const InitializationSettings initSettings = InitializationSettings(android: androidSettings);
-      await _backgroundLocalNotifications.initialize(initSettings);
+      await _backgroundLocalNotifications.initialize(settings: initSettings);
 
       _isIsolateInitialized = true;
     }
@@ -131,10 +131,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
       // Show our notification manually
       await _backgroundLocalNotifications.show(
-        DateTime.now().millisecond,
-        title,
-        body,
-        NotificationDetails(
+        id: DateTime.now().millisecond,
+        title: title,
+        body: body,
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'secure_channel_${payload.importanceTyped.toString()}',
             'Secure Notifications',
