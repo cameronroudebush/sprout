@@ -10,9 +10,10 @@
     "docs:serve": "docker run --rm -it -p 8000:8000 --entrypoint=/bin/sh -v \"%cd%\":/docs squidfunk/mkdocs-material -c \"pip install mkdocs-swagger-ui-tag && mkdocs serve --dev-addr 0.0.0.0:8000\"",
     "api:generate:dart": "docker run --rm  -v %cd%:/local --entrypoint=/bin/sh -w /local openapitools/openapi-generator-cli -c \"openapi-generator-cli generate -i /local/docs/assets/openapi-spec.json -g dart -o /local/frontend/api --global-property apiDocs=false,modelDocs=false,apiTests=false,modelTests=false && rm -rf /local/frontend/lib/api && mkdir -p /local/frontend/lib/api && mv /local/frontend/api/lib/* /local/frontend/lib/api/ && rm -rf /local/frontend/api \""
   },
+  "dependencies": {},
   "devDependencies": {
     "auto-changelog": "^2.5.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "git-describe": "^4.1.1"
   },

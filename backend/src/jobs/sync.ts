@@ -14,19 +14,16 @@ import { ProviderService } from "@backend/providers/provider.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { Inject } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { merge } from "lodash";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
 export class ProviderSyncJob extends BackgroundJob<Sync> {
-  @Inject()
-  private readonly notificationService!: NotificationService;
-
   constructor(
     private providerService: ProviderService,
     private transactionRuleService: TransactionRuleService,
+    private notificationService: NotificationService,
   ) {
     super("provider-sync", Configuration.providers.updateTime);
   }

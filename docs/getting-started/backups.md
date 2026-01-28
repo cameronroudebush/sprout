@@ -15,8 +15,8 @@ Your financial data is important. Sprout helps protect your data by creating aut
 
 Sprout automatically creates a compressed backup of your entire database. This process runs at two specific times:
 
--   Daily at **4:00 AM**, based on the [timezone](./configuration.md) set for the container.
--   Every time the container starts up.
+- Daily at **4:00 AM**, based on the [timezone](./configuration.md) set for the container.
+- Every time the container starts up.
 
 This ensures you always have a recent backup available with no manual intervention required.
 
