@@ -1,0 +1,94 @@
+<head>
+  <style>
+    .app-image {
+      width: 100%;
+      max-width: 480px !important;
+    }
+
+    ul {
+      width: 90%;
+      max-width: 920px;
+      /* margin-left: 4rem !important; */
+    }
+
+    ul ul {
+      margin-left: 1rem !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Intro -->
+  <section>
+    <img
+      src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png"
+      alt="sprout logo"
+      class="logo"
+    />
+    <div class="badges">
+      <a href="https://hub.docker.com/r/croudebush/sprout" target="_blank">
+        <img src="https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker" alt="Docker Pulls" class="badge" />
+      </a>
+      <a href="https://github.com/cameronroudebush/sprout/releases/latest" target="_blank">
+        <img
+          src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github"
+          alt="GitHub Tag"
+          class="badge"
+        />
+      </a>
+    </div>
+  </section>
+
+  <!-- What is sprout? -->
+  <section id="about">
+    <div class="card info">
+      <h2>What is Sprout?</h2>
+      <p class="center">
+        Sprout is a financial management app designed to give you a clear, simple view of your money. We specialize in providing a daily snapshot of your
+        financial data by automatically tracking your accounts using financial APIs. This allows you to easily view things like account balances and stock
+        holdings, helping you stay on top of your financial health.
+      </p>
+    </div>
+  </section>
+
+  <!-- App Images -->
+  <section id="images">
+    <div class="card-row app-image-row">
+      <div class="card">
+        <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/cash-flow.png" alt="Cash Flow" class="app-image" />
+      </div>
+      <div class="card">
+        <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/main.png" alt="Home Page" class="app-image" />
+      </div>
+      <div class="card">
+        <img
+          src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/transactions.png"
+          alt="Transactions Page"
+          class="app-image"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Security -->
+  <section id="security">
+    <div class="card info">
+      <h2>Security</h2>
+      <p class="center">Anytime you're dealing with financial data, security is an important topic. Here is our stance on the security of Sprout</p>
+      <ul>
+        <li>
+          While we do know about account balances and transactions,
+          <strong>we do not keep any user authentication</strong> information related to your bank accounts.
+        </li>
+        <li>All data transmission from the user interface to the backend is done <strong>securely</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Getting Started -->
+  <section id="getting-started">
+    <div class="card info">
+      <h2>Getting Started</h2>
+      <p class="center">For info on how to start using sprout today, checkout <a class="link" href="/getting-started/">the docs</a>.</p>
+    </div>
+  </section>
+</body>
