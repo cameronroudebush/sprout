@@ -27,7 +27,7 @@ jobs:
       # The following steps are skipped for tag pushes to save time.
       - name: Checkout for path analysis
         if: steps.check_tag.outputs.is_tag == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get changed files
         if: steps.check_tag.outputs.is_tag == 'false'
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           lfs: "true"
 
@@ -108,7 +108,7 @@ jobs:
       - name: Update Docker Hub Description
         # This step only runs when a tag is pushed.
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: peter-evans/dockerhub-description@v3
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
