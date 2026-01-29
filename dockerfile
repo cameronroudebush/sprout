@@ -1,7 +1,7 @@
 # -------------------------------
 #       Build Frontend
 # -------------------------------
-FROM ghcr.io/cirruslabs/flutter:3.35.1 AS frontend-build
+FROM ghcr.io/cirruslabs/flutter:3.38.8 AS frontend-build
 WORKDIR /app
 COPY .git .git
 COPY ./frontend ./
@@ -10,7 +10,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:20-alpine3.21 AS backend-build
+FROM node:25-alpine3.21 AS backend-build
 # Install git
 RUN apk add git
 WORKDIR /app
