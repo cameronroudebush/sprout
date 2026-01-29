@@ -37,29 +37,28 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     const providers = this.providerService.getAll();
     const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
     schedule.user = user;
+    // Track unique successful users by ID
+    const successMap = new Map<string, User>();
     try {
-      for (const provider of providers) await this.updateProvider(provider, user);
+      for (const provider of providers) {
+        const updatedInThisProvider = await this.updateProvider(provider, user);
+        // Add any successfully updated users to our tracking Set
+        for (const u of updatedInThisProvider) successMap.set(u.id, u);
+      }
     } catch (e) {
       const msg = (e as Error).message;
       schedule.failureReason = msg;
       schedule.status = "failed";
       await schedule.update();
-      // If this is specific to a user, notify them of the failure
-      if (user)
-        await this.notificationService.notifyUser(
-          user,
-          `Failed to sync your data for ${TimeZone.formatDate(new Date(), "PPP")}. Please review the logs.`,
-          "Sync Failure",
-          NotificationType.error,
-        );
-      // Don't fail graceful, let the jobs base handle this
       throw e;
     }
-    // Make sure to track that the update is complete with no errors
+
+    // Finalize the schedule status
     schedule.status = "complete";
     await schedule.update();
-    // If this is specific to a user, notify them of the success
-    if (user) await this.logSuccess(user);
+
+    // Call logSuccess for every user that had a successful update across any provider
+    for (const updatedUser of successMap.values()) await this.logSuccess(updatedUser);
 
     return schedule;
   }
@@ -68,11 +67,13 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
    * Starts an update for the given provider.
    *
    * @param specificUser If given, will only process this user
+   * @returns An array of users who had at least one account successfully updated
    */
   private async updateProvider(provider: ProviderBase, specificUser?: User) {
     this.logger.log(`Syncing ${provider.config.name}`);
     // Handle each user, or only the given user
     const users = specificUser ? [specificUser] : await User.find({});
+    const updatedUsers: User[] = [];
 
     // Handle each users accounts
     for (const user of users) {
@@ -82,51 +83,64 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       // If we don't have any user accounts, don't bother querying because we'll have nothing to update
       if (userAccounts.length === 0) continue;
       const accounts = await provider.get(user, false);
+      let userHadSuccessfulUpdate = false;
       for (const data of accounts) {
         let accountInDB: Account;
         try {
           accountInDB = (await Account.findOne({ where: { id: data.account.id } }))!;
           if (accountInDB == null) {
             this.logger.warn(`The account with the following name isn't registered: ${data.account.name}`);
-            throw new Error("Missing account");
-          } else {
-            this.logger.log(`Updating account from provider: ${data.account.name}`);
-          }
+            continue;
+          } else this.logger.log(`Updating account from provider: ${data.account.name}`);
+
+          // Set old account history
+          await AccountHistory.fromPlain({
+            account: accountInDB,
+            balance: accountInDB.balance,
+            availableBalance: accountInDB.availableBalance,
+            time: subDays(new Date(), 1),
+          }).insert();
+
+          // Update current account
+          accountInDB.balance = data.account.balance;
+          accountInDB.availableBalance = data.account.availableBalance;
+          await accountInDB.update();
+
+          // Update current institution if in database
+          const institution = accountInDB.institution;
+          institution.hasError = data.account.institution.hasError;
+          await institution.update();
+
+          // Sync transactions
+          if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
+
+          // Sync holdings if investment type
+          if (accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
+
+          // If we reached this point without an error, this account succeeded
+          userHadSuccessfulUpdate = true;
         } catch (e) {
-          // Ignore missing accounts
+          this.logger.error(`Failed to update account ${data.account.name} for ${user.username}: ${(e as Error).message}`);
           continue;
         }
-
-        // Set old account history
-        await AccountHistory.fromPlain({
-          account: accountInDB,
-          balance: accountInDB.balance,
-          availableBalance: accountInDB.availableBalance,
-          time: subDays(new Date(), 1),
-        }).insert();
-
-        // Update current account
-        accountInDB.balance = data.account.balance;
-        accountInDB.availableBalance = data.account.availableBalance;
-        await accountInDB.update();
-
-        // Update current institution if in database
-        const institution = accountInDB.institution;
-        institution.hasError = data.account.institution.hasError;
-        await institution.update();
-
-        // Sync transactions
-        if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
-
-        // Sync holdings if investment type
-        if (accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
       }
 
-      // Attempt to auto categorize transactions
-      await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
-
-      this.logger.log(`Information updated successfully for: ${user.username}`);
+      // If at least one account for this user updated, finalize and add to return list
+      if (userHadSuccessfulUpdate) {
+        // Attempt to auto categorize transactions
+        await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
+        this.logger.log(`Information updated successfully for: ${user.username}`);
+        updatedUsers.push(user);
+      } else if (!userHadSuccessfulUpdate && accounts.length > 0) {
+        await this.notificationService.notifyUser(
+          user,
+          `We couldn't update your accounts for ${provider.config.name}. Please check your connection.`,
+          "Sync Issue",
+          NotificationType.warning,
+        );
+      }
     }
+    return updatedUsers;
   }
 
   /** Updates all transaction data for the given account that matches the given transaction */
