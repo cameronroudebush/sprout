@@ -1,10 +1,22 @@
 import { TimeZone } from "@backend/config/model/tz";
 import { ConsoleLogger, LogLevel } from "@nestjs/common";
-import chalk from "chalk";
 
 /** A custom logger to use with NestJS to improve our logging capabilities */
 export class SproutLogger extends ConsoleLogger {
   static contextsToIgnore = ["InstanceLoader", "RoutesResolver", "RouterExplorer", "NestFactory", "NestApplication"];
+
+  // Color codes for console display
+  private readonly colorCodes = {
+    red: "\x1b[31m",
+    yellow: "\x1b[33m",
+    reset: "\x1b[0m",
+    dim: "\x1b[2m",
+  };
+
+  /** Applies our selected color to the output */
+  private applyColor(text: string, color: keyof typeof this.colorCodes): string {
+    return `${this.colorCodes[color]}${text}${this.colorCodes.reset}`;
+  }
 
   override log(...args: any[]): void {
     // Ignore some logging contexts that are specific to NestJS
@@ -21,7 +33,7 @@ export class SproutLogger extends ConsoleLogger {
     _formattedLogLevel: string,
     contextMessage: string,
     timestampDiff: string,
-  ): string {
+  ) {
     let output = this.stringifyMessage(message, logLevel);
     const timestamp = this.getTimestamp();
 
@@ -36,10 +48,10 @@ export class SproutLogger extends ConsoleLogger {
     // Customize log level
     let printLevel = "";
     if (logLevel === "error" || logLevel === "fatal") {
-      output = chalk.red(output);
-      printLevel = `[${chalk.red(logLevel.toUpperCase())}]`;
+      output = this.applyColor(output, "red");
+      printLevel = `[${this.applyColor(logLevel.toUpperCase(), "red")}]`;
     } else if (logLevel === "warn") {
-      printLevel = `[${chalk.yellow(logLevel.toUpperCase())}]`;
+      printLevel = `[${this.applyColor(logLevel.toUpperCase(), "yellow")}]`;
     }
 
     return `[${timestamp}]${contextParts.join("")}${printLevel}: ${output}${timestampDiff}\n`;
