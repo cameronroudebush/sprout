@@ -21,7 +21,7 @@ class UserProvider extends BaseProvider<UserApi> {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     // Don't fire if we don't have a firebase config
     if (Firebase.apps.isEmpty) {
-      LoggerService.warning("No firebase configuration is set. Refusing to startup firebase.");
+      LoggerService.warning("No firebase configuration is loaded. Refusing to start.");
       return;
     }
     String? token = await FirebaseMessaging.instance.getToken();

@@ -53,8 +53,12 @@ class FirebaseNotificationProvider {
         projectId: config.projectId,
       );
 
-      await Firebase.initializeApp(options: options);
-      await _setupPushNotifications();
+      try {
+        await Firebase.initializeApp(options: options);
+        await _setupPushNotifications();
+      } catch (e) {
+        LoggerService.error(e);
+      }
     }
   }
 

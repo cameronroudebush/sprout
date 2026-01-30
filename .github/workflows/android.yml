@@ -141,6 +141,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: android-build-artifacts
+          path: .
 
       - id: auth
         name: Authenticate with Google Cloud
