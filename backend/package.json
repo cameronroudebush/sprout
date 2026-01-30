@@ -16,9 +16,8 @@
     "@nestjs/swagger": "^11.2.1",
     "@nestjs/throttler": "^6.4.0",
     "axios": "^1.13.2",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.8",
-    "chalk": "^4.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cookie-parser": "^1.4.7",
@@ -26,7 +25,7 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "firebase-admin": "^13.6.0",
-    "glob": "^10.3.10",
+    "glob": "^13.0.0",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.2.1",
     "lodash": "^4.17.21",
@@ -40,25 +39,23 @@
     "swagger-themes": "^1.4.3",
     "ts-mixer": "^6.0.4",
     "typeorm": "^0.3.20",
-    "uuid": "^9.0.1",
     "yaml": "^2.4.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
-    "@types/bcrypt": "^5.0.2",
+    "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.4",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^22.10.7",
-    "@types/nodemon": "^1.19.6",
+    "@types/node": "^25.0.10",
+    "@types/nodemon": "^3.1.1",
     "@types/passport-jwt": "^4.0.1",
-    "@types/sharp": "^0.29.3",
+    "@types/sharp": "^0.32.0",
     "@types/source-map-support": "^0.5.10",
-    "@types/uuid": "^9.0.8",
     "@yao-pkg/pkg": "^6.8.0",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "cross-var": "^1.1.0",
     "git-describe": "^4.1.1",
     "nodemon": "^3.1.0",
@@ -79,11 +76,14 @@
     "populate:demo:data": "nest start -- populate.demo.data"
   },
   "pkg": {
+    "targets": [
+      "latest"
+    ],
     "assets": [
       "dist/**/*",
       "node_modules/axios/**/*",
       "node_modules/plaid/node_modules/axios/**/*",
-      "node_modules/bcrypt/lib/binding/**/*",
+      "node_modules/bcrypt/prebuilds/linux-x64/**/*",
       "node_modules/sqlite3/**/*",
       "node_modules/sharp/**/*",
       "node_modules/@img/sharp-win32-x64/**/*",
@@ -91,9 +91,6 @@
       "node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
       "node_modules/swagger-themes/**/*",
       "node_modules/ansis/**/*"
-    ],
-    "targets": [
-      "node20"
     ]
   }
 }
