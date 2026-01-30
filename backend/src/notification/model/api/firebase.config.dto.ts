@@ -1,7 +1,10 @@
 import { Configuration } from "@backend/config/core";
+import { InternalServerErrorException, Logger } from "@nestjs/common";
 
 /** Model that defines how firebase is configured for this app */
 export class FirebaseConfigDTO {
+  private static readonly logger = new Logger();
+
   apiKey: string;
   appId: string;
   projectNumber: string;
@@ -20,8 +23,9 @@ export class FirebaseConfigDTO {
     if (!config.enabled) return undefined;
     try {
       Configuration.server.notification.firebase.validate();
-    } catch {
-      return undefined;
+    } catch (e) {
+      this.logger.error("Firebase Config Validation Failed", e);
+      throw new InternalServerErrorException("Invalid Firebase Configuration on Server");
     }
     return new FirebaseConfigDTO(config.apiKey, config.appId, config.projectNumber.toString(), config.projectId);
   }
