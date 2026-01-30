@@ -74,7 +74,7 @@ You will need the following values for your server configuration.
 
 ## Part 2: App Signing
 
-Firebase requires you to "Allow-list" the specific certificate used to sign the Android App. You must add the SHA-1 in the firebase console following these steps:
+Firebase requires you to "Allow-list" the specific certificate used to sign the Android App. You must add the SHA's in the firebase console following these steps:
 
 1. Firebase Console
 2. Project Settings
@@ -84,10 +84,12 @@ Firebase requires you to "Allow-list" the specific certificate used to sign the 
 
 ### Official APK
 
-If you downloaded the APK directly from the GitHub releases, or the app store, you must use the official Sprout SHA-1. You can copy and paste the value from below:
+If you downloaded the APK directly from the GitHub releases, or the app store, you must use the official Sprout SHA's. You can copy and paste the value from below:
 
 ```
-3E:AA:5A:EE:97:9B:BA:89:5C:21:9A:21:E6:0C:A2:B9:18:01:39:BD
+ed3e7389f1799a43ed7b4c969e2f8b3cfa638d6e
+3eaa5aee979bba895c219a21e60ca2b9180139bd
+501a747fe9766d236f8a0e09dcf93f3e5c365d34ea4a71212e8788b2706a3d51
 ```
 
 ## Part 3: Private Backend Credentials
