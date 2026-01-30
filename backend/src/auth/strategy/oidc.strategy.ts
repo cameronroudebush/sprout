@@ -14,7 +14,7 @@ export const OIDCStrategyName = "oidc";
 
 @Injectable()
 export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger("strategy:oidc");
 
   constructor(
     private readonly httpService: HttpService,

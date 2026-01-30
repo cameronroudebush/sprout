@@ -3,7 +3,7 @@ import { InternalServerErrorException, Logger } from "@nestjs/common";
 
 /** Model that defines how firebase is configured for this app */
 export class FirebaseConfigDTO {
-  private static readonly logger = new Logger();
+  private static readonly logger = new Logger("dto:firebase:config");
 
   apiKey: string;
   appId: string;
@@ -20,7 +20,10 @@ export class FirebaseConfigDTO {
   /** Creates this DTO from the configuration of the backend */
   static fromConfig() {
     const config = Configuration.server.notification.firebase;
-    if (!config.enabled) return undefined;
+    if (!config.enabled) {
+      this.logger.debug("Firebase is disabled. Returning empty config.");
+      return undefined;
+    }
     try {
       Configuration.server.notification.firebase.validate();
     } catch (e) {

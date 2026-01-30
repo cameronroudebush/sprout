@@ -13,7 +13,7 @@ import * as admin from "firebase-admin";
 /** This service provides re-usable capability to notify users of specific interactions. */
 @Injectable()
 export class NotificationService implements OnModuleInit {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger("service:notification");
 
   constructor(private sseService: SSEService) {}
 
