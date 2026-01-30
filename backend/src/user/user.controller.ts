@@ -15,7 +15,7 @@ import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse
 @Controller("user")
 @ApiTags("User")
 export class UserController {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger("controller:user");
 
   constructor(private setupService: SetupService) {}
 

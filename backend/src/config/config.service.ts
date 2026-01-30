@@ -37,7 +37,7 @@ export class ConfigurationService {
   private updateObjectWithObject(objToUpdate: any, objectToUpdateFrom: any) {
     if (objectToUpdateFrom == null) return;
     for (let key of Object.keys(objectToUpdateFrom)) {
-      const value = objectToUpdateFrom[key];
+      const value = this.dataConversion(objectToUpdateFrom[key], objToUpdate[key]);
       // Find metadata from parent
       const metadata = Reflect.getMetadata(ConfigurationMetadata.METADATA_KEY, objToUpdate, key) as ConfigurationMetadata | undefined;
       // Ignore non enabled keys
@@ -129,5 +129,15 @@ export class ConfigurationService {
     const output = this.configHeader + configObject + "\n";
     fs.writeFileSync(path, output);
     return this;
+  }
+
+  /** Converts data to the requested type before trying to insert it into the config */
+  private dataConversion(value: any, targetData: any) {
+    if (typeof targetData === "boolean" && typeof value === "string") {
+      const lower = value.toLowerCase();
+      if (lower === "true") value = true;
+      if (lower === "false") value = false;
+    }
+    return value;
   }
 }

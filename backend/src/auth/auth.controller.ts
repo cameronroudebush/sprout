@@ -18,7 +18,7 @@ import { UserLoginResponse } from "./model/api/login.response.dto";
 @Controller("auth")
 @ApiTags("Auth")
 export class AuthController {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger("controller:auth");
 
   constructor(
     private readonly authService: AuthService,

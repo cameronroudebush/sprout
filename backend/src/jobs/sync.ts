@@ -25,7 +25,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     private transactionRuleService: TransactionRuleService,
     private notificationService: NotificationService,
   ) {
-    super("provider-sync", Configuration.providers.updateTime);
+    super("account:sync", Configuration.providers.updateTime);
   }
 
   public override async updateNow(user?: User) {
