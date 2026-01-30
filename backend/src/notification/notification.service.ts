@@ -65,6 +65,12 @@ export class NotificationService implements OnModuleInit {
     if (!Configuration.server.notification.firebase.enabled) return;
     // Find all devices related to the current user
     const devices = await UserDevice.find({ where: { user: { id: user.id } } });
+
+    if (devices.length === 0) {
+      this.logger.warn(`No devices associated to user ${user.username}`);
+      return;
+    }
+
     // Notify all of the users devices
     for (const device of devices) {
       const message: admin.messaging.Message = {

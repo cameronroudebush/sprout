@@ -1,4 +1,5 @@
-name: docs
+name: Deploy Documentation Website
+
 on:
   push:
     branches:
@@ -6,8 +7,10 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+
 permissions:
   contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

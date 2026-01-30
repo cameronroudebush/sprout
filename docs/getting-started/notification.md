@@ -72,7 +72,25 @@ You will need the following values for your server configuration.
 | **App ID**         |        The mobile app ID.         |              Firebase Console -> **Project settings** -> General -> Your apps section.              |
 | **API Key**        | The credential created in Step 2. | [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials). Copy the Key string. |
 
-## Part 2: Private Backend Credentials
+## Part 2: App Signing
+
+Firebase requires you to "Allow-list" the specific certificate used to sign the Android App. You must add the SHA-1 in the firebase console following these steps:
+
+1. Firebase Console
+2. Project Settings
+3. General
+4. Your Apps
+5. Add fingerprint (from below)
+
+### Official APK
+
+If you downloaded the APK directly from the GitHub releases, or the app store, you must use the official Sprout SHA-1. You can copy and paste the value from below:
+
+```
+3E:AA:5A:EE:97:9B:BA:89:5C:21:9A:21:E6:0C:A2:B9:18:01:39:BD
+```
+
+## Part 3: Private Backend Credentials
 
 To send notifications, your **Sprout** needs **Admin Access**. This requires a Service Account.
 
@@ -96,7 +114,7 @@ Open the downloaded JSON file. You need two specific fields:
 | `client_email` | The service account email. |            Firebase Console -> **Project settings** (Gear icon) -> General.             |
 | `private_key`  |    The RSA private key.    | Includes `-----BEGIN PRIVATE KEY-----` and `\n` characters. **Copy the entire string**. |
 
-## Part 3: Server Configuration
+## Part 4: Server Configuration
 
 To enable Firebase, update your **backend environment variables** (e.g., in your `docker-compose.yml` or `.env` file).
 

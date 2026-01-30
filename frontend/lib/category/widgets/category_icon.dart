@@ -82,6 +82,8 @@ class CategoryIcon extends StatelessWidget {
     'savings': Icons.savings,
     'investments': Icons.trending_up,
     'stocks': Icons.show_chart,
+    'buy': Icons.shopping_cart,
+    'sale': Icons.sell,
     'dividend': Icons.currency_exchange,
     'crypto': Icons.currency_bitcoin,
     'bank': Icons.account_balance,

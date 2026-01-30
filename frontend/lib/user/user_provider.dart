@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
 
 /// This provide allows for modification to the users via the API including authentication and creating new users.
@@ -19,7 +20,10 @@ class UserProvider extends BaseProvider<UserApi> {
   Future<void> registerDevice() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     // Don't fire if we don't have a firebase config
-    if (Firebase.apps.isEmpty) return;
+    if (Firebase.apps.isEmpty) {
+      LoggerService.warning("No firebase configuration is set. Refusing to startup firebase.");
+      return;
+    }
     String? token = await FirebaseMessaging.instance.getToken();
 
     String deviceName = "Unknown Device";
