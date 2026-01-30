@@ -156,7 +156,7 @@ jobs:
         with:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: net.croudebush.sprout
-          releaseFiles: frontend/build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: bundle/release/app-release.aab
           track: alpha
           status: completed
           inAppUpdatePriority: 5
@@ -166,6 +166,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: "frontend/build/app/outputs/flutter-apk/sprout.apk"
+          files: flutter-apk/sprout.apk
           tag_name: ${{ needs.build.outputs.version_string }}
           draft: true
