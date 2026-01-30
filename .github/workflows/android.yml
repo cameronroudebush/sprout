@@ -96,7 +96,7 @@ jobs:
       - name: Build App Bundle (AAB)
         run: |
           flutter pub get
-          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 --decode > frontend/android/app/upload-keystore.jks
           echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks" >> $GITHUB_ENV
           chmod +x ../scripts/build_app.sh
           ../scripts/build_app.sh appbundle
