@@ -55,7 +55,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
                   padding: EdgeInsetsGeometry.zero,
                   menuPadding: EdgeInsetsGeometry.zero,
                   offset: const Offset(0, 50),
-                  constraints: BoxConstraints(maxHeight: size.height * 0.6, maxWidth: isDesktop ? 520 : 340),
+                  constraints: BoxConstraints(maxHeight: size.height * 0.4, maxWidth: isDesktop ? 520 : 340),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   icon: NotificationItem.buildNotificationIcon(provider.hasUnread),
                   itemBuilder: (context) {

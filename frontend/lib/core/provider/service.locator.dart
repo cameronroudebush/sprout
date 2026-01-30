@@ -26,6 +26,8 @@ class ServiceLocator {
 
   /// Registers the given provider as a singleton
   static T register<T extends BaseProvider>(T prov) {
+    // Don't register if already registered
+    if (_sl.isRegistered<T>()) return _sl.get<T>();
     return _sl.registerSingleton<T>(prov);
   }
 
