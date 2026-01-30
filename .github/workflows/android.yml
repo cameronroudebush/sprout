@@ -94,13 +94,21 @@ jobs:
           cache: true
 
       - name: Build App Bundle (AAB)
+        working-directory: ./frontend
         run: |
           flutter pub get
-          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 --decode > frontend/android/app/upload-keystore.jks
-          echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks" >> $GITHUB_ENV
+
+          # Decode Keystore
+          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 --decode > android/app/upload-keystore.jks
+
+          # Update so current shell sees the path
+          export ANDROID_SIGNING_KEYSTORE_PATH="$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks"
+
+          # Also write to GITHUB_ENV for any future steps if needed
+          echo "ANDROID_SIGNING_KEYSTORE_PATH=$ANDROID_SIGNING_KEYSTORE_PATH" >> $GITHUB_ENV
+
           chmod +x ../scripts/build_app.sh
           ../scripts/build_app.sh appbundle
-        working-directory: ./frontend
 
       - name: Build and Rename APK (Tags Only)
         if: startsWith(github.ref, 'refs/tags/')
