@@ -59,6 +59,8 @@ class FirebaseNotificationProvider {
       } catch (e) {
         LoggerService.error(e);
       }
+    } else {
+      LoggerService.warning("No config given for firebase. Ignoring startup.");
     }
   }
 
