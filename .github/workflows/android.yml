@@ -143,6 +143,11 @@ jobs:
           name: android-build-artifacts
           path: .
 
+      - name: Write Android Changelog to File
+        run: |
+          mkdir -p whatsnew/en-US
+          echo "${{ needs.build.outputs.android_changelog }}" > whatsnew/en-US/whatsnew
+
       - id: auth
         name: Authenticate with Google Cloud
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
