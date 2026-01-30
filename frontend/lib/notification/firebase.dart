@@ -57,6 +57,7 @@ class FirebaseNotificationProvider {
         await Firebase.initializeApp(options: options);
         await _setupPushNotifications();
       } catch (e) {
+        // Log errors while launching
         LoggerService.error(e);
       }
     }
