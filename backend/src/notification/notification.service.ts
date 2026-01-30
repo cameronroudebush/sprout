@@ -20,6 +20,7 @@ export class NotificationService implements OnModuleInit {
   onModuleInit() {
     // Initialize firebase, if enabled
     if (Configuration.server.notification.firebase.enabled) {
+      this.logger.log(`Firebase is enabled. Validating config.`);
       Configuration.server.notification.firebase.validate();
       admin.initializeApp({
         credential: admin.credential.cert({

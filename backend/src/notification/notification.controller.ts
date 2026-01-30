@@ -28,16 +28,6 @@ export class NotificationController {
     return await Notification.find({ where: { user: { id: user.id } }, order: { createdAt: "DESC" } });
   }
 
-  @Get(":id")
-  @ApiOperation({
-    summary: "Get's a notification by it's id.",
-    description: "Returns a specific notification for the specific user by it's ID.",
-  })
-  @ApiOkResponse({ description: "Notifications retrieved successfully.", type: Notification })
-  async getById(@Param("id", new ParseUUIDPipe()) id: string, @CurrentUser() user: User) {
-    return await Notification.findOne({ where: { id, user: { id: user.id } } });
-  }
-
   @Get("read/all")
   @ApiOperation({
     summary: "Marks all notifications read.",
@@ -71,5 +61,15 @@ export class NotificationController {
   @ApiOkResponse({ description: "Firebase configuration retrieved successfully.", type: FirebaseConfigDTO })
   getFirebaseConfig() {
     return FirebaseConfigDTO.fromConfig();
+  }
+
+  @Get(":id")
+  @ApiOperation({
+    summary: "Get's a notification by it's id.",
+    description: "Returns a specific notification for the specific user by it's ID.",
+  })
+  @ApiOkResponse({ description: "Notifications retrieved successfully.", type: Notification })
+  async getById(@Param("id", new ParseUUIDPipe()) id: string, @CurrentUser() user: User) {
+    return await Notification.findOne({ where: { id, user: { id: user.id } } });
   }
 }
