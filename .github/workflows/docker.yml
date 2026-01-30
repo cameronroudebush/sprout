@@ -1,4 +1,4 @@
-name: Build and Publish Docker Image
+name: Docker Container CI/CD
 
 permissions:
   contents: write
@@ -12,9 +12,9 @@ on:
     branches: ["*"]
 
 jobs:
-  ## ------------------------------------------------------------------------------------
-  ##  Filter Job: Decides if the main build job should run.
-  ## ------------------------------------------------------------------------------------
+  # ------------------------------------------------------------------------------------
+  # Filter: Decides if work is needed
+  # ------------------------------------------------------------------------------------
   filter:
     runs-on: ubuntu-latest
     outputs:
@@ -24,7 +24,6 @@ jobs:
         id: check_tag
         run: echo "is_tag=${{ startsWith(github.ref, 'refs/tags/') }}" >> $GITHUB_OUTPUT
 
-      # The following steps are skipped for tag pushes to save time.
       - name: Checkout for path analysis
         if: steps.check_tag.outputs.is_tag == 'false'
         uses: actions/checkout@v6
@@ -51,14 +50,15 @@ jobs:
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
-  ## ------------------------------------------------------------------------------------
-  ##  Build and Publish Job
-  ## ------------------------------------------------------------------------------------
-  build-and-publish:
-    # This job only runs if the 'filter' job gives the green light.
+  # ------------------------------------------------------------------------------------
+  # Build: Verifies the Docker build (Runs on PRs, Master, Tags)
+  # ------------------------------------------------------------------------------------
+  build-image:
     needs: filter
     if: needs.filter.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      version_string: ${{ steps.get_repo_info.outputs.version_string }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -71,43 +71,63 @@ jobs:
         with:
           fetch-depth: "0"
 
-      - name: NPM Install
+      - name: Install Dependencies
         run: npm i --only=dev && npm i --prefix ./backend --only=dev
 
+      - name: Build Docker Image (Local Only)
+        run: npm run build:docker croudebush/sprout:dev
+
+      # Save the image so the Publish job doesn't have to rebuild it
+      - name: Save Docker Image Artifact
+        run: docker save croudebush/sprout:dev > sprout-image.tar
+
+      - name: Upload Image Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: docker-image
+          path: sprout-image.tar
+          retention-days: 1
+
+  # ------------------------------------------------------------------------------------
+  # Publish: ONLY runs on Master or Tags
+  # ------------------------------------------------------------------------------------
+  publish-image:
+    needs: [filter, build-image]
+    if: |
+      needs.filter.outputs.should_run == 'true' && 
+      (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Image Artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: docker-image
+
+      - name: Load Docker Image
+        run: docker load < sprout-image.tar
+
       - name: Login to Docker Hub
-        # Condition ensures this only runs on a PUSH to master or a PUSH of a tag.
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Image
-        run: |
-          IMAGE_NAME="croudebush/sprout"
-          npm run build:docker $IMAGE_NAME:dev
+      - name: Push 'dev' tag (Master Only)
+        if: github.ref == 'refs/heads/master'
+        run: docker push croudebush/sprout:dev
 
-      - name: Push 'dev' tag to Docker Hub
-        # This step only runs on pushes to the master branch.
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      - name: Tag and Push Release (Tags Only)
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           IMAGE_NAME="croudebush/sprout"
-          docker push $IMAGE_NAME:dev
-
-      - name: Tag and Push Version and Stable Tags
-        # This step only runs when a tag is pushed.
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        run: |
-          IMAGE_NAME="croudebush/sprout"
-          TAG_VERSION="${{ steps.get_repo_info.outputs.version_string }}"
+          TAG_VERSION="${{ needs.build-image.outputs.version_string }}"
           docker tag $IMAGE_NAME:dev $IMAGE_NAME:$TAG_VERSION
           docker push $IMAGE_NAME:$TAG_VERSION
           docker tag $IMAGE_NAME:dev $IMAGE_NAME:stable
           docker push $IMAGE_NAME:stable
 
       - name: Update Docker Hub Description
-        # This step only runs when a tag is pushed.
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}

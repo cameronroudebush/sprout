@@ -1,11 +1,10 @@
-name: Build and Deploy Android
+name: Android CI/CD
 
 permissions:
   contents: write
   pull-requests: read
 
 on:
-  # The workflow now triggers broadly. The 'filter' job below handles the specific logic.
   push:
     branches: ["master"]
     tags: ["v*.*.*"]
@@ -13,9 +12,9 @@ on:
     branches: ["*"]
 
 jobs:
-  ## ------------------------------------------------------------------------------------
-  ##  Filter Job: Decides if the main build job should run.
-  ## ------------------------------------------------------------------------------------
+  # ------------------------------------------------------------------------------------
+  # Filter: Decides if any work needs to happen based on file changes
+  # ------------------------------------------------------------------------------------
   filter:
     runs-on: ubuntu-latest
     outputs:
@@ -25,7 +24,6 @@ jobs:
         id: check_tag
         run: echo "is_tag=${{ startsWith(github.ref, 'refs/tags/') }}" >> $GITHUB_OUTPUT
 
-      # The following steps are skipped for tag pushes to save time.
       - name: Checkout for path analysis
         if: steps.check_tag.outputs.is_tag == 'false'
         uses: actions/checkout@v6
@@ -49,19 +47,20 @@ jobs:
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
-  ## ------------------------------------------------------------------------------------
-  ##  Build and Deploy Job
-  ## ------------------------------------------------------------------------------------
-  build-and-deploy:
-    # This job only runs if the 'filter' job gives the green light.
+  # ------------------------------------------------------------------------------------
+  # Build: Runs for PRs, Master, and Tags (Verification Only)
+  # ------------------------------------------------------------------------------------
+  build:
     needs: filter
     if: needs.filter.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      version_string: ${{ steps.get_repo_info.outputs.version_string }}
+      android_changelog: ${{ steps.generate_changelogs.outputs.android_changelog }}
     env:
       ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -81,47 +80,59 @@ jobs:
         with:
           starting-version: ${{ steps.get_repo_info.outputs.version_string }}
 
-      - name: Set up Java
+      - name: Set up Environment (Java/Flutter)
         uses: actions/setup-java@v5
         with:
           java-version: "17"
           distribution: "temurin"
           cache: "gradle"
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.x"
           channel: "stable"
           cache: true
 
-      - name: Get Flutter dependencies
-        run: flutter pub get
-        working-directory: ./frontend
-
-      - name: Decode Keystore
-        env:
-          ENCODED_STRING: ${{ secrets.ANDROID_SIGNING_KEY }}
+      - name: Build App Bundle (AAB)
         run: |
-          echo $ENCODED_STRING | base64 --decode > frontend/android/app/upload-keystore.jks
-
-      - name: Set Keystore Path Environment Variable
-        run: |
+          flutter pub get
+          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 --decode > android/app/upload-keystore.jks
           echo "ANDROID_SIGNING_KEYSTORE_PATH=$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks" >> $GITHUB_ENV
-
-      - name: Make build script executable
-        run: chmod +x scripts/build_app.sh
-
-      - name: Build Android App Bundle (AAB)
-        id: build_aab
+          chmod +x ../scripts/build_app.sh
+          ../scripts/build_app.sh appbundle
         working-directory: ./frontend
-        run: ../scripts/build_app.sh appbundle
 
-      - name: Build Android APK for Release
-        id: build_apk
+      - name: Build and Rename APK (Tags Only)
         if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          ../scripts/build_app.sh apk
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/sprout.apk
         working-directory: ./frontend
-        run: ../scripts/build_app.sh apk
+
+      # We upload the bundle so the 'deploy' job can grab it without rebuilding
+      - name: Upload Bundle for Deployment
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-build-artifacts
+          path: |
+            frontend/build/app/outputs/bundle/release/app-release.aab
+            frontend/build/app/outputs/flutter-apk/sprout.apk
+
+  # ------------------------------------------------------------------------------------
+  # Deploy: ONLY runs on Master or Tags
+  # ------------------------------------------------------------------------------------
+  deploy:
+    needs: [filter, build]
+    # Explicitly restrict to Master or Tags
+    if: |
+      needs.filter.outputs.should_run == 'true' && 
+      (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Bundle
+        uses: actions/download-artifact@v7
+        with:
+          name: android-build-artifacts
 
       - id: auth
         name: Authenticate with Google Cloud
@@ -130,42 +141,22 @@ jobs:
         with:
           credentials_json: ${{ secrets.SERVICE_ACCOUNT_JSON }}
 
-      - name: Write Android Changelog to File
-        run: |
-          mkdir -p whatsnew/en-US
-          echo "${{ steps.generate_changelogs.outputs.android_changelog }}" > whatsnew/en-US/whatsnew
-
-      - name: Deploy to Google Play (QA)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      - name: Deploy to Google Play (QA/Alpha)
+        if: github.ref == 'refs/heads/master'
         uses: r0adkll/upload-google-play@v1.1.3
         with:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: net.croudebush.sprout
           releaseFiles: frontend/build/app/outputs/bundle/release/app-release.aab
-          track: alpha # Internal testing. Should update to beta once production is allowed
+          track: alpha
           status: completed
           inAppUpdatePriority: 5
           whatsNewDirectory: whatsnew
-
-      # - name: Deploy to Google Play (Production)
-      #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-      #   uses: r0adkll/upload-google-play@v1.1.3
-      #   with:
-      #     serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
-      #     packageName: net.croudebush.sprout
-      #     releaseFiles: frontend/build/app/outputs/bundle/release/app-release.aab
-      #     track: production
-      #     status: completed
-      #     inAppUpdatePriority: 2
-
-      - name: Rename APK
-        if: startsWith(github.ref, 'refs/tags/')
-        run: mv frontend/build/app/outputs/flutter-apk/app-release.apk frontend/build/app/outputs/flutter-apk/sprout.apk
 
       - name: Upload APK to Draft Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: "frontend/build/app/outputs/flutter-apk/sprout.apk"
-          tag_name: ${{ steps.get_repo_info.outputs.version_string }}
+          tag_name: ${{ needs.build.outputs.version_string }}
           draft: true
