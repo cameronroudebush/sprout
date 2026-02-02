@@ -13,51 +13,39 @@ part of openapi.api;
 class UnsecureAppConfiguration {
   /// Returns a new [UnsecureAppConfiguration] instance.
   UnsecureAppConfiguration({
-    required this.firstTimeSetupPosition,
+    required this.authMode,
     required this.version,
-    this.oidcConfig,
+    required this.allowUserCreation,
   });
 
-  /// If this is the first time someone has connected to this interface
-  Object firstTimeSetupPosition;
+  UnsecureAppConfigurationAuthModeEnum authMode;
 
   /// Version of the backend
   String version;
 
-  /// The OIDC configuration if the server is instead setup to do that.
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  UnsecureOIDCConfig? oidcConfig;
+  bool allowUserCreation;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UnsecureAppConfiguration &&
-    other.firstTimeSetupPosition == firstTimeSetupPosition &&
+    other.authMode == authMode &&
     other.version == version &&
-    other.oidcConfig == oidcConfig;
+    other.allowUserCreation == allowUserCreation;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (firstTimeSetupPosition.hashCode) +
+    (authMode.hashCode) +
     (version.hashCode) +
-    (oidcConfig == null ? 0 : oidcConfig!.hashCode);
+    (allowUserCreation.hashCode);
 
   @override
-  String toString() => 'UnsecureAppConfiguration[firstTimeSetupPosition=$firstTimeSetupPosition, version=$version, oidcConfig=$oidcConfig]';
+  String toString() => 'UnsecureAppConfiguration[authMode=$authMode, version=$version, allowUserCreation=$allowUserCreation]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'firstTimeSetupPosition'] = this.firstTimeSetupPosition;
+      json[r'authMode'] = this.authMode;
       json[r'version'] = this.version;
-    if (this.oidcConfig != null) {
-      json[r'oidcConfig'] = this.oidcConfig;
-    } else {
-      json[r'oidcConfig'] = null;
-    }
+      json[r'allowUserCreation'] = this.allowUserCreation;
     return json;
   }
 
@@ -80,9 +68,9 @@ class UnsecureAppConfiguration {
       }());
 
       return UnsecureAppConfiguration(
-        firstTimeSetupPosition: mapValueOfType<Object>(json, r'firstTimeSetupPosition')!,
+        authMode: UnsecureAppConfigurationAuthModeEnum.fromJson(json[r'authMode'])!,
         version: mapValueOfType<String>(json, r'version')!,
-        oidcConfig: UnsecureOIDCConfig.fromJson(json[r'oidcConfig']),
+        allowUserCreation: mapValueOfType<bool>(json, r'allowUserCreation')!,
       );
     }
     return null;
@@ -130,8 +118,83 @@ class UnsecureAppConfiguration {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'firstTimeSetupPosition',
+    'authMode',
     'version',
+    'allowUserCreation',
   };
 }
+
+
+class UnsecureAppConfigurationAuthModeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const UnsecureAppConfigurationAuthModeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const oidc = UnsecureAppConfigurationAuthModeEnum._(r'oidc');
+  static const local = UnsecureAppConfigurationAuthModeEnum._(r'local');
+
+  /// List of all possible values in this [enum][UnsecureAppConfigurationAuthModeEnum].
+  static const values = <UnsecureAppConfigurationAuthModeEnum>[
+    oidc,
+    local,
+  ];
+
+  static UnsecureAppConfigurationAuthModeEnum? fromJson(dynamic value) => UnsecureAppConfigurationAuthModeEnumTypeTransformer().decode(value);
+
+  static List<UnsecureAppConfigurationAuthModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <UnsecureAppConfigurationAuthModeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = UnsecureAppConfigurationAuthModeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [UnsecureAppConfigurationAuthModeEnum] to String,
+/// and [decode] dynamic data back to [UnsecureAppConfigurationAuthModeEnum].
+class UnsecureAppConfigurationAuthModeEnumTypeTransformer {
+  factory UnsecureAppConfigurationAuthModeEnumTypeTransformer() => _instance ??= const UnsecureAppConfigurationAuthModeEnumTypeTransformer._();
+
+  const UnsecureAppConfigurationAuthModeEnumTypeTransformer._();
+
+  String encode(UnsecureAppConfigurationAuthModeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a UnsecureAppConfigurationAuthModeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  UnsecureAppConfigurationAuthModeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'oidc': return UnsecureAppConfigurationAuthModeEnum.oidc;
+        case r'local': return UnsecureAppConfigurationAuthModeEnum.local;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [UnsecureAppConfigurationAuthModeEnumTypeTransformer] instance.
+  static UnsecureAppConfigurationAuthModeEnumTypeTransformer? _instance;
+}
+
 

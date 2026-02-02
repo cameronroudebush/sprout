@@ -27,6 +27,7 @@ class ConfigProvider extends BaseProvider<ConfigApi> {
   UnsecureAppConfiguration? get unsecureConfig => _unsecureConfig;
   PackageInfo get packageInfo => _packageInfo;
   bool get failedToConnect => _failedToConnect;
+  bool get isOIDCAuthMode => _unsecureConfig?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
 
   // Constructor to check initial login status
   ConfigProvider(super.api, this._packageInfo);

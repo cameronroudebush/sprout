@@ -1,6 +1,7 @@
 import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
+import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { HttpService } from "@nestjs/axios";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
@@ -39,11 +40,13 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     });
   }
 
-  async validate(req: Request, profileData: { preferred_username: string }) {
+  async validate(req: Request, profileData: { sub: string; preferred_username: string }) {
     // Sometimes the JWT may be minified which means it excludes all profile info. So go ahead and look that up manually.
     if (!profileData.preferred_username) {
       // Need the access token to request data from OIDC provider. Try and find it from either cookies or the header
       const accessToken = req.cookies["access_token"] || req.headers["x-access-token"];
+
+      if (!accessToken) throw new UnauthorizedException("Token missing profile data and no access token provided.");
 
       if (accessToken) {
         const cacheKey = `oidc_user_${accessToken}`;
@@ -76,6 +79,11 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
 
     // Find user based on our profile data/token
     const user = await User.findOne({ where: { username: profileData.preferred_username } });
+
+    // Set request context for any data we have for setup of new users
+    (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username);
+
+    // No user? Probably should fail then
     if (!user) throw new UnauthorizedException(`User ${profileData.preferred_username} not found`);
 
     return user;

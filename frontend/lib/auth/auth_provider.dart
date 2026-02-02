@@ -20,6 +20,9 @@ class AuthProvider extends BaseProvider<AuthApi> {
   bool _isLoggedIn = false;
   bool _isLoggingOut = false;
 
+  /// Tracks if we are currently running a setup for a user
+  bool isSetupMode = false;
+
   /// Tracks when we're trying to do silent token refresh
   Completer<bool>? _refreshCompleter;
 
@@ -67,8 +70,7 @@ class AuthProvider extends BaseProvider<AuthApi> {
       _currentUser = user ?? await ServiceLocator.get<UserProvider>().api.userControllerMe();
       return _currentUser;
     } catch (e) {
-      // Logout on errors
-      await logout(forced: true);
+      if (e is ApiException && e.code == 404) await setup();
       return null;
     }
   }
@@ -84,18 +86,26 @@ class AuthProvider extends BaseProvider<AuthApi> {
     }
   }
 
+  /// If called, assumes we need to go to setup for new user creation. Runs some initial checks before trying that.
+  Future<void> setup() async {
+    isSetupMode = true;
+    final configProvider = ServiceLocator.get<ConfigProvider>();
+    final unsecureConfig = configProvider.unsecureConfig;
+    if (unsecureConfig != null && unsecureConfig.allowUserCreation) {
+      LoggerService.debug("Initiating setup for new user with strategy ${unsecureConfig.authMode.toString()}.");
+      SproutNavigator.redirect("setup");
+    }
+  }
+
   Future<User?> tryInitialLogin() async {
     if (_pendingLoginFuture != null) return _pendingLoginFuture!;
 
     _pendingLoginFuture = () async {
       final configProvider = ServiceLocator.get<ConfigProvider>();
-      if (configProvider.unsecureConfig?.firstTimeSetupPosition == "setup") return null;
-
-      // Load Tokens
       final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
 
       // OIDC
-      if (configProvider.unsecureConfig?.oidcConfig != null) {
+      if (configProvider.isOIDCAuthMode) {
         // Mobile - Restore
         if (!kIsWeb && idToken != null) {
           final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken); // OIDC Mobile
@@ -112,27 +122,29 @@ class AuthProvider extends BaseProvider<AuthApi> {
           }
         } else if (kIsWeb) {
           // Web - Restore
-          try {
-            // Attempt to fetch 'me'. If we have a cookie, this succeeds.
-            final user = await ServiceLocator.get<UserProvider>().api.userControllerMe();
-            _isLoggedIn = true;
-            _currentUser = user;
-            return user;
-          } catch (e) {
-            // No cookie, no headers -> Not logged in.
-          }
+          return await _applyAuth();
         }
 
-        // Didn't return from above? Try to hit the login again for OIDC.
-        return await loginOIDC();
+        // Base case. Don't try to auto login to prevent loops from failures
+        return null;
       }
 
       // Local Auth Restore (Mobile & Web)
       try {
-        final loginResponse = await api.authControllerLoginWithJWT(JWTLoginRequest(jwt: idToken ?? ''));
-        if (loginResponse != null) return await _applyAuth(idToken: loginResponse.jwt, user: loginResponse.user);
+        // Try and grab me as a user if we have a token to see if this needs to be a new user setup
+        if ((idToken == null || idToken == "") && configProvider.unsecureConfig!.allowUserCreation) {
+          try {
+            await ServiceLocator.get<UserProvider>().api.userControllerMe();
+          } catch (e) {
+            if (e is ApiException && e.code == 404) await setup();
+          }
+        } else {
+          final loginResponse = await api.authControllerLoginWithJWT(JWTLoginRequest(jwt: idToken ?? ''));
+          if (loginResponse != null) return await _applyAuth(idToken: loginResponse.jwt, user: loginResponse.user);
+        }
       } catch (e) {
         // Either no cookie so not logged in, or an invalid JWT
+        rethrow;
       }
 
       return null;
@@ -143,14 +155,10 @@ class AuthProvider extends BaseProvider<AuthApi> {
 
   Future<User?> loginOIDC() async {
     return _pendingLoginFuture = () async {
-      final unsecureConfig = ServiceLocator.get<ConfigProvider>().unsecureConfig;
-      if (unsecureConfig?.oidcConfig == null) throw "OIDC Config missing";
+      final configProvider = ServiceLocator.get<ConfigProvider>();
+      if (!configProvider.isOIDCAuthMode) throw "OIDC Config missing";
 
-      final tokens = await _oidcHelper.authenticate(
-        issuerUrl: unsecureConfig!.oidcConfig!.issuer,
-        clientId: unsecureConfig.oidcConfig!.clientId,
-        scopes: unsecureConfig.oidcConfig!.scopes,
-      );
+      final tokens = await _oidcHelper.authenticate();
 
       // On Web, tokens is null (Cookie flow).
       // On Mobile, tokens contains data.
@@ -188,7 +196,7 @@ class AuthProvider extends BaseProvider<AuthApi> {
     try {
       final configProvider = ServiceLocator.get<ConfigProvider>();
       // Not OIDC? Then just complete. We can't refresh with local strategy
-      if (configProvider.unsecureConfig?.oidcConfig == null) {
+      if (!configProvider.isOIDCAuthMode) {
         _refreshCompleter!.complete(false);
         return false;
       }

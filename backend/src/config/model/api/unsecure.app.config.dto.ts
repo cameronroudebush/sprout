@@ -1,22 +1,21 @@
-import { UnsecureOIDCConfig } from "@backend/auth/model/api/unsecure.oidc.config.dto";
+import { AuthenticationConfig } from "@backend/auth/model/authentication.config";
 import { Base } from "@backend/core/model/base";
-import { Optional } from "@nestjs/common";
+import { ApiProperty } from "@nestjs/swagger";
 
 /** This class provides additional information to those who request but it is **note secured behind authentication requirements** */
 export class UnsecureAppConfiguration extends Base {
-  /** If this is the first time someone has connected to this interface */
-  firstTimeSetupPosition: "welcome" | "complete";
   /** Version of the backend */
   version: string;
+  @ApiProperty({
+    enum: ["oidc", "local"],
+  })
+  authMode: AuthenticationConfig["type"];
+  allowUserCreation: boolean;
 
-  /** The OIDC configuration if the server is instead setup to do that. */
-  @Optional()
-  oidcConfig?: UnsecureOIDCConfig;
-
-  constructor(firstTimeSetupPosition: "welcome" | "complete" = "complete", version: string, oidcConfig?: UnsecureOIDCConfig) {
+  constructor(version: string, authMode: AuthenticationConfig["type"], allowUserCreation: boolean) {
     super();
-    this.firstTimeSetupPosition = firstTimeSetupPosition;
     this.version = version;
-    this.oidcConfig = oidcConfig;
+    this.authMode = authMode;
+    this.allowUserCreation = allowUserCreation;
   }
 }

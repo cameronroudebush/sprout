@@ -16,9 +16,9 @@ class UserApi {
 
   final ApiClient apiClient;
 
-  /// Create a new user.
+  /// Create a new user..
   ///
-  /// Allows for the creation of a new user. Only works during initial setup of the app.
+  /// Allows for user creation based on either first time setup configuration or OIDC user config.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -50,9 +50,9 @@ class UserApi {
     );
   }
 
-  /// Create a new user.
+  /// Create a new user..
   ///
-  /// Allows for the creation of a new user. Only works during initial setup of the app.
+  /// Allows for user creation based on either first time setup configuration or OIDC user config.
   ///
   /// Parameters:
   ///

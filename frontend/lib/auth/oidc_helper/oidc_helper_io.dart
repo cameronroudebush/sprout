@@ -8,11 +8,7 @@ import 'oidc_helper_stub.dart' as stub;
 
 class OIDCHelper implements stub.OIDCHelper {
   @override
-  Future<Map<String, String>?> authenticate({
-    required String issuerUrl,
-    required String clientId,
-    required List<String> scopes,
-  }) async {
+  Future<Map<String, String>?> authenticate() async {
     try {
       final backendLoginUrl = "${defaultApiClient.basePath}/auth/oidc/login";
       final callbackScheme = 'net.croudebush.sprout'; // Our own custom callback as defined from the manifest

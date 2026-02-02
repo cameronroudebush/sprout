@@ -11,11 +11,6 @@ import 'package:sprout/core/provider/base.dart';
 class UserProvider extends BaseProvider<UserApi> {
   UserProvider(super.api);
 
-  Future<String?> createUser(String username, String password) async {
-    final response = await api.userControllerCreate(UserCreationRequest(username: username, password: password));
-    return response?.username;
-  }
-
   /// Registers the device of this app with the backend so we can reference it in notifications
   Future<void> registerDevice() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
