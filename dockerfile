@@ -43,8 +43,6 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY --from=frontend-build /app/build/web /usr/share/nginx/html
 # Backend
 COPY --from=backend-build --chmod=0755 /app/sprout /sprout-backend
-# Grab required node files
-COPY --from=backend-build /app/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node .=
 
 # Start nginx along side backend. Frontend is hosted via nginx, backend runs it's own internal API
 ENTRYPOINT ["/bin/sh", "-c" , "nginx & ./sprout-backend"]
