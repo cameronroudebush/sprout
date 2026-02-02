@@ -115,7 +115,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       await authProvider.applyDefaultAuth();
 
       // Initialize local notification settings
-      const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@drawable/ic_notification');
+      const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('ic_notification');
       const InitializationSettings initSettings = InitializationSettings(android: androidSettings);
       await _backgroundLocalNotifications.initialize(settings: initSettings);
 
