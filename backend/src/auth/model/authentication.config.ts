@@ -1,6 +1,6 @@
 import { UnsecureOIDCConfig } from "@backend/auth/model/api/unsecure.oidc.config.dto";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
-import { v4 } from "uuid";
+import { randomUUID } from "crypto";
 
 /** This class represents the configuration for OIDC */
 class OIDCConfig {
@@ -43,7 +43,7 @@ class LocalConfig {
 /** Configuration class for controlling how authentication works in this app */
 export class AuthenticationConfig {
   /** A secret key that can be used to create JWT's and other relevant info for this app. **This will be regenerated during every restart!** */
-  readonly secretKey = process.env["SECRET_KEY"]! ?? v4();
+  readonly secretKey = process.env["SECRET_KEY"]! ?? randomUUID();
 
   @ConfigurationMetadata.assign({
     comment: [

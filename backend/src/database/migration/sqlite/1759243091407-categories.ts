@@ -1,7 +1,7 @@
 import { Category } from "@backend/category/model/category.model";
 import { User } from "@backend/user/model/user.model";
+import { randomUUID } from "crypto";
 import { MigrationInterface, QueryRunner } from "typeorm";
-import { v4 } from "uuid";
 
 export class Categories1759243091407 implements MigrationInterface {
     name = 'Categories1759243091407'
@@ -10,7 +10,7 @@ export class Categories1759243091407 implements MigrationInterface {
     static async insertDefaultCategories(queryRunner: QueryRunner) {
         // Used so we can recursively call it for parent categories if defined
         const insertCategory = async (user: User, category: Category) => {
-            category.id = v4();
+            category.id = randomUUID();
             await queryRunner.query(`INSERT INTO "category" (id, name, type, "userId", "parentCategoryId") VALUES ('${category.id}', '${category.name}', 'expense', '${user.id}', ${category.parentCategory ? `'${category.parentCategory.id}'` : "NULL"})`);
             return category;
         }
