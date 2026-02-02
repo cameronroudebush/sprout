@@ -160,9 +160,8 @@ class SproutRouter {
       final failedToConnect = configProvider.failedToConnect;
       if (failedToConnect) return "/connection-failure";
 
-      // Check if this is first time setup
-      final setupPosition = configProvider.unsecureConfig?.firstTimeSetupPosition;
-      if (setupPosition == "welcome") return "/setup";
+      // Force setup if we're in setup mode
+      if (authProvider.isSetupMode) return "/setup";
 
       // Check if we're already authenticated (JWT or not)
       if (!authProvider.isLoggedIn) return "/login";

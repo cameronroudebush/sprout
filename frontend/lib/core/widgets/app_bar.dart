@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/notification/widgets/notification_item.dart';
@@ -31,6 +33,7 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Consumer<NotificationProvider>(
       builder: (context, provider, child) {
+        final authProvider = ServiceLocator.get<AuthProvider>();
         final theme = Theme.of(context);
         final size = MediaQuery.of(context).size;
 
@@ -40,7 +43,11 @@ class SproutAppBar extends StatelessWidget implements PreferredSizeWidget {
               : Image.asset('assets/icon/color.png', width: 48, fit: BoxFit.contain);
 
           return AppBar(
-            automaticallyImplyLeading: kIsWeb && isDesktop ? false : true,
+            automaticallyImplyLeading: authProvider.isSetupMode
+                ? false
+                : kIsWeb && isDesktop
+                ? false
+                : true,
             toolbarHeight: preferredSize.height,
             scrolledUnderElevation: 0,
             backgroundColor: theme.colorScheme.primaryContainer,

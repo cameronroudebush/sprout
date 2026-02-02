@@ -1,6 +1,9 @@
+import { Category } from "@backend/category/model/category.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
 import { UserConfig } from "@backend/user/model/user.config.model";
+import { BadRequestException } from "@nestjs/common";
 import { ApiHideProperty } from "@nestjs/swagger";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
@@ -20,8 +23,8 @@ export class User extends DatabaseBase {
   @DatabaseDecorators.column({ default: false })
   admin: boolean;
 
-  /** Hashed password in the database to compare against */
-  @DatabaseDecorators.column()
+  /** Hashed password to verify for login. **You should never set this directly**. This value can be null for non local auth strategies.*/
+  @DatabaseDecorators.column({ nullable: true })
   @Exclude()
   @ApiHideProperty()
   password!: string;
@@ -56,7 +59,8 @@ export class User extends DatabaseBase {
 
   /** Checks the database to see if the username is in use and throws an error if so. */
   static async checkIfUsernameIsInUser(username: string) {
-    if ((await User.find({ where: { username } })).length > 0) throw new Error("Username is in use,");
+    if (!username.trim()) throw new BadRequestException("No username given");
+    if ((await User.find({ where: { username } })).length > 0) throw new Error("Username is in use");
   }
 
   /** Validates the given plain-text password passes password requirements. Throws an error if it doesn't. */
@@ -66,14 +70,21 @@ export class User extends DatabaseBase {
     return;
   }
 
-  /** Creates a user with the given content and returns it. Could throw errors depending upon issues. */
-  static async createUser(username: string, password: string, admin = false) {
-    await User.checkIfUsernameIsInUser(username);
-    await User.validatePassword(password);
-    const hashedPassword = User.hashPassword(password);
-    const user = User.fromPlain({ username, admin });
-    user.password = hashedPassword;
+  /**
+   * Creates a user with the given content and returns it. Could throw errors depending upon issues.
+   * If a password is not given, you will not be able to login with standard username/password login.
+   */
+  static async createUser(u: Partial<User> & { username: string; admin: boolean }) {
+    await User.checkIfUsernameIsInUser(u.username);
+    let user = User.fromPlain(u);
+    if (u.password) {
+      await User.validatePassword(u.password);
+      const hashedPassword = User.hashPassword(u.password);
+      user.password = hashedPassword;
+    }
     user.config = await UserConfig.fromPlain({ user: user }).insert();
-    return await user.insert();
+    user = await user.insert();
+    await Category.insertMany(Category.getDefaultCategoriesForUser(user));
+    return UserCreationResponse.fromPlain({ username: user.username });
   }
 }

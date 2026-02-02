@@ -14,7 +14,7 @@ export class AuthService {
   /** Given a login request from an endpoint, requests a login by validating the username and password. */
   async login(loginRequest: UsernamePasswordLoginRequest): Promise<UserLoginResponse> {
     const matchingUser = await User.findOne({ where: { username: loginRequest.username } });
-    if (matchingUser == null) throw new UnauthorizedException("Login failed");
+    if (matchingUser == null || !matchingUser.password) throw new UnauthorizedException("Login failed");
     const passwordMatches = matchingUser.verifyPassword(loginRequest.password);
     if (!passwordMatches) throw new UnauthorizedException("Login failed");
     else return UserLoginResponse.fromPlain({ user: matchingUser, jwt: this.generateJWT(matchingUser) });
@@ -25,7 +25,7 @@ export class AuthService {
     try {
       this.verifyJWT(jwt);
     } catch {
-      throw new UnauthorizedException("Session Expired");
+      throw new UnauthorizedException(!jwt ? "" : "Session Expired");
     }
     const usernameToCheck = this.decodeJWT(jwt).username;
     const matchingUser = await User.findOne({ where: { username: usernameToCheck } });

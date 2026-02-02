@@ -9,7 +9,6 @@ import { CoreController } from "@backend/core/core.controller";
 import { ImageProxyController } from "@backend/core/image.proxy.controller";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { NetWorthController } from "@backend/core/net.worth.controller";
-import { SetupService } from "@backend/core/setup.service";
 import { DatabaseService } from "@backend/database/database.service";
 import { HoldingController } from "@backend/holding/holding.controller";
 import { JobsService } from "@backend/jobs/jobs.service";
@@ -22,9 +21,7 @@ import { TransactionController } from "@backend/transaction/transaction.controll
 import { TransactionRuleController } from "@backend/transaction/transaction.rule.controller";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { TransactionService } from "@backend/transaction/transaction.service";
-import { UserConfigController } from "@backend/user/user.config.controller";
-import { UserController } from "@backend/user/user.controller";
-import { UserService } from "@backend/user/user.service";
+import { UserModule } from "@backend/user/user.module";
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
@@ -34,6 +31,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
 @Module({
   imports: [
     AuthModule,
+    UserModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -43,8 +41,6 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
   ],
   controllers: [
     CoreController,
-    UserController,
-    UserConfigController,
     AccountController,
     TransactionController,
     TransactionRuleController,
@@ -58,14 +54,12 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     NotificationController,
   ],
   providers: [
-    UserService,
     TransactionService,
     TransactionRuleService,
     ConfigurationService,
     ProviderService,
     JobsService,
     DatabaseService,
-    SetupService,
     SSEService,
     CategoryService,
     CashFlowService,

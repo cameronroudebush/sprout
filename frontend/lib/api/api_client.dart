@@ -248,8 +248,6 @@ class ApiClient {
           return TransactionSubscription.fromJson(value);
         case 'UnsecureAppConfiguration':
           return UnsecureAppConfiguration.fromJson(value);
-        case 'UnsecureOIDCConfig':
-          return UnsecureOIDCConfig.fromJson(value);
         case 'User':
           return User.fromJson(value);
         case 'UserConfig':

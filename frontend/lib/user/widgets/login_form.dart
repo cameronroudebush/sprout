@@ -84,7 +84,8 @@ class _LoginFormState extends State<LoginForm> {
             await _loginComplete(user, failureMessage: user == null ? "" : _LoginFormState.failedLoginMessage);
           })
           .onError((ApiException error, StackTrace stackTrace) async {
-            final isSessionExpiration = error.code == 401;
+            final isSessionExpiration =
+                error.code == 401 && SnackbarProvider.parseOpenAPIException(error) == "Session Expired";
             // Reset the JWT as the auto login has expired
             if (isSessionExpiration) {
               await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
@@ -112,7 +113,7 @@ class _LoginFormState extends State<LoginForm> {
       setState(() {
         _loginIsRunning = true;
       });
-      if (configProvider.unsecureConfig?.oidcConfig != null) {
+      if (configProvider.isOIDCAuthMode) {
         // OIDC login
         user = await authProvider.loginOIDC();
       } else {
@@ -149,7 +150,7 @@ class _LoginFormState extends State<LoginForm> {
                   SproutNotificationWidget(
                     SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError),
                   ),
-                if (provider.unsecureConfig?.oidcConfig == null)
+                if (!provider.isOIDCAuthMode)
                   AutofillGroup(
                     child: Column(
                       spacing: 12,
@@ -184,7 +185,7 @@ class _LoginFormState extends State<LoginForm> {
                     style: AppTheme.primaryButton,
                     onPressed: _loginIsRunning || _isLoadingData
                         ? null
-                        : provider.unsecureConfig?.oidcConfig != null
+                        : provider.isOIDCAuthMode
                         ? _login
                         : (_passwordController.text == "" || _usernameController.text == "")
                         ? null
@@ -198,7 +199,7 @@ class _LoginFormState extends State<LoginForm> {
                         Text(
                           _isLoadingData
                               ? "Loading Data"
-                              : provider.unsecureConfig?.oidcConfig == null
+                              : !provider.isOIDCAuthMode
                               ? "Login"
                               : "Login with OIDC",
                         ),

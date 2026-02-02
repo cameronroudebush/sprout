@@ -3,10 +3,10 @@ import { Configuration } from "@backend/config/core";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { SetupService } from "@backend/core/setup.service";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderService } from "@backend/providers/provider.service";
 import { User } from "@backend/user/model/user.model";
+import { UserService } from "@backend/user/user.service";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
@@ -16,7 +16,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 export class ConfigController {
   constructor(
     private readonly providerService: ProviderService,
-    private readonly setupService: SetupService,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
@@ -47,10 +47,6 @@ export class ConfigController {
   })
   @ApiOkResponse({ description: "Unsecure app configuration obtained successfully.", type: UnsecureAppConfiguration })
   async getUnsecure() {
-    return UnsecureAppConfiguration.fromPlain({
-      firstTimeSetupPosition: await this.setupService.firstTimeSetupDetermination(),
-      version: Configuration.version,
-      oidcConfig: Configuration.server.auth.type === "oidc" ? Configuration.server.auth.oidc.toUnsecure() : undefined,
-    });
+    return new UnsecureAppConfiguration(Configuration.version, Configuration.server.auth.type, await this.userService.allowUserCreation());
   }
 }

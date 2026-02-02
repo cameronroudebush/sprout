@@ -108,13 +108,13 @@ async function createUser() {
   logger.log("Creating demo user.");
   let demoUser = await User.findOne({ where: { username: "demo" } });
   if (!demoUser) {
-    demoUser = await User.createUser("demo", "Demodemo", true);
-    await Category.insertMany(Category.getDefaultCategoriesForUser(demoUser));
+    await User.createUser({ username: "demo", password: "Demodemo", admin: true });
+    demoUser = await User.findOne({ where: { username: "demo" } });
     logger.log("Created demo user and default categories.");
   } else {
     logger.log("Demo user already exists.");
   }
-  return demoUser;
+  return demoUser!;
 }
 
 /** Creates the institutions to associate accounts to */

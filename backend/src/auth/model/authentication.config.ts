@@ -1,4 +1,3 @@
-import { UnsecureOIDCConfig } from "@backend/auth/model/api/unsecure.oidc.config.dto";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { randomUUID } from "crypto";
 
@@ -13,6 +12,9 @@ class OIDCConfig {
   @ConfigurationMetadata.assign({ comment: "The secret code utilized for your OIDC client." })
   secret = "";
 
+  @ConfigurationMetadata.assign({ comment: "If new users should be allowed to be created from the OIDC client.", restrictedValues: [true, false] })
+  allowNewUsers = true;
+
   @ConfigurationMetadata.assign({ comment: "The scopes we use for our information.", externalControlDisabled: true })
   scopes = ["openid", "profile", "email", "offline_access"];
 
@@ -21,11 +23,6 @@ class OIDCConfig {
     if (!this.issuer) throw new Error("Issuer URL is required for OIDC usage.");
     if (!this.clientId) throw new Error("Client ID is required for OIDC usage.");
     if (!this.secret) throw new Error("Secret is required for OIDC usage.");
-  }
-
-  /** Returns a version that the frontend can track */
-  toUnsecure() {
-    return new UnsecureOIDCConfig(this.issuer, this.clientId, this.scopes);
   }
 
   /** Returns an auth header for the OIDC auth using the secret and client Id */

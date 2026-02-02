@@ -1,15 +1,16 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
-import { Category } from "@backend/category/model/category.model";
+import { Configuration } from "@backend/config/core";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { SetupService } from "@backend/core/setup.service";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
 import { RegisterDeviceDto } from "@backend/user/model/api/register.device.dto";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { DevicePlatform } from "@backend/user/model/user.device.type";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Post } from "@nestjs/common";
-import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
+import { UserService } from "@backend/user/user.service";
+import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Post, Req, UnauthorizedException } from "@nestjs/common";
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all User related content */
 @Controller("user")
@@ -17,7 +18,7 @@ import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse
 export class UserController {
   private readonly logger = new Logger("controller:user");
 
-  constructor(private setupService: SetupService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get("me")
   @ApiOperation({
@@ -25,8 +26,26 @@ export class UserController {
     description: "Returns the current user from the database.",
   })
   @ApiOkResponse({ description: "User found successfully.", type: User })
-  @AuthGuard.attach()
-  async me(@CurrentUser() user: User) {
+  @ApiUnauthorizedResponse({ description: "Authentication was given but it was invalid." })
+  @ApiNotFoundResponse({ description: "Authentication was given that was found to be valid but no valid user was found." })
+  @AuthGuard.attachOptional()
+  async me(@CurrentUser(true) user: User, @Req() req: Request) {
+    const authConfig = Configuration.server.auth;
+    const allowNewUsers = await this.userService.allowUserCreation();
+    // No user? Check setup status
+    if (user == null) {
+      // Check for oidc strategy. 404's will trigger the frontend to allow a new user to be created.
+      if (authConfig.type === "oidc" && allowNewUsers) {
+        const setup = (req as any).setupUser as UserSetupContext | undefined;
+        // No setup user? That means we didn't make it through user validation via the auth guard
+        if (setup == null) throw new UnauthorizedException();
+        else throw new NotFoundException(); // We do have setup info? Then go ahead and create a new one
+      }
+      // Check for local strategy. If we don't have any users, safe to assume this is first time setup.
+      else if (authConfig.type === "local" && allowNewUsers) throw new NotFoundException();
+      else if (user == null) throw new UnauthorizedException(); // Else this isn't a setup request. Hit em with an unauthorized
+    }
+    // Oh, we do have a user. Go ahead and return it then
     return await User.findOne({ where: { id: user.id } });
   }
 
@@ -46,25 +65,28 @@ export class UserController {
 
   @Post("create")
   @ApiOperation({
-    summary: "Create a new user.",
-    description: "Allows for the creation of a new user. Only works during initial setup of the app.",
+    summary: "Create a new user..",
+    description: "Allows for user creation based on either first time setup configuration or OIDC user config.",
   })
   @ApiCreatedResponse({ description: "User created successfully.", type: UserCreationResponse })
-  @ApiBadRequestResponse({ description: "The app is not in a setup state or invalid input." })
-  @ApiBody({ type: UserCreationRequest })
-  async create(@Body() data: UserCreationRequest) {
-    const firstTimeSetupStatus = await this.setupService.firstTimeSetupDetermination();
-    if (firstTimeSetupStatus === "welcome") {
+  @ApiBadRequestResponse({ description: "New users are not allowed to be created." })
+  @AuthGuard.attachOptional()
+  async create(@Body() data: UserCreationRequest, @Req() req: Request) {
+    if (!(await this.userService.allowUserCreation())) throw new BadRequestException("New users are not permitted.");
+    else {
       try {
-        const user = await User.createUser(data.username.toLowerCase(), data.password, true);
-        this.logger.log(`Admin account created with name ${data.username}`);
-        // Insert some default data
-        await Category.insertMany(Category.getDefaultCategoriesForUser(user));
-        return UserCreationResponse.fromPlain({ username: user.username });
+        const isFirstUser = (await User.count()) === 0;
+        let response: UserCreationResponse;
+        if (Configuration.server.auth.type === "oidc") {
+          const setup = (req as any).setupUser;
+          response = await User.createUser({ ...setup, admin: isFirstUser });
+        } else response = await User.createUser({ username: data.username, password: data.password, admin: isFirstUser });
+        this.logger.log(`New user registered: ${response.username}${isFirstUser ? ". This is the first user and will be registered as Admin." : ""}`);
+        return response;
       } catch (e) {
         throw new BadRequestException((e as Error).message);
       }
-    } else throw new BadRequestException("The app is not in a setup state.");
+    }
   }
 
   @Post("device/register")

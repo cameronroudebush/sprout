@@ -3,11 +3,7 @@
 /// at runtime for the _web.dart or _io.dart versions.
 class OIDCHelper {
   /// Helper to start the authentication flow.
-  Future<Map<String, String>?> authenticate({
-    required String issuerUrl,
-    required String clientId,
-    required List<String> scopes,
-  }) {
+  Future<Map<String, String>?> authenticate() {
     throw UnimplementedError('authenticate() has not been implemented.');
   }
 }
