@@ -3,27 +3,41 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Provides a row of info to display in the card structure of the user page
 // ignore: must_be_immutable
 class UserInfoRow extends StatelessWidget {
+  /// Called when a config fails to update, if applicable
+  final void Function(String msg)? onFail;
+
+  /// Called when a config updates successfully
+  final void Function()? onSet;
+
   final UserDisplayInfo info;
   final TextEditingController _textController = TextEditingController();
   Timer? _debounce;
 
-  UserInfoRow({super.key, required this.info}) {
+  UserInfoRow({super.key, required this.info, this.onFail, this.onSet}) {
     if (info.settingValue is String) _textController.text = info.settingValue ?? '';
   }
 
   void _updateVal(dynamic val) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     // Don't allow too often of updates
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
       final provider = ServiceLocator.get<UserConfigProvider>();
-      if (info.onSettingUpdate != null) info.onSettingUpdate!(val);
-      provider.updateConfig(provider.currentUserConfig!);
+      final originalVal = info.settingValue;
+      try {
+        if (info.onSettingUpdate != null) info.onSettingUpdate!(val);
+        await provider.updateConfig(provider.currentUserConfig!);
+        onSet?.call();
+      } catch (e) {
+        if (info.onSettingUpdate != null) info.onSettingUpdate!(originalVal);
+        onFail?.call(SnackbarProvider.parseOpenAPIException(e));
+      }
     });
   }
 

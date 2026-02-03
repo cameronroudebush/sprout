@@ -156,7 +156,7 @@ class _AddAccountDialogState extends State<AddAccountDialog> {
   Widget _getProvidersDisplay(BuildContext context) {
     final configProvider = ServiceLocator.get<ConfigProvider>();
     final providers = configProvider.config?.providers;
-    if (providers == null) {
+    if (providers == null || providers.isEmpty) {
       return Text(
         "No providers were configured properly.",
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

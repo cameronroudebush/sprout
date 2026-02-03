@@ -14,7 +14,7 @@ import { HoldingController } from "@backend/holding/holding.controller";
 import { JobsService } from "@backend/jobs/jobs.service";
 import { NotificationController } from "@backend/notification/notification.controller";
 import { NotificationService } from "@backend/notification/notification.service";
-import { ProviderService } from "@backend/providers/provider.service";
+import { ProviderModule } from "@backend/providers/provider.module";
 import { SSEController } from "@backend/sse/sse.controller";
 import { SSEService } from "@backend/sse/sse.service";
 import { TransactionController } from "@backend/transaction/transaction.controller";
@@ -32,6 +32,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
   imports: [
     AuthModule,
     UserModule,
+    ProviderModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -57,7 +58,6 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     TransactionService,
     TransactionRuleService,
     ConfigurationService,
-    ProviderService,
     JobsService,
     DatabaseService,
     SSEService,

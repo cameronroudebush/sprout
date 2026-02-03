@@ -7,6 +7,7 @@ import { Institution } from "@backend/institution/model/institution.model";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
+import { BadRequestException } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
@@ -125,6 +126,11 @@ export class SimpleFINProvider extends ProviderBase {
   async convertSetupToken(setupToken: string) {
     // Base64 decode the setup token to get the Claim URL
     const claimUrl = Buffer.from(setupToken, "base64").toString("utf-8");
+    try {
+      new URL(claimUrl); // Validate URL
+    } catch (e) {
+      throw new BadRequestException("Failed to parse claimUrl. Are you sure you only included the 'setup token'?");
+    }
     // Issue a POST request to the Claim URLs
     const claimResponse = await fetch(claimUrl, {
       method: "POST",

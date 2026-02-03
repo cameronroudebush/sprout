@@ -44,8 +44,10 @@ class SproutRouter {
     SproutPage(
       (context, state) {
         final configProvider = ServiceLocator.get<ConfigProvider>();
+        final authProvider = ServiceLocator.get<AuthProvider>();
         return SetupPage(
           onSetupSuccess: () async {
+            authProvider.isSetupMode = false;
             await configProvider.populateUnsecureConfig();
             // Grab all updated data
             await InitializationNotifier.initializeWithNotification((status) {});

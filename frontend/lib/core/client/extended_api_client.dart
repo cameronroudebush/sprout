@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/retry.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_interceptor.dart';
 import 'package:sprout/auth/auth_provider.dart';
@@ -43,12 +44,14 @@ Future<void> applyDefaultAPI() async {
 
 /// Helper to a generate a client for OIDC testing on web
 http.Client _createHttpClient(String url) {
+  http.Client inner;
   if (kIsWeb && kDebugMode) {
-    final client = BrowserClient();
-    client.withCredentials = true;
-    return client;
+    inner = BrowserClient();
+    (inner as BrowserClient).withCredentials = true;
+  } else {
+    inner = http.Client();
   }
-  return http.Client();
+  return RetryClient(inner, retries: 2);
 }
 
 class ExtendedApiClient extends ApiClient {
