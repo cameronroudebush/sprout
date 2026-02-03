@@ -18,6 +18,9 @@ class UserDisplayInfo {
   /// If we should render the child content in a row or a column
   final bool column;
 
+  /// If this setting should be customizable during setup
+  final bool showOnSetup;
+
   // If this is a setting, you should populate below
   final dynamic settingValue;
   final dynamic settingType;
@@ -33,5 +36,6 @@ class UserDisplayInfo {
     this.settingType,
     this.column = true,
     this.onSettingUpdate,
+    this.showOnSetup = false,
   });
 }

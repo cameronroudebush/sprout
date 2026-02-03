@@ -5,14 +5,15 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/snackbar.dart';
-import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/notification.dart';
+import 'package:sprout/setup/widgets/pages/wrapper.dart';
 import 'package:sprout/user/user_provider.dart';
 
 /// This page contains the process and inputs for creating a new user account
 class AccountSetupPage extends StatefulWidget {
-  final VoidCallback onNextPage;
-  const AccountSetupPage({super.key, required this.onNextPage});
+  final VoidCallback nextPage;
+  final bool isDesktop;
+  const AccountSetupPage(this.nextPage, this.isDesktop, {super.key});
 
   /// Creates the account and logs in as the created user
   static Future<void> createAccountAndLogin({
@@ -55,7 +56,6 @@ class AccountSetupPage extends StatefulWidget {
 
       await ServiceLocator.postLogin();
       onStatusChanged?.call('Login successful!', isError: false);
-      authProvider.isSetupMode = false;
       onSuccess?.call();
     } catch (e) {
       onStatusChanged?.call(SnackbarProvider.parseOpenAPIException(e), isError: true);
@@ -100,7 +100,7 @@ class _AccountSetupPageState extends State<AccountSetupPage> {
       },
       onSuccess: () {
         setState(() => _isLoading = false);
-        widget.onNextPage();
+        widget.nextPage();
       },
     );
   }
@@ -108,64 +108,49 @@ class _AccountSetupPageState extends State<AccountSetupPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      return Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: isDesktop ? 720 : 360),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 24,
-            children: <Widget>[
-              Text(
-                'Create Your Admin Account',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: isDesktop ? 48 : 24),
-              ),
-              Text(
-                'This will be your primary account to manage the app. Please choose a secure username and password.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: isDesktop ? 18 : 14),
-              ),
-              if (_message.isNotEmpty)
-                SproutNotificationWidget(
-                  SproutNotification(
-                    _message,
-                    _isFailureMessage ? theme.colorScheme.error : theme.colorScheme.secondary,
-                    _isFailureMessage ? theme.colorScheme.onError : theme.colorScheme.onSecondary,
-                  ),
-                ),
-              AutofillGroup(
-                child: TextField(
-                  controller: _usernameController,
-                  autofillHints: [AutofillHints.newUsername],
-                  decoration: const InputDecoration(labelText: 'Choose Username', prefixIcon: Icon(Icons.person_add)),
-                ),
-              ),
-              TextField(
-                controller: _passwordController,
-                autofillHints: [AutofillHints.newPassword],
-                decoration: const InputDecoration(labelText: 'Choose Password', prefixIcon: Icon(Icons.lock_open)),
-                onSubmitted: (String value) {
-                  _createAccountAndLogin();
-                },
-                obscureText: true,
-              ),
-              FilledButton(
-                onPressed: _passwordController.text == "" || _usernameController.text == "" || _isLoading
-                    ? null
-                    : _createAccountAndLogin,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [
-                    if (_isLoading) const SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
-                    Text("Create Account"),
-                  ],
-                ),
-              ),
-            ],
+    return SetupPageWrapper(
+      widget.isDesktop,
+      "Create Account",
+      _passwordController.text == "" || _usernameController.text == "" || _isLoading ? null : _createAccountAndLogin,
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 24,
+        children: <Widget>[
+          Text(
+            'Create Your Admin Account',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 64 : 36),
           ),
-        ),
-      );
-    });
+          Text(
+            'This will be your primary account to manage the app. Please choose a secure username and password.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: widget.isDesktop ? 18 : 14),
+          ),
+          if (_message.isNotEmpty)
+            SproutNotificationWidget(
+              SproutNotification(
+                _message,
+                _isFailureMessage ? theme.colorScheme.error : theme.colorScheme.secondary,
+                _isFailureMessage ? theme.colorScheme.onError : theme.colorScheme.onSecondary,
+              ),
+            ),
+          AutofillGroup(
+            child: TextField(
+              controller: _usernameController,
+              autofillHints: [AutofillHints.newUsername],
+              decoration: const InputDecoration(labelText: 'Choose Username', prefixIcon: Icon(Icons.person_add)),
+            ),
+          ),
+          TextField(
+            controller: _passwordController,
+            autofillHints: [AutofillHints.newPassword],
+            decoration: const InputDecoration(labelText: 'Choose Password', prefixIcon: Icon(Icons.lock_open)),
+            onSubmitted: (String value) {
+              _createAccountAndLogin();
+            },
+            obscureText: true,
+          ),
+        ],
+      ),
+    );
   }
 }

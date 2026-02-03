@@ -25,7 +25,10 @@ class ComboChart extends StatelessWidget {
     final maxValue = spendingData.data.map((e) => e.totalSpending).reduce(max);
     double maxY = (maxValue.roundToDouble());
     double yInterval = (maxValue / 4).roundToDouble();
-    maxY = maxY + yInterval - (yInterval / 1.5);
+    if (yInterval <= 0) {
+      yInterval = 1.0;
+      if (maxY == 0) maxY = 10.0;
+    }
 
     // Line Chart Constraints
     final double minX = -0.5;

@@ -13,7 +13,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// A page that display user account information along with configuration settings
 class UserConfigPage extends StatefulWidget {
-  const UserConfigPage({super.key});
+  /// Called when a config fails to update, if applicable
+  final void Function(String msg)? onFail;
+
+  /// Called when a config updates successfully
+  final void Function()? onSet;
+
+  /// If we only want to show setup supported fields
+  final bool onlyShowSetup;
+  const UserConfigPage({super.key, this.onlyShowSetup = false, this.onFail, this.onSet});
 
   @override
   State<UserConfigPage> createState() => _UserConfigPageState();
@@ -65,6 +73,7 @@ class _UserConfigPageState extends State<UserConfigPage> {
               onSettingUpdate: (val) => userConfig.simpleFinToken = val,
               settingType: "string",
               icon: Icons.api,
+              showOnSetup: true,
             ),
           ],
           "App Information": [
@@ -121,8 +130,32 @@ class _UserConfigPageState extends State<UserConfigPage> {
           ],
         };
 
+        // Filter what we want to display based on given options
+        final filteredEntries = displayInfo.entries
+            .map((entry) {
+              final filteredItems = entry.value.where((item) {
+                if (widget.onlyShowSetup) {
+                  return item.showOnSetup == true;
+                }
+                return true;
+              }).toList();
+              return MapEntry(entry.key, filteredItems);
+            })
+            // Remove sections that are empty after filtering
+            .where((entry) => entry.value.isNotEmpty);
+
         return Column(
-          children: displayInfo.entries.map((entry) => UserInfoCard(name: entry.key, info: entry.value)).toList(),
+          children: filteredEntries
+              .map(
+                (entry) => UserInfoCard(
+                  name: entry.key,
+                  info: entry.value,
+                  onFail: widget.onFail,
+                  onSet: widget.onSet,
+                  renderCards: !widget.onlyShowSetup,
+                ),
+              )
+              .toList(),
         );
       },
     );
