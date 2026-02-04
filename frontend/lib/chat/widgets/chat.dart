@@ -1,0 +1,142 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sprout/chat/chat_provider.dart';
+import 'package:sprout/chat/widgets/chat_bubble.dart';
+import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/user/user_config_provider.dart';
+
+/// This component represents a chat that can be performed with an LLM to help analyze your current content
+class Chat extends StatelessWidget {
+  final TextEditingController _controller = TextEditingController();
+
+  Chat({super.key});
+
+  /// Sends the message to the provider
+  void _send() {
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      final provider = ServiceLocator.get<ChatProvider>();
+      provider.sendMessage(text);
+      _controller.clear();
+    }
+  }
+
+  /// Returns if the chat provider has a message that is already thinking
+  bool get _isLoading {
+    return ServiceLocator.get<ChatProvider>().messages.where((element) => element.isThinking).isNotEmpty;
+  }
+
+  /// Returns if an LLM is configured or not
+  bool get llmConfigured {
+    final config = ServiceLocator.get<UserConfigProvider>().currentUserConfig;
+    return config?.geminiKey != null && config!.geminiKey!.isNotEmpty;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!llmConfigured) {
+      return SproutCard(
+        child: Padding(
+          padding: EdgeInsetsGeometry.all(24),
+          child: Column(
+            spacing: 16,
+            children: [
+              Text(
+                "No LLM is configured. Please set one in settings to proceed",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              FilledButton(onPressed: () => SproutNavigator.redirect("settings"), child: Text("Go to Settings")),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Consumer<ChatProvider>(
+      builder: (context, provider, child) {
+        final messages = provider.messages;
+        return Expanded(
+          child: Column(
+            spacing: 4,
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  reverse: true,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[messages.length - 1 - index];
+                    return ChatBubble(message: message);
+                  },
+                ),
+              ),
+              _buildQuickActions(provider),
+              _buildInputArea(provider),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Builds a list of quick actions so the user can quickly visualize how they are doing without typing their own message
+  Widget _buildQuickActions(ChatProvider chatProvider) {
+    // Suggestions on what we want to do
+    final List<Map<String, String>> suggestions = [
+      {'title': "Spending", 'message': "Analyze my spending patterns for the last few months work of data."},
+      {'title': "Net Worth", 'message': "Analyze my net worth trend for the total period of data."},
+      // {'title': "Overview", 'message': "Give me an overview of all the data you have for my accounts."},
+      {'title': "Suggestions", 'message': "Give me some ideas on how to further improve my financial health."},
+    ];
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        children: suggestions
+            .map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(
+                  label: Text(s['title']!),
+                  onPressed: _isLoading ? null : () => chatProvider.sendMessage(s['message']!),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  /// Builds the input for the user to type into
+  Widget _buildInputArea(ChatProvider chatProvider) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        spacing: 8,
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              enabled: !_isLoading,
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: "Ask Sprout anything...",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => _send(),
+            ),
+          ),
+          FloatingActionButton(
+            onPressed: _isLoading ? null : _send,
+            child: _isLoading ? CircularProgressIndicator() : const Icon(Icons.send),
+          ),
+        ],
+      ),
+    );
+  }
+}

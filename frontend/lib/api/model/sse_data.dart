@@ -140,12 +140,14 @@ class SSEDataEventEnum {
   static const sync_ = SSEDataEventEnum._(r'sync');
   static const forceUpdate = SSEDataEventEnum._(r'force-update');
   static const notification = SSEDataEventEnum._(r'notification');
+  static const chat = SSEDataEventEnum._(r'chat');
 
   /// List of all possible values in this [enum][SSEDataEventEnum].
   static const values = <SSEDataEventEnum>[
     sync_,
     forceUpdate,
     notification,
+    chat,
   ];
 
   static SSEDataEventEnum? fromJson(dynamic value) => SSEDataEventEnumTypeTransformer().decode(value);
@@ -187,6 +189,7 @@ class SSEDataEventEnumTypeTransformer {
         case r'sync': return SSEDataEventEnum.sync_;
         case r'force-update': return SSEDataEventEnum.forceUpdate;
         case r'notification': return SSEDataEventEnum.notification;
+        case r'chat': return SSEDataEventEnum.chat;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

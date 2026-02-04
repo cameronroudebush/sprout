@@ -74,6 +74,7 @@ export function createSwaggerDoc(app: INestApplication) {
     .addTag("Holding", "Define and manage holdings which tracks stock information.")
     .addTag("Net Worth", "Provides endpoints to track and visualize a user's net worth over time.")
     .addTag("Cash Flow", "Provides endpoints to analyze and visualize cash flow, showing how money moves between income and expenses using categories.")
+    .addTag("Chat", "Provides endpoints to allow querying an LLM with your account data.")
     .build();
   return () => {
     const document = SwaggerModule.createDocument(app, config);

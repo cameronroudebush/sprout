@@ -17,7 +17,8 @@
       "@backend/holding/*": ["./src/holding/*"],
       "@backend/sse/*": ["./src/sse/*"],
       "@backend/auth/*": ["./src/auth/*"],
-      "@backend/notification/*": ["./src/notification/*"]
+      "@backend/notification/*": ["./src/notification/*"],
+      "@backend/chat/*": ["./src/chat/*"]
     }
   },
   "include": ["./src/**/*"]

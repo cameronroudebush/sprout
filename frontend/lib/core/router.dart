@@ -10,6 +10,7 @@ import 'package:sprout/cash-flow/widgets/overview.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/dropdown.dart';
 import 'package:sprout/category/widgets/overview.dart';
+import 'package:sprout/chat/widgets/chat.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/home.dart';
 import 'package:sprout/core/models/page.dart';
@@ -125,12 +126,7 @@ class SproutRouter {
     SproutPage((context, state) => TransactionRuleOverview(), 'Rules', icon: Icons.rule),
     SproutPage((context, state) => CategoryOverview(), 'Categories', icon: Icons.category),
     // Subscriptions
-    SproutPage(
-      (context, state) => TransactionMonthlySubscriptions(),
-      'Subscriptions',
-      icon: Icons.subscriptions,
-      showOnBottomNav: true,
-    ),
+    SproutPage((context, state) => TransactionMonthlySubscriptions(), 'Subscriptions', icon: Icons.subscriptions),
     // Cash Flow
     SproutPage(
       (context, state) => CashFlowOverview(),
@@ -141,6 +137,14 @@ class SproutRouter {
     ),
     // Settings
     SproutPage((context, state) => UserConfigPage(), 'Settings', icon: Icons.settings, showOnSideNav: false),
+    // Chat
+    SproutPage(
+      (context, state) => Chat(),
+      'Chat',
+      icon: Icons.auto_awesome,
+      showOnBottomNav: true,
+      scrollWrapper: false,
+    ),
   ];
 
   /// A list of all pages in order including sub pages

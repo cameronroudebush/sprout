@@ -3,18 +3,19 @@ import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { EntityHistory } from "@backend/core/model/api/entity.history.dto";
-import { HoldingHistory } from "@backend/holding/model/holding.history.model";
+import { HoldingService } from "@backend/holding/holding.service";
 import { Holding } from "@backend/holding/model/holding.model";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Get, NotFoundException, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { groupBy } from "lodash";
 
 /** This controller contains information about {@link Holding} models which is stock information. */
 @Controller("holding")
 @ApiTags("Holding")
 @AuthGuard.attach()
 export class HoldingController {
+  constructor(private readonly holdingService: HoldingService) {}
+
   @Get()
   @ApiQuery({
     name: "accountId",
@@ -46,13 +47,6 @@ export class HoldingController {
   async getHoldingHistory(@CurrentUser() user: User, @Query("accountId") accountId: string) {
     const account = await Account.findOne({ where: { id: accountId, user: { id: user.id }, type: AccountType.investment } });
     if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
-    const hist = await HoldingHistory.getHistoryForAccount(account);
-    const groupedHistory = groupBy(hist, "holding.id");
-    return Object.keys(groupedHistory).map((holdingId) => {
-      const holdingHistory = groupedHistory[holdingId]!;
-      const ot = EntityHistory.getForHistory(HoldingHistory, holdingHistory);
-      ot.connectedId = holdingId;
-      return ot;
-    });
+    return await this.holdingService.getHistoryForAccount(account);
   }
 }
