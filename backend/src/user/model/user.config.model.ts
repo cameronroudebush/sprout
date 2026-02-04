@@ -27,6 +27,12 @@ export class UserConfig extends DatabaseBase {
   @IsString()
   simpleFinToken?: string;
 
+  /** This property defines the Gemini API token for LLM use. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  geminiKey?: string;
+
   constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"]) {
     super();
     this.privateMode = privateMode;

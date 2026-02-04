@@ -11,6 +11,8 @@ export enum SSEEventType {
   FORCE_UPDATE = "force-update",
   /** Used to inform that the app needs to grab updated notification info */
   NOTIFICATION = "notification",
+  /** Used to inform that the app that a new LLM response is ready for our user */
+  CHAT = "chat",
 }
 
 /** This represents the SSE data that will be sent to clients */

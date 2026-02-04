@@ -37,6 +37,7 @@ dependencies:
   flutter_local_notifications: ^20.0.0
   device_info_plus: ^12.3.0
   flutter_web_auth_2: ^5.0.1
+  gpt_markdown: ^1.1.5
 
 dev_dependencies:
   flutter_test:

@@ -76,6 +76,17 @@ class _UserConfigPageState extends State<UserConfigPage> {
               showOnSetup: true,
             ),
           ],
+          "Chat Settings": [
+            UserDisplayInfo(
+              title: "Gemini API Token",
+              hint: "The Gemini API token that will allow you to chat with an LLM about your finances.",
+              settingValue: userConfig.geminiKey,
+              onSettingUpdate: (val) => userConfig.geminiKey = val,
+              settingType: "string",
+              icon: Icons.auto_awesome,
+              showOnSetup: true,
+            ),
+          ],
           "App Information": [
             UserDisplayInfo(
               title: "App Version",

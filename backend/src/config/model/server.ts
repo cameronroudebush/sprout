@@ -1,4 +1,5 @@
 import { AuthenticationConfig } from "@backend/auth/model/authentication.config";
+import { ChatConfig } from "@backend/chat/model/chat.config.model";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
 import { JobsConfig } from "@backend/jobs/model/jobs.config";
@@ -27,4 +28,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration for automated notifications." })
   notification = new NotificationConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for LLM prompting." })
+  prompt = new ChatConfig();
 }

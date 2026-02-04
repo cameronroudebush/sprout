@@ -2,6 +2,7 @@ import { AccountController } from "@backend/account/account.controller";
 import { AuthModule } from "@backend/auth/auth.module";
 import { CategoryController } from "@backend/category/category.controller";
 import { CategoryService } from "@backend/category/category.service";
+import { ChatModule } from "@backend/chat/chat.module";
 import { ConfigController } from "@backend/config/config.controller";
 import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
@@ -10,13 +11,12 @@ import { ImageProxyController } from "@backend/core/image.proxy.controller";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { NetWorthController } from "@backend/core/net.worth.controller";
 import { DatabaseService } from "@backend/database/database.service";
-import { HoldingController } from "@backend/holding/holding.controller";
+import { HoldingModule } from "@backend/holding/holding.module";
 import { JobsService } from "@backend/jobs/jobs.service";
 import { NotificationController } from "@backend/notification/notification.controller";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderModule } from "@backend/providers/provider.module";
-import { SSEController } from "@backend/sse/sse.controller";
-import { SSEService } from "@backend/sse/sse.service";
+import { SSEModule } from "@backend/sse/sse.module";
 import { TransactionController } from "@backend/transaction/transaction.controller";
 import { TransactionRuleController } from "@backend/transaction/transaction.rule.controller";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
@@ -33,6 +33,9 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     AuthModule,
     UserModule,
     ProviderModule,
+    ChatModule,
+    HoldingModule,
+    SSEModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -45,10 +48,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     AccountController,
     TransactionController,
     TransactionRuleController,
-    SSEController,
     CategoryController,
     ConfigController,
-    HoldingController,
     NetWorthController,
     CashFlowController,
     ImageProxyController,
@@ -60,7 +61,6 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     ConfigurationService,
     JobsService,
     DatabaseService,
-    SSEService,
     CategoryService,
     CashFlowService,
     NotificationService,

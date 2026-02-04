@@ -200,6 +200,10 @@ class ApiClient {
           return CategoryStats.fromJson(value);
         case 'ChartRangeEnum':
           return ChartRangeEnumTypeTransformer().decode(value);
+        case 'ChatHistory':
+          return ChatHistory.fromJson(value);
+        case 'ChatRequestDTO':
+          return ChatRequestDTO.fromJson(value);
         case 'EntityHistory':
           return EntityHistory.fromJson(value);
         case 'EntityHistoryDataPoint':

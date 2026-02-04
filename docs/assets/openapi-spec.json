@@ -19,220 +19,9 @@
           }
         },
         "summary": "Check application status.",
-        "tags": ["Core"]
-      }
-    },
-    "/user/me": {
-      "get": {
-        "description": "Returns the current user from the database.",
-        "operationId": "UserController_me",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "User found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get's current user info.",
-        "tags": ["User"]
-      }
-    },
-    "/user/{id}": {
-      "get": {
-        "description": "Retrieves a user's information by their ID.",
-        "operationId": "UserController_getById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "User with the specified ID not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get user by ID.",
-        "tags": ["User"]
-      }
-    },
-    "/user/create": {
-      "post": {
-        "description": "Allows for user creation based on either first time setup configuration or OIDC user config.",
-        "operationId": "UserController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserCreationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserCreationResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "New users are not allowed to be created."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new user..",
-        "tags": ["User"]
-      }
-    },
-    "/user/device/register": {
-      "post": {
-        "description": "Registers a device to the current authenticated user so we can reference it in notification handlers.",
-        "operationId": "UserController_registerDevice",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Device registered"
-          },
-          "201": {
-            "description": ""
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Register a device to a user.",
-        "tags": ["User"]
-      }
-    },
-    "/user-config": {
-      "get": {
-        "description": "Retrieves the current user's configuration.",
-        "operationId": "UserConfigController_get",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "User config found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserConfig"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "User couldn't be found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get user config.",
-        "tags": ["User Config"]
-      },
-      "patch": {
-        "description": "Edits the current users configuration.",
-        "operationId": "UserConfigController_edit",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserConfig"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "User configuration updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserConfig"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "User configuration couldn't be found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Edit user config.",
-        "tags": ["User Config"]
+        "tags": [
+          "Core"
+        ]
       }
     },
     "/account/{id}": {
@@ -273,7 +62,9 @@
           }
         ],
         "summary": "Get account by ID.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       },
       "delete": {
         "description": "Deletes an account by the given ID.",
@@ -305,7 +96,9 @@
           }
         ],
         "summary": "Delete account by ID.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       },
       "patch": {
         "description": "Edits an account by the given ID.",
@@ -354,7 +147,9 @@
           }
         ],
         "summary": "Edit account.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       }
     },
     "/account": {
@@ -386,7 +181,9 @@
           }
         ],
         "summary": "Get accounts.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       }
     },
     "/account/provider/{name}": {
@@ -430,7 +227,9 @@
           }
         ],
         "summary": "Get accounts from a provider that are not yet synced.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       }
     },
     "/account/provider/{name}/link": {
@@ -484,7 +283,9 @@
           }
         ],
         "summary": "Link the new given accounts from a provider.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       }
     },
     "/account/sync": {
@@ -518,7 +319,9 @@
           }
         ],
         "summary": "Run a manual sync.",
-        "tags": ["Account"]
+        "tags": [
+          "Account"
+        ]
       }
     },
     "/transaction/{id}": {
@@ -569,7 +372,9 @@
           }
         ],
         "summary": "Edit transaction.",
-        "tags": ["Transaction"]
+        "tags": [
+          "Transaction"
+        ]
       }
     },
     "/transaction": {
@@ -657,7 +462,9 @@
           }
         ],
         "summary": "Get transactions by query.",
-        "tags": ["Transaction"]
+        "tags": [
+          "Transaction"
+        ]
       }
     },
     "/transaction/subscriptions": {
@@ -689,7 +496,9 @@
           }
         ],
         "summary": "Get's subscriptions.",
-        "tags": ["Transaction"]
+        "tags": [
+          "Transaction"
+        ]
       }
     },
     "/transaction/count": {
@@ -718,7 +527,9 @@
           }
         ],
         "summary": "Get's the total count of transactions across accounts.",
-        "tags": ["Transaction"]
+        "tags": [
+          "Transaction"
+        ]
       }
     },
     "/transaction-rule": {
@@ -750,7 +561,9 @@
           }
         ],
         "summary": "Get transaction rules.",
-        "tags": ["Transaction Rule"]
+        "tags": [
+          "Transaction Rule"
+        ]
       },
       "post": {
         "description": "Creates a new transaction rule based on the given content and runs a processor so we can organize our current transactions.",
@@ -790,7 +603,9 @@
           }
         ],
         "summary": "Creates a new transaction rule.",
-        "tags": ["Transaction Rule"]
+        "tags": [
+          "Transaction Rule"
+        ]
       }
     },
     "/transaction-rule/{id}": {
@@ -824,7 +639,9 @@
           }
         ],
         "summary": "Delete transaction rule by ID.",
-        "tags": ["Transaction Rule"]
+        "tags": [
+          "Transaction Rule"
+        ]
       },
       "patch": {
         "description": "Edits a transaction rule by the given ID.",
@@ -873,7 +690,9 @@
           }
         ],
         "summary": "Edit transaction rule.",
-        "tags": ["Transaction Rule"]
+        "tags": [
+          "Transaction Rule"
+        ]
       }
     },
     "/transaction-rule/apply": {
@@ -917,35 +736,9 @@
           }
         ],
         "summary": "Re-apply all transaction rules",
-        "tags": ["Transaction Rule"]
-      }
-    },
-    "/sse": {
-      "get": {
-        "operationId": "SSEController_sse",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Connection established. Awaiting events.",
-            "content": {
-              "text/event-stream": {
-                "schema": {
-                  "$ref": "#/components/schemas/SSEData"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Subscribe to real-time server events to allow the server to inform our client of various info.",
-        "tags": ["Core"]
+        "tags": [
+          "Transaction Rule"
+        ]
       }
     },
     "/category": {
@@ -977,7 +770,9 @@
           }
         ],
         "summary": "Get categories.",
-        "tags": ["Category"]
+        "tags": [
+          "Category"
+        ]
       },
       "post": {
         "description": "Creates a new category that can be used for transactions to associate to.",
@@ -1017,7 +812,9 @@
           }
         ],
         "summary": "Creates a new category.",
-        "tags": ["Category"]
+        "tags": [
+          "Category"
+        ]
       }
     },
     "/category/stats": {
@@ -1083,7 +880,9 @@
           }
         ],
         "summary": "Gets category stats.",
-        "tags": ["Category"]
+        "tags": [
+          "Category"
+        ]
       }
     },
     "/category/stats/unknown": {
@@ -1123,7 +922,9 @@
           }
         ],
         "summary": "Gets unknown category stats.",
-        "tags": ["Category"]
+        "tags": [
+          "Category"
+        ]
       }
     },
     "/category/{id}": {
@@ -1157,7 +958,9 @@
           }
         ],
         "summary": "Delete category by ID.",
-        "tags": ["Category"]
+        "tags": [
+          "Category"
+        ]
       },
       "patch": {
         "description": "Edits a category by the given ID.",
@@ -1206,7 +1009,9 @@
           }
         ],
         "summary": "Edit category.",
-        "tags": ["Category"]
+        "tags": [
+          "Category"
+        ]
       }
     },
     "/config": {
@@ -1235,7 +1040,9 @@
           }
         ],
         "summary": "Get app configuration.",
-        "tags": ["Config"]
+        "tags": [
+          "Config"
+        ]
       }
     },
     "/config/unsecure": {
@@ -1256,91 +1063,9 @@
           }
         },
         "summary": "Get unsecure app configuration.",
-        "tags": ["Config"]
-      }
-    },
-    "/holding": {
-      "get": {
-        "description": "Retrieves all holdings for the authenticated user within a specified account.",
-        "operationId": "HoldingController_getHoldings",
-        "parameters": [
-          {
-            "name": "accountId",
-            "required": true,
-            "in": "query",
-            "description": "The ID of the account to retrieve holdings for.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Holdings found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Holding"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get holdings for a specific account.",
-        "tags": ["Holding"]
-      }
-    },
-    "/holding/history": {
-      "get": {
-        "description": "Retrieves holding history for the given account. This is useful for displaying the holdings value over time.",
-        "operationId": "HoldingController_getHoldingHistory",
-        "parameters": [
-          {
-            "name": "accountId",
-            "required": true,
-            "in": "query",
-            "description": "The ID of the account to retrieve holding history for.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Holding history found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EntityHistory"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get holding history for a specific account.",
-        "tags": ["Holding"]
+        "tags": [
+          "Config"
+        ]
       }
     },
     "/net-worth": {
@@ -1370,7 +1095,9 @@
           }
         ],
         "summary": "Get net worth.",
-        "tags": ["Net Worth"]
+        "tags": [
+          "Net Worth"
+        ]
       }
     },
     "/net-worth/ot": {
@@ -1399,7 +1126,9 @@
           }
         ],
         "summary": "Get net worth.",
-        "tags": ["Net Worth"]
+        "tags": [
+          "Net Worth"
+        ]
       }
     },
     "/net-worth/account": {
@@ -1431,7 +1160,9 @@
           }
         ],
         "summary": "Get net worth by accounts.",
-        "tags": ["Net Worth"]
+        "tags": [
+          "Net Worth"
+        ]
       }
     },
     "/cash-flow/sankey": {
@@ -1497,7 +1228,9 @@
           }
         ],
         "summary": "Get sankey data by query.",
-        "tags": ["Cash Flow"]
+        "tags": [
+          "Cash Flow"
+        ]
       }
     },
     "/cash-flow/stats": {
@@ -1563,7 +1296,9 @@
           }
         ],
         "summary": "Get cash flow stats data by query.",
-        "tags": ["Cash Flow"]
+        "tags": [
+          "Cash Flow"
+        ]
       }
     },
     "/cash-flow/spending": {
@@ -1609,7 +1344,9 @@
           }
         ],
         "summary": "Get cash flow spending stats per month.",
-        "tags": ["Cash Flow"]
+        "tags": [
+          "Cash Flow"
+        ]
       }
     },
     "/image-proxy": {
@@ -1652,7 +1389,9 @@
           }
         ],
         "summary": "Proxy images for institutions.",
-        "tags": ["Core"]
+        "tags": [
+          "Core"
+        ]
       }
     },
     "/notification": {
@@ -1684,7 +1423,9 @@
           }
         ],
         "summary": "Get's the notifications",
-        "tags": ["Notification"]
+        "tags": [
+          "Notification"
+        ]
       }
     },
     "/notification/read/all": {
@@ -1706,7 +1447,9 @@
           }
         ],
         "summary": "Marks all notifications read.",
-        "tags": ["Notification"]
+        "tags": [
+          "Notification"
+        ]
       }
     },
     "/notification/read/{id}": {
@@ -1737,7 +1480,9 @@
           }
         ],
         "summary": "Marks a specific notification read.",
-        "tags": ["Notification"]
+        "tags": [
+          "Notification"
+        ]
       }
     },
     "/notification/config/firebase": {
@@ -1766,7 +1511,9 @@
           }
         ],
         "summary": "Returns the firebase configuration.",
-        "tags": ["Notification"]
+        "tags": [
+          "Notification"
+        ]
       }
     },
     "/notification/{id}": {
@@ -1804,7 +1551,9 @@
           }
         ],
         "summary": "Get's a notification by it's id.",
-        "tags": ["Notification"]
+        "tags": [
+          "Notification"
+        ]
       }
     },
     "/auth/login": {
@@ -1838,7 +1587,9 @@
           }
         },
         "summary": "Login with username and password.",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/login/jwt": {
@@ -1872,7 +1623,9 @@
           }
         },
         "summary": "Login with an existing JWT.",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/oidc/refresh": {
@@ -1913,7 +1666,9 @@
           }
         },
         "summary": "Proxy OIDC refresh requests.",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/oidc/login": {
@@ -1936,7 +1691,9 @@
           }
         },
         "summary": "Authenticates using the OIDC configuration.",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/oidc/callback": {
@@ -1967,7 +1724,9 @@
           }
         },
         "summary": "Callback handler for the OIDC login.",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/logout": {
@@ -1981,14 +1740,441 @@
           }
         },
         "summary": "Logout the user",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/user/me": {
+      "get": {
+        "description": "Returns the current user from the database.",
+        "operationId": "UserController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was given but it was invalid."
+          },
+          "404": {
+            "description": "Authentication was given that was found to be valid but no valid user was found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's current user info.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "description": "Retrieves a user's information by their ID.",
+        "operationId": "UserController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "User with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user by ID.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/create": {
+      "post": {
+        "description": "Allows for user creation based on either first time setup configuration or OIDC user config.",
+        "operationId": "UserController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "New users are not allowed to be created."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new user..",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/device/register": {
+      "post": {
+        "description": "Registers a device to the current authenticated user so we can reference it in notification handlers.",
+        "operationId": "UserController_registerDevice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device registered"
+          },
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register a device to a user.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user-config": {
+      "get": {
+        "description": "Retrieves the current user's configuration.",
+        "operationId": "UserConfigController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User config found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "User couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user config.",
+        "tags": [
+          "User Config"
+        ]
+      },
+      "patch": {
+        "description": "Edits the current users configuration.",
+        "operationId": "UserConfigController_edit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User configuration updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "User configuration couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit user config.",
+        "tags": [
+          "User Config"
+        ]
+      }
+    },
+    "/chat/new": {
+      "post": {
+        "operationId": "ChatController_new",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the generated text from the prompt."
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Utilizes the LLM prompt engine to help you discuss your finances.",
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/chat/history": {
+      "get": {
+        "operationId": "ChatController_history",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns the chat history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatHistory"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns the chat history for previous LLM conversations.",
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/holding": {
+      "get": {
+        "description": "Retrieves all holdings for the authenticated user within a specified account.",
+        "operationId": "HoldingController_getHoldings",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "query",
+            "description": "The ID of the account to retrieve holdings for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Holdings found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Holding"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get holdings for a specific account.",
+        "tags": [
+          "Holding"
+        ]
+      }
+    },
+    "/holding/history": {
+      "get": {
+        "description": "Retrieves holding history for the given account. This is useful for displaying the holdings value over time.",
+        "operationId": "HoldingController_getHoldingHistory",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "query",
+            "description": "The ID of the account to retrieve holding history for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Holding history found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityHistory"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get holding history for a specific account.",
+        "tags": [
+          "Holding"
+        ]
+      }
+    },
+    "/sse": {
+      "get": {
+        "operationId": "SSEController_sse",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Connection established. Awaiting events.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSEData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Subscribe to real-time server events to allow the server to inform our client of various info.",
+        "tags": [
+          "Core"
+        ]
       }
     }
   },
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-39-ged9bb51",
+    "version": "v0.1.1-46-gff0d19f",
     "contact": {}
   },
   "tags": [
@@ -2043,6 +2229,10 @@
     {
       "name": "Cash Flow",
       "description": "Provides endpoints to analyze and visualize cash flow, showing how money moves between income and expenses using categories."
+    },
+    {
+      "name": "Chat",
+      "description": "Provides endpoints to allow querying an LLM with your account data."
     }
   ],
   "servers": [],
@@ -2056,97 +2246,6 @@
       }
     },
     "schemas": {
-      "ChartRangeEnum": {
-        "type": "string",
-        "enum": ["oneDay", "sevenDays", "oneMonth", "threeMonths", "sixMonths", "oneYear", "allTime"],
-        "description": "The net worth range to display by default"
-      },
-      "UserConfig": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "netWorthRange": {
-            "description": "The net worth range to display by default",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ChartRangeEnum"
-              }
-            ]
-          },
-          "privateMode": {
-            "type": "boolean",
-            "description": "If we should hide balances on the users display"
-          },
-          "simpleFinToken": {
-            "type": "string",
-            "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
-          }
-        },
-        "required": ["id", "netWorthRange", "privateMode"]
-      },
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "admin": {
-            "type": "boolean"
-          },
-          "config": {
-            "$ref": "#/components/schemas/UserConfig"
-          }
-        },
-        "required": ["id", "username", "admin", "config"]
-      },
-      "UserCreationRequest": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "required": ["username", "password"]
-      },
-      "UserCreationResponse": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          }
-        },
-        "required": ["username"]
-      },
-      "RegisterDeviceDto": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string"
-          },
-          "platform": {
-            "enum": ["android", "ios", "web"],
-            "type": "string"
-          },
-          "deviceName": {
-            "type": "string"
-          }
-        },
-        "required": ["token"]
-      },
       "AccountSubTypeEnum": {
         "type": "string",
         "enum": [
@@ -2186,7 +2285,12 @@
             "description": "If this institution has connection errors and needs fixed"
           }
         },
-        "required": ["id", "url", "name", "hasError"]
+        "required": [
+          "id",
+          "url",
+          "name",
+          "hasError"
+        ]
       },
       "Account": {
         "type": "object",
@@ -2231,7 +2335,13 @@
           },
           "type": {
             "description": "The type of this account to better separate it from the others.",
-            "enum": ["depository", "credit", "loan", "investment", "crypto"],
+            "enum": [
+              "depository",
+              "credit",
+              "loan",
+              "investment",
+              "crypto"
+            ],
             "type": "string"
           },
           "extra": {
@@ -2239,7 +2349,16 @@
             "description": "Any extra data that we want to store as JSON"
           }
         },
-        "required": ["id", "name", "provider", "institution", "currency", "balance", "availableBalance", "type"]
+        "required": [
+          "id",
+          "name",
+          "provider",
+          "institution",
+          "currency",
+          "balance",
+          "availableBalance",
+          "type"
+        ]
       },
       "AccountEditRequest": {
         "type": "object",
@@ -2280,7 +2399,10 @@
             "description": "The icon to use for this category. If one is not given, we'll use the default."
           }
         },
-        "required": ["id", "name"]
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "Transaction": {
         "type": "object",
@@ -2329,7 +2451,14 @@
             "default": false
           }
         },
-        "required": ["id", "amount", "description", "pending", "posted", "account"]
+        "required": [
+          "id",
+          "amount",
+          "description",
+          "pending",
+          "posted",
+          "account"
+        ]
       },
       "TransactionSubscription": {
         "type": "object",
@@ -2364,7 +2493,15 @@
           },
           "period": {
             "description": "How often this is billed",
-            "enum": ["weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "yearly", "unknown"],
+            "enum": [
+              "weekly",
+              "bi-weekly",
+              "monthly",
+              "quarterly",
+              "semi-annually",
+              "yearly",
+              "unknown"
+            ],
             "type": "string"
           },
           "startDate": {
@@ -2373,7 +2510,15 @@
             "description": "The day this billing starts"
           }
         },
-        "required": ["account", "transaction", "description", "amount", "count", "period", "startDate"]
+        "required": [
+          "account",
+          "transaction",
+          "description",
+          "amount",
+          "count",
+          "period",
+          "startDate"
+        ]
       },
       "TotalTransactions": {
         "type": "object",
@@ -2382,7 +2527,9 @@
             "type": "number"
           }
         },
-        "required": ["total"]
+        "required": [
+          "total"
+        ]
       },
       "TransactionRule": {
         "type": "object",
@@ -2399,7 +2546,10 @@
             ]
           },
           "type": {
-            "enum": ["description", "amount"],
+            "enum": [
+              "description",
+              "amount"
+            ],
             "type": "string"
           },
           "value": {
@@ -2434,24 +2584,15 @@
             "default": true
           }
         },
-        "required": ["id", "type", "value", "strict", "matches", "order", "enabled"]
-      },
-      "Base": {
-        "type": "object",
-        "properties": {}
-      },
-      "SSEData": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "enum": ["sync", "force-update", "notification"],
-            "type": "string"
-          },
-          "payload": {
-            "$ref": "#/components/schemas/Base"
-          }
-        },
-        "required": ["event"]
+        "required": [
+          "id",
+          "type",
+          "value",
+          "strict",
+          "matches",
+          "order",
+          "enabled"
+        ]
       },
       "CategoryStats": {
         "type": "object",
@@ -2471,7 +2612,85 @@
             }
           }
         },
-        "required": ["categoryCount", "colorMapping"]
+        "required": [
+          "categoryCount",
+          "colorMapping"
+        ]
+      },
+      "ChartRangeEnum": {
+        "type": "string",
+        "enum": [
+          "oneDay",
+          "sevenDays",
+          "oneMonth",
+          "threeMonths",
+          "sixMonths",
+          "oneYear",
+          "allTime"
+        ],
+        "description": "The net worth range to display by default"
+      },
+      "UserConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "netWorthRange": {
+            "description": "The net worth range to display by default",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChartRangeEnum"
+              }
+            ]
+          },
+          "privateMode": {
+            "type": "boolean",
+            "description": "If we should hide balances on the users display"
+          },
+          "simpleFinToken": {
+            "type": "string",
+            "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
+          },
+          "geminiKey": {
+            "type": "string",
+            "description": "This property defines the Gemini API token for LLM use."
+          }
+        },
+        "required": [
+          "id",
+          "netWorthRange",
+          "privateMode"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "admin": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/UserConfig"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "admin",
+          "config"
+        ]
       },
       "Sync": {
         "type": "object",
@@ -2499,7 +2718,11 @@
             ]
           }
         },
-        "required": ["id", "time", "status"]
+        "required": [
+          "id",
+          "time",
+          "status"
+        ]
       },
       "ProviderConfig": {
         "type": "object",
@@ -2520,7 +2743,11 @@
             "description": "The URL to be able to fix accounts"
           }
         },
-        "required": ["dbType", "name", "logoUrl"]
+        "required": [
+          "dbType",
+          "name",
+          "logoUrl"
+        ]
       },
       "APIConfig": {
         "type": "object",
@@ -2541,14 +2768,19 @@
             }
           }
         },
-        "required": ["providers"]
+        "required": [
+          "providers"
+        ]
       },
       "UnsecureAppConfiguration": {
         "type": "object",
         "properties": {
           "authMode": {
             "type": "string",
-            "enum": ["oidc", "local"]
+            "enum": [
+              "oidc",
+              "local"
+            ]
           },
           "version": {
             "type": "string",
@@ -2558,7 +2790,515 @@
             "type": "boolean"
           }
         },
-        "required": ["authMode", "version", "allowUserCreation"]
+        "required": [
+          "authMode",
+          "version",
+          "allowUserCreation"
+        ]
+      },
+      "EntityHistoryDataPoint": {
+        "type": "object",
+        "properties": {
+          "history": {
+            "type": "object",
+            "description": "This is the history for this specific data point",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "percentChange": {
+            "type": "number"
+          },
+          "valueChange": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "history",
+          "valueChange"
+        ]
+      },
+      "EntityHistory": {
+        "type": "object",
+        "properties": {
+          "historicalData": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "last1Day": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "last7Days": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastMonth": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastThreeMonths": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastSixMonths": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastYear": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "allTime": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "connectedId": {
+            "type": "string",
+            "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
+          }
+        },
+        "required": [
+          "historicalData",
+          "last1Day",
+          "last7Days",
+          "lastMonth",
+          "lastThreeMonths",
+          "lastSixMonths",
+          "lastYear",
+          "allTime"
+        ]
+      },
+      "SankeyLink": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "description": "A way to help describe what this link is"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "value"
+        ]
+      },
+      "SankeyData": {
+        "type": "object",
+        "properties": {
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SankeyLink"
+            }
+          }
+        },
+        "required": [
+          "colors",
+          "nodes",
+          "links"
+        ]
+      },
+      "CashFlowStats": {
+        "type": "object",
+        "properties": {
+          "totalExpense": {
+            "type": "number"
+          },
+          "totalIncome": {
+            "type": "number"
+          },
+          "count": {
+            "type": "number",
+            "description": "How many total transactions we have for this query"
+          },
+          "largestExpense": {
+            "description": "The largest expense we had for this time period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            ]
+          }
+        },
+        "required": [
+          "totalExpense",
+          "totalIncome",
+          "count"
+        ]
+      },
+      "MonthlyCategoryData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Total amount spent in this category for this month"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color for the category. Will be a hex code."
+          }
+        },
+        "required": [
+          "name",
+          "amount",
+          "color"
+        ]
+      },
+      "MonthlySpendingStats": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "description": "A breakdown of the top categories for the month based on the request",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyCategoryData"
+            }
+          },
+          "monthLabel": {
+            "type": "string",
+            "description": "Month label"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date, just used for sorting"
+          },
+          "totalSpending": {
+            "type": "number",
+            "description": "Total spending for the month"
+          },
+          "periodAverage": {
+            "type": "number",
+            "description": "Average spending across the requested period (for the trend line)"
+          }
+        },
+        "required": [
+          "categories",
+          "monthLabel",
+          "date",
+          "totalSpending",
+          "periodAverage"
+        ]
+      },
+      "CashFlowSpending": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlySpendingStats"
+            }
+          },
+          "topCategoryNames": {
+            "description": "The list of top categories identified across the months.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "data",
+          "topCategoryNames"
+        ]
+      },
+      "FirebaseNotificationDTO": {
+        "type": "object",
+        "properties": {
+          "notificationId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "default": "secure_message"
+          },
+          "importance": {
+            "type": "string",
+            "description": "Notification importance level",
+            "default": "low",
+            "enum": [
+              "max",
+              "high",
+              "default",
+              "low"
+            ]
+          }
+        },
+        "required": [
+          "notificationId",
+          "type",
+          "importance"
+        ]
+      },
+      "NotificationSSEDTO": {
+        "type": "object",
+        "properties": {
+          "popupLatest": {
+            "type": "boolean",
+            "description": "If we should render the latest notification or not"
+          }
+        },
+        "required": [
+          "popupLatest"
+        ]
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title for our notification"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message that this notification intended to show the user"
+          },
+          "type": {
+            "description": "The type of notification this is",
+            "enum": [
+              "info",
+              "success",
+              "warning",
+              "error"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date that this notification occurs on",
+            "default": "2026-02-04T00:05:01.716Z"
+          },
+          "isRead": {
+            "type": "boolean",
+            "description": "Tracks if the user has interacted with this notification yet.",
+            "default": false
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "message",
+          "type",
+          "createdAt",
+          "isRead"
+        ]
+      },
+      "FirebaseConfigDTO": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "apiKey",
+          "appId",
+          "projectNumber",
+          "projectId"
+        ]
+      },
+      "UsernamePasswordLoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "UserLoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "jwt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "JWTLoginRequest": {
+        "type": "object",
+        "properties": {
+          "jwt": {
+            "type": "string",
+            "description": "The JWT to authenticate as. This is optional because"
+          }
+        }
+      },
+      "RefreshRequestDTO": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "The current refresh token"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "RefreshResponseDTO": {
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "idToken",
+          "accessToken"
+        ]
+      },
+      "UserCreationRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "UserCreationResponse": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      },
+      "RegisterDeviceDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "platform": {
+            "enum": [
+              "android",
+              "ios",
+              "web"
+            ],
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "ChatRequestDTO": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "How much did I spend on groceries in the last 30 days?",
+            "description": "The message to send to the AI"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ChatHistory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "description": "Who said the message, either the LLM (AI) or the user.",
+            "enum": [
+              "user",
+              "model"
+            ]
+          },
+          "time": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The time the chat occurred on"
+          },
+          "text": {
+            "type": "string",
+            "description": "The text of the chat"
+          },
+          "isThinking": {
+            "type": "boolean",
+            "description": "If the model is still thinking of a response for this one"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "time",
+          "text",
+          "isThinking"
+        ]
       },
       "Holding": {
         "type": "object",
@@ -2601,339 +3341,41 @@
             "description": "The symbol for this holding"
           }
         },
-        "required": ["id", "account", "currency", "costBasis", "description", "marketValue", "purchasePrice", "shares", "symbol"]
+        "required": [
+          "id",
+          "account",
+          "currency",
+          "costBasis",
+          "description",
+          "marketValue",
+          "purchasePrice",
+          "shares",
+          "symbol"
+        ]
       },
-      "EntityHistoryDataPoint": {
+      "Base": {
+        "type": "object",
+        "properties": {}
+      },
+      "SSEData": {
         "type": "object",
         "properties": {
-          "history": {
-            "type": "object",
-            "description": "This is the history for this specific data point",
-            "additionalProperties": {
-              "type": "number"
-            }
-          },
-          "percentChange": {
-            "type": "number"
-          },
-          "valueChange": {
-            "type": "number"
-          }
-        },
-        "required": ["history", "valueChange"]
-      },
-      "EntityHistory": {
-        "type": "object",
-        "properties": {
-          "historicalData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            }
-          },
-          "last1Day": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "last7Days": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastMonth": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastThreeMonths": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastSixMonths": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastYear": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "allTime": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "connectedId": {
-            "type": "string",
-            "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
-          }
-        },
-        "required": ["historicalData", "last1Day", "last7Days", "lastMonth", "lastThreeMonths", "lastSixMonths", "lastYear", "allTime"]
-      },
-      "SankeyLink": {
-        "type": "object",
-        "properties": {
-          "source": {
+          "event": {
+            "enum": [
+              "sync",
+              "force-update",
+              "notification",
+              "chat"
+            ],
             "type": "string"
           },
-          "target": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number"
-          },
-          "description": {
-            "type": "string",
-            "description": "A way to help describe what this link is"
+          "payload": {
+            "$ref": "#/components/schemas/Base"
           }
         },
-        "required": ["source", "target", "value"]
-      },
-      "SankeyData": {
-        "type": "object",
-        "properties": {
-          "colors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "nodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SankeyLink"
-            }
-          }
-        },
-        "required": ["colors", "nodes", "links"]
-      },
-      "CashFlowStats": {
-        "type": "object",
-        "properties": {
-          "totalExpense": {
-            "type": "number"
-          },
-          "totalIncome": {
-            "type": "number"
-          },
-          "count": {
-            "type": "number",
-            "description": "How many total transactions we have for this query"
-          },
-          "largestExpense": {
-            "description": "The largest expense we had for this time period",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Transaction"
-              }
-            ]
-          }
-        },
-        "required": ["totalExpense", "totalIncome", "count"]
-      },
-      "MonthlyCategoryData": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the category"
-          },
-          "amount": {
-            "type": "number",
-            "description": "Total amount spent in this category for this month"
-          },
-          "color": {
-            "type": "string",
-            "description": "Color for the category. Will be a hex code."
-          }
-        },
-        "required": ["name", "amount", "color"]
-      },
-      "MonthlySpendingStats": {
-        "type": "object",
-        "properties": {
-          "categories": {
-            "description": "A breakdown of the top categories for the month based on the request",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlyCategoryData"
-            }
-          },
-          "monthLabel": {
-            "type": "string",
-            "description": "Month label"
-          },
-          "date": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date, just used for sorting"
-          },
-          "totalSpending": {
-            "type": "number",
-            "description": "Total spending for the month"
-          },
-          "periodAverage": {
-            "type": "number",
-            "description": "Average spending across the requested period (for the trend line)"
-          }
-        },
-        "required": ["categories", "monthLabel", "date", "totalSpending", "periodAverage"]
-      },
-      "CashFlowSpending": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlySpendingStats"
-            }
-          },
-          "topCategoryNames": {
-            "description": "The list of top categories identified across the months.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": ["data", "topCategoryNames"]
-      },
-      "FirebaseNotificationDTO": {
-        "type": "object",
-        "properties": {
-          "notificationId": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "default": "secure_message"
-          },
-          "importance": {
-            "type": "string",
-            "description": "Notification importance level",
-            "default": "low",
-            "enum": ["max", "high", "default", "low"]
-          }
-        },
-        "required": ["notificationId", "type", "importance"]
-      },
-      "NotificationSSEDTO": {
-        "type": "object",
-        "properties": {
-          "popupLatest": {
-            "type": "boolean",
-            "description": "If we should render the latest notification or not"
-          }
-        },
-        "required": ["popupLatest"]
-      },
-      "Notification": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string",
-            "description": "The title for our notification"
-          },
-          "message": {
-            "type": "string",
-            "description": "The message that this notification intended to show the user"
-          },
-          "type": {
-            "description": "The type of notification this is",
-            "enum": ["info", "success", "warning", "error"],
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date that this notification occurs on",
-            "default": "2026-01-30T20:53:48.780Z"
-          },
-          "isRead": {
-            "type": "boolean",
-            "description": "Tracks if the user has interacted with this notification yet.",
-            "default": false
-          },
-          "readAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": ["id", "title", "message", "type", "createdAt", "isRead"]
-      },
-      "FirebaseConfigDTO": {
-        "type": "object",
-        "properties": {
-          "apiKey": {
-            "type": "string"
-          },
-          "appId": {
-            "type": "string"
-          },
-          "projectNumber": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          }
-        },
-        "required": ["apiKey", "appId", "projectNumber", "projectId"]
-      },
-      "UsernamePasswordLoginRequest": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "required": ["username", "password"]
-      },
-      "UserLoginResponse": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "jwt": {
-            "type": "string"
-          }
-        },
-        "required": ["user"]
-      },
-      "JWTLoginRequest": {
-        "type": "object",
-        "properties": {
-          "jwt": {
-            "type": "string",
-            "description": "The JWT to authenticate as. This is optional because"
-          }
-        }
-      },
-      "RefreshRequestDTO": {
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "type": "string",
-            "description": "The current refresh token"
-          }
-        },
-        "required": ["refreshToken"]
-      },
-      "RefreshResponseDTO": {
-        "type": "object",
-        "properties": {
-          "idToken": {
-            "type": "string"
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": ["idToken", "accessToken"]
+        "required": [
+          "event"
+        ]
       }
     }
   }

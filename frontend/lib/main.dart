@@ -6,6 +6,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/client/extended_api_client.dart';
 import 'package:sprout/core/provider/init.dart';
@@ -43,6 +44,7 @@ void main() async {
   ServiceLocator.register<TransactionRuleProvider>(TransactionRuleProvider(TransactionRuleApi()));
   ServiceLocator.register<CategoryProvider>(CategoryProvider(CategoryApi()));
   ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowApi()));
+  ServiceLocator.register<ChatProvider>(ChatProvider(ChatApi()));
 
   await FirebaseNotificationProvider.configure(null);
 
@@ -61,6 +63,7 @@ void main() async {
         ServiceLocator.createProvider<CategoryProvider>(),
         ServiceLocator.createProvider<CashFlowProvider>(),
         ServiceLocator.createProvider<NotificationProvider>(),
+        ServiceLocator.createProvider<ChatProvider>(),
 
         // Create a future that waits for all the providers to be initialized, in order
         ChangeNotifierProvider<InitializationNotifier>(

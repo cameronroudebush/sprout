@@ -17,6 +17,7 @@ class UserConfig {
     required this.netWorthRange,
     required this.privateMode,
     this.simpleFinToken,
+    this.geminiKey,
   });
 
   String id;
@@ -36,12 +37,22 @@ class UserConfig {
   ///
   String? simpleFinToken;
 
+  /// This property defines the Gemini API token for LLM use.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? geminiKey;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
     other.id == id &&
     other.netWorthRange == netWorthRange &&
     other.privateMode == privateMode &&
-    other.simpleFinToken == simpleFinToken;
+    other.simpleFinToken == simpleFinToken &&
+    other.geminiKey == geminiKey;
 
   @override
   int get hashCode =>
@@ -49,10 +60,11 @@ class UserConfig {
     (id.hashCode) +
     (netWorthRange.hashCode) +
     (privateMode.hashCode) +
-    (simpleFinToken == null ? 0 : simpleFinToken!.hashCode);
+    (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
+    (geminiKey == null ? 0 : geminiKey!.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -63,6 +75,11 @@ class UserConfig {
       json[r'simpleFinToken'] = this.simpleFinToken;
     } else {
       json[r'simpleFinToken'] = null;
+    }
+    if (this.geminiKey != null) {
+      json[r'geminiKey'] = this.geminiKey;
+    } else {
+      json[r'geminiKey'] = null;
     }
     return json;
   }
@@ -90,6 +107,7 @@ class UserConfig {
         netWorthRange: ChartRangeEnum.fromJson(json[r'netWorthRange'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
+        geminiKey: mapValueOfType<String>(json, r'geminiKey'),
       );
     }
     return null;
