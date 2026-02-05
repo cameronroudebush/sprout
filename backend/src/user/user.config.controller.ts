@@ -40,8 +40,7 @@ export class UserConfigController {
     if (existingConfig == null) throw new NotFoundException(); // This shouldn't be possible
     const userConfig = UserConfig.fromPlain(conf);
     userConfig.id = existingConfig.id;
-    await this.userService.syncEncryptedFields(conf, existingConfig);
-
+    await this.userService.syncEncryptedFields(userConfig, existingConfig);
     return await userConfig.update();
   }
 }

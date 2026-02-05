@@ -6,6 +6,12 @@
       "options": {
         "tabWidth": 4
       }
+    },
+    {
+      "files": "**/migration/sqlite/*.ts",
+      "options": {
+        "printWidth": 480
+      }
     }
   ]
 }

@@ -52,16 +52,8 @@ export class NotificationService implements OnModuleInit {
    * Notifies connected apps that new notifications should be pulled via firebase.
    *  This notification doesn't contain any actual content as it's just expected to wake up the app. The
    *  app is expected to grab new notifications with the awaken.
-   *
-   * @param importance How to treat this notification when it appears on the device
-   * @param powerPriority Defines how the OS handles the device's power state for this notification. High will wake up the device. Default is normal.
    */
-  private async notifyApp(
-    user: User,
-    notification: Notification,
-    importance: FirebaseNotificationDTO["importance"] = "default",
-    powerPriority: "high" | "normal" = "normal",
-  ) {
+  private async notifyApp(user: User, notification: Notification) {
     // Don't send if not enabled
     if (!Configuration.server.notification.firebase.enabled) return;
     // Find all devices related to the current user
@@ -76,8 +68,8 @@ export class NotificationService implements OnModuleInit {
     for (const device of devices) {
       const message: admin.messaging.Message = {
         token: device.fcmToken,
-        data: new FirebaseNotificationDTO({ notificationId: notification.id, importance }) as { [key: string]: any },
-        android: { priority: powerPriority },
+        data: new FirebaseNotificationDTO({ notificationId: notification.id, importance: notification.importance }) as { [key: string]: any },
+        android: { priority: notification.powerPriority },
         apns: { payload: { aps: { contentAvailable: true } } },
       };
 

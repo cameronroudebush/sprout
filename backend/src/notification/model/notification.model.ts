@@ -1,5 +1,6 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { FirebaseNotificationDTO } from "@backend/notification/model/api/firebase.notification.dto";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
@@ -46,5 +47,29 @@ export class Notification extends DatabaseBase {
     this.title = title;
     this.message = message;
     this.type = type;
+  }
+
+  /** Returns how important our notification is to applications */
+  get importance(): FirebaseNotificationDTO["importance"] {
+    switch (this.type) {
+      case NotificationType.info:
+      case NotificationType.success:
+        return "default";
+      case NotificationType.warning:
+      case NotificationType.error:
+        return "high";
+    }
+  }
+
+  /** Returns how important it is to wake up the device to receive this notification */
+  get powerPriority(): "high" | "normal" {
+    switch (this.type) {
+      case NotificationType.info:
+      case NotificationType.success:
+        return "normal";
+      case NotificationType.warning:
+      case NotificationType.error:
+        return "high";
+    }
   }
 }
