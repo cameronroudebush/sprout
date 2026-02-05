@@ -59,7 +59,8 @@ class _HomePageState extends StateTracker<HomePage> {
 
         // Check if a sync hasn't ran recently
         final lastSync = configProvider.config?.lastSchedulerRun;
-        if (lastSync != null && (!lastSync.time.isSameDay(today) || lastSync.status == "in-progress")) {
+        if (lastSync != null &&
+            (!lastSync.time.isSameDay(today) || lastSync.status == "in-progress" || lastSync.status == "failed")) {
           notifications.add(
             SproutNotification(
               "An account sync has not yet ran today",

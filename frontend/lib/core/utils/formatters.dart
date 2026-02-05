@@ -99,6 +99,19 @@ String formatNumber(dynamic number) {
   return NumberFormat().format(number);
 }
 
+/// Replaces all currency in the given string with de-identified amount
+String replaceCurrency(String str) {
+  final currencyRegex = RegExp(r'([$€£¥])\s?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)');
+  return str.replaceAllMapped(currencyRegex, (match) {
+    final symbol = match.group(1);
+    final value = match.group(2) ?? "";
+
+    // Ensure we are actually looking at a number
+    if (RegExp(r'\d').hasMatch(value)) return '$symbol••••';
+    return match.group(0)!;
+  });
+}
+
 /// Date formatters
 extension DateToStringFormatterExtension on DateTime {
   /// MM/dd/yyyy

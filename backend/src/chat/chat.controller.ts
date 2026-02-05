@@ -32,13 +32,13 @@ export class ChatController {
     // Generate the prompt for the new message, insert it, and inform the app
     this.sseService.sendToUser(user, SSEEventType.CHAT, await new ChatHistory(user, data.message, "user").insert());
     // Add history tracking for the model response immediately so the frontend knows about it
-    const chat = await new ChatHistory(user, "Request failed. Try again later.", "model", undefined, true).insert();
+    const chat = await new ChatHistory(user, ChatHistory.DEFAULT_MODEL_TEXT, "model", undefined, true).insert();
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
     try {
       const model = await this.chatService.getModel(user);
-      const contents = await this.chatService.buildPrompt(user);
+      const { contents, idMap } = await this.chatService.buildPrompt(user);
       try {
-        const response = await model.generateContent(contents, chat);
+        const response = await model.generateContent(contents, chat, idMap);
         if (response.text === "") throw new InternalServerErrorException("Failed to parse request from the LLM. Try again later.");
         return response.text;
       } catch (e) {
