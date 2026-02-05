@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/chat/widgets/chat_typing_indicator.dart';
+import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/utils/formatters.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// A widget that provides a chat bubble. Useful to display when the LLM is thinking.
 class ChatBubble extends StatelessWidget {
@@ -10,6 +13,10 @@ class ChatBubble extends StatelessWidget {
   const ChatBubble({super.key, required this.message});
 
   Widget _getGPTMarkdown(BuildContext context) {
+    final isPrivate = ServiceLocator.get<UserConfigProvider>().currentUserConfig!.privateMode;
+
+    final text = isPrivate ? replaceCurrency(message.text) : message.text;
+
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: Theme.of(context).textTheme.copyWith(
@@ -20,7 +27,7 @@ class ChatBubble extends StatelessWidget {
           titleLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
-      child: GptMarkdown(message.text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+      child: GptMarkdown(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
     );
   }
 

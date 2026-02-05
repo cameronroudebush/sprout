@@ -63,15 +63,39 @@ class Chat extends StatelessWidget {
             spacing: 4,
             children: [
               Expanded(
-                child: ListView.builder(
-                  reverse: true,
-                  padding: const EdgeInsets.all(12),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[messages.length - 1 - index];
-                    return ChatBubble(message: message);
-                  },
-                ),
+                child: messages.isEmpty
+                    ? Center(
+                        child: SproutCard(
+                          child: Padding(
+                            padding: EdgeInsetsGeometry.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 12,
+                              children: [
+                                Text(
+                                  "It's awfully quiet in here",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  "We haven't talked yet, but I'm ready when you are. Ask me a question below to kick things off. I promise I'm a great listener!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        reverse: true,
+                        padding: const EdgeInsets.all(12),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[messages.length - 1 - index];
+                          return ChatBubble(message: message);
+                        },
+                      ),
               ),
               _buildQuickActions(provider),
               _buildInputArea(provider),
@@ -86,9 +110,8 @@ class Chat extends StatelessWidget {
   Widget _buildQuickActions(ChatProvider chatProvider) {
     // Suggestions on what we want to do
     final List<Map<String, String>> suggestions = [
-      {'title': "Spending", 'message': "Analyze my spending patterns for the last few months work of data."},
-      {'title': "Net Worth", 'message': "Analyze my net worth trend for the total period of data."},
-      // {'title': "Overview", 'message': "Give me an overview of all the data you have for my accounts."},
+      {'title': "Spending", 'message': "Analyze my spending patterns."},
+      {'title': "Net Worth", 'message': "Analyze my net worth trend."},
       {'title': "Suggestions", 'message': "Give me some ideas on how to further improve my financial health."},
     ];
     return SizedBox(

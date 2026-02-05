@@ -17,6 +17,7 @@ We take your financial privacy seriously:
 
 - **Encryption:** API keys are encrypted at rest.
 - **Minimal Exposure:** Sprout only sends the last 90 days of transaction history to minimize data exposure.
+- **Masked Data:** Sprout replaces numerous identifiers to generic ID's when passed to the LLM to prevent data leakage. This is then turned back into the real text when we receive the response. This data includes: account ID's, transaction descriptions.
 
 ## Supported Models
 
