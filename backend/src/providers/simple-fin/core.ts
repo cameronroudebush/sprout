@@ -27,7 +27,7 @@ export class SimpleFINProvider extends ProviderBase {
     return await Promise.all(
       data.accounts.map(async (x) => {
         const hasInstitutionError = data.errors.some((z) => z.includes(x.org.name));
-        const institution = Institution.fromPlain({ name: x.org.name, id: x.org.id, url: x.org.url, hasError: hasInstitutionError });
+        const institution = new Institution(x.org.url, x.org.name, hasInstitutionError, user);
         const name = x.name;
         const balance = parseFloat(x.balance);
         const availableBalance = parseFloat(x["available-balance"]);
@@ -105,7 +105,6 @@ export class SimpleFINProvider extends ProviderBase {
     user: User,
   ) {
     const accessToken = user.config.simpleFinToken;
-
     if (accessToken == null) throw new Error("SimpleFIN access token is not properly configured. Make sure one is set within the user settings.");
     const startDateEpoch = Math.round(params.transactionStartDate.getTime() / 1000);
     const url = `${accessToken}${endpoint}?pending=${params.pending ? 1 : 0}&start-date=${startDateEpoch}&balances-only=${balancesOnly ? 1 : 0}`;

@@ -116,7 +116,7 @@ export class AccountController {
   async linkProviderAccounts(@Param("name") name: string, @Body() accountsToLink: [Account], @CurrentUser() user: User) {
     const providerMatch = this.providerService.getAll().find((x) => x.config.name === name);
     if (providerMatch == null) throw new Error("Failed to locate matching provider");
-    // We need to grab all the provider accounts again because we want to make sure we have correct data
+    // We need to grab all the provider accounts again because we want to make sure we have correct data and the API isn't being malicious
     const providerAccounts = await providerMatch.get(user, true);
     // Add these new accounts to the database
     const addedAccounts: Account[] = [];
@@ -125,8 +125,9 @@ export class AccountController {
       if (matchingAccount) {
         matchingAccount.account.user = user;
         // Try to find a matching institution first if it exists
-        const matchingInstitution = await Institution.findOne({ where: { id: matchingAccount.account.institution.id } });
+        const matchingInstitution = await Institution.findOne({ where: { user: { id: user.id }, name: matchingAccount.account.institution.name } });
         if (matchingInstitution) matchingAccount.account.institution = matchingInstitution;
+        else matchingAccount.account.institution.user = user; // Enforce user for our institution to not allow overwrites
         matchingAccount.account.subType = account.subType;
         if (account.subType != null) Account.validateSubType(account.subType);
         await matchingAccount.account.insert(false);

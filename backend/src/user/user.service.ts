@@ -17,18 +17,17 @@ export class UserService {
 
   /** Syncs encrypted fields for our user config. Does this dynamically based on the value of the transformer */
   async syncEncryptedFields(incoming: UserConfig, existing: UserConfig) {
-    const metadata = UserConfig.getRepository().metadata;
+    const keys = Object.keys(existing) as (keyof UserConfig)[];
 
-    for (const column of metadata.columns) {
-      if (column.transformer instanceof EncryptionTransformer) {
-        const field = column.propertyName as keyof UserConfig;
-
+    // Loop over all keys, determine who is encrypted and what needs updated
+    for (const key of keys) {
+      if (EncryptionTransformer.propertyIsEncrypted(existing, key)) {
         // If the incoming value is the masked placeholder, revert to the DB value
-        if (incoming[field] === EncryptionTransformer.HIDDEN_VALUE) {
-          (incoming as any)[field] = existing[field];
-        } else if (field === "simpleFinToken" && incoming[field]) {
+        if (incoming[key] === EncryptionTransformer.HIDDEN_VALUE) {
+          (incoming as any)[key] = existing[key];
+        } else if (key === "simpleFinToken" && incoming[key]) {
           // Convert simpleFin token as needed
-          incoming[field] = await this.providerService.providers.simpleFin.convertSetupToken(incoming[field]);
+          incoming[key] = await this.providerService.providers.simpleFin.convertSetupToken(incoming[key]);
         }
       }
     }

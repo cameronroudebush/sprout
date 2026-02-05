@@ -16,22 +16,33 @@ export class EncryptionTransformer implements ValueTransformer {
   static readonly REQUIRED_KEY_LENGTH = 32;
 
   /** The algorithm to use for our encryption keys */
-  static readonly ALGORITHM = "aes-256-gcm";
+  private static readonly ALGORITHM = "aes-256-gcm";
 
   /** The text that is displayed when the property is of a hidden value */
   static readonly HIDDEN_VALUE = "***";
 
   /** IV length for the encryption algorithm */
-  static readonly IV_LENGTH = 12;
+  private static readonly IV_LENGTH = 12;
+
+  /** The key that tracks if a property has encryption transformer applied to it */
+  private static readonly METADATA_KEY = "encryption:transformer";
 
   /** Decorates whatever property is using the encryption transformer so if it somehow is serialized to the API, it will be fake data */
   static decorateAPIProperty() {
     return applyDecorators(
+      (target: Object, key: string | symbol) => Reflect.defineMetadata(EncryptionTransformer.METADATA_KEY, true, target, key),
       Transform(({ value }) => (value ? EncryptionTransformer.HIDDEN_VALUE : ""), {
         /** Only do the hidden value converting when going to plain so it's not leaked into the API */
         toPlainOnly: true,
       }),
     );
+  }
+
+  /** Returns if the given property of an object is an encrypted field. */
+  static propertyIsEncrypted<T extends Object>(obj: T, key: keyof T | string) {
+    const target = obj.constructor ? obj.constructor.prototype : obj;
+    const hasMetadata = Reflect.getMetadata(EncryptionTransformer.METADATA_KEY, target, key as string);
+    return hasMetadata === true;
   }
 
   /** Generates a random encryption key of the proper length */

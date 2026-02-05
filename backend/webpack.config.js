@@ -50,7 +50,7 @@ module.exports = function (options, argv) {
       // Keys only used for development
       !isProduction
         ? new webpack.BannerPlugin({
-            banner: `process.env.sprout_encryptionKey = ${JSON.stringify("7dcfdb8a5d3fda79627788dddb100a9d26e09150580b831d501805463d085971")};`,
+            banner: `process.env.sprout_encryptionKey = process.env.sprout_encryptionKey || ${JSON.stringify("7dcfdb8a5d3fda79627788dddb100a9d26e09150580b831d501805463d085971")};`,
             raw: true,
             entryOnly: true,
           })
