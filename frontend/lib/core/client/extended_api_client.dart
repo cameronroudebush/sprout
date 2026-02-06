@@ -8,7 +8,7 @@ import 'package:sprout/auth/auto_logout_client.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/client/browser_client.dart' if (dart.library.html) 'package:http/browser_client.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/snackbar.dart';
+import 'package:sprout/notification/notification_provider.dart';
 
 /// Applies the default API content considering the connection URL and the authentication strategy
 Future<void> applyDefaultAPI() async {
@@ -28,9 +28,10 @@ Future<void> applyDefaultAPI() async {
     innerClient: interceptor,
     onLogout: () async {
       final authProvider = ServiceLocator.get<AuthProvider>();
+      final notificationProvider = ServiceLocator.get<NotificationProvider>();
       if (authProvider.isLoggedIn) {
         await authProvider.logout(forced: true);
-        SnackbarProvider.openSnackbar("Session expired", type: SnackbarType.warning);
+        notificationProvider.openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning);
       }
     },
   );

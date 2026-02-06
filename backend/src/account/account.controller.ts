@@ -170,6 +170,6 @@ export class AccountController {
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC, sync);
     // Tell to re-request data
-    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+    if (sync.status !== "failed") this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
   }
 }

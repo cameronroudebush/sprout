@@ -5,7 +5,7 @@ import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extrac
 import { Configuration } from "@backend/config/core";
 import { PublicURL } from "@backend/core/decorator/public.url.decorator";
 import { HttpService } from "@nestjs/axios";
-import { Body, Controller, Get, Logger, Post, Query, Req, Res, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Logger, Post, Query, Req, Res, UnauthorizedException } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { createHash, randomBytes } from "crypto";
 import { Request, Response } from "express";
@@ -71,9 +71,10 @@ export class AuthController {
   /** Sets tokens into the cookies based on what tokens you can provide */
   private setCookieTokens(res: Response, idToken: string, accessToken?: string, refreshToken?: string) {
     const secure = !Configuration.isDevBuild;
-    res.cookie("id_token", idToken, { httpOnly: true, secure });
-    if (accessToken) res.cookie("access_token", accessToken, { httpOnly: true, secure });
-    if (refreshToken) res.cookie("refresh_token", refreshToken, { httpOnly: true, secure, path: "/auth/oidc/refresh" });
+    const sameSite = "strict";
+    res.cookie("id_token", idToken, { httpOnly: true, secure, sameSite });
+    if (accessToken) res.cookie("access_token", accessToken, { httpOnly: true, secure, sameSite });
+    if (refreshToken) res.cookie("refresh_token", refreshToken, { httpOnly: true, secure, path: "/auth/oidc/refresh", sameSite });
   }
 
   @Post("oidc/refresh")
@@ -112,6 +113,7 @@ export class AuthController {
       // If Mobile, return tokens in Body
       return new RefreshResponseDTO(response.data.id_token, response.data.access_token, response.data.refresh_token);
     } catch (e: any) {
+      this.logger.error(`Refresh failed: ${e.message}`, e.response?.data);
       throw new UnauthorizedException("Session could not be refreshed.");
     }
   }
@@ -124,6 +126,9 @@ export class AuthController {
   })
   @StrategyGuard.attach("oidc")
   async loginOIDC(@Query("target_url") targetUrl: string, @Res() res: Response, @PublicURL() publicUrl: string) {
+    // Ensure the target URL is either a relative path, matches our public URL, or is the allowed mobile scheme
+    if (!this.authService.isValidRedirectUrl(targetUrl, publicUrl)) throw new BadRequestException("Invalid target URL provided.");
+
     const { issuer, clientId } = Configuration.server.auth.oidc;
     const redirectUri = `${publicUrl}${Configuration.server.basePath}/auth/oidc/callback`;
     // Security state
@@ -158,7 +163,13 @@ export class AuthController {
     description: "Handles the redirect back from the OIDC server and handles state control to get the authentication response back to the original requester.",
   })
   @StrategyGuard.attach("oidc")
-  async loginCallbackOIDC(@Query("code") code: string, @Query("state") state: string, @Req() req: Request, @Res() res: Response) {
+  async loginCallbackOIDC(
+    @Query("code") code: string,
+    @Query("state") state: string,
+    @Req() req: Request,
+    @Res() res: Response,
+    @PublicURL() publicUrl: string,
+  ) {
     const { issuer, authHeader } = Configuration.server.auth.oidc;
 
     // Validate Cookie
@@ -187,8 +198,14 @@ export class AuthController {
       // Clear the temporary cookie
       res.clearCookie("oidc_pending");
 
+      // We validate again to ensure the cookie wasn't tampered with (though it is signed) or that the logic hasn't drifted.
+      if (!this.authService.isValidRedirectUrl(targetUrl, publicUrl)) {
+        this.logger.warn(`Open redirect attempt detected to: ${targetUrl}`);
+        throw new UnauthorizedException("Invalid redirect target");
+      }
+
       // Detect if this is a Mobile Deep Link or a Web URL
-      const isMobileScheme = targetUrl.startsWith("net.croudebush.sprout");
+      const isMobileScheme = targetUrl.startsWith(AuthService.ALLOWED_MOBILE_SCHEME);
 
       if (isMobileScheme) {
         // Mobile - Fragments

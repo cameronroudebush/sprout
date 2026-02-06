@@ -51,25 +51,33 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
       throw e;
     }
 
-    // Finalize the schedule status
-    schedule.status = "complete";
-    await schedule.update();
-
     // Inform the user of each most important notifications
     const notifications = groupBy(totalResults, "user.id");
     for (const [_userId, items] of Object.entries(notifications)) {
       // Check for immediate problems (Errors or Warnings)
       const problems = items.filter((n) => n.type === NotificationType.error || n.type === NotificationType.warning);
 
-      if (problems.length > 0)
+      if (problems.length > 0) {
         // If problems exist, notify the user of ALL of them
         for (const problem of problems) await this.notificationService.notifyUser(problem.user, problem.message, problem.title, problem.type);
-      else {
+
+        // If we already have a failure, identify that
+        if (schedule.status === "failed") {
+          schedule.failureReason = "Multiple failure reasons. Check the logs.";
+        } else {
+          schedule.status = "failed";
+          schedule.failureReason = problems.length > 1 ? "Sync found many problems. Check the logs" : problems[0]?.message;
+        }
+      } else {
         // If no problems, find the first success (if it exists)
         const success = items.find((n) => n.type === NotificationType.success);
         if (success) await this.notificationService.notifyUser(success.user, success.message, success.title, success.type);
       }
     }
+
+    // Finalize the schedule status
+    if (schedule.status !== "failed") schedule.status = "complete";
+    await schedule.update();
 
     return schedule;
   }

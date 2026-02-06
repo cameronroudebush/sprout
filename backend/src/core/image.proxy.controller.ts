@@ -20,8 +20,24 @@ export class ImageProxyController {
    * If you want a better looking icon for a site you use, open a PR and update this mapping.
    */
   static MANUAL_PROXY: { [key: string]: string } = {
+    // Banks & Finance
     "www.wpcu.coop": "https://play-lh.googleusercontent.com/mIXMOB7Kxi0BsD5HnYcWdA-wdJbdphhMp0TfSZ6m1o8PBy86xNhegeOmrpJ5S2D2tVU",
-    "www.discover.com": "https://companieslogo.com/img/orig/DFS-72325cfa.png?t=1720244491",
+    "www.discover.com": "https://companieslogo.com/img/orig/DFS-72325cfa.png",
+    "www.chase.com": "https://companieslogo.com/img/orig/JPM-952467d3.png",
+    "www.bankofamerica.com": "https://companieslogo.com/img/orig/BAC-d62159d2.png",
+    "www.wellsfargo.com": "https://companieslogo.com/img/orig/WFC-04184852.png",
+    "www.citi.com": "https://companieslogo.com/img/orig/C-b262846f.png",
+    "www.americanexpress.com": "https://companieslogo.com/img/orig/AXP-6e393b48.png",
+    "www.capitalone.com": "https://companieslogo.com/img/orig/COF-5c029314.png",
+    "www.usbank.com": "https://companieslogo.com/img/orig/USB-0a990088.png",
+    "www.pnc.com": "https://companieslogo.com/img/orig/PNC-f29910d9.png",
+    "www.fidelity.com": "https://companieslogo.com/img/orig/FIS-9556d984.png",
+    "www.schwab.com": "https://companieslogo.com/img/orig/SCHW-8d5f35d2.png",
+    "www.vanguard.com": "https://companieslogo.com/img/orig/Vanguard-82782319.png",
+    "www.paypal.com": "https://companieslogo.com/img/orig/PYPL-33923d75.png",
+    "www.stripe.com": "https://companieslogo.com/img/orig/Stripe-d2784865.png",
+    "www.robinhood.com": "https://companieslogo.com/img/orig/HOOD-6ac214e6.png",
+    "www.coinbase.com": "https://companieslogo.com/img/orig/COIN-a05256e2.png",
   };
 
   @Get()
@@ -50,7 +66,7 @@ export class ImageProxyController {
       result = await fetch(fullImageUrl);
     } else {
       const cleanImageUrl = faviconImageUrl!.replace("https://", "");
-      const manualMapping = ImageProxyController.MANUAL_PROXY[cleanImageUrl];
+      const manualMapping = ImageProxyController.MANUAL_PROXY[new URL(faviconImageUrl!).host];
       let imageRequestURL: string;
       if (manualMapping != null) imageRequestURL = manualMapping;
       else imageRequestURL = `https://www.google.com/s2/favicons?domain=${cleanImageUrl}&sz=128`;

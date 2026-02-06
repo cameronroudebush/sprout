@@ -19,6 +19,38 @@ import 'package:sprout/user/user_provider.dart';
 
 /// This provider helps us handle firebase connection for push notifications, assuming the API has provided us a firebase config.
 class FirebaseNotificationProvider {
+  /// Clears all active notifications from the system tray.
+  static Future<void> clearNotifications() async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  /// When a specific notification is clicked via the app menu, this will be called to tell the backend
+  ///   the user saw that notification.
+  static void _onNotificationTap(NotificationResponse details) async {
+    final notificationId = details.payload;
+    if (notificationId != null && notificationId != "") {
+      try {
+        final notificationProvider = ServiceLocator.get<NotificationProvider>();
+        notificationProvider.api.notificationControllerMarkRead(notificationId);
+        // Clear the notification from display
+        notificationProvider.clearOverlay(notificationId);
+      } catch (e) {
+        LoggerService.error("Error handling notification tap: $e");
+      }
+    }
+  }
+
+  /// Checks the launch notification when the app resumes/starts up so we know what to do with them
+  static void checkLaunchNotification() async {
+    final plugin = FlutterLocalNotificationsPlugin();
+    final NotificationAppLaunchDetails? details = await plugin.getNotificationAppLaunchDetails();
+    if (details != null && details.didNotificationLaunchApp && details.notificationResponse?.payload != null) {
+      FirebaseNotificationProvider._onNotificationTap(details.notificationResponse!);
+    }
+    await FirebaseNotificationProvider.clearNotifications();
+  }
+
   /// Initializes firebase for our app. We have to wait after login so we can grab the configuration from the backend, encrypted, that contains the firebase tokens
   static Future<void> configure(NotificationApi? api) async {
     if (kIsWeb) return; // Don't even bother with firebase on web
@@ -117,7 +149,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       // Initialize local notification settings
       const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('ic_notification');
       const InitializationSettings initSettings = InitializationSettings(android: androidSettings);
-      await _backgroundLocalNotifications.initialize(settings: initSettings);
+      await _backgroundLocalNotifications.initialize(
+        settings: initSettings,
+        onDidReceiveNotificationResponse: FirebaseNotificationProvider._onNotificationTap,
+        onDidReceiveBackgroundNotificationResponse: FirebaseNotificationProvider._onNotificationTap,
+      );
 
       _isIsolateInitialized = true;
     }
@@ -140,6 +176,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         id: DateTime.now().millisecond,
         title: title,
         body: body,
+        payload: payload.notificationId,
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'secure_channel_${payload.importanceTyped.toString()}',

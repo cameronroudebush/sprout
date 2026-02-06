@@ -8,7 +8,7 @@ class AccountLogoWidget extends LogoBaseWidget<Account> {
 
   @override
   ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context) {
-    return (faviconImageUrl: logoClass.institution.id, fullImageUrl: null);
+    return (faviconImageUrl: logoClass.institution.url, fullImageUrl: null);
   }
 
   @override
