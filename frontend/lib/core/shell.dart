@@ -11,10 +11,10 @@ import 'package:sprout/core/widgets/fab.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/scroll.dart';
+import 'package:sprout/notification/firebase.dart';
 import 'package:sprout/user/model/user_extensions.dart';
 
-/// A wrapper around the scaffold that renders the navigation selection options as well as the current page
-class SproutShell extends StatelessWidget {
+class SproutShell extends StatefulWidget {
   // This object is provided by GoRouter and contains the state of the branches.
   final Widget child;
 
@@ -36,8 +36,33 @@ class SproutShell extends StatelessWidget {
   });
 
   @override
+  State<SproutShell> createState() => _SproutShellState();
+}
+
+/// A wrapper around the scaffold that renders the navigation selection options as well as the current page
+class _SproutShellState extends State<SproutShell> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    FirebaseNotificationProvider.checkLaunchNotification();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) FirebaseNotificationProvider.checkLaunchNotification();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
+    final SproutShell(:child, :renderAppBar, :renderNav, :currentPage) = widget;
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       /// The app bar we want, if necessary
@@ -196,6 +221,7 @@ class SproutShell extends StatelessWidget {
 
   /// Builds a navigation item, which can be a regular [ListTile] or an [ExpansionTile] if it has sub-pages.
   List<Widget> _buildNavItem(BuildContext context, SproutPage page, int index, bool isDesktop) {
+    final SproutShell(:currentPage) = widget;
     final topLevelPageIsSelected = currentPage.label == page.label;
     final tiles = [
       ListTile(
@@ -210,6 +236,7 @@ class SproutShell extends StatelessWidget {
 
   /// Returns the bottom navigation to display
   Widget _getBottomNav(BuildContext context) {
+    final SproutShell(:currentPage) = widget;
     final theme = Theme.of(context);
     double fontSize = 8;
     final bottomNavButtons = SproutRouter.pages.where((e) => e.canNavigateTo && e.showOnBottomNav).toList();
@@ -225,7 +252,7 @@ class SproutShell extends StatelessWidget {
     final activeIndex = bottomNavButtons.indexWhere((page) => page.label == currentPage.label);
 
     return BottomNavigationBar(
-      currentIndex: activeIndex != -1 ? activeIndex : 0,
+      currentIndex: activeIndex != -1 ? activeIndex : homePageIndex,
       iconSize: 24,
       selectedFontSize: fontSize,
       unselectedFontSize: fontSize,
@@ -238,7 +265,7 @@ class SproutShell extends StatelessWidget {
         SproutNavigator.redirect(page.label);
       },
       backgroundColor: theme.colorScheme.primaryContainer,
-      selectedItemColor: theme.colorScheme.secondaryContainer,
+      selectedItemColor: activeIndex == -1 ? Colors.white : theme.colorScheme.secondaryContainer,
       unselectedItemColor: theme.colorScheme.onPrimaryContainer,
       type: BottomNavigationBarType.fixed,
       enableFeedback: true,
@@ -246,7 +273,10 @@ class SproutShell extends StatelessWidget {
           .mapIndexed((i, page) {
             if (!page.canNavigateTo) return null;
             return BottomNavigationBarItem(
-              icon: Padding(padding: const EdgeInsets.all(4.0), child: Icon(page.icon)),
+              icon: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(page.icon, color: i == activeIndex ? theme.colorScheme.primary : Colors.white),
+              ),
               label: page.label,
             );
           })

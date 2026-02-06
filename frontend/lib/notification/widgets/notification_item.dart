@@ -5,8 +5,21 @@ import 'package:sprout/api/api.dart';
 /// A notification widget that displays the given notification in a pretty format
 class NotificationItem extends StatelessWidget {
   final Notification notification;
+  final bool showDate;
 
-  const NotificationItem(this.notification, {super.key});
+  /// Shows the unread indicator if set in notification. If this is false and the notification is unread, it won't display such.
+  final bool showUnreadIndicator;
+
+  /// If an indicator that something is in process should be shown
+  final bool showSpinner;
+
+  const NotificationItem(
+    this.notification, {
+    super.key,
+    this.showDate = true,
+    this.showUnreadIndicator = true,
+    this.showSpinner = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +38,23 @@ class NotificationItem extends StatelessWidget {
       color: notification.isRead ? null : color.withValues(alpha: 0.05),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         spacing: 12,
         children: [
           // Type Icon
-          Icon(icon, color: color, size: 20),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(icon, color: color, size: 20),
+              if (showSpinner)
+                SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: color)),
+            ],
+          ),
 
           // Text Content
-          Expanded(
+          Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -40,9 +62,10 @@ class NotificationItem extends StatelessWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: showUnreadIndicator && !notification.isRead ? MainAxisSize.max : MainAxisSize.min,
                   children: [
                     // Title
-                    Expanded(
+                    Flexible(
                       child: Text(
                         notification.title,
                         maxLines: 1,
@@ -53,7 +76,7 @@ class NotificationItem extends StatelessWidget {
                       ),
                     ),
                     // Unread indicator
-                    if (!notification.isRead)
+                    if (showUnreadIndicator && !notification.isRead)
                       Container(
                         width: 8,
                         height: 8,
@@ -62,17 +85,19 @@ class NotificationItem extends StatelessWidget {
                   ],
                 ),
                 // Message
-                Text(
-                  notification.message,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-                // Date
-                Text(
-                  DateFormat('MM-dd-yyyy').format(notification.createdAt),
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                ),
+                if (notification.message != "")
+                  Text(
+                    notification.message,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                if (showDate)
+                  // Date
+                  Text(
+                    DateFormat('MM-dd-yyyy').format(notification.createdAt),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                  ),
               ],
             ),
           ),

@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:sprout/api/api.dart';
-import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/snackbar.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 
 /// Class that provides the store of current account information
-class AccountProvider extends BaseProvider<AccountApi> {
+class AccountProvider extends BaseProvider<AccountApi> with SproutProviders {
   // Data store
   List<Account> _linkedAccounts = [];
 
@@ -49,15 +47,16 @@ class AccountProvider extends BaseProvider<AccountApi> {
 
   /// Tells the API to manually run an account refresh
   Future<void> manualSync() async {
+    String? notificationId;
     try {
       manualSyncIsRunning = true;
-      SnackbarProvider.openSnackbar("A data sync is running...");
+      notificationId = notificationProvider.openFrontendOnly("Account sync is running.", showSpinner: true);
       notifyListeners();
       await api.accountControllerManualSync(false);
     } catch (e) {
       manualSyncIsRunning = false;
-      SnackbarProvider.clearSnackBars();
-      SnackbarProvider.openWithAPIException(e);
+      if (notificationId != null) notificationProvider.clearOverlay(notificationId);
+      notificationProvider.openWithAPIException(e);
       notifyListeners();
     }
   }
@@ -73,13 +72,10 @@ class AccountProvider extends BaseProvider<AccountApi> {
     await super.onSSE(data);
     // Reset status of manual sync button
     if (data.event == SSEDataEventEnum.sync_) {
-      SnackbarProvider.clearSnackBars();
+      final sync = ModelSync.fromJson(data.payload);
       manualSyncIsRunning = false;
       notifyListeners();
-      final configProvider = ServiceLocator.get<ConfigProvider>();
-      if (configProvider.config != null) {
-        configProvider.config!.lastSchedulerRun = ModelSync.fromJson(data.payload);
-      }
+      if (configProvider.config != null) configProvider.config!.lastSchedulerRun = sync;
     }
   }
 }

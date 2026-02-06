@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/provider.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/provider/sse.dart';
 import 'package:sprout/setup/widgets/connection.dart';
 import 'package:sprout/user/model/user_display_info.dart';
@@ -27,7 +29,7 @@ class UserConfigPage extends StatefulWidget {
   State<UserConfigPage> createState() => _UserConfigPageState();
 }
 
-class _UserConfigPageState extends State<UserConfigPage> {
+class _UserConfigPageState extends State<UserConfigPage> with SproutProviders {
   /// Returns a formatted string for the last background sync status.
   String _getLastSyncStatus(ConfigProvider provider) {
     final config = provider.config;
@@ -162,7 +164,10 @@ class _UserConfigPageState extends State<UserConfigPage> {
                   name: entry.key,
                   info: entry.value,
                   onFail: widget.onFail,
-                  onSet: widget.onSet,
+                  onSet: () {
+                    notificationProvider.openFrontendOnly("Settings updated", type: NotificationTypeEnum.success);
+                    widget.onSet?.call();
+                  },
                   renderCards: !widget.onlyShowSetup,
                 ),
               )

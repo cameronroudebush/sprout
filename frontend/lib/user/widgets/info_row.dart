@@ -2,14 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/snackbar.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/user/model/user_display_info.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Provides a row of info to display in the card structure of the user page
 // ignore: must_be_immutable
-class UserInfoRow extends StatelessWidget {
+class UserInfoRow extends StatelessWidget with SproutProviders {
   /// Called when a config fails to update, if applicable
   final void Function(String msg)? onFail;
 
@@ -28,15 +27,14 @@ class UserInfoRow extends StatelessWidget {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     // Don't allow too often of updates
     _debounce = Timer(const Duration(milliseconds: 500), () async {
-      final provider = ServiceLocator.get<UserConfigProvider>();
       final originalVal = info.settingValue;
       try {
         if (info.onSettingUpdate != null) info.onSettingUpdate!(val);
-        await provider.updateConfig(provider.currentUserConfig!);
+        await userConfigProvider.updateConfig(userConfigProvider.currentUserConfig!);
         onSet?.call();
       } catch (e) {
         if (info.onSettingUpdate != null) info.onSettingUpdate!(originalVal);
-        onFail?.call(SnackbarProvider.parseOpenAPIException(e));
+        onFail?.call(notificationProvider.parseOpenAPIException(e));
       }
     });
   }

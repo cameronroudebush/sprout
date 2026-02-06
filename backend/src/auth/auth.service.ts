@@ -11,6 +11,9 @@ export type LocalJWTContent = { username: string };
 /** This service is used to validate login requests */
 @Injectable()
 export class AuthService {
+  // Allowed mobile schemes for redirect of OIDC auth
+  static readonly ALLOWED_MOBILE_SCHEME = "net.croudebush.sprout";
+
   /** Given a login request from an endpoint, requests a login by validating the username and password. */
   async login(loginRequest: UsernamePasswordLoginRequest): Promise<UserLoginResponse> {
     const matchingUser = await User.findOne({ where: { username: loginRequest.username } });
@@ -29,7 +32,7 @@ export class AuthService {
     }
     const usernameToCheck = this.decodeJWT(jwt).username;
     const matchingUser = await User.findOne({ where: { username: usernameToCheck } });
-    if (matchingUser == null) throw new UnauthorizedException("Login failed");
+    if (matchingUser == null || matchingUser.password == null) throw new UnauthorizedException("Login failed");
     else return UserLoginResponse.fromPlain({ user: matchingUser, jwt });
   }
 
@@ -49,5 +52,30 @@ export class AuthService {
     return jwt.sign({ username: user.username } as LocalJWTContent, Configuration.server.auth.secretKey, {
       expiresIn: Configuration.server.auth.local.jwtExpirationTime,
     } as any);
+  }
+
+  /**
+   * Helper to validate that the target URL is safe to redirect to.
+   * It must be either:
+   * 1. A relative URL (starts with /)
+   * 2. The same origin as the public URL
+   * 3. The allowed mobile scheme
+   */
+  isValidRedirectUrl(targetUrl: string, publicUrl: string): boolean {
+    if (!targetUrl) return false;
+    // Allow internal relative paths
+    if (targetUrl.startsWith("/")) return true;
+    // Allow specific mobile scheme
+    if (targetUrl.startsWith(AuthService.ALLOWED_MOBILE_SCHEME)) return true;
+
+    try {
+      const target = new URL(targetUrl);
+      const source = new URL(publicUrl);
+      // Compare Hostnames (e.g. api.mysite.com vs mysite.com or localhost vs localhost)
+      return target.hostname === source.hostname;
+    } catch (e) {
+      // Invalid URL format
+      return false;
+    }
   }
 }

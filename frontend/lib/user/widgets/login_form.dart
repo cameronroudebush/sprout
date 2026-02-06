@@ -5,11 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/layout.dart';
@@ -23,7 +22,7 @@ class LoginForm extends StatefulWidget {
   State<LoginForm> createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _LoginFormState extends State<LoginForm> with SproutProviders {
   static const failedLoginMessage = "Login failed. Please check credentials.";
 
   final TextEditingController _usernameController = TextEditingController();
@@ -68,7 +67,6 @@ class _LoginFormState extends State<LoginForm> {
     _usernameController.addListener(_updateButtonState);
     _passwordController.addListener(_updateButtonState);
     // Attempt initial login
-    final authProvider = ServiceLocator.get<AuthProvider>();
     setState(() {
       _loginIsRunning = false;
     });
@@ -85,7 +83,7 @@ class _LoginFormState extends State<LoginForm> {
           })
           .onError((ApiException error, StackTrace stackTrace) async {
             final isSessionExpiration =
-                error.code == 401 && SnackbarProvider.parseOpenAPIException(error) == "Session Expired";
+                error.code == 401 && notificationProvider.parseOpenAPIException(error) == "Session Expired";
             // Reset the JWT as the auto login has expired
             if (isSessionExpiration) {
               await SecureStorageProvider.saveValue(SecureStorageProvider.idToken, null);
@@ -93,7 +91,7 @@ class _LoginFormState extends State<LoginForm> {
             }
             await _loginComplete(
               null,
-              failureMessage: isSessionExpiration ? SnackbarProvider.parseOpenAPIException(error) : "",
+              failureMessage: isSessionExpiration ? notificationProvider.parseOpenAPIException(error) : "",
             );
           });
     }
@@ -106,8 +104,6 @@ class _LoginFormState extends State<LoginForm> {
 
   /// Handles the login process when the login button is pressed.
   Future<void> _login() async {
-    final authProvider = ServiceLocator.get<AuthProvider>();
-    final configProvider = ServiceLocator.get<ConfigProvider>();
     User? user;
     try {
       setState(() {

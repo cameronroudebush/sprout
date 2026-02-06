@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/models/notification.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/provider/snackbar.dart';
 import 'package:sprout/core/widgets/notification.dart';
 import 'package:sprout/setup/widgets/pages/wrapper.dart';
-import 'package:sprout/user/user_provider.dart';
 
 /// This page contains the process and inputs for creating a new user account
 class AccountSetupPage extends StatefulWidget {
@@ -22,8 +19,8 @@ class AccountSetupPage extends StatefulWidget {
     Function(String message, {bool isError})? onStatusChanged,
     VoidCallback? onSuccess,
   }) async {
-    final configProvider = ServiceLocator.get<ConfigProvider>();
-    final userProvider = ServiceLocator.get<UserProvider>();
+    final configProvider = SproutProviders.config;
+    final userProvider = SproutProviders.user;
     // Validation Guard for non OIDC
     if (!configProvider.isOIDCAuthMode && ((username ?? '').isEmpty || (password ?? '').isEmpty)) {
       onStatusChanged?.call('Username/password cannot be empty.', isError: true);
@@ -44,7 +41,7 @@ class AccountSetupPage extends StatefulWidget {
       // Update Status & Attempt Login
       onStatusChanged?.call('Account created! Logging in...', isError: false);
 
-      final authProvider = ServiceLocator.get<AuthProvider>();
+      final authProvider = SproutProviders.auth;
       final loggedIn = await (configProvider.isOIDCAuthMode
           ? authProvider.tryInitialLogin()
           : authProvider.login(username!, password!));
@@ -58,7 +55,7 @@ class AccountSetupPage extends StatefulWidget {
       onStatusChanged?.call('Login successful!', isError: false);
       onSuccess?.call();
     } catch (e) {
-      onStatusChanged?.call(SnackbarProvider.parseOpenAPIException(e), isError: true);
+      onStatusChanged?.call(SproutProviders.notification.parseOpenAPIException(e), isError: true);
     }
   }
 

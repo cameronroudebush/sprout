@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sprout/core/provider/snackbar.dart';
+import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
+import 'package:sprout/notification/notification_provider.dart';
 
 /// A widget that allows us to wrap the display so when the user uses the back button on mobile, we can allow them to exit the app.
 class ExitWidget extends StatefulWidget {
@@ -51,7 +52,7 @@ class _ExitWidgetState extends State<ExitWidget> {
           // If it's the first press, update the last pressed time.
           _lastPressedAt = now;
           if (allowExit) {
-            SnackbarProvider.openSnackbar("Press back again to exit the app");
+            ServiceLocator.get<NotificationProvider>().openFrontendOnly("Press back again to exit the app");
           }
         }
       },
