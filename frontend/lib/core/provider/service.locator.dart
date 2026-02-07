@@ -21,6 +21,7 @@ import 'package:sprout/user/user_provider.dart';
 /// This class provides lookups to other providers
 class ServiceLocator {
   static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  static final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 
   /// Internal service locator
   static final GetIt _sl = GetIt.instance;

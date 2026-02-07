@@ -7,33 +7,27 @@ import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
 
-/// A configuration object that binds a Provider to a specific data fetch request.
-/// [P] is the type of the Provider (e.g., UserProvider).
-/// [T] is the type of the data expected (e.g., UserProfile).
+// Assuming you access the global observer here, or inject it via ServiceLocator
+// import 'main.dart' show routeObserver;
+
 class DataRequest<P extends BaseProvider, T> {
   final P provider;
-
-  /// The function that actually gets the data.
   final Future<T?> Function(P provider, bool forceUpdate) onLoad;
-
-  /// [Optional] A function to synchronously check if the provider already has the data.
-  /// If this returns a non-null value, [onLoad] will be SKIPPED (unless forced),
-  /// and the spinner will not show.
   final T? Function(P provider)? getFromProvider;
-
-  /// If true, [StateTracker.hasValidData] will return false if this data is null.
   final bool isRequired;
-
-  /// The current value of this data point.
   T? value;
 
   DataRequest({required this.provider, required this.onLoad, this.getFromProvider, this.isRequired = true});
 }
 
-/// This widget provides functionality to automatically populate multiple data sets
-/// from different providers. It aggregates loading states and data validity.
-abstract class StateTracker<T extends StatefulWidget> extends State<T> with WidgetsBindingObserver {
+// 1. Add RouteAware mixin
+abstract class StateTracker<T extends StatefulWidget> extends State<T> with WidgetsBindingObserver, RouteAware {
   final _sseProvider = ServiceLocator.get<SSEProvider>();
+
+  // 2. Inject or access your global RouteObserver
+  // If you don't use DI for this, import the global variable 'routeObserver' from main.dart
+  final RouteObserver<ModalRoute> _routeObserver = ServiceLocator.routeObserver;
+
   StreamSubscription<SSEData>? _sseSubscription;
 
   /// The last time we preformed an update request per component name. Used to debounce how often we request data.
@@ -43,19 +37,9 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
   /// Internal loading state
   bool _isLoading = false;
 
-  /// Subclasses must implement this getter to define which data points to load.
-  /// Keys can be Strings, Enums, or any unique identifier.
-  ///
-  /// Example:
-  /// ```dart
-  /// @override
-  /// Map<String, DataRequest> get requests => {
-  ///   'user': DataRequest<UserProvider, User>(
-  ///      provider: userProvider,
-  ///      onLoad: (p, force) => p.fetchUser(force: force)
-  ///   ),
-  /// };
-  /// ```
+  // Flag to track if we missed an update while in background
+  bool _markedForUpdate = false;
+
   Map<dynamic, DataRequest> get requests;
 
   /// Returns true if the component is currently fetching any data.
@@ -172,8 +156,15 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
     _sseSubscription = _sseProvider.onSSEEvent.listen((data) async {
       // If this is a force update, load new data and show spinners
       if (data.event == SSEDataEventEnum.forceUpdate) {
-        await loadData(forceUpdate: true, checkLastUpdateTime: false);
-        onForceSync();
+        final isVisible = ModalRoute.of(context)?.isCurrent ?? false;
+
+        if (isVisible) {
+          await loadData(forceUpdate: true, checkLastUpdateTime: false);
+          onForceSync();
+        } else {
+          // If hidden, mark dirty but DO NOT load
+          _markedForUpdate = true;
+        }
       }
     });
   }
@@ -199,18 +190,36 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      _routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
   void dispose() {
     _sseSubscription?.cancel();
     if (!kIsWeb) WidgetsBinding.instance.removeObserver(this);
+    _routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when the top route has been popped off, and the current route shows up.
+    if (_markedForUpdate) {
+      _markedForUpdate = false;
+      loadData(forceUpdate: true, checkLastUpdateTime: false);
+      onForceSync();
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // This means the app has resumed after being woken up from the background.
-      // Refresh our data.
       loadData(forceUpdate: true);
     }
   }
