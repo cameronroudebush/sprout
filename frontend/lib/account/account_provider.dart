@@ -75,7 +75,10 @@ class AccountProvider extends BaseProvider<AccountApi> with SproutProviders {
       final sync = ModelSync.fromJson(data.payload);
       manualSyncIsRunning = false;
       notifyListeners();
-      if (configProvider.config != null) configProvider.config!.lastSchedulerRun = sync;
+      if (configProvider.config != null) {
+        configProvider.config!.lastSchedulerRun = sync;
+        configProvider.notifyListeners();
+      }
     }
   }
 }

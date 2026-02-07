@@ -16,7 +16,7 @@ export class Institution extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   hasError: boolean;
   /** The user this institution record is scoped to */
-  @ManyToOne(() => User, (u) => u.id, { nullable: false })
+  @ManyToOne(() => User, (u) => u.id, { nullable: false, onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude()
   user: User;

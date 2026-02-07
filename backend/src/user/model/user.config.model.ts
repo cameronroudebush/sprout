@@ -2,8 +2,11 @@ import { EncryptionTransformer } from "@backend/core/decorator/encryption.decora
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { ChartRange } from "@backend/user/model/chart.range.model";
-import { ApiProperty } from "@nestjs/swagger";
+import { User } from "@backend/user/model/user.model";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { IsBoolean, IsEnum, IsString } from "class-validator";
+import { JoinColumn, OneToOne } from "typeorm";
 
 /**
  * This class defines user configuration options per user
@@ -37,6 +40,12 @@ export class UserConfig extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false, default: false })
   @IsBoolean()
   secureMode: boolean;
+
+  @OneToOne(() => User, (user) => user.config, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
+  @ApiHideProperty()
+  @Exclude()
+  user!: User;
 
   constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean) {
     super();

@@ -36,7 +36,7 @@ export class UserConfigController {
   @ApiNotFoundResponse({ description: "User configuration couldn't be found." })
   @ApiBody({ type: UserConfig })
   async edit(@CurrentUser() user: User, @Body() conf: UserConfig) {
-    const existingConfig = await UserConfig.findOne({ where: { id: user.config.id } });
+    const existingConfig = await UserConfig.findOne({ where: { user: { id: user.id } } });
     if (existingConfig == null) throw new NotFoundException(); // This shouldn't be possible
     const userConfig = UserConfig.fromPlain(conf);
     userConfig.id = existingConfig.id;

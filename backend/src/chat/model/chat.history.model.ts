@@ -12,7 +12,7 @@ export class ChatHistory extends DatabaseBase {
   static readonly DEFAULT_MODEL_TEXT = "Request failed. Try again later.";
 
   /** The user this chat belongs to */
-  @ManyToOne(() => User, (u) => u.id)
+  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude()
   user: User;

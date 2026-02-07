@@ -36,7 +36,7 @@ export class Notification extends DatabaseBase {
   readAt?: Date;
 
   /** The user this notification belongs to */
-  @ManyToOne(() => User, (u) => u.id)
+  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude()
   user: User;

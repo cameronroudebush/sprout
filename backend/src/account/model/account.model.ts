@@ -24,7 +24,7 @@ export class Account extends DatabaseBase {
   institution: Institution;
 
   /** The user this account belongs to */
-  @ManyToOne(() => User, (u) => u.id)
+  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude()
   user: User;
