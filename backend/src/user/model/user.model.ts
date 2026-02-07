@@ -7,7 +7,7 @@ import { BadRequestException } from "@nestjs/common";
 import { ApiHideProperty } from "@nestjs/swagger";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
-import { JoinColumn, OneToOne } from "typeorm";
+import { OneToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
 export class User extends DatabaseBase {
@@ -29,8 +29,7 @@ export class User extends DatabaseBase {
   @ApiHideProperty()
   password!: string;
 
-  @OneToOne(() => UserConfig, { eager: true, onDelete: "CASCADE" })
-  @JoinColumn()
+  @OneToOne(() => UserConfig, (config) => config.user, { eager: true })
   config: UserConfig;
 
   get prettyName() {
