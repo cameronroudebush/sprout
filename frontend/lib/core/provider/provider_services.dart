@@ -1,5 +1,6 @@
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/chat/chat_provider.dart';
@@ -34,6 +35,7 @@ mixin SproutProviders {
   HoldingProvider get holdingProvider => SproutProviders.holding;
   CashFlowProvider get cashFlowProvider => SproutProviders.cashFlow;
   ChatProvider get chatProvider => SproutProviders.chat;
+  BiometricProvider get biometricProvider => SproutProviders.bio;
 
   // ===========================================================================
   // Static Accessors
@@ -53,4 +55,5 @@ mixin SproutProviders {
   static HoldingProvider get holding => ServiceLocator.get<HoldingProvider>();
   static CashFlowProvider get cashFlow => ServiceLocator.get<CashFlowProvider>();
   static ChatProvider get chat => ServiceLocator.get<ChatProvider>();
+  static BiometricProvider get bio => ServiceLocator.get<BiometricProvider>();
 }

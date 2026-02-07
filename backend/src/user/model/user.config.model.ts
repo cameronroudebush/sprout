@@ -33,9 +33,15 @@ export class UserConfig extends DatabaseBase {
   @IsString()
   geminiKey?: string;
 
-  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"]) {
+  /** If we should require biometrics to view the app and if we should hide the app in the background */
+  @DatabaseDecorators.column({ nullable: false, default: false })
+  @IsBoolean()
+  secureMode: boolean;
+
+  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean) {
     super();
     this.privateMode = privateMode;
     this.netWorthRange = netWorthRange;
+    this.secureMode = secureMode;
   }
 }

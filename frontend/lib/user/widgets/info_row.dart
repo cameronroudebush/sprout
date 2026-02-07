@@ -29,7 +29,7 @@ class UserInfoRow extends StatelessWidget with SproutProviders {
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       final originalVal = info.settingValue;
       try {
-        if (info.onSettingUpdate != null) info.onSettingUpdate!(val);
+        if (info.onSettingUpdate != null) await info.onSettingUpdate!(val);
         await userConfigProvider.updateConfig(userConfigProvider.currentUserConfig!);
         onSet?.call();
       } catch (e) {
