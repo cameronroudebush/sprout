@@ -4,8 +4,6 @@ import { FirebaseConfigDTO } from "@backend/notification/model/api/firebase.conf
 import { FirebaseNotificationDTO } from "@backend/notification/model/api/firebase.notification.dto";
 import { NotificationSSEDTO } from "@backend/notification/model/api/notification.sse.dto";
 import { Notification } from "@backend/notification/model/notification.model";
-import { NotificationType } from "@backend/notification/model/notification.type";
-import { NotificationService } from "@backend/notification/notification.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
@@ -18,16 +16,7 @@ import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/sw
 @ApiExtraModels(FirebaseNotificationDTO, NotificationSSEDTO)
 @AuthGuard.attach()
 export class NotificationController {
-  constructor(
-    private sseService: SSEService,
-    private notificationService: NotificationService,
-  ) {}
-
-  // TODO: Remove
-  @Get("test")
-  async test(@CurrentUser() user: User) {
-    this.notificationService.notifyUser(user, "Test", "Development test", NotificationType.warning);
-  }
+  constructor(private sseService: SSEService) {}
 
   @Get()
   @ApiOperation({

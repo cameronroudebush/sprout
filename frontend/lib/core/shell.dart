@@ -45,7 +45,6 @@ class _SproutShellState extends State<SproutShell> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    FirebaseNotificationProvider.checkLaunchNotification();
   }
 
   @override

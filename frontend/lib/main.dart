@@ -129,6 +129,7 @@ class Main extends StatelessWidget {
             return _getLoadingIndicator(context);
 
           default:
+            FirebaseNotificationProvider.checkLaunchNotification();
             return MaterialApp.router(
               routerConfig: SproutRouter.router,
               title: "Sprout",
