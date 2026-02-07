@@ -18,6 +18,7 @@ class UserConfig {
     required this.privateMode,
     this.simpleFinToken,
     this.geminiKey,
+    required this.secureMode,
   });
 
   String id;
@@ -46,13 +47,17 @@ class UserConfig {
   ///
   String? geminiKey;
 
+  /// If we should require biometrics to view the app and if we should hide the app in the background
+  bool secureMode;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
     other.id == id &&
     other.netWorthRange == netWorthRange &&
     other.privateMode == privateMode &&
     other.simpleFinToken == simpleFinToken &&
-    other.geminiKey == geminiKey;
+    other.geminiKey == geminiKey &&
+    other.secureMode == secureMode;
 
   @override
   int get hashCode =>
@@ -61,10 +66,11 @@ class UserConfig {
     (netWorthRange.hashCode) +
     (privateMode.hashCode) +
     (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
-    (geminiKey == null ? 0 : geminiKey!.hashCode);
+    (geminiKey == null ? 0 : geminiKey!.hashCode) +
+    (secureMode.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -81,6 +87,7 @@ class UserConfig {
     } else {
       json[r'geminiKey'] = null;
     }
+      json[r'secureMode'] = this.secureMode;
     return json;
   }
 
@@ -108,6 +115,7 @@ class UserConfig {
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         geminiKey: mapValueOfType<String>(json, r'geminiKey'),
+        secureMode: mapValueOfType<bool>(json, r'secureMode')!,
       );
     }
     return null;
@@ -158,6 +166,7 @@ class UserConfig {
     'id',
     'netWorthRange',
     'privateMode',
+    'secureMode',
   };
 }
 

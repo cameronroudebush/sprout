@@ -8,12 +8,13 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/user/user_provider.dart';
 
-class AuthProvider extends BaseProvider<AuthApi> {
+class AuthProvider extends BaseProvider<AuthApi> with SproutProviders {
   // Helper for OIDC login based around platforms
   final _oidcHelper = OIDCHelper();
 
@@ -31,6 +32,7 @@ class AuthProvider extends BaseProvider<AuthApi> {
   User? _currentUser;
 
   bool get isLoggedIn => _isLoggedIn;
+  bool get isLoggingOut => _isLoggingOut;
   User? get currentUser => _currentUser;
 
   AuthProvider(super.api);
@@ -252,7 +254,7 @@ class AuthProvider extends BaseProvider<AuthApi> {
       await provider.cleanupData();
     }
     StateTracker.lastUpdateTimes = {};
-    SproutNavigator.redirect("login");
+    await SproutNavigator.redirect("login");
     notifyListeners();
   }
 

@@ -1,8 +1,9 @@
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 
 /// Class that provides user configuration information
-class UserConfigProvider extends BaseProvider<UserConfigApi> {
+class UserConfigProvider extends BaseProvider<UserConfigApi> with SproutProviders {
   UserConfig? _currentUserConfig;
 
   UserConfig? get currentUserConfig => _currentUserConfig;
@@ -29,9 +30,7 @@ class UserConfigProvider extends BaseProvider<UserConfigApi> {
   }
 
   @override
-  Future<void> postLogin() async {
-    await populateUserConfig();
-  }
+  Future<void> postLogin() async {}
 
   @override
   Future<void> cleanupData() async {

@@ -1,6 +1,8 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
+import { ApiHideProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
@@ -15,6 +17,8 @@ export class Institution extends DatabaseBase {
   hasError: boolean;
   /** The user this institution record is scoped to */
   @ManyToOne(() => User, (u) => u.id, { nullable: false })
+  @ApiHideProperty()
+  @Exclude()
   user: User;
 
   constructor(url: string, name: string, hasError: boolean, user: User) {

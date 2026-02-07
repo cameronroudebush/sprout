@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
@@ -13,6 +14,7 @@ class UserProvider extends BaseProvider<UserApi> {
 
   /// Registers the device of this app with the backend so we can reference it in notifications
   Future<void> registerDevice() async {
+    if (kIsWeb) return;
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     // Don't fire if we don't have a firebase config
     if (Firebase.apps.isEmpty) {

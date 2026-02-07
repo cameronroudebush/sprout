@@ -66,6 +66,27 @@ class _UserConfigPageState extends State<UserConfigPage> with SproutProviders {
               settingType: "bool",
               icon: Icons.visibility_off_outlined,
             ),
+            if (!kIsWeb)
+              UserDisplayInfo(
+                title: "Secure Mode",
+                hint: "If enabled, requires biometric authentication to access Sprout.",
+                settingValue: userConfig.secureMode,
+                onSettingUpdate: (val) async {
+                  if (val) {
+                    final canAuthWithBio = await biometricProvider.requestBiometricAuth();
+                    if (canAuthWithBio) {
+                      userConfig.secureMode = val;
+                    } else {
+                      throw "Device does not support biometrics";
+                    }
+                  } else {
+                    userConfig.secureMode = false;
+                    await biometricProvider.reset();
+                  }
+                },
+                settingType: "bool",
+                icon: Icons.fingerprint,
+              ),
           ],
           "Finance Provider Settings": [
             UserDisplayInfo(
@@ -163,7 +184,10 @@ class _UserConfigPageState extends State<UserConfigPage> with SproutProviders {
                 (entry) => UserInfoCard(
                   name: entry.key,
                   info: entry.value,
-                  onFail: widget.onFail,
+                  onFail: (failReason) {
+                    notificationProvider.openFrontendOnly(failReason, type: NotificationTypeEnum.error);
+                    widget.onFail?.call(failReason);
+                  },
                   onSet: () {
                     notificationProvider.openFrontendOnly("Settings updated", type: NotificationTypeEnum.success);
                     widget.onSet?.call();

@@ -1908,6 +1908,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "409": {
+            "description": "Thrown if the LLM is already running a request for the current user."
           }
         },
         "security": [
@@ -2066,7 +2069,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-46-gff0d19f",
+    "version": "v0.1.1-51-g259f6fa",
     "contact": {}
   },
   "tags": [
@@ -2477,9 +2480,13 @@
           "geminiKey": {
             "type": "string",
             "description": "This property defines the Gemini API token for LLM use."
+          },
+          "secureMode": {
+            "type": "boolean",
+            "description": "If we should require biometrics to view the app and if we should hide the app in the background"
           }
         },
-        "required": ["id", "netWorthRange", "privateMode"]
+        "required": ["id", "netWorthRange", "privateMode", "secureMode"]
       },
       "User": {
         "type": "object",
@@ -2834,7 +2841,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-02-04T00:05:01.716Z"
+            "default": "2026-02-07T00:31:08.509Z"
           },
           "isRead": {
             "type": "boolean",

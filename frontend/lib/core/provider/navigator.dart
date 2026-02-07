@@ -11,11 +11,11 @@ class SproutNavigator {
   static final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
 
   /// Redirects to the given page name
-  static void redirect(String page, {Map<String, dynamic>? queryParameters}) {
+  static Future<void> redirect(String page, {Map<String, dynamic>? queryParameters}) async {
     final currentRoute = SproutRouter.router.state.topRoute?.name;
     final targetRoute = page.toLowerCase();
     if (currentRoute != targetRoute) {
-      SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
+      await SproutRouter.router.pushNamed(targetRoute, queryParameters: queryParameters ?? {});
     }
   }
 

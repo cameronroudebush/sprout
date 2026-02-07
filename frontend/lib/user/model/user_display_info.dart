@@ -24,7 +24,9 @@ class UserDisplayInfo {
   // If this is a setting, you should populate below
   final dynamic settingValue;
   final dynamic settingType;
-  final void Function(dynamic val)? onSettingUpdate;
+
+  /// What to do when the setting value is updated. Throwing an error in this will fail the change
+  final Future<void> Function(dynamic val)? onSettingUpdate;
 
   const UserDisplayInfo({
     required this.title,

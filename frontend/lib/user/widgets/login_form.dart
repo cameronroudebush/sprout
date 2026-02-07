@@ -34,7 +34,11 @@ class _LoginFormState extends State<LoginForm> with SproutProviders {
   bool _isLoadingData = false;
 
   /// Fires after our login is complete
-  Future<void> _loginComplete(User? user, {String failureMessage = _LoginFormState.failedLoginMessage}) async {
+  Future<void> _loginComplete(
+    User? user,
+    bool isAutoLogin, {
+    String failureMessage = _LoginFormState.failedLoginMessage,
+  }) async {
     setState(() {
       _loginIsRunning = false;
     });
@@ -44,6 +48,22 @@ class _LoginFormState extends State<LoginForm> with SproutProviders {
       setState(() {
         _isLoadingData = true;
       });
+      // Request user configuration
+      await userConfigProvider.populateUserConfig();
+      // Check for secure mode handling
+      if (isAutoLogin) {
+        final success = await biometricProvider.tryAutoLoginUnlock();
+        if (!success) {
+          if (mounted) {
+            setState(() {
+              _isLoadingData = false;
+            });
+          }
+          return;
+        }
+      } else {
+        biometricProvider.reset();
+      }
       // Request our basic data
       await ServiceLocator.postLogin();
       // After login, check if we were sent from a specific page.
@@ -79,7 +99,7 @@ class _LoginFormState extends State<LoginForm> with SproutProviders {
       authProvider
           .tryInitialLogin()
           .then((user) async {
-            await _loginComplete(user, failureMessage: user == null ? "" : _LoginFormState.failedLoginMessage);
+            await _loginComplete(user, true, failureMessage: user == null ? "" : _LoginFormState.failedLoginMessage);
           })
           .onError((ApiException error, StackTrace stackTrace) async {
             final isSessionExpiration =
@@ -91,6 +111,7 @@ class _LoginFormState extends State<LoginForm> with SproutProviders {
             }
             await _loginComplete(
               null,
+              false,
               failureMessage: isSessionExpiration ? notificationProvider.parseOpenAPIException(error) : "",
             );
           });
@@ -120,7 +141,7 @@ class _LoginFormState extends State<LoginForm> with SproutProviders {
         user = await authProvider.login(_usernameController.text.trim(), _passwordController.text.trim());
       }
       // Successful login? Request data and go home
-      await _loginComplete(user);
+      await _loginComplete(user, false);
     } finally {
       if (user == null) {
         setState(() {

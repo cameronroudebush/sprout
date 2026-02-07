@@ -43,6 +43,7 @@ class FirebaseNotificationProvider {
 
   /// Checks the launch notification when the app resumes/starts up so we know what to do with them
   static void checkLaunchNotification() async {
+    if (kIsWeb) return;
     final plugin = FlutterLocalNotificationsPlugin();
     final NotificationAppLaunchDetails? details = await plugin.getNotificationAppLaunchDetails();
     if (details != null && details.didNotificationLaunchApp && details.notificationResponse?.payload != null) {

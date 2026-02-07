@@ -20,12 +20,8 @@ class DataRequest<P extends BaseProvider, T> {
   DataRequest({required this.provider, required this.onLoad, this.getFromProvider, this.isRequired = true});
 }
 
-// 1. Add RouteAware mixin
 abstract class StateTracker<T extends StatefulWidget> extends State<T> with WidgetsBindingObserver, RouteAware {
   final _sseProvider = ServiceLocator.get<SSEProvider>();
-
-  // 2. Inject or access your global RouteObserver
-  // If you don't use DI for this, import the global variable 'routeObserver' from main.dart
   final RouteObserver<ModalRoute> _routeObserver = ServiceLocator.routeObserver;
 
   StreamSubscription<SSEData>? _sseSubscription;

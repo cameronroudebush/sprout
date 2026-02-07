@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/core/models/page.dart';
 import 'package:sprout/core/provider/navigator.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/widgets/app_bar.dart';
 import 'package:sprout/core/widgets/exit.dart';
 import 'package:sprout/core/widgets/fab.dart';
 import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/core/widgets/lock.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
 import 'package:sprout/core/widgets/scroll.dart';
 import 'package:sprout/notification/firebase.dart';
@@ -39,8 +41,8 @@ class SproutShell extends StatefulWidget {
   State<SproutShell> createState() => _SproutShellState();
 }
 
-/// A wrapper around the scaffold that renders the navigation selection options as well as the current page
-class _SproutShellState extends State<SproutShell> with WidgetsBindingObserver {
+/// A wrapper around the scaffold that renders the navigation selection options as well as the current page. This is what wraps every single page of Sprout
+class _SproutShellState extends State<SproutShell> with WidgetsBindingObserver, SproutProviders {
   @override
   void initState() {
     super.initState();
@@ -54,57 +56,75 @@ class _SproutShellState extends State<SproutShell> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) FirebaseNotificationProvider.checkLaunchNotification();
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      FirebaseNotificationProvider.checkLaunchNotification();
+      await biometricProvider.unlockResume();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      await biometricProvider.lockBackground();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context).size;
-    final SproutShell(:child, :renderAppBar, :renderNav, :currentPage) = widget;
+    return ListenableBuilder(
+      listenable: biometricProvider,
+      builder: (context, _) {
+        final mediaQuery = MediaQuery.of(context).size;
+        final SproutShell(:child, :renderAppBar, :renderNav, :currentPage) = widget;
 
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      /// The app bar we want, if necessary
-      final appBar = !renderAppBar
-          ? null
-          : SproutAppBar(screenHeight: mediaQuery.height, useFullLogo: currentPage.useFullLogo);
+        // Check lock state immediately
+        final isLocked = biometricProvider.isBioLocked;
 
-      // The page to render, considering scroll-ability, and some padding
-      final padding = EdgeInsets.only(
-        left: currentPage.pagePadding,
-        right: currentPage.pagePadding,
-        // This 80 pixels reserves space for the [FloatingActionButtonWidget]
-        bottom: currentPage.scrollWrapper ? FloatingActionButtonWidget.padding : 0,
-      );
-      final page = currentPage.scrollWrapper
-          ? SizedBox(
-              width: mediaQuery.width,
-              height: mediaQuery.height - (appBar?.preferredSize.height ?? 0),
-              child: SproutScrollView(padding: padding, child: child),
-            )
-          : Padding(
-              padding: padding,
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [child]),
-            );
+        return SproutLayoutBuilder((isDesktop, context, constraints) {
+          /// The app bar we want. Hidden if locked.
+          final appBar = (!renderAppBar || isLocked)
+              ? null
+              : SproutAppBar(screenHeight: mediaQuery.height, useFullLogo: currentPage.useFullLogo);
 
-      return ExitWidget(
-        child: SproutScaffold(
-          fab: FloatingActionButtonWidget(currentPage),
-          appBar: appBar,
-          bottomNavigation: !renderNav
-              ? null
-              : isDesktop
-              ? null
-              : _getBottomNav(context),
-          drawer: !renderNav
-              ? null
-              : isDesktop
-              ? null
-              : Drawer(child: SafeArea(child: _buildSideNav(context, isDesktop))),
-          child: isDesktop && renderNav ? _getSideNav(context, page, isDesktop) : page,
-        ),
-      );
-    });
+          // The page to render, considering scroll-ability, and some padding
+          final padding = EdgeInsets.only(
+            left: currentPage.pagePadding,
+            right: currentPage.pagePadding,
+            // This 80 pixels reserves space for the [FloatingActionButtonWidget]
+            bottom: currentPage.scrollWrapper ? FloatingActionButtonWidget.padding : 0,
+          );
+
+          // Determine the page content based on lock state
+          final page = isLocked
+              ? LockWidget()
+              : currentPage.scrollWrapper
+              ? SizedBox(
+                  width: mediaQuery.width,
+                  height: mediaQuery.height - (appBar?.preferredSize.height ?? 0),
+                  child: SproutScrollView(padding: padding, child: child),
+                )
+              : Padding(
+                  padding: padding,
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [child]),
+                );
+
+          return ExitWidget(
+            child: SproutScaffold(
+              fab: isLocked ? null : FloatingActionButtonWidget(currentPage),
+              appBar: appBar,
+              bottomNavigation: (!renderNav || isLocked)
+                  ? null
+                  : isDesktop
+                  ? null
+                  : _getBottomNav(context),
+              drawer: (!renderNav || isLocked)
+                  ? null
+                  : isDesktop
+                  ? null
+                  : Drawer(child: SafeArea(child: _buildSideNav(context, isDesktop))),
+              // Render the decided page
+              child: isDesktop && renderNav && !isLocked ? _getSideNav(context, page, isDesktop) : page,
+            ),
+          );
+        });
+      },
+    );
   }
 
   /// Returns the sidenav to render with your given child (as it takes up the body)

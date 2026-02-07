@@ -35,6 +35,7 @@ dependencies:
   firebase_messaging: ^16.1.1
   firebase_core: ^4.4.0
   flutter_local_notifications: ^20.0.0
+  local_auth: ^3.0.0
   device_info_plus: ^12.3.0
   flutter_web_auth_2: ^5.0.1
   gpt_markdown: ^1.1.5
