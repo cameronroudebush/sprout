@@ -57,11 +57,25 @@ class _SproutShellState extends State<SproutShell> with WidgetsBindingObserver, 
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.resumed) {
-      FirebaseNotificationProvider.checkLaunchNotification();
-      await biometricProvider.unlockResume();
-    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      await biometricProvider.lockBackground();
+    switch (state) {
+      case AppLifecycleState.resumed:
+        FirebaseNotificationProvider.checkLaunchNotification();
+        await biometricProvider.unlockResume();
+        break;
+
+      case AppLifecycleState.paused:
+        // User actually left the app. Start timer to lock the background
+        await biometricProvider.lockBackground();
+        break;
+
+      case AppLifecycleState.inactive:
+        // Just an overlay
+        await biometricProvider.enableScreenPrivacy();
+        break;
+
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        break;
     }
   }
 

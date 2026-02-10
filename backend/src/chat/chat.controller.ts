@@ -59,6 +59,6 @@ export class ChatController {
   @ApiOperation({ summary: "Returns the chat history for previous LLM conversations." })
   @ApiOkResponse({ description: "Returns the chat history", type: [ChatHistory] })
   async history(@CurrentUser() user: User) {
-    return await ChatHistory.find({ where: { user: { id: user.id } } });
+    return await ChatHistory.find({ where: { user: { id: user.id } }, order: { time: "DESC" } });
   }
 }
