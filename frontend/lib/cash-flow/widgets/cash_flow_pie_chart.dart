@@ -70,7 +70,7 @@ class _CashFlowPieChartState extends StateTracker<CashFlowPieChart> {
         final totalIncome = stats.totalIncome;
         final totalExpense = stats.totalExpense;
         // Create our mapping
-        final data = totalIncome == 0 || totalExpense == 0
+        final data = totalIncome == 0 && totalExpense == 0
             ? null
             : {"Income": totalIncome, "Expense": totalExpense.abs()};
 

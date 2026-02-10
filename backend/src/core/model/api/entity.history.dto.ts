@@ -143,8 +143,16 @@ export class EntityHistory extends Base {
       percentChange = ((lastNetWorth - firstNetWorth) / Math.abs(firstNetWorth)) * 100;
       valueChange = lastNetWorth - firstNetWorth;
     } else if (firstNetWorth === 0 && lastNetWorth != null) {
-      percentChange = lastNetWorth > 0 ? 100 : lastNetWorth < 0 ? -100 : 0;
-      valueChange = lastNetWorth;
+      const nextFirstNetWorth = filteredSnapshots[1]?.netWorth;
+      if (firstNetWorth === 0 && nextFirstNetWorth) {
+        // Try and calculate the next value
+        percentChange = ((lastNetWorth - nextFirstNetWorth) / Math.abs(nextFirstNetWorth)) * 100;
+        valueChange = lastNetWorth - nextFirstNetWorth;
+      } else {
+        // Base case, allow us to fail out to a 100% change
+        percentChange = lastNetWorth > 0 ? 100 : lastNetWorth < 0 ? -100 : 0;
+        valueChange = lastNetWorth;
+      }
     }
 
     // Check if this is a drain on finances because a decrease is actually an increase

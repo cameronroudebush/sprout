@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
@@ -17,6 +19,12 @@ class BiometricProvider extends BaseProvider with SproutProviders {
 
   /// Tracks if we're actively asking to unlock or not
   bool isBioUnlocking = false;
+
+  /// Timer to trigger the lock after the grace period
+  Timer? _lockTimer;
+
+  /// Duration before the app actually locks
+  final Duration _lockGracePeriod = const Duration(minutes: 5);
 
   /// Used for tracking authentication requirements for the app to unlock, besides username/password logins
   final LocalAuthentication _auth = LocalAuthentication();
@@ -38,6 +46,9 @@ class BiometricProvider extends BaseProvider with SproutProviders {
 
   /// Attempts to unlock the biometrics when the app resumes
   Future<void> unlockResume() async {
+    // Cancel pending lock timers cause we came back
+    _lockTimer?.cancel();
+    _lockTimer = null;
     if (!kIsWeb && authProvider.isLoggedIn && !_isLoggingOut && isBioLocked && !isBioUnlocking) {
       await _internalUnlock();
       if (!isBioLocked) await disableScreenPrivacy();
@@ -46,10 +57,15 @@ class BiometricProvider extends BaseProvider with SproutProviders {
 
   /// When going to the app is going to sleep, locks the app.
   Future<void> lockBackground() async {
-    if (!kIsWeb && !isBioUnlocking && !_isLoggingOut && authProvider.isLoggedIn) {
+    if (kIsWeb || isBioUnlocking || _isLoggingOut || !authProvider.isLoggedIn) return;
+
+    // Always make sure we're private when going to background
+    await enableScreenPrivacy();
+    // Only start the timer if it's not already running
+    _lockTimer ??= Timer(_lockGracePeriod, () async {
       await _biometricLock();
-      await enableScreenPrivacy();
-    }
+      _lockTimer = null;
+    });
   }
 
   /// Tries to unlock the biometrics when clicking the unlock button. Returns true if the unlock was a success. False if not.
@@ -126,12 +142,12 @@ class BiometricProvider extends BaseProvider with SproutProviders {
 
   /// Disables the screen privacy for FLAG_SECURE
   Future<void> disableScreenPrivacy() async {
-    await platform.invokeMethod('disableAppSecurity');
+    if (!kIsWeb) await platform.invokeMethod('disableAppSecurity');
   }
 
   /// Enables the screen privacy for FLAG_SECURE
   Future<void> enableScreenPrivacy() async {
-    await platform.invokeMethod('enableAppSecurity');
+    if (!kIsWeb) await platform.invokeMethod('enableAppSecurity');
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:sprout/user/user_config_provider.dart';
 /// This component represents a chat that can be performed with an LLM to help analyze your current content
 class Chat extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   Chat({super.key});
 
@@ -87,14 +88,19 @@ class Chat extends StatelessWidget {
                           ),
                         ),
                       )
-                    : ListView.builder(
-                        reverse: true,
-                        padding: const EdgeInsets.all(12),
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final message = messages[messages.length - 1 - index];
-                          return ChatBubble(message: message);
-                        },
+                    : Scrollbar(
+                        controller: _scrollController,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          reverse: true,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            final message = messages[index];
+                            return ChatBubble(message: message);
+                          },
+                        ),
                       ),
               ),
               _buildQuickActions(provider),
@@ -151,6 +157,7 @@ class Chat extends StatelessWidget {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               textInputAction: TextInputAction.send,
+              textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => _send(),
             ),
           ),
