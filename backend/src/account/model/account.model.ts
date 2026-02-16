@@ -51,6 +51,11 @@ export class Account extends DatabaseBase {
   @IsEnum(AccountSubType)
   subType?: AccountSubType;
 
+  /** An interest rate if this is a loan type account. */
+  @DatabaseDecorators.jsonColumn({ nullable: true, type: "float" })
+  @ApiProperty({ required: false, nullable: true, type: Number })
+  interestRate?: number;
+
   /** Any extra data that we want to store as JSON */
   @DatabaseDecorators.jsonColumn({ nullable: true })
   extra?: object;

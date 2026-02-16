@@ -38,7 +38,10 @@ class AccountProvider extends BaseProvider<AccountApi> with SproutProviders {
   /// Uses the API and edits the given account
   Future<Account> edit(Account a) async {
     notifyListeners();
-    final updated = (await api.accountControllerEdit(a.id, AccountEditRequest(name: a.name, subType: a.subType)))!;
+    final updated = (await api.accountControllerEdit(
+      a.id,
+      AccountEditRequest(name: a.name, subType: a.subType, interestRate: a.interestRate),
+    ))!;
     final index = _linkedAccounts.indexWhere((r) => r.id == updated.id);
     if (index != -1) _linkedAccounts[index] = updated;
     notifyListeners();

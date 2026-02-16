@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/dialog/account_delete.dart';
@@ -292,6 +293,32 @@ class _AccountWidgetState extends StateTracker<AccountWidget> with SproutProvide
                             accountProvider.edit(account);
                           },
                         ),
+
+                        // Interest Rate Input
+                        if (account.isNegativeNetWorth)
+                          TextFormField(
+                            key: Key(account.id + (account.interestRate?.toString() ?? "")),
+                            initialValue: account.interestRate?.toString(),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              // Allow only numbers and one decimal point
+                              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,4}')),
+                            ],
+                            decoration: InputDecoration(
+                              labelText: "Interest Rate",
+                              suffixText: "%",
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                            ),
+                            onFieldSubmitted: (value) {
+                              final newVal = double.tryParse(value);
+                              // Only update if value actually changed
+                              if (newVal != account.interestRate) {
+                                account.interestRate = newVal;
+                                accountProvider.edit(account);
+                              }
+                            },
+                          ),
 
                         // Buttons
                         Row(
