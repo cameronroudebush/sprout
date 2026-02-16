@@ -7,11 +7,16 @@ description: Learn how to start using Sprout today.
 
 <style>
 .md-footer__link--prev { display: none; }
+#getting-started {display: none;}
 </style>
 
-# Getting Started with Sprout
+# Getting Started
 
-Welcome to Sprout! This guide will walk you through setting up, configuring, and using the application.
+<p align="center">
+    <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png" width="50%">
+</p>
+
+**Welcome to Sprout!** This guide will walk you through setting up, configuring, and using the application.
 
 To get started, follow these guides in order:
 
