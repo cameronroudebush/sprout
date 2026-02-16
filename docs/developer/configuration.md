@@ -7,110 +7,104 @@ hide:
 
 # Configuration
 
-The configuration file, `sprout.config.yml`, is generated dynamically and placed next to the executable inside the container. Below are the available options with definitions.
+Sprout is designed to be flexible. You can configure the application using either a `sprout.config.yml` file placed in the application directory **OR** by using Environment Variables (best for Docker).
 
-## Full Configuration
+!!! tip "Environment Variables"
 
-```yaml linenums="1" title="sprout.config.yml"
-# The encryption key to protect certain content within sprout. DO NOT LOSE THIS.
-encryptionKey:
+    Any setting below can be set as an environment variable by prefixing the path with `sprout_` and replacing dots `.` with underscores `_`.
 
-# Configuration for the various providers
-providers:
-    # How often to perform data queries for data from providers. Default is once a day at 8am.
-    updateTime: 0 7 * * *
-    # SimpleFIN configuration: https://www.simplefin.org/
-    simpleFIN:
-        # This access token is acquired from SimpleFIN that allows us to authenticate and grab your data.
-        # You'll need to go to this link to get one configured:
-        # https://beta-bridge.simplefin.org/info/developers
-        accessToken: MY-ACCESS-TOKEN
-        # How many days to look back for transactional data.
-        lookBackDays: 7
-        # How many API calls we allow per day for this provider.
-        rateLimit: 24
+    ```
+    `server.port` becomes `sprout_server_port`.
+    ```
 
-# Core server config options
-server:
-    # The port to accept backend requests on.
-    port: 8001
-    # The log levels we want to render content for.
-    # Must be one of: [verbose, debug, log, warn, error, fatal]
-    logLevels:
-        - log
-        - error
-        - warn
-    # Configuration for rate limiting of the endpoints.
-    rateLimit:
-        # How long the limit window is.
-        ttl: 60000
-        # How many requests we can have in the limit window.
-        limit: 1000
-    # Configuration for the various jobs.
-    jobs:
-        # How many minutes to wait to re-try failed jobs automatically.
-        autoRetryTime: 60
-    # Configuration for how we want to use authentication for this app.
-    auth:
-        # The type of authentication strategy we want to use.
-        # local: Uses a local JWT authentication strategy where we sign JWT's with the backend. Only supports one user! Uses a randomly generated secret every startup.
-        # oidc: Uses the configured OIDC authentication to use a remote provider for validation. This will support multiple users.
-        # Must be one of: [local, oidc]
-        type: local
-        # Configuration OIDC authentication capability.
-        oidc:
-            # The issuer URL for who is issuing the JWT's for this OIDC. Do not include trailing slashes.
-            issuer: https://auth.mydomain.com
-            # The client ID of your OIDC configuration so we can verify the audience.
-            clientId: sprout
-        local:
-            # How long JWT's should stay valid for users.
-            jwtExpirationTime: 30m
+## Core Settings
 
-# Database specific options
-database:
-    # Configuration for performing database backups automatically
-    backup:
-        # If backups should occur
-        enabled: true
-        # How many backups we should keep
-        count: 30
-        # When to backup the database. Default is once a day at 4am.
-        time: 0 4 * * *
-        # Where to place the backup files.
-        directory: /backups/database
-    # The type of database we want to use
-    # Must be one of: [sqlite]
-    type: sqlite
-    # SQLite specific configuration options
-    sqlite:
-        # Database file name
-        database: sprout.sqlite
+These are the fundamental settings required for Sprout to secure your data and start up.
 
-# Settings specific to transactions
-transaction:
-    # When to check for stuck transactions. This includes things like stuck pending.
-    stuckTransactionTime: 0 3 * * *
-    # How many days old a transaction has to be stuck for it to be auto deleted.
-    stuckTransactionDays: 7
-    # How many occurrences of similar transactions counts as a subscription.
-    subscriptionCount: 3
+| YAML Key           | Environment Variable      | Default          | Description                                                                                         |
+| ------------------ | ------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `encryptionKey`    | `sprout_encryptionKey`    | **Required**     | A **64-character hex string** used to encrypt database fields and cookies.                          |
+| `server.port`      | `sprout_server_port`      | `8001`           | The HTTP port the backend server listens on.                                                        |
+| `server.logLevels` | `sprout_server_logLevels` | `log,error,warn` | A list of log levels to output. Valid options: `verbose`, `debug`, `log`, `warn`, `error`, `fatal`. |
 
-# Settings specific to holdings
-holding:
-    # If we should clean-up holdings from the database as we no longer find them on the provider. Warning, this will remove all history for these holdings if set to true.
-    cleanupRemovedHoldings: false
-```
+## Authentication
 
-## Environment Variables
+Sprout supports two authentication modes. You must choose one via `server.auth.type`.
 
-Environment variables are supported to make it easier to not have to keep track of the config file manually. Use the prefix `sprout_` followed by the config path. Here are some common examples.
+| YAML Key           | Environment Variable      | Default | Description                                                                |
+| ------------------ | ------------------------- | ------- | -------------------------------------------------------------------------- |
+| `server.auth.type` | `sprout_server_auth_type` | `local` | Choose `local` for a single-user setup with a password, or `oidc` for SSO. |
 
-```yaml
-TZ: America/New_York
-sprout_server_port: 9000
-sprout_encryptionKey: ${SPROUT_ENCRYPTION_KEY}
-sprout_database_backup_enabled: true
-```
+### Local Auth (`type: local`)
 
-You can see more of these examples in the [setup guide](../getting-started/configuration.md).
+**Only for single users**
+
+| YAML Key                              | Environment Variable                         | Default | Description                                                |
+| ------------------------------------- | -------------------------------------------- | ------- | ---------------------------------------------------------- |
+| `server.auth.local.jwtExpirationTime` | `sprout_server_auth_local_jwtExpirationTime` | `30m`   | How long a login session lasts (e.g., `30m`, `24h`, `7d`). |
+
+### OIDC Auth (`type: oidc`)
+
+**Recommended**
+
+| YAML Key                         | Environment Variable                    | Default | Description                                                                         |
+| -------------------------------- | --------------------------------------- | ------- | ----------------------------------------------------------------------------------- |
+| `server.auth.oidc.issuer`        | `sprout_server_auth_oidc_issuer`        |         | The URL of your OIDC provider (no trailing slash).                                  |
+| `server.auth.oidc.clientId`      | `sprout_server_auth_oidc_clientId`      |         | The Client ID from your provider.                                                   |
+| `server.auth.oidc.secret`        | `sprout_server_auth_oidc_secret`        |         | The Client Secret from your provider.                                               |
+| `server.auth.oidc.allowNewUsers` | `sprout_server_auth_oidc_allowNewUsers` | `true`  | If `true`, anyone who logs in via OIDC gets a Sprout account created automatically. |
+
+## Database & Backups
+
+Sprout uses SQLite by default and includes a built-in backup engine.
+
+| YAML Key                    | Environment Variable               | Default             | Description                                         |
+| --------------------------- | ---------------------------------- | ------------------- | --------------------------------------------------- |
+| `database.type`             | `sprout_database_type`             | `sqlite`            | The database driver to use.                         |
+| `database.sqlite.database`  | `sprout_database_sqlite_database`  | `sprout.sqlite`     | The filename of the SQLite database.                |
+| **Backups**                 |                                    |                     |                                                     |
+| `database.backup.enabled`   | `sprout_database_backup_enabled`   | `true`              | Turn built-in backups on or off.                    |
+| `database.backup.time`      | `sprout_database_backup_time`      | `0 4 * * *`         | Cron schedule for backups (Default: 4:00 AM daily). |
+| `database.backup.count`     | `sprout_database_backup_count`     | `30`                | Number of rotating backups to keep.                 |
+| `database.backup.directory` | `sprout_database_backup_directory` | `/backups/database` | Internal container path to store backups.           |
+
+## Providers (Bank Sync)
+
+Settings that control how Sprout fetches data from external financial aggregators.
+
+| YAML Key                           | Environment Variable                      | Default     | Description                                                      |
+| ---------------------------------- | ----------------------------------------- | ----------- | ---------------------------------------------------------------- |
+| `providers.updateTime`             | `sprout_providers_updateTime`             | `0 8 * * *` | Cron schedule for bank syncing (Default: 8:00 AM daily).         |
+| `providers.simpleFIN.lookBackDays` | `sprout_providers_simpleFIN_lookBackDays` | `14`        | How far back to check for edited/new transactions on every sync. |
+| `providers.simpleFIN.rateLimit`    | `sprout_providers_simpleFIN_rateLimit`    | `24`        | Max sync attempts per day to avoid provider blocks.              |
+
+## Automation & Logic
+
+Fine-tune how Sprout handles data cleanup, subscriptions, and AI.
+
+### Transactions & Holdings
+
+| YAML Key                           | Environment Variable                      | Default       | Description                                                                        |
+| ---------------------------------- | ----------------------------------------- | ------------- | ---------------------------------------------------------------------------------- |
+| `transaction.stuckTransactionTime` | `sprout_transaction_stuckTransactionTime` | `0 */6 * * *` | Cron schedule to check for "stuck" pending transactions.                           |
+| `transaction.stuckTransactionDays` | `sprout_transaction_stuckTransactionDays` | `7`           | Days before a pending transaction is considered "stuck" and removed.               |
+| `transaction.subscriptionCount`    | `sprout_transaction_subscriptionCount`    | `3`           | Number of similar recurring charges required to identify a Subscription.           |
+| `holding.cleanupRemovedHoldings`   | `sprout_holding_cleanupRemovedHoldings`   | `false`       | If `true`, deletes investment history if the holding is removed from the provider. |
+
+### AI
+
+| YAML Key                       | Environment Variable                  | Default                  | Description                                             |
+| ------------------------------ | ------------------------------------- | ------------------------ | ------------------------------------------------------- |
+| **Gemini**                     |                                       |                          |                                                         |
+| `server.prompt.geminiModel`    | `sprout_server_prompt_geminiModel`    | `gemini-3-flash-preview` | The specific Google Gemini model string to use.         |
+| `server.prompt.maxChatHistory` | `sprout_server_prompt_maxChatHistory` | `10`                     | Number of previous chat messages to retain for context. |
+
+### Notifications
+
+| YAML Key                                      | Environment Variable                                 | Default | Description                                                |
+| --------------------------------------------- | ---------------------------------------------------- | ------- | ---------------------------------------------------------- |
+| `server.notification.maxNotificationsPerUser` | `sprout_server_notification_maxNotificationsPerUser` | `10`    | Max alerts stored in the database per user.                |
+| **Firebase**                                  |                                                      |         |                                                            |
+| `server.notification.firebase.enabled`        | `sprout_server_notification_firebase_enabled`        | `false` | Enable mobile push notifications.                          |
+| `server.notification.firebase.apiKey`         | `sprout_server_notification_firebase_apiKey`         |         | Firebase configuration values (from google-services.json). |
+| `server.notification.firebase.privateKey`     | `sprout_server_notification_firebase_privateKey`     |         | The private key string for the service account.            |
