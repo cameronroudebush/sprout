@@ -58,7 +58,22 @@ export class NetWorthService {
       .andWhere("history.time > :startDate", { startDate: subDays(new Date(), years * 365) })
       .orderBy("history.time", "ASC");
     if (account) query.andWhere("account.id = :accountId", { accountId: account.id });
-    return await query.getMany();
+    const history = await query.getMany();
+
+    // Add "live" state which is today's data
+    if (account) this.appendLiveAccountEntry(history, account);
+    else {
+      const seenAccounts = new Set<string>();
+      for (let i = history.length - 1; i >= 0; i--) {
+        const entry = history[i]!;
+        if (!seenAccounts.has(entry.account.id)) {
+          this.appendLiveAccountEntry(history, entry.account);
+          seenAccounts.add(entry.account.id);
+        }
+      }
+    }
+
+    return history;
   }
 
   /** Fetches the HoldingHistory from the database utilizing QueryBuilder for efficiency. Sorts by time. */
@@ -70,7 +85,22 @@ export class NetWorthService {
       .andWhere("history.time > :startDate", { startDate: subDays(new Date(), years * 365) })
       .orderBy("history.time", "ASC");
     if (holding) query.andWhere("holding.id = :holdingId", { holdingId: holding.id });
-    return await query.getMany();
+    const history = await query.getMany();
+
+    // Add "live" state which is today's data
+    if (holding) this.appendLiveHoldingEntry(history, holding);
+    else {
+      const seenHoldings = new Set<string>();
+      for (let i = history.length - 1; i >= 0; i--) {
+        const entry = history[i]!;
+        if (!seenHoldings.has(entry.holding.id)) {
+          this.appendLiveHoldingEntry(history, entry.holding);
+          seenHoldings.add(entry.holding.id);
+        }
+      }
+    }
+
+    return history;
   }
 
   /**
@@ -237,5 +267,23 @@ export class NetWorthService {
     if (isNaN(percentChange)) percentChange = 0;
 
     return new EntityHistoryDataPoint(valueChange, percentChange, startDate);
+  }
+
+  /** Pushes a synthetic "Now" entry based on the live Account entity */
+  private appendLiveAccountEntry(history: AccountHistory[], account: Account) {
+    const liveEntry = new AccountHistory();
+    liveEntry.time = new Date(); // Right now
+    liveEntry.balance = account.balance;
+    liveEntry.account = account;
+    history.push(liveEntry);
+  }
+
+  /** Pushes a synthetic "Now" entry based on the live Holding entity */
+  private appendLiveHoldingEntry(history: HoldingHistory[], holding: Holding) {
+    const liveEntry = new HoldingHistory();
+    liveEntry.time = new Date();
+    liveEntry.marketValue = holding.marketValue;
+    liveEntry.holding = holding;
+    history.push(liveEntry);
   }
 }

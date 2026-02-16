@@ -71,7 +71,12 @@ export class ChatService {
               3. Be concise. Avoid conversational filler.
               4. Refer to accounts strictly by the provided IDs (e.g., Account_0).
               5. Consider smart finance habits. Reduce unnecessary spending, keep a rainy day fund, invest excess.
-              6. Always include: "Consult a financial advisor before making decisions."
+              6. Context Data Key Mapping:
+                 - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate
+                 - Holdings: hol (s=Symbol, v=Value)
+                 - History: his (b=Balance, d=Date)
+                 - Transactions: d=Date, n=Description ID, a=Amount, c=Category, acc=Account ID
+              7. Always include: "Consult a financial advisor before making decisions."
               
               CONTEXTUAL DATA:
               ${JSON.stringify(data)}`,
@@ -107,12 +112,13 @@ export class ChatService {
         });
 
         return {
-          id: genericId,
-          type: acc.type,
-          subType: acc.subType,
-          bal: acc.balance,
-          holdings: holdings.map((h) => ({ sym: h.symbol, val: h.marketValue })),
-          history: history.map((h) => ({ b: h.balance, d: formatDate(h.time, "P") })),
+          i: genericId,
+          t: acc.type,
+          s: acc.subType,
+          b: acc.balance,
+          r: acc.interestRate,
+          hol: holdings.map((h) => ({ s: h.symbol, v: h.marketValue })),
+          his: history.map((h) => ({ b: h.balance, d: formatDate(h.time, "P") })),
         };
       }),
     );
@@ -122,7 +128,7 @@ export class ChatService {
       transactions: transactions.map((t) => {
         const genericDescriptionId = `desc_${randomBytes(2).toString("hex")}`;
         idMap.set(t.description, genericDescriptionId);
-        return { d: formatDate(t.posted, "P"), desc: genericDescriptionId, a: t.amount, c: t.category?.name, acc: idMap.get(t.account.name) };
+        return { d: formatDate(t.posted, "P"), n: genericDescriptionId, a: t.amount, c: t.category?.name, acc: idMap.get(t.account.name) };
       }),
     };
   }

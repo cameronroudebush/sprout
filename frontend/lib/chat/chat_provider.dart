@@ -33,7 +33,7 @@ class ChatProvider extends BaseProvider<ChatApi> {
         // Replace the history
         int index = _messages.indexWhere((item) => item.id == chat.id);
         if (index == -1) {
-          _messages.add(chat);
+          _messages.insert(0, chat);
         } else {
           _messages[index] = chat;
         }

@@ -15,6 +15,7 @@ class AccountEditRequest {
   AccountEditRequest({
     this.subType,
     this.name,
+    this.interestRate,
   });
 
   ///
@@ -33,19 +34,29 @@ class AccountEditRequest {
   ///
   String? name;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  num? interestRate;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is AccountEditRequest &&
     other.subType == subType &&
-    other.name == name;
+    other.name == name &&
+    other.interestRate == interestRate;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (subType == null ? 0 : subType!.hashCode) +
-    (name == null ? 0 : name!.hashCode);
+    (name == null ? 0 : name!.hashCode) +
+    (interestRate == null ? 0 : interestRate!.hashCode);
 
   @override
-  String toString() => 'AccountEditRequest[subType=$subType, name=$name]';
+  String toString() => 'AccountEditRequest[subType=$subType, name=$name, interestRate=$interestRate]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -58,6 +69,11 @@ class AccountEditRequest {
       json[r'name'] = this.name;
     } else {
       json[r'name'] = null;
+    }
+    if (this.interestRate != null) {
+      json[r'interestRate'] = this.interestRate;
+    } else {
+      json[r'interestRate'] = null;
     }
     return json;
   }
@@ -83,6 +99,7 @@ class AccountEditRequest {
       return AccountEditRequest(
         subType: AccountSubTypeEnum.fromJson(json[r'subType']),
         name: mapValueOfType<String>(json, r'name'),
+        interestRate: num.parse('${json[r'interestRate']}'),
       );
     }
     return null;

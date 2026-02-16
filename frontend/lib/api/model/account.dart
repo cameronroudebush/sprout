@@ -15,6 +15,7 @@ class Account {
   Account({
     required this.id,
     this.subType,
+    this.interestRate,
     required this.name,
     required this.provider,
     required this.institution,
@@ -35,6 +36,9 @@ class Account {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   AccountSubTypeEnum? subType;
+
+  /// An interest rate if this is a loan type account.
+  num? interestRate;
 
   String name;
 
@@ -69,6 +73,7 @@ class Account {
   bool operator ==(Object other) => identical(this, other) || other is Account &&
     other.id == id &&
     other.subType == subType &&
+    other.interestRate == interestRate &&
     other.name == name &&
     other.provider == provider &&
     other.institution == institution &&
@@ -83,6 +88,7 @@ class Account {
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (subType == null ? 0 : subType!.hashCode) +
+    (interestRate == null ? 0 : interestRate!.hashCode) +
     (name.hashCode) +
     (provider.hashCode) +
     (institution.hashCode) +
@@ -93,7 +99,7 @@ class Account {
     (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, subType=$subType, name=$name, provider=$provider, institution=$institution, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
+  String toString() => 'Account[id=$id, subType=$subType, interestRate=$interestRate, name=$name, provider=$provider, institution=$institution, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -102,6 +108,11 @@ class Account {
       json[r'subType'] = this.subType;
     } else {
       json[r'subType'] = null;
+    }
+    if (this.interestRate != null) {
+      json[r'interestRate'] = this.interestRate;
+    } else {
+      json[r'interestRate'] = null;
     }
       json[r'name'] = this.name;
       json[r'provider'] = this.provider;
@@ -139,6 +150,9 @@ class Account {
       return Account(
         id: mapValueOfType<String>(json, r'id')!,
         subType: AccountSubTypeEnum.fromJson(json[r'subType']),
+        interestRate: json[r'interestRate'] == null
+            ? null
+            : num.parse('${json[r'interestRate']}'),
         name: mapValueOfType<String>(json, r'name')!,
         provider: mapValueOfType<String>(json, r'provider')!,
         institution: Institution.fromJson(json[r'institution'])!,

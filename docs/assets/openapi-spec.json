@@ -2121,7 +2121,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-54-g41235df",
+    "version": "v0.1.1-55-ga04f244",
     "contact": {}
   },
   "tags": [
@@ -2248,6 +2248,11 @@
               }
             ]
           },
+          "interestRate": {
+            "type": "number",
+            "description": "An interest rate if this is a loan type account.",
+            "nullable": true
+          },
           "name": {
             "type": "string"
           },
@@ -2299,6 +2304,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "interestRate": {
+            "type": "number"
           }
         }
       },
@@ -3112,7 +3120,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-02-16T15:24:35.202Z"
+            "default": "2026-02-16T16:21:07.829Z"
           },
           "isRead": {
             "type": "boolean",

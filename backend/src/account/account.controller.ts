@@ -75,6 +75,7 @@ export class AccountController {
     // Update only the allowed fields
     matchingAccount.name = updatedAccount.name ?? matchingAccount.name;
     matchingAccount.subType = updatedAccount.subType ?? (matchingAccount.subType as any);
+    matchingAccount.interestRate = updatedAccount.interestRate ?? (matchingAccount.interestRate as any);
     // Perform the update, return the result.
     const result = await matchingAccount.update();
     this.sseService.sendToUser(user, SSEEventType.SYNC);
