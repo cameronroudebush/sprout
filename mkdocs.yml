@@ -46,9 +46,11 @@ plugins:
       filter: true
 nav:
   - Home: index.md
-  - Screenshots:
-      - Desktop: images/desktop/README.md
-      - Mobile: images/mobile/README.md
+  - Features:
+      - features/index.md
+      - Images:
+          - Desktop: features/desktop.md
+          - Mobile: features/mobile.md
   - Getting Started:
       - Overview: getting-started/index.md
       - Installation: getting-started/installation.md
@@ -65,6 +67,7 @@ nav:
       - Configuration: developer/configuration.md
       - Known Issues: developer/known-issues.md
       - API Docs: developer/api.md
+      - Providers: developer/providers.md
   - What's Next?: planned-features.md
   - Privacy Policy: privacy-policy.md
 markdown_extensions:
