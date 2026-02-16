@@ -109,6 +109,7 @@ export class ChatService {
         return {
           id: genericId,
           type: acc.type,
+          subType: acc.subType,
           bal: acc.balance,
           holdings: holdings.map((h) => ({ sym: h.symbol, val: h.marketValue })),
           history: history.map((h) => ({ b: h.balance, d: formatDate(h.time, "P") })),
@@ -121,7 +122,7 @@ export class ChatService {
       transactions: transactions.map((t) => {
         const genericDescriptionId = `desc_${randomBytes(2).toString("hex")}`;
         idMap.set(t.description, genericDescriptionId);
-        return { d: formatDate(t.posted, "P"), m: genericDescriptionId, a: t.amount, c: t.category?.name, acc: idMap.get(t.account.name) };
+        return { d: formatDate(t.posted, "P"), desc: genericDescriptionId, a: t.amount, c: t.category?.name, acc: idMap.get(t.account.name) };
       }),
     };
   }

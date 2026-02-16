@@ -18,6 +18,7 @@ import { ClassSerializerInterceptor, INestApplication, Logger, LogLevel, Validat
 import { NestFactory, Reflector } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import { startCase } from "lodash";
 import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
@@ -115,6 +116,8 @@ async function main() {
     app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
     // Enable cookie handling
     app.use(cookieParser(Configuration.encryptionKey));
+    // Enable compression to help shrink responses
+    app.use(compression());
     // Trust proxy headers
     app.set("trust proxy", 1);
     if (Configuration.isDevBuild)

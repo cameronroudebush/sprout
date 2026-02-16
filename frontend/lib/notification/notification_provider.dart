@@ -81,6 +81,7 @@ class NotificationProvider extends BaseProvider<NotificationApi> {
     bool showDate = true,
     bool showUnreadIndicator = true,
     bool showSpinner = false,
+    bool frontendOnly = false,
   }) {
     // Clear any existing overlays so we only ever show one
     clearAllOverlays();
@@ -111,7 +112,7 @@ class NotificationProvider extends BaseProvider<NotificationApi> {
                       direction: DismissDirection.horizontal,
                       onDismissed: (_) async {
                         // Mark this as read
-                        await api.notificationControllerMarkRead(notification.id);
+                        if (!frontendOnly) await api.notificationControllerMarkRead(notification.id);
                         // Remove it
                         entry.remove();
                       },
@@ -166,6 +167,7 @@ class NotificationProvider extends BaseProvider<NotificationApi> {
       showDate: false,
       showUnreadIndicator: false,
       showSpinner: showSpinner,
+      frontendOnly: true,
     );
     return notification.id;
   }

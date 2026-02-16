@@ -9,12 +9,11 @@ import { Configuration } from "@backend/config/core";
 import { CoreController } from "@backend/core/core.controller";
 import { ImageProxyController } from "@backend/core/image.proxy.controller";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
-import { NetWorthController } from "@backend/core/net.worth.controller";
 import { DatabaseService } from "@backend/database/database.service";
 import { HoldingModule } from "@backend/holding/holding.module";
 import { JobsService } from "@backend/jobs/jobs.service";
-import { NotificationController } from "@backend/notification/notification.controller";
-import { NotificationService } from "@backend/notification/notification.service";
+import { NetWorthModule } from "@backend/net-worth/net-worth.module";
+import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
 import { SSEModule } from "@backend/sse/sse.module";
 import { TransactionController } from "@backend/transaction/transaction.controller";
@@ -36,6 +35,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     ChatModule,
     HoldingModule,
     SSEModule,
+    NotificationModule,
+    NetWorthModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -50,10 +51,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     TransactionRuleController,
     CategoryController,
     ConfigController,
-    NetWorthController,
     CashFlowController,
     ImageProxyController,
-    NotificationController,
   ],
   providers: [
     TransactionService,
@@ -63,7 +62,6 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     DatabaseService,
     CategoryService,
     CashFlowService,
-    NotificationService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

@@ -13,7 +13,6 @@ part of openapi.api;
 class EntityHistory {
   /// Returns a new [EntityHistory] instance.
   EntityHistory({
-    this.historicalData = const {},
     required this.last1Day,
     required this.last7Days,
     required this.lastMonth,
@@ -23,8 +22,6 @@ class EntityHistory {
     required this.allTime,
     this.connectedId,
   });
-
-  Map<String, num> historicalData;
 
   EntityHistoryDataPoint last1Day;
 
@@ -51,7 +48,6 @@ class EntityHistory {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is EntityHistory &&
-    _deepEquality.equals(other.historicalData, historicalData) &&
     other.last1Day == last1Day &&
     other.last7Days == last7Days &&
     other.lastMonth == lastMonth &&
@@ -64,7 +60,6 @@ class EntityHistory {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (historicalData.hashCode) +
     (last1Day.hashCode) +
     (last7Days.hashCode) +
     (lastMonth.hashCode) +
@@ -75,11 +70,10 @@ class EntityHistory {
     (connectedId == null ? 0 : connectedId!.hashCode);
 
   @override
-  String toString() => 'EntityHistory[historicalData=$historicalData, last1Day=$last1Day, last7Days=$last7Days, lastMonth=$lastMonth, lastThreeMonths=$lastThreeMonths, lastSixMonths=$lastSixMonths, lastYear=$lastYear, allTime=$allTime, connectedId=$connectedId]';
+  String toString() => 'EntityHistory[last1Day=$last1Day, last7Days=$last7Days, lastMonth=$lastMonth, lastThreeMonths=$lastThreeMonths, lastSixMonths=$lastSixMonths, lastYear=$lastYear, allTime=$allTime, connectedId=$connectedId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'historicalData'] = this.historicalData;
       json[r'last1Day'] = this.last1Day;
       json[r'last7Days'] = this.last7Days;
       json[r'lastMonth'] = this.lastMonth;
@@ -114,7 +108,6 @@ class EntityHistory {
       }());
 
       return EntityHistory(
-        historicalData: mapCastOfType<String, num>(json, r'historicalData')!,
         last1Day: EntityHistoryDataPoint.fromJson(json[r'last1Day'])!,
         last7Days: EntityHistoryDataPoint.fromJson(json[r'last7Days'])!,
         lastMonth: EntityHistoryDataPoint.fromJson(json[r'lastMonth'])!,
@@ -170,7 +163,6 @@ class EntityHistory {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'historicalData',
     'last1Day',
     'last7Days',
     'lastMonth',

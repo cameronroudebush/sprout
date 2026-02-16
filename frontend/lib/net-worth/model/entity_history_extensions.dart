@@ -22,25 +22,4 @@ extension EntityHistoryExtensions on EntityHistory {
         return allTime;
     }
   }
-
-  /// Returns the history as a Map<DateTime, num>
-  Map<DateTime, num> get historicalDataDate {
-    return historicalData.map((key, value) {
-      final ms = int.parse(key);
-      final date = DateTime.fromMillisecondsSinceEpoch(ms);
-      return MapEntry(date, value);
-    });
-  }
-}
-
-/// Helper functions for the specific data points
-extension EntityHistoryDataPointExtensions on EntityHistoryDataPoint {
-  /// Returns the history as a Map<DateTime, num>
-  Map<DateTime, num> get historyDate {
-    return history.map((key, value) {
-      final ms = int.parse(key);
-      final date = DateTime.fromMillisecondsSinceEpoch(ms);
-      return MapEntry(date, value);
-    });
-  }
 }

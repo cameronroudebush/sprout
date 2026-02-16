@@ -10,11 +10,11 @@ export class RequestLoggerMiddleware implements NestMiddleware {
   use(request: Request, response: Response, next: NextFunction): void {
     const { ip, method, originalUrl } = request;
     const sanitizedUrl = this.maskSensitiveInfo(originalUrl);
-
-    response.on("close", () => {
+    const startBytes = request.socket ? request.socket.bytesWritten : 0;
+    response.on("finish", () => {
       const { statusCode } = response;
-      const contentLength = response.get("content-length");
-
+      let contentLength = response.get("content-length");
+      if (!contentLength && request.socket) contentLength = (request.socket.bytesWritten - startBytes).toString();
       this.logger.verbose(`${method} ${sanitizedUrl} ${statusCode} ${contentLength ?? 0} - ${ip}`);
     });
 

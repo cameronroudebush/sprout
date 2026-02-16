@@ -2,19 +2,23 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { EntityHistory } from "@backend/core/model/api/entity.history.dto";
 import { HoldingService } from "@backend/holding/holding.service";
 import { Holding } from "@backend/holding/model/holding.model";
+import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, NotFoundException, Query } from "@nestjs/common";
+import { Controller, Get, NotFoundException, Param, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { EntityHistory, HistoricalDataPoint } from "../net-worth/model/api/entity.history.dto";
 
 /** This controller contains information about {@link Holding} models which is stock information. */
 @Controller("holding")
 @ApiTags("Holding")
 @AuthGuard.attach()
 export class HoldingController {
-  constructor(private readonly holdingService: HoldingService) {}
+  constructor(
+    private readonly holdingService: HoldingService,
+    private readonly netWorthService: NetWorthService,
+  ) {}
 
   @Get()
   @ApiQuery({
@@ -47,6 +51,18 @@ export class HoldingController {
   async getHoldingHistory(@CurrentUser() user: User, @Query("accountId") accountId: string) {
     const account = await Account.findOne({ where: { id: accountId, user: { id: user.id }, type: AccountType.investment } });
     if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
-    return await this.holdingService.getHistoryForAccount(account);
+    return (await this.netWorthService.getHistoryForHoldings(account)).map((x) => x.history);
+  }
+
+  @Get("timeline/:id")
+  @ApiOperation({
+    summary: "Get timeline of a specific holding.",
+    description: "Retrieves the value change over time of a holding given by it's ID.",
+  })
+  @ApiOkResponse({ description: "Holding over time successfully generated.", type: [HistoricalDataPoint] })
+  async getHoldingTimeline(@Param("id") id: string, @CurrentUser() user: User) {
+    const holding = await Holding.findOne({ where: { account: { user: { id: user.id } }, id } });
+    if (holding == null) throw new NotFoundException();
+    return (await this.holdingService.getTimelineForHolding(holding)).timeline();
   }
 }

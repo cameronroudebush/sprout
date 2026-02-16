@@ -212,6 +212,8 @@ class ApiClient {
           return FirebaseConfigDTO.fromJson(value);
         case 'FirebaseNotificationDTO':
           return FirebaseNotificationDTO.fromJson(value);
+        case 'HistoricalDataPoint':
+          return HistoricalDataPoint.fromJson(value);
         case 'Holding':
           return Holding.fromJson(value);
         case 'Institution':
@@ -242,6 +244,8 @@ class ApiClient {
           return SankeyData.fromJson(value);
         case 'SankeyLink':
           return SankeyLink.fromJson(value);
+        case 'TotalNetWorthDTO':
+          return TotalNetWorthDTO.fromJson(value);
         case 'TotalTransactions':
           return TotalTransactions.fromJson(value);
         case 'Transaction':

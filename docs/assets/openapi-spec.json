@@ -1018,97 +1018,6 @@
         "tags": ["Config"]
       }
     },
-    "/net-worth": {
-      "get": {
-        "description": "Retrieves the current net worth for the authenticated user.",
-        "operationId": "NetWorthController_getNetWorth",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Net worth calculated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "number",
-                  "format": "double"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get net worth.",
-        "tags": ["Net Worth"]
-      }
-    },
-    "/net-worth/ot": {
-      "get": {
-        "description": "Retrieves the net worth overtime of the current user. Useful for displaying in a chart.",
-        "operationId": "NetWorthController_getNetWorthOT",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Net worth over time successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EntityHistory"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get net worth.",
-        "tags": ["Net Worth"]
-      }
-    },
-    "/net-worth/account": {
-      "get": {
-        "description": "Retrieves the net worth overtime of each account associated to the current user. Useful for displaying in a chart.",
-        "operationId": "NetWorthController_getNetWorthByAccounts",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Net worth over time successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EntityHistory"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get net worth by accounts.",
-        "tags": ["Net Worth"]
-      }
-    },
     "/cash-flow/sankey": {
       "get": {
         "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
@@ -1328,158 +1237,6 @@
         ],
         "summary": "Proxy images for institutions.",
         "tags": ["Core"]
-      }
-    },
-    "/notification": {
-      "get": {
-        "description": "Returns all the notifications for the currently authenticated user.",
-        "operationId": "NotificationController_getNotifications",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Notifications retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Notification"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get's the notifications",
-        "tags": ["Notification"]
-      }
-    },
-    "/notification/read/all": {
-      "get": {
-        "description": "Used for when the user opens their notification shade.",
-        "operationId": "NotificationController_markAllRead",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Notifications marked read successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Marks all notifications read.",
-        "tags": ["Notification"]
-      }
-    },
-    "/notification/read/{id}": {
-      "get": {
-        "description": "Marks the given ID's notification read.",
-        "operationId": "NotificationController_markRead",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Notification marked read successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Marks a specific notification read.",
-        "tags": ["Notification"]
-      }
-    },
-    "/notification/config/firebase": {
-      "get": {
-        "description": "Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.",
-        "operationId": "NotificationController_getFirebaseConfig",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Firebase configuration retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirebaseConfigDTO"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Returns the firebase configuration.",
-        "tags": ["Notification"]
-      }
-    },
-    "/notification/{id}": {
-      "get": {
-        "description": "Returns a specific notification for the specific user by it's ID.",
-        "operationId": "NotificationController_getById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Notifications retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Notification"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get's a notification by it's id.",
-        "tags": ["Notification"]
       }
     },
     "/auth/login": {
@@ -2037,6 +1794,149 @@
         "tags": ["Holding"]
       }
     },
+    "/holding/timeline/{id}": {
+      "get": {
+        "description": "Retrieves the value change over time of a holding given by it's ID.",
+        "operationId": "HoldingController_getHoldingTimeline",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Holding over time successfully generated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoricalDataPoint"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get timeline of a specific holding.",
+        "tags": ["Holding"]
+      }
+    },
+    "/net-worth/total": {
+      "get": {
+        "description": "Retrieves all data related to the overarching accounts and how they performed over time.",
+        "operationId": "NetWorthController_getNetWorthTotal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Net worth over time successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TotalNetWorthDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieves the historical net-worth data for all accounts.",
+        "tags": ["Net Worth"]
+      }
+    },
+    "/net-worth/accounts": {
+      "get": {
+        "description": "Retrieves the net worth overtime of each account associated to the current user. Does not include any timeline data.",
+        "operationId": "NetWorthController_getNetWorthByAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Net worth over time successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityHistory"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get net worth by ALL accounts represented as time frames.",
+        "tags": ["Net Worth"]
+      }
+    },
+    "/net-worth/timeline/account/{id}": {
+      "get": {
+        "description": "Retrieves the net worth overtime for the specific given account",
+        "operationId": "NetWorthController_getNetWorthTimelineAccount",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Net worth over time successfully generated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoricalDataPoint"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get net worth over time (timeline) of a specific account.",
+        "tags": ["Net Worth"]
+      }
+    },
     "/sse": {
       "get": {
         "operationId": "SSEController_sse",
@@ -2064,12 +1964,164 @@
         "summary": "Subscribe to real-time server events to allow the server to inform our client of various info.",
         "tags": ["Core"]
       }
+    },
+    "/notification": {
+      "get": {
+        "description": "Returns all the notifications for the currently authenticated user.",
+        "operationId": "NotificationController_getNotifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Notification"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's the notifications",
+        "tags": ["Notification"]
+      }
+    },
+    "/notification/read/all": {
+      "get": {
+        "description": "Used for when the user opens their notification shade.",
+        "operationId": "NotificationController_markAllRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications marked read successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marks all notifications read.",
+        "tags": ["Notification"]
+      }
+    },
+    "/notification/read/{id}": {
+      "get": {
+        "description": "Marks the given ID's notification read.",
+        "operationId": "NotificationController_markRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked read successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marks a specific notification read.",
+        "tags": ["Notification"]
+      }
+    },
+    "/notification/config/firebase": {
+      "get": {
+        "description": "Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.",
+        "operationId": "NotificationController_getFirebaseConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Firebase configuration retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirebaseConfigDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns the firebase configuration.",
+        "tags": ["Notification"]
+      }
+    },
+    "/notification/{id}": {
+      "get": {
+        "description": "Returns a specific notification for the specific user by it's ID.",
+        "operationId": "NotificationController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Notification"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get's a notification by it's id.",
+        "tags": ["Notification"]
+      }
     }
   },
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-51-g259f6fa",
+    "version": "v0.1.1-54-g41235df",
     "contact": {}
   },
   "tags": [
@@ -2599,62 +2651,6 @@
         },
         "required": ["authMode", "version", "allowUserCreation"]
       },
-      "EntityHistoryDataPoint": {
-        "type": "object",
-        "properties": {
-          "history": {
-            "type": "object",
-            "description": "This is the history for this specific data point",
-            "additionalProperties": {
-              "type": "number"
-            }
-          },
-          "percentChange": {
-            "type": "number"
-          },
-          "valueChange": {
-            "type": "number"
-          }
-        },
-        "required": ["history", "valueChange"]
-      },
-      "EntityHistory": {
-        "type": "object",
-        "properties": {
-          "historicalData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            }
-          },
-          "last1Day": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "last7Days": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastMonth": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastThreeMonths": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastSixMonths": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "lastYear": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "allTime": {
-            "$ref": "#/components/schemas/EntityHistoryDataPoint"
-          },
-          "connectedId": {
-            "type": "string",
-            "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
-          }
-        },
-        "required": ["historicalData", "last1Day", "last7Days", "lastMonth", "lastThreeMonths", "lastSixMonths", "lastYear", "allTime"]
-      },
       "SankeyLink": {
         "type": "object",
         "properties": {
@@ -2788,90 +2784,6 @@
           }
         },
         "required": ["data", "topCategoryNames"]
-      },
-      "FirebaseNotificationDTO": {
-        "type": "object",
-        "properties": {
-          "notificationId": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "default": "secure_message"
-          },
-          "importance": {
-            "type": "string",
-            "description": "Notification importance level",
-            "default": "low",
-            "enum": ["max", "high", "default", "low"]
-          }
-        },
-        "required": ["notificationId", "type", "importance"]
-      },
-      "NotificationSSEDTO": {
-        "type": "object",
-        "properties": {
-          "popupLatest": {
-            "type": "boolean",
-            "description": "If we should render the latest notification or not"
-          }
-        },
-        "required": ["popupLatest"]
-      },
-      "Notification": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string",
-            "description": "The title for our notification"
-          },
-          "message": {
-            "type": "string",
-            "description": "The message that this notification intended to show the user"
-          },
-          "type": {
-            "description": "The type of notification this is",
-            "enum": ["info", "success", "warning", "error"],
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date that this notification occurs on",
-            "default": "2026-02-07T00:31:08.509Z"
-          },
-          "isRead": {
-            "type": "boolean",
-            "description": "Tracks if the user has interacted with this notification yet.",
-            "default": false
-          },
-          "readAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": ["id", "title", "message", "type", "createdAt", "isRead"]
-      },
-      "FirebaseConfigDTO": {
-        "type": "object",
-        "properties": {
-          "apiKey": {
-            "type": "string"
-          },
-          "appId": {
-            "type": "string"
-          },
-          "projectNumber": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          }
-        },
-        "required": ["apiKey", "appId", "projectNumber", "projectId"]
       },
       "UsernamePasswordLoginRequest": {
         "type": "object",
@@ -3049,6 +2961,88 @@
         },
         "required": ["id", "account", "currency", "costBasis", "description", "marketValue", "purchasePrice", "shares", "symbol"]
       },
+      "EntityHistoryDataPoint": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When our data starts",
+            "example": "2025-07-21T17:32:28Z"
+          },
+          "percentChange": {
+            "type": "number"
+          },
+          "valueChange": {
+            "type": "number"
+          }
+        },
+        "required": ["start", "valueChange"]
+      },
+      "EntityHistory": {
+        "type": "object",
+        "properties": {
+          "last1Day": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "last7Days": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastMonth": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastThreeMonths": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastSixMonths": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "lastYear": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "allTime": {
+            "$ref": "#/components/schemas/EntityHistoryDataPoint"
+          },
+          "connectedId": {
+            "type": "string",
+            "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
+          }
+        },
+        "required": ["last1Day", "last7Days", "lastMonth", "lastThreeMonths", "lastSixMonths", "lastYear", "allTime"]
+      },
+      "HistoricalDataPoint": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date of the record"
+          },
+          "value": {
+            "type": "number",
+            "description": "The numerical value"
+          }
+        },
+        "required": ["date", "value"]
+      },
+      "TotalNetWorthDTO": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "history": {
+            "$ref": "#/components/schemas/EntityHistory"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          }
+        },
+        "required": ["value", "history", "timeline"]
+      },
       "Base": {
         "type": "object",
         "properties": {}
@@ -3065,6 +3059,90 @@
           }
         },
         "required": ["event"]
+      },
+      "FirebaseNotificationDTO": {
+        "type": "object",
+        "properties": {
+          "notificationId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "default": "secure_message"
+          },
+          "importance": {
+            "type": "string",
+            "description": "Notification importance level",
+            "default": "low",
+            "enum": ["max", "high", "default", "low"]
+          }
+        },
+        "required": ["notificationId", "type", "importance"]
+      },
+      "NotificationSSEDTO": {
+        "type": "object",
+        "properties": {
+          "popupLatest": {
+            "type": "boolean",
+            "description": "If we should render the latest notification or not"
+          }
+        },
+        "required": ["popupLatest"]
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title for our notification"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message that this notification intended to show the user"
+          },
+          "type": {
+            "description": "The type of notification this is",
+            "enum": ["info", "success", "warning", "error"],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date that this notification occurs on",
+            "default": "2026-02-16T15:24:35.202Z"
+          },
+          "isRead": {
+            "type": "boolean",
+            "description": "Tracks if the user has interacted with this notification yet.",
+            "default": false
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "message", "type", "createdAt", "isRead"]
+      },
+      "FirebaseConfigDTO": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          }
+        },
+        "required": ["apiKey", "appId", "projectNumber", "projectId"]
       }
     }
   }

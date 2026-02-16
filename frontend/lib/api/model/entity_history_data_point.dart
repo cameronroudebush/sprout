@@ -13,13 +13,13 @@ part of openapi.api;
 class EntityHistoryDataPoint {
   /// Returns a new [EntityHistoryDataPoint] instance.
   EntityHistoryDataPoint({
-    this.history = const {},
+    required this.start,
     this.percentChange,
     required this.valueChange,
   });
 
-  /// This is the history for this specific data point
-  Map<String, num> history;
+  /// When our data starts
+  DateTime start;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -33,23 +33,23 @@ class EntityHistoryDataPoint {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is EntityHistoryDataPoint &&
-    _deepEquality.equals(other.history, history) &&
+    other.start == start &&
     other.percentChange == percentChange &&
     other.valueChange == valueChange;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (history.hashCode) +
+    (start.hashCode) +
     (percentChange == null ? 0 : percentChange!.hashCode) +
     (valueChange.hashCode);
 
   @override
-  String toString() => 'EntityHistoryDataPoint[history=$history, percentChange=$percentChange, valueChange=$valueChange]';
+  String toString() => 'EntityHistoryDataPoint[start=$start, percentChange=$percentChange, valueChange=$valueChange]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'history'] = this.history;
+      json[r'start'] = this.start.toUtc().toIso8601String();
     if (this.percentChange != null) {
       json[r'percentChange'] = this.percentChange;
     } else {
@@ -78,7 +78,7 @@ class EntityHistoryDataPoint {
       }());
 
       return EntityHistoryDataPoint(
-        history: mapCastOfType<String, num>(json, r'history')!,
+        start: mapDateTime(json, r'start', r'')!,
         percentChange: num.parse('${json[r'percentChange']}'),
         valueChange: num.parse('${json[r'valueChange']}'),
       );
@@ -128,7 +128,7 @@ class EntityHistoryDataPoint {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'history',
+    'start',
     'valueChange',
   };
 }

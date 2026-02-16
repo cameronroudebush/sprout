@@ -5,12 +5,13 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/dialog/account_delete.dart';
 import 'package:sprout/account/dialog/account_error.dart';
 import 'package:sprout/account/model/account_extensions.dart';
+import 'package:sprout/account/widgets/account_holding.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/account_sub_type.dart';
 import 'package:sprout/account/widgets/institution_error.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
-import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
@@ -23,6 +24,7 @@ import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account.dart';
 import 'package:sprout/net-worth/model/entity_history_extensions.dart';
+import 'package:sprout/net-worth/model/historical_data_point_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
@@ -41,26 +43,31 @@ class AccountWidget extends StatefulWidget {
 }
 
 /// A page that displays information about the given account
-class _AccountWidgetState extends StateTracker<AccountWidget> {
+class _AccountWidgetState extends StateTracker<AccountWidget> with SproutProviders {
   Holding? _selectedHolding;
 
   /// Returns the account based on our current Id
   Account get account {
-    return ServiceLocator.get<AccountProvider>().linkedAccounts.firstWhereOrNull((x) => x.id == widget.accountId)!;
+    return accountProvider.linkedAccounts.firstWhereOrNull((x) => x.id == widget.accountId)!;
   }
 
   @override
   Map<dynamic, DataRequest> get requests => {
     'account': DataRequest<AccountProvider, Account>(
-      provider: ServiceLocator.get<AccountProvider>(),
+      provider: accountProvider,
       onLoad: (p, force) async {
         await p.populateLinkedAccounts(); // Populate accounts
         return account;
       },
       getFromProvider: (p) => account,
     ),
+    'timeline': DataRequest<NetWorthProvider, List<HistoricalDataPoint>>(
+      provider: netWorthProvider,
+      onLoad: (p, force) => p.populateAccountTimelineData(account.id),
+      getFromProvider: (p) => p.getAccountTimelineData(account.id),
+    ),
     'holdings': DataRequest<HoldingProvider, (List<Holding>?, List<EntityHistory>?)>(
-      provider: ServiceLocator.get<HoldingProvider>(),
+      provider: holdingProvider,
       onLoad: (p, force) => p.populateDataForAccount(account),
       getFromProvider: (p) {
         // Trick the loading so we don't load holding data for non holding accounts
@@ -83,6 +90,7 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
     final chartRange = userConfigProvider.userDefaultChartRange;
     final data = netWorthProvider.historicalAccountData?.firstWhereOrNull((e) => e.connectedId == widget.accountId);
     final accountDataForRange = data?.getValueByFrame(chartRange);
+    final timeline = netWorthProvider.getAccountTimelineData(account.id);
 
     num accountValChange = accountDataForRange?.valueChange ?? 0;
     num accountPercentChange = accountDataForRange?.percentChange ?? 0;
@@ -111,7 +119,7 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
                       title: "Account Value",
                     ),
                     SproutLineChart(
-                      data: accountDataForRange.historyDate,
+                      data: HistoricalDataPointExtensions.toMap(timeline ?? []),
                       chartRange: chartRange,
                       formatValue: (value) => getFormattedCurrency(value),
                       showGrid: true,
@@ -187,14 +195,7 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
                                 holdingDataForRange.valueChange,
                                 title: "${selectedHolding.symbol} Value",
                               ),
-                              SproutLineChart(
-                                data: holdingDataForRange.historyDate,
-                                chartRange: chartRange,
-                                formatValue: (value) => getFormattedCurrency(value),
-                                showGrid: true,
-                                showXAxis: true,
-                                height: 150,
-                              ),
+                              AccountHoldingTimeline(_selectedHolding!, chartRange),
                               ChartRangeSelector(
                                 selectedChartRange: chartRange,
                                 onRangeSelected: (value) {
@@ -349,5 +350,11 @@ class _AccountWidgetState extends StateTracker<AccountWidget> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    StateTracker.lastUpdateTimes.remove(widgetName);
   }
 }

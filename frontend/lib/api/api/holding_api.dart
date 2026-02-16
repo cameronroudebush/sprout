@@ -79,6 +79,66 @@ class HoldingApi {
     return null;
   }
 
+  /// Get timeline of a specific holding.
+  ///
+  /// Retrieves the value change over time of a holding given by it's ID.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<Response> holdingControllerGetHoldingTimelineWithHttpInfo(String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/holding/timeline/{id}'
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get timeline of a specific holding.
+  ///
+  /// Retrieves the value change over time of a holding given by it's ID.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<List<HistoricalDataPoint>?> holdingControllerGetHoldingTimeline(String id,) async {
+    final response = await holdingControllerGetHoldingTimelineWithHttpInfo(id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<HistoricalDataPoint>') as List)
+        .cast<HistoricalDataPoint>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get holdings for a specific account.
   ///
   /// Retrieves all holdings for the authenticated user within a specified account.
