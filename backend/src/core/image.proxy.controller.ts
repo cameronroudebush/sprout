@@ -76,6 +76,7 @@ export class ImageProxyController {
       return;
     }
 
+    res.setHeader("Cache-Control", "public, max-age=604800, immutable");
     const contentType = result.headers.get("content-type");
     res.setHeader("Content-Type", contentType!);
 

@@ -129,11 +129,6 @@ class SSEProvider extends BaseProvider<CoreApi> {
 
   /// Unified handler for when the SSE connection is lost (error or done).
   void _handleConnectionLost(dynamic e, {bool forceReconnect = true}) {
-    if (e != null && e.message != null && e.message.contains('403')) {
-      final authProvider = ServiceLocator.get<AuthProvider>();
-      authProvider.logout(forced: true);
-      return;
-    }
     _isConnected = false;
     _isConnecting = false; // Mark connection attempt as finished for now
     notifyListeners(); // Notify UI about disconnection

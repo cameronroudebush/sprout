@@ -6,22 +6,19 @@ import 'package:sprout/account/widgets/account_group.dart';
 import 'package:sprout/account/widgets/accounts.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/line_chart.dart';
-import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/fab.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/core/widgets/tabs.dart';
-import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_text.dart';
 import 'package:sprout/net-worth/widgets/range_selector.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
-/// The main accounts display that contains the chart along side the actual accounts list
 class AccountsOverview extends StatefulWidget {
-  /// The account type tab to go to by default
   final AccountTypeEnum? defaultAccountType;
 
   const AccountsOverview({super.key, this.defaultAccountType});
@@ -30,30 +27,25 @@ class AccountsOverview extends StatefulWidget {
   State<AccountsOverview> createState() => _AccountsOverviewState();
 }
 
-class _AccountsOverviewState extends StateTracker<AccountsOverview> {
+class _AccountsOverviewState extends StateTracker<AccountsOverview> with SproutProviders {
   @override
   Map<dynamic, DataRequest> get requests => {
     'accounts': DataRequest<AccountProvider, List<Account>>(
-      provider: ServiceLocator.get<AccountProvider>(),
+      provider: accountProvider,
       onLoad: (p, force) => p.populateLinkedAccounts(),
       getFromProvider: (p) => p.linkedAccounts,
-    ),
-    'history': DataRequest<NetWorthProvider, List<EntityHistory>?>(
-      provider: ServiceLocator.get<NetWorthProvider>(),
-      onLoad: (p, force) => p.populateHistoricalAccountData(),
-      getFromProvider: (p) => p.historicalAccountData,
     ),
   };
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<UserConfigProvider, AccountProvider, NetWorthProvider>(
-      builder: (context, userConfigProvider, accountProvider, netWorthProvider, child) {
+    return Consumer<UserConfigProvider>(
+      builder: (context, userConfigProvider, child) {
         final accountTypes = AccountTypeEnum.values;
         final accountTypesContent = accountTypes.map((a) {
           return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: FloatingActionButtonWidget.padding),
-            child: _buildTabContent(context, a, userConfigProvider, accountProvider, netWorthProvider),
+            child: _AccountTypeTab(accountType: a),
           );
         }).toList();
         final initialIndex = widget.defaultAccountType == null ? 0 : accountTypes.indexOf(widget.defaultAccountType!);
@@ -74,102 +66,147 @@ class _AccountsOverviewState extends StateTracker<AccountsOverview> {
       },
     );
   }
+}
 
-  // Helper method to create the tab content for each account type
-  Widget _buildTabContent(
-    BuildContext context,
-    AccountTypeEnum accountType,
-    UserConfigProvider provider,
-    AccountProvider accountProvider,
-    NetWorthProvider netWorthProvider,
-  ) {
-    final chartRange = provider.userDefaultChartRange;
-    final accountsForType = accountProvider.linkedAccounts.where((element) => element.type == accountType).toList();
-    // Build the net worth data for these accounts
-    final historyForRange = accountsForType
-        .map(
-          (account) =>
-              netWorthProvider.historicalAccountData?.firstWhereOrNull((element) => element.connectedId == account.id),
-        )
-        .nonNulls
+/// A dedicated widget for the tab content.
+class _AccountTypeTab extends StatefulWidget {
+  final AccountTypeEnum accountType;
+
+  const _AccountTypeTab({required this.accountType});
+
+  @override
+  State<_AccountTypeTab> createState() => _AccountTypeTabState();
+}
+
+class _AccountTypeTabState extends State<_AccountTypeTab> {
+  Future<Map<DateTime, num>>? _dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the future here so it only fires once when the tab is first built
+    _dataFuture = _loadAndCombineData();
+  }
+
+  Future<Map<DateTime, num>> _loadAndCombineData() async {
+    final accountProvider = Provider.of<AccountProvider>(context, listen: false);
+    final netWorthProvider = Provider.of<NetWorthProvider>(context, listen: false);
+
+    // Filter accounts for this specific tab
+    final accountsForType = accountProvider.linkedAccounts
+        .where((element) => element.type == widget.accountType)
         .toList();
 
-    // Flatten the data so the line chart can display the combined net worth for these accounts
-    final Map<DateTime, num> data = {};
-    for (final entityHistory in historyForRange) {
-      final history = entityHistory.getValueByFrame(chartRange).historyDate;
-      for (final historyPoint in history.entries) {
-        data.update(historyPoint.key, (value) => value + historyPoint.value, ifAbsent: () => historyPoint.value);
+    final Map<DateTime, num> combinedData = {};
+
+    for (final account in accountsForType) {
+      var timeline = netWorthProvider.getAccountTimelineData(account.id);
+      if (timeline == null) {
+        await netWorthProvider.populateAccountTimelineData(account.id);
+        timeline = netWorthProvider.getAccountTimelineData(account.id);
+      }
+      if (timeline != null) {
+        for (final p in timeline) {
+          combinedData.update(p.date, (value) => value + p.value, ifAbsent: () => p.value);
+        }
       }
     }
+    return combinedData;
+  }
 
-    final groupCalc = AccountGroupWidget.calculate(historyForRange, accountsForType, chartRange);
-    final netWorth = groupCalc.totalBalance;
-    double totalChange = groupCalc.totalChange;
-    final percentageChange = groupCalc.percentageChange;
-    if (accountType == AccountTypeEnum.loan || accountType == AccountTypeEnum.credit) totalChange *= -1;
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<UserConfigProvider, AccountProvider, NetWorthProvider>(
+      builder: (context, userConfigProvider, accountProvider, netWorthProvider, child) {
+        final chartRange = userConfigProvider.userDefaultChartRange;
+        final accountsForType = accountProvider.linkedAccounts
+            .where((element) => element.type == widget.accountType)
+            .toList();
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
-        child: Column(
-          children: [
-            // Render net worth chart
-            SproutCard(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 0, right: 12, left: 12, bottom: 12),
-                child: Column(
-                  spacing: 12,
-                  children: isLoading
-                      ? [SizedBox(height: 150, child: Center(child: CircularProgressIndicator()))]
-                      : data.isEmpty
-                      ? [
-                          SizedBox(
-                            height: 150,
-                            child: Center(child: Text("No ${formatAccountType(accountType)} Accounts")),
-                          ),
-                        ]
-                      : [
-                          NetWorthTextWidget(
-                            chartRange,
-                            netWorth,
-                            percentageChange,
-                            totalChange,
-                            title: "${formatAccountType(accountType)} Accounts Value",
-                            applyColor: false,
-                          ),
-                          SproutLineChart(
-                            data: data,
-                            chartRange: chartRange,
-                            formatValue: (value) => getFormattedCurrency(value),
-                            showYAxis: false,
-                            showXAxis: true,
-                            formatYAxis: (value) => getShortFormattedCurrency(value),
-                            yAxisSize: 50,
-                            showGrid: true,
-                          ),
-                          ChartRangeSelector(
-                            selectedChartRange: chartRange,
-                            onRangeSelected: (value) {
-                              provider.updateChartRange(value);
-                            },
-                          ),
-                        ],
-                ),
+        return FutureBuilder<Map<DateTime, num>>(
+          future: _dataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return SizedBox(height: 300, child: Center(child: CircularProgressIndicator()));
+            }
+
+            final data = snapshot.data ?? {};
+            final historyForRange = accountsForType
+                .map(
+                  (account) => netWorthProvider.historicalAccountData?.firstWhereOrNull(
+                    (element) => element.connectedId == account.id,
+                  ),
+                )
+                .nonNulls
+                .toList();
+
+            final groupCalc = AccountGroupWidget.calculate(historyForRange, accountsForType, chartRange);
+            final netWorth = groupCalc.totalBalance;
+            double totalChange = groupCalc.totalChange;
+            final percentageChange = groupCalc.percentageChange;
+
+            if (widget.accountType == AccountTypeEnum.loan || widget.accountType == AccountTypeEnum.credit) {
+              totalChange *= -1;
+            }
+
+            return Padding(
+              padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
+              child: Column(
+                children: [
+                  SproutCard(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 0, right: 12, left: 12, bottom: 12),
+                      child: Column(
+                        spacing: 12,
+                        children: data.isEmpty
+                            ? [
+                                SizedBox(
+                                  height: 150,
+                                  child: Center(child: Text("No ${formatAccountType(widget.accountType)} Accounts")),
+                                ),
+                              ]
+                            : [
+                                NetWorthTextWidget(
+                                  chartRange,
+                                  netWorth,
+                                  percentageChange,
+                                  totalChange,
+                                  title: "${formatAccountType(widget.accountType)} Accounts Value",
+                                  applyColor: false,
+                                ),
+                                SproutLineChart(
+                                  data: data,
+                                  chartRange: chartRange,
+                                  formatValue: (value) => getFormattedCurrency(value),
+                                  showYAxis: false,
+                                  showXAxis: true,
+                                  formatYAxis: (value) => getShortFormattedCurrency(value),
+                                  yAxisSize: 50,
+                                  showGrid: true,
+                                ),
+                                ChartRangeSelector(
+                                  selectedChartRange: chartRange,
+                                  onRangeSelected: (value) {
+                                    userConfigProvider.updateChartRange(value);
+                                  },
+                                ),
+                              ],
+                      ),
+                    ),
+                  ),
+                  AccountsWidget(
+                    allowCollapse: false,
+                    netWorthPeriod: chartRange,
+                    accountType: widget.accountType,
+                    showGroupTitles: false,
+                    shouldRequestNewData: false,
+                  ),
+                ],
               ),
-            ),
-            // Render accounts
-            AccountsWidget(
-              allowCollapse: false,
-              netWorthPeriod: chartRange,
-              accountType: accountType,
-              showGroupTitles: false,
-              // We should already have the data we need
-              shouldRequestNewData: false,
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

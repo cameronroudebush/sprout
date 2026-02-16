@@ -89,15 +89,8 @@ class SproutLineChart extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final positiveColor = applyPosNegColors ? Colors.green : colorScheme.primary;
     final negativeColor = applyPosNegColors ? colorScheme.error : colorScheme.primary;
-
-    // 1. Calculate Bounds
     final yAxisBounds = _calculateYAxisBounds(spots);
-
-    // 2. SPLIT THE DATA
-    // Instead of gradients, we physically split the line into two parts.
     final segments = _splitDataIntoSegments(spots);
-
-    // 3. Build Titles & Touch Data (same as before)
     final titlesData = _buildTitlesData(theme, chartData, selectedChartRange, yAxisBounds);
     final touchData = _buildLineTouchData(theme, chartData, positiveColor, negativeColor);
 

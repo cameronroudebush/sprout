@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/service.locator.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
@@ -38,18 +38,13 @@ class NetWorthOverviewWidget extends StatefulWidget {
   State<NetWorthOverviewWidget> createState() => _NetWorthOverviewWidgetState();
 }
 
-class _NetWorthOverviewWidgetState extends StateTracker<NetWorthOverviewWidget> {
+class _NetWorthOverviewWidgetState extends StateTracker<NetWorthOverviewWidget> with SproutProviders {
   @override
   Map<dynamic, DataRequest> get requests => {
-    'netWorth': DataRequest<NetWorthProvider, num?>(
-      provider: ServiceLocator.get<NetWorthProvider>(),
-      onLoad: (p, force) => p.populateNetWorth(),
-      getFromProvider: (p) => p.netWorth,
-    ),
-    'historical': DataRequest<NetWorthProvider, EntityHistory?>(
-      provider: ServiceLocator.get<NetWorthProvider>(),
-      onLoad: (p, force) => p.populateHistoricalNetWorth(),
-      getFromProvider: (p) => p.historicalNetWorth,
+    'total': DataRequest<NetWorthProvider, TotalNetWorthDTO>(
+      provider: netWorthProvider,
+      onLoad: (p, force) => p.populateTotal(),
+      getFromProvider: (p) => p.total,
     ),
   };
 

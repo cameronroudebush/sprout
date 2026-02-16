@@ -17,11 +17,12 @@ class CurrentNetWorthDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<NetWorthProvider>(
       builder: (context, netWorthProvider, child) {
-        if (netWorthProvider.netWorth == null) {
-          return Center(child: CircularProgressIndicator());
-        }
-        final currentNetWorth = netWorthProvider.netWorth ?? 0;
-        final pastValueRange = netWorthProvider.historicalNetWorth?.getValueByFrame(chartRange);
+        final totalData = netWorthProvider.total;
+        final total = totalData?.value;
+        if (total == null) return Center(child: CircularProgressIndicator());
+
+        final currentNetWorth = total;
+        final pastValueRange = totalData?.history.getValueByFrame(chartRange);
         final pastNetWorthChange = pastValueRange?.valueChange;
         final percentageChange = pastValueRange?.percentChange ?? 0;
 

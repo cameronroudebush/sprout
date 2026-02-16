@@ -30,8 +30,8 @@ Future<void> applyDefaultAPI() async {
       final authProvider = ServiceLocator.get<AuthProvider>();
       final notificationProvider = ServiceLocator.get<NotificationProvider>();
       if (authProvider.isLoggedIn) {
+        notificationProvider.openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning, duration: 7);
         await authProvider.logout(forced: true);
-        notificationProvider.openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning);
       }
     },
   );

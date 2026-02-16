@@ -18,7 +18,8 @@
       "@backend/sse/*": ["./src/sse/*"],
       "@backend/auth/*": ["./src/auth/*"],
       "@backend/notification/*": ["./src/notification/*"],
-      "@backend/chat/*": ["./src/chat/*"]
+      "@backend/chat/*": ["./src/chat/*"],
+      "@backend/net-worth/*": ["./src/net-worth/*"]
     }
   },
   "include": ["./src/**/*"]

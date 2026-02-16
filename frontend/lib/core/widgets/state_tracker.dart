@@ -169,15 +169,6 @@ abstract class StateTracker<T extends StatefulWidget> extends State<T> with Widg
   /// before the load data in-case you have any special handling
   void onForceSync() {}
 
-  /// Helper to get data type-safely
-  D? getData<D>(dynamic key) {
-    final req = requests[key];
-    if (req != null && req.value is D) {
-      return req.value as D;
-    }
-    return null;
-  }
-
   @override
   void initState() {
     super.initState();
