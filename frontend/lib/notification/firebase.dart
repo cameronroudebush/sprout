@@ -172,7 +172,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       String title = notification.title;
       String body = notification.message;
 
-      // Show our notification manually
+      // Show our notification using the background notifications
       await _backgroundLocalNotifications.show(
         id: DateTime.now().millisecond,
         title: title,
