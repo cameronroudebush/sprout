@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/transactions"
+    android:previewLayout="@layout/transactions_preview"
     android:minWidth="203dp"
     android:minHeight="120dp"
     android:description="@string/widget_transactions_description"
-    android:previewLayout="@layout/transactions"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen" />
