@@ -42,6 +42,9 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/transactions" />
         </receiver>
 
+        <!-- Services -->
+        <service android:name=".widget.TransactionsWidgetService" android:permission="android.permission.BIND_REMOTEVIEWS" android:exported="false" />
+
     </application>
     <queries>
         <intent>

@@ -24,12 +24,10 @@ class Transactions : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.transactions)
 
-            // Always hide the preview stub in the live widget
-            views.setViewVisibility(R.id.widget_preview_stub_container, View.GONE)
-
             if (hasData) {
                 views.setViewVisibility(R.id.widget_transactions_list, View.VISIBLE)
                 views.setViewVisibility(R.id.widget_empty_view, View.GONE)
+                views.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
                 views.setTextViewText(R.id.widget_last_updated, timestamp)
 
                 // Setup the remote adapter if we have data

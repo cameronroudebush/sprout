@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -14,9 +13,9 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:alpha="0.7"
+        android:text="Jan 01, 1:00 PM"
         android:textColor="@color/sprout_text_secondary"
-        android:textSize="10sp"
-        tools:text="Jan 01, 1:00 PM" />
+        android:textSize="10sp" />
 
     <ImageView
         android:id="@+id/widget_launcher_icon"
@@ -34,8 +33,7 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/widget_launcher_icon"
         android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -52,10 +50,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:includeFontPadding="false"
+            android:text="$12,345.67"
             android:textColor="@color/sprout_text_primary"
             android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="$12,345.67" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -68,15 +66,15 @@
                 android:layout_width="10dp"
                 android:layout_height="10dp"
                 android:layout_marginEnd="2dp"
-                tools:src="@android:drawable/arrow_up_float" />
+                android:src="@android:drawable/arrow_up_float" />
 
             <TextView
                 android:id="@+id/widget_nw_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="$1,234.56 (7.89%)"
                 android:textColor="@color/sprout_accent_green"
-                android:textSize="11sp"
-                tools:text="$1,234.56 (7.89%)" />
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -90,6 +88,5 @@
         android:text="@string/widget_no_data"
         android:textColor="@color/sprout_text_secondary"
         android:textSize="13sp"
-        tools:visibility="gone" />
-
+        android:visibility="gone" />
 </RelativeLayout>

@@ -40,6 +40,7 @@ class Overview : AppWidgetProvider() {
             } else {
                 views.setViewVisibility(R.id.data_container, View.VISIBLE)
                 views.setViewVisibility(R.id.empty_state_container, View.GONE)
+                views.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
 
                 val netWorth = data.optString("netWorth", "$0.00")
                 val numericChange = data.optDouble("numericChange", 0.0)
