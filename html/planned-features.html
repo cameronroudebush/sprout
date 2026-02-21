@@ -1,0 +1,242 @@
+<style>
+  .sprout-roadmap {
+    --priority-high: #ef5350;
+    --priority-med: #ffa726;
+    --priority-low: var(--md-accent-fg-color);
+
+    color: var(--md-typeset-color);
+    font-family: "Inter", sans-serif;
+    margin: 0 auto;
+    max-width: 1000px;
+    padding: 1rem 0;
+  }
+
+  .intro h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+
+  .sprout-roadmap h2 {
+    color: var(--light-color);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .sprout-roadmap .intro-text {
+    text-align: center;
+    color: var(--md-default-fg-color--light);
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* List Container */
+  .sprout-roadmap .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* The Row Card */
+  .sprout-roadmap .feature-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    background-color: var(--md-primary-fg-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .sprout-roadmap .feature-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Left Column: Meta (Title & Badge) */
+  .sprout-roadmap .feature-meta {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sprout-roadmap .feature-meta h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--light-color);
+  }
+
+  /* Right Column: Content */
+  .sprout-roadmap .feature-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .sprout-roadmap .feature-content p {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--md-typeset-color);
+  }
+
+  .sprout-roadmap .feature-content ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--md-default-fg-color--light);
+    font-size: 0.9rem;
+  }
+
+  .sprout-roadmap .feature-content li {
+    margin-bottom: 0.4rem;
+  }
+
+  .sprout-roadmap .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    font-weight: 800;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    width: fit-content;
+  }
+
+  /* High Priority Styling */
+  .sprout-roadmap .p-high {
+    border-left: 4px solid var(--priority-high);
+  }
+  .sprout-roadmap .p-high .priority-badge {
+    color: var(--priority-high);
+    background: rgba(239, 83, 80, 0.15);
+  }
+
+  /* Medium Priority Styling */
+  .sprout-roadmap .p-med {
+    border-left: 4px solid var(--priority-med);
+  }
+  .sprout-roadmap .p-med .priority-badge {
+    color: var(--priority-med);
+    background: rgba(255, 167, 38, 0.15);
+  }
+
+  /* Low Priority Styling */
+  .sprout-roadmap .p-low {
+    border-left: 4px solid var(--priority-low);
+  }
+  .sprout-roadmap .p-low .priority-badge {
+    color: var(--light-color);
+    background: rgba(160, 202, 253, 0.1);
+  }
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 768px) {
+    .sprout-roadmap .feature-row {
+      grid-template-columns: 1fr;
+    }
+
+    .sprout-roadmap .feature-meta {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      border-right: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+    }
+
+    .sprout-roadmap .feature-content {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<div class="sprout-roadmap">
+  <div class="intro center">
+    <h2>What's Next for Sprout?</h2>
+    <p class="intro-text">
+      I'm a busy guy but I try my best to get new features built in my free time.<br />
+      Here is the roadmap sorted by priority.
+    </p>
+  </div>
+
+  <div class="feature-list">
+    <div class="feature-row p-med">
+      <div class="feature-meta">
+        <h3>Mobile Apps</h3>
+        <span class="priority-badge">In Progress</span>
+      </div>
+      <div class="feature-content">
+        <p>Native applications are being designed to help you track your portfolio on the go.</p>
+        <ul>
+          <li><strong>Android Widgets:</strong> Home screen summary view.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row p-med">
+      <div class="feature-meta">
+        <h3>Holdings</h3>
+        <span class="priority-badge">Planned</span>
+      </div>
+      <div class="feature-content">
+        <p>Improvements to how we display and track stock tickers.</p>
+        <ul>
+          <li><strong>Live Pricing:</strong> Live integration for second-by-second updates.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row p-med">
+      <div class="feature-meta">
+        <h3>Providers</h3>
+        <span class="priority-badge">Planned</span>
+      </div>
+      <div class="feature-content">
+        <p>Integration with third-party asset tracking to automate your net worth calculation.</p>
+        <ul>
+          <li><strong>Zillow:</strong> Automatic real estate value updates with the introduction of assets.</li>
+          <li><strong>Plaid:</strong> Bank account syncing.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row p-low">
+      <div class="feature-meta">
+        <h3>Interface</h3>
+        <span class="priority-badge">Backlog</span>
+      </div>
+      <div class="feature-content">
+        <p>Further improving how you can visualize your finances.</p>
+        <ul>
+          <li><strong>Version 2</strong> overhauling and modernizing the application.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-row p-low">
+      <div class="feature-meta">
+        <h3>User Config</h3>
+        <span class="priority-badge">Backlog</span>
+      </div>
+      <div class="feature-content">
+        <p>Enhanced customization for user profiles and dashboard layouts.</p>
+        <ul>
+          <li><strong>Custom currency</strong> formatting.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
