@@ -7,7 +7,6 @@ import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
-import { Notification } from "@backend/notification/model/notification.model";
 import { NotificationType } from "@backend/notification/model/notification.type";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
@@ -16,11 +15,12 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
 import { subDays } from "date-fns";
-import { groupBy, merge } from "lodash";
+import { merge } from "lodash";
+import { LessThan } from "typeorm";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
-export class ProviderSyncJob extends BackgroundJob<Sync> {
+export class ProviderSyncJob extends BackgroundJob<Sync | null> {
   constructor(
     private providerService: ProviderService,
     private transactionRuleService: TransactionRuleService,
@@ -36,164 +36,117 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
   protected async update(user?: User) {
     this.logger.log("Starting sync for all providers." + (user ? ` Only for user: ${user?.username}` : ""));
     const providers = this.providerService.getAll();
-    const schedule = await Sync.fromPlain({ time: new Date(), status: "in-progress" }).insert();
-    schedule.user = user;
-    // A map of result notifications per user.
-    const totalResults: Notification[] = [];
-    try {
-      for (const provider of providers) totalResults.push(...(await this.updateProvider(provider, user)));
-    } catch (e) {
-      // Worst case, major issues exist and we need to log it within the sync status
-      const msg = (e as Error).message;
-      schedule.failureReason = msg;
-      schedule.status = "failed";
-      await schedule.update();
-      throw e;
-    }
-
-    // Inform the user of each most important notifications
-    const notifications = groupBy(totalResults, "user.id");
-    for (const [_userId, items] of Object.entries(notifications)) {
-      // Check for immediate problems (Errors or Warnings)
-      const problems = items.filter((n) => n.type === NotificationType.error || n.type === NotificationType.warning);
-
-      if (problems.length > 0) {
-        // If problems exist, notify the user of ALL of them
-        for (const problem of problems) await this.notificationService.notifyUser(problem.user, problem.message, problem.title, problem.type);
-
-        // If we already have a failure, identify that
-        if (schedule.status === "failed") {
-          schedule.failureReason = "Multiple failure reasons. Check the logs.";
-        } else {
-          schedule.status = "failed";
-          schedule.failureReason = problems.length > 1 ? "Sync found many problems. Check the logs" : problems[0]?.message;
-        }
-      } else {
-        // If no problems, find the first success (if it exists)
-        const success = items.find((n) => n.type === NotificationType.success);
-        if (success) await this.notificationService.notifyUser(success.user, success.message, success.title, success.type);
-      }
-    }
-
-    // Finalize the schedule status
-    if (schedule.status !== "failed") schedule.status = "complete";
-    await schedule.update();
-
-    return schedule;
+    for (const provider of providers) await this.updateProvider(provider, user);
+    // Cleanup
+    await this.cleanupOldSyncs();
+    // If we we're given a single user, find their most recent sync status
+    if (user) return await Sync.findOne({ where: { user: { id: user.id } }, order: { time: "DESC" } });
+    else return null;
   }
 
   /**
    * Starts an update for the given provider.
    *
    * @param specificUser If given, will only process this user
-   * @returns An array of the results of our update
    */
   private async updateProvider(provider: ProviderBase, specificUser?: User) {
     this.logger.log(`Syncing ${provider.config.name}`);
     // Handle each user, or only the given user
     const users = specificUser ? [specificUser] : await User.find({});
-    // Initialize the return array
-    const results: Notification[] = [];
     // Handle each user's accounts
     for (const user of users) {
-      this.logger.log(`Updating information for: ${user.username}`);
-      // Sync transactions and account balances. Only do it for existing accounts.
-      const userAccounts = await Account.getForUser(user);
-      // If we don't have any user accounts, don't bother querying because we'll have nothing to update
-      if (userAccounts.length === 0) continue;
-
-      let accounts;
+      // Create unique sync status
+      const sync = await Sync.fromPlain({
+        time: new Date(),
+        status: "in-progress",
+        user: user,
+      }).insert();
       try {
-        accounts = await provider.get(user, false);
-      } catch (err) {
-        this.logger.error(`Failed to fetch provider data for ${user.username}`);
-        results.push(new Notification(user, "Provider Fetch Failed", `Failed to fetch the ${provider.config.name} information.`, NotificationType.error));
-        continue;
-      }
-
-      let userHadSuccessfulUpdate = false;
-      let institutionNamesToUpdate: string[] = [];
-
-      for (const data of accounts) {
-        try {
-          const accountInDB = await Account.findOne({ where: { id: data.account.id } });
-          if (!accountInDB) {
-            this.logger.warn(`The account with the following name isn't registered: ${data.account.name}`);
-            continue;
-          } else this.logger.log(`Updating account from provider: ${data.account.name}`);
-
-          // Set old account history
-          await AccountHistory.fromPlain({
-            account: accountInDB,
-            balance: accountInDB.balance,
-            availableBalance: accountInDB.availableBalance,
-            time: subDays(new Date(), 1),
-          }).insert();
-
-          // Update current account
-          accountInDB.balance = data.account.balance;
-          accountInDB.availableBalance = data.account.availableBalance;
-          await accountInDB.update();
-
-          // Update current institution if in database
-          const institution = accountInDB.institution;
-          institution.hasError = data.account.institution.hasError;
-          institution.url = data.account.institution.url;
-          await institution.update();
-
-          // Check if the institution reports an error
-          if (institution.hasError) institutionNamesToUpdate.push(institution.name);
-
-          // Sync transactions
-          if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
-
-          // Sync holdings if investment type
-          if (accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
-
-          // If we reached this point, this specific account sync was valid
-          userHadSuccessfulUpdate = true;
-        } catch (e) {
-          this.logger.error(`Failed to update account ${data.account.name} for ${user.username}: ${(e as Error).message}`);
+        this.logger.log(`Updating ${provider.config.name} for: ${user.username}`);
+        // Sync transactions and account balances. Only do it for existing accounts.
+        const userAccounts = await Account.getForUser(user);
+        // If we don't have any user accounts, don't bother querying because we'll have nothing to update
+        if (userAccounts.length === 0) {
+          sync.status = "complete";
+          await sync.update();
           continue;
         }
-      }
 
-      // Post-Loop Notification & Result Logic
-      if (institutionNamesToUpdate.length > 0) {
-        // Handle Institution Errors (User Action Required)
-        results.push(
-          new Notification(
-            user,
-            "Connection Update Required",
-            `Connection lost with ${institutionNamesToUpdate.length > 1 ? "multiple institutions" : institutionNamesToUpdate[0]}. Please update your login credentials.`,
-            NotificationType.error,
-          ),
-        );
-      } else if (userHadSuccessfulUpdate) {
-        // Successful Update
-        const message = this.randomSuccessMessage;
-        results.push(new Notification(user, message.title, message.body, NotificationType.success));
-        await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
-        this.logger.log(`Information updated successfully for: ${user.username}, provider: ${provider.config.name}`);
-      } else {
-        // Generic Failure (No updates succeeded, but no specific institution error)
-        if (accounts.length > 0)
-          results.push(
-            new Notification(
-              user,
-              "Sync Issue",
-              `We couldn't update your accounts for ${provider.config.name}. Please check your connection.`,
-              NotificationType.error,
-            ),
-          );
-        else
-          results.push(
-            new Notification(user, "Unknown Sync Issue", `Failed to update your accounts. Please check the logs for more information.`, NotificationType.error),
-          );
+        let accounts;
+        try {
+          accounts = await provider.get(user, false);
+        } catch (err) {
+          throw new Error(`Provider connection failed: ${(err as Error).message}`);
+        }
+
+        let userHadSuccessfulUpdate = false;
+        const institutionErrors = new Set<string>();
+
+        for (const data of accounts) {
+          try {
+            const accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } } });
+            if (!accountInDB) continue;
+
+            // Set old account history
+            await AccountHistory.fromPlain({
+              account: accountInDB,
+              balance: accountInDB.balance,
+              availableBalance: accountInDB.availableBalance,
+              time: subDays(new Date(), 1),
+            }).insert();
+
+            // Update current account
+            accountInDB.balance = data.account.balance;
+            accountInDB.availableBalance = data.account.availableBalance;
+            await accountInDB.update();
+
+            // Update current institution if in database
+            const institution = accountInDB.institution;
+            institution.hasError = data.account.institution.hasError;
+            institution.url = data.account.institution.url;
+            await institution.update();
+
+            // Check if the institution reports an error
+            if (data.account.institution.hasError) institutionErrors.add(data.account.institution.name);
+            // Sync transactions
+            if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
+            // Sync holdings if investment type
+            if (accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
+
+            // If we reached this point, this specific account sync was valid
+            userHadSuccessfulUpdate = true;
+          } catch (e) {
+            this.logger.error(`Account error: ${(e as Error).message}`);
+          }
+        }
+
+        // Always apply rules if at least one account updated successfully
+        if (userHadSuccessfulUpdate) await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
+
+        // Finalize status and notify the user as necessary
+        if (institutionErrors.size > 0) {
+          const names = Array.from(institutionErrors);
+          sync.status = "failed";
+          sync.failureReason = `Connection lost with ${names.join(", ")}`;
+          await this.notificationService.notifyUser(user, sync.failureReason, "Connection Update Required", NotificationType.error);
+        } else if (userHadSuccessfulUpdate) {
+          sync.status = "complete";
+          const msg = this.randomSuccessMessage;
+          await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
+        } else {
+          sync.status = "failed";
+          sync.failureReason = "No accounts were updated. Check provider logs.";
+        }
+        // Finalize by updating the sync
+        await sync.update();
+      } catch (e) {
+        // Catch-all for a total user-provider failure
+        sync.status = "failed";
+        sync.failureReason = (e as Error).message;
+        await sync.update();
+        this.logger.error(`Sync failed for ${user.username}: ${sync.failureReason}`);
       }
     }
-
-    return results;
   }
 
   /** Updates all transaction data for the given account that matches the given transaction */
@@ -270,8 +223,22 @@ export class ProviderSyncJob extends BackgroundJob<Sync> {
     }
   }
 
+  /** Removes sync history older than N days to maintain database performance. */
+  private async cleanupOldSyncs(days = 60) {
+    try {
+      const thirtyDaysAgo = subDays(new Date(), days);
+      const result = await Sync.delete({
+        time: LessThan(thirtyDaysAgo),
+      });
+      const cleaned = result.affected;
+      this.logger.log(`Removed ${cleaned} old sync record${cleaned !== 1 ? "s" : ""}.`);
+    } catch (e) {
+      this.logger.error(`Failed to cleanup old sync records: ${(e as Error).message}`);
+    }
+  }
+
   /** Returns a random success message for the user */
-  get randomSuccessMessage() {
+  private get randomSuccessMessage() {
     return Utility.randomFromArray([
       { title: "Sync Success", body: `Your financial overview is now up to date for ${TimeZone.formatDate(new Date(), "PPP")}.` },
       { title: "Data Refreshed", body: "We've pulled in your latest transactions. Take a look at your updated balances!" },

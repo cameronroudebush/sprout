@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/widgets/account_percentage.dart';
 import 'package:sprout/account/widgets/accounts.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/config/provider.dart';
@@ -59,15 +60,20 @@ class _HomePageState extends StateTracker<HomePage> {
 
         // Check if a sync hasn't ran recently
         final lastSync = configProvider.config?.lastSchedulerRun;
-        if (lastSync != null && (lastSync.status == "in-progress" || lastSync.status == "failed")) {
-          notifications.add(
-            SproutNotification(
-              "An account sync has not yet ran today",
-              theme.colorScheme.error,
-              theme.colorScheme.onError,
-              icon: Icons.sync,
-            ),
-          );
+        if (lastSync != null &&
+            (lastSync.status == ModelSyncStatusEnum.inProgress || lastSync.status == ModelSyncStatusEnum.failed)) {
+          var message = "An account sync has not yet ran today";
+          var bgColor = theme.colorScheme.error;
+          var color = theme.colorScheme.onError;
+          if (lastSync.status == ModelSyncStatusEnum.inProgress) {
+            bgColor = theme.colorScheme.secondary;
+            color = theme.colorScheme.onSecondary;
+            message = "An account sync is in progress";
+          } else if (lastSync.status == ModelSyncStatusEnum.failed) {
+            message = "Account sync failed: ${lastSync.failureReason}";
+          }
+
+          notifications.add(SproutNotification(message, bgColor, color, icon: Icons.sync));
         }
 
         final unknownCatCount = catProvider.unknownCategoryCount;
