@@ -14,18 +14,19 @@ class ModelSync {
   /// Returns a new [ModelSync] instance.
   ModelSync({
     required this.id,
-    required this.time,
     required this.status,
+    required this.time,
     this.failureReason,
     this.user,
   });
 
   String id;
 
+  /// The status of the sync job
+  ModelSyncStatusEnum status;
+
   /// When this was started
   DateTime time;
-
-  Object status;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -47,8 +48,8 @@ class ModelSync {
   @override
   bool operator ==(Object other) => identical(this, other) || other is ModelSync &&
     other.id == id &&
-    other.time == time &&
     other.status == status &&
+    other.time == time &&
     other.failureReason == failureReason &&
     other.user == user;
 
@@ -56,19 +57,19 @@ class ModelSync {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
-    (time.hashCode) +
     (status.hashCode) +
+    (time.hashCode) +
     (failureReason == null ? 0 : failureReason!.hashCode) +
     (user == null ? 0 : user!.hashCode);
 
   @override
-  String toString() => 'ModelSync[id=$id, time=$time, status=$status, failureReason=$failureReason, user=$user]';
+  String toString() => 'ModelSync[id=$id, status=$status, time=$time, failureReason=$failureReason, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
-      json[r'time'] = this.time.toUtc().toIso8601String();
       json[r'status'] = this.status;
+      json[r'time'] = this.time.toUtc().toIso8601String();
     if (this.failureReason != null) {
       json[r'failureReason'] = this.failureReason;
     } else {
@@ -102,8 +103,8 @@ class ModelSync {
 
       return ModelSync(
         id: mapValueOfType<String>(json, r'id')!,
+        status: ModelSyncStatusEnum.fromJson(json[r'status'])!,
         time: mapDateTime(json, r'time', r'')!,
-        status: mapValueOfType<Object>(json, r'status')!,
         failureReason: mapValueOfType<String>(json, r'failureReason'),
         user: User.fromJson(json[r'user']),
       );
@@ -154,8 +155,85 @@ class ModelSync {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'id',
-    'time',
     'status',
+    'time',
   };
 }
+
+/// The status of the sync job
+class ModelSyncStatusEnum {
+  /// Instantiate a new enum with the provided [value].
+  const ModelSyncStatusEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const inProgress = ModelSyncStatusEnum._(r'in-progress');
+  static const complete = ModelSyncStatusEnum._(r'complete');
+  static const failed = ModelSyncStatusEnum._(r'failed');
+
+  /// List of all possible values in this [enum][ModelSyncStatusEnum].
+  static const values = <ModelSyncStatusEnum>[
+    inProgress,
+    complete,
+    failed,
+  ];
+
+  static ModelSyncStatusEnum? fromJson(dynamic value) => ModelSyncStatusEnumTypeTransformer().decode(value);
+
+  static List<ModelSyncStatusEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <ModelSyncStatusEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = ModelSyncStatusEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [ModelSyncStatusEnum] to String,
+/// and [decode] dynamic data back to [ModelSyncStatusEnum].
+class ModelSyncStatusEnumTypeTransformer {
+  factory ModelSyncStatusEnumTypeTransformer() => _instance ??= const ModelSyncStatusEnumTypeTransformer._();
+
+  const ModelSyncStatusEnumTypeTransformer._();
+
+  String encode(ModelSyncStatusEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a ModelSyncStatusEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  ModelSyncStatusEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'in-progress': return ModelSyncStatusEnum.inProgress;
+        case r'complete': return ModelSyncStatusEnum.complete;
+        case r'failed': return ModelSyncStatusEnum.failed;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [ModelSyncStatusEnumTypeTransformer] instance.
+  static ModelSyncStatusEnumTypeTransformer? _instance;
+}
+
 

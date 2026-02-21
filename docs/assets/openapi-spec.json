@@ -2121,7 +2121,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.1.1-55-ga04f244",
+    "version": "v0.2.0",
     "contact": {}
   },
   "tags": [
@@ -2578,13 +2578,15 @@
           "id": {
             "type": "string"
           },
+          "status": {
+            "type": "string",
+            "enum": ["in-progress", "complete", "failed"],
+            "description": "The status of the sync job"
+          },
           "time": {
             "format": "date-time",
             "type": "string",
             "description": "When this was started"
-          },
-          "status": {
-            "type": "object"
           },
           "failureReason": {
             "type": "string"
@@ -2598,7 +2600,7 @@
             ]
           }
         },
-        "required": ["id", "time", "status"]
+        "required": ["id", "status", "time"]
       },
       "ProviderConfig": {
         "type": "object",
@@ -3120,7 +3122,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-02-16T16:21:07.829Z"
+            "default": "2026-02-21T00:46:44.683Z"
           },
           "isRead": {
             "type": "boolean",

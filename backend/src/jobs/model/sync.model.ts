@@ -1,6 +1,7 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
+import { ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { ManyToOne } from "typeorm";
 
@@ -12,6 +13,10 @@ export class Sync extends DatabaseBase {
   declare time: Date;
 
   @DatabaseDecorators.column({ nullable: false })
+  @ApiProperty({
+    enum: ["in-progress", "complete", "failed"],
+    description: "The status of the sync job",
+  })
   declare status: "in-progress" | "complete" | "failed";
 
   @DatabaseDecorators.column({ nullable: true })
