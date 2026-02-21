@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/chat/chat_provider.dart';
@@ -10,6 +11,7 @@ import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/base.dart';
 import 'package:sprout/core/provider/sse.dart';
+import 'package:sprout/core/provider/widget.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
@@ -55,6 +57,8 @@ class ServiceLocator {
     HoldingProvider,
     CashFlowProvider,
     ChatProvider,
+    BiometricProvider,
+    WidgetProvider,
   ];
 
   /// Returns every provider that has been initialized by the app in a list like format

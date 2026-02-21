@@ -9,7 +9,7 @@ import 'package:sprout/core/provider/provider_services.dart';
 /// A provider intended to only handle biometric authentication for [secureMode]
 class BiometricProvider extends BaseProvider with SproutProviders {
   /// Platform for interacting with the activity
-  final platform = MethodChannel('security');
+  final platform = MethodChannel("net.croudebush.sprout/security");
 
   /// Tracks if we're in the middle of an auto logout due to failure in biometric checking
   bool _isLoggingOut = false;

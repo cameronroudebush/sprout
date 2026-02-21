@@ -26,13 +26,22 @@
         <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
         <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
 
-        <receiver android:name=".widget.Overview" android:exported="false">
+        <!-- Widgets -->
+        <receiver android:name=".widget.Overview" android:exported="false" android:label="@string/widget_label_overview">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/overview" />
         </receiver>
+        <receiver android:name=".widget.Transactions" android:exported="false" android:label="@string/widget_label_transactions">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/transactions" />
+        </receiver>
+
     </application>
     <queries>
         <intent>

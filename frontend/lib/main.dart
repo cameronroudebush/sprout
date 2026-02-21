@@ -13,6 +13,7 @@ import 'package:sprout/core/client/extended_api_client.dart';
 import 'package:sprout/core/provider/init.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
+import 'package:sprout/core/provider/widget.dart';
 import 'package:sprout/core/router.dart';
 import 'package:sprout/core/theme.dart';
 import 'package:sprout/core/widgets/scaffold.dart';
@@ -47,6 +48,7 @@ void main() async {
   ServiceLocator.register<CashFlowProvider>(CashFlowProvider(CashFlowApi()));
   ServiceLocator.register<ChatProvider>(ChatProvider(ChatApi()));
   ServiceLocator.register<BiometricProvider>(BiometricProvider(ApiClient()));
+  ServiceLocator.register<WidgetProvider>(WidgetProvider(CoreApi()));
 
   await FirebaseNotificationProvider.configure(null);
 
@@ -67,6 +69,7 @@ void main() async {
         ServiceLocator.createProvider<NotificationProvider>(),
         ServiceLocator.createProvider<ChatProvider>(),
         ServiceLocator.createProvider<BiometricProvider>(),
+        ServiceLocator.createProvider<WidgetProvider>(),
 
         // Create a future that waits for all the providers to be initialized, in order
         ChangeNotifierProvider<InitializationNotifier>(
