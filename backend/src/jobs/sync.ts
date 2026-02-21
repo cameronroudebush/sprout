@@ -59,8 +59,8 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
       const sync = await Sync.fromPlain({
         time: new Date(),
         status: "in-progress",
-        user: user,
       }).insert();
+      sync.user = user;
       try {
         this.logger.log(`Updating ${provider.config.name} for: ${user.username}`);
         // Sync transactions and account balances. Only do it for existing accounts.
