@@ -269,11 +269,8 @@ class SproutLineChart extends StatelessWidget {
     final yAppliedInterval = LineChartDataProcessor.getChartValueInterval(yAxisBounds.minY, yAxisBounds.maxY);
     // Define a "collision zone" for Y-axis. Any label within 40% of the interval from the min/max will be hidden.
     final yCollisionThreshold = yAppliedInterval * 0.4;
-
     // Calculate the interval for the X-axis labels.
     final xAppliedInterval = ChartRangeUtility.getChartInterval(selectedChartRange, spots.length);
-    // Define a "collision zone" for X-axis to prevent overlap with first/last labels.
-    final xCollisionThreshold = xAppliedInterval * 0.4;
 
     return FlTitlesData(
       show: true,
@@ -285,30 +282,30 @@ class SproutLineChart extends StatelessWidget {
           maxIncluded: showMinMax,
           showTitles: showXAxis,
           reservedSize: 30,
-          interval: xAppliedInterval, // Use the calculated interval
+          interval: xAppliedInterval,
           getTitlesWidget: (value, meta) {
-            if (showMinMax) {
-              // Only check for intermediate labels, not the very first or last one.
-              if (value != meta.min && value != meta.max) {
-                // Check if the current label is too close to the edges.
-                if ((value - meta.min).abs() < xCollisionThreshold || (meta.max - value).abs() < xCollisionThreshold) {
-                  // If it's in the "collision zone", draw nothing.
-                  return const Text('');
-                }
-              }
-            }
+            final int index = value.toInt();
+            final int totalEntries = chartData.sortedEntries.length;
+            final int showEveryNth = (totalEntries / 4).ceil();
+            bool isStart = index == 0;
+            bool isEnd = index == totalEntries - 1;
+            bool isIntermediate = index % showEveryNth == 0;
+            bool isTooCloseToEdge = index < (totalEntries * 0.15) || index > (totalEntries * 0.85);
 
-            if (value.toInt() >= 0 && value.toInt() < chartData.sortedEntries.length) {
-              final date = chartData.sortedEntries[value.toInt()].key;
+            if (isStart || isEnd || (isIntermediate && !isTooCloseToEdge)) {
+              final date = chartData.sortedEntries[index].key;
               String format = ChartRangeUtility.getDateFormat(selectedChartRange);
+
               return SideTitleWidget(
                 meta: meta,
-                // Ensures labels like 'Dec' don't get clipped on the right edge.
+                space: 8,
                 fitInside: SideTitleFitInsideData.fromTitleMeta(meta, enabled: true, distanceFromEdge: 0),
                 child: Text(DateFormat(format).format(date), style: theme.textTheme.bodySmall),
               );
             }
-            return const Text('');
+
+            // Return an empty box for everything else
+            return const SizedBox.shrink();
           },
         ),
       ),
