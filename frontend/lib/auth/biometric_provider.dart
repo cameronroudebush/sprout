@@ -9,7 +9,7 @@ import 'package:sprout/core/provider/provider_services.dart';
 /// A provider intended to only handle biometric authentication for [secureMode]
 class BiometricProvider extends BaseProvider with SproutProviders {
   /// Platform for interacting with the activity
-  final platform = MethodChannel('security');
+  final platform = MethodChannel("net.croudebush.sprout/security");
 
   /// Tracks if we're in the middle of an auto logout due to failure in biometric checking
   bool _isLoggingOut = false;
@@ -46,9 +46,14 @@ class BiometricProvider extends BaseProvider with SproutProviders {
 
   /// Attempts to unlock the biometrics when the app resumes
   Future<void> unlockResume() async {
-    // Cancel pending lock timers cause we came back
     _lockTimer?.cancel();
     _lockTimer = null;
+
+    if (!(userConfigProvider.currentUserConfig?.secureMode ?? false)) {
+      await disableScreenPrivacy();
+      return;
+    }
+
     if (!kIsWeb && authProvider.isLoggedIn && !_isLoggingOut && isBioLocked && !isBioUnlocking) {
       await _internalUnlock();
       if (!isBioLocked) await disableScreenPrivacy();
@@ -59,13 +64,17 @@ class BiometricProvider extends BaseProvider with SproutProviders {
   Future<void> lockBackground() async {
     if (kIsWeb || isBioUnlocking || _isLoggingOut || !authProvider.isLoggedIn) return;
 
-    // Always make sure we're private when going to background
-    await enableScreenPrivacy();
-    // Only start the timer if it's not already running
-    _lockTimer ??= Timer(_lockGracePeriod, () async {
-      await _biometricLock();
-      _lockTimer = null;
-    });
+    if (userConfigProvider.currentUserConfig?.secureMode ?? false) {
+      // Always make sure we're private when going to background
+      await enableScreenPrivacy();
+      // Only start the timer if it's not already running
+      _lockTimer ??= Timer(_lockGracePeriod, () async {
+        await _biometricLock();
+        _lockTimer = null;
+      });
+    } else {
+      await disableScreenPrivacy();
+    }
   }
 
   /// Tries to unlock the biometrics when clicking the unlock button. Returns true if the unlock was a success. False if not.
@@ -147,7 +156,11 @@ class BiometricProvider extends BaseProvider with SproutProviders {
 
   /// Enables the screen privacy for FLAG_SECURE
   Future<void> enableScreenPrivacy() async {
-    if (!kIsWeb) await platform.invokeMethod('enableAppSecurity');
+    if (!kIsWeb) {
+      if (userConfigProvider.currentUserConfig?.secureMode ?? false) {
+        await platform.invokeMethod('enableAppSecurity');
+      }
+    }
   }
 
   @override

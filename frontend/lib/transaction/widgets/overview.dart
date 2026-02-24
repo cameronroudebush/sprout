@@ -90,19 +90,12 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
       ),
       'initialTransactions': DataRequest<TransactionProvider, dynamic>(
         provider: provider,
-        onLoad: (p, force) => p.populateTransactions(
-          startIndex: 0,
-          endIndex: TransactionProvider.initialTransactionCount,
-          shouldNotify: false,
-        ),
+        onLoad: (p, force) => p.populateInitial(),
         getFromProvider: (p) => p.transactions,
       ),
       'todaysTransactions': DataRequest<TransactionProvider, dynamic>(
         provider: provider,
         onLoad: (p, force) => p.populateTransactions(date: DateTime.now(), shouldNotify: false),
-        // We purposefully omit 'getFromProvider' here.
-        // This forces the "no matter what" behavior (always fetches on mount),
-        // regardless of what is currently in the provider.
         getFromProvider: null,
       ),
     };
@@ -418,7 +411,7 @@ class _TransactionsOverviewPageState extends StateTracker<TransactionsOverview> 
 
   /// Places all transactions into separate lists by date
   Widget _buildGroupedByDate(List<Transaction> transactions, bool isLoading, ThemeData theme) {
-    // Categorize transactions by day.
+    // Categorize transactions by day
     final groupedTransactions = transactions.groupListsBy((e) => DateTime(e.posted.year, e.posted.month, e.posted.day));
 
     return ListView.separated(

@@ -53,6 +53,9 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {

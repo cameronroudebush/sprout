@@ -2,4 +2,9 @@
 <resources>
     <color name="splash_background_color">#141a1f</color>
     <color name="ic_launcher_background">#141a1f</color>
+    <color name="sprout_widget_background">#1A2A36</color>
+    <color name="sprout_text_primary">#FFFFFF</color>
+    <color name="sprout_text_secondary">#AAB8C2</color>
+    <color name="sprout_accent_green">#4CD964</color>
+    <color name="sprout_divider">#2C3E50</color>
 </resources>

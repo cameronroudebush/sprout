@@ -37,7 +37,7 @@ class _UserConfigPageState extends State<UserConfigPage> with SproutProviders {
     String? lastScheduleStatus = "success";
     if (config == null) {
       lastScheduleStatus = "N/A";
-    } else if (config.lastSchedulerRun?.status == "failed") {
+    } else if (config.lastSchedulerRun?.status == ModelSyncStatusEnum.failed) {
       if (config.lastSchedulerRun?.failureReason == null) {
         lastScheduleStatus = "failed - unknown reason";
       } else {
@@ -66,6 +66,19 @@ class _UserConfigPageState extends State<UserConfigPage> with SproutProviders {
               settingType: "bool",
               icon: Icons.visibility_off_outlined,
             ),
+
+            if (!kIsWeb)
+              UserDisplayInfo(
+                title: "Allow widgets",
+                hint: "If widgets should be able to access account data.",
+                settingValue: userConfig.allowWidgets,
+                onSettingUpdate: (val) async {
+                  userConfig.allowWidgets = val;
+                  await widgetProvider.update();
+                },
+                settingType: "bool",
+                icon: Icons.widgets,
+              ),
             if (!kIsWeb)
               UserDisplayInfo(
                 title: "Secure Mode",

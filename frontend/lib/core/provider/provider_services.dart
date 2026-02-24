@@ -7,6 +7,7 @@ import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/config/provider.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/sse.dart';
+import 'package:sprout/core/provider/widget.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
@@ -36,6 +37,7 @@ mixin SproutProviders {
   CashFlowProvider get cashFlowProvider => SproutProviders.cashFlow;
   ChatProvider get chatProvider => SproutProviders.chat;
   BiometricProvider get biometricProvider => SproutProviders.bio;
+  WidgetProvider get widgetProvider => SproutProviders.widget;
 
   // ===========================================================================
   // Static Accessors
@@ -56,4 +58,5 @@ mixin SproutProviders {
   static CashFlowProvider get cashFlow => ServiceLocator.get<CashFlowProvider>();
   static ChatProvider get chat => ServiceLocator.get<ChatProvider>();
   static BiometricProvider get bio => ServiceLocator.get<BiometricProvider>();
+  static WidgetProvider get widget => ServiceLocator.get<WidgetProvider>();
 }
