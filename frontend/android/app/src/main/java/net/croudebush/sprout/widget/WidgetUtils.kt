@@ -7,8 +7,8 @@ import java.util.Date
 import java.util.Locale
 
 object WidgetUtils {
-    private const val PREFS_NAME = "widget_prefs"
-    private const val JSON_KEY = "widget_json"
+    public const val PREFS_NAME = "widget_prefs"
+    public const val JSON_KEY = "widget_json"
 
     /**
      * Gets the widget data from shared preferences
@@ -18,14 +18,8 @@ object WidgetUtils {
         val jsonString = prefs.getString(JSON_KEY, null) ?: return null
         return try {
             JSONObject(jsonString)
-        } catch (e: Exception) { null }
-    }
-
-    /**
-     * Returns a formatted timestamp of right now to use for when our widgets have updated
-     */
-    fun getFormattedTimestamp(): String {
-        val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
-        return sdf.format(Date())
+        } catch (e: Exception) {
+            null
+        }
     }
 }

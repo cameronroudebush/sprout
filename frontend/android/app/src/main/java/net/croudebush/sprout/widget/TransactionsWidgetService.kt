@@ -2,6 +2,7 @@ package net.croudebush.sprout.widget
 
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.core.content.ContextCompat
@@ -18,7 +19,6 @@ class TransactionsRemoteViewsFactory(private val context: Context) : RemoteViews
     private var transactions = JSONArray()
 
     override fun onDataSetChanged() {
-        // Fetch fresh data from shared prefs
         val data = WidgetUtils.getWidgetData(context)
         transactions = data?.optJSONArray("recentTransactions") ?: JSONArray()
     }
@@ -27,19 +27,24 @@ class TransactionsRemoteViewsFactory(private val context: Context) : RemoteViews
         val item = transactions.getJSONObject(position)
         val views = RemoteViews(context.packageName, R.layout.transaction_item)
 
-        // Data Binding
         val merchant = item.optString("merchant", "Unknown")
         val category = item.optString("category", "General")
         val amountText = item.optString("amount", "$0.00")
         val date = item.optString("date", "")
         val amountNumeric = item.optDouble("amountNumeric", 0.0)
+        val isPending = item.optBoolean("pending", false)
 
         views.setTextViewText(R.id.item_merchant_name, merchant)
         views.setTextViewText(R.id.item_category, category.uppercase())
         views.setTextViewText(R.id.item_amount, amountText)
         views.setTextViewText(R.id.item_date, date)
 
-        // Color logic based on numeric value
+        if (isPending) {
+            views.setViewVisibility(R.id.item_pending, View.VISIBLE)
+        } else {
+            views.setViewVisibility(R.id.item_pending, View.GONE)
+        }
+
         val isPositive = amountNumeric >= 0
         val colorRes = if (isPositive) {
             R.color.sprout_accent_green

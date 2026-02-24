@@ -5,17 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/client/extended_api_client.dart';
 import 'package:sprout/core/logger.dart';
 import 'package:sprout/core/provider/service.locator.dart';
 import 'package:sprout/core/provider/storage.dart';
 import 'package:sprout/notification/model/firebase_notification_extension.dart';
 import 'package:sprout/notification/notification_provider.dart';
-import 'package:sprout/user/user_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// This provider helps us handle firebase connection for push notifications, assuming the API has provided us a firebase config.
@@ -137,16 +133,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     if (!_isIsolateInitialized) {
       await FirebaseNotificationProvider.configure(null);
-      // Configure us an API
-      await applyDefaultAPI();
-      // Configure the necessary providers
-      PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      ServiceLocator.register(ConfigProvider(ConfigApi(), packageInfo));
-      final authProvider = ServiceLocator.register(AuthProvider(AuthApi()));
-      ServiceLocator.register(UserProvider(UserApi()));
-      ServiceLocator.register(NotificationProvider(NotificationApi()));
-      // Try to load the auth credentials from the store
-      await authProvider.applyDefaultAuth();
+      await ServiceLocator.setupBackgroundIsolate();
 
       // Initialize local notification settings
       const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('ic_notification');
@@ -175,7 +162,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         notification = await notificationProvider.api.notificationControllerGetById(payload.notificationId);
         if (notification == null) throw "Failed to find notification";
       } catch (e) {
-        // We failed to receive it so let them know they have a notification's, we just don't know what
+        // We failed to receive it so let them know they have a notification, we just don't know what
         failedToLoadNotification = true;
         notification = Notification(
           id: Uuid().toString(),
@@ -201,7 +188,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
             'secure_channel_${payload.importanceTyped.toString()}',
             'Secure Notifications',
             importance: payload.importanceTyped,
-            largeIcon: const DrawableResourceAndroidBitmap('@drawable/ic_notification_large'),
+            largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
             color: const Color(0xFF141a1f),
           ),
         ),

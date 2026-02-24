@@ -18,11 +18,7 @@ class Overview : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // Grab data using shared logic
         val data = WidgetUtils.getWidgetData(context)
-        val timestamp = WidgetUtils.getFormattedTimestamp()
-
-        // Setup the base click intent
         val pendingIntent = PendingIntent.getActivity(
             context, 0,
             Intent(context, MainActivity::class.java),
@@ -44,16 +40,12 @@ class Overview : AppWidgetProvider() {
 
                 val netWorth = data.optString("netWorth", "$0.00")
                 val numericChange = data.optDouble("numericChange", 0.0)
+                val timestamp = data.optString("updateTime", "")
                 val isPositive = numericChange >= 0
-
+                
                 views.setTextViewText(R.id.widget_nw_value, netWorth)
-                views.setTextViewText(R.id.widget_nw_change,
-                    "${data.optString("changeAmount")} (${data.optString("changePercent")}) ${data.optString("dayRange")}")
-
-                // Unified styling
-                val color = ContextCompat.getColor(context,
-                    if (isPositive) R.color.sprout_accent_green else android.R.color.holo_red_light)
-
+                views.setTextViewText(R.id.widget_nw_change, "${data.optString("changeAmount")} (${data.optString("changePercent")}) ${data.optString("dayRange")}")
+                val color = ContextCompat.getColor(context, if (isPositive) R.color.sprout_accent_green else android.R.color.holo_red_light)
                 views.setTextColor(R.id.widget_nw_change, color)
                 views.setImageViewResource(R.id.widget_nw_change_icon,
                     if (isPositive) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float)

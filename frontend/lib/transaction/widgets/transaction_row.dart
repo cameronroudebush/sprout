@@ -4,8 +4,8 @@ import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
+import 'package:sprout/transaction/model/transaction_extensions.dart';
 import 'package:sprout/transaction/widgets/transaction_info.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 /// A widget that displays a transaction row on a transaction table
 class TransactionRow extends StatelessWidget {
@@ -37,9 +37,7 @@ class TransactionRow extends StatelessWidget {
     }
     if (transaction == null) return Center(child: CircularProgressIndicator());
 
-    final timeText = DateTime.now().difference(transaction!.posted).inDays > 3
-        ? transaction!.posted.toShort
-        : timeago.format(transaction!.posted);
+    final timeText = transaction!.timeText;
 
     return InkWell(
       onTap: allowDialog
