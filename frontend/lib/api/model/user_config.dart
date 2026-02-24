@@ -19,6 +19,7 @@ class UserConfig {
     this.simpleFinToken,
     this.geminiKey,
     required this.secureMode,
+    required this.allowWidgets,
   });
 
   String id;
@@ -50,6 +51,9 @@ class UserConfig {
   /// If we should require biometrics to view the app and if we should hide the app in the background
   bool secureMode;
 
+  /// If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once.
+  bool allowWidgets;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
     other.id == id &&
@@ -57,7 +61,8 @@ class UserConfig {
     other.privateMode == privateMode &&
     other.simpleFinToken == simpleFinToken &&
     other.geminiKey == geminiKey &&
-    other.secureMode == secureMode;
+    other.secureMode == secureMode &&
+    other.allowWidgets == allowWidgets;
 
   @override
   int get hashCode =>
@@ -67,10 +72,11 @@ class UserConfig {
     (privateMode.hashCode) +
     (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
     (geminiKey == null ? 0 : geminiKey!.hashCode) +
-    (secureMode.hashCode);
+    (secureMode.hashCode) +
+    (allowWidgets.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode, allowWidgets=$allowWidgets]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -88,6 +94,7 @@ class UserConfig {
       json[r'geminiKey'] = null;
     }
       json[r'secureMode'] = this.secureMode;
+      json[r'allowWidgets'] = this.allowWidgets;
     return json;
   }
 
@@ -116,6 +123,7 @@ class UserConfig {
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         geminiKey: mapValueOfType<String>(json, r'geminiKey'),
         secureMode: mapValueOfType<bool>(json, r'secureMode')!,
+        allowWidgets: mapValueOfType<bool>(json, r'allowWidgets')!,
       );
     }
     return null;
@@ -167,6 +175,7 @@ class UserConfig {
     'netWorthRange',
     'privateMode',
     'secureMode',
+    'allowWidgets',
   };
 }
 

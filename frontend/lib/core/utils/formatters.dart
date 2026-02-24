@@ -117,8 +117,11 @@ extension DateToStringFormatterExtension on DateTime {
   /// MM/dd/yyyy
   String get toShort => DateFormat("MM/dd/yyyy").format(toLocal());
 
-  /// MM/dd/yyyy
+  /// MMM dd, yyyy
   String get toShortMonth => DateFormat("MMM dd, yyyy").format(toLocal());
+
+  /// MMM dd, h:mm a
+  String get toShortMonthWithTime => DateFormat("MMM dd, h:mm a").format(toLocal());
 
   /// Returns true if the given date is on the same day as this date
   bool isSameDay(DateTime other) {

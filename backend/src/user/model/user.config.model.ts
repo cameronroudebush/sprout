@@ -41,16 +41,22 @@ export class UserConfig extends DatabaseBase {
   @IsBoolean()
   secureMode: boolean;
 
+  /** If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once. */
+  @DatabaseDecorators.column({ nullable: false, default: false })
+  @IsBoolean()
+  allowWidgets: boolean;
+
   @OneToOne(() => User, (user) => user.config, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   @ApiHideProperty()
   @Exclude()
   user!: User;
 
-  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean) {
+  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean, allowWidgets: boolean) {
     super();
     this.privateMode = privateMode;
     this.netWorthRange = netWorthRange;
     this.secureMode = secureMode;
+    this.allowWidgets = allowWidgets;
   }
 }
