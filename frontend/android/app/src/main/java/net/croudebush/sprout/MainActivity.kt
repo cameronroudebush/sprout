@@ -1,6 +1,5 @@
 package net.croudebush.sprout
 
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -11,6 +10,8 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import androidx.core.content.edit
 import net.croudebush.sprout.widget.Overview
+import net.croudebush.sprout.widget.Transactions
+import net.croudebush.sprout.widget.WidgetUtils
 
 class MainActivity : FlutterFragmentActivity() {
 
@@ -31,26 +32,40 @@ class MainActivity : FlutterFragmentActivity() {
             if (call.method == "updateData") {
                 val json = call.argument<String>("json")
 
-                // Save the data
-                val prefs = getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-                prefs.edit { putString("widget_json", json) }
+                // Save the data using your existing setup
+                val prefs = getSharedPreferences(WidgetUtils.PREFS_NAME, Context.MODE_PRIVATE)
+                prefs.edit { putString(WidgetUtils.JSON_KEY, json) }
 
-                // Trigger widget refresh
                 val context: Context = this
-                val intent = Intent(context, Overview::class.java).apply {
-                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+
+                // Update overview widget
+                val overviewIds = appWidgetManager.getAppWidgetIds(
+                    ComponentName(context, Overview::class.java)
+                )
+                if (overviewIds.isNotEmpty()) {
+                    val overviewIntent = Intent(context, Overview::class.java).apply {
+                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, overviewIds)
+                    }
+                    sendBroadcast(overviewIntent)
                 }
 
-                // Get all IDs for the Overview widget and add them to the intent
-                val ids = AppWidgetManager.getInstance(context).getAppWidgetIds(
-                    ComponentName(
-                        context,
-                        Overview::class.java
-                    )
+                // Update transactions widget
+                val transactionIds = appWidgetManager.getAppWidgetIds(
+                    ComponentName(context, Transactions::class.java)
                 )
-
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                sendBroadcast(intent)
+                if (transactionIds.isNotEmpty()) {
+                    val transactionIntent = Intent(context, Transactions::class.java).apply {
+                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, transactionIds)
+                    }
+                    sendBroadcast(transactionIntent)
+                    appWidgetManager.notifyAppWidgetViewDataChanged(
+                        transactionIds,
+                        R.id.widget_transactions_list
+                    )
+                }
 
                 result.success(true)
             } else {

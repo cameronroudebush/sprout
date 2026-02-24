@@ -70,7 +70,7 @@ class _HomePageState extends StateTracker<HomePage> {
             color = theme.colorScheme.onSecondary;
             message = "An account sync is in progress";
           } else if (lastSync.status == ModelSyncStatusEnum.failed) {
-            message = "Account sync failed: ${lastSync.failureReason}";
+            message = "Account sync error: ${lastSync.failureReason}";
           }
 
           notifications.add(SproutNotification(message, bgColor, color, icon: Icons.sync));

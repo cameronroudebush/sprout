@@ -56,6 +56,15 @@ class TransactionProvider extends BaseProvider<TransactionApi> {
     return newTransactions;
   }
 
+  /// Populates the initial list of transactions
+  Future<List<Transaction>?> populateInitial() async {
+    return await populateTransactions(
+      startIndex: 0,
+      endIndex: TransactionProvider.initialTransactionCount,
+      shouldNotify: false,
+    );
+  }
+
   /// Populates subscription information built from transactions
   Future<List<TransactionSubscription>?> populateSubscriptions() async {
     await populateAndSetIfChanged(
