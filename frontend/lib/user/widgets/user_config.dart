@@ -113,15 +113,16 @@ class _UserConfigPageState extends State<UserConfigPage> with SproutProviders {
             ),
           ],
           "Chat Settings": [
-            UserDisplayInfo(
-              title: "Gemini API Token",
-              hint: "The Gemini API token that will allow you to chat with an LLM about your finances.",
-              settingValue: userConfig.geminiKey,
-              onSettingUpdate: (val) async => userConfig.geminiKey = val,
-              settingType: "string",
-              icon: Icons.auto_awesome,
-              showOnSetup: true,
-            ),
+            if (!configProvider.config!.chatKeyProvidedInBackend)
+              UserDisplayInfo(
+                title: "Gemini API Token",
+                hint: "The Gemini API token that will allow you to chat with an LLM about your finances.",
+                settingValue: userConfig.geminiKey,
+                onSettingUpdate: (val) async => userConfig.geminiKey = val,
+                settingType: "string",
+                icon: Icons.auto_awesome,
+                showOnSetup: true,
+              ),
           ],
           "App Information": [
             UserDisplayInfo(

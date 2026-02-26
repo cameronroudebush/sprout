@@ -15,6 +15,7 @@ class APIConfig {
   APIConfig({
     this.lastSchedulerRun,
     this.providers = const [],
+    required this.chatKeyProvidedInBackend,
   });
 
   /// The status of the last sync we ran
@@ -29,19 +30,24 @@ class APIConfig {
   /// List of providers that this application has configured and is supported
   List<ProviderConfig> providers;
 
+  /// Determines if the chat key is already provided and users shouldn't be able to set theirs then.
+  bool chatKeyProvidedInBackend;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
     other.lastSchedulerRun == lastSchedulerRun &&
-    _deepEquality.equals(other.providers, providers);
+    _deepEquality.equals(other.providers, providers) &&
+    other.chatKeyProvidedInBackend == chatKeyProvidedInBackend;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (lastSchedulerRun == null ? 0 : lastSchedulerRun!.hashCode) +
-    (providers.hashCode);
+    (providers.hashCode) +
+    (chatKeyProvidedInBackend.hashCode);
 
   @override
-  String toString() => 'APIConfig[lastSchedulerRun=$lastSchedulerRun, providers=$providers]';
+  String toString() => 'APIConfig[lastSchedulerRun=$lastSchedulerRun, providers=$providers, chatKeyProvidedInBackend=$chatKeyProvidedInBackend]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -51,6 +57,7 @@ class APIConfig {
       json[r'lastSchedulerRun'] = null;
     }
       json[r'providers'] = this.providers;
+      json[r'chatKeyProvidedInBackend'] = this.chatKeyProvidedInBackend;
     return json;
   }
 
@@ -75,6 +82,7 @@ class APIConfig {
       return APIConfig(
         lastSchedulerRun: ModelSync.fromJson(json[r'lastSchedulerRun']),
         providers: ProviderConfig.listFromJson(json[r'providers']),
+        chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
       );
     }
     return null;
@@ -123,6 +131,7 @@ class APIConfig {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'providers',
+    'chatKeyProvidedInBackend',
   };
 }
 

@@ -10,9 +10,13 @@ export class APIConfig extends Base {
   /** List of providers that this application has configured and is supported */
   providers!: ProviderConfig[];
 
-  constructor(lastSchedulerRun: Sync | undefined, providers: ProviderConfig[]) {
+  /** Determines if the chat key is already provided and users shouldn't be able to set theirs then. */
+  chatKeyProvidedInBackend: boolean;
+
+  constructor(lastSchedulerRun: Sync | undefined, providers: ProviderConfig[], chatKeyProvidedInBackend: boolean) {
     super();
     this.lastSchedulerRun = lastSchedulerRun;
     this.providers = providers;
+    this.chatKeyProvidedInBackend = chatKeyProvidedInBackend;
   }
 }
