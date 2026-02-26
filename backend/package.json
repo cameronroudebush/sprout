@@ -41,6 +41,7 @@
     "swagger-themes": "^1.4.3",
     "ts-mixer": "^6.0.4",
     "typeorm": "^0.3.20",
+    "yahoo-finance2": "^3.13.0",
     "yaml": "^2.4.1"
   },
   "devDependencies": {

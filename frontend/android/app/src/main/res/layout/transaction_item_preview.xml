@@ -20,6 +20,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Starbucks"
+            android:maxWidth="200dp"
             android:textColor="@color/sprout_text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />

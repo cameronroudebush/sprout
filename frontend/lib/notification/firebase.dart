@@ -188,7 +188,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
             'secure_channel_${payload.importanceTyped.toString()}',
             'Secure Notifications',
             importance: payload.importanceTyped,
-            largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
             color: const Color(0xFF141a1f),
           ),
         ),

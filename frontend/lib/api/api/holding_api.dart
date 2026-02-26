@@ -201,4 +201,118 @@ class HoldingApi {
     }
     return null;
   }
+
+  /// Returns major holding prices.
+  ///
+  /// Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> holdingControllerGetLiveWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/holding/live/major';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Returns major holding prices.
+  ///
+  /// Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.
+  Future<List<MarketIndexDto>?> holdingControllerGetLive() async {
+    final response = await holdingControllerGetLiveWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<MarketIndexDto>') as List)
+        .cast<MarketIndexDto>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
+  /// Returns live prices for requested symbols.
+  ///
+  /// Retrieves the current ticker values for the provided symbols. Calling this for the same symbols within 5 minutes will return cached data.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] symbols (required):
+  ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
+  Future<Response> holdingControllerGetLivePricesWithHttpInfo(String symbols,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/holding/live';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'symbols', symbols));
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Returns live prices for requested symbols.
+  ///
+  /// Retrieves the current ticker values for the provided symbols. Calling this for the same symbols within 5 minutes will return cached data.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] symbols (required):
+  ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
+  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(String symbols,) async {
+    final response = await holdingControllerGetLivePricesWithHttpInfo(symbols,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<MarketIndexDto>') as List)
+        .cast<MarketIndexDto>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
 }

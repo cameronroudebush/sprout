@@ -18,60 +18,6 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         setupSecurityMethodChannel(flutterEngine)
-        setupWidgetMethodChannel(flutterEngine)
-    }
-
-    /**
-     * Setups the method channel so the flutter app can communicate to update widget data directly.
-     */
-    private fun setupWidgetMethodChannel(flutterEngine: FlutterEngine) {
-        MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            "net.croudebush.sprout/widget"
-        ).setMethodCallHandler { call, result ->
-            if (call.method == "updateData") {
-                val json = call.argument<String>("json")
-
-                // Save the data using your existing setup
-                val prefs = getSharedPreferences(WidgetUtils.PREFS_NAME, Context.MODE_PRIVATE)
-                prefs.edit { putString(WidgetUtils.JSON_KEY, json) }
-
-                val context: Context = this
-                val appWidgetManager = AppWidgetManager.getInstance(context)
-
-                // Update overview widget
-                val overviewIds = appWidgetManager.getAppWidgetIds(
-                    ComponentName(context, Overview::class.java)
-                )
-                if (overviewIds.isNotEmpty()) {
-                    val overviewIntent = Intent(context, Overview::class.java).apply {
-                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, overviewIds)
-                    }
-                    sendBroadcast(overviewIntent)
-                }
-
-                // Update transactions widget
-                val transactionIds = appWidgetManager.getAppWidgetIds(
-                    ComponentName(context, Transactions::class.java)
-                )
-                if (transactionIds.isNotEmpty()) {
-                    val transactionIntent = Intent(context, Transactions::class.java).apply {
-                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, transactionIds)
-                    }
-                    sendBroadcast(transactionIntent)
-                    appWidgetManager.notifyAppWidgetViewDataChanged(
-                        transactionIds,
-                        R.id.widget_transactions_list
-                    )
-                }
-
-                result.success(true)
-            } else {
-                result.notImplemented()
-            }
-        }
     }
 
     /**

@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/transactions"
     android:previewLayout="@layout/transactions_preview"
-    android:minWidth="203dp"
+    android:minWidth="250dp"
     android:minHeight="120dp"
     android:description="@string/widget_transactions_description"
     android:resizeMode="horizontal|vertical"

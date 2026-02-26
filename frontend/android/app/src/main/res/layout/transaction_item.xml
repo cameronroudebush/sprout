@@ -24,7 +24,8 @@
             android:textColor="@color/sprout_text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
-            tools:text="Starbucks" />
+            tools:text="Starbucks"
+            android:maxWidth="200dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

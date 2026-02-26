@@ -3,10 +3,11 @@ import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { HoldingService } from "@backend/holding/holding.service";
+import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, NotFoundException, Param, Query } from "@nestjs/common";
+import { BadRequestException, Controller, Get, NotFoundException, Param, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { EntityHistory, HistoricalDataPoint } from "../net-worth/model/api/entity.history.dto";
 
@@ -64,5 +65,34 @@ export class HoldingController {
     const holding = await Holding.findOne({ where: { account: { user: { id: user.id } }, id } });
     if (holding == null) throw new NotFoundException();
     return (await this.holdingService.getTimelineForHolding(holding)).timeline();
+  }
+
+  @Get("live/major")
+  @ApiOperation({
+    summary: "Returns major holding prices.",
+    description: "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
+  })
+  @ApiOkResponse({ description: "Successfully acquired major ticker prices.", type: [MarketIndexDto] })
+  async getLive(@CurrentUser() _user: User) {
+    return await this.holdingService.getMajorIndices();
+  }
+
+  @Get("live")
+  @ApiOperation({
+    summary: "Returns live prices for requested symbols.",
+    description: "Retrieves the current ticker values for the provided symbols. Calling this for the same symbols within 5 minutes will return cached data.",
+  })
+  @ApiQuery({
+    name: "symbols",
+    required: true,
+    description: "Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)",
+    type: String,
+  })
+  @ApiOkResponse({ description: "Successfully acquired live ticker prices.", type: [MarketIndexDto] })
+  async getLivePrices(@CurrentUser() _user: User, @Query("symbols") symbols: string) {
+    if (!symbols) throw new BadRequestException("You must provide at least one symbol in the query parameters.");
+    // Convert the comma-separated string into an array of uppercase, trimmed strings
+    const symbolArray = symbols.split(",").map((s) => s.trim().toUpperCase());
+    return await this.holdingService.getLiveHoldingPrices(symbolArray);
   }
 }

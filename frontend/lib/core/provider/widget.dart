@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/charts/models/chart_range.dart';
 import 'package:sprout/core/logger.dart';
@@ -13,18 +14,21 @@ import 'package:sprout/net-worth/model/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/transaction/model/transaction_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
 /// Top level dispatcher that uses worker manager to populate background tasks to run.
 @pragma('vm:entry-point')
 void callbackDispatcher() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   Workmanager().executeTask((task, inputData) async {
     try {
       LoggerService.info("Executing background widget update");
-      WidgetsFlutterBinding.ensureInitialized();
       await ServiceLocator.setupBackgroundIsolate();
 
       // Fetch fresh data from the backend
+      await ServiceLocator.get<UserConfigProvider>().populateUserConfig();
       await ServiceLocator.get<NetWorthProvider>().populateTotal();
       await ServiceLocator.get<TransactionProvider>().populateInitial();
 
@@ -50,9 +54,13 @@ class WidgetProvider extends BaseProvider<CoreApi> with SproutProviders {
   Future<void> _updateWidgetData(Map<String, dynamic>? data) async {
     try {
       final String jsonString = jsonEncode(data ?? {});
-      await platform.invokeMethod('updateData', {"json": jsonString});
-    } on PlatformException catch (e) {
-      LoggerService.error("Failed to sync widget: ${e.message}");
+      // Saves directly to native SharedPreferences in the background
+      await HomeWidget.saveWidgetData('widget_data', jsonString);
+      // Triggers the native widget broadcast
+      await HomeWidget.updateWidget(androidName: 'widget.Overview');
+      await HomeWidget.updateWidget(androidName: 'widget.Transactions');
+    } catch (e) {
+      LoggerService.error("Failed to sync widget: $e");
     }
   }
 
@@ -99,7 +107,8 @@ class WidgetProvider extends BaseProvider<CoreApi> with SproutProviders {
   Future<void> update() async {
     if (userConfigProvider.currentUserConfig != null) {
       if (userConfigProvider.currentUserConfig!.allowWidgets) {
-        await _updateWidgetData(await _getData());
+        final data = await _getData();
+        await _updateWidgetData(data);
       } else {
         await _updateWidgetData(null);
       }
@@ -108,6 +117,9 @@ class WidgetProvider extends BaseProvider<CoreApi> with SproutProviders {
 
   @override
   postLogin() async {
+    // Populate initial required data
+    await netWorthProvider.populateTotal();
+    await transactionProvider.populateInitial();
     // Update the data immediately after the login so we have the initial data set
     await update();
     // Initialize Workmanager
