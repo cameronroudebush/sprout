@@ -3,6 +3,7 @@ package net.croudebush.sprout.widget
 import android.content.Context
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import es.antonborri.home_widget.HomeWidgetPlugin
 import java.util.Date
 import java.util.Locale
 
@@ -14,12 +15,17 @@ object WidgetUtils {
      * Gets the widget data from shared preferences
      */
     fun getWidgetData(context: Context): JSONObject? {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val jsonString = prefs.getString(JSON_KEY, null) ?: return null
-        return try {
-            JSONObject(jsonString)
+        try {
+            // Read from the SharedPreferences managed by home_widget
+            val prefs = HomeWidgetPlugin.getData(context)
+            val jsonString = prefs.getString("widget_data", null)
+            
+            if (jsonString != null) {
+                return JSONObject(jsonString)
+            }
         } catch (e: Exception) {
-            null
+            e.printStackTrace()
         }
+        return null
     }
 }

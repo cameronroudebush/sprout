@@ -1835,6 +1835,80 @@
         "tags": ["Holding"]
       }
     },
+    "/holding/live/major": {
+      "get": {
+        "description": "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
+        "operationId": "HoldingController_getLive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully acquired major ticker prices.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketIndexDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns major holding prices.",
+        "tags": ["Holding"]
+      }
+    },
+    "/holding/live": {
+      "get": {
+        "description": "Retrieves the current ticker values for the provided symbols. Calling this for the same symbols within 5 minutes will return cached data.",
+        "operationId": "HoldingController_getLivePrices",
+        "parameters": [
+          {
+            "name": "symbols",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully acquired live ticker prices.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketIndexDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns live prices for requested symbols.",
+        "tags": ["Holding"]
+      }
+    },
     "/net-worth/total": {
       "get": {
         "description": "Retrieves all data related to the overarching accounts and how they performed over time.",
@@ -2121,7 +2195,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.2.0-3-gfb588e5",
+    "version": "v0.2.0-9-gde18d89",
     "contact": {}
   },
   "tags": [
@@ -3039,6 +3113,33 @@
         },
         "required": ["date", "value"]
       },
+      "MarketIndexDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "change": {
+            "type": "number"
+          },
+          "changePercent": {
+            "type": "number"
+          },
+          "lastUpdated": {
+            "type": "string"
+          }
+        },
+        "required": ["symbol", "name", "price", "change", "changePercent", "lastUpdated"]
+      },
       "TotalNetWorthDTO": {
         "type": "object",
         "properties": {
@@ -3126,7 +3227,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-02-21T20:04:25.406Z"
+            "default": "2026-02-26T00:48:50.925Z"
           },
           "isRead": {
             "type": "boolean",

@@ -220,6 +220,8 @@ class ApiClient {
           return Institution.fromJson(value);
         case 'JWTLoginRequest':
           return JWTLoginRequest.fromJson(value);
+        case 'MarketIndexDto':
+          return MarketIndexDto.fromJson(value);
         case 'ModelSync':
           return ModelSync.fromJson(value);
         case 'MonthlyCategoryData':
