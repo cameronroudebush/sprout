@@ -8,8 +8,8 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
-import { ContentListUnion, GoogleGenAI } from "@google/genai";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { ApiError, ContentListUnion, GoogleGenAI } from "@google/genai";
+import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { randomBytes } from "crypto";
 import { formatDate, subDays } from "date-fns";
 import { MoreThan } from "typeorm";
@@ -21,32 +21,50 @@ export class ChatService {
 
   /** Gets the model for the given users LLM configuration */
   async getModel(user: User) {
-    if (user.config.geminiKey == null) throw new BadRequestException("No API key configured. Please set an API key in settings");
-    const model = new GoogleGenAI({ apiKey: user.config.geminiKey }).models;
-    return {
-      /**
-       * Generates the content based on the model as configured by the backend. The
-       *  contents provide the context for the prompt.
-       * @param chat The initial chat that should be inserted prior to call so the frontend recognizes it's thinking.
-       */
-      generateContent: async (contents: ContentListUnion, chat: ChatHistory, idMap: Map<string, string>) => {
-        try {
-          const response = await model.generateContent({ model: Configuration.server.prompt.geminiModel, contents });
-          let aiText = response.text ?? "";
-          // Convert generic IDs back to real names for the user
-          idMap.forEach((genericId, realName) => (aiText = aiText.replaceAll(genericId, realName)));
-          chat.text = aiText;
-          return response;
-        } catch (e) {
-          throw e;
-        } finally {
-          // Update the chat with the response
-          chat.isThinking = false;
-          await chat.update();
-          this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
-        }
-      },
-    };
+    if (Configuration.server.prompt.type === "gemini") {
+      // Find API key
+      const apiKey = Configuration.server.prompt.gemini.key ?? user.config.geminiKey;
+      if (!apiKey) throw new BadRequestException("No API key configured. Please set an API key in settings");
+
+      // Load the model based on the key
+      const model = new GoogleGenAI({ apiKey }).models;
+      return {
+        /**
+         * Generates the content based on the model as configured by the backend. The
+         *  contents provide the context for the prompt.
+         * @param chat The initial chat that should be inserted prior to call so the frontend recognizes it's thinking.
+         */
+        generateContent: async (contents: ContentListUnion, chat: ChatHistory, idMap: Map<string, string>) => {
+          try {
+            const response = await model.generateContent({ model: Configuration.server.prompt.gemini.model, contents });
+            let aiText = response.text ?? "";
+            // Convert generic IDs back to real names for the user
+            idMap.forEach((genericId, realName) => (aiText = aiText.replaceAll(genericId, realName)));
+            chat.text = aiText;
+            return response;
+          } catch (e: any) {
+            // Check if the error object itself contains a message string that looks like JSON
+            if (e?.message)
+              // Attempt to parse the message string in case it's a JSON-encoded ApiError
+              throw JSON.parse(e.message)?.error as ApiError;
+
+            // Fallback: handle cases where the error follows the structure e.error.message
+            const err = e?.error as ApiError | undefined;
+            if (err?.message) throw err.message;
+
+            throw e;
+          } finally {
+            // Update the chat with the response
+            chat.isThinking = false;
+            await chat.update();
+            this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
+          }
+        },
+      };
+    } else {
+      // For future use of more models. For now just throw an exception
+      throw new InternalServerErrorException("Invalid LLM model configured");
+    }
   }
 
   /** Generates the system instruction and prompt content to pass to the LLM. */

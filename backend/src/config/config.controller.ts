@@ -37,6 +37,7 @@ export class ConfigController {
     return new APIConfig(
       lastSync,
       providers.map((x) => x.config),
+      Configuration.server.prompt.hasChatKey,
     );
   }
 
