@@ -69,6 +69,12 @@ export class HoldingService {
 
   /** Fetches the live data for major indices. */
   async getMajorIndices(symbols = ["^GSPC", "^DJI", "^IXIC"], ttlMs?: number) {
-    return await this.getLiveHoldingPrices(symbols, ttlMs);
+    return (await this.getLiveHoldingPrices(symbols, ttlMs)).map((x) => {
+      // Adjust their names
+      if (x.symbol === "^GSPC") x.name = "S&P 500";
+      else if (x.symbol === "^DJI") x.name = "DIJA";
+      else if (x.symbol === "^IXIC") x.name = "NASDAQ";
+      return x;
+    });
   }
 }

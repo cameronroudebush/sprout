@@ -56,7 +56,7 @@ class _AccountHoldingTimelineState extends StateTracker<AccountHoldingTimeline> 
       formatValue: (value) => getFormattedCurrency(value),
       showGrid: true,
       showXAxis: true,
-      height: 150,
+      height: 100,
     );
   }
 

@@ -35,13 +35,13 @@ class NetWorthTextWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (renderTitle) Text(title, style: TextStyle(fontSize: 16)),
+          if (renderTitle) Text(title, style: TextStyle(fontSize: 14)),
           Text(
             getFormattedCurrency(netWorth),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: applyColor ? getBalanceColor(netWorth, theme) : null,
-              fontSize: 30,
+              fontSize: 24,
             ),
           ),
           Padding(

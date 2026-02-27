@@ -1,7 +1,7 @@
 import { Account } from "@backend/account/model/account.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { ManyToOne } from "typeorm";
+import { ManyToOne, Not } from "typeorm";
 import { HoldingHistory } from "./holding.history.model";
 
 /** This class provides information for a current stock that is associated to an account. */
@@ -60,7 +60,7 @@ export class Holding extends DatabaseBase {
 
   /** Given an account, returns all holdings in the database for that account. */
   static getForAccount(account: Account) {
-    return Holding.find({ where: { account: { id: account.id } } });
+    return Holding.find({ where: { account: { id: account.id }, shares: Not(0) } });
   }
 
   /** Turns this holding to act like a holding history for today */

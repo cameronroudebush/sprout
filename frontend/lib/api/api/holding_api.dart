@@ -207,7 +207,7 @@ class HoldingApi {
   /// Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> holdingControllerGetLiveWithHttpInfo() async {
+  Future<Response> holdingControllerGetLiveMajorWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/holding/live/major';
 
@@ -235,8 +235,8 @@ class HoldingApi {
   /// Returns major holding prices.
   ///
   /// Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.
-  Future<List<MarketIndexDto>?> holdingControllerGetLive() async {
-    final response = await holdingControllerGetLiveWithHttpInfo();
+  Future<List<MarketIndexDto>?> holdingControllerGetLiveMajor() async {
+    final response = await holdingControllerGetLiveMajorWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -261,9 +261,9 @@ class HoldingApi {
   ///
   /// Parameters:
   ///
-  /// * [String] symbols (required):
+  /// * [List<String>] symbols (required):
   ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
-  Future<Response> holdingControllerGetLivePricesWithHttpInfo(String symbols,) async {
+  Future<Response> holdingControllerGetLivePricesWithHttpInfo(List<String> symbols,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/live';
 
@@ -274,7 +274,7 @@ class HoldingApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'symbols', symbols));
+      queryParams.addAll(_queryParams('multi', 'symbols', symbols));
 
     const contentTypes = <String>[];
 
@@ -296,9 +296,9 @@ class HoldingApi {
   ///
   /// Parameters:
   ///
-  /// * [String] symbols (required):
+  /// * [List<String>] symbols (required):
   ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
-  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(String symbols,) async {
+  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(List<String> symbols,) async {
     final response = await holdingControllerGetLivePricesWithHttpInfo(symbols,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));

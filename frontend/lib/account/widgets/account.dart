@@ -102,40 +102,46 @@ class _AccountWidgetState extends StateTracker<AccountWidget> with SproutProvide
 
     return SproutScrollView(
       padding: EdgeInsets.zero,
-      child: SproutCard(
-        child: Padding(
-          padding: EdgeInsetsGeometry.all(12),
-          child: accountDataForRange == null
-              ? SizedBox(height: 250, child: TextWidget(text: "Failed to locate any account history"))
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 24,
-                  children: [
-                    NetWorthTextWidget(
-                      chartRange,
-                      account.balance,
-                      accountPercentChange,
-                      accountValChange,
-                      title: "Account Value",
+      child: Column(
+        spacing: 4,
+        children: [
+          _buildInfoBar(),
+          SproutCard(
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(12),
+              child: accountDataForRange == null
+                  ? SizedBox(height: 250, child: TextWidget(text: "Failed to locate any account history"))
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 24,
+                      children: [
+                        NetWorthTextWidget(
+                          chartRange,
+                          account.balance,
+                          accountPercentChange,
+                          accountValChange,
+                          title: "Account Value",
+                        ),
+                        SproutLineChart(
+                          data: HistoricalDataPointExtensions.toMap(timeline ?? []),
+                          chartRange: chartRange,
+                          formatValue: (value) => getFormattedCurrency(value),
+                          showGrid: true,
+                          showXAxis: true,
+                          height: 150,
+                        ),
+                        ChartRangeSelector(
+                          selectedChartRange: chartRange,
+                          onRangeSelected: (value) {
+                            userConfigProvider.updateChartRange(value);
+                          },
+                        ),
+                      ],
                     ),
-                    SproutLineChart(
-                      data: HistoricalDataPointExtensions.toMap(timeline ?? []),
-                      chartRange: chartRange,
-                      formatValue: (value) => getFormattedCurrency(value),
-                      showGrid: true,
-                      showXAxis: true,
-                      height: 150,
-                    ),
-                    ChartRangeSelector(
-                      selectedChartRange: chartRange,
-                      onRangeSelected: (value) {
-                        userConfigProvider.updateChartRange(value);
-                      },
-                    ),
-                  ],
-                ),
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -224,6 +230,125 @@ class _AccountWidgetState extends StateTracker<AccountWidget> with SproutProvide
     );
   }
 
+  /// Builds an info bar that represents the account
+  Widget _buildInfoBar() {
+    return // Top Bar of Account info
+    SproutCard(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 16,
+              children: [
+                AccountLogoWidget(account),
+
+                // Name and Institution
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        account.institution.name,
+                        style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 16),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // Sub-type Selector
+            AccountSubTypeSelect(
+              account,
+              onChanged: (newSubType) {
+                account.subType = newSubType;
+                accountProvider.edit(account);
+              },
+            ),
+
+            // Interest Rate Input
+            if (account.isNegativeNetWorth)
+              TextFormField(
+                key: Key(account.id + (account.interestRate?.toString() ?? "")),
+                initialValue: account.interestRate?.toString(),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  // Allow only numbers and one decimal point
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,4}')),
+                ],
+                decoration: InputDecoration(
+                  labelText: "Interest Rate",
+                  suffixText: "%",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                ),
+                onFieldSubmitted: (value) {
+                  final newVal = double.tryParse(value);
+                  // Only update if value actually changed
+                  if (newVal != account.interestRate) {
+                    account.interestRate = newVal;
+                    accountProvider.edit(account);
+                  }
+                },
+              ),
+
+            // Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              spacing: 24,
+              children: [
+                // Error Status & Fix Button
+                if (account.institution.hasError) ...[
+                  SproutTooltip(
+                    message: "Opens a dialog to fix this account via the provider.",
+                    child: FilledButton.icon(
+                      icon: const Icon(Icons.build_circle_outlined, size: 16),
+                      label: const Text("Fix"),
+                      style: AppTheme.errorButton,
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (_) => AccountErrorDialog(account: account),
+                        );
+                      },
+                    ),
+                  ),
+                  InstitutionError(institution: account.institution),
+                ],
+
+                // Delete Button
+                FilledButton.icon(
+                  icon: const Icon(Icons.delete_outline, size: 16),
+                  label: const Text("Delete"),
+                  style: AppTheme.errorButton,
+                  onPressed: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (_) => AccountDeleteDialog(account: account),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer4<UserConfigProvider, AccountProvider, NetWorthProvider, HoldingProvider>(
@@ -247,122 +372,6 @@ class _AccountWidgetState extends StateTracker<AccountWidget> with SproutProvide
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Top Bar of Account info
-                SproutCard(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: 12,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 16,
-                          children: [
-                            AccountLogoWidget(account),
-
-                            // Name and Institution
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    account.name,
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    account.institution.name,
-                                    style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 16),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Sub-type Selector
-                        AccountSubTypeSelect(
-                          account,
-                          onChanged: (newSubType) {
-                            account.subType = newSubType;
-                            accountProvider.edit(account);
-                          },
-                        ),
-
-                        // Interest Rate Input
-                        if (account.isNegativeNetWorth)
-                          TextFormField(
-                            key: Key(account.id + (account.interestRate?.toString() ?? "")),
-                            initialValue: account.interestRate?.toString(),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [
-                              // Allow only numbers and one decimal point
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,4}')),
-                            ],
-                            decoration: InputDecoration(
-                              labelText: "Interest Rate",
-                              suffixText: "%",
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                            ),
-                            onFieldSubmitted: (value) {
-                              final newVal = double.tryParse(value);
-                              // Only update if value actually changed
-                              if (newVal != account.interestRate) {
-                                account.interestRate = newVal;
-                                accountProvider.edit(account);
-                              }
-                            },
-                          ),
-
-                        // Buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          spacing: 24,
-                          children: [
-                            // Error Status & Fix Button
-                            if (account.institution.hasError) ...[
-                              SproutTooltip(
-                                message: "Opens a dialog to fix this account via the provider.",
-                                child: FilledButton.icon(
-                                  icon: const Icon(Icons.build_circle_outlined, size: 16),
-                                  label: const Text("Fix"),
-                                  style: AppTheme.errorButton,
-                                  onPressed: () async {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (_) => AccountErrorDialog(account: account),
-                                    );
-                                  },
-                                ),
-                              ),
-                              InstitutionError(institution: account.institution),
-                            ],
-
-                            // Delete Button
-                            FilledButton.icon(
-                              icon: const Icon(Icons.delete_outline, size: 16),
-                              label: const Text("Delete"),
-                              style: AppTheme.errorButton,
-                              onPressed: () async {
-                                await showDialog(
-                                  context: context,
-                                  builder: (_) => AccountDeleteDialog(account: account),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
                 // Render the tabs for the different content views
                 Expanded(
                   child: LayoutBuilder(

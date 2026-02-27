@@ -14,6 +14,7 @@ import 'package:sprout/core/widgets/card.dart';
 import 'package:sprout/core/widgets/layout.dart';
 import 'package:sprout/core/widgets/notification.dart';
 import 'package:sprout/core/widgets/state_tracker.dart';
+import 'package:sprout/holding/widgets/major_indices.dart';
 import 'package:sprout/net-worth/widgets/overview.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/category_pie_chart.dart';
@@ -204,6 +205,7 @@ class _HomePageState extends StateTracker<HomePage> {
             spacing: 4,
             children: <Widget>[
               if (notifications.isNotEmpty) Column(children: notificationWidgets),
+              MajorIndicesWidget(),
               netWorthWidget,
               accountsWidget,
               accountPercentageWidget,
