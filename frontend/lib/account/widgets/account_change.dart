@@ -10,6 +10,7 @@ class AccountChangeWidget extends StatelessWidget {
   final MainAxisAlignment mainAxisAlignment;
   final ChartRangeEnum? netWorthPeriod;
   final bool showPercentage;
+  final bool showValue;
 
   /// If we should use the extended period information for the string (1 month vs 1m)
   final bool useExtendedPeriodString;
@@ -21,6 +22,7 @@ class AccountChangeWidget extends StatelessWidget {
     this.percentageChange,
     this.mainAxisAlignment = MainAxisAlignment.end,
     this.showPercentage = true,
+    this.showValue = true,
     this.useExtendedPeriodString = false,
   });
 
@@ -37,15 +39,18 @@ class AccountChangeWidget extends StatelessWidget {
           Row(
             spacing: 4,
             children: [
-              Text(getFormattedCurrency(totalChange ?? 0), style: TextStyle(color: changeColor, fontSize: 12)),
+              if (showValue)
+                Text(getFormattedCurrency(totalChange ?? 0), style: TextStyle(color: changeColor, fontSize: 12)),
               if (showPercentage)
                 Text(
                   percentageChange == double.infinity
                       ? "(∞)"
                       : percentageChange!.isNaN
                       ? ""
-                      : "(${formatPercentage(percentageChange!)})",
-                  style: TextStyle(color: changeColor, fontSize: 10),
+                      : showValue
+                      ? "(${formatPercentage(percentageChange!)})"
+                      : formatPercentage(percentageChange!),
+                  style: TextStyle(color: changeColor, fontSize: !showValue ? 12 : 10),
                 ),
               if (netWorthPeriod != null)
                 Text(

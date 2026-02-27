@@ -1838,7 +1838,7 @@
     "/holding/live/major": {
       "get": {
         "description": "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
-        "operationId": "HoldingController_getLive",
+        "operationId": "HoldingController_getLiveMajor",
         "parameters": [],
         "responses": {
           "200": {
@@ -1878,7 +1878,11 @@
             "in": "query",
             "description": "Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)",
             "schema": {
-              "type": "string"
+              "example": "AAPL,MSFT,TSLA",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2195,7 +2199,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.2.0-10-g0438c1c",
+    "version": "v0.2.0-12-gdff0df6",
     "contact": {}
   },
   "tags": [
@@ -3129,6 +3133,19 @@
           "price": {
             "type": "number"
           },
+          "previousClose": {
+            "type": "number"
+          },
+          "dayLow": {
+            "type": "number"
+          },
+          "dayHigh": {
+            "type": "number"
+          },
+          "marketState": {
+            "enum": ["REGULAR", "CLOSED", "PRE", "POST", "PREPRE", "POSTPOST"],
+            "type": "string"
+          },
           "currency": {
             "type": "string"
           },
@@ -3231,7 +3248,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-02-26T01:06:09.588Z"
+            "default": "2026-02-27T18:20:37.588Z"
           },
           "isRead": {
             "type": "boolean",

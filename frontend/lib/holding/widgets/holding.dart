@@ -1,43 +1,107 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sprout/account/widgets/account_change.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/core/provider/provider_services.dart';
 import 'package:sprout/core/utils/formatters.dart';
 import 'package:sprout/core/widgets/text.dart';
 import 'package:sprout/core/widgets/tooltip.dart';
 import 'package:sprout/holding/widgets/holding_logo.dart';
 
-/// Renders a single holding
-// ignore: must_be_immutable
-class HoldingWidget extends StatelessWidget {
+/// Renders a single holding with live price updates vs yesterday's stored value
+class HoldingWidget extends StatefulWidget {
   final Holding holding;
-  bool isSelected;
-  Function(Holding holding)? onClick;
+  final bool isSelected;
+  final Function(Holding holding)? onClick;
 
-  HoldingWidget({super.key, required this.holding, this.isSelected = false, this.onClick});
+  /// Howe often to refresh live prices. Updating more than every 5 minutes will not result in any change as the backend cache is 5 minutes
+  final int refreshMinutes;
+
+  const HoldingWidget({
+    super.key,
+    required this.holding,
+    this.isSelected = false,
+    this.onClick,
+    this.refreshMinutes = 5,
+  });
+
+  @override
+  State<HoldingWidget> createState() => _HoldingWidgetState();
+}
+
+class _HoldingWidgetState extends State<HoldingWidget> with SproutProviders {
+  Timer? _refreshTimer;
+  MarketIndexDto? _liveData;
+  bool _isLoading = false;
+
+  Holding get holding => widget.holding;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchUpdate();
+    });
+    _refreshTimer = Timer.periodic(Duration(minutes: widget.refreshMinutes), (_) => _fetchUpdate());
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchUpdate() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    try {
+      final results = await holdingProvider.api.holdingControllerGetLivePrices([holding.symbol]);
+      if (mounted && results != null && results.isNotEmpty) {
+        setState(() {
+          _liveData = results.first;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final costBasisTotalChange = holding.marketValue - holding.costBasis;
-    final costBasisPercentChange = (holding.marketValue - holding.costBasis) / holding.costBasis * 100;
+    // Live Calculations
+    final livePrice = _liveData?.price ?? (holding.marketValue / holding.shares);
+    final liveMarketValue = livePrice * holding.shares;
+
+    // Day Change (Live Value vs. Yesterday's Stored Value)
+    // We use holding.marketValue as the "base" from the last database sync
+    final dayValueChange = liveMarketValue - holding.marketValue;
+    final dayPercentChange = holding.marketValue != 0 ? (dayValueChange / holding.marketValue) * 100 : 0.0;
+
+    // Total Return (Live Value vs. Original Cost Basis)
+    final totalValueChange = liveMarketValue - holding.costBasis;
+    final totalPercentChange = holding.costBasis != 0 ? (totalValueChange / holding.costBasis) * 100 : 0.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 600;
-
-        final renderSymbol = true;
-        final renderDescription = false;
-
-        final statsContent = _buildContent(isMobile, costBasisTotalChange, costBasisPercentChange);
+        final statsContent = _buildContent(
+          isMobile,
+          totalValueChange,
+          totalPercentChange,
+          livePrice,
+          liveMarketValue,
+          dayValueChange,
+          dayPercentChange,
+        );
 
         return InkWell(
-          onTap: () {
-            if (onClick != null) onClick!(holding);
-          },
+          onTap: () => widget.onClick?.call(holding),
           child: Padding(
-            padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-
               spacing: 12,
               children: [
                 Expanded(
@@ -51,36 +115,25 @@ class HoldingWidget extends StatelessWidget {
                         child: Row(
                           spacing: 12,
                           children: [
-                            // Render logo
                             HoldingLogoWidget(holding),
-                            // Print details about the holding
-                            // ignore: dead_code
-                            if (renderSymbol || renderDescription)
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 8,
-                                  children: [
-                                    if (renderSymbol)
-                                      TextWidget(
-                                        text: holding.symbol,
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    if (renderDescription)
-                                      // ignore: dead_code
-                                      TextWidget(
-                                        text: holding.description,
-                                        style: TextStyle(color: Colors.grey),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                  ],
-                                ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 8,
+                                children: [
+                                  TextWidget(
+                                    text: holding.symbol,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  if (_isLoading)
+                                    const SizedBox(height: 2, child: LinearProgressIndicator(minHeight: 1)),
+                                ],
                               ),
+                            ),
                           ],
                         ),
                       ),
-                      // Print details at the end of the row
                       Expanded(flex: isMobile ? 5 : 7, child: statsContent),
                     ],
                   ),
@@ -93,33 +146,46 @@ class HoldingWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(bool isMobile, num costBasisTotalChange, double costBasisPercentChange) {
+  Widget _buildContent(
+    bool isMobile,
+    num totalChange,
+    num totalPercent,
+    num livePrice,
+    num liveValue,
+    num dayChange,
+    num dayPercent,
+  ) {
     final content = [
-      // Amount of shares
       _buildColumnOfContent("Shares", holding.shares.toStringAsFixed(2), row: isMobile),
       const Divider(height: 1),
-      // Cost basis
       _buildColumnOfContent(
-        "Cost Basis",
-        getFormattedCurrency(holding.costBasis),
-        description: "The original total cost for this asset",
+        "Live Price",
+        getFormattedCurrency(livePrice),
+        description: "Current market price",
         row: isMobile,
       ),
       const Divider(height: 1),
-      // Current Value
+      // Day Change: Comparing Live Market Value to the Market Value stored in the holding
+      _buildColumnOfContent(
+        "Day Change",
+        "",
+        description: "Change in value since the last account sync (Yesterday)",
+        child: AccountChangeWidget(totalChange: dayChange, percentageChange: dayPercent),
+        row: isMobile,
+      ),
+      const Divider(height: 1),
       _buildColumnOfContent(
         "Market Value",
-        getFormattedCurrency(holding.marketValue),
-        description: "The current value of this asset",
+        getFormattedCurrency(liveValue),
+        description: "Total value based on live price",
         row: isMobile,
       ),
       const Divider(height: 1),
-      // Total value change
       _buildColumnOfContent(
-        "Total Change",
+        "Total Return",
         "",
-        description: "This is the total gain/loss calculated from cost basis and market value",
-        child: AccountChangeWidget(totalChange: costBasisTotalChange, percentageChange: costBasisPercentChange),
+        description: "All-time performance vs Cost Basis",
+        child: AccountChangeWidget(totalChange: totalChange, percentageChange: totalPercent),
         row: isMobile,
       ),
     ];
@@ -134,7 +200,6 @@ class HoldingWidget extends StatelessWidget {
         : Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: content);
   }
 
-  /// Builds a column of a specific type of content related to the stock
   Widget _buildColumnOfContent(
     String text,
     dynamic displayText, {
@@ -152,12 +217,12 @@ class HoldingWidget extends StatelessWidget {
           TextWidget(
             text: text,
             referenceSize: 0.9,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
           if (description != null)
             SproutTooltip(
               message: description,
-              child: Icon(Icons.info, size: 16, color: Colors.grey),
+              child: const Icon(Icons.info, size: 16, color: Colors.grey),
             ),
         ],
       ),

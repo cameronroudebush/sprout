@@ -7,7 +7,7 @@ import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Controller, Get, NotFoundException, Param, Query } from "@nestjs/common";
+import { BadRequestException, Controller, Get, NotFoundException, Param, ParseArrayPipe, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { EntityHistory, HistoricalDataPoint } from "../net-worth/model/api/entity.history.dto";
 
@@ -35,7 +35,7 @@ export class HoldingController {
   async getHoldings(@CurrentUser() user: User, @Query("accountId") accountId: string) {
     const account = await Account.findOne({ where: { id: accountId, user: { id: user.id } } });
     if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
-    return await Holding.find({ where: { account: { id: accountId } } });
+    return await Holding.getForAccount(account);
   }
 
   @Get("history")
@@ -73,7 +73,7 @@ export class HoldingController {
     description: "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
   })
   @ApiOkResponse({ description: "Successfully acquired major ticker prices.", type: [MarketIndexDto] })
-  async getLive(@CurrentUser() _user: User) {
+  async getLiveMajor(@CurrentUser() _user: User) {
     return await this.holdingService.getMajorIndices();
   }
 
@@ -87,12 +87,12 @@ export class HoldingController {
     required: true,
     description: "Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)",
     type: String,
+    isArray: true,
+    example: "AAPL,MSFT,TSLA",
   })
   @ApiOkResponse({ description: "Successfully acquired live ticker prices.", type: [MarketIndexDto] })
-  async getLivePrices(@CurrentUser() _user: User, @Query("symbols") symbols: string) {
+  async getLivePrices(@CurrentUser() _user: User, @Query("symbols", new ParseArrayPipe({ items: String, separator: "," })) symbols: string[]) {
     if (!symbols) throw new BadRequestException("You must provide at least one symbol in the query parameters.");
-    // Convert the comma-separated string into an array of uppercase, trimmed strings
-    const symbolArray = symbols.split(",").map((s) => s.trim().toUpperCase());
-    return await this.holdingService.getLiveHoldingPrices(symbolArray);
+    return await this.holdingService.getLiveHoldingPrices(symbols);
   }
 }
