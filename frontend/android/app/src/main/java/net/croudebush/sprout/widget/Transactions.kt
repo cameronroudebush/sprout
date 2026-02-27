@@ -24,19 +24,27 @@ class Transactions : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.transactions)
             views.setEmptyView(R.id.widget_transactions_list, R.id.widget_empty_view)
-            if (hasData) {
-                val timestamp = widgetData?.optString("updateTime", "") ?: ""
-                views.setTextViewText(R.id.widget_last_updated, timestamp)
-                views.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
-            } else {
-                views.setViewVisibility(R.id.widget_last_updated, View.GONE)
-            }
+
             val intent = Intent(context, TransactionsWidgetService::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 data = toUri(Intent.URI_INTENT_SCHEME).toUri()
             }
             views.setRemoteAdapter(R.id.widget_transactions_list, intent)
+
+            // Commit the structural changes to the Launcher first
             appWidgetManager.updateAppWidget(appWidgetId, views)
+
+            // PARTIAL UPDATE: Force the text changes directly to bypass the launcher's layout engine
+            val headerViews = RemoteViews(context.packageName, R.layout.transactions)
+            if (hasData) {
+                val timestamp = widgetData.optString("updateTime", "")
+                headerViews.setTextViewText(R.id.widget_last_updated, timestamp)
+                headerViews.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
+            } else {
+                headerViews.setViewVisibility(R.id.widget_last_updated, View.GONE)
+            }
+            appWidgetManager.partiallyUpdateAppWidget(appWidgetId, headerViews)
+
             appWidgetManager.notifyAppWidgetViewDataChanged(
                 appWidgetId,
                 R.id.widget_transactions_list
