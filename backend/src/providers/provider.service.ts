@@ -1,6 +1,8 @@
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { SimpleFINProvider } from "@backend/providers/simple-fin/core";
+import { ZillowProvider } from "@backend/providers/zillow/core";
+import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 
 /**
@@ -10,9 +12,9 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class ProviderService {
   /** Providers available to the backend, defined by {@link init} */
-  providers: { simpleFin: SimpleFINProvider } = {} as any;
+  providers: { simpleFin: SimpleFINProvider; zillow: ZillowProvider } = {} as any;
 
-  constructor() {}
+  constructor(private readonly httpService: HttpService) {}
 
   /** Initializes all providers and schedulers */
   async init() {
@@ -22,7 +24,13 @@ export class ProviderService {
      */
     this.providers.simpleFin = new SimpleFINProvider(
       new ProviderConfig("SimpleFIN", "simple-fin", "https://beta-bridge.simplefin.org/static/logo.svg", "https://beta-bridge.simplefin.org/my-account"),
+      this.httpService,
     );
+
+    /**
+     * Zillow
+     */
+    this.providers.zillow = new ZillowProvider(new ProviderConfig("Zillow", "zillow", "https://www.zillow.com/apple-touch-icon.png"), this.httpService);
   }
 
   /** Returns all currently registered providers as an array */

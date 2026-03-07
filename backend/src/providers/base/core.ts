@@ -3,6 +3,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
+import { HttpService } from "@nestjs/axios";
 import { ProviderRateLimit } from "./rate-limit";
 
 /**
@@ -10,7 +11,10 @@ import { ProviderRateLimit } from "./rate-limit";
  *  for automatically loading finance information.
  */
 export abstract class ProviderBase {
-  constructor(public config: ProviderConfig) {}
+  constructor(
+    public config: ProviderConfig,
+    public httpService: HttpService,
+  ) {}
 
   /** The rate limit class for this provider */
   abstract readonly rateLimit: { (user?: User): ProviderRateLimit };
