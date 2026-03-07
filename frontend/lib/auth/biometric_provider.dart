@@ -3,73 +3,91 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/provider_services.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
-/// A provider intended to only handle biometric authentication for [secureMode]
-class BiometricProvider extends BaseProvider with SproutProviders {
-  /// Platform for interacting with the activity
-  final platform = MethodChannel("net.croudebush.sprout/security");
+part 'biometric_provider.g.dart';
 
-  /// Tracks if we're in the middle of an auto logout due to failure in biometric checking
-  bool _isLoggingOut = false;
+/// Used to track the current biometric state of our app
+class BiometricState {
+  final bool isLocked;
+  final bool isUnlocking;
+  final bool isLoggingOut;
 
-  /// If our devices is locked by biometrics
-  bool _isBioLocked = false;
+  BiometricState({this.isLocked = false, this.isUnlocking = false, this.isLoggingOut = false});
 
-  /// Tracks if we're actively asking to unlock or not
-  bool isBioUnlocking = false;
+  BiometricState copyWith({bool? isLocked, bool? isUnlocking, bool? isLoggingOut}) {
+    return BiometricState(
+      isLocked: isLocked ?? this.isLocked,
+      isUnlocking: isUnlocking ?? this.isUnlocking,
+      isLoggingOut: isLoggingOut ?? this.isLoggingOut,
+    );
+  }
+}
 
-  /// Timer to trigger the lock after the grace period
+/// A provider that tracks our current biometric lock/unlock state and how to do the loc/unlock
+@Riverpod(keepAlive: true)
+class Biometrics extends _$Biometrics {
+  final _platform = const MethodChannel("net.croudebush.sprout/security");
+  final _auth = LocalAuthentication();
+  final _lockGracePeriod = const Duration(minutes: 5);
   Timer? _lockTimer;
 
-  /// Duration before the app actually locks
-  final Duration _lockGracePeriod = const Duration(minutes: 5);
+  // UI helpers
+  bool get isLocked => state.isLocked && (ref.read(authProvider).value != null);
 
-  /// Used for tracking authentication requirements for the app to unlock, besides username/password logins
-  final LocalAuthentication _auth = LocalAuthentication();
+  @override
+  BiometricState build() {
+    // Automatically manage screen privacy when config changes
+    ref.listen(userConfigProvider, (prev, next) {
+      final config = next.value;
+      if (config?.secureMode == true) {
+        enableScreenPrivacy();
+      } else {
+        disableScreenPrivacy();
+      }
+    });
 
-  /// Public Getters
-  bool get isBioLocked => _isBioLocked && authProvider.isLoggedIn;
-
-  BiometricProvider(super.api);
-
-  /// Used during manual logins to reset our locked state
-  Future<void> reset() async {
-    if (kIsWeb) return;
-    _isBioLocked = false;
-    _isLoggingOut = false;
-    isBioUnlocking = false;
-    await disableScreenPrivacy();
-    notifyListeners();
+    return BiometricState();
   }
 
-  /// Attempts to unlock the biometrics when the app resumes
+  Future<void> reset() async {
+    if (kIsWeb) return;
+    _lockTimer?.cancel();
+    _lockTimer = null;
+    state = BiometricState(isLocked: false);
+    await disableScreenPrivacy();
+  }
+
+  /// App Resumed: Cancel timer and try to unlock if needed
   Future<void> unlockResume() async {
     _lockTimer?.cancel();
     _lockTimer = null;
 
-    if (!(userConfigProvider.currentUserConfig?.secureMode ?? false)) {
+    final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
+    if (!secureMode) {
       await disableScreenPrivacy();
       return;
     }
 
-    if (!kIsWeb && authProvider.isLoggedIn && !_isLoggingOut && isBioLocked && !isBioUnlocking) {
+    final isLoggedIn = ref.read(authProvider).value != null;
+    if (!kIsWeb && isLoggedIn && !state.isLoggingOut && state.isLocked && !state.isUnlocking) {
       await _internalUnlock();
-      if (!isBioLocked) await disableScreenPrivacy();
+      if (!state.isLocked) await disableScreenPrivacy();
     }
   }
 
-  /// When going to the app is going to sleep, locks the app.
+  /// App Background-ed: Start grace period timer
   Future<void> lockBackground() async {
-    if (kIsWeb || isBioUnlocking || _isLoggingOut || !authProvider.isLoggedIn) return;
+    final isLoggedIn = ref.read(authProvider).value != null;
+    if (kIsWeb || state.isUnlocking || state.isLoggingOut || !isLoggedIn) return;
 
-    if (userConfigProvider.currentUserConfig?.secureMode ?? false) {
-      // Always make sure we're private when going to background
+    final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
+    if (secureMode) {
       await enableScreenPrivacy();
-      // Only start the timer if it's not already running
-      _lockTimer ??= Timer(_lockGracePeriod, () async {
-        await _biometricLock();
+      _lockTimer ??= Timer(_lockGracePeriod, () {
+        state = state.copyWith(isLocked: true);
         _lockTimer = null;
       });
     } else {
@@ -77,68 +95,34 @@ class BiometricProvider extends BaseProvider with SproutProviders {
     }
   }
 
-  /// Tries to unlock the biometrics when clicking the unlock button. Returns true if the unlock was a success. False if not.
-  Future<bool> tryManualUnlock() async {
-    return await _internalUnlock();
-  }
-
-  /// Tries to unlock the biometrics used during auto login. Returns true if the unlock was a success. False if not.
-  Future<bool> tryAutoLoginUnlock() async {
-    return await _internalUnlock(preLogout: true);
-  }
-
-  /// Separated to allow us to unlock and auto logout if it fails.
-  /// [preLogout] Allows us to customize where to set isBioLocked
   Future<bool> _internalUnlock({bool preLogout = false}) async {
-    if (!kIsWeb && userConfigProvider.currentUserConfig!.secureMode) {
-      final unlocked = !(await _biometricUnlock());
-      if (!unlocked) {
-        _isLoggingOut = true;
-        if (preLogout) _isBioLocked = false;
-        notifyListeners();
+    final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
+
+    if (!kIsWeb && secureMode) {
+      final success = await _requestBiometricAuth();
+      if (!success) {
+        state = state.copyWith(isLoggingOut: true, isLocked: preLogout ? false : state.isLocked);
         try {
-          await authProvider.logout();
-        } catch (e) {
-          // Ignore logout failure
+          await ref.read(authProvider.notifier).logout();
+        } finally {
+          state = BiometricState(isLocked: false, isLoggingOut: false);
         }
-        _isBioLocked = false;
-        _isLoggingOut = false;
-        notifyListeners();
         return false;
       }
-      return true;
-    } else {
-      // If we're not required to do biometrics, always return true
+      state = state.copyWith(isLocked: false);
       return true;
     }
+    return true;
   }
 
-  /// Locks the app and requires biometrics to access it in the future. Returns if we're locked or not.
-  Future<bool> _biometricLock() async {
-    if (userConfigProvider.currentUserConfig != null && userConfigProvider.currentUserConfig!.secureMode) {
-      _isBioLocked = true;
-      notifyListeners();
-    }
-    return _isBioLocked;
-  }
-
-  /// Attempts to unlock the app via biometrics. Returns if we're locked or not.
-  Future<bool> _biometricUnlock() async {
-    isBioUnlocking = true;
-    notifyListeners();
-    _isBioLocked = !(await requestBiometricAuth());
-    isBioUnlocking = false;
-    notifyListeners();
-    return _isBioLocked;
-  }
-
-  /// Requests a biometric authorization for the app. Used to check if biometrics can be enabled
-  Future<bool> requestBiometricAuth() async {
+  /// Request that the user verifies they can use biometrics
+  Future<bool> _requestBiometricAuth() async {
+    state = state.copyWith(isUnlocking: true);
     try {
-      // Check if the hardware supports biometrics
-      final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
-      final bool isDeviceSupported = await _auth.isDeviceSupported();
-      if (!canAuthenticateWithBiometrics || !isDeviceSupported) return false;
+      final canCheck = await _auth.canCheckBiometrics;
+      final isSupported = await _auth.isDeviceSupported();
+      if (!canCheck || !isSupported) return false;
+
       return await _auth.authenticate(
         localizedReason: 'Please authenticate to view Sprout',
         biometricOnly: true,
@@ -146,32 +130,21 @@ class BiometricProvider extends BaseProvider with SproutProviders {
       );
     } catch (e) {
       return false;
+    } finally {
+      state = state.copyWith(isUnlocking: false);
     }
   }
 
-  /// Disables the screen privacy for FLAG_SECURE
+  /// Disables the background screen privacy blackout
   Future<void> disableScreenPrivacy() async {
-    if (!kIsWeb) await platform.invokeMethod('disableAppSecurity');
+    if (!kIsWeb) await _platform.invokeMethod('disableAppSecurity');
   }
 
-  /// Enables the screen privacy for FLAG_SECURE
+  // Enables the background screen privacy lockout
   Future<void> enableScreenPrivacy() async {
-    if (!kIsWeb) {
-      if (userConfigProvider.currentUserConfig?.secureMode ?? false) {
-        await platform.invokeMethod('enableAppSecurity');
-      }
-    }
-  }
-
-  @override
-  Future<void> postLogin() async {
-    // Enable the screen privacy if needed
-    if (!kIsWeb) {
-      if (userConfigProvider.currentUserConfig!.secureMode) {
-        await enableScreenPrivacy();
-      } else {
-        await disableScreenPrivacy();
-      }
+    final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
+    if (!kIsWeb && secureMode) {
+      await _platform.invokeMethod('enableAppSecurity');
     }
   }
 }

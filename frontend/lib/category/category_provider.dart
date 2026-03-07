@@ -1,85 +1,70 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 
-/// Class that provides the store of current category info
-class CategoryProvider extends BaseProvider<CategoryApi> {
-  // Data store
-  List<Category> _categories = [];
-  final Map<String, CategoryStats> _statsCache = {};
-  int _unknownCategoryCount = 0;
+part "category_provider.g.dart";
 
-  // Public getters
-  List<Category> get categories => _categories;
-  int get unknownCategoryCount => _unknownCategoryCount;
-  CategoryStats? getStatsData(int year, int? month, {int? day, Account? account}) {
-    return _statsCache[generateCacheKey(year, month, day, account)];
+@Riverpod(keepAlive: true)
+Future<CategoryApi> categoryApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return CategoryApi(client);
+}
+
+@Riverpod(keepAlive: true)
+class Categories extends _$Categories {
+  @override
+  Future<List<Category>> build() async {
+    // Listen for SSE force updates to refresh the list
+    ref.listen(sseProvider, (previous, next) {
+      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
+    final api = await ref.watch(categoryApiProvider.future);
+    return await api.categoryControllerGetCategories() ?? [];
   }
 
-  CategoryProvider(super.api);
-
-  /// Uses the API to add the given category
   Future<Category?> add(Category c) async {
-    notifyListeners();
+    final api = await ref.read(categoryApiProvider.future);
     final newCategory = await api.categoryControllerCreate(c);
-    if (newCategory != null) _categories.add(newCategory);
-    notifyListeners();
+    if (newCategory != null) {
+      ref.invalidateSelf();
+    }
     return newCategory;
   }
 
-  /// Uses the API to delete the given category
-  Future<Category> delete(Category c) async {
-    notifyListeners();
-    await api.categoryControllerDelete(c.id);
-    _categories.removeWhere((r) => r.id == c.id);
-    notifyListeners();
-    return c;
+  Future<void> delete(String id) async {
+    final api = await ref.read(categoryApiProvider.future);
+    await api.categoryControllerDelete(id);
+    ref.invalidateSelf();
   }
 
-  Future<Category> edit(Category c) async {
-    notifyListeners();
-    final updatedCategory = (await api.categoryControllerEdit(c.id, c))!;
-    final index = _categories.indexWhere((r) => r.id == updatedCategory.id);
-    if (index != -1) _categories[index] = updatedCategory;
-    notifyListeners();
-    return updatedCategory;
-  }
-
-  /// Loads updated category information, also updates loading status
-  Future<void> loadUpdatedCategories() async {
-    await populateAndSetIfChanged(
-      api.categoryControllerGetCategories,
-      _categories,
-      (newValue) => newValue == null ? [] : _categories = [...newValue],
-    );
-  }
-
-  /// Loads updated category stats
-  Future<CategoryStats?> loadCategoryStats(int year, int? month, {int? day, Account? account}) async {
-    final cacheKey = generateCacheKey(year, month, day, account);
-    final data = await api.categoryControllerGetCategoryStats(year, month: month, day: day, accountId: account?.id);
-    if (data != null) _statsCache[cacheKey] = data;
-    notifyListeners();
-    return data;
-  }
-
-  Future<int?> loadUnknownCategoryCount({Account? account}) async {
-    _unknownCategoryCount = await api.categoryControllerGetUnknownCategoryStats(accountId: account?.id) ?? 0;
-    notifyListeners();
-    return _unknownCategoryCount;
-  }
-
-  @override
-  Future<void> cleanupData() async {
-    _categories = [];
-    _statsCache.clear();
-    notifyListeners();
-  }
-
-  @override
-  Future<void> onSSE(SSEData sse) async {
-    super.onSSE(sse);
-    if (sse.event == SSEDataEventEnum.forceUpdate) {
-      cleanupData();
+  Future<Category?> edit(Category c) async {
+    final api = await ref.read(categoryApiProvider.future);
+    final updated = await api.categoryControllerEdit(c.id, c);
+    if (updated != null) {
+      ref.invalidateSelf();
     }
+    return updated;
   }
+}
+
+/// Tracks the state for the unknown category count
+@Riverpod(keepAlive: true)
+class UnknownCategoryCount extends _$UnknownCategoryCount {
+  @override
+  Future<int> build([String? accountId]) async {
+    ref.listen(sseProvider, (prev, next) {
+      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
+    final api = await ref.watch(categoryApiProvider.future);
+    return await api.categoryControllerGetUnknownCategoryStats(accountId: accountId) ?? 0;
+  }
+
+  Future<void> refresh() async => ref.invalidateSelf();
 }

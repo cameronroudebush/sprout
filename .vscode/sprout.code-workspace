@@ -22,6 +22,7 @@
       "backend": true,
       "frontend": true,
       "common": true,
+      "**/*.g.dart": true,
     },
     "typescript.tsdk": "Backend\\node_modules\\typescript\\lib",
     "typescript.preferences.importModuleSpecifier": "non-relative",

@@ -1,109 +1,93 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/transaction/models/transaction_state.dart';
 
-/// Class that provides the store of current transactions
-class TransactionProvider extends BaseProvider<TransactionApi> {
-  /// How many transactions we should initially pull
-  static final initialTransactionCount = 20;
-  // Data store
-  TotalTransactions? _totalTransactions;
-  List<Transaction> _transactions = [];
-  List<TransactionSubscription> _subscriptions = [];
+part 'transaction_provider.g.dart';
 
-  // Public getters
-  List<Transaction> get transactions => _transactions;
-  TotalTransactions? get totalTransactions => _totalTransactions;
-  List<TransactionSubscription> get subscriptions => _subscriptions;
+/// Provider for the transaction api
+@Riverpod(keepAlive: true)
+Future<TransactionApi> transactionApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return TransactionApi(client);
+}
 
-  TransactionProvider(super.api);
+@Riverpod(keepAlive: true)
+class TransactionList extends _$TransactionList {
+  static const int pageSize = 20;
 
-  Future<TotalTransactions?> populateTotalTransactionCount() async {
-    return _totalTransactions = await api.transactionControllerGetTotal();
+  @override
+  Future<TransactionState> build() async {
+    // Listen for SSE updates to refresh the list
+    ref.listen(sseProvider, (prev, next) {
+      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
+    final api = await ref.watch(transactionApiProvider.future);
+    final total = await api.transactionControllerGetTotal();
+    final initial = await api.transactionControllerGetByQuery(startIndex: 0, endIndex: pageSize);
+
+    return TransactionState(transactions: initial ?? [], totalCount: total?.total ?? 0);
   }
 
-  /// Adds new transactions to our global list and filters duplicates out
-  void _addNewTransactions(List<Transaction> newTransactions) {
-    // Combine new transactions with existing ones, removing duplicates
-    final Set<String> existingTransactionIds = _transactions.map((t) => t.id).toSet();
-    for (var newTransaction in newTransactions) {
-      if (!existingTransactionIds.contains(newTransaction.id)) {
-        _transactions.add(newTransaction);
+  /// Fetches the next page and appends it to the list
+  Future<void> fetchNextPage({String? accountId, String? category, String? description, DateTime? date}) async {
+    if (state.value == null || state.value!.isLoadingMore) return;
+    if (state.value!.transactions.length >= state.value!.totalCount) return;
+
+    state = AsyncData(state.value!.copyWith(isLoadingMore: true));
+
+    try {
+      final api = await ref.read(transactionApiProvider.future);
+      final nextItems = await api.transactionControllerGetByQuery(
+        startIndex: state.value!.transactions.length,
+        endIndex: state.value!.transactions.length + pageSize,
+        accountId: accountId,
+        category: category,
+        description: description,
+        date: date,
+      );
+
+      if (nextItems != null) {
+        final currentIds = state.value!.transactions.map((t) => t.id).toSet();
+        final filtered = nextItems.where((t) => !currentIds.contains(t.id)).toList();
+
+        final newList = [...state.value!.transactions, ...filtered]..sort((a, b) => b.posted.compareTo(a.posted));
+
+        state = AsyncData(state.value!.copyWith(transactions: newList, isLoadingMore: false));
+      }
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<Transaction?> editTransaction(Transaction t) async {
+    final api = await ref.read(transactionApiProvider.future);
+    final updated = await api.transactionControllerEdit(t.id, t);
+
+    if (updated != null && state.value != null) {
+      final index = state.value!.transactions.indexWhere((r) => r.id == updated.id);
+      if (index != -1) {
+        final newList = [...state.value!.transactions];
+        newList[index] = updated;
+        state = AsyncData(state.value!.copyWith(transactions: newList));
       }
     }
-    _transactions.sort((a, b) => b.posted.compareTo(a.posted));
+    return updated;
   }
+}
 
-  /// Populates transactions based on the parameters given
-  Future<List<Transaction>?> populateTransactions({
-    int? startIndex,
-    int? endIndex,
-    bool shouldNotify = true,
-    Account? account,
-    String? category,
-    String? description,
-    DateTime? date,
-  }) async {
-    final newTransactions = await api.transactionControllerGetByQuery(
-      startIndex: startIndex,
-      endIndex: endIndex,
-      accountId: account?.id,
-      category: category,
-      description: description,
-      date: date,
-    );
-    if (newTransactions != null) _addNewTransactions(newTransactions);
-    if (shouldNotify) notifyListeners();
-    return newTransactions;
-  }
-
-  /// Populates the initial list of transactions
-  Future<List<Transaction>?> populateInitial() async {
-    return await populateTransactions(
-      startIndex: 0,
-      endIndex: TransactionProvider.initialTransactionCount,
-      shouldNotify: false,
-    );
-  }
-
-  /// Populates subscription information built from transactions
-  Future<List<TransactionSubscription>?> populateSubscriptions() async {
-    await populateAndSetIfChanged(
-      api.transactionControllerSubscriptions,
-      _subscriptions,
-      (newValue) => _subscriptions = newValue ?? [],
-    );
-    return _subscriptions;
-  }
-
-  /// Utilizes the API to edit the given transaction and updates the data store
-  Future<Transaction> editTransaction(Transaction t) async {
-    final updatedTransaction = (await api.transactionControllerEdit(t.id, t))!;
-    final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
-    if (index != -1) _transactions[index] = updatedTransaction;
-    notifyListeners();
-    return updatedTransaction;
-  }
-
-  /// Wipes all currently loaded transaction data. You'll normally do this if you're about to request more.
-  void wipeData() {
-    _totalTransactions = null;
-    _transactions = [];
-    _subscriptions = [];
-  }
-
+/// Provider to track transaction subscriptions
+@Riverpod(keepAlive: true)
+class TransactionSubscriptions extends _$TransactionSubscriptions {
   @override
-  Future<void> cleanupData() async {
-    _totalTransactions = null;
-    _transactions = [];
-    _subscriptions = [];
-    notifyListeners();
+  Future<List<TransactionSubscription>> build() async {
+    final api = await ref.watch(transactionApiProvider.future);
+    return await api.transactionControllerSubscriptions() ?? [];
   }
 
-  @override
-  Future<void> onSSE(SSEData data) async {
-    super.onSSE(data);
-    if (data.event == SSEDataEventEnum.forceUpdate) {
-      wipeData();
-    }
-  }
+  Future<void> refresh() async => ref.invalidateSelf();
 }
