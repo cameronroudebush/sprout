@@ -26,9 +26,9 @@
     "cron-parser": "^5.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "firebase-admin": "13.6.1",
+    "firebase-admin": "^13.6.0",
     "glob": "^13.0.0",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.1",
     "lodash": "^4.17.21",
     "passport": "^0.7.0",
@@ -71,6 +71,9 @@
     "tsconfig-paths": "^4.2.0",
     "tslib": "^2.6.2",
     "typescript": "^5.4.2"
+  },
+  "overrides": {
+    "google-auth-library": "^9.14.2"
   },
   "scripts": {
     "start": "nest start --watch",
