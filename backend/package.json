@@ -26,7 +26,7 @@
     "cron-parser": "^5.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "firebase-admin": "^13.6.0",
+    "firebase-admin": "13.6.1",
     "glob": "^13.0.0",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.2.1",
@@ -87,14 +87,16 @@
       "dist/**/*",
       "node_modules/axios/**/*",
       "node_modules/plaid/node_modules/axios/**/*",
-      "node_modules/bcrypt/prebuilds/linux-x64/**/*",
+      "node_modules/bcrypt/prebuilds/**/*",
       "node_modules/sqlite3/**/*",
       "node_modules/sharp/**/*",
       "node_modules/@img/sharp-win32-x64/**/*",
       "node_modules/@img/sharp-linuxmusl-x64/**/*",
       "node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
       "node_modules/swagger-themes/**/*",
-      "node_modules/ansis/**/*"
+      "node_modules/ansis/**/*",
+      "node_modules/firebase-admin/**/*",
+      "node_modules/google-auth-library/**/*"
     ]
   }
 }
