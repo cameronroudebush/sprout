@@ -8,7 +8,7 @@ import { SSEService } from "@backend/sse/sse.service";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
 
 /** This service provides re-usable capability to notify users of specific interactions. */
 @Injectable()
