@@ -1,8 +1,9 @@
 import { ProviderService } from "@backend/providers/provider.service";
+import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 
 @Module({
-  imports: [],
+  imports: [HttpModule],
   controllers: [],
   providers: [ProviderService],
   exports: [ProviderService],
