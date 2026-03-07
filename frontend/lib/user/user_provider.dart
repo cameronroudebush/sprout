@@ -4,46 +4,64 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/logger.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 
-/// This provide allows for modification to the users via the API including authentication and creating new users.
-class UserProvider extends BaseProvider<UserApi> {
-  UserProvider(super.api);
+part 'user_provider.g.dart';
 
-  /// Registers the device of this app with the backend so we can reference it in notifications
+/// Provides the UserApi with the correct base path automatically.
+@Riverpod(keepAlive: true)
+Future<UserApi> userApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return UserApi(client);
+}
+
+/// Manages User-related actions like device registration.
+@Riverpod(keepAlive: true)
+class UserNotifier extends _$UserNotifier {
+  @override
+  void build() {
+    // No specific state to return here, so we return void or null.
+    return;
+  }
+
+  /// Registers the device for push notifications.
+  /// Replaces registerDevice() and postLogin() logic.
   Future<void> registerDevice() async {
     if (kIsWeb) return;
-    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    // Don't fire if we don't have a firebase config
+
+    // Check Firebase initialization
     if (Firebase.apps.isEmpty) {
-      LoggerService.warning("No firebase configuration is loaded. Refusing to start.");
+      LoggerProvider.warning("No firebase configuration is loaded. Refusing to start.");
       return;
     }
-    String? token = await FirebaseMessaging.instance.getToken();
 
-    String deviceName = "Unknown Device";
-    RegisterDeviceDtoPlatformEnum platform = RegisterDeviceDtoPlatformEnum.android;
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return;
 
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      deviceName = "${androidInfo.manufacturer} ${androidInfo.model}";
-    } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      deviceName = iosInfo.name;
-      platform = RegisterDeviceDtoPlatformEnum.ios;
-    }
+      final deviceInfo = DeviceInfoPlugin();
+      String deviceName = "Unknown Device";
+      RegisterDeviceDtoPlatformEnum platform = RegisterDeviceDtoPlatformEnum.android;
 
-    if (token != null) {
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        deviceName = "${androidInfo.manufacturer} ${androidInfo.model}";
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        deviceName = iosInfo.name;
+        platform = RegisterDeviceDtoPlatformEnum.ios;
+      }
+      final api = await ref.read(userApiProvider.future);
       await api.userControllerRegisterDevice(
         RegisterDeviceDto(token: token, deviceName: deviceName, platform: platform),
       );
-    }
-  }
 
-  @override
-  Future<void> postLogin() async {
-    await registerDevice();
+      LoggerProvider.debug("Device registered successfully: $deviceName");
+    } catch (e) {
+      LoggerProvider.error("Failed to register device: $e");
+    }
   }
 }

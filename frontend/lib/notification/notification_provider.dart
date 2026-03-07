@@ -1,80 +1,63 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart' hide Notification;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/navigator.dart';
-import 'package:sprout/core/widgets/layout.dart';
-import 'package:sprout/notification/firebase.dart';
 import 'package:sprout/notification/widgets/notification_item.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:uuid/uuid.dart';
 
-/// Class that provides the store of current net worth information
-class NotificationProvider extends BaseProvider<NotificationApi> {
-  List<Notification> _notifications = [];
+part 'notification_provider.g.dart';
+
+/// Returns the notification api future considering the authenticated client
+@Riverpod(keepAlive: true)
+Future<NotificationApi> notificationApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return NotificationApi(client);
+}
+
+/// Describes the riverpod state for our notifications set
+@Riverpod(keepAlive: true)
+class Notifications extends _$Notifications {
   final Map<String, OverlayEntry> _displayedNotifications = {};
 
-  /// Public getters
-  List<Notification> get notifications => _notifications;
-  bool get hasUnread => _notifications.where((n) => !n.isRead).isNotEmpty;
-
-  NotificationProvider(super.api);
-
-  /// Populates notifications into our base notification provider
-  Future<List<Notification>> _populateNotifications() async {
-    await populateAndSetIfChanged(
-      api.notificationControllerGetNotifications,
-      _notifications,
-      (newValue) => _notifications = newValue ?? [],
-    );
-    notifyListeners();
-    return _notifications;
-  }
+  // Ui info
+  bool get hasUnread => (state.value ?? []).any((n) => !n.isRead);
 
   @override
-  Future<void> postLogin() async {
-    // Update the firebase config
-    await FirebaseNotificationProvider.configure(api);
-    await _populateNotifications();
-  }
+  Future<List<Notification>> build() async {
+    final api = await ref.watch(notificationApiProvider.future);
 
-  @override
-  Future<void> onSSE(SSEData data) async {
-    await super.onSSE(data);
-    if (data.event == SSEDataEventEnum.notification) {
-      final msg = NotificationSSEDTO.fromJson(data.payload);
-      final existingIds = _notifications.map((n) => n.id).toSet();
-      await _populateNotifications();
+    // 1. Setup Firebase (Replaces postLogin logic)
+    // We do this as a side effect of the provider being initialized
+    // await FirebaseNotificationProvider.configure(api); // TODO
 
-      if (msg != null && msg.popupLatest) {
-        final notification = _notifications.firstWhere(
-          (n) => !existingIds.contains(n.id),
-          orElse: () => _notifications.first,
-        );
+    // Listen to SSE for new notifications
+    ref.listen(sseProvider, (previous, next) async {
+      final data = next.value;
+      if (data?.event == SSEDataEventEnum.notification) {
+        final msg = NotificationSSEDTO.fromJson(data!.payload);
 
-        WidgetsBinding.instance.addPostFrameCallback((_) => _showInAppNotification(notification));
+        // Refresh the list
+        final oldIds = (state.value ?? []).map((n) => n.id).toSet();
+        ref.invalidateSelf();
+
+        // Wait for refresh to complete to find the new one for the popup
+        final newList = await future;
+        if (msg != null && msg.popupLatest) {
+          final notification = newList.firstWhere((n) => !oldIds.contains(n.id), orElse: () => newList.first);
+          _showInAppNotification(notification);
+        }
       }
-    }
+    });
+
+    return await api.notificationControllerGetNotifications() ?? [];
   }
 
-  /// Clears a specific notification overlay if it's displayed
-  void clearOverlay(String id) {
-    if (_displayedNotifications.containsKey(id)) {
-      final entry = _displayedNotifications[id];
-      if (entry != null && entry.mounted) entry.remove();
-      _displayedNotifications.remove(id);
-    }
-  }
-
-  /// Clears all open overlay notifications
-  void clearAllOverlays() {
-    for (final entry in _displayedNotifications.values) {
-      if (entry.mounted) entry.remove();
-    }
-    _displayedNotifications.clear();
-  }
-
-  /// Renders an in app notification for when we receive data in the corner of the screen
+  /// Opens a notification with the given info
   void _showInAppNotification(
     Notification notification, {
     int autoCloseTimeout = 5,
@@ -83,70 +66,76 @@ class NotificationProvider extends BaseProvider<NotificationApi> {
     bool showSpinner = false,
     bool frontendOnly = false,
   }) {
-    // Clear any existing overlays so we only ever show one
     clearAllOverlays();
-    final context = SproutNavigator.key.currentState;
-    if (context != null) {
-      final overlay = context.overlay;
+    final navigatorState = NavigationProvider.key.currentState;
+    if (navigatorState == null) return;
 
-      late OverlayEntry entry;
-      entry = OverlayEntry(
-        builder: (context) {
-          final theme = SproutNavigator.key.currentContext != null
-              ? Theme.of(SproutNavigator.key.currentContext!)
-              : ThemeData.dark();
+    final overlay = navigatorState.overlay;
+    late OverlayEntry entry;
 
-          return SproutLayoutBuilder((isDesktop, context, constraints) {
-            return SafeArea(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Material(
-                    type: MaterialType.card,
-                    elevation: 8,
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Dismissible(
-                      key: Key('overlay_${notification.id}'),
-                      direction: DismissDirection.horizontal,
-                      onDismissed: (_) async {
-                        // Mark this as read
-                        if (!frontendOnly) await api.notificationControllerMarkRead(notification.id);
-                        // Remove it
-                        entry.remove();
-                      },
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 120, maxWidth: isDesktop ? 520 : 340),
-                        child: NotificationItem(
-                          notification,
-                          showDate: showDate,
-                          showUnreadIndicator: showUnreadIndicator,
-                          showSpinner: showSpinner,
-                        ),
+    entry = OverlayEntry(
+      builder: (context) {
+        final theme = Theme.of(navigatorState.context);
+        return SproutLayoutBuilder((isDesktop, context, constraints) {
+          return SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Material(
+                  type: MaterialType.card,
+                  elevation: 8,
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Dismissible(
+                    key: Key('overlay_${notification.id}'),
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (_) async {
+                      if (!frontendOnly) {
+                        final api = await ref.read(notificationApiProvider.future);
+                        await api.notificationControllerMarkRead(notification.id);
+                      }
+                      entry.remove();
+                      _displayedNotifications.remove(notification.id);
+                    },
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 120, maxWidth: isDesktop ? 520 : 340),
+                      child: NotificationItem(
+                        notification,
+                        showDate: showDate,
+                        showUnreadIndicator: showUnreadIndicator,
+                        showSpinner: showSpinner,
                       ),
                     ),
                   ),
                 ),
               ),
-            );
-          });
-        },
-      );
-      // Insert the overlay
-      overlay!.insert(entry);
-      _displayedNotifications[notification.id] = entry;
-      // Cleanup the overlay after some time passes
-      Future.delayed(Duration(seconds: autoCloseTimeout), () {
-        if (entry.mounted) {
-          entry.remove();
-          _displayedNotifications.remove(entry);
-        }
-      });
-    }
+            ),
+          );
+        });
+      },
+    );
+
+    overlay?.insert(entry);
+    _displayedNotifications[notification.id] = entry;
+
+    Future.delayed(Duration(seconds: autoCloseTimeout), () {
+      if (entry.mounted) {
+        entry.remove();
+        _displayedNotifications.remove(notification.id);
+      }
+    });
   }
 
-  /// Opens a notification that is intended to only appear within the app, not saved from the database
+  /// Closes all open notifications
+  void clearAllOverlays() {
+    for (final entry in _displayedNotifications.values) {
+      if (entry.mounted) entry.remove();
+    }
+    _displayedNotifications.clear();
+  }
+
+  /// Opens a frontend only notification. These are not tracked in the backend
   String openFrontendOnly(
     String title, {
     NotificationTypeEnum type = NotificationTypeEnum.info,
@@ -155,7 +144,7 @@ class NotificationProvider extends BaseProvider<NotificationApi> {
     int duration = 2,
   }) {
     final notification = Notification(
-      id: Uuid().v4(),
+      id: const Uuid().v4(),
       title: title,
       message: message,
       type: type,
@@ -172,27 +161,21 @@ class NotificationProvider extends BaseProvider<NotificationApi> {
     return notification.id;
   }
 
-  /// Given an error, attempts to determine a error message
-  ///   from it if it's an openAPI exception by parsing the JSON. If it's
-  ///   not, it just toString's the error and returns it.
+  /// Parses an OpenAPI exception and attempts to extract the message out of it assuming it's JSON
   String parseOpenAPIException(dynamic e) {
-    String message;
     if (e is ApiException && e.message != null) {
       try {
         final decoded = json.decode(e.message!);
-        message = decoded['message'] ?? e.message;
+        return decoded['message'] ?? e.message;
       } catch (_) {
-        message = e.message!;
+        return e.message!;
       }
-    } else {
-      message = e.toString();
     }
-    return message;
+    return e.toString();
   }
 
-  /// Opens an error display for only the frontend with an API exception if decoded. Returns the notification ID that was opened.
+  /// Opens a frontend only notification with the OpenAPI exception info
   String openWithAPIException(dynamic e) {
-    final message = parseOpenAPIException(e);
-    return openFrontendOnly(message);
+    return openFrontendOnly(parseOpenAPIException(e));
   }
 }

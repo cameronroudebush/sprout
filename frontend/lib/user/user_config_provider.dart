@@ -1,40 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/provider_services.dart';
+import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/shared/api/base_api.dart';
 
-/// Class that provides user configuration information
-class UserConfigProvider extends BaseProvider<UserConfigApi> with SproutProviders {
-  UserConfig? _currentUserConfig;
+part 'user_config_provider.g.dart';
 
-  UserConfig? get currentUserConfig => _currentUserConfig;
-  ChartRangeEnum get userDefaultChartRange => _currentUserConfig?.netWorthRange ?? ChartRangeEnum.oneDay;
+@Riverpod(keepAlive: true)
+Future<UserConfigApi> userConfigApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return UserConfigApi(client);
+}
 
-  UserConfigProvider(super.api);
+@Riverpod(keepAlive: true)
+class UserConfigNotifier extends _$UserConfigNotifier {
+  /// Getters for UI
+  UserConfig? get config => state.value;
 
-  Future<UserConfig?> updateConfig(config) async {
-    _currentUserConfig = await api.userConfigControllerEdit(config);
-    notifyListeners();
-    return _currentUserConfig;
+  @override
+  Future<UserConfig?> build() async {
+    // If the user is null, we return null and don't attempt the API call.
+    final authState = ref.watch(authProvider);
+
+    if (authState.value == null) {
+      return null;
+    }
+
+    return await populateUserConfig();
+  }
+
+  /// Determines the ThemeMode based on the saved user config
+  ThemeMode get themeMode {
+    // TODO: Add user setting in the backend
+    // final mode = config?.theme?.toLowerCase();
+    final mode = "dark";
+    return switch (mode) {
+      'dark' => ThemeMode.dark,
+      'light' => ThemeMode.light,
+      _ => ThemeMode.system,
+    };
   }
 
   Future<UserConfig?> populateUserConfig() async {
-    _currentUserConfig = await api.userConfigControllerGet();
-    notifyListeners();
-    return _currentUserConfig;
+    final api = await ref.read(userConfigApiProvider.future);
+    final newConfig = await api.userConfigControllerGet();
+    state = AsyncData(newConfig);
+    return newConfig;
   }
 
-  /// Updates the users last selected chart range to the given value
+  Future<UserConfig?> updateConfig(UserConfig update) async {
+    final api = await ref.read(userConfigApiProvider.future);
+    final result = await api.userConfigControllerEdit(update);
+    ref.invalidateSelf();
+    state = AsyncData(result);
+    return result;
+  }
+
   Future<void> updateChartRange(ChartRangeEnum range) async {
-    currentUserConfig!.netWorthRange = range;
-    updateConfig(currentUserConfig!);
-  }
-
-  @override
-  Future<void> postLogin() async {}
-
-  @override
-  Future<void> cleanupData() async {
-    _currentUserConfig = null;
-    notifyListeners();
+    final current = state.value;
+    if (current != null) {
+      current.netWorthRange = range;
+      await updateConfig(current);
+    }
   }
 }

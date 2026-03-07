@@ -1,49 +1,53 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 
-/// Class that provides the store of current net worth information
-class NetWorthProvider extends BaseProvider<NetWorthApi> {
-  // Data store
-  TotalNetWorthDTO? _total;
-  List<EntityHistory>? _historicalAccountData;
-  final Map<String, List<HistoricalDataPoint>> _accountTimelineData = {};
+part 'net_worth_provider.g.dart';
 
-  // Public getters
-  TotalNetWorthDTO? get total => _total;
-  List<EntityHistory>? get historicalAccountData => _historicalAccountData;
-  List<HistoricalDataPoint>? getAccountTimelineData(String accountId) => _accountTimelineData[accountId];
+/// Future that provides an authenticated net worth api
+@Riverpod(keepAlive: true)
+Future<NetWorthApi> netWorthApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return NetWorthApi(client);
+}
 
-  NetWorthProvider(super.api);
-
-  /// Populates the overarching net worth over time data for all our accounts
-  Future<TotalNetWorthDTO?> populateTotal() async {
-    return populateAndSetIfChanged(api.netWorthControllerGetNetWorthTotal, _total, (newValue) => _total = newValue);
-  }
-
-  /// Populate how our accounts have performed
-  Future<List<EntityHistory>?> populateHistoricalAccountData() async {
-    return populateAndSetIfChanged(
-      () => api.netWorthControllerGetNetWorthByAccounts(),
-      _historicalAccountData,
-      (newValue) => _historicalAccountData = newValue,
-    );
-  }
-
-  /// Populates the timeline data for display for our given account
-  Future<List<HistoricalDataPoint>?> populateAccountTimelineData(String accountId) async {
-    return populateAndSetIfChanged(
-      () => api.netWorthControllerGetNetWorthTimelineAccount(accountId),
-      getAccountTimelineData(accountId),
-      (newValue) {
-        if (newValue != null) _accountTimelineData[accountId] = newValue;
-      },
-    );
-  }
-
+/// Defines the riverpod for the net worth state
+@Riverpod(keepAlive: true)
+class TotalNetWorth extends _$TotalNetWorth {
   @override
-  Future<void> cleanupData() async {
-    _total = null;
-    _historicalAccountData = null;
-    notifyListeners();
+  Future<TotalNetWorthDTO?> build() async {
+    // Automatically refresh on SSE events
+    ref.listen(sseProvider, (prev, next) {
+      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
+    final api = await ref.watch(netWorthApiProvider.future);
+    return await api.netWorthControllerGetNetWorthTotal();
+  }
+}
+
+/// Defines the historical account data
+@Riverpod(keepAlive: true)
+class HistoricalAccountData extends _$HistoricalAccountData {
+  @override
+  Future<List<EntityHistory>?> build() async {
+    final api = await ref.watch(netWorthApiProvider.future);
+    return await api.netWorthControllerGetNetWorthByAccounts();
+  }
+
+  /// Manual refresh if needed from UI pull-to-refresh
+  Future<void> refresh() async => ref.invalidateSelf();
+}
+
+/// Defines the overall account timeline
+@riverpod
+class AccountTimeline extends _$AccountTimeline {
+  @override
+  Future<List<HistoricalDataPoint>?> build(String accountId) async {
+    final api = await ref.watch(netWorthApiProvider.future);
+    return await api.netWorthControllerGetNetWorthTimelineAccount(accountId);
   }
 }
