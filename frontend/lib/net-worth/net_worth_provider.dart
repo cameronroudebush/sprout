@@ -43,7 +43,7 @@ class HistoricalAccountData extends _$HistoricalAccountData {
 }
 
 /// Defines the overall account timeline
-@riverpod
+@Riverpod(keepAlive: true)
 class AccountTimeline extends _$AccountTimeline {
   @override
   Future<List<HistoricalDataPoint>?> build(String accountId) async {

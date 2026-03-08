@@ -14,7 +14,7 @@ Future<CashFlowApi> cashFlowApi(Ref ref) async {
 }
 
 /// Sankey data based on time
-@riverpod
+@Riverpod(keepAlive: true)
 Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
   // Automatically refresh on SSE forceUpdate
   ref.listen(sseProvider, (prev, next) {
@@ -38,14 +38,14 @@ Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day,
 }
 
 /// State for cash flow stats
-@riverpod
+@Riverpod(keepAlive: true)
 Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
   final api = await ref.watch(cashFlowApiProvider.future);
   return await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: accountId);
 }
 
 /// Monthly spending state
-@riverpod
+@Riverpod(keepAlive: true)
 class MonthlySpending extends _$MonthlySpending {
   @override
   Future<CashFlowSpending?> build({int months = 4, int? categories}) async {

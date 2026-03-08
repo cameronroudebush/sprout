@@ -48,10 +48,12 @@ class SproutBaseDialogWidget extends StatelessWidget {
         title: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            spacing: 8,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
+                  spacing: 48,
                   children: [
                     // Empty space to balance the close button
                     const Expanded(child: SizedBox.shrink()),
@@ -72,7 +74,6 @@ class SproutBaseDialogWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
               Divider(height: 4, thickness: 4, color: theme.colorScheme.secondary),
             ],
           ),

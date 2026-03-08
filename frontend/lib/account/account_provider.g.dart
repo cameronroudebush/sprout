@@ -51,33 +51,33 @@ final class AccountApiProvider
 
 String _$accountApiHash() => r'17c51225bb51701c62c0754e92c6b0c2f4a652ee';
 
-@ProviderFor(AccountList)
-const accountListProvider = AccountListProvider._();
+@ProviderFor(Accounts)
+const accountsProvider = AccountsProvider._();
 
-final class AccountListProvider
-    extends $AsyncNotifierProvider<AccountList, AccountState> {
-  const AccountListProvider._()
+final class AccountsProvider
+    extends $AsyncNotifierProvider<Accounts, AccountState> {
+  const AccountsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'accountListProvider',
+        name: r'accountsProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$accountListHash();
+  String debugGetCreateSourceHash() => _$accountsHash();
 
   @$internal
   @override
-  AccountList create() => AccountList();
+  Accounts create() => Accounts();
 }
 
-String _$accountListHash() => r'8c0931825d645b2159a8663ea4af426ed29f1210';
+String _$accountsHash() => r'e969c56f8756628b9260fb806e3aad09ba8fea16';
 
-abstract class _$AccountList extends $AsyncNotifier<AccountState> {
+abstract class _$Accounts extends $AsyncNotifier<AccountState> {
   FutureOr<AccountState> build();
   @$mustCallSuper
   @override

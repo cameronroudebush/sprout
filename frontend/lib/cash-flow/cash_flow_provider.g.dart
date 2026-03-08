@@ -75,7 +75,7 @@ final class SankeyDataProvider
   }) : super(
          retry: null,
          name: r'sankeyDataProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -119,7 +119,7 @@ final class SankeyDataProvider
   }
 }
 
-String _$sankeyDataHash() => r'33f0f83f79768b61323253e5e95ee434a275e529';
+String _$sankeyDataHash() => r'7c0d590545ab265ac6b895f92a4067e423fb2065';
 
 /// Sankey data based on time
 
@@ -135,7 +135,7 @@ final class SankeyDataFamily extends $Family
         name: r'sankeyDataProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Sankey data based on time
@@ -177,7 +177,7 @@ final class CashFlowStatsProvider
   }) : super(
          retry: null,
          name: r'cashFlowStatsProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -222,7 +222,7 @@ final class CashFlowStatsProvider
   }
 }
 
-String _$cashFlowStatsHash() => r'22c2c1a52ad01782be70d37a8d86cf95f7950975';
+String _$cashFlowStatsHash() => r'918718ba8c35e7be9569a9b1b87807b53eff15fa';
 
 /// State for cash flow stats
 
@@ -238,7 +238,7 @@ final class CashFlowStatsFamily extends $Family
         name: r'cashFlowStatsProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// State for cash flow stats
@@ -272,7 +272,7 @@ final class MonthlySpendingProvider
   }) : super(
          retry: null,
          name: r'monthlySpendingProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -302,7 +302,7 @@ final class MonthlySpendingProvider
   }
 }
 
-String _$monthlySpendingHash() => r'82cac3130af9d8fe239396d413e371ef471b5f97';
+String _$monthlySpendingHash() => r'2b8e7c65de1689f8ec7f6e5a2059ff7fcaf673b4';
 
 /// Monthly spending state
 
@@ -321,7 +321,7 @@ final class MonthlySpendingFamily extends $Family
         name: r'monthlySpendingProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Monthly spending state

@@ -7,6 +7,7 @@ class SproutCard extends StatelessWidget {
   final bool applySizedBox;
   final double? height;
   final Color? bgColor;
+  final Color? borderColor;
   final bool clip;
 
   const SproutCard({
@@ -16,21 +17,21 @@ class SproutCard extends StatelessWidget {
     this.applySizedBox = true,
     this.height,
     this.bgColor,
+    this.borderColor,
     this.clip = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
-    final isAbsoluteDark = Theme.of(context).scaffoldBackgroundColor == Colors.black;
 
     final card = Card(
-      elevation: isAbsoluteDark ? 0 : 3.0,
+      color: bgColor ?? theme.cardTheme.color,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Matched to your theme's 12.0
-        side: isAbsoluteDark ? BorderSide(color: Colors.white.withOpacity(0.12), width: 1) : BorderSide.none,
+        borderRadius: BorderRadius.circular(12.0),
+        side: BorderSide(color: borderColor ?? theme.dividerColor, width: 1),
       ),
-      color: bgColor ?? (isAbsoluteDark ? const Color(0xFF121212) : null),
       child: child,
     );
 

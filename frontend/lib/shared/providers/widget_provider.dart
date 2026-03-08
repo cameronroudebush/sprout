@@ -25,7 +25,7 @@ class WidgetSync extends _$WidgetSync {
         // Invalidate the data providers to ensure they pull fresh from API
         ref.invalidate(userConfigProvider);
         ref.invalidate(totalNetWorthProvider);
-        ref.invalidate(transactionListProvider);
+        ref.invalidate(transactionsProvider);
 
         await update();
       }
@@ -68,7 +68,7 @@ class WidgetSync extends _$WidgetSync {
   /// Aggregates data from [NetWorth] and [Transactions] providers.
   Future<Map<String, dynamic>?> _prepareData() async {
     final netWorth = ref.read(totalNetWorthProvider).value;
-    final transactions = ref.read(transactionListProvider).value?.transactions ?? [];
+    final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
     final isPrivate = false; // Set to false so widget info always shows real values
 
     if (netWorth == null) return null;
@@ -120,7 +120,7 @@ void callbackDispatcher() {
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
-      await container.read(transactionListProvider.future);
+      await container.read(transactionsProvider.future);
 
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).update();

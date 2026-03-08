@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/notification/firebase_bg_provider.dart';
+import 'package:sprout/notification/firebase_bg_handler.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';

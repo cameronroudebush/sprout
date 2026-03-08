@@ -5,9 +5,8 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/widgets/login.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/routes/util/route.dart';
+import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
-import 'package:sprout/shared/widgets/connect_fail.dart';
 
 /// This provides the GoRouter for all of Sprout so pages know what is available
 final routerProvider = Provider<GoRouter>((ref) {
@@ -23,12 +22,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       // Routes that don't require Auth
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
-      GoRoute(path: '/setup', builder: (context, state) => const SetupPage()),
-      GoRoute(path: '/connection-setup', builder: (context, state) => const ConnectionSetupPage()),
-      GoRoute(path: '/connection-failure', builder: (context, state) => const ConnectionFailurePage()),
+      // TODO
+      GoRoute(path: '/setup', builder: (context, state) => const Placeholder()),
+      GoRoute(path: '/connection-setup', builder: (context, state) => const Placeholder()),
+      GoRoute(path: '/connection-failure', builder: (context, state) => const Placeholder()),
       // Routes that do require auth
       ShellRoute(
-        builder: (context, state, child) => SproutShell(child: child),
+        builder: (context, state, child) => SproutShell(state: state, child: child),
         routes: authenticatedRoutes.map((route) {
           return GoRoute(path: route.path, builder: route.builder);
         }).toList(),
@@ -69,16 +69,4 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   }
 
   return null;
-}
-
-class SetupPage extends StatelessWidget {
-  const SetupPage({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold();
-}
-
-class ConnectionSetupPage extends StatelessWidget {
-  const ConnectionSetupPage({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold();
 }

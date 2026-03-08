@@ -15,7 +15,7 @@ Future<HoldingApi> holdingApi(Ref ref) async {
 }
 
 /// Provides state to the account holdings info
-@riverpod
+@Riverpod(keepAlive: true)
 class AccountHoldings extends _$AccountHoldings {
   @override
   Future<List<Holding>> build(String accountId) async {
@@ -32,7 +32,7 @@ class AccountHoldings extends _$AccountHoldings {
 }
 
 /// Provides state to the account holding history per account id
-@riverpod
+@Riverpod(keepAlive: true)
 class AccountHoldingsHistory extends _$AccountHoldingsHistory {
   @override
   Future<List<EntityHistory>> build(String accountId) async {
@@ -42,7 +42,7 @@ class AccountHoldingsHistory extends _$AccountHoldingsHistory {
 }
 
 /// Provides state to the account holding timelines
-@riverpod
+@Riverpod(keepAlive: true)
 class HoldingTimeline extends _$HoldingTimeline {
   @override
   Future<List<HistoricalDataPoint>> build(String holdingId) async {
@@ -52,7 +52,7 @@ class HoldingTimeline extends _$HoldingTimeline {
 }
 
 /// Provides information for the major indices for holding content
-@riverpod
+@Riverpod(keepAlive: true)
 class MajorIndices extends _$MajorIndices {
   Timer? _timer;
 
