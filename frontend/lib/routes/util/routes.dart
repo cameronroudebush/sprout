@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
 import 'package:sprout/routes/util/route.dart';
 
@@ -9,7 +10,7 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Chat',
     icon: Icons.auto_awesome,
     showInBottomNav: true,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const ChatPage(),
   ),
   SproutRoute(
     path: '/accounts',

@@ -20,8 +20,12 @@ class TransactionRow extends StatelessWidget {
     return InkWell(
       onTap: () => _showDetails(context),
       borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: transaction.pending ? theme.colorScheme.secondary.withValues(alpha: 0.4) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
         child: Row(
           spacing: 12,
           children: [
@@ -31,27 +35,64 @@ class TransactionRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    transaction.description,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, letterSpacing: -0.2),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 6,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          transaction.description,
+                          style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, letterSpacing: -0.2),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (transaction.pending) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            "PENDING",
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSecondaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
+                  // Account name
                   Text(
-                    transaction.timeText,
+                    transaction.account.name,
                     style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
-            // Amount
-            Text(
-              transaction.amount.toCurrency(isPrivate),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                fontFamily: 'monospace',
-                color: isIncome ? Colors.green : Colors.red,
-              ),
+            // Amount and Time
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  transaction.amount.toCurrency(isPrivate),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    fontFamily: 'monospace',
+                    color: isIncome ? Colors.green : Colors.red,
+                  ),
+                ),
+                Text(
+                  transaction.timeText,
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 10),
+                ),
+              ],
             ),
           ],
         ),
@@ -61,19 +102,34 @@ class TransactionRow extends StatelessWidget {
 
   /// Opens a dialog to show the details of this transaction
   void _showDetails(BuildContext context) {
+    // TODO: Separate dialog, for editing too
     showDialog(
       context: context,
       builder: (context) => SproutBaseDialogWidget(
         "Transaction Details",
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          spacing: 8,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
           children: [
-            Text(transaction.description, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(transaction.amount.toCurrency(isPrivate)),
+            _buildDetailField("Description", transaction.description, isBold: true),
+            _buildDetailField("Account", transaction.account.name),
+            _buildDetailField("Amount", transaction.amount.toCurrency(isPrivate)),
+            _buildDetailField("Date", transaction.timeText),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDetailField(String label, String value, {bool isBold = false}) {
+    // TODO: Remove with new dialog
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 10)),
+        Text(value, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+      ],
     );
   }
 }

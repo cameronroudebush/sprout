@@ -45,6 +45,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
                 ),
               ],
             ),
+            Divider(height: 1),
             transactionsAsync.when(
               data: (state) {
                 final recent = state.transactions.take(count).toList();
@@ -55,7 +56,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: recent.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, __) => const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     return TransactionRow(transaction: recent[index], isPrivate: isPrivate);
                   },

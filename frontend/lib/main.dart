@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/routes/util/router.dart';
+import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -16,6 +17,8 @@ Future<void> main() async {
   final container = ProviderContainer();
   // Setup firebase, using cached credentials as provided
   await container.read(firebaseProvider.notifier).configure();
+  // Make sure the widget provider is syncing
+  container.read(widgetSyncProvider);
   runApp(UncontrolledProviderScope(container: container, child: SproutApp()));
 }
 

@@ -28,7 +28,7 @@ class SproutMoreSheet extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
       decoration: BoxDecoration(
-        color: theme.canvasColor,
+        color: theme.cardColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1),
       ),
