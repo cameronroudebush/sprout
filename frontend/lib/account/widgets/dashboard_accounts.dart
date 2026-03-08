@@ -85,11 +85,11 @@ class DashboardAccountsCard extends ConsumerWidget {
                   children: [
                     // Assets
                     _buildBarSegment(cashTotal, visualTotal, Colors.teal),
-                    _buildBarSegment(investTotal, visualTotal, theme.colorScheme.primary),
-                    _buildBarSegment(cryptoTotal, visualTotal, Colors.orangeAccent),
+                    _buildBarSegment(investTotal, visualTotal, Colors.green),
+                    _buildBarSegment(cryptoTotal, visualTotal, Colors.blue),
                     // Debts
-                    _buildBarSegment(creditTotal, visualTotal, Colors.brown),
-                    _buildBarSegment(loanTotal, visualTotal, Colors.redAccent),
+                    _buildBarSegment(creditTotal, visualTotal, Colors.red),
+                    _buildBarSegment(loanTotal, visualTotal, Colors.orangeAccent),
                   ],
                 ),
               ),
@@ -106,21 +106,16 @@ class DashboardAccountsCard extends ConsumerWidget {
             title: "Investments",
             accounts: investments,
             isPrivate: isPrivate,
-            accentColor: theme.colorScheme.primary,
+            accentColor: Colors.green,
           ),
         if (crypto.isNotEmpty)
-          _AccountGroupSection(
-            title: "Crypto",
-            accounts: crypto,
-            isPrivate: isPrivate,
-            accentColor: Colors.orangeAccent,
-          ),
+          _AccountGroupSection(title: "Crypto", accounts: crypto, isPrivate: isPrivate, accentColor: Colors.blue),
         if (creditCards.isNotEmpty)
           _AccountGroupSection(
             title: "Credit Cards",
             accounts: creditCards,
             isPrivate: isPrivate,
-            accentColor: Colors.brown,
+            accentColor: Colors.red,
             isNegative: true,
           ),
         if (loans.isNotEmpty)
@@ -128,7 +123,7 @@ class DashboardAccountsCard extends ConsumerWidget {
             title: "Loans",
             accounts: loans,
             isPrivate: isPrivate,
-            accentColor: Colors.redAccent,
+            accentColor: Colors.orangeAccent,
             isNegative: true,
           ),
       ],

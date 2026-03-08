@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
@@ -18,18 +19,22 @@ part 'widget_provider.g.dart';
 class WidgetSync extends _$WidgetSync {
   @override
   void build() {
-    /// Listen for SSE events to trigger immediate widget updates.
-    ref.listen(sseProvider, (prev, next) async {
-      final data = next.value;
-      if (data?.event == SSEDataEventEnum.forceUpdate) {
-        // Invalidate the data providers to ensure they pull fresh from API
-        ref.invalidate(userConfigProvider);
-        ref.invalidate(totalNetWorthProvider);
-        ref.invalidate(transactionsProvider);
+    if (!kIsWeb) {
+      initializeBackground();
 
-        await update();
-      }
-    });
+      /// Listen for SSE events to trigger immediate widget updates.
+      ref.listen(sseProvider, (prev, next) async {
+        final data = next.value;
+        if (data?.event == SSEDataEventEnum.forceUpdate) {
+          // Invalidate the data providers to ensure they pull fresh from API
+          ref.invalidate(userConfigProvider);
+          ref.invalidate(totalNetWorthProvider);
+          ref.invalidate(transactionsProvider);
+
+          await update();
+        }
+      });
+    }
   }
 
   /// Initializes the [Workmanager] and registers a periodic background task.
