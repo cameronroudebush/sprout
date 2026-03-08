@@ -55,6 +55,6 @@ class HomeNotificationsWidget extends ConsumerWidget {
     }
 
     if (notifications.isEmpty) return const SizedBox.shrink();
-    return Column(spacing: 4, children: notifications);
+    return Column(spacing: 0, children: notifications);
   }
 }

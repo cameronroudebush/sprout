@@ -3,25 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/routes/util/route.dart';
+import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/user/models/extensions/user_extensions.dart';
 
-/// A widget that is used to render the side navigation for Sprout
+/// A widget that is used to render the side navigation for Sprout. Only used on desktop displays.
 class SproutSideNav extends ConsumerWidget {
   final Widget? child;
-  final bool isDesktop;
 
-  const SproutSideNav({super.key, this.child, required this.isDesktop});
+  const SproutSideNav({super.key, this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return Row(
       children: [
-        SizedBox(
-          width: 300,
-          child: Material(elevation: 2.0, child: _InternalSideNavContent(isDesktop: isDesktop)),
-        ),
+        SizedBox(width: 300, child: Material(elevation: 2.0, child: const _InternalSideNavContent())),
         VerticalDivider(width: 4, color: theme.colorScheme.secondary),
         if (child != null) Expanded(child: child!),
       ],
@@ -31,9 +27,7 @@ class SproutSideNav extends ConsumerWidget {
 
 /// Internal navigation content that renders the actual sidenav
 class _InternalSideNavContent extends ConsumerWidget {
-  final bool isDesktop;
-
-  const _InternalSideNavContent({required this.isDesktop});
+  const _InternalSideNavContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,7 +42,6 @@ class _InternalSideNavContent extends ConsumerWidget {
         title: Text(page.label),
         selected: NavigationProvider.currentRoute == page.path,
         onTap: () {
-          if (!isDesktop) Navigator.pop(context); // Close drawer if mobile
           NavigationProvider.redirect(page.path);
         },
       );
@@ -60,13 +53,11 @@ class _InternalSideNavContent extends ConsumerWidget {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              if (!isDesktop) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Image.asset('assets/logo/color-transparent-no-tag.png', height: 48),
-                ),
-                Divider(height: 1, color: theme.colorScheme.outlineVariant),
-              ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Image.asset('assets/logo/color-transparent-no-tag.png', height: 48),
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
               // Map items with dividers
               ...navItems.expand((item) => [item, const Divider(height: 1)]),
             ],

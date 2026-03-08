@@ -16,7 +16,7 @@ Future<AccountApi> accountApi(Ref ref) async {
 }
 
 @Riverpod(keepAlive: true)
-class AccountList extends _$AccountList {
+class Accounts extends _$Accounts {
   @override
   Future<AccountState> build() async {
     ref.listen(sseProvider, (prev, next) {

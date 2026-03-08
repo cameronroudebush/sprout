@@ -14,7 +14,7 @@ Future<TransactionApi> transactionApi(Ref ref) async {
 }
 
 @Riverpod(keepAlive: true)
-class TransactionList extends _$TransactionList {
+class Transactions extends _$Transactions {
   static const int pageSize = 20;
 
   @override
@@ -28,6 +28,8 @@ class TransactionList extends _$TransactionList {
 
     final api = await ref.watch(transactionApiProvider.future);
     final total = await api.transactionControllerGetTotal();
+
+    /// Grab our initial transactions. Utilizes [pageSize]
     final initial = await api.transactionControllerGetByQuery(startIndex: 0, endIndex: pageSize);
 
     return TransactionState(transactions: initial ?? [], totalCount: total?.total ?? 0);

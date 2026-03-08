@@ -3,6 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/theme/absolute_dark.dart';
+import 'package:sprout/theme/bliss_light.dart';
+import 'package:sprout/theme/colored_dark.dart';
 
 part 'user_config_provider.g.dart';
 
@@ -38,6 +41,29 @@ class UserConfigNotifier extends _$UserConfigNotifier {
       'dark' => ThemeMode.dark,
       'light' => ThemeMode.light,
       _ => ThemeMode.system,
+    };
+  }
+
+  /// Determines the dark theme to use based on the user config
+  ThemeData get activeLightTheme {
+    // TODO: Add user setting in the backend
+    final style = "bliss";
+
+    return switch (style) {
+      'bliss' => blissLightTheme,
+      _ => blissLightTheme,
+    };
+  }
+
+  /// Determines the dark theme to use based on the user config
+  ThemeData get activeDarkTheme {
+    // TODO: Add user setting in the backend
+    final style = "colored";
+
+    return switch (style) {
+      'absolute' => absoluteDarkTheme,
+      'colored' => coloredDarkTheme,
+      _ => absoluteDarkTheme,
     };
   }
 

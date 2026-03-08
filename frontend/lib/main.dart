@@ -4,7 +4,6 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/routes/util/router.dart';
 import 'package:sprout/theme/absolute_dark.dart';
-import 'package:sprout/theme/white.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Provider that fires first
@@ -70,18 +69,15 @@ class SproutApp extends ConsumerWidget {
         home: Scaffold(body: Center(child: Text('Failed to initialize: $error'))),
       ),
       data: (_) {
-        final themeMode = ref.watch(userConfigProvider.notifier).themeMode;
+        final configNotifier = ref.watch(userConfigProvider.notifier);
         final router = ref.watch(routerProvider);
-        // Initialization is complete
-        // TODO
-        // FirebaseNotificationProvider.checkLaunchNotification();
 
         return MaterialApp.router(
           routerConfig: router,
           title: "Sprout",
-          theme: whiteTheme,
-          darkTheme: absoluteDarkTheme,
-          themeMode: themeMode,
+          theme: configNotifier.activeLightTheme,
+          darkTheme: configNotifier.activeDarkTheme,
+          themeMode: configNotifier.themeMode,
         );
       },
     );

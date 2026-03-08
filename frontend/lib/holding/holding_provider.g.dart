@@ -66,7 +66,7 @@ final class AccountHoldingsProvider
   }) : super(
          retry: null,
          name: r'accountHoldingsProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -96,7 +96,7 @@ final class AccountHoldingsProvider
   }
 }
 
-String _$accountHoldingsHash() => r'c7bdb627863a3bdf12feb876a7f333d808fb67bb';
+String _$accountHoldingsHash() => r'8debce54fefadb24e4da189e2d2715706c318e5e';
 
 /// Provides state to the account holdings info
 
@@ -115,7 +115,7 @@ final class AccountHoldingsFamily extends $Family
         name: r'accountHoldingsProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Provides state to the account holdings info
@@ -167,7 +167,7 @@ final class AccountHoldingsHistoryProvider
   }) : super(
          retry: null,
          name: r'accountHoldingsHistoryProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -199,7 +199,7 @@ final class AccountHoldingsHistoryProvider
 }
 
 String _$accountHoldingsHistoryHash() =>
-    r'b1f6c0d8736724662090d50afca3f34706c7233d';
+    r'7fd340017cf003d047ba3d5041bdfbdedc3b9ecf';
 
 /// Provides state to the account holding history per account id
 
@@ -218,7 +218,7 @@ final class AccountHoldingsHistoryFamily extends $Family
         name: r'accountHoldingsHistoryProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Provides state to the account holding history per account id
@@ -271,7 +271,7 @@ final class HoldingTimelineProvider
   }) : super(
          retry: null,
          name: r'holdingTimelineProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -301,7 +301,7 @@ final class HoldingTimelineProvider
   }
 }
 
-String _$holdingTimelineHash() => r'a0e8a5ccc17e756cb932fa11ce16d2337be2c532';
+String _$holdingTimelineHash() => r'7bffb548699a1a7d44f3a23d349957a46e3f7962';
 
 /// Provides state to the account holding timelines
 
@@ -320,7 +320,7 @@ final class HoldingTimelineFamily extends $Family
         name: r'holdingTimelineProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Provides state to the account holding timelines
@@ -380,7 +380,7 @@ final class MajorIndicesProvider
         argument: null,
         retry: null,
         name: r'majorIndicesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -393,7 +393,7 @@ final class MajorIndicesProvider
   MajorIndices create() => MajorIndices();
 }
 
-String _$majorIndicesHash() => r'c7ac4dd9d504a1fb7768d629a9dfc57456bb3ba0';
+String _$majorIndicesHash() => r'6080e07669598bb49b3a4afe842db31cd0db6952';
 
 /// Provides information for the major indices for holding content
 

@@ -179,7 +179,7 @@ final class AccountTimelineProvider
   }) : super(
          retry: null,
          name: r'accountTimelineProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -209,7 +209,7 @@ final class AccountTimelineProvider
   }
 }
 
-String _$accountTimelineHash() => r'5b2c979e433c30f5b82d0bde94bbe29ef85e0f5f';
+String _$accountTimelineHash() => r'23ecb35de97cb151f2f8f85c1f73a9226b27b141';
 
 /// Defines the overall account timeline
 
@@ -228,7 +228,7 @@ final class AccountTimelineFamily extends $Family
         name: r'accountTimelineProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   /// Defines the overall account timeline

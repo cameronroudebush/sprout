@@ -3,8 +3,10 @@ import 'package:sprout/theme/absolute_dark.dart';
 
 /// Helper theme functions
 class ThemeHelpers {
+  /// Primary blue shared across themes
   static const Color primaryBlue = Color(0xff6b9ac4);
 
+  /// The max size we'll allow desktop pages to expand to
   static final maxDesktopSize = 1920.0;
 
   /// Styling for displaying error buttons

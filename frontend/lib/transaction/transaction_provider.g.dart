@@ -52,33 +52,33 @@ final class TransactionApiProvider
 
 String _$transactionApiHash() => r'd7537afeaaf1c267fadfc572064951e09529b86c';
 
-@ProviderFor(TransactionList)
-const transactionListProvider = TransactionListProvider._();
+@ProviderFor(Transactions)
+const transactionsProvider = TransactionsProvider._();
 
-final class TransactionListProvider
-    extends $AsyncNotifierProvider<TransactionList, TransactionState> {
-  const TransactionListProvider._()
+final class TransactionsProvider
+    extends $AsyncNotifierProvider<Transactions, TransactionState> {
+  const TransactionsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'transactionListProvider',
+        name: r'transactionsProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$transactionListHash();
+  String debugGetCreateSourceHash() => _$transactionsHash();
 
   @$internal
   @override
-  TransactionList create() => TransactionList();
+  Transactions create() => Transactions();
 }
 
-String _$transactionListHash() => r'69543fca46a759907e05e1ad1eb736ed076c4223';
+String _$transactionsHash() => r'12068b7ef27605174db14e2bc8549a1c89435fae';
 
-abstract class _$TransactionList extends $AsyncNotifier<TransactionState> {
+abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
   FutureOr<TransactionState> build();
   @$mustCallSuper
   @override

@@ -88,7 +88,7 @@ class TransactionRules extends _$TransactionRules {
 
     // After rules are applied, transactions likely changed.
     // Invalidate the transaction list to show the new categories/data.
-    ref.invalidate(transactionListProvider);
+    ref.invalidate(transactionsProvider);
   }
 
   /// Helper to toggle the [isRunning] state for UI feedback.

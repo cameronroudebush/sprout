@@ -1,0 +1,18 @@
+import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/shared/widgets/logo_base.dart';
+
+/// A widget used to display an account logo
+class AccountLogo extends LogoBaseWidget<Account> {
+  const AccountLogo(super.logoClass, {super.key, super.height, super.width});
+
+  @override
+  ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context) {
+    return (faviconImageUrl: logoClass.institution.url, fullImageUrl: null);
+  }
+
+  @override
+  IconData getFallbackIcon(BuildContext context) {
+    return Icons.account_balance;
+  }
+}

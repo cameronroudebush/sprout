@@ -3,44 +3,40 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/theme/helpers.dart';
 
-/// Absolute dark defines an OLED theme
-final ThemeData absoluteDarkTheme =
-    FlexThemeData.dark(
+/// A lighter theme for people that light to hurt their eyes
+final ThemeData blissLightTheme =
+    FlexThemeData.light(
       colors: const FlexSchemeColor(
         primary: ThemeHelpers.primaryBlue,
-        primaryContainer: Color(0xff001e2c),
+        primaryContainer: Color(0xffd1e4ff),
         secondary: Color(0xff116383),
         secondaryContainer: Color(0xffc2e8ff),
-        tertiary: Color(0xffd6bee4),
-        tertiaryContainer: Color(0xff523f5f),
+        tertiary: Color(0xff6b5778),
+        tertiaryContainer: Color(0xfff2daff),
         error: Color(0xffba1a1a),
       ),
       surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-      blendLevel: 13,
-      darkIsTrueBlack: true,
+      blendLevel: 7,
       subThemesData: const FlexSubThemesData(
         interactionEffects: true,
         tintedDisabledControls: true,
-        blendOnColors: true,
         useM2StyleDividerInM3: true,
         inputDecoratorIsFilled: true,
         inputDecoratorBorderType: FlexInputBorderType.outline,
         alignedDropdown: true,
         navigationRailUseIndicator: true,
-        cardRadius: 12.0,
-        dialogRadius: 12.0,
       ),
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3: true,
       platform: TargetPlatform.windows,
       cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
     ).copyWith(
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: Color(0xff6b9ac4),
-        refreshBackgroundColor: Color(0xff000000),
+      appBarTheme: const AppBarTheme(backgroundColor: Colors.white, foregroundColor: Color(0xff001d36)),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.white,
+        selectedItemColor: ThemeHelpers.primaryBlue,
+        unselectedItemColor: Color(0xff43474e),
       ),
-      appBarTheme: const AppBarTheme(backgroundColor: Color(0xff000000)),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(backgroundColor: Color(0xff000000)),
-      canvasColor: const Color(0xff000000),
+      canvasColor: const Color(0xffd1e4ff),
       dividerColor: Color(0xff116383),
     );
