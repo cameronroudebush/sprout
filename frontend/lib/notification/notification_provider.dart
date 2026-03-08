@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/notification/widgets/notification_item.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
@@ -31,9 +32,8 @@ class Notifications extends _$Notifications {
   Future<List<Notification>> build() async {
     final api = await ref.watch(notificationApiProvider.future);
 
-    // 1. Setup Firebase (Replaces postLogin logic)
-    // We do this as a side effect of the provider being initialized
-    // await FirebaseNotificationProvider.configure(api); // TODO
+    // Setup Firebase (now with Authentication capability)
+    ref.read(firebaseProvider.notifier).configure(api);
 
     // Listen to SSE for new notifications
     ref.listen(sseProvider, (previous, next) async {
@@ -125,6 +125,21 @@ class Notifications extends _$Notifications {
         _displayedNotifications.remove(notification.id);
       }
     });
+  }
+
+  /// Clears a specific overlay by its unique ID
+  void clearOverlay(String id) {
+    final entry = _displayedNotifications[id];
+
+    if (entry != null) {
+      // Check if the entry is currently in the overlay tree before removing
+      if (entry.mounted) {
+        entry.remove();
+      }
+
+      // Remove from our internal tracking map
+      _displayedNotifications.remove(id);
+    }
   }
 
   /// Closes all open notifications
