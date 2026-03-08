@@ -85,4 +85,16 @@ class SecureConfig extends _$SecureConfig {
     }
     return "N/A";
   }
+
+  /// Updates the local state with a new sync status from an SSE event
+  void updateLastSync(ModelSync sync) {
+    final currentConfig = state.value;
+    if (currentConfig != null) {
+      // Update the property on the existing object
+      currentConfig.lastSchedulerRun = sync;
+
+      // Re-emit the state as AsyncData so all listeners (like the Home Notification) rebuild
+      state = AsyncData(currentConfig);
+    }
+  }
 }
