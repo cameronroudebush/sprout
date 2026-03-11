@@ -3,60 +3,74 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/models/extensions/historical_data_point_extensions.dart';
-import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
-import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
-class NetWorthCard extends ConsumerStatefulWidget {
-  const NetWorthCard({super.key});
+/// A generic net worth display that can display a title, the balances, and allow selection of the display timeline
+class NetWorthDisplay extends ConsumerWidget {
+  /// The title shown in the top-left (e.g., "NET WORTH" or "ACCOUNT BALANCE")
+  final String? title;
+
+  /// Current value to display on our card
+  final AsyncValue<num?> currentValue;
+
+  /// The DTO containing the maps for valueChange and percentChange
+  final AsyncValue<EntityHistory?> historyData;
+
+  /// The list of points used to render the sparkline
+  final AsyncValue<List<HistoricalDataPoint>?> timelineData;
+
+  const NetWorthDisplay({
+    super.key,
+    this.title,
+    required this.historyData,
+    required this.timelineData,
+    required this.currentValue,
+  });
 
   @override
-  ConsumerState<NetWorthCard> createState() => _NetWorthCardState();
-}
-
-class _NetWorthCardState extends ConsumerState<NetWorthCard> {
-  @override
-  Widget build(BuildContext context) {
-    final netWorthAsync = ref.watch(totalNetWorthProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(userConfigProvider).value;
     final isPrivate = config?.privateMode ?? false;
     final selectedRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
 
-    return SproutCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
-          children: [
-            _buildHeader(netWorthAsync, isPrivate, selectedRange),
-            // Net worth chart data
-            netWorthAsync.when(
-              data: (data) => SproutLineChart(
-                data: HistoricalDataPointExtensions.toMap(data?.timeline ?? []),
-                chartRange: selectedRange,
-                showYAxis: false,
-                height: 100,
-                showXAxis: true,
-                formatValue: (val) => val.toCurrency(isPrivate),
-              ),
-              loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
-              error: (e, _) => const SizedBox(height: 100, child: Center(child: Text("Error loading chart"))),
-            ),
-          ],
+    final frame = historyData.value?.getValueByFrame(selectedRange);
+    final currentVal = currentValue.value ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 12,
+      children: [
+        _buildHeader(context, isPrivate, selectedRange, currentVal, frame),
+        // Net worth chart data
+        timelineData.when(
+          data: (points) => SproutLineChart(
+            data: HistoricalDataPointExtensions.toMap(points ?? []),
+            chartRange: selectedRange,
+            showYAxis: false,
+            height: 100,
+            showXAxis: true,
+            formatValue: (val) => val.toCurrency(isPrivate),
+          ),
+          loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+          error: (e, _) => const SizedBox(height: 100, child: Center(child: Text("Error loading chart"))),
         ),
-      ),
+      ],
     );
   }
 
   /// Builds the header row that displays net worth information and range selectors
-  Widget _buildHeader(AsyncValue<TotalNetWorthDTO?> async, bool isPrivate, ChartRangeEnum selectedRange) {
-    final data = async.value;
-    final dataForRange = data?.history.getValueByFrame(selectedRange);
+  Widget _buildHeader(
+    BuildContext context,
+    bool isPrivate,
+    ChartRangeEnum range,
+    num value,
+    EntityHistoryDataPoint? frame,
+  ) {
+    final theme = Theme.of(context);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -66,28 +80,25 @@ class _NetWorthCardState extends ConsumerState<NetWorthCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 2,
           children: [
-            Text(
-              "NET WORTH",
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                letterSpacing: 1.0,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
+            if (title != null)
+              Text(
+                title!,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  letterSpacing: 1.0,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
             Text(
-              data?.value.toCurrency(isPrivate) ?? "--",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                // Reduced from headlineMedium
-                fontWeight: FontWeight.w900,
-                fontFamily: 'monospace',
-              ),
+              value.toCurrency(isPrivate),
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, fontFamily: 'monospace'),
             ),
             SproutChangeWidget(
-              totalChange: dataForRange?.valueChange,
-              percentageChange: dataForRange?.percentChange,
+              totalChange: frame?.valueChange,
+              percentageChange: frame?.percentChange,
               mainAxisAlignment: MainAxisAlignment.start,
-              period: selectedRange,
-              fontSize: 11, // Slightly smaller font
+              period: range,
+              fontSize: 11,
             ),
           ],
         ),
