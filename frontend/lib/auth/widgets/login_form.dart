@@ -26,6 +26,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   bool _isActionRunning = false;
 
   @override
+  void initState() {
+    super.initState();
+    _errorMessage = "";
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();

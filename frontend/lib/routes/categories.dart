@@ -26,7 +26,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5), width: 1),
       ),
-      builder: (context) => CategoryEditSheet(category: category),
+      builder: (context) => CategoryEdit(category: category),
     );
   }
 
@@ -54,62 +54,6 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
     return widgets;
   }
 
-  /// Loading indicator
-  Widget _buildShimmerLoading(ThemeData theme) {
-    return SingleChildScrollView(
-      child: Column(
-        spacing: 12,
-        children: [
-          // Explanation card
-          SproutCard(
-            child: Container(
-              height: 60,
-              width: double.infinity,
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            ),
-          ),
-          // The category options
-          SproutCard(
-            child: Column(
-              children: List.generate(
-                8,
-                (index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    spacing: 16,
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: 24,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
@@ -118,7 +62,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
         actions: [FABAction(icon: Icons.add, label: 'New Category', onTap: (context) => _openEditSheet(null))],
       ),
       body: categoriesAsync.when(
-        loading: () => _buildShimmerLoading(Theme.of(context)),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text("Error: $err")),
         data: (categories) {
           final topLevel = categories.where((c) => c.parentCategory == null).toList()

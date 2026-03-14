@@ -103,7 +103,7 @@ class TransactionRow extends StatelessWidget {
   /// Opens a dialog to show the details of this transaction
   void _showDetails(BuildContext context) {
     // TODO: Separate dialog, for editing too
-    showDialog(
+    showSproutPopup(
       context: context,
       builder: (context) => SproutBaseDialogWidget(
         "Transaction Details",

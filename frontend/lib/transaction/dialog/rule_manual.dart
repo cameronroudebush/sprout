@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
-import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_rule_provider.dart';
 
 /// Dialog display that gives options for running manual rules
@@ -65,10 +64,8 @@ class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleMan
       'Re-apply Transaction Rules',
       showCloseDialogButton: true,
       closeButtonText: "Cancel",
-      closeButtonStyle: ThemeHelpers.primaryButton,
       showSubmitButton: true,
       submitButtonText: isRunning ? "Processing..." : "Continue",
-      submitButtonStyle: ThemeHelpers.secondaryButton,
       // Disable the button if the provider is already processing
       onSubmitClick: isRunning
           ? null

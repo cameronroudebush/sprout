@@ -7,11 +7,16 @@ import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_card.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
+import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
+import 'package:sprout/shared/widgets/notification.dart';
+import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// A responsive view for account details that adapts its navigation
 /// based on the user's screen size for better ergonomics.
@@ -25,9 +30,58 @@ class AccountDetailsView extends ConsumerStatefulWidget {
   ConsumerState<AccountDetailsView> createState() => _AccountDetailsViewState();
 }
 
-class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
+class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with WidgetsBindingObserver {
   /// Selected tab index for bottom/top navigation
   int _selectedIndex = 0;
+
+  /// Track if we sent the user away to fix their institution connection
+  bool _expectingReturnFromFix = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When the user returns to the app after clicking the notification
+    if (state == AppLifecycleState.resumed && _expectingReturnFromFix) {
+      _expectingReturnFromFix = false;
+      showSproutPopup(
+        context: context,
+        builder: (ctx) => SproutBaseDialogWidget(
+          'Re-Sync',
+          showCloseDialogButton: true,
+          showSubmitButton: true,
+          submitButtonText: "Sync",
+          onSubmitClick: () async {
+            Navigator.of(context).pop();
+            await ref.read(accountsProvider.notifier).manualSync();
+          },
+          child: Text(
+            'Welcome back! Would you like to re-sync your accounts to get updated data from fixed accounts?',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Launch the external SimpleFin bridge to fix the connection
+  Future<void> _launchFixUrl() async {
+    final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
+    _expectingReturnFromFix = true;
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      _expectingReturnFromFix = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +96,31 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
       AccountTabItem(label: "Settings", icon: Icons.settings, child: _buildConfigurationSection(theme)),
     ];
 
+    final List<Widget> notifications = [];
+
+    // Institution Error Notification
+    if (widget.account.institution.hasError) {
+      notifications.add(
+        SproutNotificationWidget(
+          SproutNotification(
+            "Connection Issue: ${widget.account.institution.name} requires attention.",
+            theme.colorScheme.error,
+            theme.colorScheme.onError,
+            icon: Icons.warning_amber_rounded,
+            onClick: _launchFixUrl,
+          ),
+        ),
+      );
+    }
+
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       return Scaffold(
         body: Column(
           children: [
+            // Notifications
+            if (notifications.isNotEmpty) Column(spacing: 0, children: notifications),
             // Top card
-            Padding(padding: const EdgeInsets.all(16.0), child: _buildBalanceHeroCard(theme, accountHistory, timeline)),
+            _buildBalanceHeroCard(theme, accountHistory, timeline),
 
             // Navigation
             Padding(
@@ -215,6 +288,43 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
                 _buildStaticRow(theme, Icons.account_balance, "Provider", account.provider),
                 _buildStaticRow(theme, Icons.language, "Currency", account.currency),
                 _buildStaticRow(theme, Icons.fingerprint, "Account ID", account.id, isLast: true),
+
+                const Divider(),
+
+                // Delete
+                SizedBox(
+                  width: 240,
+                  child: FilledButton(
+                    onPressed: () {
+                      // Confirmation dialog
+                      showSproutPopup(
+                        context: context,
+                        builder: (ctx) => SproutBaseDialogWidget(
+                          'Delete Account',
+                          showCloseDialogButton: true,
+                          closeButtonStyle: ThemeHelpers.primaryButton,
+                          showSubmitButton: true,
+                          submitButtonText: "Delete",
+                          submitButtonStyle: ThemeHelpers.errorButton,
+                          onSubmitClick: () async {
+                            Navigator.of(context).pop();
+                            await accountProvider.delete(account.id);
+                          },
+                          child: Text(
+                            "Are you sure you would like to delete this account? You'll lose all previous history. This action cannot be reversed.",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ThemeHelpers.errorButton,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 8,
+                      children: [Icon(Icons.delete), Text("Delete")],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
