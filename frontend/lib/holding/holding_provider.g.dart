@@ -96,7 +96,7 @@ final class AccountHoldingsProvider
   }
 }
 
-String _$accountHoldingsHash() => r'8debce54fefadb24e4da189e2d2715706c318e5e';
+String _$accountHoldingsHash() => r'1d4a77dd177db03c78e457886fd8eb550c7e05e9';
 
 /// Provides state to the account holdings info
 

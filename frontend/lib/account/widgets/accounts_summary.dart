@@ -1,87 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/account/models/extensions/account_extensions.dart';
+import 'package:sprout/account/widgets/account_group.dart';
+import 'package:sprout/account/widgets/account_total_summary_card.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
+import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
-/// Renders a scrollable list of all user accounts grouped by their [AccountTypeEnum].
+/// Renders a grouped overview of all user accounts.
 ///
-/// This view provides a high-level overview of balances and institution names,
-/// allowing users to quickly scan their total financial distribution.
+/// Includes a visual breakdown of Assets vs. Debts and uses expandable
+/// sections to maintain a clean, scannable interface.
 class AccountSummaryView extends ConsumerWidget {
+  /// The accounts to render
   final List<Account> accounts;
+
+  /// If the user is configured to private mode
   final bool isPrivate;
 
-  // TODO: This sucks, improve it
+  /// If each grouping should be rendered as it's own card
+  final bool individualCards;
 
-  const AccountSummaryView({super.key, required this.accounts, required this.isPrivate});
+  final ScrollPhysics? physics;
+  final bool shrinkWrap;
+
+  const AccountSummaryView({
+    super.key,
+    required this.accounts,
+    required this.isPrivate,
+    this.individualCards = true,
+    this.physics,
+    this.shrinkWrap = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final config = AccountExtensions.groupConfig;
+    final historyAsync = ref.watch(historicalAccountDataProvider);
+    final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ?? ChartRangeEnum.oneDay;
+
+    final groupedAccounts = config.keys.map((type) {
+      final groupAccounts = accounts.where((a) => a.type == type).toList();
+      final ui = config[type];
+
+      if (groupAccounts.isEmpty || ui == null) return const SizedBox.shrink();
+
+      // Calculate the weighted aggregate percentage change for this group
+      double totalGroupValueChange = 0;
+      double totalWeightedPercent = 0;
+      double totalBalance = 0;
+
+      historyAsync.whenData((historyList) {
+        if (historyList == null) return;
+
+        // Filter histories for accounts in this group
+        final groupHistories = historyList.where((h) => groupAccounts.any((a) => a.id == h.connectedId));
+
+        for (final h in groupHistories) {
+          // Use the helper to get the correct data point for the range
+          final dataPoint = h.getValueByFrame(selectedRange);
+
+          // Use the balance of the account to weight the percentage
+          final account = groupAccounts.firstWhere((a) => a.id == h.connectedId);
+          final balance = account.balance.abs();
+          totalGroupValueChange += dataPoint.valueChange.toDouble();
+          totalWeightedPercent += ((dataPoint.percentChange?.toDouble() ?? 0) * balance);
+          totalBalance += balance;
+        }
+      });
+
+      final groupPercentChange = totalBalance > 0 ? (totalWeightedPercent / totalBalance) : 0.0;
+
+      return AccountGroupSection(
+        title: ui.title,
+        accounts: groupAccounts,
+        isPrivate: isPrivate,
+        accentColor: ui.color,
+        isNegative: ui.isNegative,
+        initiallyExpanded: individualCards,
+        renderAsCard: individualCards,
+        percentChange: groupPercentChange,
+        totalChange: totalGroupValueChange,
+        selectedRange: selectedRange,
+        historyList: historyAsync.value,
+        onAccountClick: (acc) => NavigationProvider.redirect('accounts', queryParameters: {'id': acc.id}),
+      );
+    }).toList();
 
     return ListView(
-      padding: const EdgeInsets.all(16),
-      children: AccountTypeEnum.values.map((type) {
-        final filtered = accounts.where((a) => a.type == type).toList();
-        if (filtered.isEmpty) return const SizedBox.shrink();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildGroupHeader(theme, type.value),
-            SproutCard(
-              child: Column(
-                children: filtered.asMap().entries.map((entry) {
-                  return _buildAccountRow(context, entry.value, entry.key == filtered.length - 1);
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        );
-      }).toList(),
-    );
-  }
-
-  /// Builds the uppercase section header for a specific account group.
-  Widget _buildGroupHeader(ThemeData theme, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(label.toUpperCase(), style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
-    );
-  }
-
-  /// Builds a clickable row for an individual account that navigates to the detail view.
-  Widget _buildAccountRow(BuildContext context, Account a, bool isLast) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: () => NavigationProvider.redirect('accounts', queryParameters: {'id': a.id}),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: isLast ? null : Border(bottom: BorderSide(color: theme.dividerColor)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(a.name, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  Text(a.institution.name, style: theme.textTheme.labelSmall),
-                ],
-              ),
-            ),
-            Text(
-              a.balance.toCurrency(isPrivate),
-              style: theme.textTheme.bodyLarge?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            ),
-            const Icon(Icons.chevron_right, size: 16),
-          ],
-        ),
-      ),
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      padding: individualCards ? const EdgeInsets.symmetric(horizontal: 12) : EdgeInsets.zero,
+      children: [
+        TotalSummary(accounts: accounts, isPrivate: isPrivate),
+        if (!individualCards)
+          SproutCard(
+            child: Column(mainAxisSize: MainAxisSize.min, children: groupedAccounts),
+          )
+        else
+          ...groupedAccounts,
+      ],
     );
   }
 }

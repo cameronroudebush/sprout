@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/routes/accounts.dart';
+import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
+import 'package:sprout/routes/user_config.dart';
 import 'package:sprout/routes/util/route.dart';
 
 /// List of routes that require authentication
@@ -37,7 +39,7 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/categories',
     label: 'Categories',
     icon: Icons.category,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const CategoryOverviewPage(),
   ),
   SproutRoute(
     path: '/rules',
@@ -63,6 +65,6 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Settings',
     icon: Icons.settings_rounded,
     showInSidebar: false,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const UserConfigPage(),
   ),
 ];

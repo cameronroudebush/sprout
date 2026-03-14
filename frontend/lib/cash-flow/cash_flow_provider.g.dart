@@ -119,7 +119,7 @@ final class SankeyDataProvider
   }
 }
 
-String _$sankeyDataHash() => r'7c0d590545ab265ac6b895f92a4067e423fb2065';
+String _$sankeyDataHash() => r'663aee4dc0e8937bf533f78333406418bfe8816e';
 
 /// Sankey data based on time
 

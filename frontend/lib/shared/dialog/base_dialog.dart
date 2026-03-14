@@ -44,83 +44,86 @@ class SproutBaseDialogWidget extends StatelessWidget {
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.of(context).pop(),
-        child: AlertDialog(
-          insetPadding: EdgeInsets.zero,
-          titlePadding: const EdgeInsets.symmetric(vertical: 12),
-          contentPadding: const EdgeInsets.only(bottom: 24),
-          title: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    spacing: 48,
-                    children: [
-                      // Empty space to balance the close button
-                      const Expanded(child: SizedBox.shrink()),
-                      Text(dialogTitleText, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () => Navigator.of(context).pop(),
-                            // Using a subtle splash instead of full button styling
-                            visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(height: 4, thickness: 4, color: theme.colorScheme.secondary),
-              ],
-            ),
-          ),
-          content: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .9,
-              maxHeight: mediaQuery.height * .75,
-            ),
-            child: SingleChildScrollView(
-              child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: child),
-            ),
-          ),
-          actions: showSubmitButton || showCloseDialogButton
-              ? [
+        child: GestureDetector(
+          onTap: () {}, // Prevent clicking in the dialog from closing it
+          child: AlertDialog(
+            insetPadding: EdgeInsets.zero,
+            titlePadding: const EdgeInsets.symmetric(vertical: 12),
+            contentPadding: const EdgeInsets.only(bottom: 24),
+            title: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
-                      spacing: 12,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 48,
                       children: [
-                        if (showCloseDialogButton)
-                          Expanded(
-                            child: FilledButton(
-                              style: closeButtonStyle == null
-                                  ? ThemeHelpers.errorButton
-                                  : closeButtonStyle!.merge(ThemeHelpers.errorButton),
-                              onPressed: !allowCloseClick ? null : () => Navigator.of(context).pop(),
-                              child: Text(closeButtonText),
+                        // Empty space to balance the close button
+                        const Expanded(child: SizedBox.shrink()),
+                        Text(dialogTitleText, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.of(context).pop(),
+                              // Using a subtle splash instead of full button styling
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
                           ),
-                        if (showSubmitButton)
-                          Expanded(
-                            child: FilledButton(
-                              style: submitButtonStyle,
-                              onPressed: !allowSubmitClick ? null : onSubmitClick,
-                              child: Text(submitButtonText),
-                            ),
-                          ),
+                        ),
                       ],
                     ),
                   ),
-                ]
-              : null,
+                  Divider(height: 4, thickness: 4, color: theme.colorScheme.secondary),
+                ],
+              ),
+            ),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: mediaQuery.width > 640 ? 640 : mediaQuery.width * .9,
+                maxHeight: mediaQuery.height * .75,
+              ),
+              child: SingleChildScrollView(
+                child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: child),
+              ),
+            ),
+            actions: showSubmitButton || showCloseDialogButton
+                ? [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        spacing: 12,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (showCloseDialogButton)
+                            Expanded(
+                              child: FilledButton(
+                                style: closeButtonStyle == null
+                                    ? ThemeHelpers.errorButton
+                                    : closeButtonStyle!.merge(ThemeHelpers.errorButton),
+                                onPressed: !allowCloseClick ? null : () => Navigator.of(context).pop(),
+                                child: Text(closeButtonText),
+                              ),
+                            ),
+                          if (showSubmitButton)
+                            Expanded(
+                              child: FilledButton(
+                                style: submitButtonStyle,
+                                onPressed: !allowSubmitClick ? null : onSubmitClick,
+                                child: Text(submitButtonText),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ]
+                : null,
+          ),
         ),
       ),
     );

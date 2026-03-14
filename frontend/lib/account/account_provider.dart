@@ -20,7 +20,7 @@ class Accounts extends _$Accounts {
   @override
   Future<AccountState> build() async {
     ref.listen(sseProvider, (prev, next) {
-      final data = next.value;
+      final data = next.latestData;
       if (data == null) return;
 
       if (data.event == SSEDataEventEnum.sync_) {

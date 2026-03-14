@@ -80,7 +80,7 @@ final class TotalNetWorthProvider
   TotalNetWorth create() => TotalNetWorth();
 }
 
-String _$totalNetWorthHash() => r'04d700d8a8d69b0131badd90585834d40db5edc4';
+String _$totalNetWorthHash() => r'41f4aab46c28414abe9d7c7547e3b88dce5b7a46';
 
 /// Defines the riverpod for the net worth state
 

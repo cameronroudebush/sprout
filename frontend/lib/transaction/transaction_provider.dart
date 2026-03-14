@@ -19,9 +19,9 @@ class Transactions extends _$Transactions {
 
   @override
   Future<TransactionState> build() async {
-    // Listen for SSE updates to refresh the list
     ref.listen(sseProvider, (prev, next) {
-      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
         ref.invalidateSelf();
       }
     });

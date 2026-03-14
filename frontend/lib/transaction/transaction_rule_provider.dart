@@ -20,9 +20,9 @@ Future<TransactionRuleApi> transactionRuleApi(Ref ref) async {
 class TransactionRules extends _$TransactionRules {
   @override
   Future<TransactionRuleState> build() async {
-    // Listen for SSE events to refresh rules or stop loading spinners
     ref.listen(sseProvider, (prev, next) {
-      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
         ref.invalidateSelf();
       }
     });

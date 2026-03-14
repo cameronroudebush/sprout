@@ -79,7 +79,7 @@ final class TransactionRulesProvider
   TransactionRules create() => TransactionRules();
 }
 
-String _$transactionRulesHash() => r'c19b68350fdf94c05ca1718090754d0c25805b1b';
+String _$transactionRulesHash() => r'1d5f54b29522765f0993b7aa2e2de095391a1d08';
 
 abstract class _$TransactionRules extends $AsyncNotifier<TransactionRuleState> {
   FutureOr<TransactionRuleState> build();

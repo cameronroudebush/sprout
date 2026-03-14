@@ -48,6 +48,45 @@ final class UserConfigApiProvider
 
 String _$userConfigApiHash() => r'3fb676f40219a1c1f2dea6580987defebea3d62b';
 
+@ProviderFor(packageInfo)
+const packageInfoProvider = PackageInfoProvider._();
+
+final class PackageInfoProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<PackageInfo>,
+          PackageInfo,
+          FutureOr<PackageInfo>
+        >
+    with $FutureModifier<PackageInfo>, $FutureProvider<PackageInfo> {
+  const PackageInfoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'packageInfoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$packageInfoHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<PackageInfo> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<PackageInfo> create(Ref ref) {
+    return packageInfo(ref);
+  }
+}
+
+String _$packageInfoHash() => r'44d37547139567a5f03c1942c1d62ff1abb07248';
+
 @ProviderFor(UserConfigNotifier)
 const userConfigProvider = UserConfigNotifierProvider._();
 
@@ -73,7 +112,7 @@ final class UserConfigNotifierProvider
 }
 
 String _$userConfigNotifierHash() =>
-    r'7b0585f5e1a89f9396029b6bac7884bf987f1f37';
+    r'e83106b3fe248d53c4f6795a7306a4a40e092d5d';
 
 abstract class _$UserConfigNotifier extends $AsyncNotifier<UserConfig?> {
   FutureOr<UserConfig?> build();

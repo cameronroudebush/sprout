@@ -37,7 +37,7 @@ class Notifications extends _$Notifications {
 
     // Listen to SSE for new notifications
     ref.listen(sseProvider, (previous, next) async {
-      final data = next.value;
+      final data = next.latestData;
       if (data?.event == SSEDataEventEnum.notification) {
         final msg = NotificationSSEDTO.fromJson(data!.payload);
 
