@@ -14,7 +14,7 @@ part of 'sse_provider.dart';
 const sseProvider = SseProvider._();
 
 /// Defines an SSE riverpod that tracks our current SSE info
-final class SseProvider extends $StreamNotifierProvider<Sse, SSEData> {
+final class SseProvider extends $NotifierProvider<Sse, SseConnectionState> {
   /// Defines an SSE riverpod that tracks our current SSE info
   const SseProvider._()
     : super(
@@ -33,24 +33,32 @@ final class SseProvider extends $StreamNotifierProvider<Sse, SSEData> {
   @$internal
   @override
   Sse create() => Sse();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SseConnectionState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SseConnectionState>(value),
+    );
+  }
 }
 
-String _$sseHash() => r'333571f23f2f10091959ff77b2713f45361d8c17';
+String _$sseHash() => r'd2b576e925ef5ae9b19c07abf4bc229be9e71100';
 
 /// Defines an SSE riverpod that tracks our current SSE info
 
-abstract class _$Sse extends $StreamNotifier<SSEData> {
-  Stream<SSEData> build();
+abstract class _$Sse extends $Notifier<SseConnectionState> {
+  SseConnectionState build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<AsyncValue<SSEData>, SSEData>;
+    final ref = this.ref as $Ref<SseConnectionState, SseConnectionState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<SSEData>, SSEData>,
-              AsyncValue<SSEData>,
+              AnyNotifier<SseConnectionState, SseConnectionState>,
+              SseConnectionState,
               Object?,
               Object?
             >;

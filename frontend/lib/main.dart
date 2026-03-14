@@ -75,13 +75,7 @@ class SproutApp extends ConsumerWidget {
         final configNotifier = ref.watch(userConfigProvider.notifier);
         final router = ref.watch(routerProvider);
 
-        return MaterialApp.router(
-          routerConfig: router,
-          title: "Sprout",
-          theme: configNotifier.activeLightTheme,
-          darkTheme: configNotifier.activeDarkTheme,
-          themeMode: configNotifier.themeMode,
-        );
+        return MaterialApp.router(routerConfig: router, title: "Sprout", theme: configNotifier.activeTheme);
       },
     );
   }

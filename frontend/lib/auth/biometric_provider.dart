@@ -52,6 +52,7 @@ class Biometrics extends _$Biometrics {
     return BiometricState();
   }
 
+  /// Resets our biometric lock state to disable it
   Future<void> reset() async {
     if (kIsWeb) return;
     _lockTimer?.cancel();
@@ -99,7 +100,7 @@ class Biometrics extends _$Biometrics {
     final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
 
     if (!kIsWeb && secureMode) {
-      final success = await _requestBiometricAuth();
+      final success = await requestBiometricAuth();
       if (!success) {
         state = state.copyWith(isLoggingOut: true, isLocked: preLogout ? false : state.isLocked);
         try {
@@ -116,7 +117,7 @@ class Biometrics extends _$Biometrics {
   }
 
   /// Request that the user verifies they can use biometrics
-  Future<bool> _requestBiometricAuth() async {
+  Future<bool> requestBiometricAuth() async {
     state = state.copyWith(isUnlocking: true);
     try {
       final canCheck = await _auth.canCheckBiometrics;

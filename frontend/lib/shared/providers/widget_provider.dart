@@ -24,7 +24,7 @@ class WidgetSync extends _$WidgetSync {
 
       /// Listen for SSE events to trigger immediate widget updates.
       ref.listen(sseProvider, (prev, next) async {
-        final data = next.value;
+        final data = next.latestData;
         if (data?.event == SSEDataEventEnum.forceUpdate) {
           // Invalidate the data providers to ensure they pull fresh from API
           ref.invalidate(userConfigProvider);

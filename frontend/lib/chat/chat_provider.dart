@@ -18,7 +18,7 @@ class Chat extends _$Chat {
   @override
   Future<List<ChatHistory>> build() async {
     ref.listen(sseProvider, (prev, next) {
-      final data = next.value;
+      final data = next.latestData;
       if (data?.event == SSEDataEventEnum.chat) {
         final chat = ChatHistory.fromJson(data?.payload);
         if (chat != null) {

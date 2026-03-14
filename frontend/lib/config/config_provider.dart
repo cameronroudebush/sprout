@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/config/models/extensions/config_extension.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 part 'config_provider.g.dart';
 
@@ -77,13 +77,10 @@ class SecureConfig extends _$SecureConfig {
     return config;
   }
 
-  /// Returns the last sync status based on the secure config
+  /// Returns the formatted sync status string from the current state
   String getLastSyncStatus() {
-    final config = state.value;
-    if (config?.lastSchedulerRun?.time != null) {
-      return timeago.format(config!.lastSchedulerRun!.time.toLocal());
-    }
-    return "N/A";
+    // Calling the extension property on the state value
+    return state.value?.syncStatusString ?? "N/A";
   }
 
   /// Updates the local state with a new sync status from an SSE event

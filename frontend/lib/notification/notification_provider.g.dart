@@ -80,7 +80,7 @@ final class NotificationsProvider
   Notifications create() => Notifications();
 }
 
-String _$notificationsHash() => r'6cd80889912086a3c58492fe5a3beef092f5a080';
+String _$notificationsHash() => r'ca59e89ffd23ba2e48ffee45813766fcee7c8b38';
 
 /// Describes the riverpod state for our notifications set
 

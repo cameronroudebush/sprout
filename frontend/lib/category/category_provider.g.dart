@@ -72,7 +72,7 @@ final class CategoriesProvider
   Categories create() => Categories();
 }
 
-String _$categoriesHash() => r'b427437fb31a61b5d4c3994a97a1fe8dc19de290';
+String _$categoriesHash() => r'f5594818e4cd4712270896dce0b698f3a31ad1d1';
 
 abstract class _$Categories extends $AsyncNotifier<List<Category>> {
   FutureOr<List<Category>> build();
@@ -139,7 +139,7 @@ final class UnknownCategoryCountProvider
 }
 
 String _$unknownCategoryCountHash() =>
-    r'869f2703a8d746f0fcb0dad8dfa344dd4a3b629b';
+    r'0b9e674259cff58752149d10a91034e4840e7b5f';
 
 /// Tracks the state for the unknown category count
 

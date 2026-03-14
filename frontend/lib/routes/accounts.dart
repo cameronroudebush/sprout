@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/account/dialog/add_account_dialog.dart';
 import 'package:sprout/account/widgets/account_details.dart';
 import 'package:sprout/account/widgets/accounts_summary.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/widgets/speed_dial.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// The primary entry point for the Accounts section of Sprout.
@@ -24,14 +27,60 @@ class AccountsPage extends ConsumerWidget {
 
     return accountsAsync.when(
       data: (state) {
+        Widget body;
+        // Determine the body content based on URL parameters
         if (accountId != null) {
           final account = state.accounts.firstWhere((a) => a.id == accountId, orElse: () => state.accounts.first);
-          return AccountDetailsView(account: account, isPrivate: isPrivate);
+          body = AccountDetailsView(account: account, isPrivate: isPrivate);
+        } else {
+          body = AccountSummaryView(accounts: state.accounts, isPrivate: isPrivate);
         }
-        return AccountSummaryView(accounts: state.accounts, isPrivate: isPrivate);
+
+        return Scaffold(
+          body: body,
+          // Add a FAB button
+          floatingActionButton: SproutSpeedDial(
+            actions: [
+              FABAction(
+                icon: Icons.add,
+                label: 'Add Account',
+                onTap: (context) => showDialog(context: context, builder: (_) => const AddAccountDialog()),
+              ),
+              FABAction(
+                icon: Icons.refresh,
+                label: 'Sync All',
+                onTap: (context) => showDialog(
+                  context: context,
+                  builder: (context) => SproutBaseDialogWidget(
+                    "Confirm Sync",
+                    showCloseDialogButton: true,
+                    closeButtonText: "Cancel",
+                    showSubmitButton: true,
+                    submitButtonText: "Start Sync",
+                    onSubmitClick: () {
+                      // Trigger the sync
+                      ref.read(accountsProvider.notifier).manualSync();
+                      // Close the dialog
+                      Navigator.of(context).pop();
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        "Are you sure you want to manually sync all accounts? This may take a moment depending on your providers.",
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('Error: $err')),
     );
   }
 }
+
+// TODO: Add the time frame selection for change

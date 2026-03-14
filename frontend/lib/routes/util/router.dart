@@ -16,7 +16,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.watch(connectionUrlProvider);
 
   final router = GoRouter(
-    initialLocation: '/login',
+    // initialLocation: '/login',
     // We pass the ref to our redirect
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [

@@ -19,7 +19,8 @@ class TotalNetWorth extends _$TotalNetWorth {
   Future<TotalNetWorthDTO?> build() async {
     // Automatically refresh on SSE events
     ref.listen(sseProvider, (prev, next) {
-      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
         ref.invalidateSelf();
       }
     });

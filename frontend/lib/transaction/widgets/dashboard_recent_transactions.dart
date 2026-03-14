@@ -31,7 +31,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "RECENT ACTIVITY",
+                  "Recent Activity",
                   style: theme.textTheme.labelSmall?.copyWith(
                     letterSpacing: 1.2,
                     fontWeight: FontWeight.bold,

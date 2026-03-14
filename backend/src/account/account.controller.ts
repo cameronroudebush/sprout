@@ -13,6 +13,7 @@ import { TransactionRuleService } from "@backend/transaction/transaction.rule.se
 import { User } from "@backend/user/model/user.model";
 import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Post, Put, Query } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { randomUUID } from "crypto";
 import { startOfDay } from "date-fns";
 import { MoreThanOrEqual } from "typeorm";
 import { SSEService } from "../sse/sse.service";
@@ -103,7 +104,17 @@ export class AccountController {
     const matchingProvider = this.providerService.getAll().find((x) => x.config.name === name);
     if (matchingProvider == null) throw new NotFoundException(`Failed to locate matching provider for ${name}`);
     const existingAccounts = await Account.find({ where: { user: { id: user.id } } });
-    const providerAccounts = (await matchingProvider.get(user, true)).map((x) => x.account);
+    const providerAccounts = await Promise.all(
+      (await matchingProvider.get(user, true)).map(async (x) => {
+        const account = x.account;
+        const matchingInstitution = await Institution.findOne({ where: { user: { id: user.id }, name: account.institution.name } });
+        if (matchingInstitution == null) {
+          // New institution
+          account.institution.id = randomUUID();
+        } else account.institution = matchingInstitution;
+        return x.account;
+      }),
+    );
     return providerAccounts.filter((providerAccount) => !existingAccounts.some((existingAccount) => existingAccount.id === providerAccount.id));
   }
 

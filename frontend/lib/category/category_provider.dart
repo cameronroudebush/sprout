@@ -16,8 +16,9 @@ class Categories extends _$Categories {
   @override
   Future<List<Category>> build() async {
     // Listen for SSE force updates to refresh the list
-    ref.listen(sseProvider, (previous, next) {
-      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+    ref.listen(sseProvider, (prev, next) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
         ref.invalidateSelf();
       }
     });
@@ -57,7 +58,8 @@ class UnknownCategoryCount extends _$UnknownCategoryCount {
   @override
   Future<int> build([String? accountId]) async {
     ref.listen(sseProvider, (prev, next) {
-      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
         ref.invalidateSelf();
       }
     });

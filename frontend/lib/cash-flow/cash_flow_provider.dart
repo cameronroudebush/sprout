@@ -18,7 +18,8 @@ Future<CashFlowApi> cashFlowApi(Ref ref) async {
 Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
   // Automatically refresh on SSE forceUpdate
   ref.listen(sseProvider, (prev, next) {
-    if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+    final event = next.latestData?.event;
+    if (event == SSEDataEventEnum.forceUpdate) {
       ref.invalidateSelf();
     }
   });

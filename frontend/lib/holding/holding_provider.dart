@@ -21,7 +21,8 @@ class AccountHoldings extends _$AccountHoldings {
   Future<List<Holding>> build(String accountId) async {
     // Auto-refresh when an SSE update for this account arrives
     ref.listen(sseProvider, (prev, next) {
-      if (next.value?.event == SSEDataEventEnum.forceUpdate) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
         ref.invalidateSelf();
       }
     });
