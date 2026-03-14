@@ -90,4 +90,20 @@ class Accounts extends _$Accounts {
     }
     return updated;
   }
+
+  /// Deletes the given account via the backend
+  Future<void> delete(String accountId) async {
+    final notifications = ref.read(notificationsProvider.notifier);
+    try {
+      final api = await ref.read(accountApiProvider.future);
+      await api.accountControllerDelete(accountId);
+      if (state.value != null) {
+        final newList = state.value!.accounts.where((a) => a.id != accountId).toList();
+        state = AsyncData(state.value!.copyWith(accounts: newList));
+      }
+      notifications.openFrontendOnly("Account deleted successfully.");
+    } catch (e) {
+      notifications.openWithAPIException(e);
+    }
+  }
 }

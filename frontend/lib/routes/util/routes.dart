@@ -3,6 +3,7 @@ import 'package:sprout/routes/accounts.dart';
 import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
+import 'package:sprout/routes/transaction_rules.dart';
 import 'package:sprout/routes/user_config.dart';
 import 'package:sprout/routes/util/route.dart';
 
@@ -45,7 +46,7 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/rules',
     label: 'Rules',
     icon: Icons.receipt_long_rounded,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const TransactionRulesPage(),
   ),
   SproutRoute(
     path: '/subscriptions',

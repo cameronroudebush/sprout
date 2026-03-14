@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/transaction/dialog/rule_manual.dart';
 import 'package:sprout/transaction/models/transaction_rule_state.dart';
@@ -100,6 +101,6 @@ class TransactionRules extends _$TransactionRules {
 
   /// Opens the manual refresh dialog.
   void openManualRefreshDialog(BuildContext context) {
-    showDialog(context: context, builder: (_) => const TransactionRuleManualDialog());
+    showSproutPopup(context: context, builder: (_) => const TransactionRuleManualDialog());
   }
 }

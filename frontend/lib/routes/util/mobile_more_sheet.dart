@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/theme/helpers.dart';
 
 /// Used to display a grid in a sheet of additional routes on mobile that are not shown on develop
@@ -25,37 +26,24 @@ class SproutMoreSheet extends ConsumerWidget {
     // Filter routes: Sidebar enabled but NOT in the bottom bar
     final moreRoutes = authenticatedRoutes.where((r) => r.showInSidebar && !r.showInBottomNav).toList();
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1),
-      ),
+    return SproutBaseDialogWidget(
+      "${_getGreeting()} ${user?.username ?? 'User'}!",
       child: Column(
         mainAxisSize: MainAxisSize.min,
         spacing: 24,
         children: [
-          _buildHandle(theme),
-          // Personalized Header
-          Column(
-            spacing: 4,
-            children: [
-              Text(
-                "${_getGreeting()} ${user?.username ?? 'User'}!",
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w500, letterSpacing: -0.5),
-              ),
-              Text(
-                "Where are we headed today?",
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-              ),
-            ],
+          // Sub-header text
+          Text(
+            "Where are we headed today?",
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+            textAlign: TextAlign.center,
           ),
+
           // Build the grid of pages
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 16),
             itemCount: moreRoutes.length,
             itemBuilder: (context, index) {
               final route = moreRoutes[index];
@@ -72,19 +60,13 @@ class SproutMoreSheet extends ConsumerWidget {
               );
             },
           ),
+
           // Build bottom actions
           _buildBottomActions(context, ref),
         ],
       ),
     );
   }
-
-  /// The handle for closing this popup
-  Widget _buildHandle(ThemeData theme) => Container(
-    width: 36,
-    height: 4,
-    decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(10)),
-  );
 
   /// Constructs the bottom row allowing for settings access for the user
   Widget _buildBottomActions(BuildContext context, WidgetRef ref) {

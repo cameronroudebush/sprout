@@ -8,15 +8,20 @@ import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/theme/helpers.dart';
 
 /// A widget that renders the ability to edit a category
-class CategoryEditSheet extends ConsumerStatefulWidget {
+class CategoryEdit extends ConsumerStatefulWidget {
   final Category? category;
-  const CategoryEditSheet({super.key, this.category});
+
+  /// A callback that is triggered when a new category is saved.
+  /// If provided, this is called instead of the default provider add.
+  final Function(Category category)? onAdd;
+
+  const CategoryEdit({super.key, this.category, this.onAdd});
 
   @override
-  ConsumerState<CategoryEditSheet> createState() => _CategoryEditSheetState();
+  ConsumerState<CategoryEdit> createState() => _CategoryEditState();
 }
 
-class _CategoryEditSheetState extends ConsumerState<CategoryEditSheet> {
+class _CategoryEditState extends ConsumerState<CategoryEdit> {
   late TextEditingController _nameController;
   String? _selectedIcon;
   Category? _selectedParent;
@@ -37,16 +42,18 @@ class _CategoryEditSheetState extends ConsumerState<CategoryEditSheet> {
 
   /// Opens a dialog to confirm that we can delete this category
   void _confirmDelete(BuildContext context) {
-    showDialog(
+    showSproutPopup(
       context: context,
       builder: (_) => SproutBaseDialogWidget(
         'Delete Category',
         showCloseDialogButton: true,
+        closeButtonStyle: ThemeHelpers.primaryButton,
         showSubmitButton: true,
         submitButtonText: "Delete",
         submitButtonStyle: ThemeHelpers.errorButton,
         onSubmitClick: () {
           ref.read(categoriesProvider.notifier).delete(widget.category!.id);
+          Navigator.of(context).pop();
           Navigator.of(context).pop();
         },
         child: const Text('This will set linked transactions to "Unknown". Continue?', textAlign: TextAlign.center),
@@ -55,7 +62,7 @@ class _CategoryEditSheetState extends ConsumerState<CategoryEditSheet> {
   }
 
   /// What to do when we are ready to save our content
-  Future<void> _handleSave(String name, BuildContext context) async {
+  Future<void> _handleSave(BuildContext context) async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
@@ -67,7 +74,11 @@ class _CategoryEditSheetState extends ConsumerState<CategoryEditSheet> {
     );
 
     if (widget.category == null) {
-      await ref.read(categoriesProvider.notifier).add(categoryToSave);
+      if (widget.onAdd != null) {
+        widget.onAdd!(categoryToSave);
+      } else {
+        await ref.read(categoriesProvider.notifier).add(categoryToSave);
+      }
     } else {
       await ref.read(categoriesProvider.notifier).edit(categoryToSave);
     }
@@ -77,67 +88,51 @@ class _CategoryEditSheetState extends ConsumerState<CategoryEditSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _nameController,
+      builder: (context, value, child) {
+        final bool canSave = value.text.trim().isNotEmpty;
+        final isEdit = widget.category != null;
 
-    return Padding(
-      padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: MediaQuery.of(context).viewInsets.bottom + 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 20,
-        children: [
-          Text(widget.category == null ? "New Category" : "Edit Category", style: theme.textTheme.titleLarge),
-
-          TextField(
-            controller: _nameController,
-            autofocus: true,
-            decoration: const InputDecoration(labelText: "Category Name", border: OutlineInputBorder()),
-            onSubmitted: (_) => _handleSave(_nameController.text, context),
-          ),
-
-          // Icon Selection
-          CategoryIconDropdown(_selectedIcon, (newValue) {
-            setState(() => _selectedIcon = newValue);
-          }),
-
-          // Parent Category Selection
-          CategoryDropdown(
-            _selectedParent,
-            (newValue) => setState(() => _selectedParent = newValue),
-            editingCategoryId: widget.category?.id,
-          ),
-
-          Row(
-            spacing: 12,
-            children: [
-              if (widget.category != null)
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    backgroundColor: theme.colorScheme.errorContainer,
-                    foregroundColor: theme.colorScheme.onErrorContainer,
-                  ),
-                  icon: const Icon(Icons.delete_outline),
+        return SproutBaseDialogWidget(
+          isEdit ? "Edit Category" : "New Category",
+          showCloseDialogButton: true,
+          closeButtonText: "Cancel",
+          showSubmitButton: true,
+          submitButtonText: "Save",
+          allowSubmitClick: canSave,
+          onSubmitClick: () => _handleSave(context),
+          extraButtons: !isEdit
+              ? null
+              : IconButton.filled(
+                  style: ThemeHelpers.errorButton,
                   onPressed: () => _confirmDelete(context),
+                  icon: Icon(Icons.delete),
                 ),
-              Expanded(
-                child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 20,
+            children: [
+              TextField(
+                controller: _nameController,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: "Category Name", border: OutlineInputBorder()),
+                onSubmitted: (_) => canSave ? _handleSave(context) : null,
               ),
-              Expanded(
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _nameController,
-                  builder: (context, value, child) {
-                    final bool canSave = value.text.trim().isNotEmpty;
-                    return FilledButton(
-                      onPressed: !canSave ? null : () => _handleSave(value.text, context),
-                      child: const Text("Save", style: TextStyle(fontWeight: FontWeight.bold)),
-                    );
-                  },
-                ),
+
+              CategoryIconDropdown(_selectedIcon, (newValue) {
+                setState(() => _selectedIcon = newValue);
+              }),
+
+              CategoryDropdown(
+                _selectedParent,
+                (newValue) => setState(() => _selectedParent = newValue),
+                editingCategoryId: widget.category?.id,
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/widgets/login.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/routes/connection_failure.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
@@ -24,8 +25,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       // TODO
       GoRoute(path: '/setup', builder: (context, state) => const Placeholder()),
-      GoRoute(path: '/connection-setup', builder: (context, state) => const Placeholder()),
-      GoRoute(path: '/connection-failure', builder: (context, state) => const Placeholder()),
+      GoRoute(path: '/connection/setup', builder: (context, state) => const Placeholder()),
+      GoRoute(path: '/connection/failure', builder: (context, state) => const ConnectionFailurePage()),
       // Routes that do require auth
       ShellRoute(
         builder: (context, state, child) => SproutShell(state: state, child: child),
@@ -45,11 +46,11 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final connUrlState = ref.read(connectionUrlProvider);
 
   // Connection URL Check
-  if (connUrlState.value == null) return '/connection-setup';
+  if (connUrlState.value == null) return '/connection/setup';
 
   // Server Connection Check
   final configNotifier = ref.read(unsecureConfigProvider.notifier);
-  if (configNotifier.failedToConnect) return '/connection-failure';
+  if (configNotifier.failedToConnect) return '/connection/failure';
 
   // Setup Mode Check
   if (ref.read(authProvider.notifier).isSetupMode) return '/setup';

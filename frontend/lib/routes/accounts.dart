@@ -37,19 +37,19 @@ class AccountsPage extends ConsumerWidget {
         }
 
         return Scaffold(
-          body: body,
+          body: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 12), child: body),
           // Add a FAB button
           floatingActionButton: SproutSpeedDial(
             actions: [
               FABAction(
                 icon: Icons.add,
                 label: 'Add Account',
-                onTap: (context) => showDialog(context: context, builder: (_) => const AddAccountDialog()),
+                onTap: (context) => showSproutPopup(context: context, builder: (_) => const AddAccountDialog()),
               ),
               FABAction(
                 icon: Icons.refresh,
                 label: 'Sync All',
-                onTap: (context) => showDialog(
+                onTap: (context) => showSproutPopup(
                   context: context,
                   builder: (context) => SproutBaseDialogWidget(
                     "Confirm Sync",
