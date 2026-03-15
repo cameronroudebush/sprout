@@ -10,7 +10,6 @@ import 'package:sprout/routes/connection_setup.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
-import 'package:sprout/shared/widgets/lock.dart';
 
 /// Defines a notifier that allows us to subscribe to necessary configuration
 class RouterNotifier extends ChangeNotifier {
@@ -30,12 +29,12 @@ final routerProvider = Provider<GoRouter>((ref) {
   final notifier = RouterNotifier(ref);
 
   final router = GoRouter(
+    navigatorKey: NavigationProvider.key,
     refreshListenable: notifier,
     initialLocation: '/login',
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [
       // Routes that don't require Auth
-      GoRoute(path: '/locked', builder: (context, state) => const SproutLockWidget()),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(path: '/setup', builder: (context, state) => const Placeholder()), // TODO Implement setup capabilities
       GoRoute(path: '/connection/setup', builder: (context, state) => const ConnectionSetupPage()),
@@ -57,10 +56,6 @@ final routerProvider = Provider<GoRouter>((ref) {
 String? _authRedirect(Ref ref, GoRouterState state) {
   final connUrlState = ref.read(connectionUrlProvider);
   final authState = ref.read(authProvider);
-  final bioState = ref.read(biometricsProvider);
-
-  // Check if we're biometric locked
-  if (bioState.isLocked) return "/locked";
 
   // Connection URL Check
   if (connUrlState.isLoading) return null;

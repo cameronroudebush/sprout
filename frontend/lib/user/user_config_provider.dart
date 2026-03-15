@@ -45,7 +45,8 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     final authState = ref.watch(authProvider);
     if (authState.value == null) return null;
 
-    return await populateUserConfig();
+    final config = await populateUserConfig();
+    return config;
   }
 
   /// Returns the theme considering config, cache, then default
@@ -101,15 +102,17 @@ class UserConfigNotifier extends _$UserConfigNotifier {
   }
 
   Future<void> toggleSecureMode(bool enable) async {
-    final provider = ref.read(biometricsProvider.notifier);
+    final biometricNotifier = ref.read(biometricsProvider.notifier);
     if (enable) {
-      final success = await provider.requestBiometricAuth();
+      final success = await biometricNotifier.requestBiometricAuth();
       if (success) {
         await updateConfig((c) => c.secureMode = true);
+        await biometricNotifier.syncNativePrivacy(true);
       }
     } else {
       await updateConfig((c) => c.secureMode = false);
-      await provider.reset();
+      await biometricNotifier.reset();
+      await biometricNotifier.syncNativePrivacy(false);
     }
   }
 

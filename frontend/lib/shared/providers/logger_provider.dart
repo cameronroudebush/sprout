@@ -7,7 +7,14 @@ class LoggerProvider {
       ? (kDebugMode ? Logger(printer: SimplePrinter(printTime: true, colors: true)) : Logger(level: Level.off))
       : Logger(
           filter: ProductionFilter(), // Show important logs
-          printer: PrettyPrinter(methodCount: 2, errorMethodCount: 8, lineLength: 120, colors: true, printTime: true),
+          printer: PrettyPrinter(
+            methodCount: 2,
+            errorMethodCount: 8,
+            lineLength: 120,
+            colors: true,
+            printTime: true,
+            printEmojis: false,
+          ),
         );
 
   static void info(dynamic message) {

@@ -93,6 +93,7 @@ class Sse extends _$Sse {
 
   /// Stops and disconnects the SSE
   void _stopSSE() {
+    if (!ref.mounted) return;
     _reconnectTimer?.cancel();
     _httpClient?.close();
     state = SseConnectionState();

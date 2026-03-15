@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/notification/models/extensions/firebase_notification_extension.dart';
 import 'package:sprout/notification/notification_provider.dart';
@@ -22,6 +23,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     // Re-configure Firebase for this isolate
     await container.read(firebaseProvider.notifier).configure();
+    await container.read(authProvider.notifier).applyDefaultAuth();
 
     // Determine notification payload
     final payload = FirebaseNotificationDTO.fromJson(message.data)!;
