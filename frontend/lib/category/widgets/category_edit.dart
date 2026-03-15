@@ -15,7 +15,7 @@ class CategoryEdit extends ConsumerStatefulWidget {
   /// If provided, this is called instead of the default provider add.
   final Function(Category category)? onAdd;
 
-  const CategoryEdit({super.key, this.category, this.onAdd});
+  const CategoryEdit(this.category, {super.key, this.onAdd});
 
   @override
   ConsumerState<CategoryEdit> createState() => _CategoryEditState();

@@ -4,6 +4,7 @@ import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
 import 'package:sprout/routes/transaction_rules.dart';
+import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/user_config.dart';
 import 'package:sprout/routes/util/route.dart';
 
@@ -34,7 +35,7 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Transactions',
     icon: Icons.receipt,
     showInBottomNav: true,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const TransactionsPage(),
   ),
   SproutRoute(
     path: '/categories',

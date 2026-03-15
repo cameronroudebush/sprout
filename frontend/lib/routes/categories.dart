@@ -26,7 +26,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5), width: 1),
       ),
-      builder: (context) => CategoryEdit(category: category),
+      builder: (context) => CategoryEdit(category),
     );
   }
 
