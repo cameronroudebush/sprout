@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/api/base_api.dart';
-import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 
 part 'transaction_provider.g.dart';
@@ -15,54 +15,53 @@ Future<TransactionApi> transactionApi(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class Transactions extends _$Transactions {
-  static const int pageSize = 20;
+  static const int pageSize = 25;
 
   @override
   Future<TransactionState> build() async {
-    ref.listen(sseProvider, (prev, next) {
-      final event = next.latestData?.event;
-      if (event == SSEDataEventEnum.forceUpdate) {
-        ref.invalidateSelf();
-      }
-    });
-
     final api = await ref.watch(transactionApiProvider.future);
     final total = await api.transactionControllerGetTotal();
-
-    /// Grab our initial transactions. Utilizes [pageSize]
     final initial = await api.transactionControllerGetByQuery(startIndex: 0, endIndex: pageSize);
 
     return TransactionState(transactions: initial ?? [], totalCount: total?.total ?? 0);
   }
 
-  /// Fetches the next page and appends it to the list
-  Future<void> fetchNextPage({String? accountId, String? category, String? description, DateTime? date}) async {
-    if (state.value == null || state.value!.isLoadingMore) return;
-    if (state.value!.transactions.length >= state.value!.totalCount) return;
-
-    state = AsyncData(state.value!.copyWith(isLoadingMore: true));
-
+  /// Fetches data matching the given filter with the given index
+  Future<void> fetchFilteredPage({required int startIndex, String? accountId, String? catId, String? search}) async {
+    final current = state.value;
+    if (current == null || current.isLoadingMore) return;
+    state = AsyncData(current.copyWith(isLoadingMore: true));
     try {
       final api = await ref.read(transactionApiProvider.future);
+
+      // Slight category adjustment
+      String? apiCategory = catId == "all" ? null : (catId == "null" ? "unknown" : catId);
+
       final nextItems = await api.transactionControllerGetByQuery(
-        startIndex: state.value!.transactions.length,
-        endIndex: state.value!.transactions.length + pageSize,
+        startIndex: startIndex,
+        endIndex: startIndex + pageSize,
         accountId: accountId,
-        category: category,
-        description: description,
-        date: date,
+        category: apiCategory,
+        description: search,
       );
 
       if (nextItems != null) {
-        final currentIds = state.value!.transactions.map((t) => t.id).toSet();
-        final filtered = nextItems.where((t) => !currentIds.contains(t.id)).toList();
+        final existingIds = current.transactions.map((t) => t.id).toSet();
+        final newUnique = nextItems.where((t) => !existingIds.contains(t.id)).toList();
 
-        final newList = [...state.value!.transactions, ...filtered]..sort((a, b) => b.posted.compareTo(a.posted));
+        // If we got back fewer items than we asked for, we've reached the end
+        final reachedMax = nextItems.length < pageSize;
 
-        state = AsyncData(state.value!.copyWith(transactions: newList, isLoadingMore: false));
+        state = AsyncData(
+          current.copyWith(
+            transactions: [...current.transactions, ...newUnique]..sort((a, b) => b.posted.compareTo(a.posted)),
+            isLoadingMore: false,
+            hasReachedMax: reachedMax,
+          ),
+        );
       }
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (e) {
+      state = AsyncData(current.copyWith(isLoadingMore: false));
     }
   }
 
@@ -71,15 +70,43 @@ class Transactions extends _$Transactions {
     final updated = await api.transactionControllerEdit(t.id, t);
 
     if (updated != null && state.value != null) {
-      final index = state.value!.transactions.indexWhere((r) => r.id == updated.id);
+      final newList = [...state.value!.transactions];
+      final index = newList.indexWhere((r) => r.id == updated.id);
       if (index != -1) {
-        final newList = [...state.value!.transactions];
         newList[index] = updated;
         state = AsyncData(state.value!.copyWith(transactions: newList));
       }
     }
     return updated;
   }
+}
+
+/// List of filtered transactions based on our state
+@riverpod
+List<Transaction> filteredTransactions(Ref ref, {String? accountId, String? categoryId, String? search}) {
+  // Watch the master list
+  final masterState = ref.watch(transactionsProvider).value;
+  if (masterState == null) return [];
+
+  return masterState.transactions.where((t) {
+    // Filter by Account
+    if (accountId != null && t.account.id != accountId) return false;
+
+    // Filter by Search String
+    if (search != null && search.isNotEmpty) {
+      if (!t.description.toLowerCase().contains(search.toLowerCase())) return false;
+    }
+
+    // Filter by Category
+    if (categoryId != null && categoryId != "null" && categoryId != CategoryDropdown.fakeAllCategory.id) {
+      // If filtering for null in DB
+      if (categoryId == "unknown") return t.category == null;
+      // Normal category match
+      if (t.category?.id != categoryId) return false;
+    }
+
+    return true;
+  }).toList();
 }
 
 /// Provider to track transaction subscriptions

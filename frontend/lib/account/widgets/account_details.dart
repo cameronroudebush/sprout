@@ -345,7 +345,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
           padding: const EdgeInsets.all(16),
           itemCount: filtered.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) => TransactionRow(transaction: filtered[index], isPrivate: widget.isPrivate),
+          itemBuilder: (context, index) => TransactionRow(transaction: filtered[index]),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),

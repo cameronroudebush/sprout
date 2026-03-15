@@ -192,7 +192,15 @@ class TransactionApi {
   /// Retrieves a count of the total number of transactions available for the current user including a total for each account.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> transactionControllerGetTotalWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId:
+  ///
+  /// * [String] category:
+  ///
+  /// * [String] description:
+  Future<Response> transactionControllerGetTotalWithHttpInfo({ String? accountId, String? category, String? description, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/count';
 
@@ -202,6 +210,16 @@ class TransactionApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (accountId != null) {
+      queryParams.addAll(_queryParams('', 'accountId', accountId));
+    }
+    if (category != null) {
+      queryParams.addAll(_queryParams('', 'category', category));
+    }
+    if (description != null) {
+      queryParams.addAll(_queryParams('', 'description', description));
+    }
 
     const contentTypes = <String>[];
 
@@ -220,8 +238,16 @@ class TransactionApi {
   /// Get's the total count of transactions across accounts.
   ///
   /// Retrieves a count of the total number of transactions available for the current user including a total for each account.
-  Future<TotalTransactions?> transactionControllerGetTotal() async {
-    final response = await transactionControllerGetTotalWithHttpInfo();
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId:
+  ///
+  /// * [String] category:
+  ///
+  /// * [String] description:
+  Future<TotalTransactions?> transactionControllerGetTotal({ String? accountId, String? category, String? description, }) async {
+    final response = await transactionControllerGetTotalWithHttpInfo( accountId: accountId, category: category, description: description, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

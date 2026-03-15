@@ -13,6 +13,8 @@ import 'package:sprout/transaction/transaction_rule_provider.dart';
 /// A widget that displays the editing capabilities of a [TransactionRule]
 class TransactionRuleEdit extends ConsumerStatefulWidget {
   final TransactionRule? rule;
+
+  /// Initial value for the description
   final dynamic initialValue;
 
   const TransactionRuleEdit(this.rule, {super.key, this.initialValue});
@@ -294,7 +296,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                             await showSproutPopup(
                               context: context,
                               builder: (_) => CategoryEdit(
-                                category: null,
+                                null,
                                 onAdd: (category) {
                                   setState(() => _category = category);
                                 },

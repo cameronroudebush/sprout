@@ -76,7 +76,7 @@ final class TransactionsProvider
   Transactions create() => Transactions();
 }
 
-String _$transactionsHash() => r'82279aba45784d70144a2a9711b15b2517527ce2';
+String _$transactionsHash() => r'46d6fcceb2d7c72165cd00c332a821b249d2afb1';
 
 abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
   FutureOr<TransactionState> build();
@@ -96,6 +96,117 @@ abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
             >;
     element.handleValue(ref, created);
   }
+}
+
+/// List of filtered transactions based on our state
+
+@ProviderFor(filteredTransactions)
+const filteredTransactionsProvider = FilteredTransactionsFamily._();
+
+/// List of filtered transactions based on our state
+
+final class FilteredTransactionsProvider
+    extends
+        $FunctionalProvider<
+          List<Transaction>,
+          List<Transaction>,
+          List<Transaction>
+        >
+    with $Provider<List<Transaction>> {
+  /// List of filtered transactions based on our state
+  const FilteredTransactionsProvider._({
+    required FilteredTransactionsFamily super.from,
+    required ({String? accountId, String? categoryId, String? search})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'filteredTransactionsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$filteredTransactionsHash();
+
+  @override
+  String toString() {
+    return r'filteredTransactionsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<List<Transaction>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  List<Transaction> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({String? accountId, String? categoryId, String? search});
+    return filteredTransactions(
+      ref,
+      accountId: argument.accountId,
+      categoryId: argument.categoryId,
+      search: argument.search,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<Transaction> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<Transaction>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FilteredTransactionsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$filteredTransactionsHash() =>
+    r'77c801ed076e212e70805f60575c6758ba94829d';
+
+/// List of filtered transactions based on our state
+
+final class FilteredTransactionsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          List<Transaction>,
+          ({String? accountId, String? categoryId, String? search})
+        > {
+  const FilteredTransactionsFamily._()
+    : super(
+        retry: null,
+        name: r'filteredTransactionsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// List of filtered transactions based on our state
+
+  FilteredTransactionsProvider call({
+    String? accountId,
+    String? categoryId,
+    String? search,
+  }) => FilteredTransactionsProvider._(
+    argument: (accountId: accountId, categoryId: categoryId, search: search),
+    from: this,
+  );
+
+  @override
+  String toString() => r'filteredTransactionsProvider';
 }
 
 /// Provider to track transaction subscriptions

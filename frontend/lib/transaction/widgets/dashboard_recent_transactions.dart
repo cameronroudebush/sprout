@@ -5,7 +5,6 @@ import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders the recent number of transactions in a card intended for the dashboard
 class DashboardRecentTransactionsCard extends ConsumerWidget {
@@ -18,7 +17,6 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final transactionsAsync = ref.watch(transactionsProvider);
-    final isPrivate = ref.watch(userConfigProvider).value?.privateMode ?? false;
 
     return SproutCard(
       child: Padding(
@@ -58,7 +56,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
                   itemCount: recent.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 4),
                   itemBuilder: (context, index) {
-                    return TransactionRow(transaction: recent[index], isPrivate: isPrivate);
+                    return TransactionRow(transaction: recent[index]);
                   },
                 );
               },
