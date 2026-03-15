@@ -52,6 +52,11 @@ class Biometrics extends _$Biometrics {
     return BiometricState();
   }
 
+  /// Tries to unlock the biometrics when clicking the unlock button. Returns true if the unlock was a success. False if not.
+  Future<bool> tryManualUnlock() async {
+    return await _internalUnlock();
+  }
+
   /// Resets our biometric lock state to disable it
   Future<void> reset() async {
     if (kIsWeb) return;

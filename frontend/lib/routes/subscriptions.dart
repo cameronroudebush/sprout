@@ -136,10 +136,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(
-              DateFormat.yMMMMd().format(_selectedDay),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            child: Text(DateFormat.yMMMMd().format(_selectedDay), style: const TextStyle(fontSize: 16)),
           ),
           const Divider(height: 1),
           if (events.isEmpty)

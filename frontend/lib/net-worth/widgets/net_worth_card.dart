@@ -90,7 +90,7 @@ class NetWorthDisplay extends ConsumerWidget {
               ),
             Text(
               value.toCurrency(isPrivate),
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             SproutChangeWidget(
               totalChange: frame?.valueChange,

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/shared/widgets/layout.dart';
-import 'package:sprout/shared/widgets/tooltip.dart';
 
 /// A generic calendar intended to display the given content
 class SproutCalendar<T> extends StatefulWidget {
@@ -110,7 +109,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                   flex: 1,
                   child: Row(
                     children: [
-                      SproutTooltip(
+                      Tooltip(
                         message: "Go to today's date.",
                         child: IconButton(
                           icon: const Icon(Icons.today),

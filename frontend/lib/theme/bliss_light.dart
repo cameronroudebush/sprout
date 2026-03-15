@@ -35,8 +35,14 @@ final ThemeData blissLightTheme =
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: ThemeHelpers.primaryBlue,
-        unselectedItemColor: Color(0xff43474e),
+        unselectedItemColor: Colors.black,
       ),
       canvasColor: const Color(0xffd1e4ff),
       dividerColor: Color(0xff116383),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+        waitDuration: const Duration(milliseconds: 500),
+        showDuration: const Duration(seconds: 2),
+      ),
     );

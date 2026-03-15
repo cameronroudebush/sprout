@@ -50,12 +50,7 @@ class AccountItemRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    account.name,
-                    style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
+                  Text(account.name, style: theme.textTheme.labelLarge, overflow: TextOverflow.ellipsis, maxLines: 1),
                   Text(
                     account.institution.name,
                     style: theme.textTheme.labelSmall,

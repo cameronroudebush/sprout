@@ -3,6 +3,8 @@ import 'package:sprout/routes/accounts.dart';
 import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
+import 'package:sprout/routes/holdings.dart';
+import 'package:sprout/routes/reports.dart';
 import 'package:sprout/routes/settings.dart';
 import 'package:sprout/routes/subscriptions.dart';
 import 'package:sprout/routes/transaction_rules.dart';
@@ -61,7 +63,7 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Reports',
     icon: Icons.bar_chart,
     showInBottomNav: true,
-    builder: (context, state) => const Placeholder(), // TODO
+    builder: (context, state) => const ReportsPage(),
   ),
   SproutRoute(
     path: '/settings',
@@ -74,6 +76,6 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/holdings',
     label: 'Holdings',
     icon: Icons.show_chart,
-    builder: (context, state) => const Placeholder(), // TODO
+    builder: (context, state) => const HoldingsPage(),
   ),
 ];

@@ -53,6 +53,7 @@ class SproutAppBar extends ConsumerWidget implements PreferredSizeWidget {
         actions: [
           if (!useFullLogo)
             PopupMenuButton<String>(
+              color: theme.colorScheme.surface,
               onOpened: () => _handleNotificationMenuOpened(ref),
               padding: EdgeInsets.zero,
               menuPadding: EdgeInsets.zero,

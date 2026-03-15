@@ -32,7 +32,7 @@ class UserConfigNotifier extends _$UserConfigNotifier {
 
   @override
   Future<UserConfig?> build() async {
-    // 1. Try to load the theme from cache immediately on startup
+    // Try to load the theme from cache immediately on startup
     final savedTheme = await SecureStorageProvider.getValue(_themeCacheKey);
     if (savedTheme != null) {
       _cachedTheme = ThemeStyleEnum.values.firstWhere(
@@ -48,10 +48,14 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     return await populateUserConfig();
   }
 
+  /// Returns the theme considering config, cache, then default
+  ThemeStyleEnum getTheme(UserConfig? config) {
+    return config?.themeStyle ?? _cachedTheme ?? ThemeStyleEnum.colored;
+  }
+
   /// Determines the theme that is in used by the given users config
   ThemeData activeTheme(UserConfig? config) {
-    final style = config?.themeStyle ?? _cachedTheme ?? ThemeStyleEnum.colored;
-
+    final style = getTheme(config);
     return switch (style) {
       ThemeStyleEnum.bliss => blissLightTheme,
       ThemeStyleEnum.absolute => absoluteDarkTheme,
