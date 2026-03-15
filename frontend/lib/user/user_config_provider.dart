@@ -5,6 +5,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/theme/bliss_light.dart';
 import 'package:sprout/theme/colored_dark.dart';
@@ -24,37 +25,51 @@ Future<PackageInfo> packageInfo(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class UserConfigNotifier extends _$UserConfigNotifier {
-  /// Getters for UI
+  static const _themeCacheKey = 'sprout_theme_style';
+  ThemeStyleEnum? _cachedTheme;
+
   UserConfig? get config => state.value;
 
   @override
   Future<UserConfig?> build() async {
+    // 1. Try to load the theme from cache immediately on startup
+    final savedTheme = await SecureStorageProvider.getValue(_themeCacheKey);
+    if (savedTheme != null) {
+      _cachedTheme = ThemeStyleEnum.values.firstWhere(
+        (e) => e.value == savedTheme,
+        orElse: () => ThemeStyleEnum.colored,
+      );
+    }
+
     // If the user is null, we return null and don't attempt the API call.
     final authState = ref.watch(authProvider);
-
-    if (authState.value == null) {
-      return null;
-    }
+    if (authState.value == null) return null;
 
     return await populateUserConfig();
   }
 
-  /// Determines the dark theme to use based on the user config
-  ThemeData get activeTheme {
-    // TODO: Add user setting in the backend
-    final style = "colored";
+  /// Determines the theme that is in used by the given users config
+  ThemeData activeTheme(UserConfig? config) {
+    final style = config?.themeStyle ?? _cachedTheme ?? ThemeStyleEnum.colored;
 
     return switch (style) {
-      'bliss' => blissLightTheme,
-      'absolute' => absoluteDarkTheme,
-      'colored' => coloredDarkTheme,
+      ThemeStyleEnum.bliss => blissLightTheme,
+      ThemeStyleEnum.absolute => absoluteDarkTheme,
+      ThemeStyleEnum.colored => coloredDarkTheme,
       _ => absoluteDarkTheme,
     };
+  }
+
+  /// Updates local cache and persistence
+  Future<void> _updateThemeCache(ThemeStyleEnum style) async {
+    _cachedTheme = style;
+    await SecureStorageProvider.saveValue(_themeCacheKey, style.value);
   }
 
   Future<UserConfig?> populateUserConfig() async {
     final api = await ref.read(userConfigApiProvider.future);
     final newConfig = await api.userConfigControllerGet();
+    if (newConfig != null) await _updateThemeCache(newConfig.themeStyle);
     state = AsyncData(newConfig);
     return newConfig;
   }
@@ -74,6 +89,7 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     try {
       final api = await ref.read(userConfigApiProvider.future);
       final result = await api.userConfigControllerEdit(updatedConfig);
+      if (result != null) await _updateThemeCache(result.themeStyle);
       state = AsyncData(result);
     } catch (e, st) {
       state = AsyncError(e, st);

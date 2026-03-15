@@ -64,6 +64,7 @@ class SproutApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final initStatus = ref.watch(initializationProvider);
+    final userConfigAsync = ref.watch(userConfigProvider);
 
     return initStatus.when(
       loading: () => _getLoadingIndicator(context),
@@ -72,10 +73,14 @@ class SproutApp extends ConsumerWidget {
         home: Scaffold(body: Center(child: Text('Failed to initialize: $error'))),
       ),
       data: (_) {
-        final configNotifier = ref.watch(userConfigProvider.notifier);
+        if (userConfigAsync.isLoading && !userConfigAsync.hasValue) return _getLoadingIndicator(context);
+
+        final userConfig = ref.watch(userConfigProvider).value;
+        final userConfigNotifier = ref.read(userConfigProvider.notifier);
+        final theme = userConfigNotifier.activeTheme(userConfig);
         final router = ref.watch(routerProvider);
 
-        return MaterialApp.router(routerConfig: router, title: "Sprout", theme: configNotifier.activeTheme);
+        return MaterialApp.router(routerConfig: router, title: "Sprout", theme: theme);
       },
     );
   }

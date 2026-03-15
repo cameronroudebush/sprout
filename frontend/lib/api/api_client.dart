@@ -246,6 +246,8 @@ class ApiClient {
           return SankeyData.fromJson(value);
         case 'SankeyLink':
           return SankeyLink.fromJson(value);
+        case 'ThemeStyleEnum':
+          return ThemeStyleEnumTypeTransformer().decode(value);
         case 'TotalNetWorthDTO':
           return TotalNetWorthDTO.fromJson(value);
         case 'TotalTransactions':

@@ -84,5 +84,3 @@ class AccountsPage extends ConsumerWidget {
     );
   }
 }
-
-// TODO: Add the time frame selection for change

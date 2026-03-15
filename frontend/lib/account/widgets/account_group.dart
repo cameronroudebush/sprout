@@ -139,7 +139,7 @@ class AccountGroupSection extends StatelessWidget {
                       onAccountClick: onAccountClick != null ? () => onAccountClick!(acc) : null,
                     ),
                     // Display the error badge if the institution has an error
-                    Positioned(left: -4, top: 8, child: SproutErrorIcon(hasError: hasError, size: 14)),
+                    Positioned(left: -10, top: 2, child: SproutErrorIcon(hasError: hasError, size: 12)),
                   ],
                 ),
               );

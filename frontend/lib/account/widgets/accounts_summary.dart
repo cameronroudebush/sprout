@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
@@ -8,6 +9,7 @@ import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dar
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/range_selector.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a grouped overview of all user accounts.
@@ -93,12 +95,28 @@ class AccountSummaryView extends ConsumerWidget {
     return ListView(
       physics: physics,
       shrinkWrap: shrinkWrap,
-      padding: individualCards ? const EdgeInsets.symmetric(horizontal: 12) : EdgeInsets.zero,
       children: [
         TotalSummary(accounts: accounts, isPrivate: isPrivate),
+        if (individualCards)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: ChartRangeSelector(large: true),
+          ),
         if (!individualCards)
           SproutCard(
-            child: Column(mainAxisSize: MainAxisSize.min, children: groupedAccounts),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...groupedAccounts
+                    .mapIndexed(
+                      (index, widget) => [
+                        widget,
+                        if (index < groupedAccounts.length - 1) const Divider(height: 1, indent: 16, endIndent: 16),
+                      ],
+                    )
+                    .expand((widgets) => widgets),
+              ],
+            ),
           )
         else
           ...groupedAccounts,

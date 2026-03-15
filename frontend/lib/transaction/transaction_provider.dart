@@ -1,7 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 
 part 'transaction_provider.g.dart';
@@ -23,11 +25,35 @@ class Transactions extends _$Transactions {
     final total = await api.transactionControllerGetTotal();
     final initial = await api.transactionControllerGetByQuery(startIndex: 0, endIndex: pageSize);
 
+    // Listen for SSE data
+    ref.listen(sseProvider, (prev, next) {
+      final data = next.latestData;
+      if (data?.event == SSEDataEventEnum.forceUpdate) {
+        // SSE Triggered: Grab current filters from the other provider
+        final currentFilters = ref.read(transactionFilterStateProvider);
+
+        // Re-fetch the first page using current parameters
+        fetchFilteredPage(
+          startIndex: 0,
+          resetList: true, // We need to clear the list for a force update
+          accountId: currentFilters.accountId,
+          catId: currentFilters.categoryId,
+          search: currentFilters.search,
+        );
+      }
+    });
+
     return TransactionState(transactions: initial ?? [], totalCount: total?.total ?? 0);
   }
 
   /// Fetches data matching the given filter with the given index
-  Future<void> fetchFilteredPage({required int startIndex, String? accountId, String? catId, String? search}) async {
+  Future<void> fetchFilteredPage({
+    required int startIndex,
+    String? accountId,
+    String? catId,
+    String? search,
+    bool resetList = false,
+  }) async {
     final current = state.value;
     if (current == null || current.isLoadingMore) return;
     state = AsyncData(current.copyWith(isLoadingMore: true));
@@ -46,17 +72,15 @@ class Transactions extends _$Transactions {
       );
 
       if (nextItems != null) {
-        final existingIds = current.transactions.map((t) => t.id).toSet();
-        final newUnique = nextItems.where((t) => !existingIds.contains(t.id)).toList();
-
-        // If we got back fewer items than we asked for, we've reached the end
-        final reachedMax = nextItems.length < pageSize;
+        final updatedList = resetList
+            ? nextItems
+            : [...current.transactions, ...nextItems.where((t) => !current.transactions.any((e) => e.id == t.id))];
 
         state = AsyncData(
           current.copyWith(
-            transactions: [...current.transactions, ...newUnique]..sort((a, b) => b.posted.compareTo(a.posted)),
+            transactions: updatedList..sort((a, b) => b.posted.compareTo(a.posted)),
             isLoadingMore: false,
-            hasReachedMax: reachedMax,
+            hasReachedMax: nextItems.length < pageSize,
           ),
         );
       }
@@ -68,6 +92,7 @@ class Transactions extends _$Transactions {
   Future<Transaction?> editTransaction(Transaction t) async {
     final api = await ref.read(transactionApiProvider.future);
     final updated = await api.transactionControllerEdit(t.id, t);
+    await ref.read(unknownCategoryCountProvider().notifier).refresh();
 
     if (updated != null && state.value != null) {
       final newList = [...state.value!.transactions];
@@ -81,28 +106,37 @@ class Transactions extends _$Transactions {
   }
 }
 
+// Global filter state
+@riverpod
+class TransactionFilterState extends _$TransactionFilterState {
+  @override
+  TransactionFilter build() => TransactionFilter();
+
+  void update(TransactionFilter filter) => state = filter;
+}
+
 /// List of filtered transactions based on our state
 @riverpod
-List<Transaction> filteredTransactions(Ref ref, {String? accountId, String? categoryId, String? search}) {
-  // Watch the master list
+List<Transaction> filteredTransactions(Ref ref) {
+  final filter = ref.watch(transactionFilterStateProvider);
   final masterState = ref.watch(transactionsProvider).value;
   if (masterState == null) return [];
 
   return masterState.transactions.where((t) {
     // Filter by Account
-    if (accountId != null && t.account.id != accountId) return false;
+    if (filter.accountId != null && t.account.id != filter.accountId) return false;
 
     // Filter by Search String
-    if (search != null && search.isNotEmpty) {
-      if (!t.description.toLowerCase().contains(search.toLowerCase())) return false;
+    if (filter.search.isNotEmpty) {
+      if (!t.description.toLowerCase().contains(filter.search.toLowerCase())) return false;
     }
 
     // Filter by Category
-    if (categoryId != null && categoryId != CategoryDropdown.fakeAllCategory.id) {
+    if (filter.categoryId != null && filter.categoryId != CategoryDropdown.fakeAllCategory.id) {
       // If filtering for null in DB
-      if (categoryId == "unknown") return t.category == null;
+      if (filter.categoryId == "unknown") return t.category == null;
       // Normal category match
-      if (t.category?.id != categoryId) return false;
+      if (t.category?.id != filter.categoryId) return false;
     }
 
     return true;

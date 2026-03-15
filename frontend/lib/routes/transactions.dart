@@ -10,6 +10,7 @@ import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
+import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
@@ -41,23 +42,19 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Timer? _debounce;
   int _filteredOffset = 0;
 
-  // Track local UI state for filtering
-  String? _selectedCategoryId;
-
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _selectedCategoryId = CategoryDropdown.fakeAllCategory.id;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = GoRouterState.of(context);
       final catId = state.uri.queryParameters['categoryId'];
 
-      setState(() {
-        _selectedCategoryId = catId == "unknown"
-            ? CategoryDropdown.unknownCategory.id
-            : catId ?? CategoryDropdown.fakeAllCategory.id;
-      });
+      ref
+          .read(transactionFilterStateProvider.notifier)
+          .update(
+            TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
+          );
 
       _fetchPage(reset: true);
     });
@@ -72,19 +69,25 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
   /// Fetches the content that needs based on our current filter
   Future<void> _fetchPage({bool reset = false}) async {
-    if (reset) {
-      setState(() => _filteredOffset = 0);
-      if (_scrollController.hasClients) _scrollController.jumpTo(0);
-    }
+    final filters = ref.read(transactionFilterStateProvider);
 
     await ref
         .read(transactionsProvider.notifier)
         .fetchFilteredPage(
-          startIndex: _filteredOffset,
-          accountId: widget.accountId,
-          catId: _selectedCategoryId,
-          search: _searchController.text,
+          startIndex: reset ? 0 : _filteredOffset,
+          resetList: reset,
+          accountId: filters.accountId,
+          catId: filters.categoryId,
+          search: filters.search,
         );
+  }
+
+  /// What to do when the category dropdown changes
+  void _onFilterChanged(String? newCatId) {
+    final notifier = ref.read(transactionFilterStateProvider.notifier);
+    notifier.update(ref.read(transactionFilterStateProvider).copyWith(categoryId: newCatId));
+
+    _fetchPage(reset: true);
   }
 
   /// What to do as we scroll down the page
@@ -98,14 +101,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     }
   }
 
-  void _onFilterChanged(String? newCatId) {
-    _selectedCategoryId = newCatId;
-    _fetchPage(reset: true);
-  }
-
+  /// What to do when the search term string changes
   void _onSearchChanged(String val) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () => _fetchPage(reset: true));
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final notifier = ref.read(transactionFilterStateProvider.notifier);
+      notifier.update(ref.read(transactionFilterStateProvider).copyWith(search: val));
+
+      _fetchPage(reset: true);
+    });
   }
 
   @override
@@ -113,13 +117,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final theme = Theme.of(context);
     final masterAsync = ref.watch(transactionsProvider);
 
-    final filteredTransactions = ref.watch(
-      filteredTransactionsProvider(
-        accountId: widget.accountId,
-        categoryId: _selectedCategoryId,
-        search: _searchController.text,
-      ),
-    );
+    final filteredTransactions = ref.watch(filteredTransactionsProvider);
 
     return Padding(
       padding: widget.padding,
@@ -156,6 +154,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   /// Builds the filters for the top row to decide what to render
   Widget _buildFilters(ThemeData theme) {
     final categories = ref.watch(categoriesProvider).value ?? [];
+    final currentFilters = ref.watch(transactionFilterStateProvider);
+    final selectedId = currentFilters.categoryId;
 
     return Padding(
       padding: widget.padding,
@@ -171,15 +171,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           onChanged: _onSearchChanged,
         );
 
-        // Locate our initial category
         Category initialCategory;
-        if (_selectedCategoryId == CategoryDropdown.fakeAllCategory.id) {
+        if (selectedId == CategoryDropdown.fakeAllCategory.id) {
           initialCategory = CategoryDropdown.fakeAllCategory;
-        } else if (_selectedCategoryId == CategoryDropdown.unknownCategory.id) {
+        } else if (selectedId == CategoryDropdown.unknownCategory.id) {
           initialCategory = CategoryDropdown.unknownCategory;
         } else {
-          initialCategory =
-              categories.firstWhereOrNull((c) => c.id == _selectedCategoryId) ?? CategoryDropdown.fakeAllCategory;
+          initialCategory = categories.firstWhereOrNull((c) => c.id == selectedId) ?? CategoryDropdown.fakeAllCategory;
         }
 
         final categoryField = CategoryDropdown(

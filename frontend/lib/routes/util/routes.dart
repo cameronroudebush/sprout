@@ -70,4 +70,10 @@ final List<SproutRoute> authenticatedRoutes = [
     showInSidebar: false,
     builder: (context, state) => const SettingsPage(),
   ),
+  SproutRoute(
+    path: '/holdings',
+    label: 'Holdings',
+    icon: Icons.show_chart,
+    builder: (context, state) => const Placeholder(), // TODO
+  ),
 ];
