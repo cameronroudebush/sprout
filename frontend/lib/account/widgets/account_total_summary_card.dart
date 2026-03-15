@@ -113,12 +113,7 @@ class _SummaryLabel extends StatelessWidget {
         ),
         Text(
           amount.toCurrency(isPrivate),
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontFamily: 'monospace',
-            fontWeight: FontWeight.w900,
-            color: color,
-            fontSize: 18,
-          ),
+          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: color, fontSize: 18),
         ),
       ],
     );

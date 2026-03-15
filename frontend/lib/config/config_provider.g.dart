@@ -16,8 +16,8 @@ const connectionUrlProvider = ConnectionUrlProvider._();
 /// Future that produces the connection URL of the backend
 
 final class ConnectionUrlProvider
-    extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
-    with $FutureModifier<String>, $FutureProvider<String> {
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
   /// Future that produces the connection URL of the backend
   const ConnectionUrlProvider._()
     : super(
@@ -35,16 +35,16 @@ final class ConnectionUrlProvider
 
   @$internal
   @override
-  $FutureProviderElement<String> $createElement($ProviderPointer pointer) =>
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
       $FutureProviderElement(pointer);
 
   @override
-  FutureOr<String> create(Ref ref) {
+  FutureOr<String?> create(Ref ref) {
     return connectionUrl(ref);
   }
 }
 
-String _$connectionUrlHash() => r'bf63c3100554855a8684aebf1abb3df7f8e366c4';
+String _$connectionUrlHash() => r'ea696a98649748a5981c31d9adc9fbfb02f1c59d';
 
 /// Future that produces the configuration API configured with the base path
 /// DOES NOT HAVE AUTHENTICATION
@@ -163,7 +163,7 @@ final class UnsecureConfigProvider
   UnsecureConfig create() => UnsecureConfig();
 }
 
-String _$unsecureConfigHash() => r'59f9d3bedd972be722ac5a59ccb65d45338c6e35';
+String _$unsecureConfigHash() => r'b481206b54a33ff4748d05cb20e3b81a6fb81dd4';
 
 /// Extension upon unsecure config that allows state management using riverpod
 

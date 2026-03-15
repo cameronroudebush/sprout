@@ -35,7 +35,7 @@ class Transactions extends _$Transactions {
       final api = await ref.read(transactionApiProvider.future);
 
       // Slight category adjustment
-      String? apiCategory = catId == "all" ? null : (catId == "null" ? "unknown" : catId);
+      String? apiCategory = catId == "all" ? null : catId;
 
       final nextItems = await api.transactionControllerGetByQuery(
         startIndex: startIndex,
@@ -98,7 +98,7 @@ List<Transaction> filteredTransactions(Ref ref, {String? accountId, String? cate
     }
 
     // Filter by Category
-    if (categoryId != null && categoryId != "null" && categoryId != CategoryDropdown.fakeAllCategory.id) {
+    if (categoryId != null && categoryId != CategoryDropdown.fakeAllCategory.id) {
       // If filtering for null in DB
       if (categoryId == "unknown") return t.category == null;
       // Normal category match

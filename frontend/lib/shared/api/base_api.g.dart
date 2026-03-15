@@ -49,7 +49,7 @@ final class BaseApiClientProvider
   }
 }
 
-String _$baseApiClientHash() => r'be3991511c9d76a94cf8edee6c6c8ec682e737ed';
+String _$baseApiClientHash() => r'fcaef499b4440258536d440a04856c03fb048cb6';
 
 /// Base API client that implements things auto logout, auth info, and auto retries on top of [baseApiClient]
 
@@ -93,4 +93,4 @@ final class BaseAuthenticatedClientProvider
 }
 
 String _$baseAuthenticatedClientHash() =>
-    r'3df420d6f0468dad0c2b5d4c85e3fd135da6c4c8';
+    r'290887edb7333bd4f1758fde70365ca2e11e9475';

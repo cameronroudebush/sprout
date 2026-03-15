@@ -21,60 +21,55 @@ class TransactionRow extends ConsumerWidget {
 
     return InkWell(
       onTap: () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Row(
-          spacing: 16,
-          children: [
-            // Category
-            CategoryIcon(transaction.category, avatarSize: 16),
-            // Description
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        decoration: BoxDecoration(
+          color: transaction.pending ? theme.colorScheme.primary.withValues(alpha: 0.15) : Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Row(
+            spacing: 16,
+            children: [
+              // Category
+              CategoryIcon(transaction.category, avatarSize: 16),
+              // Description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description,
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      transaction.account.name,
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // End content
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: 8,
                 children: [
                   Text(
-                    transaction.description,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    transaction.amount.toCurrency(isPrivate),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: transaction.amount.toBalanceColor(theme),
+                    ),
                   ),
-                  Text(transaction.account.name, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
+                  Icon(Icons.chevron_right, color: theme.disabledColor),
                 ],
               ),
-            ),
-            // End content
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              spacing: 8,
-              children: [
-                if (transaction.pending)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      "Pending",
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondary,
-                      ),
-                    ),
-                  ),
-                Text(
-                  transaction.amount.toCurrency(isPrivate),
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: transaction.amount.toBalanceColor(theme),
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: theme.disabledColor),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

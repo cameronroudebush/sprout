@@ -41,7 +41,7 @@ class AccountItemRow extends StatelessWidget {
     return InkWell(
       onTap: onAccountClick,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
         child: Row(
           spacing: 8,
           children: [
@@ -56,7 +56,12 @@ class AccountItemRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
-                  Text(account.institution.name, style: theme.textTheme.labelSmall),
+                  Text(
+                    account.institution.name,
+                    style: theme.textTheme.labelSmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -71,6 +76,7 @@ class AccountItemRow extends StatelessWidget {
                   percentageChange: percentChange,
                   totalChange: valueChange,
                   period: period ?? ChartRangeEnum.oneDay,
+                  useExtendedPeriodString: false,
                   fontSize: 12,
                 ),
               ],

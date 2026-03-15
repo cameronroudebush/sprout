@@ -61,7 +61,7 @@ class ConnectionFailurePage extends ConsumerWidget {
                         style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      _buildStep(theme, "Ensure the Sprout Docker container is running."),
+                      _buildStep(theme, "Ensure that Sprout is running."),
                       _buildStep(theme, "If remote, make sure your URL above is correct."),
                     ],
                   ),
@@ -76,8 +76,10 @@ class ConnectionFailurePage extends ConsumerWidget {
                   // Only allow connection setup on mobile
                   if (!kIsWeb)
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
+                      child: FilledButton.icon(
+                        onPressed: () async {
+                          // Wipe the setting then navigate to setup
+                          await ref.read(unsecureConfigProvider.notifier).setConnectionUrl(null);
                           NavigationProvider.redirect('/connection/setup');
                         },
                         icon: Icon(Icons.settings, color: theme.colorScheme.secondaryContainer),
@@ -115,7 +117,7 @@ class ConnectionFailurePage extends ConsumerWidget {
         Flexible(
           child: Text(
             value,
-            style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
+            style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
             overflow: TextOverflow.ellipsis,
           ),
         ),

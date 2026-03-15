@@ -37,44 +37,46 @@ class AccountsPage extends ConsumerWidget {
         }
 
         return Scaffold(
-          body: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 12), child: body),
+          body: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 8), child: body),
           // Add a FAB button
-          floatingActionButton: SproutSpeedDial(
-            actions: [
-              FABAction(
-                icon: Icons.add,
-                label: 'Add Account',
-                onTap: (context) => showSproutPopup(context: context, builder: (_) => const AddAccountDialog()),
-              ),
-              FABAction(
-                icon: Icons.refresh,
-                label: 'Sync All',
-                onTap: (context) => showSproutPopup(
-                  context: context,
-                  builder: (context) => SproutBaseDialogWidget(
-                    "Confirm Sync",
-                    showCloseDialogButton: true,
-                    closeButtonText: "Cancel",
-                    showSubmitButton: true,
-                    submitButtonText: "Start Sync",
-                    onSubmitClick: () {
-                      // Trigger the sync
-                      ref.read(accountsProvider.notifier).manualSync();
-                      // Close the dialog
-                      Navigator.of(context).pop();
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Text(
-                        "Are you sure you want to manually sync all accounts? This may take a moment depending on your providers.",
-                        textAlign: TextAlign.center,
+          floatingActionButton: accountId != null
+              ? null
+              : SproutSpeedDial(
+                  actions: [
+                    FABAction(
+                      icon: Icons.add,
+                      label: 'Add Account',
+                      onTap: (context) => showSproutPopup(context: context, builder: (_) => const AddAccountDialog()),
+                    ),
+                    FABAction(
+                      icon: Icons.refresh,
+                      label: 'Sync All',
+                      onTap: (context) => showSproutPopup(
+                        context: context,
+                        builder: (context) => SproutBaseDialogWidget(
+                          "Confirm Sync",
+                          showCloseDialogButton: true,
+                          closeButtonText: "Cancel",
+                          showSubmitButton: true,
+                          submitButtonText: "Start Sync",
+                          onSubmitClick: () {
+                            // Trigger the sync
+                            ref.read(accountsProvider.notifier).manualSync();
+                            // Close the dialog
+                            Navigator.of(context).pop();
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Text(
+                              "Are you sure you want to manually sync all accounts? This may take a moment depending on your providers.",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),

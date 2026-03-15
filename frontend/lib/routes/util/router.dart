@@ -5,27 +5,37 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/widgets/login.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/connection_failure.dart';
+import 'package:sprout/routes/connection_setup.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
 
+/// Defines a notifier that allows us to subscribe to necessary configuration
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    // Listens to the providers and notifies GoRouter to re-run the redirect
+    _ref.listen(connectionUrlProvider, (_, __) => notifyListeners());
+    _ref.listen(authProvider, (_, __) => notifyListeners());
+    _ref.listen(unsecureConfigProvider, (_, __) => notifyListeners());
+  }
+}
+
 /// This provides the GoRouter for all of Sprout so pages know what is available
 final routerProvider = Provider<GoRouter>((ref) {
-  // Watch states we need for tracking data changes
-  ref.watch(authProvider);
-  ref.watch(unsecureConfigProvider);
-  ref.watch(connectionUrlProvider);
+  final notifier = RouterNotifier(ref);
 
   final router = GoRouter(
-    // initialLocation: '/login',
+    refreshListenable: notifier,
+    initialLocation: '/login', // TODO: Make this remember where we were and go back to that page?
     // We pass the ref to our redirect
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [
       // Routes that don't require Auth
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
-      // TODO
-      GoRoute(path: '/setup', builder: (context, state) => const Placeholder()),
-      GoRoute(path: '/connection/setup', builder: (context, state) => const Placeholder()),
+      GoRoute(path: '/setup', builder: (context, state) => const Placeholder()), // TODO Implement setup capabilities
+      GoRoute(path: '/connection/setup', builder: (context, state) => const ConnectionSetupPage()),
       GoRoute(path: '/connection/failure', builder: (context, state) => const ConnectionFailurePage()),
       // Routes that do require auth
       ShellRoute(
@@ -42,11 +52,12 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 String? _authRedirect(Ref ref, GoRouterState state) {
-  final authState = ref.read(authProvider);
   final connUrlState = ref.read(connectionUrlProvider);
+  final authState = ref.read(authProvider);
 
   // Connection URL Check
-  if (connUrlState.value == null) return '/connection/setup';
+  if (connUrlState.isLoading) return null;
+  if (connUrlState.value == null || connUrlState.value!.isEmpty) return '/connection/setup';
 
   // Server Connection Check
   final configNotifier = ref.read(unsecureConfigProvider.notifier);

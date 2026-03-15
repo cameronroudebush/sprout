@@ -60,6 +60,9 @@ class SproutBottomNav extends ConsumerWidget {
         currentIndex: effectiveIndex,
         selectedItemColor: hasMatch ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
         unselectedItemColor: theme.colorScheme.onSurfaceVariant,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        iconSize: 22,
         onTap: (index) {
           final selectedItem = displayItems[index];
           if (selectedItem is String) {

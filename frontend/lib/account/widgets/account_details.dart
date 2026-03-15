@@ -7,6 +7,7 @@ import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_card.dart';
+import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/models/notification.dart';
@@ -14,8 +15,6 @@ import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
-import 'package:sprout/transaction/transaction_provider.dart';
-import 'package:sprout/transaction/widgets/transaction_row.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A responsive view for account details that adapts its navigation
@@ -174,22 +173,35 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  spacing: 8,
-                  children: [
-                    AccountLogo(widget.account, height: 36, width: 36),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.account.institution.name, style: theme.textTheme.labelMedium),
-                        Text(
-                          widget.account.name,
-                          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      AccountLogo(widget.account, height: 36, width: 36),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              widget.account.institution.name,
+                              style: theme.textTheme.labelMedium,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              widget.account.name,
+                              style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 _getTypeBadge(theme),
               ],
             ),
@@ -215,7 +227,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
     final accountProvider = ref.read(accountsProvider.notifier);
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       children: [
         SproutCard(
           child: Padding(
@@ -287,7 +299,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                 // Static Read-Only Fields
                 _buildStaticRow(theme, Icons.account_balance, "Provider", account.provider),
                 _buildStaticRow(theme, Icons.language, "Currency", account.currency),
-                _buildStaticRow(theme, Icons.fingerprint, "Account ID", account.id, isLast: true),
 
                 const Divider(),
 
@@ -334,27 +345,12 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   }
 
   /// Builds the transactions to display related to this account
-  // TODO: Replace with infinite scroll transactions
   Widget _buildTransactionSection(BuildContext context, WidgetRef ref) {
-    final transactionsAsync = ref.watch(transactionsProvider);
-    return transactionsAsync.when(
-      data: (state) {
-        final filtered = state.transactions.where((t) => t.account.id == widget.account.id).toList();
-        if (filtered.isEmpty) return const Center(child: Text("No transactions recorded."));
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: filtered.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) => TransactionRow(transaction: filtered[index]),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text("Error loading transactions")),
-    );
+    return TransactionsPage(accountId: widget.account.id);
   }
 
   /// Helper for configuration fields that are read only
-  Widget _buildStaticRow(ThemeData theme, IconData icon, String label, String value, {bool isLast = false}) {
+  Widget _buildStaticRow(ThemeData theme, IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(

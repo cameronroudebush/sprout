@@ -29,6 +29,7 @@ class SwitchSettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
       leading: Icon(icon),
       title: Text(title),
       subtitle: Text(subtitle),

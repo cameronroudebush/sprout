@@ -9,14 +9,14 @@ part 'config_provider.g.dart';
 
 /// Future that produces the connection URL of the backend
 @Riverpod(keepAlive: true)
-Future<String> connectionUrl(Ref ref) async {
+Future<String?> connectionUrl(Ref ref) async {
   if (kIsWeb) {
     Uri uri = Uri.base;
     final leading = '${uri.scheme}://${uri.host}';
     return "${kDebugMode ? '$leading:8001' : leading}/api";
   } else {
     String? storedUrl = await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey);
-    return (storedUrl == null || storedUrl.isEmpty) ? "http://localhost/api" : "$storedUrl/api";
+    return (storedUrl == null || storedUrl.isEmpty) ? null : "$storedUrl/api";
   }
 }
 
@@ -53,6 +53,22 @@ class UnsecureConfig extends _$UnsecureConfig {
       _failedToConnect = true;
       rethrow;
     }
+  }
+
+  /// Sets the connection url, persists it, and triggers a full app-wide refresh
+  Future<void> setConnectionUrl(String? url) async {
+    // Persist the value for future app launches
+    await SecureStorageProvider.saveValue(SecureStorageProvider.connectionUrlKey, url);
+    // Update the provider that holds the URL.
+    ref.invalidate(connectionUrlProvider);
+    if (url != null) {
+      // Invalidate the API provider so it gets the new basePath from the refreshed connectionUrlProvider
+      ref.invalidate(configApiProvider);
+      // Finally, invalidate this provider to re-attempt the fetch with the new URL
+      ref.invalidateSelf();
+    }
+    // Await the new state to ensure we handle the result
+    await future;
   }
 
   /// Triggers a retry
