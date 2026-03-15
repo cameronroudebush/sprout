@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
@@ -38,6 +40,18 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _selectedCategoryId = CategoryDropdown.fakeAllCategory.id;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = GoRouterState.of(context);
+      final catId = state.uri.queryParameters['categoryId'];
+
+      setState(() {
+        _selectedCategoryId = catId == "unknown"
+            ? CategoryDropdown.unknownCategory.id
+            : catId ?? CategoryDropdown.fakeAllCategory.id;
+      });
+
+      _fetchPage(reset: true);
+    });
   }
 
   @override
@@ -99,28 +113,35 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       ),
     );
 
-    return Column(
-      children: [
-        if (widget.allowFiltering) _buildFilters(theme),
-        Expanded(
-          child: masterAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text("Error: $err")),
-            data: (masterState) {
-              if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
-                return const Center(child: Text("No matching transactions found."));
-              }
+    return Padding(
+      padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
+      child: Column(
+        children: [
+          if (widget.allowFiltering) _buildFilters(theme),
+          Expanded(
+            child: masterAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, _) => Center(child: Text("Error: $err")),
+              data: (masterState) {
+                if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
+                  return const Center(child: Text("No matching transactions found."));
+                }
 
-              return RefreshIndicator(
-                onRefresh: () async => ref.invalidate(transactionsProvider),
-                child: widget.separateByDate
-                    ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
-                    : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
-              );
-            },
+                return RefreshIndicator(
+                  color: theme.colorScheme.onSecondaryContainer,
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  onRefresh: () async {
+                    await _fetchPage(reset: true);
+                  },
+                  child: widget.separateByDate
+                      ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
+                      : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -142,8 +163,16 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           onChanged: _onSearchChanged,
         );
 
-        final initialCategory =
-            categories.firstWhereOrNull((c) => c.id == _selectedCategoryId) ?? CategoryDropdown.fakeAllCategory;
+        // Locate our initial category
+        Category initialCategory;
+        if (_selectedCategoryId == CategoryDropdown.fakeAllCategory.id) {
+          initialCategory = CategoryDropdown.fakeAllCategory;
+        } else if (_selectedCategoryId == CategoryDropdown.unknownCategory.id) {
+          initialCategory = CategoryDropdown.unknownCategory;
+        } else {
+          initialCategory =
+              categories.firstWhereOrNull((c) => c.id == _selectedCategoryId) ?? CategoryDropdown.fakeAllCategory;
+        }
 
         final categoryField = CategoryDropdown(
           initialCategory,

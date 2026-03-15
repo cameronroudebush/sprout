@@ -8,7 +8,7 @@ import 'package:sprout/category/widgets/category_icon.dart';
 /// A re-usable dropdown that allows us to select a category
 class CategoryDropdown extends ConsumerWidget {
   static final fakeAllCategory = Category(id: "all", name: "All Categories", icon: "category");
-  static final unknownCategory = Category(id: "null" as dynamic, name: "Unknown", icon: "unknown");
+  static final unknownCategory = Category(id: "unknown" as dynamic, name: "Unknown", icon: "unknown");
 
   final Category? selectedParent;
   final String? editingCategoryId;
@@ -80,16 +80,14 @@ class CategoryDropdown extends ConsumerWidget {
     return categoriesAsync.when(
       loading: () => const LinearProgressIndicator(),
       error: (err, _) => const Text("Error loading categories"),
-      data: (categories) {
+      data: (cats) {
+        final categories = [...cats];
+        categories.insert(0, unknownCategory);
+        if (displayAllCategoryButton) categories.insert(0, fakeAllCategory);
         var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParent?.id);
-
         if (displayAllCategoryButton && selectedValue == null) selectedValue = CategoryDropdown.fakeAllCategory;
-
         final topLevel = categories.where((c) => c.parentCategory == null && c.id != editingCategoryId).toList()
           ..sort((a, b) => a.name.compareTo(b.name));
-
-        topLevel.insert(0, unknownCategory);
-        if (displayAllCategoryButton) topLevel.insert(0, fakeAllCategory);
 
         return DropdownButtonFormField<Category>(
           menuMaxHeight: MediaQuery.of(context).size.height * 0.5,

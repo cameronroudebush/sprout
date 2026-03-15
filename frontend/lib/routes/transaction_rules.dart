@@ -63,7 +63,7 @@ class TransactionRulesPage extends ConsumerWidget {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 84),
+            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 84),
             child: Column(
               spacing: 12,
               children: [

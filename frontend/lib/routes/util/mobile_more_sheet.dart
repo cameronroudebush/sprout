@@ -129,15 +129,6 @@ class _MoreGridTile extends StatelessWidget {
               // Squircle shape using dynamic colors
               color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : [],
             ),
             child: Icon(icon, color: isSelected ? colorScheme.onPrimary : colorScheme.primary, size: 28),
           ),

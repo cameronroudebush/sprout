@@ -52,7 +52,7 @@ class NavigationProvider {
     }
 
     if (id != null || navigateOnUnknown) {
-      redirect("/transactions", queryParameters: {'cat': id ?? 'unknown'});
+      redirect("/transactions", queryParameters: {'categoryId': id ?? 'unknown'});
     }
   }
 

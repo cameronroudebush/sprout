@@ -9,8 +9,10 @@ import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/auth_interceptor_client.dart';
 import 'package:sprout/shared/api/auto_logout_client.dart';
+import 'package:sprout/shared/api/base_path_client.dart';
 import 'package:sprout/shared/api/browser_client.dart' if (dart.library.html) 'package:http/browser_client.dart';
 import 'package:sprout/shared/api/platform_client.dart';
+import 'package:sprout/shared/api/timeout_client.dart';
 
 part 'base_api.g.dart';
 
@@ -19,9 +21,9 @@ part 'base_api.g.dart';
 Future<ApiClient> baseApiClient(Ref ref) async {
   final basePath = await ref.watch(connectionUrlProvider.future);
   final rootClient = _createHttpClient();
-  final extendedClient = ExtendedApiClient(basePath: basePath);
-  extendedClient.client = PlatformClient(innerClient: rootClient);
-  return extendedClient;
+  final platformClient = PlatformClient(innerClient: rootClient);
+  final timeoutClient = TimeoutClient(innerClient: platformClient, timeout: 5);
+  return BasePathClient(client: timeoutClient, basePath: basePath ?? "");
 }
 
 /// Base API client that implements things auto logout, auth info, and auto retries on top of [baseApiClient]
@@ -30,12 +32,12 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
   final basePath = await ref.watch(connectionUrlProvider.future);
   final tokens = ref.watch(authTokensProvider).value;
   final rootClient = _createHttpClient();
-  final platform = PlatformClient(innerClient: rootClient);
-  final interceptor = AuthInterceptorClient(innerClient: platform, ref: ref);
+  final platformClient = PlatformClient(innerClient: rootClient);
+  final interceptorClient = AuthInterceptorClient(innerClient: platformClient, ref: ref);
 
   // Create the AutoLogout wrapper
   final autoLogoutClient = AutoLogoutClient(
-    innerClient: interceptor,
+    innerClient: interceptorClient,
     onLogout: () async {
       final auth = ref.read(authProvider.notifier);
       final notifications = ref.read(notificationsProvider.notifier);
@@ -53,10 +55,7 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
     auth.accessToken = tokens.idToken!;
   }
 
-  // Create the ExtendedApiClient and inject the client stack
-  final extendedClient = ExtendedApiClient(basePath: basePath, authentication: auth);
-  extendedClient.client = autoLogoutClient;
-  return extendedClient;
+  return BasePathClient(client: autoLogoutClient, basePath: basePath ?? "", authentication: auth);
 }
 
 /// Helper to generate the base http client
@@ -68,18 +67,4 @@ http.Client _createHttpClient() {
     inner = http.Client();
   }
   return RetryClient(inner, retries: 2);
-}
-
-/// Extended API client that allows customization of the base path and auth
-class ExtendedApiClient extends ApiClient {
-  String _basePath;
-
-  ExtendedApiClient({required super.basePath, super.authentication}) : _basePath = basePath;
-
-  @override
-  String get basePath => _basePath;
-
-  set basePath(String newPath) {
-    _basePath = newPath;
-  }
 }

@@ -84,19 +84,19 @@ class NetWorthDisplay extends ConsumerWidget {
               Text(
                 title!,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  letterSpacing: 1.0,
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             Text(
               value.toCurrency(isPrivate),
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, fontFamily: 'monospace'),
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
             ),
             SproutChangeWidget(
               totalChange: frame?.valueChange,
               percentageChange: frame?.percentChange,
               mainAxisAlignment: MainAxisAlignment.start,
+              useExtendedPeriodString: false,
               period: range,
               fontSize: 11,
             ),

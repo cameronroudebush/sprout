@@ -33,7 +33,7 @@ class HomeNotificationsWidget extends ConsumerWidget {
         textColor = theme.colorScheme.onSecondary;
         message = "An account sync is in progress";
       } else if (lastSync.status == ModelSyncStatusEnum.failed) {
-        message = "Account sync error: ${lastSync.failureReason}";
+        message = "Sync error: ${lastSync.failureReason}";
       }
 
       notifications.add(SproutNotificationWidget(SproutNotification(message, bgColor, textColor, icon: Icons.sync)));
@@ -48,7 +48,7 @@ class HomeNotificationsWidget extends ConsumerWidget {
             theme.colorScheme.primary,
             theme.colorScheme.onPrimary,
             icon: Icons.category,
-            onClick: () => NavigationProvider.redirect("/transactions", queryParameters: {'cat': "unknown"}),
+            onClick: () => NavigationProvider.redirect("/transactions", queryParameters: {'categoryId': "unknown"}),
           ),
         ),
       );

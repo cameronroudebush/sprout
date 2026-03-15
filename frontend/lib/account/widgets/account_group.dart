@@ -101,7 +101,6 @@ class AccountGroupSection extends StatelessWidget {
               Text(
                 total.toCurrency(isPrivate),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontFamily: 'monospace',
                   fontWeight: FontWeight.bold,
                   color: isNegative ? Colors.redAccent : Colors.green,
                 ),

@@ -3,9 +3,9 @@ import 'package:sprout/routes/accounts.dart';
 import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
+import 'package:sprout/routes/settings.dart';
 import 'package:sprout/routes/transaction_rules.dart';
 import 'package:sprout/routes/transactions.dart';
-import 'package:sprout/routes/user_config.dart';
 import 'package:sprout/routes/util/route.dart';
 
 /// List of routes that require authentication
@@ -53,20 +53,20 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/subscriptions',
     label: 'Subscriptions',
     icon: Icons.subscriptions,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const Placeholder(), // TODO
   ),
   SproutRoute(
     path: '/reports',
     label: 'Reports',
     icon: Icons.bar_chart,
     showInBottomNav: true,
-    builder: (context, state) => const Placeholder(),
+    builder: (context, state) => const Placeholder(), // TODO
   ),
   SproutRoute(
     path: '/settings',
     label: 'Settings',
     icon: Icons.settings_rounded,
     showInSidebar: false,
-    builder: (context, state) => const UserConfigPage(),
+    builder: (context, state) => const SettingsPage(),
   ),
 ];

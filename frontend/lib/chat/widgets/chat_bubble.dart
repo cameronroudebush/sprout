@@ -44,7 +44,7 @@ class ChatBubble extends ConsumerWidget {
       return Align(
         alignment: isAi ? Alignment.centerLeft : Alignment.centerRight,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: size.width * (isDesktop ? .35 : .8)),
+          constraints: BoxConstraints(maxWidth: size.width * (isDesktop ? .35 : 1)),
           child: Container(
             margin: EdgeInsets.only(top: 4, bottom: 4, left: isAi ? 0 : 60, right: isAi ? 60 : 0),
             padding: const EdgeInsets.all(12),
