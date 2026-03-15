@@ -108,7 +108,6 @@ class _SummaryLabel extends StatelessWidget {
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.bold,
-            letterSpacing: 1.1,
           ),
         ),
         Text(

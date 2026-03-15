@@ -20,7 +20,16 @@ class TransactionsPage extends ConsumerStatefulWidget {
   final bool allowFiltering;
   final bool separateByDate;
 
-  const TransactionsPage({super.key, this.accountId, this.allowFiltering = true, this.separateByDate = true});
+  /// Padding to apply around this page
+  final EdgeInsetsGeometry padding;
+
+  const TransactionsPage({
+    super.key,
+    this.accountId,
+    this.allowFiltering = true,
+    this.separateByDate = true,
+    this.padding = const EdgeInsets.all(8.0),
+  });
 
   @override
   ConsumerState<TransactionsPage> createState() => _TransactionsPageState();
@@ -100,7 +109,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final masterAsync = ref.watch(transactionsProvider);
@@ -114,7 +122,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     );
 
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
+      padding: widget.padding,
       child: Column(
         children: [
           if (widget.allowFiltering) _buildFilters(theme),
@@ -150,7 +158,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final categories = ref.watch(categoriesProvider).value ?? [];
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: widget.padding,
       child: SproutLayoutBuilder((isDesktop, context, constraints) {
         final searchField = TextField(
           controller: _searchController,
@@ -219,7 +227,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Text(date.toShortMonth, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
             ),
             SproutCard(
@@ -228,7 +236,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: dayTransactions.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, tIndex) => TransactionRow(transaction: dayTransactions[tIndex]),
+                itemBuilder: (context, tIndex) => TransactionRow(dayTransactions[tIndex]),
               ),
             ),
             const SizedBox(height: 8),
@@ -253,7 +261,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               child: Center(child: CircularProgressIndicator()),
             );
           }
-          return TransactionRow(transaction: transactions[index]);
+          return TransactionRow(transactions[index]);
         },
       ),
     );

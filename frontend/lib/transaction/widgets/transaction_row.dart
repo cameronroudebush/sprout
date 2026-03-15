@@ -11,7 +11,10 @@ import 'package:sprout/user/user_config_provider.dart';
 class TransactionRow extends ConsumerWidget {
   final Transaction transaction;
 
-  const TransactionRow({super.key, required this.transaction});
+  /// If we should be allowed to click this row to open the dialog
+  final bool allowDialog;
+
+  const TransactionRow(this.transaction, {super.key, this.allowDialog = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,13 +23,15 @@ class TransactionRow extends ConsumerWidget {
     final isPrivate = userConfig?.privateMode ?? false;
 
     return InkWell(
-      onTap: () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
+      onTap: !allowDialog
+          ? null
+          : () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
       child: Container(
         decoration: BoxDecoration(
           color: transaction.pending ? theme.colorScheme.primary.withValues(alpha: 0.15) : Colors.transparent,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           child: Row(
             spacing: 16,
             children: [
@@ -65,7 +70,7 @@ class TransactionRow extends ConsumerWidget {
                       color: transaction.amount.toBalanceColor(theme),
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: theme.disabledColor),
+                  if (allowDialog) Icon(Icons.chevron_right, color: theme.disabledColor),
                 ],
               ),
             ],

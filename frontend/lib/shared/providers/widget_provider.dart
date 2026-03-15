@@ -60,13 +60,13 @@ class WidgetSync extends _$WidgetSync {
 
     // Safety check: If widgets aren't allowed, clear existing data
     if (config == null || !config.allowWidgets) {
-      await _saveToNative(null);
+      await saveToNative(null);
       return;
     }
 
     final data = await _prepareData();
     if (data != null) {
-      await _saveToNative(data);
+      await saveToNative(data);
     }
   }
 
@@ -103,7 +103,7 @@ class WidgetSync extends _$WidgetSync {
   }
 
   /// Serializes the data and sends it to the native platform via [HomeWidget].
-  Future<void> _saveToNative(Map<String, dynamic>? data) async {
+  Future<void> saveToNative(Map<String, dynamic>? data) async {
     final String jsonString = jsonEncode(data ?? {});
     await HomeWidget.saveWidgetData('widget_data', jsonString);
     await HomeWidget.updateWidget(androidName: 'widget.Overview');

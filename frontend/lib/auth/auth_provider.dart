@@ -10,6 +10,7 @@ import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
+import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
 part 'auth_provider.g.dart';
@@ -150,6 +151,7 @@ class Auth extends _$Auth {
     try {
       await api.authControllerLogout();
     } finally {
+      await ref.read(widgetSyncProvider.notifier).saveToNative(null); // Wipe widget content
       await ref.read(authTokensProvider.notifier).clear();
       // Wipe the state
       state = const AsyncData(null);

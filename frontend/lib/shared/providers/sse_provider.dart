@@ -24,7 +24,7 @@ class Sse extends _$Sse {
 
     // Cleanup on logout or disposal
     ref.onDispose(() {
-      _stopSSE();
+      Future.microtask(() => _stopSSE());
     });
 
     if (authState.value != null) {

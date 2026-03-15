@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/chat_bubble.dart';
-import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -36,55 +35,86 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final messages = ref.watch(chatProvider).value ?? [];
-    final userConfig = ref.watch(userConfigProvider).value;
+    final chatAsync = ref.watch(chatProvider);
+    final userConfigAsync = ref.watch(userConfigProvider);
 
-    final bool isLoading = messages.any((m) => m.isThinking);
-    final bool llmConfigured = userConfig?.geminiKey?.isNotEmpty ?? false;
+    return userConfigAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Center(child: Text("Error loading config: $err")),
+      data: (userConfig) {
+        final bool llmConfigured = userConfig?.geminiKey?.isNotEmpty ?? false;
 
-    if (!llmConfigured) {
-      return SproutCard(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            spacing: 16,
-            children: [
-              const Text(
-                "No LLM is configured. Please set one in settings to proceed",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-              FilledButton(
-                onPressed: () => NavigationProvider.redirect("/settings"),
-                child: const Text("Go to Settings"),
-              ),
-            ],
+        if (!llmConfigured) {
+          return _buildNoConfigState();
+        }
+
+        return chatAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text("Error loading chat: $err")),
+          data: (messagesList) {
+            final messages = messagesList;
+            final bool isLoading = messages.any((m) => m.isThinking);
+
+            return Column(
+              spacing: 4,
+              children: [
+                Expanded(
+                  child: messages.isEmpty
+                      ? _buildEmptyState()
+                      : Scrollbar(
+                          controller: _scrollController,
+                          thumbVisibility: true,
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            reverse: true,
+                            padding: const EdgeInsets.all(12),
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) => ChatBubble(message: messages[index]),
+                          ),
+                        ),
+                ),
+                _buildQuickActions(isLoading),
+                _buildInputArea(isLoading),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Builds what to display when the AI isn't configured
+  Widget _buildNoConfigState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: SproutCard(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 16,
+              children: [
+                Icon(
+                  Icons.auto_awesome_outlined,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                ),
+                const Text(
+                  "AI Assistant Not Configured",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
+                const Text(
+                  "To chat with Sprout and analyze your data, you'll need to provide an API key in your settings.",
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
-      );
-    }
-
-    return Column(
-      spacing: 4,
-      children: [
-        Expanded(
-          child: messages.isEmpty
-              ? _buildEmptyState()
-              : Scrollbar(
-                  controller: _scrollController,
-                  thumbVisibility: true,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    reverse: true,
-                    padding: const EdgeInsets.all(12),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) => ChatBubble(message: messages[index]),
-                  ),
-                ),
-        ),
-        _buildQuickActions(isLoading),
-        _buildInputArea(isLoading),
-      ],
+      ),
     );
   }
 

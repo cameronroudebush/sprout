@@ -53,30 +53,37 @@ class SproutBottomNav extends ConsumerWidget {
         color: theme.bottomNavigationBarTheme.backgroundColor,
         border: Border(top: BorderSide(color: theme.dividerColor, width: 4)),
       ),
-      child: BottomNavigationBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        type: BottomNavigationBarType.fixed,
-        currentIndex: effectiveIndex,
-        selectedItemColor: hasMatch ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-        unselectedItemColor: theme.colorScheme.onSurfaceVariant,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        iconSize: 22,
-        onTap: (index) {
-          final selectedItem = displayItems[index];
-          if (selectedItem is String) {
-            _showMoreSheet(context);
-          } else if (selectedItem is SproutRoute) {
-            context.go(selectedItem.path);
-          }
-        },
-        items: displayItems.map((item) {
-          if (item is SproutRoute) {
-            return BottomNavigationBarItem(icon: Icon(item.icon), label: item.label);
-          }
-          return const BottomNavigationBarItem(icon: Icon(Icons.menu_open_rounded), label: 'Menu');
-        }).toList(),
+      child: SafeArea(
+        child: SizedBox(
+          height: 48,
+          child: BottomNavigationBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            type: BottomNavigationBarType.fixed,
+            currentIndex: effectiveIndex,
+            selectedItemColor: hasMatch ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+            unselectedItemColor: theme.colorScheme.onSurfaceVariant,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            iconSize: 24,
+            onTap: (index) {
+              final selectedItem = displayItems[index];
+              if (selectedItem is String) {
+                _showMoreSheet(context);
+              } else if (selectedItem is SproutRoute) {
+                context.go(selectedItem.path);
+              }
+            },
+            items: displayItems.map((item) {
+              if (item is SproutRoute) {
+                return BottomNavigationBarItem(icon: Icon(item.icon), label: item.label);
+              }
+              return const BottomNavigationBarItem(icon: Icon(Icons.menu_open_rounded), label: 'Menu');
+            }).toList(),
+          ),
+        ),
       ),
     );
   }

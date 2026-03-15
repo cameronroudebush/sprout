@@ -22,11 +22,7 @@ class SettingSection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16, bottom: 8),
           child: Text(
             title.toUpperCase(),
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
+            style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
           ),
         ),
         Card(
