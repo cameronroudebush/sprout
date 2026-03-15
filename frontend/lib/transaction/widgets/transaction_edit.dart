@@ -81,10 +81,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
       final newTransaction = _getNewTransaction();
 
       if (_valHasChanged()) {
-        // Use ref to access providers instead of ServiceLocator
         ref.read(transactionsProvider.notifier).editTransaction(newTransaction);
-        // TODO
-        // ref.read(categoriesProvider.notifier).loadUnknownCategoryCount();
       }
 
       Navigator.of(context).pop();
@@ -157,7 +154,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                         child: IconButton(
                           icon: const Icon(Icons.rule),
                           onPressed: () async {
-                            await showDialog(
+                            await showSproutPopup(
                               context: context,
                               builder: (_) => TransactionRuleEdit(null, initialValue: widget.transaction.description),
                             );
@@ -212,7 +209,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                         child: IconButton(
                           icon: const Icon(Icons.category),
                           onPressed: () async {
-                            await showDialog(
+                            await showSproutPopup(
                               context: context,
                               builder: (_) => CategoryEdit(
                                 null,

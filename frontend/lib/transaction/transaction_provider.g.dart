@@ -76,7 +76,7 @@ final class TransactionsProvider
   Transactions create() => Transactions();
 }
 
-String _$transactionsHash() => r'ffef2954457abaecb09fcc0093a2a7529a1cd4c3';
+String _$transactionsHash() => r'f61a960b9ab90f8e5f6fafeb016499d782bebb01';
 
 abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
   FutureOr<TransactionState> build();
@@ -98,10 +98,64 @@ abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
   }
 }
 
+@ProviderFor(TransactionFilterState)
+const transactionFilterStateProvider = TransactionFilterStateProvider._();
+
+final class TransactionFilterStateProvider
+    extends $NotifierProvider<TransactionFilterState, TransactionFilter> {
+  const TransactionFilterStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionFilterStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionFilterStateHash();
+
+  @$internal
+  @override
+  TransactionFilterState create() => TransactionFilterState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TransactionFilter value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TransactionFilter>(value),
+    );
+  }
+}
+
+String _$transactionFilterStateHash() =>
+    r'7df8ac1a9710089fc2dc3361c0730a16bc213c93';
+
+abstract class _$TransactionFilterState extends $Notifier<TransactionFilter> {
+  TransactionFilter build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<TransactionFilter, TransactionFilter>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<TransactionFilter, TransactionFilter>,
+              TransactionFilter,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 /// List of filtered transactions based on our state
 
 @ProviderFor(filteredTransactions)
-const filteredTransactionsProvider = FilteredTransactionsFamily._();
+const filteredTransactionsProvider = FilteredTransactionsProvider._();
 
 /// List of filtered transactions based on our state
 
@@ -114,27 +168,19 @@ final class FilteredTransactionsProvider
         >
     with $Provider<List<Transaction>> {
   /// List of filtered transactions based on our state
-  const FilteredTransactionsProvider._({
-    required FilteredTransactionsFamily super.from,
-    required ({String? accountId, String? categoryId, String? search})
-    super.argument,
-  }) : super(
-         retry: null,
-         name: r'filteredTransactionsProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  const FilteredTransactionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'filteredTransactionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$filteredTransactionsHash();
-
-  @override
-  String toString() {
-    return r'filteredTransactionsProvider'
-        ''
-        '$argument';
-  }
 
   @$internal
   @override
@@ -144,15 +190,7 @@ final class FilteredTransactionsProvider
 
   @override
   List<Transaction> create(Ref ref) {
-    final argument =
-        this.argument
-            as ({String? accountId, String? categoryId, String? search});
-    return filteredTransactions(
-      ref,
-      accountId: argument.accountId,
-      categoryId: argument.categoryId,
-      search: argument.search,
-    );
+    return filteredTransactions(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -162,52 +200,10 @@ final class FilteredTransactionsProvider
       providerOverride: $SyncValueProvider<List<Transaction>>(value),
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is FilteredTransactionsProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
 String _$filteredTransactionsHash() =>
-    r'75cf6fa95c68ad00f0313f59a52f9aca455224c8';
-
-/// List of filtered transactions based on our state
-
-final class FilteredTransactionsFamily extends $Family
-    with
-        $FunctionalFamilyOverride<
-          List<Transaction>,
-          ({String? accountId, String? categoryId, String? search})
-        > {
-  const FilteredTransactionsFamily._()
-    : super(
-        retry: null,
-        name: r'filteredTransactionsProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  /// List of filtered transactions based on our state
-
-  FilteredTransactionsProvider call({
-    String? accountId,
-    String? categoryId,
-    String? search,
-  }) => FilteredTransactionsProvider._(
-    argument: (accountId: accountId, categoryId: categoryId, search: search),
-    from: this,
-  );
-
-  @override
-  String toString() => r'filteredTransactionsProvider';
-}
+    r'4788f7e8119aa8bbd4c558aae10bedd7dbeac240';
 
 /// Provider to track transaction subscriptions
 

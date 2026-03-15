@@ -112,7 +112,7 @@ final class UserConfigNotifierProvider
 }
 
 String _$userConfigNotifierHash() =>
-    r'e83106b3fe248d53c4f6795a7306a4a40e092d5d';
+    r'a3287befb13e6695a08c5bd46e2aa1c8aee0064d';
 
 abstract class _$UserConfigNotifier extends $AsyncNotifier<UserConfig?> {
   FutureOr<UserConfig?> build();

@@ -8,14 +8,32 @@ import 'package:sprout/user/user_config_provider.dart';
 class ChartRangeSelector extends ConsumerWidget {
   final ValueChanged<ChartRangeEnum>? onRangeSelected;
 
-  const ChartRangeSelector({super.key, this.onRangeSelected});
+  /// If we want to render the large version of this
+  final bool large;
+
+  const ChartRangeSelector({super.key, this.onRangeSelected, this.large = false});
+
+  /// Centralized handler for range updates to keep providers and callbacks in sync
+  void _handleRangeChange(WidgetRef ref, ChartRangeEnum range) async {
+    await ref.read(userConfigProvider.notifier).updateChartRange(range);
+    if (onRangeSelected != null) {
+      onRangeSelected!(range);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final userConfig = ref.watch(userConfigProvider);
     final selectedRange = userConfig.value?.netWorthRange ?? ChartRangeEnum.oneMonth;
+
+    if (large) return _buildLargeVersion(context, ref, selectedRange);
+    return _buildCompactVersion(context, ref, selectedRange);
+  }
+
+  /// The compact popup menu version
+  Widget _buildCompactVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return PopupMenuButton<ChartRangeEnum>(
       initialValue: selectedRange,
@@ -43,13 +61,7 @@ class ChartRangeSelector extends ConsumerWidget {
           ],
         ),
       ),
-      onSelected: (ChartRangeEnum newRange) async {
-        await ref.read(userConfigProvider.notifier).updateChartRange(newRange);
-
-        if (onRangeSelected != null) {
-          onRangeSelected!(newRange);
-        }
-      },
+      onSelected: (range) => _handleRangeChange(ref, range),
       itemBuilder: (context) => ChartRangeEnum.values.map((range) {
         final isSelected = range == selectedRange;
         return PopupMenuItem(
@@ -69,6 +81,34 @@ class ChartRangeSelector extends ConsumerWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// Builds a large version of the selection range that acts as a row using SegmentedButton
+  Widget _buildLargeVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      width: double.infinity,
+      child: SegmentedButton<ChartRangeEnum>(
+        showSelectedIcon: false,
+        segments: ChartRangeEnum.values.map((range) {
+          return ButtonSegment<ChartRangeEnum>(
+            value: range,
+            label: Text(ChartRangeUtility.asPretty(range), style: const TextStyle(fontSize: 12)),
+          );
+        }).toList(),
+        selected: {selectedRange},
+        onSelectionChanged: (Set<ChartRangeEnum> newSelection) {
+          _handleRangeChange(ref, newSelection.first);
+        },
+        style: SegmentedButton.styleFrom(
+          visualDensity: VisualDensity.compact,
+          selectedForegroundColor: theme.colorScheme.onPrimary,
+          selectedBackgroundColor: theme.colorScheme.primary,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
     );
   }
 }

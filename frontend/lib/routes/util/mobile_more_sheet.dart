@@ -40,23 +40,29 @@ class SproutMoreSheet extends ConsumerWidget {
           ),
 
           // Build the grid of pages
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 16),
-            itemCount: moreRoutes.length,
-            itemBuilder: (context, index) {
-              final route = moreRoutes[index];
-              final isSelected = NavigationProvider.currentRoute == route.path;
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = constraints.maxWidth / 4;
 
-              return _MoreGridTile(
-                icon: route.icon,
-                label: route.label,
-                isSelected: isSelected,
-                onTap: () {
-                  Navigator.pop(context);
-                  NavigationProvider.redirect(route.path);
-                },
+              return Wrap(
+                textDirection: TextDirection.rtl,
+                runSpacing: 16,
+                children: moreRoutes.map((route) {
+                  final isSelected = NavigationProvider.currentRoute == route.path;
+
+                  return SizedBox(
+                    width: itemWidth,
+                    child: _MoreGridTile(
+                      icon: route.icon,
+                      label: route.label,
+                      isSelected: isSelected,
+                      onTap: () {
+                        Navigator.pop(context);
+                        NavigationProvider.redirect(route.path);
+                      },
+                    ),
+                  );
+                }).toList(),
               );
             },
           ),

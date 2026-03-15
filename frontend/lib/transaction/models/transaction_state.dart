@@ -28,3 +28,20 @@ class TransactionState {
     );
   }
 }
+
+/// A state utilized by the transaction provider
+class TransactionFilter {
+  final String? accountId;
+  final String? categoryId;
+  final String search;
+
+  TransactionFilter({this.accountId, this.categoryId, this.search = ''});
+
+  TransactionFilter copyWith({String? accountId, String? categoryId, String? search}) {
+    return TransactionFilter(
+      accountId: accountId ?? this.accountId,
+      categoryId: categoryId ?? this.categoryId,
+      search: search ?? this.search,
+    );
+  }
+}

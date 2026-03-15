@@ -25,10 +25,23 @@ class SettingSection extends StatelessWidget {
             style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
           ),
         ),
-        Card(
+        Container(
           margin: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: theme.cardTheme.color,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.dividerColor, width: 1),
+          ),
           clipBehavior: Clip.antiAlias,
-          child: Column(children: children),
+          child: Column(
+            children: [
+              for (int i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i < children.length - 1)
+                  Divider(height: 1, thickness: 1, indent: 16, endIndent: 16, color: theme.dividerColor),
+              ],
+            ],
+          ),
         ),
       ],
     );

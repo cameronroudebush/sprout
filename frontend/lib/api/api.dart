@@ -75,6 +75,7 @@ part 'model/register_device_dto.dart';
 part 'model/sse_data.dart';
 part 'model/sankey_data.dart';
 part 'model/sankey_link.dart';
+part 'model/theme_style_enum.dart';
 part 'model/total_net_worth_dto.dart';
 part 'model/total_transactions.dart';
 part 'model/transaction.dart';

@@ -2338,7 +2338,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.2.0-23-g22da5c2",
+    "version": "v0.2.0-26-g29c4f0e",
     "contact": {}
   },
   "tags": [
@@ -2802,6 +2802,15 @@
         ],
         "description": "The net worth range to display by default"
       },
+      "ThemeStyleEnum": {
+        "type": "string",
+        "enum": [
+          "bliss",
+          "absolute",
+          "colored"
+        ],
+        "description": "The visual theme style selected by the user"
+      },
       "UserConfig": {
         "type": "object",
         "properties": {
@@ -2813,6 +2822,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/ChartRangeEnum"
+              }
+            ]
+          },
+          "themeStyle": {
+            "description": "The visual theme style selected by the user",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ThemeStyleEnum"
               }
             ]
           },
@@ -2840,6 +2857,7 @@
         "required": [
           "id",
           "netWorthRange",
+          "themeStyle",
           "privateMode",
           "secureMode",
           "allowWidgets"
@@ -3612,7 +3630,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-03-14T23:11:07.757Z"
+            "default": "2026-03-15T17:15:53.113Z"
           },
           "isRead": {
             "type": "boolean",

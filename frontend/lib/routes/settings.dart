@@ -2,11 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/config/models/extensions/config_extension.dart';
 import 'package:sprout/config/widgets/settings_section.dart';
 import 'package:sprout/config/widgets/tiles/action_tile.dart';
 import 'package:sprout/config/widgets/tiles/switch_tile.dart';
+import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -40,38 +42,35 @@ class SettingsPage extends ConsumerWidget {
           spacing: 16,
           children: [
             // Appearance Settings
-            // TODO: Add back once backend has support
-            // SettingSection(
-            //   title: "Appearance",
-            //   children: [
-            //     ActionSettingTile(
-            //       title: "App Theme",
-            //       subtitle: "Customize how Sprout looks",
-            //       icon: Icons.palette_outlined,
-            //       trailing: DropdownButtonHideUnderline(
-            //         child: DropdownButton<String>(
-            //           value: userConfig.theme ?? 'dark', // Fallback to current config
-            //           alignment: Alignment.centerRight,
-            //           icon: const Icon(Icons.arrow_drop_down),
-            //           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            //             color: Theme.of(context).colorScheme.primary,
-            //             fontWeight: FontWeight.bold,
-            //           ),
-            //           onChanged: (String? newValue) {
-            //             if (newValue != null) {
-            //               provider.updateConfig((c) => c.theme = newValue);
-            //             }
-            //           },
-            //           items: const [
-            //             DropdownMenuItem(value: 'system', child: Text("System")),
-            //             DropdownMenuItem(value: 'light', child: Text("Light")),
-            //             DropdownMenuItem(value: 'dark', child: Text("Dark")),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
+            SettingSection(
+              title: "Appearance",
+              children: [
+                ActionSettingTile(
+                  title: "App Theme",
+                  subtitle: "Customize how Sprout looks",
+                  icon: Icons.palette_outlined,
+                  trailing: DropdownButtonHideUnderline(
+                    child: DropdownButton<ThemeStyleEnum>(
+                      value: userConfig.themeStyle,
+                      alignment: Alignment.centerRight,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      onChanged: (ThemeStyleEnum? newValue) {
+                        if (newValue != null) {
+                          provider.updateConfig((c) => c.themeStyle = newValue);
+                        }
+                      },
+                      items: ThemeStyleEnum.values
+                          .map((style) => DropdownMenuItem(value: style, child: Text(style.value.toTitleCase)))
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             // Privacy and security
             SettingSection(
               title: "Privacy & Security",
@@ -160,7 +159,10 @@ class SettingsPage extends ConsumerWidget {
                   title: "Real-time Connection",
                   subtitle: sseConnected ? "Connected" : "Disconnected",
                   icon: Icons.sync,
-                  trailing: Icon(Icons.circle, color: sseConnected ? Colors.green : Colors.red, size: 12),
+                  trailing: Padding(
+                    padding: EdgeInsetsGeometry.only(right: 14),
+                    child: Icon(Icons.circle, color: sseConnected ? Colors.green : Colors.red, size: 12),
+                  ),
                 ),
                 ActionSettingTile(
                   title: "Sprout Documentation",
@@ -170,7 +172,6 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 ActionSettingTile(
                   title: "Connection Url",
-                  subtitle: "The Url where the Sprout server lives",
                   icon: Icons.http,
                   trailing: Text(backendUrl ?? "", style: Theme.of(context).textTheme.labelMedium),
                 ),

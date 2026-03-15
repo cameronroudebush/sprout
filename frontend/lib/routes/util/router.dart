@@ -28,7 +28,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   final router = GoRouter(
     refreshListenable: notifier,
-    initialLocation: '/login', // TODO: Make this remember where we were and go back to that page?
+    initialLocation: '/login',
     // We pass the ref to our redirect
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [

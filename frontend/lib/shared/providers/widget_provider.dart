@@ -29,7 +29,6 @@ class WidgetSync extends _$WidgetSync {
           // Invalidate the data providers to ensure they pull fresh from API
           ref.invalidate(userConfigProvider);
           ref.invalidate(totalNetWorthProvider);
-          ref.invalidate(transactionsProvider);
 
           await update();
         }
