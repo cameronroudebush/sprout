@@ -43,10 +43,10 @@ class Notifications extends _$Notifications {
 
         // Refresh the list
         final oldIds = (state.value ?? []).map((n) => n.id).toSet();
-        ref.invalidateSelf();
+        await ref.container.refresh(notificationsProvider.future);
+        final newList = state.value ?? [];
 
         // Wait for refresh to complete to find the new one for the popup
-        final newList = await future;
         if (msg != null && msg.popupLatest) {
           final notification = newList.firstWhere((n) => !oldIds.contains(n.id), orElse: () => newList.first);
           _showInAppNotification(notification);

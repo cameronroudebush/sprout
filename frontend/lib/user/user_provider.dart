@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 
@@ -23,12 +24,17 @@ Future<UserApi> userApi(Ref ref) async {
 class UserNotifier extends _$UserNotifier {
   @override
   void build() {
-    // No specific state to return here, so we return void or null.
+    // Listen for authentication changes
+    ref.listen(authProvider, (previous, next) {
+      print(next.value);
+      if (next.value != null && previous?.value == null) {
+        registerDevice();
+      }
+    });
     return;
   }
 
   /// Registers the device for push notifications.
-  /// Replaces registerDevice() and postLogin() logic.
   Future<void> registerDevice() async {
     if (kIsWeb) return;
 
@@ -58,8 +64,6 @@ class UserNotifier extends _$UserNotifier {
       await api.userControllerRegisterDevice(
         RegisterDeviceDto(token: token, deviceName: deviceName, platform: platform),
       );
-
-      LoggerProvider.debug("Device registered successfully: $deviceName");
     } catch (e) {
       LoggerProvider.error("Failed to register device: $e");
     }

@@ -39,17 +39,18 @@ class Biometrics extends _$Biometrics {
 
   @override
   BiometricState build() {
-    // Automatically manage screen privacy when config changes
-    ref.listen(userConfigProvider, (prev, next) {
-      final config = next.value;
-      if (config?.secureMode == true) {
-        enableScreenPrivacy();
-      } else {
-        disableScreenPrivacy();
-      }
-    });
-
     return BiometricState();
+  }
+
+  /// Explicitly sync native privacy state with config
+  /// This should be called after a successful login or when security settings change
+  Future<void> syncNativePrivacy(bool secureMode) async {
+    if (kIsWeb) return;
+    if (secureMode) {
+      await enableScreenPrivacy();
+    } else {
+      await disableScreenPrivacy();
+    }
   }
 
   /// Tries to unlock the biometrics when clicking the unlock button. Returns true if the unlock was a success. False if not.
@@ -67,7 +68,7 @@ class Biometrics extends _$Biometrics {
   }
 
   /// App Resumed: Cancel timer and try to unlock if needed
-  Future<void> unlockResume() async {
+  Future<void> unlockResume({VoidCallback? onResume}) async {
     _lockTimer?.cancel();
     _lockTimer = null;
 
@@ -79,8 +80,11 @@ class Biometrics extends _$Biometrics {
 
     final isLoggedIn = ref.read(authProvider).value != null;
     if (!kIsWeb && isLoggedIn && !state.isLoggingOut && state.isLocked && !state.isUnlocking) {
-      await _internalUnlock();
-      if (!state.isLocked) await disableScreenPrivacy();
+      final success = await _internalUnlock();
+      if (success) {
+        if (!state.isLocked) await disableScreenPrivacy();
+        onResume?.call();
+      }
     }
   }
 
@@ -101,6 +105,7 @@ class Biometrics extends _$Biometrics {
     }
   }
 
+  /// Returns a bool if the biometric authentication was successful
   Future<bool> _internalUnlock({bool preLogout = false}) async {
     final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
 

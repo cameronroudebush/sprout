@@ -32,7 +32,7 @@ class FirebaseNotifier extends _$FirebaseNotifier {
     if (kIsWeb) return;
 
     FirebaseConfigDTO? config;
-    ;
+
     final stored = await SecureStorageProvider.getValue(_firebaseConfigKey);
 
     if (stored != null && stored.isNotEmpty) {

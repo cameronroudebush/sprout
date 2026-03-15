@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/routes/util/app_bar.dart';
 import 'package:sprout/routes/util/bottom_nav.dart';
 import 'package:sprout/routes/util/sidenav.dart';
 import 'package:sprout/shared/widgets/lifecycle_observer.dart';
+import 'package:sprout/shared/widgets/lock.dart';
 
 /// A lightweight wrapper that provides persistent navigation (e.g., Side/Bottom Nav).
 class SproutShell extends ConsumerWidget {
@@ -16,6 +18,7 @@ class SproutShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bioState = ref.watch(biometricsProvider);
     final theme = Theme.of(context);
     // Determine layout based on screen size
     final isDesktop = MediaQuery.of(context).size.width > 800;
@@ -28,16 +31,18 @@ class SproutShell extends ConsumerWidget {
               ? Brightness.light
               : Brightness.dark,
         ),
-        child: Scaffold(
-          appBar: const SproutAppBar(),
-          body: Row(
-            children: [
-              if (isDesktop) SproutSideNav(),
-              Expanded(child: child),
-            ],
-          ),
-          bottomNavigationBar: isDesktop ? null : SproutBottomNav(currentPath: state.fullPath!),
-        ),
+        child: bioState.isLocked
+            ? SproutLockWidget()
+            : Scaffold(
+                appBar: const SproutAppBar(),
+                body: Row(
+                  children: [
+                    if (isDesktop) SproutSideNav(),
+                    Expanded(child: child),
+                  ],
+                ),
+                bottomNavigationBar: isDesktop ? null : SproutBottomNav(currentPath: state.fullPath ?? ""),
+              ),
       ),
     );
   }

@@ -146,6 +146,8 @@ void callbackDispatcher() {
     final container = ProviderContainer();
 
     try {
+      // Apply default auth to grab data in the background of this isolate
+      await container.read(authProvider.notifier).applyDefaultAuth();
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await Future.wait([
         container.refresh(userConfigProvider.future),

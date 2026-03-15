@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/biometric_provider.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 
 /// This widget is intended to display when the app is locked by biometrics
 class SproutLockWidget extends ConsumerWidget {
@@ -17,7 +18,10 @@ class SproutLockWidget extends ConsumerWidget {
           SizedBox(
             width: 240,
             child: FilledButton(
-              onPressed: () => ref.read(biometricsProvider.notifier).tryManualUnlock(),
+              onPressed: () async {
+                final success = await ref.read(biometricsProvider.notifier).tryManualUnlock();
+                if (success) NavigationProvider.redirect("/");
+              },
               child: Row(mainAxisAlignment: MainAxisAlignment.center, spacing: 8, children: [Text("Unlock")]),
             ),
           ),

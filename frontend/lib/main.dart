@@ -6,19 +6,23 @@ import 'package:sprout/routes/util/router.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// Provider that fires first
-final initializationProvider = FutureProvider<void>((ref) async {});
+final initializationProvider = FutureProvider<void>((ref) async {
+  // Setup firebase, using cached credentials as provided
+  await ref.read(firebaseProvider.notifier).configure();
+});
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
 
   final container = ProviderContainer();
-  // Setup firebase, using cached credentials as provided
-  await container.read(firebaseProvider.notifier).configure();
   // Make sure the widget provider is syncing
   container.read(widgetSyncProvider);
+  // Make sure the user provider is tracked
+  container.read(userProvider);
   runApp(UncontrolledProviderScope(container: container, child: SproutApp()));
 }
 
