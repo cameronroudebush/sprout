@@ -11,7 +11,7 @@ class SproutAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   const SproutAppBar({super.key, this.useFullLogo = false});
 
-  static const double _defaultHeight = 64.0;
+  static const double _defaultHeight = 48.0;
 
   @override
   Size get preferredSize => const Size.fromHeight(_defaultHeight + 4.0);

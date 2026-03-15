@@ -73,7 +73,7 @@ class SproutMoreSheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final isSettings = NavigationProvider.currentRoute == '/settings';
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(20),
@@ -81,20 +81,26 @@ class SproutMoreSheet extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              NavigationProvider.redirect('/settings');
-            },
-            icon: Icon(isSettings ? Icons.settings : Icons.settings_outlined, size: 20),
-            label: const Text("Settings"),
-            style: isSettings ? ThemeHelpers.primaryButton : ThemeHelpers.secondaryButton,
+          SizedBox(
+            height: 30,
+            child: FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                NavigationProvider.redirect('/settings');
+              },
+              icon: Icon(isSettings ? Icons.settings : Icons.settings_outlined, size: 20),
+              label: const Text("Settings"),
+              style: isSettings ? ThemeHelpers.primaryButton : ThemeHelpers.secondaryButton,
+            ),
           ),
-          FilledButton.icon(
-            onPressed: () => ref.read(authProvider.notifier).logout(),
-            icon: const Icon(Icons.logout_rounded, size: 20),
-            label: const Text("Logout"),
-            style: ThemeHelpers.errorButton,
+          SizedBox(
+            height: 30,
+            child: FilledButton.icon(
+              onPressed: () => ref.read(authProvider.notifier).logout(),
+              icon: const Icon(Icons.logout_rounded, size: 20),
+              label: const Text("Logout"),
+              style: ThemeHelpers.errorButton,
+            ),
           ),
         ],
       ),

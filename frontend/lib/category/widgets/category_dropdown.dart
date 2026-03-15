@@ -86,8 +86,24 @@ class CategoryDropdown extends ConsumerWidget {
         if (displayAllCategoryButton) categories.insert(0, fakeAllCategory);
         var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParent?.id);
         if (displayAllCategoryButton && selectedValue == null) selectedValue = CategoryDropdown.fakeAllCategory;
-        final topLevel = categories.where((c) => c.parentCategory == null && c.id != editingCategoryId).toList()
-          ..sort((a, b) => a.name.compareTo(b.name));
+
+        // Build the display list
+        // Filter out special IDs and parents to get "clean" top-level categories
+        final topLevel =
+            cats
+                .where(
+                  (c) =>
+                      c.parentCategory == null &&
+                      c.id != editingCategoryId &&
+                      c.id != fakeAllCategory.id &&
+                      c.id != unknownCategory.id,
+                )
+                .toList()
+              ..sort((a, b) => a.name.compareTo(b.name));
+
+        // Pin the specials back to the TOP of the display list
+        topLevel.insert(0, unknownCategory);
+        if (displayAllCategoryButton) topLevel.insert(0, fakeAllCategory);
 
         return DropdownButtonFormField<Category>(
           menuMaxHeight: MediaQuery.of(context).size.height * 0.5,

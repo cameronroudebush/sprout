@@ -86,7 +86,6 @@ class AccountGroupSection extends StatelessWidget {
                 title,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),

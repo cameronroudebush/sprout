@@ -68,7 +68,7 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
                     const SizedBox(height: 12),
                     Text(
                       'Server Configuration',
-                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     Text(

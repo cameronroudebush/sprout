@@ -52,7 +52,7 @@ class AccountItemRow extends StatelessWidget {
                 children: [
                   Text(
                     account.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

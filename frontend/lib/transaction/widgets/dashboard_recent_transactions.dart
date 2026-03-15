@@ -19,52 +19,54 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
     final transactionsAsync = ref.watch(transactionsProvider);
 
     return SproutCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Padding(
+            padding: EdgeInsetsGeometry.fromLTRB(12, 12, 12, 0),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   "Recent Activity",
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    letterSpacing: 1.2,
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                FilledButton(
-                  onPressed: () => NavigationProvider.redirect('/transactions'),
-                  style: ThemeHelpers.primaryButton,
-                  child: const Text("See All"),
+                SizedBox(
+                  height: 32,
+                  child: FilledButton(
+                    onPressed: () => NavigationProvider.redirect('/transactions'),
+                    style: ThemeHelpers.primaryButton,
+                    child: const Text("See All"),
+                  ),
                 ),
               ],
             ),
-            Divider(height: 1),
-            transactionsAsync.when(
-              data: (state) {
-                final recent = state.transactions.take(count).toList();
-                if (recent.isEmpty) {
-                  return const Center(child: Text("No recent transactions"));
-                }
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: recent.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 4),
-                  itemBuilder: (context, index) {
-                    return TransactionRow(transaction: recent[index]);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => const Center(child: Text("Failed to load transactions")),
-            ),
-          ],
-        ),
+          ),
+          Divider(),
+          transactionsAsync.when(
+            data: (state) {
+              final recent = state.transactions.take(count).toList();
+              if (recent.isEmpty) {
+                return const Center(child: Text("No recent transactions"));
+              }
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: recent.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 0),
+                itemBuilder: (context, index) {
+                  return TransactionRow(recent[index]);
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => const Center(child: Text("Failed to load transactions")),
+          ),
+        ],
       ),
     );
   }
