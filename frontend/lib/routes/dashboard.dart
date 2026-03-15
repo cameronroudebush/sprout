@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
-import 'package:sprout/holding/widgets/market_indices_bar.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_card.dart';
 import 'package:sprout/notification/widgets/home_notifications.dart';
@@ -22,8 +21,6 @@ class DashboardPage extends ConsumerWidget {
         children: [
           // Important notifications that the user needs to know
           const HomeNotificationsWidget(),
-          // Major indices for the current market
-          const MajorIndicesBarWidget(),
           // Net worth chart
           SproutCard(
             child: Padding(

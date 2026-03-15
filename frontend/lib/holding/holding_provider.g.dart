@@ -420,3 +420,103 @@ abstract class _$MajorIndices extends $AsyncNotifier<List<MarketIndexDto>> {
     element.handleValue(ref, created);
   }
 }
+
+/// Riverpod that provides live price of a stock utilizing the backend API
+
+@ProviderFor(LivePrice)
+const livePriceProvider = LivePriceFamily._();
+
+/// Riverpod that provides live price of a stock utilizing the backend API
+final class LivePriceProvider
+    extends $AsyncNotifierProvider<LivePrice, MarketIndexDto?> {
+  /// Riverpod that provides live price of a stock utilizing the backend API
+  const LivePriceProvider._({
+    required LivePriceFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'livePriceProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$livePriceHash();
+
+  @override
+  String toString() {
+    return r'livePriceProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  LivePrice create() => LivePrice();
+
+  @override
+  bool operator ==(Object other) {
+    return other is LivePriceProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$livePriceHash() => r'96715e8ffc836594a4ac53c12671b1f1aa4d079c';
+
+/// Riverpod that provides live price of a stock utilizing the backend API
+
+final class LivePriceFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          LivePrice,
+          AsyncValue<MarketIndexDto?>,
+          MarketIndexDto?,
+          FutureOr<MarketIndexDto?>,
+          String
+        > {
+  const LivePriceFamily._()
+    : super(
+        retry: null,
+        name: r'livePriceProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  /// Riverpod that provides live price of a stock utilizing the backend API
+
+  LivePriceProvider call(String symbol) =>
+      LivePriceProvider._(argument: symbol, from: this);
+
+  @override
+  String toString() => r'livePriceProvider';
+}
+
+/// Riverpod that provides live price of a stock utilizing the backend API
+
+abstract class _$LivePrice extends $AsyncNotifier<MarketIndexDto?> {
+  late final _$args = ref.$arg as String;
+  String get symbol => _$args;
+
+  FutureOr<MarketIndexDto?> build(String symbol);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(_$args);
+    final ref = this.ref as $Ref<AsyncValue<MarketIndexDto?>, MarketIndexDto?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<MarketIndexDto?>, MarketIndexDto?>,
+              AsyncValue<MarketIndexDto?>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

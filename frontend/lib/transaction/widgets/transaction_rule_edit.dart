@@ -6,7 +6,6 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
-import 'package:sprout/shared/widgets/tooltip.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_rule_provider.dart';
 
@@ -288,7 +287,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
-                      SproutTooltip(
+                      Tooltip(
                         message: "Add new category",
                         child: IconButton(
                           icon: const Icon(Icons.category),

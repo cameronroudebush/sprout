@@ -68,3 +68,20 @@ class MajorIndices extends _$MajorIndices {
     return await api.holdingControllerGetLiveMajor() ?? [];
   }
 }
+
+/// Riverpod that provides live price of a stock utilizing the backend API
+@Riverpod(keepAlive: true)
+class LivePrice extends _$LivePrice {
+  Timer? _timer;
+
+  @override
+  Future<MarketIndexDto?> build(String symbol) async {
+    // Refresh cycle to match backend cache
+    _timer = Timer.periodic(const Duration(minutes: 5), (_) => ref.invalidateSelf());
+    ref.onDispose(() => _timer?.cancel());
+    final api = await ref.watch(holdingApiProvider.future);
+    final results = await api.holdingControllerGetLivePrices([symbol]);
+
+    return results?.firstOrNull;
+  }
+}

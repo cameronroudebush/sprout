@@ -4,31 +4,26 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 // ignore: must_be_immutable
-class ComboChart extends StatelessWidget {
+class ComboChart extends ConsumerWidget {
   Timer? _debounce;
 
   final String? title;
   final CashFlowSpending spendingData;
   final Color lineColor;
   final void Function(String node)? onNodeTap;
-  final bool isPrivateMode;
 
-  ComboChart(
-    this.spendingData,
-    this.isPrivateMode, {
-    super.key,
-    this.lineColor = Colors.red,
-    this.title,
-    this.onNodeTap,
-  });
+  ComboChart(this.spendingData, {super.key, this.lineColor = Colors.red, this.title, this.onNodeTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (spendingData.data.isEmpty) return const SizedBox();
+    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
 
     final maxValue = spendingData.data.map((e) => e.totalSpending).reduce(max);
     double maxY = (maxValue.roundToDouble());
@@ -70,7 +65,7 @@ class ComboChart extends StatelessWidget {
                           dotData: const FlDotData(show: true),
                         ),
                       ],
-                      titlesData: _getSharedTitlesData(yInterval, isVisibleLayer: false),
+                      titlesData: _getSharedTitlesData(yInterval, privateMode, isVisibleLayer: false),
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
                     ),
@@ -84,7 +79,7 @@ class ComboChart extends StatelessWidget {
                     maxY: maxY,
                     minY: 0,
                     barGroups: _getBarGroups(),
-                    titlesData: _getSharedTitlesData(yInterval, isVisibleLayer: true),
+                    titlesData: _getSharedTitlesData(yInterval, privateMode, isVisibleLayer: true),
                     gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: yInterval),
                     borderData: FlBorderData(show: false),
                     barTouchData: BarTouchData(
@@ -128,13 +123,13 @@ class ComboChart extends StatelessWidget {
                             TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                             children: <TextSpan>[
                               TextSpan(
-                                text: '${barValue.toCurrency(isPrivateMode)}\n',
-                                style: TextStyle(color: Colors.red[200], fontSize: 12, fontWeight: FontWeight.w500),
+                                text: '${barValue.toCurrency(privateMode)}\n',
+                                style: TextStyle(color: Colors.red[200], fontSize: 12),
                               ),
 
                               // Footer: Show the Total from the line chart
                               TextSpan(
-                                text: 'Total: ${totalValue.toCurrency(isPrivateMode)}',
+                                text: 'Total: ${totalValue.toCurrency(privateMode)}',
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 10,
@@ -185,7 +180,7 @@ class ComboChart extends StatelessWidget {
 
   /// Generates titles data.
   /// [isVisibleLayer] determines if we draw visible text or transparent text (spacer).
-  FlTitlesData _getSharedTitlesData(double yInterval, {required bool isVisibleLayer}) {
+  FlTitlesData _getSharedTitlesData(double yInterval, bool privateMode, {required bool isVisibleLayer}) {
     return FlTitlesData(
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -216,7 +211,7 @@ class ComboChart extends StatelessWidget {
           interval: yInterval,
           getTitlesWidget: (value, meta) {
             final textColor = isVisibleLayer ? null : Colors.transparent;
-            return Text(value.toCurrency(isPrivateMode), style: TextStyle(fontSize: 10, color: textColor));
+            return Text(value.toCurrency(privateMode), style: TextStyle(fontSize: 10, color: textColor));
           },
         ),
       ),
@@ -250,7 +245,7 @@ class ComboChart extends StatelessWidget {
           height: isLine ? 3 : 12,
           decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
         ),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }

@@ -11,6 +11,8 @@ class SproutNotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       return SproutCard(
         bgColor: notification.bgColor,
@@ -29,7 +31,7 @@ class SproutNotificationWidget extends StatelessWidget {
                     children: [
                       Text(
                         notification.message,
-                        style: TextStyle(color: notification.color, fontSize: isDesktop ? 16 : 14),
+                        style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

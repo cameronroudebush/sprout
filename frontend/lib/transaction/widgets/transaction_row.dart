@@ -44,7 +44,7 @@ class TransactionRow extends ConsumerWidget {
                   children: [
                     Text(
                       transaction.description,
-                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.bodyLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

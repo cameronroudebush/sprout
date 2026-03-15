@@ -193,3 +193,106 @@ abstract class _$UnknownCategoryCount extends $AsyncNotifier<int> {
     element.handleValue(ref, created);
   }
 }
+
+/// Riverpod to get specific category stats given the query
+
+@ProviderFor(categoryStats)
+const categoryStatsProvider = CategoryStatsFamily._();
+
+/// Riverpod to get specific category stats given the query
+
+final class CategoryStatsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<CategoryStats?>,
+          CategoryStats?,
+          FutureOr<CategoryStats?>
+        >
+    with $FutureModifier<CategoryStats?>, $FutureProvider<CategoryStats?> {
+  /// Riverpod to get specific category stats given the query
+  const CategoryStatsProvider._({
+    required CategoryStatsFamily super.from,
+    required ({int year, int? month, int? day, String? accountId})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'categoryStatsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryStatsHash();
+
+  @override
+  String toString() {
+    return r'categoryStatsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<CategoryStats?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<CategoryStats?> create(Ref ref) {
+    final argument =
+        this.argument as ({int year, int? month, int? day, String? accountId});
+    return categoryStats(
+      ref,
+      year: argument.year,
+      month: argument.month,
+      day: argument.day,
+      accountId: argument.accountId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CategoryStatsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$categoryStatsHash() => r'd4168268c7a8a757fde97154da28ff0c6097ce97';
+
+/// Riverpod to get specific category stats given the query
+
+final class CategoryStatsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<CategoryStats?>,
+          ({int year, int? month, int? day, String? accountId})
+        > {
+  const CategoryStatsFamily._()
+    : super(
+        retry: null,
+        name: r'categoryStatsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Riverpod to get specific category stats given the query
+
+  CategoryStatsProvider call({
+    required int year,
+    int? month,
+    int? day,
+    String? accountId,
+  }) => CategoryStatsProvider._(
+    argument: (year: year, month: month, day: day, accountId: accountId),
+    from: this,
+  );
+
+  @override
+  String toString() => r'categoryStatsProvider';
+}

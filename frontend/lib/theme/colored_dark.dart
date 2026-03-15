@@ -39,7 +39,16 @@ final ThemeData coloredDarkTheme =
         refreshBackgroundColor: Color(0xff6b9ac4),
       ),
       appBarTheme: const AppBarTheme(backgroundColor: Color(0xff001e2c)),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(backgroundColor: Color(0xff001e2c)),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Color(0xff001e2c),
+        unselectedItemColor: Colors.white,
+      ),
       canvasColor: const Color(0xff001e2c),
       dividerColor: Color(0xff116383),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+        waitDuration: const Duration(milliseconds: 500),
+        showDuration: const Duration(seconds: 2),
+      ),
     );

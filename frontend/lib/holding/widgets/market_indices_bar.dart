@@ -121,6 +121,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isLive = state == MarketIndexDtoMarketStateEnum.REGULAR;
     final color = isLive
         ? Colors.green
@@ -136,7 +137,7 @@ class _StatusBadge extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("MARKET STATUS", style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 10)),
+        Text("MARKET STATUS", style: theme.textTheme.labelSmall?.copyWith(fontSize: 10)),
         Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 8,
@@ -152,7 +153,7 @@ class _StatusBadge extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w900),
+              style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: color, fontWeight: FontWeight.bold),
             ),
           ],
         ),

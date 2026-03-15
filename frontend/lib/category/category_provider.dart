@@ -70,3 +70,16 @@ class UnknownCategoryCount extends _$UnknownCategoryCount {
 
   Future<void> refresh() async => ref.invalidateSelf();
 }
+
+/// Riverpod to get specific category stats given the query
+@riverpod
+Future<CategoryStats?> categoryStats(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+  ref.listen(sseProvider, (prev, next) {
+    if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
+      ref.invalidateSelf();
+    }
+  });
+
+  final api = await ref.watch(categoryApiProvider.future);
+  return await api.categoryControllerGetCategoryStats(year, month: month, day: day, accountId: accountId);
+}

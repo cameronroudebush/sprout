@@ -90,6 +90,15 @@ class SproutMoreSheet extends ConsumerWidget {
           SizedBox(
             height: 30,
             child: FilledButton.icon(
+              onPressed: () => ref.read(authProvider.notifier).logout(),
+              icon: const Icon(Icons.logout_rounded, size: 20),
+              label: const Text("Logout"),
+              style: ThemeHelpers.errorButton,
+            ),
+          ),
+          SizedBox(
+            height: 30,
+            child: FilledButton.icon(
               onPressed: () {
                 Navigator.pop(context);
                 NavigationProvider.redirect('/settings');
@@ -97,15 +106,6 @@ class SproutMoreSheet extends ConsumerWidget {
               icon: Icon(isSettings ? Icons.settings : Icons.settings_outlined, size: 20),
               label: const Text("Settings"),
               style: isSettings ? ThemeHelpers.primaryButton : ThemeHelpers.secondaryButton,
-            ),
-          ),
-          SizedBox(
-            height: 30,
-            child: FilledButton.icon(
-              onPressed: () => ref.read(authProvider.notifier).logout(),
-              icon: const Icon(Icons.logout_rounded, size: 20),
-              label: const Text("Logout"),
-              style: ThemeHelpers.errorButton,
             ),
           ),
         ],
@@ -150,7 +150,7 @@ class _MoreGridTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelMedium?.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               color: isSelected ? colorScheme.primary : colorScheme.onSurface,
             ),
           ),

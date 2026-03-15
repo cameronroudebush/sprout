@@ -110,10 +110,7 @@ class _SummaryLabel extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        Text(
-          amount.toCurrency(isPrivate),
-          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: color, fontSize: 18),
-        ),
+        Text(amount.toCurrency(isPrivate), style: theme.textTheme.headlineSmall?.copyWith(color: color, fontSize: 18)),
       ],
     );
   }

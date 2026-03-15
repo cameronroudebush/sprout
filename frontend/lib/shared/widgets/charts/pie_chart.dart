@@ -15,6 +15,9 @@ class SproutPieChart extends StatefulWidget {
   /// If we should wrap this in a card
   final bool showLegend;
 
+  /// True for rendering legend on the right, false for on the left
+  final bool legendRight;
+
   /// If we should show how the title of that pie slice
   final bool showPieTitle;
 
@@ -44,6 +47,7 @@ class SproutPieChart extends StatefulWidget {
     this.onSliceTap,
     this.height = 250,
     this.subheader,
+    this.legendRight = false,
   });
 
   @override
@@ -72,6 +76,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final height = widget.height - 50;
     if (widget.data == null || widget.data!.isEmpty) {
       return SizedBox(
@@ -87,7 +92,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
       padding: EdgeInsetsGeometry.all(10),
       child: Column(
         children: [
-          Text(widget.header, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(widget.header, style: theme.textTheme.labelLarge?.copyWith(fontSize: 18)),
           if (widget.subheader != null) Text(widget.subheader!, style: TextStyle()),
           SizedBox(
             height: height * 1.25,
@@ -95,7 +100,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (widget.showLegend) _buildLegend(),
+                if (widget.showLegend && !widget.legendRight) _buildLegend(),
                 Expanded(
                   child: SizedBox(
                     height: height,
@@ -131,6 +136,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
                     ),
                   ),
                 ),
+                if (widget.showLegend && widget.legendRight) _buildLegend(),
               ],
             ),
           ),

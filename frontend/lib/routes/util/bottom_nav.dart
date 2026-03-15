@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sprout/routes/util/mobile_more_sheet.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
 
@@ -73,7 +73,7 @@ class SproutBottomNav extends ConsumerWidget {
               if (selectedItem is String) {
                 _showMoreSheet(context);
               } else if (selectedItem is SproutRoute) {
-                context.go(selectedItem.path);
+                NavigationProvider.redirect(selectedItem.path);
               }
             },
             items: displayItems.map((item) {

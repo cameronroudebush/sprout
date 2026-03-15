@@ -22,14 +22,9 @@ class NavigationProvider {
 
   /// Redirects (using push or go) to the given path or route name
   static Future<void> redirect(String path, {Map<String, dynamic>? queryParameters}) async {
-    // Ensure path starts with / if it's a path, or use pushNamed if you have named routes
     final target = path.startsWith('/') ? path : '/$path';
-
-    // Convert dynamic map to String map for GoRouter
     final params = queryParameters?.map((k, v) => MapEntry(k, v.toString())) ?? {};
-
-    // We use 'go' for top-level shell navigation to avoid stacking pages infinitely
-    router.go(Uri(path: target, queryParameters: params).toString());
+    router.push(Uri(path: target, queryParameters: params).toString());
   }
 
   /// Standard back navigation
@@ -40,6 +35,7 @@ class NavigationProvider {
   }
 
   /// Redirects to the transaction page with a category filter
+  /// [navigateOnUnknown] If we should still navigate even if the category is unknown
   static Future<void> redirectToCatFilter(WidgetRef ref, String cat, {bool navigateOnUnknown = false}) async {
     final categoryName = cat.trim();
     final categories = ref.read(categoriesProvider).value ?? [];

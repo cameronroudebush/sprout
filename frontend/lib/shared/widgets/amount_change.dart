@@ -53,16 +53,12 @@ class SproutChangeWidget extends ConsumerWidget {
               if (showValue && totalChange != null)
                 Text(
                   totalChange!.toCurrency(isPrivate),
-                  style: TextStyle(color: changeColor, fontSize: fontSize, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: changeColor, fontSize: fontSize),
                 ),
               if (showPercentage && percentageChange != null)
                 Text(
                   _formatPercent(percentageChange!, showValue),
-                  style: TextStyle(
-                    color: changeColor,
-                    fontSize: showValue ? fontSize - 2 : fontSize,
-                    fontWeight: showValue ? FontWeight.normal : FontWeight.w600,
-                  ),
+                  style: TextStyle(color: changeColor, fontSize: showValue ? fontSize - 2 : fontSize),
                 ),
               if (period != null)
                 Text(

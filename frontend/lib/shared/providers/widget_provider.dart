@@ -4,10 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/transaction/models/extensions/transaction_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -22,14 +25,23 @@ class WidgetSync extends _$WidgetSync {
     if (!kIsWeb) {
       initializeBackground();
 
+      // Listen to the auth state to trigger the initial setup
+      ref.listen(authProvider, (prev, next) {
+        final user = next.value;
+
+        if (user != null && prev?.value == null) {
+          // User just logged in
+          _setupAndInitialSync();
+        } else if (user == null && prev?.value != null) {
+          // User logged out - wipe data
+          _saveToNative(null);
+        }
+      });
+
       /// Listen for SSE events to trigger immediate widget updates.
       ref.listen(sseProvider, (prev, next) async {
         final data = next.latestData;
         if (data?.event == SSEDataEventEnum.forceUpdate) {
-          // Invalidate the data providers to ensure they pull fresh from API
-          ref.invalidate(userConfigProvider);
-          ref.invalidate(totalNetWorthProvider);
-
           await update();
         }
       });
@@ -50,22 +62,28 @@ class WidgetSync extends _$WidgetSync {
     );
   }
 
+  /// Sets up the background worker and runs the first update
+  Future<void> _setupAndInitialSync() async {
+    await initializeBackground();
+    await update();
+  }
+
   /// The primary entry point for updating native widget data.
   ///
   /// Checks the user's [allowWidgets] preference before proceeding. If disabled,
   /// it clears the widget data to ensure privacy.
   Future<void> update() async {
-    final config = ref.read(userConfigProvider).value;
+    final config = await ref.read(userConfigProvider.future);
 
     // Safety check: If widgets aren't allowed, clear existing data
     if (config == null || !config.allowWidgets) {
-      await saveToNative(null);
+      await _saveToNative(null);
       return;
     }
 
     final data = await _prepareData();
     if (data != null) {
-      await saveToNative(data);
+      await _saveToNative(data);
     }
   }
 
@@ -73,11 +91,15 @@ class WidgetSync extends _$WidgetSync {
   Future<Map<String, dynamic>?> _prepareData() async {
     final netWorth = ref.read(totalNetWorthProvider).value;
     final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
+    final userConfig = ref.read(userConfigProvider).value;
+    final theme = ref.read(userConfigProvider.notifier).getTheme(userConfig);
     final isPrivate = false; // Set to false so widget info always shows real values
-
     if (netWorth == null) return null;
 
     final monthFrame = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+    final dayRange = ChartRangeEnum.oneMonth;
+    final pastValueRange = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+    final pastNetWorthChange = pastValueRange.valueChange;
 
     // Map the 10 most recent transactions into a widget-friendly format
     final recent = transactions
@@ -93,16 +115,19 @@ class WidgetSync extends _$WidgetSync {
         .toList();
 
     return {
-      "updateTime": DateTime.now().toIso8601String(),
+      "updateTime": DateTime.now().toShortMonthWithTime,
       "netWorth": netWorth.value.toCurrency(isPrivate),
       "changeAmount": monthFrame.valueChange.toCurrency(isPrivate),
       "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
+      "numericChange": pastNetWorthChange,
+      "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
       "recentTransactions": recent,
+      "theme": theme.value,
     };
   }
 
   /// Serializes the data and sends it to the native platform via [HomeWidget].
-  Future<void> saveToNative(Map<String, dynamic>? data) async {
+  Future<void> _saveToNative(Map<String, dynamic>? data) async {
     final String jsonString = jsonEncode(data ?? {});
     await HomeWidget.saveWidgetData('widget_data', jsonString);
     await HomeWidget.updateWidget(androidName: 'widget.Overview');
@@ -122,9 +147,11 @@ void callbackDispatcher() {
 
     try {
       // Force-refresh the futures to ensure the widget doesn't show stale data
-      await container.read(userConfigProvider.future);
-      await container.read(totalNetWorthProvider.future);
-      await container.read(transactionsProvider.future);
+      await Future.wait([
+        container.refresh(userConfigProvider.future),
+        container.refresh(totalNetWorthProvider.future),
+        container.refresh(transactionsProvider.future),
+      ]);
 
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).update();

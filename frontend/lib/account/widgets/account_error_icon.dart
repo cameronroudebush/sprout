@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/shared/widgets/tooltip.dart';
 
 /// An icon that is intended to just display an error if an account has one
 class SproutErrorIcon extends StatefulWidget {
@@ -63,7 +62,7 @@ class _SproutErrorIconState extends State<SproutErrorIcon> with SingleTickerProv
 
     final theme = Theme.of(context);
 
-    return SproutTooltip(
+    return Tooltip(
       message: widget.message ?? "Connection error",
       child: AnimatedBuilder(
         animation: _controller,
