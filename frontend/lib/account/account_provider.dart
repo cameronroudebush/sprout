@@ -1,87 +1,109 @@
-import 'dart:async';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sprout/account/models/account_state.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
-import 'package:sprout/core/provider/provider_services.dart';
+import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 
-/// Class that provides the store of current account information
-class AccountProvider extends BaseProvider<AccountApi> with SproutProviders {
-  // Data store
-  List<Account> _linkedAccounts = [];
+part 'account_provider.g.dart';
 
-  /// Tracks if we are actively running a sync that was trigger by this user
-  bool manualSyncIsRunning = false;
+/// Returns the authenticated API for the client
+@Riverpod(keepAlive: true)
+Future<AccountApi> accountApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return AccountApi(client);
+}
 
-  // Getters to not allow editing the internal store
-  List<Account> get linkedAccounts => _linkedAccounts;
+@Riverpod(keepAlive: true)
+class Accounts extends _$Accounts {
+  @override
+  Future<AccountState> build() async {
+    ref.listen(sseProvider, (prev, next) {
+      final data = next.latestData;
+      if (data == null) return;
 
-  AccountProvider(super.api);
+      if (data.event == SSEDataEventEnum.sync_) {
+        final sync = ModelSync.fromJson(data.payload)!;
 
-  /// Populates link account information for the initial load and handles double checking if the data has actually changed
-  Future<List<Account>> populateLinkedAccounts() async {
-    await populateAndSetIfChanged(
-      api.accountControllerGetAccounts,
-      _linkedAccounts,
-      (newValue) => _linkedAccounts = newValue ?? [],
-    );
+        // Update the global config for the "Last Synced" UI
+        ref.read(secureConfigProvider.notifier).updateLastSync(sync);
 
-    // Sort the accounts by their type
-    _linkedAccounts.sort((a, b) {
+        // Mark manual sync as finished and refresh the list
+        state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
+        ref.invalidateSelf();
+      }
+
+      if (data.event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
+    final api = await ref.watch(accountApiProvider.future);
+    final accounts = await api.accountControllerGetAccounts() ?? [];
+
+    accounts.sort((a, b) {
       final aIsLoan = a.type == AccountTypeEnum.loan;
       final bIsLoan = b.type == AccountTypeEnum.loan;
       if (aIsLoan != bIsLoan) return aIsLoan ? 1 : -1;
       return (b.balance).compareTo(a.balance);
     });
-    return _linkedAccounts;
+
+    return AccountState(accounts: accounts);
   }
 
-  /// Uses the API and edits the given account
-  Future<Account> edit(Account a) async {
-    notifyListeners();
-    final updated = (await api.accountControllerEdit(
-      a.id,
-      AccountEditRequest(name: a.name, subType: a.subType, interestRate: a.interestRate),
-    ))!;
-    final index = _linkedAccounts.indexWhere((r) => r.id == updated.id);
-    if (index != -1) _linkedAccounts[index] = updated;
-    notifyListeners();
-    return updated;
-  }
-
-  /// Tells the API to manually run an account refresh
+  /// Runs a manual sync via the backend
   Future<void> manualSync() async {
+    if (state.value == null) return;
+
+    final notifications = ref.read(notificationsProvider.notifier);
     String? notificationId;
+
     try {
-      manualSyncIsRunning = true;
-      notificationId = notificationProvider.openFrontendOnly("Account sync is running.", showSpinner: true);
-      notifyListeners();
+      state = AsyncData(state.value!.copyWith(manualSyncIsRunning: true));
+      notificationId = notifications.openFrontendOnly("Account sync is running.", showSpinner: true);
+
+      final api = await ref.read(accountApiProvider.future);
       await api.accountControllerManualSync(false);
     } catch (e) {
-      manualSyncIsRunning = false;
-      if (notificationId != null) notificationProvider.clearOverlay(notificationId);
-      notificationProvider.openWithAPIException(e);
-      notifyListeners();
+      state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
+      if (notificationId != null) notifications.clearOverlay(notificationId);
+      notifications.openWithAPIException(e);
     }
   }
 
-  @override
-  Future<void> cleanupData() async {
-    _linkedAccounts = [];
-    notifyListeners();
+  /// Edits the given account via the backend
+  Future<Account?> edit(Account a) async {
+    final api = await ref.read(accountApiProvider.future);
+    final updated = await api.accountControllerEdit(
+      a.id,
+      AccountEditRequest(name: a.name, subType: a.subType, interestRate: a.interestRate),
+    );
+
+    if (updated != null && state.value != null) {
+      final newList = [...state.value!.accounts];
+      final index = newList.indexWhere((r) => r.id == updated.id);
+      if (index != -1) {
+        newList[index] = updated;
+        state = AsyncData(state.value!.copyWith(accounts: newList));
+      }
+    }
+    return updated;
   }
 
-  @override
-  Future<void> onSSE(SSEData data) async {
-    await super.onSSE(data);
-    // Reset status of manual sync button
-    if (data.event == SSEDataEventEnum.sync_) {
-      final sync = ModelSync.fromJson(data.payload);
-      manualSyncIsRunning = false;
-      notifyListeners();
-      if (configProvider.config != null) {
-        configProvider.config!.lastSchedulerRun = sync;
-        configProvider.notifyListeners();
+  /// Deletes the given account via the backend
+  Future<void> delete(String accountId) async {
+    final notifications = ref.read(notificationsProvider.notifier);
+    try {
+      final api = await ref.read(accountApiProvider.future);
+      await api.accountControllerDelete(accountId);
+      if (state.value != null) {
+        final newList = state.value!.accounts.where((a) => a.id != accountId).toList();
+        state = AsyncData(state.value!.copyWith(accounts: newList));
       }
+      notifications.openFrontendOnly("Account deleted successfully.");
+    } catch (e) {
+      notifications.openWithAPIException(e);
     }
   }
 }

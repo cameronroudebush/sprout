@@ -8,6 +8,15 @@ import { Exclude } from "class-transformer";
 import { IsBoolean, IsEnum, IsString } from "class-validator";
 import { JoinColumn, OneToOne } from "typeorm";
 
+/** Themes supported by the frontend for the user */
+enum Theme {
+  // Light mode
+  BLISS = "bliss",
+  // Dark mode
+  ABSOLUTE = "absolute",
+  COLORED = "colored",
+}
+
 /**
  * This class defines user configuration options per user
  */
@@ -45,6 +54,16 @@ export class UserConfig extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false, default: false })
   @IsBoolean()
   allowWidgets: boolean;
+
+  /** The visual theme style selected by the user */
+  @DatabaseDecorators.column({
+    nullable: false,
+    default: Theme.COLORED,
+    type: "varchar",
+  })
+  @ApiProperty({ enum: Theme, enumName: "ThemeStyleEnum" })
+  @IsEnum(Theme)
+  themeStyle!: Theme;
 
   @OneToOne(() => User, (user) => user.config, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })

@@ -15,6 +15,7 @@ class UserConfig {
   UserConfig({
     required this.id,
     required this.netWorthRange,
+    required this.themeStyle,
     required this.privateMode,
     this.simpleFinToken,
     this.geminiKey,
@@ -26,6 +27,9 @@ class UserConfig {
 
   /// The net worth range to display by default
   ChartRangeEnum netWorthRange;
+
+  /// The visual theme style selected by the user
+  ThemeStyleEnum themeStyle;
 
   /// If we should hide balances on the users display
   bool privateMode;
@@ -58,6 +62,7 @@ class UserConfig {
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
     other.id == id &&
     other.netWorthRange == netWorthRange &&
+    other.themeStyle == themeStyle &&
     other.privateMode == privateMode &&
     other.simpleFinToken == simpleFinToken &&
     other.geminiKey == geminiKey &&
@@ -69,6 +74,7 @@ class UserConfig {
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (netWorthRange.hashCode) +
+    (themeStyle.hashCode) +
     (privateMode.hashCode) +
     (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
     (geminiKey == null ? 0 : geminiKey!.hashCode) +
@@ -76,12 +82,13 @@ class UserConfig {
     (allowWidgets.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode, allowWidgets=$allowWidgets]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, themeStyle=$themeStyle, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode, allowWidgets=$allowWidgets]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
       json[r'netWorthRange'] = this.netWorthRange;
+      json[r'themeStyle'] = this.themeStyle;
       json[r'privateMode'] = this.privateMode;
     if (this.simpleFinToken != null) {
       json[r'simpleFinToken'] = this.simpleFinToken;
@@ -119,6 +126,7 @@ class UserConfig {
       return UserConfig(
         id: mapValueOfType<String>(json, r'id')!,
         netWorthRange: ChartRangeEnum.fromJson(json[r'netWorthRange'])!,
+        themeStyle: ThemeStyleEnum.fromJson(json[r'themeStyle'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         geminiKey: mapValueOfType<String>(json, r'geminiKey'),
@@ -173,6 +181,7 @@ class UserConfig {
   static const requiredKeys = <String>{
     'id',
     'netWorthRange',
+    'themeStyle',
     'privateMode',
     'secureMode',
     'allowWidgets',

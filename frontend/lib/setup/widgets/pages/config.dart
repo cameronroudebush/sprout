@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/core/models/notification.dart';
-import 'package:sprout/core/widgets/notification.dart';
+import 'package:sprout/routes/settings.dart';
 import 'package:sprout/setup/widgets/pages/wrapper.dart';
-import 'package:sprout/user/widgets/user_config.dart';
+import 'package:sprout/shared/models/notification.dart';
+import 'package:sprout/shared/widgets/notification.dart';
 
 /// This page contains the setup process for allowing the user to do some configuration during setup
 class UserConfigSetupPage extends StatefulWidget {
@@ -40,14 +40,14 @@ class _UserConfigSetupPageState extends State<UserConfigSetupPage> {
           ),
           if (_message.isNotEmpty)
             SproutNotificationWidget(SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError)),
-          UserConfigPage(
+          SettingsPage(
             onlyShowSetup: true,
-            onSet: () {
+            onConfigChanged: () {
               setState(() {
                 _message = "";
               });
             },
-            onFail: (msg) {
+            onConfigFailure: (msg) {
               setState(() {
                 _message = msg;
               });

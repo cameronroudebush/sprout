@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:sprout/api/api.dart'; // Assuming this holds your API client
-import 'package:sprout/core/logger.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 
 import 'oidc_helper_stub.dart' as stub;
 
@@ -33,7 +33,7 @@ class OIDCHelper implements stub.OIDCHelper {
       final params = Uri.splitQueryString(fragment);
       return _extractTokens(params);
     } catch (e) {
-      LoggerService.error('OIDC Auth Error: $e');
+      LoggerProvider.error('OIDC Auth Error: $e');
     }
     return null;
   }

@@ -15,3 +15,7 @@ npm run api:generate:dart
 This will then place the clients appropriately in the frontend.
 
 **Note:** This must be executed in the root directory of the workspace.
+
+# Riverpod Generator
+
+We use the [riverpod](https://pub.dev/packages/riverpod) generator to simplify code creation of our cached states. To utilize this, you'll need to run `dart run build_runner watch -d` whenever you intend to make changes to the providers.

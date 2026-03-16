@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
-import 'package:sprout/charts/pie_chart.dart';
-import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/state_tracker.dart';
+import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/pie_chart.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// This renders a pie chart for cash flow on how much money came in versus went out
-class CashFlowPieChart extends StatefulWidget {
+class CashFlowPieChart extends ConsumerWidget {
   final bool showLegend;
   final DateTime selectedDate;
   final double height;
@@ -25,59 +25,47 @@ class CashFlowPieChart extends StatefulWidget {
   });
 
   @override
-  State<CashFlowPieChart> createState() => _CashFlowPieChartState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final year = selectedDate.year;
+    final month = view == CashFlowView.monthly ? selectedDate.month : null;
+    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
+    final statsAsync = ref.watch(cashFlowStatsProvider(year: year, month: month));
 
-class _CashFlowPieChartState extends StateTracker<CashFlowPieChart> {
-  @override
-  Map<dynamic, DataRequest> get requests {
-    final date = widget.selectedDate;
-    final month = widget.view == CashFlowView.monthly ? date.month : null;
-    final cashFlowProvider = context.read<CashFlowProvider>();
-
-    return {
-      'stats': DataRequest<CashFlowProvider, dynamic>(
-        provider: cashFlowProvider,
-        onLoad: (p, force) => p.getStats(date.year, month),
-        getFromProvider: (p) => p.getStatsData(date.year, month),
+    return statsAsync.when(
+      loading: () => SproutCard(
+        child: SizedBox(
+          height: height + 50,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       ),
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<CashFlowProvider>(
-      builder: (context, provider, child) {
-        final month = widget.view == CashFlowView.monthly ? widget.selectedDate.month : null;
-        final periodText = CashFlowViewFormatter.getPeriodText(widget.view, widget.selectedDate);
-        final stats = provider.getStatsData(widget.selectedDate.year, month);
-        if (isLoading) {
-          return SproutCard(
-            child: SizedBox(
-              height: widget.height + 50,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
+      error: (err, _) => SproutCard(
+        height: height + 50,
+        child: Center(child: Text("Error loading chart: $err")),
+      ),
+      data: (stats) {
+        final periodText = CashFlowViewFormatter.getPeriodText(view, selectedDate);
 
         if (stats == null) {
           return SproutCard(
-            height: widget.height + 50,
-            child: Center(child: Text(CashFlowViewFormatter.getNoDataText(widget.view, widget.selectedDate))),
+            height: height + 50,
+            child: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
           );
         }
 
         final totalIncome = stats.totalIncome;
         final totalExpense = stats.totalExpense;
-        // Create our mapping
-        final data = totalIncome == 0 && totalExpense == 0
-            ? null
-            : {"Income": totalIncome, "Expense": totalExpense.abs()};
+
+        // Create mapping or handle zero state
+        final bool hasData = totalIncome != 0 || totalExpense != 0;
+        final Map<String, double>? data = hasData
+            ? {"Income": totalIncome.toDouble(), "Expense": totalExpense.abs().toDouble()}
+            : null;
 
         if (data == null) {
           return SproutCard(
-            height: widget.height,
-            child: Center(child: Text(CashFlowViewFormatter.getNoDataText(widget.view, widget.selectedDate))),
+            height: height,
+            child: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
           );
         }
 
@@ -85,13 +73,13 @@ class _CashFlowPieChartState extends StateTracker<CashFlowPieChart> {
           applySizedBox: false,
           child: SproutPieChart(
             data: data,
-            colorMapping: {"Income": Colors.green, "Expense": Colors.red[700]!},
+            colorMapping: {"Income": Colors.green, "Expense": theme.colorScheme.error},
             header: "Cash Flow",
-            subheader: widget.showSubheader ? periodText : null,
-            showLegend: widget.showLegend,
+            subheader: showSubheader ? periodText : null,
+            showLegend: showLegend,
             showPieValue: true,
-            formatValue: (value) => getFormattedCurrency(value),
-            height: widget.height,
+            formatValue: (value) => value.toCurrency(privateMode),
+            height: height,
           ),
         );
       },

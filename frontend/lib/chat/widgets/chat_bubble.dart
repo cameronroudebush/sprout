@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/chat/widgets/chat_typing_indicator.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/layout.dart';
+import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// A widget that provides a chat bubble. Useful to display when the LLM is thinking.
-class ChatBubble extends StatelessWidget {
+class ChatBubble extends ConsumerWidget {
   final ChatHistory message;
 
   const ChatBubble({super.key, required this.message});
 
-  Widget _getGPTMarkdown(BuildContext context) {
-    final isPrivate = ServiceLocator.get<UserConfigProvider>().currentUserConfig!.privateMode;
+  /// Renders the message data using GPT markdown
+  Widget _getGPTMarkdown(BuildContext context, WidgetRef ref) {
+    final userConfig = ref.watch(userConfigProvider).value;
+    final isPrivate = userConfig?.privateMode ?? false;
 
-    final text = isPrivate ? replaceCurrency(message.text) : message.text;
+    // Use the formatter to mask currency if privacy mode is active
+    final text = isPrivate ? message.text.deIdentifyCurrency() : message.text;
 
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: Theme.of(context).textTheme.copyWith(
-          // Override the specific header styles used by markdown
           headlineLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
           headlineMedium: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           headlineSmall: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
@@ -33,17 +35,16 @@ class ChatBubble extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    // Determine if the last message is from AI, used to trigger chat loading indication
     bool isAi = message.role == ChatHistoryRoleEnum.model;
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       return Align(
         alignment: isAi ? Alignment.centerLeft : Alignment.centerRight,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: size.width * (isDesktop ? .35 : .8)),
+          constraints: BoxConstraints(maxWidth: size.width * (isDesktop ? .35 : 1)),
           child: Container(
             margin: EdgeInsets.only(top: 4, bottom: 4, left: isAi ? 0 : 60, right: isAi ? 60 : 0),
             padding: const EdgeInsets.all(12),
@@ -56,7 +57,7 @@ class ChatBubble extends StatelessWidget {
                 bottomRight: const Radius.circular(15),
               ),
             ),
-            child: message.isThinking ? const TypingIndicator() : _getGPTMarkdown(context),
+            child: message.isThinking ? const TypingIndicator() : _getGPTMarkdown(context, ref),
           ),
         ),
       );
