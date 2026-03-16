@@ -166,29 +166,15 @@ Future<T?> showSproutPopup<T>({
   final bool isDesktop = MediaQuery.sizeOf(context).width > SproutLayoutBuilder.desktopBreakpoint;
 
   // Adds a blur effect to our child
-  Widget blurWrapper(Widget child) => Stack(
-    children: [
-      Positioned.fill(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-          child: Container(color: Colors.black.withValues(alpha: 0.2)), // Slight tint to help readability
-        ),
-      ),
-      child,
-    ],
-  );
 
   if (isDesktop) {
     return showDialog<T>(
       context: context,
-      barrierColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.1),
       barrierDismissible: isDismissible,
-      builder: (context) => blurWrapper(
-        Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 500), child: builder(context)),
-        ),
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        child: Dialog(backgroundColor: Colors.transparent, elevation: 0, child: builder(context)),
       ),
     );
   }
@@ -198,12 +184,30 @@ Future<T?> showSproutPopup<T>({
     isDismissible: isDismissible,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.transparent,
-    builder: (context) => blurWrapper(
-      Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: builder(context),
-      ),
-    ),
+    barrierColor: Colors.black.withValues(alpha: 0.1),
+    builder: (context) {
+      return Stack(
+        children: [
+          GestureDetector(
+            onTap: isDismissible ? () => Navigator.pop(context) : null,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+              child: Container(
+                color: Colors.transparent,
+                height: MediaQuery.sizeOf(context).height,
+                width: MediaQuery.sizeOf(context).width,
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+              child: builder(context),
+            ),
+          ),
+        ],
+      );
+    },
   );
 }

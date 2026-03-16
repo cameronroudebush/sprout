@@ -4,6 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
 
@@ -18,16 +19,7 @@ class CategoryOverviewPage extends ConsumerStatefulWidget {
 class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
   /// Opens the edit dialog
   void _openEditSheet(Category? category) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5), width: 1),
-      ),
-      builder: (context) => CategoryEdit(category),
-    );
+    showSproutPopup(context: context, builder: (context) => CategoryEdit(category));
   }
 
   /// Builds an individual category with indentation of depth

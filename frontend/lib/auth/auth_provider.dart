@@ -88,7 +88,12 @@ class Auth extends _$Auth {
         final loginResponse = await api.authControllerLoginWithJWT(JWTLoginRequest(jwt: tokens.idToken ?? ''));
         if (loginResponse != null) return await _applyAuth(idToken: loginResponse.jwt, user: loginResponse.user);
       }
-    } catch (e) {
+    } on ApiException catch (e, _) {
+      final isSessionExpiration = e.code == 401;
+      // Reset the JWT as the auto login has expired
+      if (isSessionExpiration) {
+        await ref.read(authTokensProvider.notifier).clear();
+      }
       // Either no cookie so not logged in, or an invalid JWT
       return null;
     }
@@ -114,6 +119,16 @@ class Auth extends _$Auth {
       LoggerProvider.debug("Initiating setup for new user with strategy ${config.authMode.toString()}.");
       NavigationProvider.redirect("setup");
     }
+  }
+
+  /// What to do when setup is done
+  Future<void> completeSetup() async {
+    isSetupMode = false;
+    state = AsyncData(state.value);
+    // Force refresh the unsecure config to pick up post-setup settings
+    // ignore: unused_result
+    await ref.refresh(unsecureConfigProvider.future);
+    NavigationProvider.redirect("/");
   }
 
   /// Private helper to set tokens and update the state

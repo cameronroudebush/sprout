@@ -4,6 +4,7 @@ import 'package:sprout/routes/util/mobile_more_sheet.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
 
 /// The bottom navigation used for mobile displays
 class SproutBottomNav extends ConsumerWidget {
@@ -90,11 +91,6 @@ class SproutBottomNav extends ConsumerWidget {
 
   /// Opens the modal bottom sheet to allow seeing the rest of the pages
   void _showMoreSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const SproutMoreSheet(),
-    );
+    showSproutPopup(context: context, builder: (context) => const SproutMoreSheet());
   }
 }

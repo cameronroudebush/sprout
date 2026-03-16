@@ -23,7 +23,7 @@ class AccountSummaryView extends ConsumerWidget {
   /// If the user is configured to private mode
   final bool isPrivate;
 
-  /// If each grouping should be rendered as it's own card
+  /// If each grouping should be rendered as it's own card. We use this heavily to determine if this is displayed on the dashboard vs it's own page
   final bool individualCards;
 
   final ScrollPhysics? physics;
@@ -40,9 +40,43 @@ class AccountSummaryView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final config = AccountExtensions.groupConfig;
     final historyAsync = ref.watch(historicalAccountDataProvider);
     final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ?? ChartRangeEnum.oneDay;
+
+    // Handle empty state
+    if (accounts.isEmpty) {
+      return Center(
+        child: SproutCard(
+          height: 360,
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 8,
+              children: [
+                Icon(Icons.account_balance_wallet_outlined, size: 64, color: theme.colorScheme.primary),
+                Text("No accounts found", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  !individualCards
+                      ? "You haven't added any accounts yet. Head over to the accounts page to get started."
+                      : "Use the floating action button in the bottom right to add a new account!",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+                if (!individualCards)
+                  FilledButton.icon(
+                    onPressed: () => NavigationProvider.redirect('accounts'),
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add Account"),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     final groupedAccounts = config.keys.map((type) {
       final groupAccounts = accounts.where((a) => a.type == type).toList();
@@ -111,7 +145,7 @@ class AccountSummaryView extends ConsumerWidget {
                     .mapIndexed(
                       (index, widget) => [
                         widget,
-                        if (index < groupedAccounts.length - 1) const Divider(height: 1, indent: 16, endIndent: 16),
+                        if (index < groupedAccounts.length - 1) const Divider(height: 0.5, indent: 16, endIndent: 16),
                       ],
                     )
                     .expand((widgets) => widgets),

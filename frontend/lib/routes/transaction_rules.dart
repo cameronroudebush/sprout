@@ -51,13 +51,20 @@ class TransactionRulesPage extends ConsumerWidget {
         data: (prov) {
           if (prov.rules.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.rule_folder_outlined, size: 64, color: theme.dividerColor),
-                  const SizedBox(height: 16),
-                  const Text("No rules found. Add one to start organizing!", style: TextStyle(fontSize: 18)),
-                ],
+              child: SizedBox(
+                height: 164,
+                child: SproutCard(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      spacing: 12,
+                      children: [
+                        Icon(Icons.rule_folder_outlined, size: 64, color: theme.colorScheme.primary),
+                        const Text("No rules found. Add one to start organizing!", style: TextStyle(fontSize: 18)),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             );
           }

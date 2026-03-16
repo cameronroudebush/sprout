@@ -7,6 +7,7 @@ import 'package:sprout/auth/widgets/login.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/connection_failure.dart';
 import 'package:sprout/routes/connection_setup.dart';
+import 'package:sprout/routes/setup.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
@@ -36,7 +37,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       // Routes that don't require Auth
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
-      GoRoute(path: '/setup', builder: (context, state) => const Placeholder()), // TODO Implement setup capabilities
+      GoRoute(
+        path: '/setup',
+        builder: (context, state) => SproutShell(child: SetupPage()),
+      ),
       GoRoute(path: '/connection/setup', builder: (context, state) => const ConnectionSetupPage()),
       GoRoute(path: '/connection/failure', builder: (context, state) => const ConnectionFailurePage()),
       // Routes that do require auth
