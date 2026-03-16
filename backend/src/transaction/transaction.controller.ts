@@ -12,7 +12,7 @@ import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Patch, Query } from "@nestjs/common";
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { endOfDay, startOfDay } from "date-fns";
-import { Between, In, IsNull, Like } from "typeorm";
+import { Between, FindOptionsWhere, ILike, In, IsNull, Like } from "typeorm";
 
 /**
  * This controller provides the endpoint for all Transaction related content
@@ -91,7 +91,7 @@ export class TransactionController {
     let categoryQuery;
     if (category == null) {
       categoryQuery = undefined; // No category filter
-    } else if (category === "Unknown") {
+    } else if (category.toLowerCase() === "unknown") {
       categoryQuery = IsNull(); // Filter for un-categorized
     } else {
       // Handle nested categories
@@ -146,15 +146,42 @@ export class TransactionController {
     summary: "Get's the total count of transactions across accounts.",
     description: "Retrieves a count of the total number of transactions available for the current user including a total for each account.",
   })
+  @ApiQuery({ name: "accountId", required: false, type: String })
+  @ApiQuery({ name: "category", required: false, type: String })
+  @ApiQuery({ name: "description", required: false, type: String })
   @ApiOkResponse({ description: "Transaction count found successfully.", type: TotalTransactions })
-  async getTotal(@CurrentUser() user: User) {
+  async getTotal(
+    @CurrentUser() user: User,
+    @Query("accountId") accountId?: string,
+    @Query("category") category?: string,
+    @Query("description") description?: string,
+  ) {
+    const where: FindOptionsWhere<Transaction> = {
+      account: {
+        user: { id: user.id },
+      },
+    };
+    // Apply Filters to the Count
+    if (accountId) where.account = { id: accountId };
+    if (category)
+      if (category.toLowerCase() === "unknown") {
+        // If "Unknown", we look for null categories
+        where.category = IsNull();
+      } else {
+        where.category = { id: category };
+      }
+    if (description) where.description = ILike(`%${description}%`);
+    const total = await Transaction.count({ where });
+    // If you're not querying specifics, populate additional content
     const map: TotalTransactions["accounts"] = {};
-    const accounts = await Account.getForUser(user);
-    for (const account of accounts) {
-      const transactionCount = await Transaction.count({ where: { account: { id: account.id, user: { id: user.id } } } });
-      map[account.id] = transactionCount;
+    if (!accountId && !category && !description) {
+      const accounts = await Account.getForUser(user);
+      for (const account of accounts)
+        map[account.id] = await Transaction.count({
+          where: { account: { id: account.id, user: { id: user.id } } },
+        });
     }
-    const total = await Transaction.count({ where: { account: { user: { id: user.id } } } });
+
     return new TotalTransactions(map, total);
   }
 }

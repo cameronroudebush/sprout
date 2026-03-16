@@ -1,57 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
-import 'package:sprout/core/client/extended_api_client.dart';
-import 'package:sprout/core/provider/init.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/router.dart';
-import 'package:sprout/core/theme.dart';
-import 'package:sprout/core/widgets/scaffold.dart';
-import 'package:sprout/notification/firebase.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:sprout/notification/firebase_provider.dart';
+import 'package:sprout/routes/util/router.dart';
+import 'package:sprout/shared/providers/widget_provider.dart';
+import 'package:sprout/theme/absolute_dark.dart';
+import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/user/user_provider.dart';
 
-void main() async {
+/// Provider that fires first
+final initializationProvider = FutureProvider<void>((ref) async {
+  // Setup firebase, using cached credentials as provided
+  await ref.read(firebaseProvider.notifier).configure();
+});
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  // Apply default API requirements
-  await applyDefaultAPI();
-  // Register all the providers
-  ServiceLocator.registerAll(packageInfo);
-  // Configure firebase for notification listening
-  await FirebaseNotificationProvider.configure(null);
+  usePathUrlStrategy();
 
-  runApp(
-    MultiProvider(
-      providers: [
-        // Create all the providers we'll need
-        ...ServiceLocator.createAllProviders(),
-
-        // Create a future that waits for all the providers to be initialized, in order
-        ChangeNotifierProvider<InitializationNotifier>(
-          create: (_) {
-            final notifier = InitializationNotifier();
-            notifier.initialize();
-            return notifier;
-          },
-          lazy: false, // Keep this to ensure it runs immediately
-        ),
-      ],
-      child: Main(),
-    ),
-  );
+  final container = ProviderContainer();
+  // Make sure the widget provider is syncing
+  container.read(widgetSyncProvider);
+  // Make sure the user provider is tracked
+  container.read(userProvider);
+  runApp(UncontrolledProviderScope(container: container, child: SproutApp()));
 }
 
-/// This page contains the process for when the application is first started
-class Main extends StatelessWidget {
-  const Main({super.key});
+/// The main app entrypoint
+class SproutApp extends ConsumerWidget {
+  const SproutApp({super.key});
 
   Widget _getLoadingIndicator(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
     return Theme(
-      data: AppTheme.dark,
+      data: absoluteDarkTheme,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: SproutScaffold(
-          child: Center(
+        child: Scaffold(
+          body: Center(
             child: SizedBox(
               width: mediaQuery.height * .3,
               height: mediaQuery.height * .3,
@@ -80,25 +66,25 @@ class Main extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<InitializationNotifier>(
-      builder: (context, value, child) {
-        final init = value;
-        switch (init.status) {
-          case InitStatus.loading:
-            return _getLoadingIndicator(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final initStatus = ref.watch(initializationProvider);
+    final userConfigAsync = ref.watch(userConfigProvider);
 
-          default:
-            FirebaseNotificationProvider.checkLaunchNotification();
-            return MaterialApp.router(
-              routerConfig: SproutRouter.router,
-              title: "Sprout",
-              theme: AppTheme.dark,
-              darkTheme: AppTheme.dark,
-              themeMode: ThemeMode.dark,
-              scaffoldMessengerKey: ServiceLocator.scaffoldMessengerKey,
-            );
-        }
+    return initStatus.when(
+      loading: () => _getLoadingIndicator(context),
+      error: (error, stackTrace) => MaterialApp(
+        theme: absoluteDarkTheme,
+        home: Scaffold(body: Center(child: Text('Failed to initialize: $error'))),
+      ),
+      data: (_) {
+        if (userConfigAsync.isLoading && !userConfigAsync.hasValue) return _getLoadingIndicator(context);
+
+        final userConfig = ref.watch(userConfigProvider).value;
+        final userConfigNotifier = ref.read(userConfigProvider.notifier);
+        final theme = userConfigNotifier.activeTheme(userConfig);
+        final router = ref.watch(routerProvider);
+
+        return MaterialApp.router(routerConfig: router, title: "Sprout", theme: theme);
       },
     );
   }

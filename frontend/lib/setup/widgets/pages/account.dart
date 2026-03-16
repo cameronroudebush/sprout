@@ -1,35 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/models/notification.dart';
-import 'package:sprout/core/provider/provider_services.dart';
-import 'package:sprout/core/provider/service.locator.dart';
-import 'package:sprout/core/widgets/notification.dart';
+import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/setup/widgets/pages/wrapper.dart';
+import 'package:sprout/shared/models/notification.dart';
+import 'package:sprout/shared/widgets/notification.dart';
+import 'package:sprout/user/user_provider.dart';
 
 /// This page contains the process and inputs for creating a new user account
-class AccountSetupPage extends StatefulWidget {
+class AccountSetupPage extends ConsumerStatefulWidget {
   final VoidCallback nextPage;
   final bool isDesktop;
   const AccountSetupPage(this.nextPage, this.isDesktop, {super.key});
 
-  /// Creates the account and logs in as the created user
+  /// Uses riverpod to create the account and login
   static Future<void> createAccountAndLogin({
+    required WidgetRef ref,
     String? username,
     String? password,
     Function(String message, {bool isError})? onStatusChanged,
     VoidCallback? onSuccess,
   }) async {
-    final configProvider = SproutProviders.config;
-    final userProvider = SproutProviders.user;
+    final unsecureConfig = ref.read(unsecureConfigProvider).value;
+    final isOIDC = unsecureConfig?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+
     // Validation Guard for non OIDC
-    if (!configProvider.isOIDCAuthMode && ((username ?? '').isEmpty || (password ?? '').isEmpty)) {
+    if (!isOIDC && ((username ?? '').isEmpty || (password ?? '').isEmpty)) {
       onStatusChanged?.call('Username/password cannot be empty.', isError: true);
       return;
     }
 
     try {
-      // Attempt Registration
-      final registered = await userProvider.api.userControllerCreate(
+      final userApi = await ref.read(userApiProvider.future);
+      final registered = await userApi.userControllerCreate(
         UserCreationRequest(username: username ?? '', password: password ?? ''),
       );
 
@@ -38,32 +43,31 @@ class AccountSetupPage extends StatefulWidget {
         return;
       }
 
-      // Update Status & Attempt Login
       onStatusChanged?.call('Account created! Logging in...', isError: false);
 
-      final authProvider = SproutProviders.auth;
-      final loggedIn = await (configProvider.isOIDCAuthMode
-          ? authProvider.tryInitialLogin()
-          : authProvider.login(username!, password!));
+      final authNotifier = ref.read(authProvider.notifier);
+
+      // Attempt Login
+      final loggedIn = await (isOIDC ? authNotifier.loginOIDC() : authNotifier.login(username!, password!));
 
       if (loggedIn == null) {
         onStatusChanged?.call('Account created but failed to get user.', isError: true);
         return;
       }
 
-      await ServiceLocator.postLogin();
       onStatusChanged?.call('Login successful!', isError: false);
       onSuccess?.call();
     } catch (e) {
-      onStatusChanged?.call(SproutProviders.notification.parseOpenAPIException(e), isError: true);
+      final errorMsg = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+      onStatusChanged?.call(errorMsg, isError: true);
     }
   }
 
   @override
-  State<AccountSetupPage> createState() => _AccountSetupPageState();
+  ConsumerState<AccountSetupPage> createState() => _AccountSetupPageState();
 }
 
-class _AccountSetupPageState extends State<AccountSetupPage> {
+class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _message = '';
@@ -77,27 +81,31 @@ class _AccountSetupPageState extends State<AccountSetupPage> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _usernameController.addListener(() => setState(() {}));
-    _passwordController.addListener(() => setState(() {}));
-  }
+  Future<void> _handleCreateAccount() async {
+    setState(() {
+      _isLoading = true;
+      _message = 'Creating account...';
+      _isFailureMessage = false;
+    });
 
-  Future<void> _createAccountAndLogin() async {
     await AccountSetupPage.createAccountAndLogin(
+      ref: ref,
       username: _usernameController.text.trim(),
       password: _passwordController.text.trim(),
       onStatusChanged: (msg, {isError = false}) {
-        setState(() {
-          _message = msg;
-          _isFailureMessage = isError;
-          if (isError) _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _message = msg;
+            _isFailureMessage = isError;
+            if (isError) _isLoading = false;
+          });
+        }
       },
       onSuccess: () {
-        setState(() => _isLoading = false);
-        widget.nextPage();
+        if (mounted) {
+          setState(() => _isLoading = false);
+          widget.nextPage();
+        }
       },
     );
   }
@@ -105,23 +113,29 @@ class _AccountSetupPageState extends State<AccountSetupPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // Disable button if loading or fields empty
+    final bool canSubmit = !_isLoading && _usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty;
+
     return SetupPageWrapper(
       widget.isDesktop,
       "Create Account",
-      _passwordController.text == "" || _usernameController.text == "" || _isLoading ? null : _createAccountAndLogin,
+      canSubmit ? _handleCreateAccount : null,
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 24,
         children: <Widget>[
           Text(
             'Create Your Admin Account',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 64 : 36),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 64 : 24),
           ),
           Text(
-            'This will be your primary account to manage the app. Please choose a secure username and password.',
+            'This will be your primary account to manage Sprout.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: widget.isDesktop ? 18 : 14),
           ),
+
           if (_message.isNotEmpty)
             SproutNotificationWidget(
               SproutNotification(
@@ -129,22 +143,29 @@ class _AccountSetupPageState extends State<AccountSetupPage> {
                 _isFailureMessage ? theme.colorScheme.error : theme.colorScheme.secondary,
                 _isFailureMessage ? theme.colorScheme.onError : theme.colorScheme.onSecondary,
               ),
+              allowMultiLine: true,
             ),
+
           AutofillGroup(
-            child: TextField(
-              controller: _usernameController,
-              autofillHints: [AutofillHints.newUsername],
-              decoration: const InputDecoration(labelText: 'Choose Username', prefixIcon: Icon(Icons.person_add)),
+            child: Column(
+              spacing: 16,
+              children: [
+                TextField(
+                  controller: _usernameController,
+                  autofillHints: [AutofillHints.newUsername],
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(labelText: 'Choose Username', prefixIcon: Icon(Icons.person_add)),
+                ),
+                TextField(
+                  controller: _passwordController,
+                  autofillHints: [AutofillHints.newPassword],
+                  onChanged: (_) => setState(() {}),
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Choose Password', prefixIcon: Icon(Icons.lock_open)),
+                  onSubmitted: (_) => canSubmit ? _handleCreateAccount() : null,
+                ),
+              ],
             ),
-          ),
-          TextField(
-            controller: _passwordController,
-            autofillHints: [AutofillHints.newPassword],
-            decoration: const InputDecoration(labelText: 'Choose Password', prefixIcon: Icon(Icons.lock_open)),
-            onSubmitted: (String value) {
-              _createAccountAndLogin();
-            },
-            obscureText: true,
           ),
         ],
       ),

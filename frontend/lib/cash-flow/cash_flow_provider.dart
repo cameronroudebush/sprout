@@ -1,72 +1,62 @@
 import 'package:flutter/foundation.dart';
-import 'package:sprout/api/api.dart' hide SankeyData, SankeyLink;
-import 'package:sprout/charts/sankey/models/data.dart';
-import 'package:sprout/charts/sankey/models/link.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 
-/// Class that provides the store of cash flow data
-class CashFlowProvider extends BaseProvider<CashFlowApi> {
-  // Data store
-  final Map<String, SankeyData> _sankeyDataCache = {};
-  final Map<String, CashFlowStats> _statsCache = {};
-  CashFlowSpending? _monthlySpending;
+part 'cash_flow_provider.g.dart';
 
-  // Public getters
-  CashFlowSpending? get monthlySpending => _monthlySpending;
-  SankeyData? getSankeyData(int year, int? month, {int? day, Account? account}) {
-    return _sankeyDataCache[generateCacheKey(year, month, day, account)];
-  }
+/// Authenticated API to cash flow
+@Riverpod(keepAlive: true)
+Future<CashFlowApi> cashFlowApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return CashFlowApi(client);
+}
 
-  CashFlowStats? getStatsData(int year, int? month, {int? day, Account? account}) {
-    return _statsCache[generateCacheKey(year, month, day, account)];
-  }
-
-  CashFlowProvider(super.api);
-
-  /// Populates the sankey data for all accounts
-  Future<SankeyData> getSankey(int year, int? month, {int? day, Account? account}) async {
-    final cacheKey = generateCacheKey(year, month, day, account);
-    final data = (await api.cashFlowControllerGetSankey(year, month: month, day: day, accountId: account?.id))!;
-
-    final convertedData = SankeyData(
-      nodes: data.nodes,
-      colors: data.colors as dynamic,
-      links: data.links
-          .map((e) => SankeyLink(source: e.source_, target: e.target, value: e.value, description: e.description))
-          .toList(),
-    );
-    _sankeyDataCache[cacheKey] = convertedData;
-    notifyListeners();
-    return convertedData;
-  }
-
-  /// Populates cash flow stats for the given query
-  Future<CashFlowStats?> getStats(int year, int? month, {int? day, Account? account}) async {
-    final cacheKey = generateCacheKey(year, month, day, account);
-    final data = await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: account?.id);
-    if (data != null) _statsCache[cacheKey] = data;
-    notifyListeners();
-    return data;
-  }
-
-  Future<CashFlowSpending?> loadMonthlySpending({months = 4, categories = kIsWeb ? 5 : 3}) async {
-    _monthlySpending = await api.cashFlowControllerGetSpending(months, categories);
-    notifyListeners();
-    return _monthlySpending;
-  }
-
-  @override
-  Future<void> cleanupData() async {
-    _sankeyDataCache.clear();
-    _statsCache.clear();
-    notifyListeners();
-  }
-
-  @override
-  Future<void> onSSE(SSEData sse) async {
-    super.onSSE(sse);
-    if (sse.event == SSEDataEventEnum.forceUpdate) {
-      cleanupData();
+/// Sankey data based on time
+@Riverpod(keepAlive: true)
+Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+  // Automatically refresh on SSE forceUpdate
+  ref.listen(sseProvider, (prev, next) {
+    final event = next.latestData?.event;
+    if (event == SSEDataEventEnum.forceUpdate) {
+      ref.invalidateSelf();
     }
+  });
+
+  final api = await ref.watch(cashFlowApiProvider.future);
+  final data = await api.cashFlowControllerGetSankey(year, month: month, day: day, accountId: accountId);
+
+  if (data == null) throw Exception("Failed to load Sankey data");
+
+  return SankeyData(
+    nodes: data.nodes,
+    colors: data.colors as dynamic,
+    links: data.links
+        .map((e) => SankeyLink(source_: e.source_, target: e.target, value: e.value, description: e.description))
+        .toList(),
+  );
+}
+
+/// State for cash flow stats
+@Riverpod(keepAlive: true)
+Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+  final api = await ref.watch(cashFlowApiProvider.future);
+  return await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: accountId);
+}
+
+/// Monthly spending state
+@Riverpod(keepAlive: true)
+class MonthlySpending extends _$MonthlySpending {
+  @override
+  Future<CashFlowSpending?> build({int months = 4, int? categories}) async {
+    // Default categories based on platform if not provided
+    final categoryCount = categories ?? (kIsWeb ? 5 : 3);
+
+    final api = await ref.watch(cashFlowApiProvider.future);
+    return await api.cashFlowControllerGetSpending(months, categoryCount);
   }
+
+  /// Explicitly trigger a refresh if needed
+  Future<void> refresh() async => ref.invalidateSelf();
 }

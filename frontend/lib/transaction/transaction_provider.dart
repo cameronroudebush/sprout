@@ -1,109 +1,156 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/category/widgets/category_dropdown.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/transaction/models/transaction_state.dart';
 
-/// Class that provides the store of current transactions
-class TransactionProvider extends BaseProvider<TransactionApi> {
-  /// How many transactions we should initially pull
-  static final initialTransactionCount = 20;
-  // Data store
-  TotalTransactions? _totalTransactions;
-  List<Transaction> _transactions = [];
-  List<TransactionSubscription> _subscriptions = [];
+part 'transaction_provider.g.dart';
 
-  // Public getters
-  List<Transaction> get transactions => _transactions;
-  TotalTransactions? get totalTransactions => _totalTransactions;
-  List<TransactionSubscription> get subscriptions => _subscriptions;
+/// Provider for the transaction api
+@Riverpod(keepAlive: true)
+Future<TransactionApi> transactionApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return TransactionApi(client);
+}
 
-  TransactionProvider(super.api);
+@Riverpod(keepAlive: true)
+class Transactions extends _$Transactions {
+  static const int pageSize = 25;
 
-  Future<TotalTransactions?> populateTotalTransactionCount() async {
-    return _totalTransactions = await api.transactionControllerGetTotal();
+  @override
+  Future<TransactionState> build() async {
+    final api = await ref.watch(transactionApiProvider.future);
+    final total = await api.transactionControllerGetTotal();
+    final initial = await api.transactionControllerGetByQuery(startIndex: 0, endIndex: pageSize);
+
+    // Listen for SSE data
+    ref.listen(sseProvider, (prev, next) {
+      final data = next.latestData;
+      if (data?.event == SSEDataEventEnum.forceUpdate) {
+        // SSE Triggered: Grab current filters from the other provider
+        final currentFilters = ref.read(transactionFilterStateProvider);
+
+        // Re-fetch the first page using current parameters
+        fetchFilteredPage(
+          startIndex: 0,
+          resetList: true, // We need to clear the list for a force update
+          accountId: currentFilters.accountId,
+          catId: currentFilters.categoryId,
+          search: currentFilters.search,
+        );
+      }
+    });
+
+    return TransactionState(transactions: initial ?? [], totalCount: total?.total ?? 0);
   }
 
-  /// Adds new transactions to our global list and filters duplicates out
-  void _addNewTransactions(List<Transaction> newTransactions) {
-    // Combine new transactions with existing ones, removing duplicates
-    final Set<String> existingTransactionIds = _transactions.map((t) => t.id).toSet();
-    for (var newTransaction in newTransactions) {
-      if (!existingTransactionIds.contains(newTransaction.id)) {
-        _transactions.add(newTransaction);
+  /// Fetches data matching the given filter with the given index
+  Future<void> fetchFilteredPage({
+    required int startIndex,
+    String? accountId,
+    String? catId,
+    String? search,
+    bool resetList = false,
+  }) async {
+    final current = state.value;
+    if (current == null || current.isLoadingMore) return;
+    state = AsyncData(current.copyWith(isLoadingMore: true));
+    try {
+      final api = await ref.read(transactionApiProvider.future);
+
+      // Slight category adjustment
+      String? apiCategory = catId == "all" ? null : catId;
+
+      final nextItems = await api.transactionControllerGetByQuery(
+        startIndex: startIndex,
+        endIndex: startIndex + pageSize,
+        accountId: accountId,
+        category: apiCategory,
+        description: search,
+      );
+
+      if (nextItems != null) {
+        final updatedList = resetList
+            ? nextItems
+            : [...current.transactions, ...nextItems.where((t) => !current.transactions.any((e) => e.id == t.id))];
+
+        state = AsyncData(
+          current.copyWith(
+            transactions: updatedList..sort((a, b) => b.posted.compareTo(a.posted)),
+            isLoadingMore: false,
+            hasReachedMax: nextItems.length < pageSize,
+          ),
+        );
+      }
+    } catch (e) {
+      state = AsyncData(current.copyWith(isLoadingMore: false));
+    }
+  }
+
+  Future<Transaction?> editTransaction(Transaction t) async {
+    final api = await ref.read(transactionApiProvider.future);
+    final updated = await api.transactionControllerEdit(t.id, t);
+    await ref.read(unknownCategoryCountProvider().notifier).refresh();
+
+    if (updated != null && state.value != null) {
+      final newList = [...state.value!.transactions];
+      final index = newList.indexWhere((r) => r.id == updated.id);
+      if (index != -1) {
+        newList[index] = updated;
+        state = AsyncData(state.value!.copyWith(transactions: newList));
       }
     }
-    _transactions.sort((a, b) => b.posted.compareTo(a.posted));
+    return updated;
   }
+}
 
-  /// Populates transactions based on the parameters given
-  Future<List<Transaction>?> populateTransactions({
-    int? startIndex,
-    int? endIndex,
-    bool shouldNotify = true,
-    Account? account,
-    String? category,
-    String? description,
-    DateTime? date,
-  }) async {
-    final newTransactions = await api.transactionControllerGetByQuery(
-      startIndex: startIndex,
-      endIndex: endIndex,
-      accountId: account?.id,
-      category: category,
-      description: description,
-      date: date,
-    );
-    if (newTransactions != null) _addNewTransactions(newTransactions);
-    if (shouldNotify) notifyListeners();
-    return newTransactions;
-  }
-
-  /// Populates the initial list of transactions
-  Future<List<Transaction>?> populateInitial() async {
-    return await populateTransactions(
-      startIndex: 0,
-      endIndex: TransactionProvider.initialTransactionCount,
-      shouldNotify: false,
-    );
-  }
-
-  /// Populates subscription information built from transactions
-  Future<List<TransactionSubscription>?> populateSubscriptions() async {
-    await populateAndSetIfChanged(
-      api.transactionControllerSubscriptions,
-      _subscriptions,
-      (newValue) => _subscriptions = newValue ?? [],
-    );
-    return _subscriptions;
-  }
-
-  /// Utilizes the API to edit the given transaction and updates the data store
-  Future<Transaction> editTransaction(Transaction t) async {
-    final updatedTransaction = (await api.transactionControllerEdit(t.id, t))!;
-    final index = _transactions.indexWhere((r) => r.id == updatedTransaction.id);
-    if (index != -1) _transactions[index] = updatedTransaction;
-    notifyListeners();
-    return updatedTransaction;
-  }
-
-  /// Wipes all currently loaded transaction data. You'll normally do this if you're about to request more.
-  void wipeData() {
-    _totalTransactions = null;
-    _transactions = [];
-    _subscriptions = [];
-  }
-
+// Global filter state
+@riverpod
+class TransactionFilterState extends _$TransactionFilterState {
   @override
-  Future<void> cleanupData() async {
-    _totalTransactions = null;
-    _transactions = [];
-    _subscriptions = [];
-    notifyListeners();
-  }
+  TransactionFilter build() => TransactionFilter();
 
-  @override
-  Future<void> onSSE(SSEData data) async {
-    super.onSSE(data);
-    if (data.event == SSEDataEventEnum.forceUpdate) {
-      wipeData();
+  void update(TransactionFilter filter) => state = filter;
+}
+
+/// List of filtered transactions based on our state
+@riverpod
+List<Transaction> filteredTransactions(Ref ref) {
+  final filter = ref.watch(transactionFilterStateProvider);
+  final masterState = ref.watch(transactionsProvider).value;
+  if (masterState == null) return [];
+
+  return masterState.transactions.where((t) {
+    // Filter by Account
+    if (filter.accountId != null && t.account.id != filter.accountId) return false;
+
+    // Filter by Search String
+    if (filter.search.isNotEmpty) {
+      if (!t.description.toLowerCase().contains(filter.search.toLowerCase())) return false;
     }
+
+    // Filter by Category
+    if (filter.categoryId != null && filter.categoryId != CategoryDropdown.fakeAllCategory.id) {
+      // If filtering for null in DB
+      if (filter.categoryId == "unknown") return t.category == null;
+      // Normal category match
+      if (t.category?.id != filter.categoryId) return false;
+    }
+
+    return true;
+  }).toList();
+}
+
+/// Provider to track transaction subscriptions
+@Riverpod(keepAlive: true)
+class TransactionSubscriptions extends _$TransactionSubscriptions {
+  @override
+  Future<List<TransactionSubscription>> build() async {
+    final api = await ref.watch(transactionApiProvider.future);
+    return await api.transactionControllerSubscriptions() ?? [];
   }
+
+  Future<void> refresh() async => ref.invalidateSelf();
 }

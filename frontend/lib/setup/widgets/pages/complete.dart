@@ -17,7 +17,7 @@ class CompleteSetupPage extends StatelessWidget {
         spacing: 24,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.check_circle_outline, color: Colors.green, size: MediaQuery.of(context).size.height * .25),
+          Icon(Icons.check_circle_outline, color: Colors.green, size: 128),
           Text(
             'Setup Complete!',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: isDesktop ? 48 : 36),

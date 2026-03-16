@@ -152,11 +152,12 @@ class CategoryIcon extends StatelessWidget {
     'warning': Icons.warning,
     'help': Icons.help_outline,
     'unknown': Icons.question_mark_rounded,
+    'category': Icons.category,
   };
 
   /// Attempts to load the icon from the library, else defaults to the category icon
   IconData _getIconForCategory(Category? category) {
-    return iconLibrary[category?.icon] ?? Icons.category;
+    return iconLibrary[category?.icon] ?? Icons.question_mark_rounded;
   }
 
   @override

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/widgets/logo_base.dart';
+import 'package:sprout/shared/widgets/logo_base.dart';
 
-/// A widget used to display an account logo
-class HoldingLogoWidget extends LogoBaseWidget<Holding> {
-  const HoldingLogoWidget(super.logoClass, {super.key});
+/// A widget used to display a logo for a specific holding. Utilizes a stock icon registry
+class HoldingLogo extends LogoBaseWidget<Holding> {
+  const HoldingLogo(super.logoClass, {super.key});
 
   @override
   ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context) {

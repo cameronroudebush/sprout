@@ -1,53 +1,87 @@
 import 'dart:async';
 
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 
-/// Class that provides the store of current holding information for accounts
-class HoldingProvider extends BaseProvider<HoldingApi> {
-  // Data store. Both are separated by account ID
-  final Map<String, List<Holding>> _holdings = {};
-  final Map<String, List<EntityHistory>> _holdingsHistory = {};
+part "holding_provider.g.dart";
 
-  /// Split by holdingID
-  final Map<String, List<HistoricalDataPoint>> _holdingsTimeline = {};
+/// Provides the API for the holding info
+@Riverpod(keepAlive: true)
+Future<HoldingApi> holdingApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return HoldingApi(client);
+}
 
-  // Public getters
-  List<HistoricalDataPoint>? getHoldingTimelineData(String holdingId) => _holdingsTimeline[holdingId];
+/// Provides state to the account holdings info
+@Riverpod(keepAlive: true)
+class AccountHoldings extends _$AccountHoldings {
+  @override
+  Future<List<Holding>> build(String accountId) async {
+    // Auto-refresh when an SSE update for this account arrives
+    ref.listen(sseProvider, (prev, next) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
 
-  HoldingProvider(super.api);
-
-  /// Given an account, grabs holdings and holdings over time and returns that information
-  Future<(List<Holding>?, List<EntityHistory>?)> populateDataForAccount(Account account) async {
-    await Future.wait([
-      populateAndSetIfChanged(
-        () => api.holdingControllerGetHoldings(account.id),
-        _holdings[account.id],
-        (newValue) => _holdings[account.id] = newValue ?? [],
-      ),
-      populateAndSetIfChanged(
-        () => api.holdingControllerGetHoldingHistory(account.id),
-        _holdingsHistory[account.id],
-        (newValue) => _holdingsHistory[account.id] = newValue ?? [],
-      ),
-    ]);
-
-    return (_holdings[account.id], _holdingsHistory[account.id]);
+    final api = await ref.watch(holdingApiProvider.future);
+    return await api.holdingControllerGetHoldings(accountId) ?? [];
   }
+}
 
-  /// Given an account, returns the holdings and holdings over time without populating more
-  (List<Holding>?, List<EntityHistory>?) getHoldingDataForAccount(Account account) {
-    return (_holdings[account.id], _holdingsHistory[account.id]);
+/// Provides state to the account holding history per account id
+@Riverpod(keepAlive: true)
+class AccountHoldingsHistory extends _$AccountHoldingsHistory {
+  @override
+  Future<List<EntityHistory>> build(String accountId) async {
+    final api = await ref.watch(holdingApiProvider.future);
+    return await api.holdingControllerGetHoldingHistory(accountId) ?? [];
   }
+}
 
-  /// Populates the timeline data for a specific given holding
-  Future<List<HistoricalDataPoint>?> populateHoldingTimelineData(String holdingId) async {
-    return populateAndSetIfChanged(
-      () => api.holdingControllerGetHoldingTimeline(holdingId),
-      getHoldingTimelineData(holdingId),
-      (newValue) {
-        if (newValue != null) _holdingsTimeline[holdingId] = newValue;
-      },
-    );
+/// Provides state to the account holding timelines
+@Riverpod(keepAlive: true)
+class HoldingTimeline extends _$HoldingTimeline {
+  @override
+  Future<List<HistoricalDataPoint>> build(String holdingId) async {
+    final api = await ref.watch(holdingApiProvider.future);
+    return await api.holdingControllerGetHoldingTimeline(holdingId) ?? [];
+  }
+}
+
+/// Provides information for the major indices for holding content
+@Riverpod(keepAlive: true)
+class MajorIndices extends _$MajorIndices {
+  Timer? _timer;
+
+  @override
+  Future<List<MarketIndexDto>> build() async {
+    // Refresh every 5 minutes. Anything less than that will be the same as the backend caches in 5 minute increments
+    _timer = Timer.periodic(const Duration(minutes: 5), (_) => ref.invalidateSelf());
+
+    ref.onDispose(() => _timer?.cancel());
+
+    final api = await ref.watch(holdingApiProvider.future);
+    return await api.holdingControllerGetLiveMajor() ?? [];
+  }
+}
+
+/// Riverpod that provides live price of a stock utilizing the backend API
+@Riverpod(keepAlive: true)
+class LivePrice extends _$LivePrice {
+  Timer? _timer;
+
+  @override
+  Future<MarketIndexDto?> build(String symbol) async {
+    // Refresh cycle to match backend cache
+    _timer = Timer.periodic(const Duration(minutes: 5), (_) => ref.invalidateSelf());
+    ref.onDispose(() => _timer?.cancel());
+    final api = await ref.watch(holdingApiProvider.future);
+    final results = await api.holdingControllerGetLivePrices([symbol]);
+
+    return results?.firstOrNull;
   }
 }

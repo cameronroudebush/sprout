@@ -1,132 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
-import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/core/widgets/tooltip.dart';
-import 'package:sprout/transaction/model/transaction_extensions.dart';
-import 'package:sprout/transaction/widgets/transaction_info.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/transaction/widgets/transaction_edit.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
-/// A widget that displays a transaction row on a transaction table
-class TransactionRow extends StatelessWidget {
-  static double rowHeight = 66;
+// Renders a singular transaction with all necessary information in a single row
+class TransactionRow extends ConsumerWidget {
+  final Transaction transaction;
 
-  final Transaction? transaction;
-  final bool isEvenRow;
-  final bool renderPostedTime;
-
-  /// If we're allowed to open this dialog menu
+  /// If we should be allowed to click this row to open the dialog
   final bool allowDialog;
 
-  const TransactionRow({
-    super.key,
-    required this.transaction,
-    required this.isEvenRow,
-    this.renderPostedTime = true,
-    this.allowDialog = true,
-  });
+  const TransactionRow(this.transaction, {super.key, this.allowDialog = true});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    Color? rowColor;
-    if (transaction!.pending) {
-      rowColor = Colors.grey.withValues(alpha: 0.2);
-    } else if (isEvenRow) {
-      rowColor = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2);
-    }
-    if (transaction == null) return Center(child: CircularProgressIndicator());
-
-    final timeText = transaction!.timeText;
+    final userConfig = ref.watch(userConfigProvider).value;
+    final isPrivate = userConfig?.privateMode ?? false;
 
     return InkWell(
-      onTap: allowDialog
-          ? () {
-              showDialog(context: context, builder: (_) => TransactionInfo(transaction!));
-            }
-          : null,
+      onTap: !allowDialog
+          ? null
+          : () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
       child: Container(
-        color: rowColor,
-        width: double.infinity,
-        height: TransactionRow.rowHeight,
-        padding: EdgeInsetsGeometry.all(6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              flex: 3,
-              child: Row(
-                spacing: 12,
-                mainAxisAlignment: MainAxisAlignment.start,
+        decoration: BoxDecoration(
+          color: transaction.pending ? theme.colorScheme.primary.withValues(alpha: 0.15) : Colors.transparent,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Row(
+            spacing: 16,
+            children: [
+              // Category
+              CategoryIcon(transaction.category, avatarSize: 16),
+              // Description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description,
+                      style: theme.textTheme.bodyLarge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      transaction.account.name,
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // End content
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: 8,
                 children: [
-                  // Render an type icon
-                  CategoryIcon(transaction?.category),
-                  // Description info
-                  Flexible(
-                    child: Column(
-                      spacing: 6,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Description
-                        TextWidget(
-                          referenceSize: 1.15,
-                          text: transaction!.description,
-                          style: TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
-                        ),
-                        // Account
-                        TextWidget(
-                          referenceSize: 0.9,
-                          text: transaction!.account.name.toTitleCase,
-                          style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis),
-                        ),
-                      ],
+                  Text(
+                    transaction.amount.toCurrency(isPrivate),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: transaction.amount.toBalanceColor(theme),
                     ),
                   ),
+                  if (allowDialog) Icon(Icons.chevron_right, color: theme.disabledColor),
                 ],
               ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  transaction!.pending
-                      ? SproutTooltip(
-                          message: "This transaction has not yet posted",
-                          child: Icon(Icons.hourglass_empty, size: 24, color: theme.colorScheme.onSurfaceVariant),
-                        )
-                      : SizedBox.shrink(),
-                  Column(
-                    spacing: 6,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // Amount
-                      TextWidget(
-                        text: getFormattedCurrency(transaction!.amount),
-                        style: TextStyle(color: getBalanceColor(transaction!.amount, theme)),
-                        textAlign: TextAlign.end,
-                      ),
-                      // Time
-                      if (renderPostedTime)
-                        Row(
-                          spacing: 4,
-                          children: [
-                            TextWidget(
-                              referenceSize: .9,
-                              text: timeText,
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            Icon(Icons.calendar_month, color: Colors.grey),
-                          ],
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

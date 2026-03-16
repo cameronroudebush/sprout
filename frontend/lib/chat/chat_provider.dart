@@ -1,49 +1,62 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/core/provider/base.dart';
+import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/sse_provider.dart';
 
-/// This provider handles communication and common functions for LLM prompting to the backend
-class ChatProvider extends BaseProvider<ChatApi> {
-  List<ChatHistory> _messages = [];
+part 'chat_provider.g.dart';
 
-  // Public getters
-  List<ChatHistory> get messages => _messages;
+/// State for chat API
+@Riverpod(keepAlive: true)
+Future<ChatApi> chatApi(Ref ref) async {
+  final client = await ref.watch(baseAuthenticatedClientProvider.future);
+  return ChatApi(client);
+}
 
-  ChatProvider(super.api);
+/// State for the chat elements
+@Riverpod(keepAlive: true)
+class Chat extends _$Chat {
+  @override
+  Future<List<ChatHistory>> build() async {
+    ref.listen(sseProvider, (prev, next) {
+      final data = next.latestData;
+      if (data?.event == SSEDataEventEnum.chat) {
+        final chat = ChatHistory.fromJson(data?.payload);
+        if (chat != null) {
+          _updateMessage(chat);
+        }
+      }
+    });
 
-  /// Populates the previous chat messages
-  Future<List<ChatHistory>?> populateHistory() async {
-    await populateAndSetIfChanged(
-      api.chatControllerHistory,
-      _messages,
-      (newValue) => _messages = List.from(newValue ?? []),
-    );
-    return _messages;
+    final api = await ref.watch(chatApiProvider.future);
+    final history = await api.chatControllerHistory() ?? [];
+
+    // Sort by latest first
+    return history..sort((a, b) => b.time.compareTo(a.time));
   }
 
-  /// Initiates a new prompt to the LLM through the backend
+  /// Handles inserting a new message or updating an existing one
+  void _updateMessage(ChatHistory chat) {
+    if (state.value == null) return;
+
+    final messages = [...state.value!];
+    final index = messages.indexWhere((m) => m.id == chat.id);
+
+    if (index == -1) {
+      messages.insert(0, chat);
+    } else {
+      messages[index] = chat;
+    }
+
+    state = AsyncData(messages);
+  }
+
+  /// Sends a message to the backend
   Future<void> sendMessage(String message) async {
+    final api = await ref.read(chatApiProvider.future);
+
     await api.chatControllerNew(ChatRequestDTO(message: message));
   }
 
-  @override
-  Future<void> onSSE(SSEData data) async {
-    if (data.event == SSEDataEventEnum.chat) {
-      final chat = ChatHistory.fromJson(data.payload);
-      if (chat != null) {
-        // Replace the history
-        int index = _messages.indexWhere((item) => item.id == chat.id);
-        if (index == -1) {
-          _messages.insert(0, chat);
-        } else {
-          _messages[index] = chat;
-        }
-        notifyListeners();
-      }
-    }
-  }
-
-  @override
-  Future<void> postLogin() async {
-    await populateHistory();
-  }
+  /// Clears chat state
+  void clear() => state = const AsyncData([]);
 }

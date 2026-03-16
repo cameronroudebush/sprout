@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprout/core/widgets/card.dart';
+import 'package:sprout/shared/widgets/card.dart';
 
 /// Re-usable component that wraps all our setup pages
 class SetupPageWrapper extends StatelessWidget {
@@ -24,29 +24,33 @@ class SetupPageWrapper extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SproutCard(
-          child: Padding(
-            padding: EdgeInsetsGeometry.all(24),
-            child: Column(
-              spacing: 24,
-              children: [
-                child,
-                // Next button
-                SizedBox(
-                  width: 360,
-                  child: FilledButton(
-                    onPressed: nextBtnAction,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 8,
-                      children: [
-                        if (nextBtnIsLoading) const SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
-                        Text(nextBtnText),
-                      ],
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          child: SproutCard(
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(16),
+              child: Column(
+                spacing: 24,
+                children: [
+                  child,
+                  // Next button
+                  SizedBox(
+                    width: 360,
+                    child: FilledButton(
+                      onPressed: nextBtnAction,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8,
+                        children: [
+                          if (nextBtnIsLoading)
+                            const SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
+                          Text(nextBtnText),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

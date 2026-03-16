@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
-import 'package:sprout/core/widgets/tooltip.dart';
-
-import '../../core/widgets/layout.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 
 /// A widget for selecting the view (monthly/yearly), year, and navigating months for cash flow.
 class CashFlowSelector extends StatelessWidget {
@@ -39,7 +37,7 @@ class CashFlowSelector extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SproutTooltip(
+                  Tooltip(
                     message: isMonthly ? "Previous Month" : "Previous Year",
                     child: IconButton(
                       icon: const Icon(Icons.chevron_left),
@@ -86,7 +84,7 @@ class CashFlowSelector extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SproutTooltip(
+                  Tooltip(
                     message: isMonthly ? "Next Month" : "Next Year",
                     child: IconButton(
                       icon: const Icon(Icons.chevron_right),
@@ -95,7 +93,7 @@ class CashFlowSelector extends StatelessWidget {
                           : (selectedDate.year < now.year ? () => onYearChanged(selectedDate.year + 1) : null),
                     ),
                   ),
-                  SproutTooltip(
+                  Tooltip(
                     message: isMonthly ? "This Month" : "This Year",
                     child: IconButton(
                       icon: const Icon(Icons.keyboard_double_arrow_right),

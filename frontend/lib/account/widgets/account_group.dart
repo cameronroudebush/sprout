@@ -1,242 +1,176 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:sprout/account/widgets/account_change.dart';
-import 'package:sprout/account/widgets/account_row.dart';
-import 'package:sprout/account/widgets/institution_error.dart';
+import 'package:sprout/account/widgets/account_error_icon.dart';
+import 'package:sprout/account/widgets/account_item_row.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/config/provider.dart';
-import 'package:sprout/core/utils/formatters.dart';
-import 'package:sprout/core/widgets/card.dart';
-import 'package:sprout/core/widgets/text.dart';
-import 'package:sprout/net-worth/model/entity_history_extensions.dart';
-import 'package:sprout/net-worth/net_worth_provider.dart';
+import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
+import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/widgets/amount_change.dart';
+import 'package:sprout/shared/widgets/card.dart';
 
-/// When we calculate data for a group, we'll return this type
-class GroupCalculatedData {
-  final double percentageChange;
-  final double totalBalance;
-  final double totalChange;
-  GroupCalculatedData({required this.percentageChange, required this.totalBalance, required this.totalChange});
-}
+/// Renders a grouping of accounts with the given data and configuration
+class AccountGroupSection extends StatelessWidget {
+  /// The account group name
+  final String title;
 
-/// A widget used to display a grouping of accounts for a specific type
-class AccountGroupWidget extends StatelessWidget {
+  /// The list of accounts in this group
   final List<Account> accounts;
-  final AccountTypeEnum type;
-  final ChartRangeEnum netWorthPeriod;
-  final void Function(Account)? onAccountClick;
+
+  /// If the user is in private mode
+  final bool isPrivate;
+
+  /// The color of this grouping
+  final Color accentColor;
+
+  /// If this is a liability account
+  final bool isNegative;
+
+  /// If we should render this group in it's own card
+  final bool renderAsCard;
+
+  /// If this expansion should be initially expanded
+  final bool initiallyExpanded;
+
+  /// If we should allow expansion of the tiles
+  final bool allowExpansion;
+
+  // Properties for change rendering
+  final List<EntityHistory>? historyList;
+  final num? percentChange;
+  final num? totalChange;
+  final ChartRangeEnum selectedRange;
+
+  // Additional properties for selection and accordion control
   final Set<Account>? selectedAccounts;
+  final void Function(Account)? onAccountClick;
 
-  /// If this group should render in a card
-  final bool applyCard;
-
-  /// If stats should be displayed (percentage changes etc)
-  final bool displayStats;
-
-  /// If we should display the total values
-  final bool displayTotals;
-
-  /// If the group should be collapsible
-  final bool allowCollapse;
-
-  /// If we should render the title for this section with more info and total percentages
-  final bool showTitle;
-
-  /// If we should display the selectable subType of the account
-  final bool displaySubTypes;
-
-  const AccountGroupWidget({
+  const AccountGroupSection({
     super.key,
-    required this.netWorthPeriod,
+    required this.title,
     required this.accounts,
-    required this.type,
-    this.onAccountClick,
-    required this.displayStats,
-    required this.displayTotals,
+    required this.isPrivate,
+    required this.accentColor,
+    required this.selectedRange,
+    this.isNegative = false,
+    this.renderAsCard = false,
+    this.initiallyExpanded = true,
+    this.percentChange,
+    this.totalChange,
+    this.historyList,
     this.selectedAccounts,
-    required this.allowCollapse,
-    required this.applyCard,
-    this.showTitle = true,
-    this.displaySubTypes = false,
+    this.onAccountClick,
+    this.allowExpansion = true,
   });
-
-  /// Calculates useful content per group of given accounts with historical data and returns it
-  static GroupCalculatedData calculate(
-    List<EntityHistory>? historical,
-    List<Account> accounts,
-    ChartRangeEnum chartRange,
-  ) {
-    final totalBalance = accounts.fold(0.0, (sum, account) => sum + account.balance);
-    double groupAmountChange = 0;
-    // Filter the historical data once.
-    final filteredGroupData = historical?.where(
-      (element) => accounts.any((account) => account.id == element.connectedId),
-    );
-
-    // Use a for-in loop to iterate through the filtered data and accumulate sums.
-    if (filteredGroupData != null) {
-      for (final element in filteredGroupData) {
-        final valueByFrame = element.getValueByFrame(chartRange);
-        groupAmountChange += valueByFrame.valueChange;
-      }
-    }
-    double groupPercentChange = (groupAmountChange / totalBalance) * 100;
-    if (totalBalance == 0 && groupAmountChange != 0) groupPercentChange = 100;
-    return GroupCalculatedData(
-      percentageChange: groupPercentChange,
-      totalBalance: totalBalance,
-      totalChange: groupAmountChange,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ConfigProvider, NetWorthProvider>(
-      builder: (context, configProvider, netWorthProvider, child) {
-        final groupCalc = AccountGroupWidget.calculate(
-          netWorthProvider.historicalAccountData,
-          accounts,
-          netWorthPeriod,
-        );
-        double groupAmountChange = groupCalc.totalChange;
-        double groupPercentChange = groupCalc.percentageChange;
-        final totalBalance = groupCalc.totalBalance;
+    final theme = Theme.of(context);
+    final total = accounts.fold(0.0, (sum, a) => sum + (isNegative ? a.balance.abs() : a.balance));
+    final bool groupHasError = accounts.any((a) => a.institution.hasError);
 
-        /// The percent of total net worth
-        final theme = Theme.of(context);
-        final balanceColor = getBalanceColor(totalBalance, theme);
-
-        final accountWithInstitutionError = accounts.firstWhereOrNull((x) => x.institution.hasError);
-
-        // If this is a liability, adjust the value
-        if (type == AccountTypeEnum.loan || type == AccountTypeEnum.credit) groupAmountChange *= -1;
-
-        /// A cleaned up type name for display
-        String adjustedType = formatAccountType(type);
-
-        final element = Theme(
-          data: theme.copyWith(
-            // Remove trailing and leading dividers when expansion tile is open
-            dividerColor: Colors.transparent,
-            disabledColor: theme.textTheme.titleMedium?.color,
-          ),
-          child: ExpansionTile(
-            enabled: allowCollapse,
-            initiallyExpanded: !allowCollapse,
-            showTrailingIcon: false,
-            minTileHeight: !showTitle ? 0 : null,
-            tilePadding: !showTitle ? EdgeInsets.zero : EdgeInsets.symmetric(horizontal: 12),
-            title: !showTitle
-                ? SizedBox.shrink()
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          spacing: 4,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(adjustedType, style: TextStyle(fontWeight: FontWeight.bold)),
-                            if (displayStats)
-                              AccountChangeWidget(
-                                percentageChange: groupPercentChange,
-                                totalChange: groupAmountChange,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                netWorthPeriod: netWorthPeriod,
-                                useExtendedPeriodString: true,
-                              ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          spacing: 10,
-                          children: [
-                            InstitutionError(
-                              institution: accountWithInstitutionError?.institution,
-                              overrideMessage: "An account within this group contains an error",
-                            ),
-                            // Asset information
-                            SizedBox(
-                              height: 45,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 4,
-                                children: [
-                                  // Group balance
-                                  if (displayTotals)
-                                    TextWidget(
-                                      referenceSize: 1.15,
-                                      text: getFormattedCurrency(totalBalance),
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: balanceColor),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+    final innerContent = Padding(
+      padding: EdgeInsets.zero,
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: initiallyExpanded,
+          enabled: allowExpansion,
+          visualDensity: VisualDensity.compact,
+          leading: Icon(Icons.circle, color: accentColor, size: 12),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 8,
             children: [
-              const Divider(height: 1),
-              ...accounts.expand((account) {
-                final isSelected = selectedAccounts?.contains(account) ?? false;
-                final lastAccountIsSelected =
-                    accounts.first != account &&
-                    (selectedAccounts?.contains(accounts[accounts.indexOf(account) - 1]) ?? false);
-
-                // Determine border for selection
-                BoxBorder? border;
-                if (isSelected == true) {
-                  final width = 3.0;
-                  final color = theme.colorScheme.secondary;
-                  border = Border(
-                    top: accounts.first == account || !lastAccountIsSelected
-                        ? BorderSide(width: width, color: color)
-                        : BorderSide.none,
-                    left: BorderSide(width: width, color: color),
-                    right: BorderSide(width: width, color: color),
-                    bottom: BorderSide(width: width, color: color),
-                  );
-                }
-
-                return [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: border,
-                      borderRadius: accounts.last == account
-                          ? BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
-                          : null,
-                    ),
-                    child: Column(
-                      children: [
-                        AccountRowWidget(
-                          account: account,
-                          netWorthPeriod: netWorthPeriod,
-                          displayTotals: displayTotals,
-                          displayStats: displayStats,
-                          onClick: onAccountClick == null ? null : () => onAccountClick!(account),
-                          isSelected: isSelected,
-                          displaySubType: displaySubTypes,
-                        ),
-                        if (account != accounts.last) const Divider(height: 1),
-                      ],
-                    ),
-                  ),
-                ];
-              }),
+              Text(
+                title,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              // Error indicator for the group
+              SproutErrorIcon(hasError: groupHasError, size: 14),
             ],
           ),
-        );
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                total.toCurrency(isPrivate),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isNegative ? Colors.redAccent : Colors.green,
+                ),
+              ),
 
-        return applyCard ? SproutCard(child: element) : element;
-      },
+              if (percentChange != null)
+                SproutChangeWidget(
+                  totalChange: totalChange,
+                  percentageChange: percentChange,
+                  period: selectedRange,
+                  fontSize: 12,
+                  useExtendedPeriodString: false,
+                ),
+            ],
+          ),
+          children: [
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            ...accounts.map((acc) {
+              // Find history for this specific account
+              final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
+              final dataPoint = history?.getValueByFrame(selectedRange);
+              final isSelected = selectedAccounts?.contains(acc) ?? false;
+              final hasError = acc.institution.hasError;
+
+              // Main row content
+              Widget row = Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AccountItemRow(
+                      acc,
+                      isPrivate,
+                      percentChange: dataPoint?.percentChange?.toDouble(),
+                      valueChange: dataPoint?.valueChange.toDouble(),
+                      period: selectedRange,
+                      onAccountClick: onAccountClick != null ? () => onAccountClick!(acc) : null,
+                    ),
+                    // Display the error badge if the institution has an error
+                    Positioned(left: -10, top: 2, child: SproutErrorIcon(hasError: hasError, size: 12)),
+                  ],
+                ),
+              );
+
+              if (selectedAccounts != null) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      if (isSelected)
+                        SizedBox(
+                          width: 24,
+                          child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+                        ),
+                      Expanded(child: row),
+                    ],
+                  ),
+                );
+              }
+
+              return row;
+            }),
+          ],
+        ),
+      ),
     );
+
+    if (renderAsCard) {
+      return SproutCard(child: innerContent);
+    } else {
+      return innerContent;
+    }
   }
 }
