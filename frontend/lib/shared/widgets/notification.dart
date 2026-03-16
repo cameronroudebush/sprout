@@ -7,7 +7,10 @@ import 'package:sprout/shared/widgets/layout.dart';
 class SproutNotificationWidget extends StatelessWidget {
   final SproutNotification notification;
 
-  const SproutNotificationWidget(this.notification, {super.key});
+  /// If we should be allowed to render this notification in more than one line
+  final bool allowMultiLine;
+
+  const SproutNotificationWidget(this.notification, {super.key, this.allowMultiLine = false});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,7 @@ class SproutNotificationWidget extends StatelessWidget {
                         notification.message,
                         style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
-                        maxLines: 1,
+                        maxLines: allowMultiLine ? 8 : 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],

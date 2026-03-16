@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/shared/providers/logger_provider.dart';
+import 'package:sprout/config/config_provider.dart';
 
 /// An interceptor that attempts to refresh access tokens as needed on failures using Riverpod.
 class AuthInterceptorClient extends http.BaseClient {
@@ -13,20 +13,17 @@ class AuthInterceptorClient extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final authNotifier = _ref.read(authProvider.notifier);
+    final isOIDCAuthMode = _ref.read(unsecureConfigProvider.notifier).isOIDCAuthMode;
     final headers = await authNotifier.getHeaders();
     request.headers.addAll(headers);
     var response = await _inner.send(request);
 
     // If 401 Unauthorized, attempt a silent refresh
-    if (response.statusCode == 401) {
-      LoggerProvider.debug("AuthInterceptor: 401 Detected. Attempting silent refresh...");
-
+    if (response.statusCode == 401 && isOIDCAuthMode) {
       // Trigger the refresh logic in your AuthNotifier
       final success = await authNotifier.silentRefresh();
 
       if (success) {
-        LoggerProvider.info("AuthInterceptor: Refresh success. Retrying request.");
-
         // Re-create the request with new tokens
         final newHeaders = await authNotifier.getHeaders();
         final newRequest = _copyRequest(request);

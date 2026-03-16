@@ -12,9 +12,9 @@ import 'package:sprout/shared/widgets/lock.dart';
 /// A lightweight wrapper that provides persistent navigation (e.g., Side/Bottom Nav).
 class SproutShell extends ConsumerWidget {
   final Widget child;
-  final GoRouterState state;
+  final GoRouterState? state;
 
-  const SproutShell({super.key, required this.child, required this.state});
+  const SproutShell({super.key, required this.child, this.state});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,7 +41,9 @@ class SproutShell extends ConsumerWidget {
                     Expanded(child: child),
                   ],
                 ),
-                bottomNavigationBar: isDesktop ? null : SproutBottomNav(currentPath: state.fullPath ?? ""),
+                bottomNavigationBar: isDesktop || state == null
+                    ? null
+                    : SproutBottomNav(currentPath: state!.fullPath ?? ""),
               ),
       ),
     );

@@ -26,7 +26,6 @@ class UserNotifier extends _$UserNotifier {
   void build() {
     // Listen for authentication changes
     ref.listen(authProvider, (previous, next) {
-      print(next.value);
       if (next.value != null && previous?.value == null) {
         registerDevice();
       }

@@ -32,7 +32,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text("Error: $err")),
       data: (subs) {
-        if (subs.isEmpty) return _buildEmptyState();
+        if (subs.isEmpty) return _buildEmptyState(theme);
 
         // Calculate events for the currently selected day
         final eventsForCurrentDay = subs.where((s) => s.isBilledOn(_selectedDay)).toList();
@@ -155,16 +155,17 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   }
 
   /// Builds a display of what to do when we have no subscriptions
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: SizedBox(
-        height: 158,
+        height: 220,
         child: SproutCard(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               spacing: 12,
-              children: const [
+              children: [
+                Icon(Icons.calendar_month, size: 48, color: theme.colorScheme.primary),
                 Text("No Subscriptions Found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 Text(
                   "Sprout detects recurring bills automatically from your history. Check back later to see if Sprout has detected any.",

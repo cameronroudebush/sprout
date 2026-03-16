@@ -51,7 +51,12 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
             data: (state) {
               final recent = state.transactions.take(count).toList();
               if (recent.isEmpty) {
-                return const Center(child: Text("No recent transactions"));
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.directional(bottom: 12),
+                    child: Text("No recent transactions"),
+                  ),
+                );
               }
               return ListView.separated(
                 shrinkWrap: true,

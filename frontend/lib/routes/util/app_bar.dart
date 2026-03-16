@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/notification/widgets/notification_item.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -35,10 +36,11 @@ class SproutAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
     final notificationState = ref.watch(notificationsProvider);
     final notificationNotifier = ref.watch(notificationsProvider.notifier);
+    final authNotifier = ref.watch(authProvider.notifier);
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
-      final logo = useFullLogo || isDesktop
-          ? Image.asset('assets/logo/color-transparent-no-tag.png', width: 128, fit: BoxFit.contain)
+      final logo = useFullLogo || isDesktop || authNotifier.isSetupMode
+          ? Image.asset('assets/logo/color-transparent-no-tag.png', width: 116, fit: BoxFit.contain)
           : Image.asset('assets/icon/color.png', width: 48, fit: BoxFit.contain);
 
       return AppBar(
@@ -51,7 +53,7 @@ class SproutAppBar extends ConsumerWidget implements PreferredSizeWidget {
         centerTitle: true,
         title: logo,
         actions: [
-          if (!useFullLogo)
+          if (!useFullLogo && !authNotifier.isSetupMode)
             PopupMenuButton<String>(
               color: theme.colorScheme.surface,
               onOpened: () => _handleNotificationMenuOpened(ref),

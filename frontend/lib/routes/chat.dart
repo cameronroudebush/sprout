@@ -95,11 +95,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               mainAxisSize: MainAxisSize.min,
               spacing: 16,
               children: [
-                Icon(
-                  Icons.auto_awesome_outlined,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-                ),
+                Icon(Icons.auto_awesome_outlined, size: 48, color: Theme.of(context).colorScheme.primary),
                 const Text(
                   "AI Assistant Not Configured",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),

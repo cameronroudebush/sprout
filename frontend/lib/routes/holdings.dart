@@ -48,34 +48,54 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                 child: Column(
                   spacing: 8,
                   children: [
-                    // Account Sections
-                    ...accounts.where((a) => a.type == AccountTypeEnum.investment).map((account) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Row(
-                              spacing: 12,
-                              children: [
-                                AccountLogo(account),
-                                Text(account.name, style: Theme.of(context).textTheme.titleMedium),
-                              ],
+                    if (accounts.isEmpty)
+                      Center(
+                        child: SizedBox(
+                          height: 164,
+                          child: SproutCard(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                spacing: 12,
+                                children: [
+                                  Icon(Icons.show_chart, size: 64, color: theme.colorScheme.primary),
+                                  const Text("No accounts found to choose from", style: TextStyle(fontSize: 18)),
+                                ],
+                              ),
                             ),
                           ),
-                          AccountHoldingsList(
-                            accountId: account.id,
-                            selectedId: _selectedHolding?.id,
-                            onSelect: (holding) {
-                              setState(() {
-                                _selectedHolding = holding;
-                              });
-                            },
-                          ),
-                        ],
-                      );
-                    }),
+                        ),
+                      ),
+
+                    if (accounts.isNotEmpty)
+                      // Account Sections
+                      ...accounts.where((a) => a.type == AccountTypeEnum.investment).map((account) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Row(
+                                spacing: 12,
+                                children: [
+                                  AccountLogo(account),
+                                  Text(account.name, style: Theme.of(context).textTheme.titleMedium),
+                                ],
+                              ),
+                            ),
+                            AccountHoldingsList(
+                              accountId: account.id,
+                              selectedId: _selectedHolding?.id,
+                              onSelect: (holding) {
+                                setState(() {
+                                  _selectedHolding = holding;
+                                });
+                              },
+                            ),
+                          ],
+                        );
+                      }),
                   ],
                 ),
               ),
