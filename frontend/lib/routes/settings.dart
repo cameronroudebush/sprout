@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/config/models/extensions/config_extension.dart';
 import 'package:sprout/config/widgets/settings_section.dart';
@@ -126,7 +127,7 @@ class SettingsPage extends ConsumerWidget {
                     value: userConfig.secureMode,
                     onChanged: (val) async {
                       try {
-                        await ref.read(userConfigProvider.notifier).toggleSecureMode(val);
+                        await ref.read(biometricsProvider.notifier).toggleSecureMode(val);
                         onConfigChanged?.call();
                       } catch (e) {
                         ref.read(notificationsProvider.notifier).openWithAPIException(e);

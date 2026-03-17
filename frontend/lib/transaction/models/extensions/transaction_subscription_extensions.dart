@@ -74,7 +74,7 @@ extension TransactionSubscriptionExtensions on TransactionSubscription {
   Transaction toMockTransaction() {
     return Transaction(
       id: description,
-      amount: -amount,
+      amount: amount,
       posted: DateTime.now(),
       description: description,
       category: transaction.category,

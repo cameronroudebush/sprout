@@ -123,16 +123,10 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLive = state == MarketIndexDtoMarketStateEnum.REGULAR;
-    final color = isLive
-        ? Colors.green
-        : state == MarketIndexDtoMarketStateEnum.PRE || state == MarketIndexDtoMarketStateEnum.POST
-        ? Colors.orange
-        : Colors.red;
+    final color = isLive ? Colors.green : Colors.red;
 
     String label = "CLOSED";
     if (isLive) label = "LIVE";
-    if (state == MarketIndexDtoMarketStateEnum.PRE) label = "PRE-MARKET";
-    if (state == MarketIndexDtoMarketStateEnum.POST) label = "POST-MARKET";
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
