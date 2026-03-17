@@ -56,7 +56,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
           );
 
-      _fetchPage(reset: true);
+      _fetchPage(reset: false);
     });
   }
 

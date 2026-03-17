@@ -35,7 +35,6 @@ class _SproutSpeedDialState extends State<SproutSpeedDial> {
       final action = widget.actions.first;
       return FloatingActionButton(
         heroTag: 'single_fab',
-        backgroundColor: theme.colorScheme.secondary,
         onPressed: () => action.onTap(context),
         child: Icon(action.icon),
       );
@@ -64,7 +63,7 @@ class _SproutSpeedDialState extends State<SproutSpeedDial> {
                       elevation: 2,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.secondary,
+                          color: theme.floatingActionButtonTheme.backgroundColor,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
                         ),
@@ -72,13 +71,12 @@ class _SproutSpeedDialState extends State<SproutSpeedDial> {
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           child: Text(
                             action.label,
-                            style: TextStyle(fontSize: 12, backgroundColor: theme.colorScheme.secondary),
+                            style: TextStyle(fontSize: 12, color: theme.floatingActionButtonTheme.foregroundColor),
                           ),
                         ),
                       ),
                     ),
                   FloatingActionButton.small(
-                    backgroundColor: theme.colorScheme.secondary,
                     heroTag: 'sub_$index',
                     onPressed: () {
                       action.onTap(context);
@@ -96,7 +94,6 @@ class _SproutSpeedDialState extends State<SproutSpeedDial> {
         FloatingActionButton(
           heroTag: 'toggle_fab',
           onPressed: () => setState(() => _isExpanded = !_isExpanded),
-          backgroundColor: theme.colorScheme.secondary,
           child: AnimatedRotation(
             turns: _isExpanded ? 0.125 : 0,
             duration: const Duration(milliseconds: 200),

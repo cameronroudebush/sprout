@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
@@ -56,7 +57,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         setState(() => _errorMessage = failedLoginMessage);
       }
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      final msg = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+      setState(() => _errorMessage = msg);
     } finally {
       if (mounted) setState(() => _isActionRunning = false);
     }

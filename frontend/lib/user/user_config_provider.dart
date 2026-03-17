@@ -3,7 +3,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
@@ -42,11 +41,10 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     }
 
     // If the user is null, we return null and don't attempt the API call.
-    final authState = ref.watch(authProvider);
-    if (authState.value == null) return null;
+    final auth = ref.watch(authProvider).value;
+    if (auth == null) return null;
 
-    final config = await populateUserConfig();
-    return config;
+    return await populateUserConfig();
   }
 
   /// Returns the theme considering config, cache, then default
@@ -98,21 +96,6 @@ class UserConfigNotifier extends _$UserConfigNotifier {
       state = AsyncData(result);
     } catch (e, st) {
       state = AsyncError(e, st);
-    }
-  }
-
-  Future<void> toggleSecureMode(bool enable) async {
-    final biometricNotifier = ref.read(biometricsProvider.notifier);
-    if (enable) {
-      final success = await biometricNotifier.requestBiometricAuth();
-      if (success) {
-        await updateConfig((c) => c.secureMode = true);
-        await biometricNotifier.syncNativePrivacy(true);
-      }
-    } else {
-      await updateConfig((c) => c.secureMode = false);
-      await biometricNotifier.reset();
-      await biometricNotifier.syncNativePrivacy(false);
     }
   }
 

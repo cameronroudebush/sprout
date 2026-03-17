@@ -24,6 +24,15 @@ class NavigationProvider {
   static Future<void> redirect(String path, {Map<String, dynamic>? queryParameters}) async {
     final target = path.startsWith('/') ? path : '/$path';
     final params = queryParameters?.map((k, v) => MapEntry(k, v.toString())) ?? {};
+
+    // Don't allow same page navigation
+    final currentPage = router.state.path;
+    final bool isSamePath = currentPage == path || currentPage == '/$path';
+    const MapEquality mapEquality = MapEquality();
+    final bool isSameParams = mapEquality.equals(router.state.pathParameters, queryParameters ?? {});
+    if (isSamePath && isSameParams) {
+      return;
+    }
     router.push(Uri(path: target, queryParameters: params).toString());
   }
 

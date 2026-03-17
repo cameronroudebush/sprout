@@ -46,6 +46,59 @@ final class AuthApiProvider
 
 String _$authApiHash() => r'40eb50cd77ab1fe2a0880f2adda3de32db0bc69e';
 
+@ProviderFor(SessionStatus)
+const sessionStatusProvider = SessionStatusProvider._();
+
+final class SessionStatusProvider
+    extends $NotifierProvider<SessionStatus, bool> {
+  const SessionStatusProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sessionStatusProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sessionStatusHash();
+
+  @$internal
+  @override
+  SessionStatus create() => SessionStatus();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$sessionStatusHash() => r'70637bca7d1e5e2d92d7bf2519fdd2516b5e4dd4';
+
+abstract class _$SessionStatus extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 @ProviderFor(Auth)
 const authProvider = AuthProvider._();
 
@@ -69,7 +122,7 @@ final class AuthProvider extends $AsyncNotifierProvider<Auth, User?> {
   Auth create() => Auth();
 }
 
-String _$authHash() => r'5bc2868b451b7db50c14d2203aeb9672a84d3d4d';
+String _$authHash() => r'0d8c2aeb743459cdb92ae8e165fc4575f002bd1c';
 
 abstract class _$Auth extends $AsyncNotifier<User?> {
   FutureOr<User?> build();
