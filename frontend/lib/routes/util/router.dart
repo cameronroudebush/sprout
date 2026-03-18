@@ -36,30 +36,51 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [
       // Routes that don't require Auth
-      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) => const NoTransitionPage(child: LoginPage()),
+      ),
       GoRoute(
         path: '/setup',
-        builder: (context, state) => SproutShell(child: SetupPage()),
+        pageBuilder: (context, state) => const NoTransitionPage(child: SproutShell(child: SetupPage())),
       ),
-      GoRoute(path: '/connection/setup', builder: (context, state) => const ConnectionSetupPage()),
-      GoRoute(path: '/connection/failure', builder: (context, state) => const ConnectionFailurePage()),
+      GoRoute(
+        path: '/connection/setup',
+        pageBuilder: (context, state) => const NoTransitionPage(child: ConnectionSetupPage()),
+      ),
+      GoRoute(
+        path: '/connection/failure',
+        pageBuilder: (context, state) => const NoTransitionPage(child: ConnectionFailurePage()),
+      ),
       // Routes that do require auth
       ShellRoute(
         builder: (context, state, child) => SproutShell(state: state, child: child),
         routes: authenticatedRoutes.map((route) {
-          return GoRoute(path: route.path, builder: route.builder);
+          return GoRoute(
+            path: route.path,
+            pageBuilder: (context, state) => NoTransitionPage(child: route.builder(context, state)),
+          );
         }).toList(),
       ),
     ],
   );
 
   NavigationProvider.router = router;
+
+  router.routerDelegate.addListener(() {
+    final location = router.routerDelegate.currentConfiguration.last.matchedLocation;
+    Future.microtask(() {
+      ref.read(currentRouteProvider.notifier).update(location);
+    });
+  });
   return router;
 });
 
 String? _authRedirect(Ref ref, GoRouterState state) {
   final connUrlState = ref.read(connectionUrlProvider);
   final authState = ref.read(authProvider);
+
+  if (authState.isLoading) return null; // Wait for auth/config
 
   // Connection URL Check
   if (connUrlState.isLoading) return null;

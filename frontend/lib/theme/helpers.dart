@@ -9,6 +9,9 @@ class ThemeHelpers {
   /// The max size we'll allow desktop pages to expand to
   static final maxDesktopSize = 1920.0;
 
+  /// The max size we'll allow the main displayed content to be
+  static final maxWidth = 1024.0;
+
   /// Styling for displaying error buttons
   static final errorButton = FilledButton.styleFrom(
     backgroundColor: absoluteDarkTheme.colorScheme.error,

@@ -34,15 +34,18 @@ class SproutNotificationWidget extends StatelessWidget {
                     children: [
                       Text(
                         notification.message,
-                        style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: notification.color,
+                        ),
                         textAlign: TextAlign.center,
-                        maxLines: allowMultiLine ? 8 : 1,
+                        maxLines: allowMultiLine ? 5 : 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                if (notification.onClick != null) Icon(Icons.chevron_right),
+                if (notification.onClick != null) Icon(Icons.chevron_right, color: notification.color),
               ],
             ),
           ),

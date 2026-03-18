@@ -126,7 +126,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
           return ButtonSegment(
             value: entry.key,
             label: Text(entry.value.label),
-            icon: Icon(entry.value.icon, size: 18, color: theme.colorScheme.onPrimaryContainer),
+            icon: Icon(entry.value.icon, size: 18),
           );
         }).toList(),
         selected: {_selectedIndex},
@@ -359,6 +359,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
             icon: Icons.warning_amber_rounded,
             onClick: _launchFixUrl,
           ),
+          allowMultiLine: true,
         ),
       );
     }

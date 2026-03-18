@@ -11,6 +11,7 @@ import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
 part 'auth_provider.g.dart';
@@ -20,6 +21,14 @@ part 'auth_provider.g.dart';
 Future<AuthApi> authApi(Ref ref) async {
   final client = await ref.watch(baseApiClientProvider.future);
   return AuthApi(client);
+}
+
+@Riverpod(keepAlive: true)
+class SessionStatus extends _$SessionStatus {
+  @override
+  bool build() => false;
+
+  void markAsManualLogin() => state = true;
 }
 
 @Riverpod(keepAlive: true)
@@ -53,16 +62,22 @@ class Auth extends _$Auth {
         if (JwtDecoder.isExpired(tokens.idToken!)) {
           final user = await loginOIDC();
           if (user != null) {
+            // Wait for user config to load before proceeding
+            ref.watch(userConfigProvider);
             return user;
           } else {
             return null;
           }
         } else {
-          return await _applyAuth(
+          final result = await _applyAuth(
             idToken: tokens.idToken,
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
           );
+          if (result != null) {
+            ref.watch(userConfigProvider);
+          }
+          return result;
         }
       } else if (kIsWeb) {
         // Web - Restore
@@ -80,6 +95,8 @@ class Auth extends _$Auth {
         try {
           final api = await ref.read(userApiProvider.future);
           await api.userControllerMe();
+          // Wait for user config to load before proceeding
+          ref.watch(userConfigProvider);
         } catch (e) {
           if (e is ApiException && e.code == 404) await setup();
         }
@@ -149,6 +166,7 @@ class Auth extends _$Auth {
       UsernamePasswordLoginRequest(username: username, password: password),
     );
     if (response != null) {
+      ref.read(sessionStatusProvider.notifier).markAsManualLogin();
       return await _applyAuth(idToken: response.jwt, user: response.user);
     }
     return null;
@@ -157,16 +175,11 @@ class Auth extends _$Auth {
   /// Attempts a login via OIDC using the OIDC helper
   Future<User?> loginOIDC() async {
     final tokens = await _oidcHelper.authenticate();
-    if (!kIsWeb && tokens != null) {
-      return await _applyAuth(
-        idToken: tokens['id_token'],
-        accessToken: tokens['access_token'],
-        refreshToken: tokens['refresh_token'],
-      );
-    } else if (kIsWeb) {
-      return await _applyAuth();
-    }
-    return null;
+    return await _applyAuth(
+      idToken: tokens?['id_token'],
+      accessToken: tokens?['access_token'],
+      refreshToken: tokens?['refresh_token'],
+    );
   }
 
   /// Initiates a logout

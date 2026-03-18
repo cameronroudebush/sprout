@@ -109,7 +109,9 @@ class WidgetSync extends _$WidgetSync {
             "merchant": t.description,
             "category": t.category?.name ?? "Unknown",
             "amount": t.amount.toCurrency(isPrivate),
+            "amountNumeric": t.amount,
             "date": t.timeText,
+            "pending": t.pending,
           },
         )
         .toList();

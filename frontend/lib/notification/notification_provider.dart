@@ -105,6 +105,7 @@ class Notifications extends _$Notifications {
                         showDate: showDate,
                         showUnreadIndicator: showUnreadIndicator,
                         showSpinner: showSpinner,
+                        isFloating: true,
                       ),
                     ),
                   ),
@@ -156,7 +157,7 @@ class Notifications extends _$Notifications {
     NotificationTypeEnum type = NotificationTypeEnum.info,
     String message = "",
     bool showSpinner = false,
-    int duration = 2,
+    int duration = 5,
   }) {
     final notification = Notification(
       id: const Uuid().v4(),
@@ -191,6 +192,6 @@ class Notifications extends _$Notifications {
 
   /// Opens a frontend only notification with the OpenAPI exception info
   String openWithAPIException(dynamic e) {
-    return openFrontendOnly(parseOpenAPIException(e));
+    return openFrontendOnly(parseOpenAPIException(e), type: NotificationTypeEnum.error);
   }
 }

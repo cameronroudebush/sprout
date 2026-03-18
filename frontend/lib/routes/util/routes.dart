@@ -14,11 +14,11 @@ import 'package:sprout/routes/util/route.dart';
 /// List of routes that require authentication
 final List<SproutRoute> authenticatedRoutes = [
   SproutRoute(
-    path: '/chat',
-    label: 'Chat',
-    icon: Icons.auto_awesome,
+    path: '/',
+    label: 'Dashboard',
+    icon: Icons.dashboard_rounded,
     showInBottomNav: true,
-    builder: (context, state) => const ChatPage(),
+    builder: (context, state) => const DashboardPage(),
   ),
   SproutRoute(
     path: '/accounts',
@@ -27,11 +27,11 @@ final List<SproutRoute> authenticatedRoutes = [
     builder: (context, state) => const AccountsPage(),
   ),
   SproutRoute(
-    path: '/',
-    label: 'Dashboard',
-    icon: Icons.dashboard_rounded,
+    path: '/chat',
+    label: 'Chat',
+    icon: Icons.auto_awesome,
     showInBottomNav: true,
-    builder: (context, state) => const DashboardPage(),
+    builder: (context, state) => const ChatPage(),
   ),
   SproutRoute(
     path: '/transactions',

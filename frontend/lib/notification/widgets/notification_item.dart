@@ -13,12 +13,16 @@ class NotificationItem extends StatelessWidget {
   /// If an indicator that something is in process should be shown
   final bool showSpinner;
 
+  /// If this is a floating indicator that is singular
+  final bool isFloating;
+
   const NotificationItem(
     this.notification, {
     super.key,
     this.showDate = true,
     this.showUnreadIndicator = true,
     this.showSpinner = false,
+    this.isFloating = false,
   });
 
   @override
@@ -34,9 +38,12 @@ class NotificationItem extends StatelessWidget {
     };
 
     return Container(
-      // Highlight unread notifications with a very subtle background tint
-      color: notification.isRead ? null : color.withValues(alpha: 0.05),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: notification.isRead ? null : color.withValues(alpha: 0.05),
+        border: isFloating ? Border.all(color: theme.dividerColor, width: 1) : null,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -68,7 +75,7 @@ class NotificationItem extends StatelessWidget {
                     Flexible(
                       child: Text(
                         notification.title,
-                        maxLines: 1,
+                        maxLines: 5,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,

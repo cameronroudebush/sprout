@@ -42,10 +42,13 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     }
 
     // If the user is null, we return null and don't attempt the API call.
-    final authState = ref.watch(authProvider);
-    if (authState.value == null) return null;
+    final auth = ref.watch(authProvider).value;
+    if (auth == null) return null;
 
     final config = await populateUserConfig();
+    // Populate biometrics consideration
+    await ref.read(biometricsProvider.notifier).checkLockState(config!);
+
     return config;
   }
 
@@ -98,21 +101,6 @@ class UserConfigNotifier extends _$UserConfigNotifier {
       state = AsyncData(result);
     } catch (e, st) {
       state = AsyncError(e, st);
-    }
-  }
-
-  Future<void> toggleSecureMode(bool enable) async {
-    final biometricNotifier = ref.read(biometricsProvider.notifier);
-    if (enable) {
-      final success = await biometricNotifier.requestBiometricAuth();
-      if (success) {
-        await updateConfig((c) => c.secureMode = true);
-        await biometricNotifier.syncNativePrivacy(true);
-      }
-    } else {
-      await updateConfig((c) => c.secureMode = false);
-      await biometricNotifier.reset();
-      await biometricNotifier.syncNativePrivacy(false);
     }
   }
 
