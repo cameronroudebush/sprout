@@ -34,13 +34,14 @@ class _InternalSideNavContent extends ConsumerWidget {
     final theme = Theme.of(context);
     final authUser = ref.watch(authProvider).value;
     final authNotifier = ref.read(authProvider.notifier);
+    final currentPath = ref.watch(currentRouteProvider);
 
     // Filter and build the navigation items from your Router definition
     final navItems = authenticatedRoutes.where((page) => page.showInSidebar).mapIndexed((index, page) {
       return ListTile(
         leading: Icon(page.icon),
-        title: Text(page.label),
-        selected: NavigationProvider.currentRoute == page.path,
+        title: Text(page.label, textAlign: TextAlign.center),
+        selected: currentPath == page.path,
         onTap: () {
           NavigationProvider.redirect(page.path);
         },

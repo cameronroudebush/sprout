@@ -40,11 +40,12 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
     innerClient: interceptorClient,
     onLogout: () async {
       final auth = ref.read(authProvider.notifier);
-      final notifications = ref.read(notificationsProvider.notifier);
       final authState = ref.read(authProvider);
 
       if (authState.value != null) {
-        notifications.openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning, duration: 7);
+        ref
+            .read(notificationsProvider.notifier)
+            .openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning, duration: 7);
         await auth.logout();
       }
     },

@@ -66,6 +66,13 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 
   NavigationProvider.router = router;
+
+  router.routerDelegate.addListener(() {
+    final location = router.routerDelegate.currentConfiguration.last.matchedLocation;
+    Future.microtask(() {
+      ref.read(currentRouteProvider.notifier).update(location);
+    });
+  });
   return router;
 });
 

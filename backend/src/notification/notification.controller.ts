@@ -1,13 +1,16 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { DevModeGuard } from "@backend/config/guard/dev-mode.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { FirebaseConfigDTO } from "@backend/notification/model/api/firebase.config.dto";
 import { FirebaseNotificationDTO } from "@backend/notification/model/api/firebase.notification.dto";
 import { NotificationSSEDTO } from "@backend/notification/model/api/notification.sse.dto";
 import { Notification } from "@backend/notification/model/notification.model";
+import { NotificationType } from "@backend/notification/model/notification.type";
+import { NotificationService } from "@backend/notification/notification.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, Param, ParseUUIDPipe } from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from "@nestjs/common";
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all notification related content per user */
@@ -16,7 +19,10 @@ import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/sw
 @ApiExtraModels(FirebaseNotificationDTO, NotificationSSEDTO)
 @AuthGuard.attach()
 export class NotificationController {
-  constructor(private sseService: SSEService) {}
+  constructor(
+    private sseService: SSEService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -71,5 +77,14 @@ export class NotificationController {
   @ApiOkResponse({ description: "Notifications retrieved successfully.", type: Notification })
   async getById(@Param("id", new ParseUUIDPipe()) id: string, @CurrentUser() user: User) {
     return await Notification.findOne({ where: { id, user: { id: user.id } } });
+  }
+
+  @Post("test/notify")
+  @ApiOperation({
+    description: "Notifies all the current users devices with a test notification. Only available in dev mode.",
+  })
+  @UseGuards(DevModeGuard)
+  async notify(@CurrentUser() user: User) {
+    this.notificationService.notifyUser(user, "This is a test of the notification pipeline", "Test notification", NotificationType.warning);
   }
 }

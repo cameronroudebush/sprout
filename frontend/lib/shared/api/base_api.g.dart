@@ -93,4 +93,4 @@ final class BaseAuthenticatedClientProvider
 }
 
 String _$baseAuthenticatedClientHash() =>
-    r'290887edb7333bd4f1758fde70365ca2e11e9475';
+    r'73e930cbbde316a40a429563e18c1f73f12ad757';

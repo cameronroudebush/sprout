@@ -165,8 +165,6 @@ Future<T?> showSproutPopup<T>({
 }) {
   final bool isDesktop = MediaQuery.sizeOf(context).width > SproutLayoutBuilder.desktopBreakpoint;
 
-  // Adds a blur effect to our child
-
   if (isDesktop) {
     return showDialog<T>(
       context: context,

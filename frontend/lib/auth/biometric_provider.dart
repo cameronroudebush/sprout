@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -15,14 +16,21 @@ class BiometricState {
   final bool isLocked;
   final bool isUnlocking;
   final bool isLoggingOut;
+  final bool hasInitialized;
 
-  BiometricState({this.isLocked = false, this.isUnlocking = false, this.isLoggingOut = false});
+  BiometricState({
+    this.isLocked = false,
+    this.isUnlocking = false,
+    this.isLoggingOut = false,
+    this.hasInitialized = false,
+  });
 
-  BiometricState copyWith({bool? isLocked, bool? isUnlocking, bool? isLoggingOut}) {
+  BiometricState copyWith({bool? isLocked, bool? isUnlocking, bool? isLoggingOut, bool? hasInitialized}) {
     return BiometricState(
       isLocked: isLocked ?? this.isLocked,
       isUnlocking: isUnlocking ?? this.isUnlocking,
       isLoggingOut: isLoggingOut ?? this.isLoggingOut,
+      hasInitialized: hasInitialized ?? this.hasInitialized,
     );
   }
 }
@@ -35,43 +43,25 @@ class Biometrics extends _$Biometrics {
   final _lockGracePeriod = const Duration(minutes: 5);
   Timer? _lockTimer;
 
-  // If we just set the biometric via settings, we use this to ignore the auto build request
-  bool _triggeredBySetting = false;
-
-  // UI helpers
-  bool get isLocked => state.isLocked && (ref.read(authProvider).value != null);
-
   @override
   BiometricState build() {
-    final userConfigAsync = ref.watch(userConfigProvider);
-    final authState = ref.watch(authProvider);
-    final isManualLogin = ref.watch(sessionStatusProvider);
+    return BiometricState(isLocked: false, hasInitialized: false);
+  }
 
-    return userConfigAsync.when(
-      data: (config) {
-        final isLoggedIn = authState.value != null;
-        final secureMode = config?.secureMode ?? false;
-
-        if (isManualLogin) {
-          return BiometricState(isLocked: false);
-        }
-
-        if (!kIsWeb && isLoggedIn && secureMode) {
-          if (_triggeredBySetting) return BiometricState(isLocked: false);
-          Future.microtask(() => tryManualUnlock());
-          return BiometricState(isLocked: true);
-        }
-
-        return BiometricState(isLocked: false);
-      },
-      loading: () => BiometricState(isLocked: false),
-      error: (_, __) => BiometricState(isLocked: false),
-    );
+  /// Checks the lock state using the user config if we should lock the app or not
+  Future<void> checkLockState(UserConfig conf) async {
+    final isManualLogin = ref.read(sessionStatusProvider);
+    if (!kIsWeb && conf.secureMode && !isManualLogin) {
+      state = state.copyWith(isLocked: true, hasInitialized: true);
+      await tryManualUnlock();
+    } else {
+      state = state.copyWith(hasInitialized: true);
+    }
   }
 
   /// Explicitly sync native privacy state with config
   /// This should be called after a successful login or when security settings change
-  Future<void> syncNativePrivacy(bool secureMode) async {
+  Future<void> _syncNativePrivacy(bool secureMode) async {
     if (kIsWeb) return;
     if (secureMode) {
       await enableScreenPrivacy();
@@ -139,6 +129,7 @@ class Biometrics extends _$Biometrics {
   /// Returns a bool if the biometric authentication was successful
   Future<bool> _internalUnlock({bool preLogout = false}) async {
     final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
+    state = state.copyWith(hasInitialized: true);
 
     if (!kIsWeb && secureMode) {
       final success = await requestBiometricAuth();
@@ -147,7 +138,7 @@ class Biometrics extends _$Biometrics {
         try {
           await ref.read(authProvider.notifier).logout();
         } finally {
-          state = BiometricState(isLocked: false, isLoggingOut: false);
+          state = BiometricState(isLocked: false, isLoggingOut: false, hasInitialized: true);
         }
         return false;
       }
@@ -164,7 +155,7 @@ class Biometrics extends _$Biometrics {
       final canCheck = await _auth.canCheckBiometrics;
       final isSupported = await _auth.isDeviceSupported();
       if (!canCheck || !isSupported) {
-        throw "Biometrics are not supported on this device. Are they enabled in device settings?";
+        throw "Biometrics are not supported or enabled on this device.";
       }
 
       return await _auth.authenticate(
@@ -172,6 +163,11 @@ class Biometrics extends _$Biometrics {
         biometricOnly: true,
         persistAcrossBackgrounding: true,
       );
+    } on LocalAuthException catch (e) {
+      if (e.code == LocalAuthExceptionCode.userCanceled) {
+        throw "User canceled enrollment";
+      }
+      throw "An unexpected error occurred";
     } catch (e) {
       rethrow;
     } finally {
@@ -197,14 +193,13 @@ class Biometrics extends _$Biometrics {
     if (enable) {
       final success = await requestBiometricAuth();
       if (success) {
-        _triggeredBySetting = true;
         await ref.read(userConfigProvider.notifier).updateConfig((c) => c.secureMode = true);
-        await syncNativePrivacy(true);
+        await _syncNativePrivacy(true);
       }
     } else {
       await ref.read(userConfigProvider.notifier).updateConfig((c) => c.secureMode = false);
       await reset();
-      await syncNativePrivacy(false);
+      await _syncNativePrivacy(false);
     }
   }
 }
