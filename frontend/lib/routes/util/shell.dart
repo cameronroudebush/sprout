@@ -8,9 +8,11 @@ import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/routes/util/app_bar.dart';
 import 'package:sprout/routes/util/bottom_nav.dart';
 import 'package:sprout/routes/util/sidenav.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/lifecycle_observer.dart';
 import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/shared/widgets/lock.dart';
+import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// A lightweight wrapper that provides persistent navigation (e.g., Side/Bottom Nav).
@@ -26,17 +28,16 @@ class SproutShell extends ConsumerWidget {
     final userConfigAsync = ref.watch(userConfigProvider);
     final bioState = ref.watch(biometricsProvider);
     final theme = Theme.of(context);
-    // Determine layout based on screen size
-    final isDesktop = MediaQuery.of(context).size.width > 800;
 
-    if (authState.isLoading || (!userConfigAsync.hasValue && userConfigAsync.isLoading)) {
-      return const SproutLoadingIndicator(key: ValueKey('sprout_lock_screen'));
-    }
-
+    // Various config
     final secureModeEnabled = userConfigAsync.value?.secureMode ?? false;
-    final needsBioCheck = !kIsWeb && secureModeEnabled && authState.value != null;
+    final isLoggedIn = authState.value != null;
+    final needsBioCheck = !kIsWeb && secureModeEnabled && isLoggedIn;
+    final isLoading =
+        authState.isLoading || (!userConfigAsync.hasValue && userConfigAsync.isLoading) || !bioState.hasInitialized;
 
-    // If we need a check and the bioState hasn't flipped to 'unlocked' yet
+    if (isLoading) return const SproutLoadingIndicator(key: ValueKey('sprout_loading'));
+
     if (needsBioCheck && bioState.isLocked) {
       return const SproutLockWidget(key: ValueKey('sprout_locked_screen'));
     }
@@ -49,16 +50,29 @@ class SproutShell extends ConsumerWidget {
               ? Brightness.light
               : Brightness.dark,
         ),
-        child: Scaffold(
-          appBar: const SproutAppBar(),
-          body: Row(
-            children: [
-              if (isDesktop) SproutSideNav(),
-              Expanded(child: child),
-            ],
-          ),
-          bottomNavigationBar: isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
-        ),
+        child: SproutLayoutBuilder((isDesktop, context, constraints) {
+          return Scaffold(
+            appBar: !isDesktop ? const SproutAppBar() : null,
+            body: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: ThemeHelpers.maxDesktopSize),
+                child: isDesktop
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const SproutSideNav(),
+                          SizedBox(width: ThemeHelpers.maxWidth, child: child),
+                          const SizedBox.shrink(),
+                        ],
+                      )
+                    : child,
+              ),
+            ),
+            bottomNavigationBar: isDesktop || state == null
+                ? null
+                : SproutBottomNav(currentPath: state!.fullPath ?? ""),
+          );
+        }),
       ),
     );
   }

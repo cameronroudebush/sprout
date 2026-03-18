@@ -1,9 +1,22 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
+
+part 'navigation_provider.g.dart';
+
+// A simple provider to hold the current path
+@riverpod
+class CurrentRoute extends _$CurrentRoute {
+  @override
+  String build() => NavigationProvider.currentRoute;
+
+  void update(String newPath) => state = newPath;
+}
 
 /// A provider used to navigate to different pages
 class NavigationProvider {
@@ -33,7 +46,13 @@ class NavigationProvider {
     if (isSamePath && isSameParams) {
       return;
     }
-    router.push(Uri(path: target, queryParameters: params).toString());
+    final uri = Uri(path: target, queryParameters: params).toString();
+
+    if (kIsWeb) {
+      router.go(uri);
+    } else {
+      router.push(uri);
+    }
   }
 
   /// Standard back navigation

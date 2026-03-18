@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
@@ -44,7 +45,11 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     final auth = ref.watch(authProvider).value;
     if (auth == null) return null;
 
-    return await populateUserConfig();
+    final config = await populateUserConfig();
+    // Populate biometrics consideration
+    await ref.read(biometricsProvider.notifier).checkLockState(config!);
+
+    return config;
   }
 
   /// Returns the theme considering config, cache, then default
