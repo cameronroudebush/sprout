@@ -11,7 +11,7 @@ part of 'auth_provider.dart';
 /// Returns the authApi configured with the proper base path
 
 @ProviderFor(authApi)
-const authApiProvider = AuthApiProvider._();
+final authApiProvider = AuthApiProvider._();
 
 /// Returns the authApi configured with the proper base path
 
@@ -19,16 +19,16 @@ final class AuthApiProvider
     extends $FunctionalProvider<AsyncValue<AuthApi>, AuthApi, FutureOr<AuthApi>>
     with $FutureModifier<AuthApi>, $FutureProvider<AuthApi> {
   /// Returns the authApi configured with the proper base path
-  const AuthApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'authApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  AuthApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'authApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$authApiHash();
@@ -47,20 +47,20 @@ final class AuthApiProvider
 String _$authApiHash() => r'40eb50cd77ab1fe2a0880f2adda3de32db0bc69e';
 
 @ProviderFor(SessionStatus)
-const sessionStatusProvider = SessionStatusProvider._();
+final sessionStatusProvider = SessionStatusProvider._();
 
 final class SessionStatusProvider
     extends $NotifierProvider<SessionStatus, bool> {
-  const SessionStatusProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'sessionStatusProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  SessionStatusProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'sessionStatusProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$sessionStatusHash();
@@ -85,34 +85,27 @@ abstract class _$SessionStatus extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<bool, bool>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<bool, bool>,
-              bool,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<bool, bool>, bool, Object?, Object?>;
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(Auth)
-const authProvider = AuthProvider._();
+final authProvider = AuthProvider._();
 
 final class AuthProvider extends $AsyncNotifierProvider<Auth, User?> {
-  const AuthProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'authProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  AuthProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'authProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$authHash();
@@ -129,16 +122,12 @@ abstract class _$Auth extends $AsyncNotifier<User?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<User?>, User?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<User?>, User?>,
-              AsyncValue<User?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<User?>, User?>,
+        AsyncValue<User?>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }

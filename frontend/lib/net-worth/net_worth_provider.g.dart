@@ -11,29 +11,24 @@ part of 'net_worth_provider.dart';
 /// Future that provides an authenticated net worth api
 
 @ProviderFor(netWorthApi)
-const netWorthApiProvider = NetWorthApiProvider._();
+final netWorthApiProvider = NetWorthApiProvider._();
 
 /// Future that provides an authenticated net worth api
 
-final class NetWorthApiProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<NetWorthApi>,
-          NetWorthApi,
-          FutureOr<NetWorthApi>
-        >
+final class NetWorthApiProvider extends $FunctionalProvider<
+        AsyncValue<NetWorthApi>, NetWorthApi, FutureOr<NetWorthApi>>
     with $FutureModifier<NetWorthApi>, $FutureProvider<NetWorthApi> {
   /// Future that provides an authenticated net worth api
-  const NetWorthApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'netWorthApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  NetWorthApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'netWorthApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$netWorthApiHash();
@@ -41,8 +36,8 @@ final class NetWorthApiProvider
   @$internal
   @override
   $FutureProviderElement<NetWorthApi> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
   FutureOr<NetWorthApi> create(Ref ref) {
@@ -55,22 +50,22 @@ String _$netWorthApiHash() => r'29d4de716ec1fac061c34db54bd8ab4a6a6f4e6f';
 /// Defines the riverpod for the net worth state
 
 @ProviderFor(TotalNetWorth)
-const totalNetWorthProvider = TotalNetWorthProvider._();
+final totalNetWorthProvider = TotalNetWorthProvider._();
 
 /// Defines the riverpod for the net worth state
 final class TotalNetWorthProvider
     extends $AsyncNotifierProvider<TotalNetWorth, TotalNetWorthDTO?> {
   /// Defines the riverpod for the net worth state
-  const TotalNetWorthProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'totalNetWorthProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  TotalNetWorthProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'totalNetWorthProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$totalNetWorthHash();
@@ -89,41 +84,36 @@ abstract class _$TotalNetWorth extends $AsyncNotifier<TotalNetWorthDTO?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref as $Ref<AsyncValue<TotalNetWorthDTO?>, TotalNetWorthDTO?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<TotalNetWorthDTO?>, TotalNetWorthDTO?>,
-              AsyncValue<TotalNetWorthDTO?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<TotalNetWorthDTO?>, TotalNetWorthDTO?>,
+        AsyncValue<TotalNetWorthDTO?>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }
 
 /// Defines the historical account data
 
 @ProviderFor(HistoricalAccountData)
-const historicalAccountDataProvider = HistoricalAccountDataProvider._();
+final historicalAccountDataProvider = HistoricalAccountDataProvider._();
 
 /// Defines the historical account data
-final class HistoricalAccountDataProvider
-    extends
-        $AsyncNotifierProvider<HistoricalAccountData, List<EntityHistory>?> {
+final class HistoricalAccountDataProvider extends $AsyncNotifierProvider<
+    HistoricalAccountData, List<EntityHistory>?> {
   /// Defines the historical account data
-  const HistoricalAccountDataProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'historicalAccountDataProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  HistoricalAccountDataProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'historicalAccountDataProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$historicalAccountDataHash();
@@ -144,45 +134,36 @@ abstract class _$HistoricalAccountData
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
-    final ref =
-        this.ref
-            as $Ref<AsyncValue<List<EntityHistory>?>, List<EntityHistory>?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<List<EntityHistory>?>,
-                List<EntityHistory>?
-              >,
-              AsyncValue<List<EntityHistory>?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final ref = this.ref
+        as $Ref<AsyncValue<List<EntityHistory>?>, List<EntityHistory>?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<EntityHistory>?>, List<EntityHistory>?>,
+        AsyncValue<List<EntityHistory>?>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }
 
 /// Defines the overall account timeline
 
 @ProviderFor(AccountTimeline)
-const accountTimelineProvider = AccountTimelineFamily._();
+final accountTimelineProvider = AccountTimelineFamily._();
 
 /// Defines the overall account timeline
-final class AccountTimelineProvider
-    extends
-        $AsyncNotifierProvider<AccountTimeline, List<HistoricalDataPoint>?> {
+final class AccountTimelineProvider extends $AsyncNotifierProvider<
+    AccountTimeline, List<HistoricalDataPoint>?> {
   /// Defines the overall account timeline
-  const AccountTimelineProvider._({
-    required AccountTimelineFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'accountTimelineProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  AccountTimelineProvider._(
+      {required AccountTimelineFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'accountTimelineProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$accountTimelineHash();
@@ -216,24 +197,25 @@ String _$accountTimelineHash() => r'23ecb35de97cb151f2f8f85c1f73a9226b27b141';
 final class AccountTimelineFamily extends $Family
     with
         $ClassFamilyOverride<
-          AccountTimeline,
-          AsyncValue<List<HistoricalDataPoint>?>,
-          List<HistoricalDataPoint>?,
-          FutureOr<List<HistoricalDataPoint>?>,
-          String
-        > {
-  const AccountTimelineFamily._()
-    : super(
-        retry: null,
-        name: r'accountTimelineProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
+            AccountTimeline,
+            AsyncValue<List<HistoricalDataPoint>?>,
+            List<HistoricalDataPoint>?,
+            FutureOr<List<HistoricalDataPoint>?>,
+            String> {
+  AccountTimelineFamily._()
+      : super(
+          retry: null,
+          name: r'accountTimelineProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
 
   /// Defines the overall account timeline
 
-  AccountTimelineProvider call(String accountId) =>
+  AccountTimelineProvider call(
+    String accountId,
+  ) =>
       AccountTimelineProvider._(argument: accountId, from: this);
 
   @override
@@ -247,28 +229,24 @@ abstract class _$AccountTimeline
   late final _$args = ref.$arg as String;
   String get accountId => _$args;
 
-  FutureOr<List<HistoricalDataPoint>?> build(String accountId);
+  FutureOr<List<HistoricalDataPoint>?> build(
+    String accountId,
+  );
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
-    final ref =
-        this.ref
-            as $Ref<
-              AsyncValue<List<HistoricalDataPoint>?>,
-              List<HistoricalDataPoint>?
-            >;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<List<HistoricalDataPoint>?>,
-                List<HistoricalDataPoint>?
-              >,
-              AsyncValue<List<HistoricalDataPoint>?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final ref = this.ref as $Ref<AsyncValue<List<HistoricalDataPoint>?>,
+        List<HistoricalDataPoint>?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<HistoricalDataPoint>?>,
+            List<HistoricalDataPoint>?>,
+        AsyncValue<List<HistoricalDataPoint>?>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }

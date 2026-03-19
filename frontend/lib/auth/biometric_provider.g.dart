@@ -11,22 +11,22 @@ part of 'biometric_provider.dart';
 /// A provider that tracks our current biometric lock/unlock state and how to do the loc/unlock
 
 @ProviderFor(Biometrics)
-const biometricsProvider = BiometricsProvider._();
+final biometricsProvider = BiometricsProvider._();
 
 /// A provider that tracks our current biometric lock/unlock state and how to do the loc/unlock
 final class BiometricsProvider
     extends $NotifierProvider<Biometrics, BiometricState> {
   /// A provider that tracks our current biometric lock/unlock state and how to do the loc/unlock
-  const BiometricsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'biometricsProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  BiometricsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'biometricsProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$biometricsHash();
@@ -53,16 +53,12 @@ abstract class _$Biometrics extends $Notifier<BiometricState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<BiometricState, BiometricState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<BiometricState, BiometricState>,
-              BiometricState,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<BiometricState, BiometricState>,
+        BiometricState,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }
