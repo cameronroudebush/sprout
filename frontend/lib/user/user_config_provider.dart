@@ -47,7 +47,11 @@ class UserConfigNotifier extends _$UserConfigNotifier {
 
     final config = await populateUserConfig();
     // Populate biometrics consideration
-    await ref.read(biometricsProvider.notifier).checkLockState(config!);
+    try {
+      await ref.read(biometricsProvider.notifier).checkLockState(config!);
+    } catch (e) {
+      /// Ignore errors, we'll allow them to re-auth via the lock screen
+    }
 
     return config;
   }

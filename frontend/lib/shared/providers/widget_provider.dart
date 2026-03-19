@@ -22,30 +22,30 @@ part 'widget_provider.g.dart';
 class WidgetSync extends _$WidgetSync {
   @override
   void build() {
-    if (!kIsWeb) {
-      initializeBackground();
+    if (kIsWeb) return;
 
-      // Listen to the auth state to trigger the initial setup
-      ref.listen(authProvider, (prev, next) {
-        final user = next.value;
+    // Listen for when user is authenticated
+    ref.listen(authProvider, (prev, next) {
+      if (next.value == null && prev?.value != null) {
+        _saveToNative(null); // On logout, wipe data
+      } else if (next.value != null) {
+        update();
+        // Initialize background waiter
+        initializeBackground();
+      }
+    });
 
-        if (user != null && prev?.value == null) {
-          // User just logged in
-          _setupAndInitialSync();
-        } else if (user == null && prev?.value != null) {
-          // User logged out - wipe data
-          _saveToNative(null);
-        }
-      });
+    ref.listen(transactionsProvider, (_, __) => update());
+    ref.listen(totalNetWorthProvider, (_, __) => update());
+    ref.listen(userConfigProvider, (_, __) => update());
 
-      /// Listen for SSE events to trigger immediate widget updates.
-      ref.listen(sseProvider, (prev, next) async {
-        final data = next.latestData;
-        if (data?.event == SSEDataEventEnum.forceUpdate) {
-          await update();
-        }
-      });
-    }
+    /// Listen for SSE events to trigger immediate widget updates.
+    ref.listen(sseProvider, (prev, next) async {
+      final data = next.latestData;
+      if (data?.event == SSEDataEventEnum.forceUpdate) {
+        await update();
+      }
+    });
   }
 
   /// Initializes the [Workmanager] and registers a periodic background task.
@@ -60,12 +60,6 @@ class WidgetSync extends _$WidgetSync {
       frequency: const Duration(hours: 1),
       constraints: Constraints(networkType: NetworkType.connected),
     );
-  }
-
-  /// Sets up the background worker and runs the first update
-  Future<void> _setupAndInitialSync() async {
-    await initializeBackground();
-    await update();
   }
 
   /// The primary entry point for updating native widget data.
@@ -152,9 +146,9 @@ void callbackDispatcher() {
       await container.read(authProvider.notifier).applyDefaultAuth();
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await Future.wait([
-        container.refresh(userConfigProvider.future),
-        container.refresh(totalNetWorthProvider.future),
-        container.refresh(transactionsProvider.future),
+        container.read(userConfigProvider.future),
+        container.read(totalNetWorthProvider.future),
+        container.read(transactionsProvider.future),
       ]);
 
       // Perform the native widget update
