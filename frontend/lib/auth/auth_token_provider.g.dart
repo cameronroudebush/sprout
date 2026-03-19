@@ -11,22 +11,22 @@ part of 'auth_token_provider.dart';
 /// Defines a riverpod that tracks all of our relevant tokens
 
 @ProviderFor(AuthTokens)
-const authTokensProvider = AuthTokensProvider._();
+final authTokensProvider = AuthTokensProvider._();
 
 /// Defines a riverpod that tracks all of our relevant tokens
 final class AuthTokensProvider
     extends $AsyncNotifierProvider<AuthTokens, SproutTokens> {
   /// Defines a riverpod that tracks all of our relevant tokens
-  const AuthTokensProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'authTokensProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  AuthTokensProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'authTokensProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$authTokensHash();
@@ -45,16 +45,12 @@ abstract class _$AuthTokens extends $AsyncNotifier<SproutTokens> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<SproutTokens>, SproutTokens>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<SproutTokens>, SproutTokens>,
-              AsyncValue<SproutTokens>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<SproutTokens>, SproutTokens>,
+        AsyncValue<SproutTokens>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }

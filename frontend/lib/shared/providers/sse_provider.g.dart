@@ -11,21 +11,21 @@ part of 'sse_provider.dart';
 /// Defines an SSE riverpod that tracks our current SSE info
 
 @ProviderFor(Sse)
-const sseProvider = SseProvider._();
+final sseProvider = SseProvider._();
 
 /// Defines an SSE riverpod that tracks our current SSE info
 final class SseProvider extends $NotifierProvider<Sse, SseConnectionState> {
   /// Defines an SSE riverpod that tracks our current SSE info
-  const SseProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'sseProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  SseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'sseProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$sseHash();
@@ -52,16 +52,12 @@ abstract class _$Sse extends $Notifier<SseConnectionState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<SseConnectionState, SseConnectionState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<SseConnectionState, SseConnectionState>,
-              SseConnectionState,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<SseConnectionState, SseConnectionState>,
+        SseConnectionState,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }

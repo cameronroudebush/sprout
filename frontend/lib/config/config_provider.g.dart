@@ -11,7 +11,7 @@ part of 'config_provider.dart';
 /// Future that produces the connection URL of the backend
 
 @ProviderFor(connectionUrl)
-const connectionUrlProvider = ConnectionUrlProvider._();
+final connectionUrlProvider = ConnectionUrlProvider._();
 
 /// Future that produces the connection URL of the backend
 
@@ -19,16 +19,16 @@ final class ConnectionUrlProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
     with $FutureModifier<String?>, $FutureProvider<String?> {
   /// Future that produces the connection URL of the backend
-  const ConnectionUrlProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'connectionUrlProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  ConnectionUrlProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'connectionUrlProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$connectionUrlHash();
@@ -50,31 +50,26 @@ String _$connectionUrlHash() => r'ea696a98649748a5981c31d9adc9fbfb02f1c59d';
 /// DOES NOT HAVE AUTHENTICATION
 
 @ProviderFor(configApi)
-const configApiProvider = ConfigApiProvider._();
+final configApiProvider = ConfigApiProvider._();
 
 /// Future that produces the configuration API configured with the base path
 /// DOES NOT HAVE AUTHENTICATION
 
-final class ConfigApiProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<ConfigApi>,
-          ConfigApi,
-          FutureOr<ConfigApi>
-        >
+final class ConfigApiProvider extends $FunctionalProvider<AsyncValue<ConfigApi>,
+        ConfigApi, FutureOr<ConfigApi>>
     with $FutureModifier<ConfigApi>, $FutureProvider<ConfigApi> {
   /// Future that produces the configuration API configured with the base path
   /// DOES NOT HAVE AUTHENTICATION
-  const ConfigApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'configApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  ConfigApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'configApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$configApiHash();
@@ -95,29 +90,24 @@ String _$configApiHash() => r'd0e5f5a1ff813e6714c2877416349e80681ae54e';
 /// Future that produces the configuration API configured with the base path and authentication
 
 @ProviderFor(secureConfigApi)
-const secureConfigApiProvider = SecureConfigApiProvider._();
+final secureConfigApiProvider = SecureConfigApiProvider._();
 
 /// Future that produces the configuration API configured with the base path and authentication
 
-final class SecureConfigApiProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<ConfigApi>,
-          ConfigApi,
-          FutureOr<ConfigApi>
-        >
+final class SecureConfigApiProvider extends $FunctionalProvider<
+        AsyncValue<ConfigApi>, ConfigApi, FutureOr<ConfigApi>>
     with $FutureModifier<ConfigApi>, $FutureProvider<ConfigApi> {
   /// Future that produces the configuration API configured with the base path and authentication
-  const SecureConfigApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'secureConfigApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  SecureConfigApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'secureConfigApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$secureConfigApiHash();
@@ -138,22 +128,22 @@ String _$secureConfigApiHash() => r'd387c0157949e57747f86d1f477acfb8a1ab3b9c';
 /// Extension upon unsecure config that allows state management using riverpod
 
 @ProviderFor(UnsecureConfig)
-const unsecureConfigProvider = UnsecureConfigProvider._();
+final unsecureConfigProvider = UnsecureConfigProvider._();
 
 /// Extension upon unsecure config that allows state management using riverpod
 final class UnsecureConfigProvider
     extends $AsyncNotifierProvider<UnsecureConfig, UnsecureAppConfiguration?> {
   /// Extension upon unsecure config that allows state management using riverpod
-  const UnsecureConfigProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'unsecureConfigProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  UnsecureConfigProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'unsecureConfigProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$unsecureConfigHash();
@@ -173,47 +163,37 @@ abstract class _$UnsecureConfig
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
-    final ref =
-        this.ref
-            as $Ref<
-              AsyncValue<UnsecureAppConfiguration?>,
-              UnsecureAppConfiguration?
-            >;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<UnsecureAppConfiguration?>,
-                UnsecureAppConfiguration?
-              >,
-              AsyncValue<UnsecureAppConfiguration?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final ref = this.ref as $Ref<AsyncValue<UnsecureAppConfiguration?>,
+        UnsecureAppConfiguration?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<UnsecureAppConfiguration?>,
+            UnsecureAppConfiguration?>,
+        AsyncValue<UnsecureAppConfiguration?>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }
 
 /// Extension upon secure config that allows state management using riverpod
 
 @ProviderFor(SecureConfig)
-const secureConfigProvider = SecureConfigProvider._();
+final secureConfigProvider = SecureConfigProvider._();
 
 /// Extension upon secure config that allows state management using riverpod
 final class SecureConfigProvider
     extends $AsyncNotifierProvider<SecureConfig, APIConfig?> {
   /// Extension upon secure config that allows state management using riverpod
-  const SecureConfigProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'secureConfigProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  SecureConfigProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'secureConfigProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$secureConfigHash();
@@ -232,16 +212,12 @@ abstract class _$SecureConfig extends $AsyncNotifier<APIConfig?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<APIConfig?>, APIConfig?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<APIConfig?>, APIConfig?>,
-              AsyncValue<APIConfig?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<APIConfig?>, APIConfig?>,
+        AsyncValue<APIConfig?>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }

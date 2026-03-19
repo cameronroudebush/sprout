@@ -10,26 +10,21 @@ part of 'category_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(categoryApi)
-const categoryApiProvider = CategoryApiProvider._();
+final categoryApiProvider = CategoryApiProvider._();
 
-final class CategoryApiProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<CategoryApi>,
-          CategoryApi,
-          FutureOr<CategoryApi>
-        >
+final class CategoryApiProvider extends $FunctionalProvider<
+        AsyncValue<CategoryApi>, CategoryApi, FutureOr<CategoryApi>>
     with $FutureModifier<CategoryApi>, $FutureProvider<CategoryApi> {
-  const CategoryApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'categoryApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  CategoryApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'categoryApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$categoryApiHash();
@@ -37,8 +32,8 @@ final class CategoryApiProvider
   @$internal
   @override
   $FutureProviderElement<CategoryApi> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
   FutureOr<CategoryApi> create(Ref ref) {
@@ -49,20 +44,20 @@ final class CategoryApiProvider
 String _$categoryApiHash() => r'e91826b9e39ef37c3567625243b0e73bd61f0571';
 
 @ProviderFor(Categories)
-const categoriesProvider = CategoriesProvider._();
+final categoriesProvider = CategoriesProvider._();
 
 final class CategoriesProvider
     extends $AsyncNotifierProvider<Categories, List<Category>> {
-  const CategoriesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'categoriesProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  CategoriesProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'categoriesProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$categoriesHash();
@@ -79,39 +74,35 @@ abstract class _$Categories extends $AsyncNotifier<List<Category>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<List<Category>>, List<Category>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<List<Category>>, List<Category>>,
-              AsyncValue<List<Category>>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<Category>>, List<Category>>,
+        AsyncValue<List<Category>>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }
 
 /// Tracks the state for the unknown category count
 
 @ProviderFor(UnknownCategoryCount)
-const unknownCategoryCountProvider = UnknownCategoryCountFamily._();
+final unknownCategoryCountProvider = UnknownCategoryCountFamily._();
 
 /// Tracks the state for the unknown category count
 final class UnknownCategoryCountProvider
     extends $AsyncNotifierProvider<UnknownCategoryCount, int> {
   /// Tracks the state for the unknown category count
-  const UnknownCategoryCountProvider._({
-    required UnknownCategoryCountFamily super.from,
-    required String? super.argument,
-  }) : super(
-         retry: null,
-         name: r'unknownCategoryCountProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  UnknownCategoryCountProvider._(
+      {required UnknownCategoryCountFamily super.from,
+      required String? super.argument})
+      : super(
+          retry: null,
+          name: r'unknownCategoryCountProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$unknownCategoryCountHash();
@@ -145,25 +136,22 @@ String _$unknownCategoryCountHash() =>
 
 final class UnknownCategoryCountFamily extends $Family
     with
-        $ClassFamilyOverride<
-          UnknownCategoryCount,
-          AsyncValue<int>,
-          int,
-          FutureOr<int>,
-          String?
-        > {
-  const UnknownCategoryCountFamily._()
-    : super(
-        retry: null,
-        name: r'unknownCategoryCountProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
+        $ClassFamilyOverride<UnknownCategoryCount, AsyncValue<int>, int,
+            FutureOr<int>, String?> {
+  UnknownCategoryCountFamily._()
+      : super(
+          retry: null,
+          name: r'unknownCategoryCountProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
 
   /// Tracks the state for the unknown category count
 
-  UnknownCategoryCountProvider call([String? accountId]) =>
+  UnknownCategoryCountProvider call([
+    String? accountId,
+  ]) =>
       UnknownCategoryCountProvider._(argument: accountId, from: this);
 
   @override
@@ -176,51 +164,50 @@ abstract class _$UnknownCategoryCount extends $AsyncNotifier<int> {
   late final _$args = ref.$arg as String?;
   String? get accountId => _$args;
 
-  FutureOr<int> build([String? accountId]);
+  FutureOr<int> build([
+    String? accountId,
+  ]);
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref = this.ref as $Ref<AsyncValue<int>, int>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<int>, int>,
-              AsyncValue<int>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<int>, int>, AsyncValue<int>, Object?, Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
 
 /// Riverpod to get specific category stats given the query
 
 @ProviderFor(categoryStats)
-const categoryStatsProvider = CategoryStatsFamily._();
+final categoryStatsProvider = CategoryStatsFamily._();
 
 /// Riverpod to get specific category stats given the query
 
-final class CategoryStatsProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<CategoryStats?>,
-          CategoryStats?,
-          FutureOr<CategoryStats?>
-        >
+final class CategoryStatsProvider extends $FunctionalProvider<
+        AsyncValue<CategoryStats?>, CategoryStats?, FutureOr<CategoryStats?>>
     with $FutureModifier<CategoryStats?>, $FutureProvider<CategoryStats?> {
   /// Riverpod to get specific category stats given the query
-  const CategoryStatsProvider._({
-    required CategoryStatsFamily super.from,
-    required ({int year, int? month, int? day, String? accountId})
-    super.argument,
-  }) : super(
-         retry: null,
-         name: r'categoryStatsProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  CategoryStatsProvider._(
+      {required CategoryStatsFamily super.from,
+      required ({
+        int year,
+        int? month,
+        int? day,
+        String? accountId,
+      })
+          super.argument})
+      : super(
+          retry: null,
+          name: r'categoryStatsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$categoryStatsHash();
@@ -235,13 +222,17 @@ final class CategoryStatsProvider
   @$internal
   @override
   $FutureProviderElement<CategoryStats?> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
   FutureOr<CategoryStats?> create(Ref ref) {
-    final argument =
-        this.argument as ({int year, int? month, int? day, String? accountId});
+    final argument = this.argument as ({
+      int year,
+      int? month,
+      int? day,
+      String? accountId,
+    });
     return categoryStats(
       ref,
       year: argument.year,
@@ -269,17 +260,21 @@ String _$categoryStatsHash() => r'd4168268c7a8a757fde97154da28ff0c6097ce97';
 final class CategoryStatsFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<CategoryStats?>,
-          ({int year, int? month, int? day, String? accountId})
-        > {
-  const CategoryStatsFamily._()
-    : super(
-        retry: null,
-        name: r'categoryStatsProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
+            FutureOr<CategoryStats?>,
+            ({
+              int year,
+              int? month,
+              int? day,
+              String? accountId,
+            })> {
+  CategoryStatsFamily._()
+      : super(
+          retry: null,
+          name: r'categoryStatsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
 
   /// Riverpod to get specific category stats given the query
 
@@ -288,10 +283,13 @@ final class CategoryStatsFamily extends $Family
     int? month,
     int? day,
     String? accountId,
-  }) => CategoryStatsProvider._(
-    argument: (year: year, month: month, day: day, accountId: accountId),
-    from: this,
-  );
+  }) =>
+      CategoryStatsProvider._(argument: (
+        year: year,
+        month: month,
+        day: day,
+        accountId: accountId,
+      ), from: this);
 
   @override
   String toString() => r'categoryStatsProvider';

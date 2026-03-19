@@ -10,20 +10,20 @@ part of 'navigation_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(CurrentRoute)
-const currentRouteProvider = CurrentRouteProvider._();
+final currentRouteProvider = CurrentRouteProvider._();
 
 final class CurrentRouteProvider
     extends $NotifierProvider<CurrentRoute, String> {
-  const CurrentRouteProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'currentRouteProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  CurrentRouteProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'currentRouteProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$currentRouteHash();
@@ -48,16 +48,9 @@ abstract class _$CurrentRoute extends $Notifier<String> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<String, String>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<String, String>,
-              String,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<String, String>, String, Object?, Object?>;
+    element.handleCreate(ref, build);
   }
 }

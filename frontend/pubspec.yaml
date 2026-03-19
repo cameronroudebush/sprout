@@ -6,7 +6,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.0.0"
   flutter: ">=3.0.0"
 
 dependencies:
@@ -34,22 +34,22 @@ dependencies:
   jwt_decoder: ^2.0.1
   firebase_messaging: ^16.1.1
   firebase_core: ^4.4.0
-  flutter_local_notifications: ^20.0.0
+  flutter_local_notifications: ^21.0.0
   local_auth: ^3.0.0
   device_info_plus: ^12.3.0
   flutter_web_auth_2: ^5.0.1
   gpt_markdown: ^1.1.5
   workmanager: ^0.9.0+3
   home_widget: ^0.9.0
-  flutter_riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.3
+  flutter_riverpod: ^3.2.1
+  riverpod_annotation: ^4.0.2
 
 dev_dependencies:
-  build_runner: ^2.12.2
+  build_runner: ^2.13.0
   flutter_web_plugins:
     sdk: flutter
   flutter_lints: ^6.0.0
-  riverpod_generator: ^3.0.3
+  riverpod_generator: ^4.0.3
 
 flutter:
   uses-material-design: true
