@@ -10,20 +10,20 @@ part of 'firebase_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FirebaseNotifier)
-const firebaseProvider = FirebaseNotifierProvider._();
+final firebaseProvider = FirebaseNotifierProvider._();
 
 final class FirebaseNotifierProvider
     extends $NotifierProvider<FirebaseNotifier, void> {
-  const FirebaseNotifierProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'firebaseProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  FirebaseNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'firebaseProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$firebaseNotifierHash();
@@ -48,16 +48,9 @@ abstract class _$FirebaseNotifier extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, null);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<void, void>, void, Object?, Object?>;
+    element.handleCreate(ref, build);
   }
 }

@@ -19,9 +19,7 @@
           }
         },
         "summary": "Check application status.",
-        "tags": [
-          "Core"
-        ]
+        "tags": ["Core"]
       }
     },
     "/account/{id}": {
@@ -62,9 +60,7 @@
           }
         ],
         "summary": "Get account by ID.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       },
       "delete": {
         "description": "Deletes an account by the given ID.",
@@ -96,9 +92,7 @@
           }
         ],
         "summary": "Delete account by ID.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       },
       "patch": {
         "description": "Edits an account by the given ID.",
@@ -147,9 +141,7 @@
           }
         ],
         "summary": "Edit account.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       }
     },
     "/account": {
@@ -181,9 +173,7 @@
           }
         ],
         "summary": "Get accounts.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       }
     },
     "/account/provider/{name}": {
@@ -227,9 +217,7 @@
           }
         ],
         "summary": "Get accounts from a provider that are not yet synced.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       }
     },
     "/account/provider/{name}/link": {
@@ -283,9 +271,7 @@
           }
         ],
         "summary": "Link the new given accounts from a provider.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       }
     },
     "/account/sync": {
@@ -319,9 +305,7 @@
           }
         ],
         "summary": "Run a manual sync.",
-        "tags": [
-          "Account"
-        ]
+        "tags": ["Account"]
       }
     },
     "/transaction/{id}": {
@@ -372,9 +356,7 @@
           }
         ],
         "summary": "Edit transaction.",
-        "tags": [
-          "Transaction"
-        ]
+        "tags": ["Transaction"]
       }
     },
     "/transaction": {
@@ -462,9 +444,7 @@
           }
         ],
         "summary": "Get transactions by query.",
-        "tags": [
-          "Transaction"
-        ]
+        "tags": ["Transaction"]
       }
     },
     "/transaction/subscriptions": {
@@ -496,9 +476,7 @@
           }
         ],
         "summary": "Get's subscriptions.",
-        "tags": [
-          "Transaction"
-        ]
+        "tags": ["Transaction"]
       }
     },
     "/transaction/count": {
@@ -552,9 +530,7 @@
           }
         ],
         "summary": "Get's the total count of transactions across accounts.",
-        "tags": [
-          "Transaction"
-        ]
+        "tags": ["Transaction"]
       }
     },
     "/transaction-rule": {
@@ -586,9 +562,7 @@
           }
         ],
         "summary": "Get transaction rules.",
-        "tags": [
-          "Transaction Rule"
-        ]
+        "tags": ["Transaction Rule"]
       },
       "post": {
         "description": "Creates a new transaction rule based on the given content and runs a processor so we can organize our current transactions.",
@@ -628,9 +602,7 @@
           }
         ],
         "summary": "Creates a new transaction rule.",
-        "tags": [
-          "Transaction Rule"
-        ]
+        "tags": ["Transaction Rule"]
       }
     },
     "/transaction-rule/{id}": {
@@ -664,9 +636,7 @@
           }
         ],
         "summary": "Delete transaction rule by ID.",
-        "tags": [
-          "Transaction Rule"
-        ]
+        "tags": ["Transaction Rule"]
       },
       "patch": {
         "description": "Edits a transaction rule by the given ID.",
@@ -715,9 +685,7 @@
           }
         ],
         "summary": "Edit transaction rule.",
-        "tags": [
-          "Transaction Rule"
-        ]
+        "tags": ["Transaction Rule"]
       }
     },
     "/transaction-rule/apply": {
@@ -761,9 +729,7 @@
           }
         ],
         "summary": "Re-apply all transaction rules",
-        "tags": [
-          "Transaction Rule"
-        ]
+        "tags": ["Transaction Rule"]
       }
     },
     "/category": {
@@ -795,9 +761,7 @@
           }
         ],
         "summary": "Get categories.",
-        "tags": [
-          "Category"
-        ]
+        "tags": ["Category"]
       },
       "post": {
         "description": "Creates a new category that can be used for transactions to associate to.",
@@ -837,9 +801,7 @@
           }
         ],
         "summary": "Creates a new category.",
-        "tags": [
-          "Category"
-        ]
+        "tags": ["Category"]
       }
     },
     "/category/stats": {
@@ -905,9 +867,7 @@
           }
         ],
         "summary": "Gets category stats.",
-        "tags": [
-          "Category"
-        ]
+        "tags": ["Category"]
       }
     },
     "/category/stats/unknown": {
@@ -947,9 +907,7 @@
           }
         ],
         "summary": "Gets unknown category stats.",
-        "tags": [
-          "Category"
-        ]
+        "tags": ["Category"]
       }
     },
     "/category/{id}": {
@@ -983,9 +941,7 @@
           }
         ],
         "summary": "Delete category by ID.",
-        "tags": [
-          "Category"
-        ]
+        "tags": ["Category"]
       },
       "patch": {
         "description": "Edits a category by the given ID.",
@@ -1034,9 +990,7 @@
           }
         ],
         "summary": "Edit category.",
-        "tags": [
-          "Category"
-        ]
+        "tags": ["Category"]
       }
     },
     "/config": {
@@ -1065,9 +1019,7 @@
           }
         ],
         "summary": "Get app configuration.",
-        "tags": [
-          "Config"
-        ]
+        "tags": ["Config"]
       }
     },
     "/config/unsecure": {
@@ -1088,9 +1040,7 @@
           }
         },
         "summary": "Get unsecure app configuration.",
-        "tags": [
-          "Config"
-        ]
+        "tags": ["Config"]
       }
     },
     "/cash-flow/sankey": {
@@ -1156,9 +1106,7 @@
           }
         ],
         "summary": "Get sankey data by query.",
-        "tags": [
-          "Cash Flow"
-        ]
+        "tags": ["Cash Flow"]
       }
     },
     "/cash-flow/stats": {
@@ -1224,9 +1172,7 @@
           }
         ],
         "summary": "Get cash flow stats data by query.",
-        "tags": [
-          "Cash Flow"
-        ]
+        "tags": ["Cash Flow"]
       }
     },
     "/cash-flow/spending": {
@@ -1272,9 +1218,7 @@
           }
         ],
         "summary": "Get cash flow spending stats per month.",
-        "tags": [
-          "Cash Flow"
-        ]
+        "tags": ["Cash Flow"]
       }
     },
     "/image-proxy": {
@@ -1317,9 +1261,7 @@
           }
         ],
         "summary": "Proxy images for institutions.",
-        "tags": [
-          "Core"
-        ]
+        "tags": ["Core"]
       }
     },
     "/auth/login": {
@@ -1353,9 +1295,7 @@
           }
         },
         "summary": "Login with username and password.",
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/login/jwt": {
@@ -1389,9 +1329,7 @@
           }
         },
         "summary": "Login with an existing JWT.",
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/oidc/refresh": {
@@ -1432,9 +1370,7 @@
           }
         },
         "summary": "Proxy OIDC refresh requests.",
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/oidc/login": {
@@ -1457,9 +1393,7 @@
           }
         },
         "summary": "Authenticates using the OIDC configuration.",
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/oidc/callback": {
@@ -1490,9 +1424,7 @@
           }
         },
         "summary": "Callback handler for the OIDC login.",
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/logout": {
@@ -1506,9 +1438,7 @@
           }
         },
         "summary": "Logout the user",
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/user/me": {
@@ -1540,9 +1470,7 @@
           }
         ],
         "summary": "Get's current user info.",
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       }
     },
     "/user/{id}": {
@@ -1583,9 +1511,7 @@
           }
         ],
         "summary": "Get user by ID.",
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       }
     },
     "/user/create": {
@@ -1624,9 +1550,7 @@
           }
         ],
         "summary": "Create a new user..",
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       }
     },
     "/user/device/register": {
@@ -1661,9 +1585,7 @@
           }
         ],
         "summary": "Register a device to a user.",
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       }
     },
     "/user-config": {
@@ -1695,9 +1617,7 @@
           }
         ],
         "summary": "Get user config.",
-        "tags": [
-          "User Config"
-        ]
+        "tags": ["User Config"]
       },
       "patch": {
         "description": "Edits the current users configuration.",
@@ -1737,9 +1657,7 @@
           }
         ],
         "summary": "Edit user config.",
-        "tags": [
-          "User Config"
-        ]
+        "tags": ["User Config"]
       }
     },
     "/chat/new": {
@@ -1783,9 +1701,7 @@
           }
         ],
         "summary": "Utilizes the LLM prompt engine to help you discuss your finances.",
-        "tags": [
-          "Chat"
-        ]
+        "tags": ["Chat"]
       }
     },
     "/chat/history": {
@@ -1816,9 +1732,7 @@
           }
         ],
         "summary": "Returns the chat history for previous LLM conversations.",
-        "tags": [
-          "Chat"
-        ]
+        "tags": ["Chat"]
       }
     },
     "/holding": {
@@ -1860,9 +1774,7 @@
           }
         ],
         "summary": "Get holdings for a specific account.",
-        "tags": [
-          "Holding"
-        ]
+        "tags": ["Holding"]
       }
     },
     "/holding/history": {
@@ -1904,9 +1816,7 @@
           }
         ],
         "summary": "Get holding history for a specific account.",
-        "tags": [
-          "Holding"
-        ]
+        "tags": ["Holding"]
       }
     },
     "/holding/timeline/{id}": {
@@ -1947,9 +1857,7 @@
           }
         ],
         "summary": "Get timeline of a specific holding.",
-        "tags": [
-          "Holding"
-        ]
+        "tags": ["Holding"]
       }
     },
     "/holding/live/major": {
@@ -1981,9 +1889,7 @@
           }
         ],
         "summary": "Returns major holding prices.",
-        "tags": [
-          "Holding"
-        ]
+        "tags": ["Holding"]
       }
     },
     "/holding/live": {
@@ -2029,9 +1935,7 @@
           }
         ],
         "summary": "Returns live prices for requested symbols.",
-        "tags": [
-          "Holding"
-        ]
+        "tags": ["Holding"]
       }
     },
     "/net-worth/total": {
@@ -2060,9 +1964,7 @@
           }
         ],
         "summary": "Retrieves the historical net-worth data for all accounts.",
-        "tags": [
-          "Net Worth"
-        ]
+        "tags": ["Net Worth"]
       }
     },
     "/net-worth/accounts": {
@@ -2094,9 +1996,7 @@
           }
         ],
         "summary": "Get net worth by ALL accounts represented as time frames.",
-        "tags": [
-          "Net Worth"
-        ]
+        "tags": ["Net Worth"]
       }
     },
     "/net-worth/timeline/account/{id}": {
@@ -2137,9 +2037,7 @@
           }
         ],
         "summary": "Get net worth over time (timeline) of a specific account.",
-        "tags": [
-          "Net Worth"
-        ]
+        "tags": ["Net Worth"]
       }
     },
     "/sse": {
@@ -2167,9 +2065,7 @@
           }
         ],
         "summary": "Subscribe to real-time server events to allow the server to inform our client of various info.",
-        "tags": [
-          "Core"
-        ]
+        "tags": ["Core"]
       }
     },
     "/notification": {
@@ -2201,9 +2097,7 @@
           }
         ],
         "summary": "Get's the notifications",
-        "tags": [
-          "Notification"
-        ]
+        "tags": ["Notification"]
       }
     },
     "/notification/read/all": {
@@ -2225,9 +2119,7 @@
           }
         ],
         "summary": "Marks all notifications read.",
-        "tags": [
-          "Notification"
-        ]
+        "tags": ["Notification"]
       }
     },
     "/notification/read/{id}": {
@@ -2258,9 +2150,7 @@
           }
         ],
         "summary": "Marks a specific notification read.",
-        "tags": [
-          "Notification"
-        ]
+        "tags": ["Notification"]
       }
     },
     "/notification/config/firebase": {
@@ -2289,9 +2179,7 @@
           }
         ],
         "summary": "Returns the firebase configuration.",
-        "tags": [
-          "Notification"
-        ]
+        "tags": ["Notification"]
       }
     },
     "/notification/{id}": {
@@ -2329,9 +2217,7 @@
           }
         ],
         "summary": "Get's a notification by it's id.",
-        "tags": [
-          "Notification"
-        ]
+        "tags": ["Notification"]
       }
     }
   },
@@ -2449,12 +2335,7 @@
             "description": "If this institution has connection errors and needs fixed"
           }
         },
-        "required": [
-          "id",
-          "url",
-          "name",
-          "hasError"
-        ]
+        "required": ["id", "url", "name", "hasError"]
       },
       "Account": {
         "type": "object",
@@ -2504,13 +2385,7 @@
           },
           "type": {
             "description": "The type of this account to better separate it from the others.",
-            "enum": [
-              "depository",
-              "credit",
-              "loan",
-              "investment",
-              "crypto"
-            ],
+            "enum": ["depository", "credit", "loan", "investment", "crypto"],
             "type": "string"
           },
           "extra": {
@@ -2518,16 +2393,7 @@
             "description": "Any extra data that we want to store as JSON"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "provider",
-          "institution",
-          "currency",
-          "balance",
-          "availableBalance",
-          "type"
-        ]
+        "required": ["id", "name", "provider", "institution", "currency", "balance", "availableBalance", "type"]
       },
       "AccountEditRequest": {
         "type": "object",
@@ -2571,10 +2437,7 @@
             "description": "The icon to use for this category. If one is not given, we'll use the default."
           }
         },
-        "required": [
-          "id",
-          "name"
-        ]
+        "required": ["id", "name"]
       },
       "Transaction": {
         "type": "object",
@@ -2623,14 +2486,7 @@
             "default": false
           }
         },
-        "required": [
-          "id",
-          "amount",
-          "description",
-          "pending",
-          "posted",
-          "account"
-        ]
+        "required": ["id", "amount", "description", "pending", "posted", "account"]
       },
       "TransactionSubscription": {
         "type": "object",
@@ -2665,15 +2521,7 @@
           },
           "period": {
             "description": "How often this is billed",
-            "enum": [
-              "weekly",
-              "bi-weekly",
-              "monthly",
-              "quarterly",
-              "semi-annually",
-              "yearly",
-              "unknown"
-            ],
+            "enum": ["weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "yearly", "unknown"],
             "type": "string"
           },
           "startDate": {
@@ -2682,15 +2530,7 @@
             "description": "The day this billing starts"
           }
         },
-        "required": [
-          "account",
-          "transaction",
-          "description",
-          "amount",
-          "count",
-          "period",
-          "startDate"
-        ]
+        "required": ["account", "transaction", "description", "amount", "count", "period", "startDate"]
       },
       "TotalTransactions": {
         "type": "object",
@@ -2699,9 +2539,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "total"
-        ]
+        "required": ["total"]
       },
       "TransactionRule": {
         "type": "object",
@@ -2718,10 +2556,7 @@
             ]
           },
           "type": {
-            "enum": [
-              "description",
-              "amount"
-            ],
+            "enum": ["description", "amount"],
             "type": "string"
           },
           "value": {
@@ -2756,15 +2591,7 @@
             "default": true
           }
         },
-        "required": [
-          "id",
-          "type",
-          "value",
-          "strict",
-          "matches",
-          "order",
-          "enabled"
-        ]
+        "required": ["id", "type", "value", "strict", "matches", "order", "enabled"]
       },
       "CategoryStats": {
         "type": "object",
@@ -2784,31 +2611,16 @@
             }
           }
         },
-        "required": [
-          "categoryCount",
-          "colorMapping"
-        ]
+        "required": ["categoryCount", "colorMapping"]
       },
       "ChartRangeEnum": {
         "type": "string",
-        "enum": [
-          "oneDay",
-          "sevenDays",
-          "oneMonth",
-          "threeMonths",
-          "sixMonths",
-          "oneYear",
-          "allTime"
-        ],
+        "enum": ["oneDay", "sevenDays", "oneMonth", "threeMonths", "sixMonths", "oneYear", "allTime"],
         "description": "The net worth range to display by default"
       },
       "ThemeStyleEnum": {
         "type": "string",
-        "enum": [
-          "bliss",
-          "absolute",
-          "colored"
-        ],
+        "enum": ["bliss", "absolute", "colored"],
         "description": "The visual theme style selected by the user"
       },
       "UserConfig": {
@@ -2854,14 +2666,7 @@
             "description": "If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once."
           }
         },
-        "required": [
-          "id",
-          "netWorthRange",
-          "themeStyle",
-          "privateMode",
-          "secureMode",
-          "allowWidgets"
-        ]
+        "required": ["id", "netWorthRange", "themeStyle", "privateMode", "secureMode", "allowWidgets"]
       },
       "User": {
         "type": "object",
@@ -2885,12 +2690,7 @@
             "$ref": "#/components/schemas/UserConfig"
           }
         },
-        "required": [
-          "id",
-          "username",
-          "admin",
-          "config"
-        ]
+        "required": ["id", "username", "admin", "config"]
       },
       "Sync": {
         "type": "object",
@@ -2900,11 +2700,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "in-progress",
-              "complete",
-              "failed"
-            ],
+            "enum": ["in-progress", "complete", "failed"],
             "description": "The status of the sync job"
           },
           "time": {
@@ -2924,11 +2720,7 @@
             ]
           }
         },
-        "required": [
-          "id",
-          "status",
-          "time"
-        ]
+        "required": ["id", "status", "time"]
       },
       "ProviderConfig": {
         "type": "object",
@@ -2949,11 +2741,7 @@
             "description": "The URL to be able to fix accounts"
           }
         },
-        "required": [
-          "dbType",
-          "name",
-          "logoUrl"
-        ]
+        "required": ["dbType", "name", "logoUrl"]
       },
       "APIConfig": {
         "type": "object",
@@ -2978,20 +2766,14 @@
             "description": "Determines if the chat key is already provided and users shouldn't be able to set theirs then."
           }
         },
-        "required": [
-          "providers",
-          "chatKeyProvidedInBackend"
-        ]
+        "required": ["providers", "chatKeyProvidedInBackend"]
       },
       "UnsecureAppConfiguration": {
         "type": "object",
         "properties": {
           "authMode": {
             "type": "string",
-            "enum": [
-              "oidc",
-              "local"
-            ]
+            "enum": ["oidc", "local"]
           },
           "version": {
             "type": "string",
@@ -3001,11 +2783,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "authMode",
-          "version",
-          "allowUserCreation"
-        ]
+        "required": ["authMode", "version", "allowUserCreation"]
       },
       "SankeyLink": {
         "type": "object",
@@ -3024,11 +2802,7 @@
             "description": "A way to help describe what this link is"
           }
         },
-        "required": [
-          "source",
-          "target",
-          "value"
-        ]
+        "required": ["source", "target", "value"]
       },
       "SankeyData": {
         "type": "object",
@@ -3052,11 +2826,7 @@
             }
           }
         },
-        "required": [
-          "colors",
-          "nodes",
-          "links"
-        ]
+        "required": ["colors", "nodes", "links"]
       },
       "CashFlowStats": {
         "type": "object",
@@ -3080,11 +2850,7 @@
             ]
           }
         },
-        "required": [
-          "totalExpense",
-          "totalIncome",
-          "count"
-        ]
+        "required": ["totalExpense", "totalIncome", "count"]
       },
       "MonthlyCategoryData": {
         "type": "object",
@@ -3102,11 +2868,7 @@
             "description": "Color for the category. Will be a hex code."
           }
         },
-        "required": [
-          "name",
-          "amount",
-          "color"
-        ]
+        "required": ["name", "amount", "color"]
       },
       "MonthlySpendingStats": {
         "type": "object",
@@ -3136,13 +2898,7 @@
             "description": "Average spending across the requested period (for the trend line)"
           }
         },
-        "required": [
-          "categories",
-          "monthLabel",
-          "date",
-          "totalSpending",
-          "periodAverage"
-        ]
+        "required": ["categories", "monthLabel", "date", "totalSpending", "periodAverage"]
       },
       "CashFlowSpending": {
         "type": "object",
@@ -3161,10 +2917,7 @@
             }
           }
         },
-        "required": [
-          "data",
-          "topCategoryNames"
-        ]
+        "required": ["data", "topCategoryNames"]
       },
       "UsernamePasswordLoginRequest": {
         "type": "object",
@@ -3176,10 +2929,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "username",
-          "password"
-        ]
+        "required": ["username", "password"]
       },
       "UserLoginResponse": {
         "type": "object",
@@ -3191,9 +2941,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "user"
-        ]
+        "required": ["user"]
       },
       "JWTLoginRequest": {
         "type": "object",
@@ -3212,9 +2960,7 @@
             "description": "The current refresh token"
           }
         },
-        "required": [
-          "refreshToken"
-        ]
+        "required": ["refreshToken"]
       },
       "RefreshResponseDTO": {
         "type": "object",
@@ -3229,10 +2975,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "idToken",
-          "accessToken"
-        ]
+        "required": ["idToken", "accessToken"]
       },
       "UserCreationRequest": {
         "type": "object",
@@ -3244,10 +2987,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "username",
-          "password"
-        ]
+        "required": ["username", "password"]
       },
       "UserCreationResponse": {
         "type": "object",
@@ -3256,9 +2996,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "username"
-        ]
+        "required": ["username"]
       },
       "RegisterDeviceDto": {
         "type": "object",
@@ -3267,20 +3005,14 @@
             "type": "string"
           },
           "platform": {
-            "enum": [
-              "android",
-              "ios",
-              "web"
-            ],
+            "enum": ["android", "ios", "web"],
             "type": "string"
           },
           "deviceName": {
             "type": "string"
           }
         },
-        "required": [
-          "token"
-        ]
+        "required": ["token"]
       },
       "ChatRequestDTO": {
         "type": "object",
@@ -3291,9 +3023,7 @@
             "description": "The message to send to the AI"
           }
         },
-        "required": [
-          "message"
-        ]
+        "required": ["message"]
       },
       "ChatHistory": {
         "type": "object",
@@ -3304,10 +3034,7 @@
           "role": {
             "type": "string",
             "description": "Who said the message, either the LLM (AI) or the user.",
-            "enum": [
-              "user",
-              "model"
-            ]
+            "enum": ["user", "model"]
           },
           "time": {
             "format": "date-time",
@@ -3323,13 +3050,7 @@
             "description": "If the model is still thinking of a response for this one"
           }
         },
-        "required": [
-          "id",
-          "role",
-          "time",
-          "text",
-          "isThinking"
-        ]
+        "required": ["id", "role", "time", "text", "isThinking"]
       },
       "Holding": {
         "type": "object",
@@ -3372,17 +3093,7 @@
             "description": "The symbol for this holding"
           }
         },
-        "required": [
-          "id",
-          "account",
-          "currency",
-          "costBasis",
-          "description",
-          "marketValue",
-          "purchasePrice",
-          "shares",
-          "symbol"
-        ]
+        "required": ["id", "account", "currency", "costBasis", "description", "marketValue", "purchasePrice", "shares", "symbol"]
       },
       "EntityHistoryDataPoint": {
         "type": "object",
@@ -3400,10 +3111,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "start",
-          "valueChange"
-        ]
+        "required": ["start", "valueChange"]
       },
       "EntityHistory": {
         "type": "object",
@@ -3434,15 +3142,7 @@
             "description": "Some entity history data may have a connected Id of what it relates to. This could be something like an account Id."
           }
         },
-        "required": [
-          "last1Day",
-          "last7Days",
-          "lastMonth",
-          "lastThreeMonths",
-          "lastSixMonths",
-          "lastYear",
-          "allTime"
-        ]
+        "required": ["last1Day", "last7Days", "lastMonth", "lastThreeMonths", "lastSixMonths", "lastYear", "allTime"]
       },
       "HistoricalDataPoint": {
         "type": "object",
@@ -3457,10 +3157,7 @@
             "description": "The numerical value"
           }
         },
-        "required": [
-          "date",
-          "value"
-        ]
+        "required": ["date", "value"]
       },
       "MarketIndexDto": {
         "type": "object",
@@ -3484,14 +3181,7 @@
             "type": "number"
           },
           "marketState": {
-            "enum": [
-              "REGULAR",
-              "CLOSED",
-              "PRE",
-              "POST",
-              "PREPRE",
-              "POSTPOST"
-            ],
+            "enum": ["REGULAR", "CLOSED", "PRE", "POST", "PREPRE", "POSTPOST"],
             "type": "string"
           },
           "currency": {
@@ -3507,14 +3197,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "symbol",
-          "name",
-          "price",
-          "change",
-          "changePercent",
-          "lastUpdated"
-        ]
+        "required": ["symbol", "name", "price", "change", "changePercent", "lastUpdated"]
       },
       "TotalNetWorthDTO": {
         "type": "object",
@@ -3532,11 +3215,7 @@
             }
           }
         },
-        "required": [
-          "value",
-          "history",
-          "timeline"
-        ]
+        "required": ["value", "history", "timeline"]
       },
       "Base": {
         "type": "object",
@@ -3546,21 +3225,14 @@
         "type": "object",
         "properties": {
           "event": {
-            "enum": [
-              "sync",
-              "force-update",
-              "notification",
-              "chat"
-            ],
+            "enum": ["sync", "force-update", "notification", "chat"],
             "type": "string"
           },
           "payload": {
             "$ref": "#/components/schemas/Base"
           }
         },
-        "required": [
-          "event"
-        ]
+        "required": ["event"]
       },
       "FirebaseNotificationDTO": {
         "type": "object",
@@ -3576,19 +3248,10 @@
             "type": "string",
             "description": "Notification importance level",
             "default": "low",
-            "enum": [
-              "max",
-              "high",
-              "default",
-              "low"
-            ]
+            "enum": ["max", "high", "default", "low"]
           }
         },
-        "required": [
-          "notificationId",
-          "type",
-          "importance"
-        ]
+        "required": ["notificationId", "type", "importance"]
       },
       "NotificationSSEDTO": {
         "type": "object",
@@ -3598,9 +3261,7 @@
             "description": "If we should render the latest notification or not"
           }
         },
-        "required": [
-          "popupLatest"
-        ]
+        "required": ["popupLatest"]
       },
       "Notification": {
         "type": "object",
@@ -3618,12 +3279,7 @@
           },
           "type": {
             "description": "The type of notification this is",
-            "enum": [
-              "info",
-              "success",
-              "warning",
-              "error"
-            ],
+            "enum": ["info", "success", "warning", "error"],
             "type": "string"
           },
           "createdAt": {
@@ -3642,14 +3298,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "title",
-          "message",
-          "type",
-          "createdAt",
-          "isRead"
-        ]
+        "required": ["id", "title", "message", "type", "createdAt", "isRead"]
       },
       "FirebaseConfigDTO": {
         "type": "object",
@@ -3667,12 +3316,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "apiKey",
-          "appId",
-          "projectNumber",
-          "projectId"
-        ]
+        "required": ["apiKey", "appId", "projectNumber", "projectId"]
       }
     }
   }

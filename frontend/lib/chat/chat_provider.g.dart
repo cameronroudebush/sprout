@@ -11,7 +11,7 @@ part of 'chat_provider.dart';
 /// State for chat API
 
 @ProviderFor(chatApi)
-const chatApiProvider = ChatApiProvider._();
+final chatApiProvider = ChatApiProvider._();
 
 /// State for chat API
 
@@ -19,16 +19,16 @@ final class ChatApiProvider
     extends $FunctionalProvider<AsyncValue<ChatApi>, ChatApi, FutureOr<ChatApi>>
     with $FutureModifier<ChatApi>, $FutureProvider<ChatApi> {
   /// State for chat API
-  const ChatApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'chatApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  ChatApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'chatApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$chatApiHash();
@@ -49,22 +49,22 @@ String _$chatApiHash() => r'57b1815bf49e6d920c3fc51dbaa6a034d0a110e1';
 /// State for the chat elements
 
 @ProviderFor(Chat)
-const chatProvider = ChatProvider._();
+final chatProvider = ChatProvider._();
 
 /// State for the chat elements
 final class ChatProvider
     extends $AsyncNotifierProvider<Chat, List<ChatHistory>> {
   /// State for the chat elements
-  const ChatProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'chatProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  ChatProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'chatProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$chatHash();
@@ -83,17 +83,13 @@ abstract class _$Chat extends $AsyncNotifier<List<ChatHistory>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref as $Ref<AsyncValue<List<ChatHistory>>, List<ChatHistory>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<List<ChatHistory>>, List<ChatHistory>>,
-              AsyncValue<List<ChatHistory>>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<ChatHistory>>, List<ChatHistory>>,
+        AsyncValue<List<ChatHistory>>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }

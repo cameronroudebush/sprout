@@ -11,29 +11,24 @@ part of 'holding_provider.dart';
 /// Provides the API for the holding info
 
 @ProviderFor(holdingApi)
-const holdingApiProvider = HoldingApiProvider._();
+final holdingApiProvider = HoldingApiProvider._();
 
 /// Provides the API for the holding info
 
-final class HoldingApiProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<HoldingApi>,
-          HoldingApi,
-          FutureOr<HoldingApi>
-        >
+final class HoldingApiProvider extends $FunctionalProvider<
+        AsyncValue<HoldingApi>, HoldingApi, FutureOr<HoldingApi>>
     with $FutureModifier<HoldingApi>, $FutureProvider<HoldingApi> {
   /// Provides the API for the holding info
-  const HoldingApiProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'holdingApiProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  HoldingApiProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'holdingApiProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$holdingApiHash();
@@ -54,22 +49,22 @@ String _$holdingApiHash() => r'4cffc7e0ac0197fb443f478bb35f2fcd0da28910';
 /// Provides state to the account holdings info
 
 @ProviderFor(AccountHoldings)
-const accountHoldingsProvider = AccountHoldingsFamily._();
+final accountHoldingsProvider = AccountHoldingsFamily._();
 
 /// Provides state to the account holdings info
 final class AccountHoldingsProvider
     extends $AsyncNotifierProvider<AccountHoldings, List<Holding>> {
   /// Provides state to the account holdings info
-  const AccountHoldingsProvider._({
-    required AccountHoldingsFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'accountHoldingsProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  AccountHoldingsProvider._(
+      {required AccountHoldingsFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'accountHoldingsProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$accountHoldingsHash();
@@ -102,25 +97,22 @@ String _$accountHoldingsHash() => r'1d4a77dd177db03c78e457886fd8eb550c7e05e9';
 
 final class AccountHoldingsFamily extends $Family
     with
-        $ClassFamilyOverride<
-          AccountHoldings,
-          AsyncValue<List<Holding>>,
-          List<Holding>,
-          FutureOr<List<Holding>>,
-          String
-        > {
-  const AccountHoldingsFamily._()
-    : super(
-        retry: null,
-        name: r'accountHoldingsProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
+        $ClassFamilyOverride<AccountHoldings, AsyncValue<List<Holding>>,
+            List<Holding>, FutureOr<List<Holding>>, String> {
+  AccountHoldingsFamily._()
+      : super(
+          retry: null,
+          name: r'accountHoldingsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
 
   /// Provides state to the account holdings info
 
-  AccountHoldingsProvider call(String accountId) =>
+  AccountHoldingsProvider call(
+    String accountId,
+  ) =>
       AccountHoldingsProvider._(argument: accountId, from: this);
 
   @override
@@ -133,44 +125,45 @@ abstract class _$AccountHoldings extends $AsyncNotifier<List<Holding>> {
   late final _$args = ref.$arg as String;
   String get accountId => _$args;
 
-  FutureOr<List<Holding>> build(String accountId);
+  FutureOr<List<Holding>> build(
+    String accountId,
+  );
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref = this.ref as $Ref<AsyncValue<List<Holding>>, List<Holding>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<List<Holding>>, List<Holding>>,
-              AsyncValue<List<Holding>>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<Holding>>, List<Holding>>,
+        AsyncValue<List<Holding>>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
 
 /// Provides state to the account holding history per account id
 
 @ProviderFor(AccountHoldingsHistory)
-const accountHoldingsHistoryProvider = AccountHoldingsHistoryFamily._();
+final accountHoldingsHistoryProvider = AccountHoldingsHistoryFamily._();
 
 /// Provides state to the account holding history per account id
-final class AccountHoldingsHistoryProvider
-    extends
-        $AsyncNotifierProvider<AccountHoldingsHistory, List<EntityHistory>> {
+final class AccountHoldingsHistoryProvider extends $AsyncNotifierProvider<
+    AccountHoldingsHistory, List<EntityHistory>> {
   /// Provides state to the account holding history per account id
-  const AccountHoldingsHistoryProvider._({
-    required AccountHoldingsHistoryFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'accountHoldingsHistoryProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  AccountHoldingsHistoryProvider._(
+      {required AccountHoldingsHistoryFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'accountHoldingsHistoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$accountHoldingsHistoryHash();
@@ -206,24 +199,25 @@ String _$accountHoldingsHistoryHash() =>
 final class AccountHoldingsHistoryFamily extends $Family
     with
         $ClassFamilyOverride<
-          AccountHoldingsHistory,
-          AsyncValue<List<EntityHistory>>,
-          List<EntityHistory>,
-          FutureOr<List<EntityHistory>>,
-          String
-        > {
-  const AccountHoldingsHistoryFamily._()
-    : super(
-        retry: null,
-        name: r'accountHoldingsHistoryProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
+            AccountHoldingsHistory,
+            AsyncValue<List<EntityHistory>>,
+            List<EntityHistory>,
+            FutureOr<List<EntityHistory>>,
+            String> {
+  AccountHoldingsHistoryFamily._()
+      : super(
+          retry: null,
+          name: r'accountHoldingsHistoryProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
 
   /// Provides state to the account holding history per account id
 
-  AccountHoldingsHistoryProvider call(String accountId) =>
+  AccountHoldingsHistoryProvider call(
+    String accountId,
+  ) =>
       AccountHoldingsHistoryProvider._(argument: accountId, from: this);
 
   @override
@@ -237,44 +231,46 @@ abstract class _$AccountHoldingsHistory
   late final _$args = ref.$arg as String;
   String get accountId => _$args;
 
-  FutureOr<List<EntityHistory>> build(String accountId);
+  FutureOr<List<EntityHistory>> build(
+    String accountId,
+  );
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref as $Ref<AsyncValue<List<EntityHistory>>, List<EntityHistory>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<List<EntityHistory>>, List<EntityHistory>>,
-              AsyncValue<List<EntityHistory>>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<EntityHistory>>, List<EntityHistory>>,
+        AsyncValue<List<EntityHistory>>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
 
 /// Provides state to the account holding timelines
 
 @ProviderFor(HoldingTimeline)
-const holdingTimelineProvider = HoldingTimelineFamily._();
+final holdingTimelineProvider = HoldingTimelineFamily._();
 
 /// Provides state to the account holding timelines
 final class HoldingTimelineProvider
     extends $AsyncNotifierProvider<HoldingTimeline, List<HistoricalDataPoint>> {
   /// Provides state to the account holding timelines
-  const HoldingTimelineProvider._({
-    required HoldingTimelineFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'holdingTimelineProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  HoldingTimelineProvider._(
+      {required HoldingTimelineFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'holdingTimelineProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$holdingTimelineHash();
@@ -308,24 +304,25 @@ String _$holdingTimelineHash() => r'7bffb548699a1a7d44f3a23d349957a46e3f7962';
 final class HoldingTimelineFamily extends $Family
     with
         $ClassFamilyOverride<
-          HoldingTimeline,
-          AsyncValue<List<HistoricalDataPoint>>,
-          List<HistoricalDataPoint>,
-          FutureOr<List<HistoricalDataPoint>>,
-          String
-        > {
-  const HoldingTimelineFamily._()
-    : super(
-        retry: null,
-        name: r'holdingTimelineProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
+            HoldingTimeline,
+            AsyncValue<List<HistoricalDataPoint>>,
+            List<HistoricalDataPoint>,
+            FutureOr<List<HistoricalDataPoint>>,
+            String> {
+  HoldingTimelineFamily._()
+      : super(
+          retry: null,
+          name: r'holdingTimelineProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
 
   /// Provides state to the account holding timelines
 
-  HoldingTimelineProvider call(String holdingId) =>
+  HoldingTimelineProvider call(
+    String holdingId,
+  ) =>
       HoldingTimelineProvider._(argument: holdingId, from: this);
 
   @override
@@ -339,51 +336,47 @@ abstract class _$HoldingTimeline
   late final _$args = ref.$arg as String;
   String get holdingId => _$args;
 
-  FutureOr<List<HistoricalDataPoint>> build(String holdingId);
+  FutureOr<List<HistoricalDataPoint>> build(
+    String holdingId,
+  );
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
-    final ref =
-        this.ref
-            as $Ref<
-              AsyncValue<List<HistoricalDataPoint>>,
-              List<HistoricalDataPoint>
-            >;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<List<HistoricalDataPoint>>,
-                List<HistoricalDataPoint>
-              >,
-              AsyncValue<List<HistoricalDataPoint>>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final ref = this.ref as $Ref<AsyncValue<List<HistoricalDataPoint>>,
+        List<HistoricalDataPoint>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<HistoricalDataPoint>>,
+            List<HistoricalDataPoint>>,
+        AsyncValue<List<HistoricalDataPoint>>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
 
 /// Provides information for the major indices for holding content
 
 @ProviderFor(MajorIndices)
-const majorIndicesProvider = MajorIndicesProvider._();
+final majorIndicesProvider = MajorIndicesProvider._();
 
 /// Provides information for the major indices for holding content
 final class MajorIndicesProvider
     extends $AsyncNotifierProvider<MajorIndices, List<MarketIndexDto>> {
   /// Provides information for the major indices for holding content
-  const MajorIndicesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'majorIndicesProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  MajorIndicesProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'majorIndicesProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$majorIndicesHash();
@@ -402,44 +395,35 @@ abstract class _$MajorIndices extends $AsyncNotifier<List<MarketIndexDto>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
-    final ref =
-        this.ref
-            as $Ref<AsyncValue<List<MarketIndexDto>>, List<MarketIndexDto>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<List<MarketIndexDto>>,
-                List<MarketIndexDto>
-              >,
-              AsyncValue<List<MarketIndexDto>>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final ref = this.ref
+        as $Ref<AsyncValue<List<MarketIndexDto>>, List<MarketIndexDto>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<MarketIndexDto>>, List<MarketIndexDto>>,
+        AsyncValue<List<MarketIndexDto>>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
   }
 }
 
 /// Riverpod that provides live price of a stock utilizing the backend API
 
 @ProviderFor(LivePrice)
-const livePriceProvider = LivePriceFamily._();
+final livePriceProvider = LivePriceFamily._();
 
 /// Riverpod that provides live price of a stock utilizing the backend API
 final class LivePriceProvider
     extends $AsyncNotifierProvider<LivePrice, MarketIndexDto?> {
   /// Riverpod that provides live price of a stock utilizing the backend API
-  const LivePriceProvider._({
-    required LivePriceFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'livePriceProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  LivePriceProvider._(
+      {required LivePriceFamily super.from, required String super.argument})
+      : super(
+          retry: null,
+          name: r'livePriceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$livePriceHash();
@@ -472,25 +456,22 @@ String _$livePriceHash() => r'96715e8ffc836594a4ac53c12671b1f1aa4d079c';
 
 final class LivePriceFamily extends $Family
     with
-        $ClassFamilyOverride<
-          LivePrice,
-          AsyncValue<MarketIndexDto?>,
-          MarketIndexDto?,
-          FutureOr<MarketIndexDto?>,
-          String
-        > {
-  const LivePriceFamily._()
-    : super(
-        retry: null,
-        name: r'livePriceProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
+        $ClassFamilyOverride<LivePrice, AsyncValue<MarketIndexDto?>,
+            MarketIndexDto?, FutureOr<MarketIndexDto?>, String> {
+  LivePriceFamily._()
+      : super(
+          retry: null,
+          name: r'livePriceProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
 
   /// Riverpod that provides live price of a stock utilizing the backend API
 
-  LivePriceProvider call(String symbol) =>
+  LivePriceProvider call(
+    String symbol,
+  ) =>
       LivePriceProvider._(argument: symbol, from: this);
 
   @override
@@ -503,20 +484,22 @@ abstract class _$LivePrice extends $AsyncNotifier<MarketIndexDto?> {
   late final _$args = ref.$arg as String;
   String get symbol => _$args;
 
-  FutureOr<MarketIndexDto?> build(String symbol);
+  FutureOr<MarketIndexDto?> build(
+    String symbol,
+  );
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref = this.ref as $Ref<AsyncValue<MarketIndexDto?>, MarketIndexDto?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<MarketIndexDto?>, MarketIndexDto?>,
-              AsyncValue<MarketIndexDto?>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<MarketIndexDto?>, MarketIndexDto?>,
+        AsyncValue<MarketIndexDto?>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }

@@ -11,29 +11,24 @@ part of 'base_api.dart';
 /// Base API client that only adds the connection URL. Everything else is basic and this should be used for public routes
 
 @ProviderFor(baseApiClient)
-const baseApiClientProvider = BaseApiClientProvider._();
+final baseApiClientProvider = BaseApiClientProvider._();
 
 /// Base API client that only adds the connection URL. Everything else is basic and this should be used for public routes
 
-final class BaseApiClientProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<ApiClient>,
-          ApiClient,
-          FutureOr<ApiClient>
-        >
+final class BaseApiClientProvider extends $FunctionalProvider<
+        AsyncValue<ApiClient>, ApiClient, FutureOr<ApiClient>>
     with $FutureModifier<ApiClient>, $FutureProvider<ApiClient> {
   /// Base API client that only adds the connection URL. Everything else is basic and this should be used for public routes
-  const BaseApiClientProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'baseApiClientProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  BaseApiClientProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'baseApiClientProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$baseApiClientHash();
@@ -54,29 +49,24 @@ String _$baseApiClientHash() => r'fcaef499b4440258536d440a04856c03fb048cb6';
 /// Base API client that implements things auto logout, auth info, and auto retries on top of [baseApiClient]
 
 @ProviderFor(baseAuthenticatedClient)
-const baseAuthenticatedClientProvider = BaseAuthenticatedClientProvider._();
+final baseAuthenticatedClientProvider = BaseAuthenticatedClientProvider._();
 
 /// Base API client that implements things auto logout, auth info, and auto retries on top of [baseApiClient]
 
-final class BaseAuthenticatedClientProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<ApiClient>,
-          ApiClient,
-          FutureOr<ApiClient>
-        >
+final class BaseAuthenticatedClientProvider extends $FunctionalProvider<
+        AsyncValue<ApiClient>, ApiClient, FutureOr<ApiClient>>
     with $FutureModifier<ApiClient>, $FutureProvider<ApiClient> {
   /// Base API client that implements things auto logout, auth info, and auto retries on top of [baseApiClient]
-  const BaseAuthenticatedClientProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'baseAuthenticatedClientProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  BaseAuthenticatedClientProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'baseAuthenticatedClientProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$baseAuthenticatedClientHash();

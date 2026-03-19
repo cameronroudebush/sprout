@@ -10,19 +10,19 @@ part of 'widget_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(WidgetSync)
-const widgetSyncProvider = WidgetSyncProvider._();
+final widgetSyncProvider = WidgetSyncProvider._();
 
 final class WidgetSyncProvider extends $NotifierProvider<WidgetSync, void> {
-  const WidgetSyncProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'widgetSyncProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  WidgetSyncProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'widgetSyncProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$widgetSyncHash();
@@ -47,16 +47,9 @@ abstract class _$WidgetSync extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, null);
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<void, void>, void, Object?, Object?>;
+    element.handleCreate(ref, build);
   }
 }
