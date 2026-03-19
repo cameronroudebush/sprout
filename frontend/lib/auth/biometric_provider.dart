@@ -80,7 +80,7 @@ class Biometrics extends _$Biometrics {
     if (kIsWeb) return;
     _lockTimer?.cancel();
     _lockTimer = null;
-    state = BiometricState(isLocked: false);
+    state = BiometricState(isLocked: false, hasInitialized: true);
     await disableScreenPrivacy();
   }
 

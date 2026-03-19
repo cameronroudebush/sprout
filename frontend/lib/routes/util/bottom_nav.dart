@@ -56,7 +56,7 @@ class SproutBottomNav extends ConsumerWidget {
       ),
       child: SafeArea(
         child: SizedBox(
-          height: 48,
+          height: 64,
           child: BottomNavigationBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
@@ -68,7 +68,7 @@ class SproutBottomNav extends ConsumerWidget {
             showUnselectedLabels: false,
             selectedFontSize: 0,
             unselectedFontSize: 0,
-            iconSize: 24,
+            iconSize: 28,
             onTap: (index) {
               final selectedItem = displayItems[index];
               if (selectedItem is String) {
