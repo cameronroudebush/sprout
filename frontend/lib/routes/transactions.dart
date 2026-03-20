@@ -29,7 +29,7 @@ class TransactionsPage extends ConsumerStatefulWidget {
     this.accountId,
     this.allowFiltering = true,
     this.separateByDate = true,
-    this.padding = const EdgeInsets.all(8.0),
+    this.padding = const EdgeInsets.symmetric(horizontal: 8),
   });
 
   @override
@@ -50,9 +50,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       final state = GoRouterState.of(context);
       final catId = state.uri.queryParameters['categoryId'];
 
-      ref
-          .read(transactionFilterStateProvider.notifier)
-          .update(
+      ref.read(transactionFilterStateProvider.notifier).update(
             TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
           );
 
@@ -71,9 +69,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Future<void> _fetchPage({bool reset = false}) async {
     final filters = ref.read(transactionFilterStateProvider);
 
-    await ref
-        .read(transactionsProvider.notifier)
-        .fetchFilteredPage(
+    await ref.read(transactionsProvider.notifier).fetchFilteredPage(
           startIndex: reset ? 0 : _filteredOffset,
           resetList: reset,
           accountId: filters.accountId,
