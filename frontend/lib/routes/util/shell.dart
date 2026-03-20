@@ -46,9 +46,8 @@ class SproutShell extends ConsumerWidget {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           systemNavigationBarColor: theme.bottomNavigationBarTheme.backgroundColor,
-          systemNavigationBarIconBrightness: theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white
-              ? Brightness.light
-              : Brightness.dark,
+          systemNavigationBarIconBrightness:
+              theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white ? Brightness.light : Brightness.dark,
         ),
         child: SproutLayoutBuilder((isDesktop, context, constraints) {
           return Scaffold(
@@ -61,16 +60,18 @@ class SproutShell extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const SproutSideNav(),
-                          SizedBox(width: ThemeHelpers.maxWidth, child: child),
+                          Padding(
+                              padding: EdgeInsetsGeometry.symmetric(horizontal: 0),
+                              child: ConstrainedBox(
+                                  constraints: BoxConstraints(maxWidth: ThemeHelpers.maxWidth), child: child)),
                           const SizedBox.shrink(),
                         ],
                       )
                     : child,
               ),
             ),
-            bottomNavigationBar: isDesktop || state == null
-                ? null
-                : SproutBottomNav(currentPath: state!.fullPath ?? ""),
+            bottomNavigationBar:
+                isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
           );
         }),
       ),

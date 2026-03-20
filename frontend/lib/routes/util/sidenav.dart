@@ -1,6 +1,6 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
@@ -17,8 +17,15 @@ class SproutSideNav extends ConsumerWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        SizedBox(width: 300, child: Material(elevation: 2.0, child: const _InternalSideNavContent())),
-        VerticalDivider(width: 4, color: theme.colorScheme.secondary),
+        const SizedBox(
+          width: 280,
+          child: _InternalSideNavContent(),
+        ),
+        VerticalDivider(
+          width: 1,
+          thickness: 1,
+          color: theme.dividerColor,
+        ),
         if (child != null) Expanded(child: child!),
       ],
     );
@@ -36,90 +43,191 @@ class _InternalSideNavContent extends ConsumerWidget {
     final authNotifier = ref.read(authProvider.notifier);
     final currentPath = ref.watch(currentRouteProvider);
 
-    // Filter and build the navigation items from your Router definition
-    final navItems = authenticatedRoutes.where((page) => page.showInSidebar).mapIndexed((index, page) {
-      return ListTile(
-        leading: Icon(page.icon),
-        title: Text(page.label, textAlign: TextAlign.center),
-        selected: currentPath == page.path,
-        onTap: () {
-          NavigationProvider.redirect(page.path);
-        },
-      );
-    }).toList();
+    final navItems = authenticatedRoutes.where((page) => page.showInSidebar).toList();
 
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Image.asset('assets/logo/color-transparent-no-tag.png', height: 48),
+    return Container(
+        color: theme.appBarTheme.backgroundColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const SizedBox.shrink(),
+                    Image.asset(
+                      'assets/logo/color-transparent-no-tag.png',
+                      height: 64,
+                    ),
+                    const SizedBox.shrink(),
+                  ],
+                )),
+
+            // Navigation Items
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: navItems.length,
+                itemBuilder: (context, index) {
+                  final page = navItems[index];
+                  final isSelected = currentPath == page.path;
+
+                  final borderRadius = 12.0;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: InkWell(
+                      onTap: () => NavigationProvider.redirect(page.path),
+                      borderRadius: BorderRadius.circular(borderRadius),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+                          borderRadius: BorderRadius.circular(borderRadius),
+                        ),
+                        child: Row(
+                          spacing: 12,
+                          children: [
+                            // Route Icon
+                            Icon(
+                              page.icon,
+                              color: isSelected
+                                  ? theme.colorScheme.onSecondaryContainer
+                                  : theme.colorScheme.onSurfaceVariant,
+                            ),
+                            // Route name
+                            Text(
+                              page.label,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: isSelected
+                                    ? theme.colorScheme.onSecondaryContainer
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-              Divider(height: 1, color: theme.colorScheme.outlineVariant),
-              // Map items with dividers
-              ...navItems.expand((item) => [item, const Divider(height: 1)]),
-            ],
-          ),
+            ),
+
+            // User Profile Section
+            _UserProfileTile(authUser: authUser!, onLogout: authNotifier.logout, currentPath: currentPath),
+          ],
+        ));
+  }
+}
+
+/// The user profile tile that allows configuration based on the user with a settings menu
+class _UserProfileTile extends StatelessWidget {
+  /// The current authorized user
+  final User authUser;
+
+  /// What to do on logout
+  final VoidCallback onLogout;
+  final String currentPath;
+
+  const _UserProfileTile({required this.authUser, required this.onLogout, required this.currentPath});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isSettings = currentPath == "/settings";
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: MenuAnchor(
+        alignmentOffset: const Offset(250, -40),
+        style: MenuStyle(
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
         ),
-
-        // User Profile & Settings Section
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: PopupMenuButton<String>(
-            offset: const Offset(0, -110),
-            onSelected: (value) {
-              if (value == 'settings') {
-                NavigationProvider.redirect("settings");
-              } else if (value == 'logout') {
-                authNotifier.logout();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'settings',
-                child: ListTile(
-                  leading: Icon(Icons.settings_outlined),
-                  title: Text('Settings'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'logout',
-                child: ListTile(
-                  leading: Icon(Icons.logout, color: theme.colorScheme.error),
-                  title: Text('Logout', style: TextStyle(color: theme.colorScheme.error)),
-                  contentPadding: EdgeInsets.zero,
-                  onTap: authNotifier.logout,
-                ),
-              ),
-            ],
+        builder: (context, controller, child) {
+          return InkWell(
+            onTap: () => controller.isOpen ? controller.close() : controller.open(),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(16),
+                color: isSettings ? theme.colorScheme.secondaryContainer : null,
               ),
               child: Row(
+                spacing: 12,
                 children: [
-                  const Icon(Icons.account_circle_outlined),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  // Avatar
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: theme.colorScheme.primary,
                     child: Text(
-                      authUser?.prettyName ?? "User",
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
+                      authUser.prettyName[0].toUpperCase(),
+                      style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
                     ),
                   ),
-                  const Icon(Icons.unfold_more),
+                  // User name
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          authUser.prettyName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isSettings ? theme.colorScheme.onSecondaryContainer : null,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        Text(
+                          "Account Settings",
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: isSettings ? theme.colorScheme.onSecondaryContainer : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Icon just to show we can open the menu
+                  Icon(
+                    Icons.more_vert,
+                    size: 18,
+                    color: isSettings ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
+                  ),
                 ],
               ),
             ),
+          );
+        },
+        menuChildren: [
+          MenuItemButton(
+            style: ButtonStyle(
+              minimumSize: WidgetStateProperty.all(const Size(196, 52)),
+              backgroundColor: WidgetStateProperty.all(
+                isSettings ? theme.colorScheme.secondaryContainer : null,
+              ),
+              foregroundColor: WidgetStateProperty.all(
+                isSettings ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onBackground,
+              ),
+            ),
+            leadingIcon:
+                Icon(Icons.settings_outlined, color: isSettings ? theme.colorScheme.onSecondaryContainer : null),
+            onPressed: () => NavigationProvider.redirect("settings"),
+            child: const Text('Settings'),
           ),
-        ),
-      ],
+          MenuItemButton(
+            style: ButtonStyle(minimumSize: WidgetStateProperty.all(const Size(196, 52))),
+            leadingIcon: Icon(Icons.logout, color: theme.colorScheme.error),
+            onPressed: onLogout,
+            child: Text('Logout', style: TextStyle(color: theme.colorScheme.error)),
+          ),
+        ],
+      ),
     );
   }
 }

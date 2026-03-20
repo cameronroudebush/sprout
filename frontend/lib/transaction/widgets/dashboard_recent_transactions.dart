@@ -46,7 +46,9 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
               ],
             ),
           ),
-          Divider(),
+          Divider(
+            height: 1,
+          ),
           transactionsAsync.when(
             data: (state) {
               final recent = state.transactions.take(count).toList();
