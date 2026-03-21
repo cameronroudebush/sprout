@@ -38,7 +38,7 @@ class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleMan
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Force Override", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text("Force Override", style: theme.textTheme.bodyLarge),
                   Switch(value: _force, onChanged: (newValue) => setState(() => _force = newValue)),
                 ],
               ),

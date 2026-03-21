@@ -10,6 +10,7 @@ import 'package:sprout/config/widgets/settings_section.dart';
 import 'package:sprout/config/widgets/tiles/action_tile.dart';
 import 'package:sprout/config/widgets/tiles/switch_tile.dart';
 import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
@@ -60,8 +61,7 @@ class SettingsPage extends ConsumerWidget {
     }
 
     return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsetsGeometry.only(top: 12, bottom: 12),
+      child: SproutRouteWrapper(
         child: Column(
           spacing: 16,
           children: [
@@ -79,9 +79,8 @@ class SettingsPage extends ConsumerWidget {
                       alignment: Alignment.centerRight,
                       icon: const Icon(Icons.arrow_drop_down),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                       onChanged: (ThemeStyleEnum? newValue) {
                         if (newValue != null) {
                           _update(ref, (c) => c.themeStyle = newValue);
@@ -250,7 +249,6 @@ class SettingsPage extends ConsumerWidget {
       context: context,
       builder: (context) => SproutBaseDialogWidget(
         "Update $provider Token",
-
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +290,9 @@ class SettingsPage extends ConsumerWidget {
                               }
                             : null,
                         style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.primary),
-                        child: const Text("Save", style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          "Save",
+                        ),
                       );
                     },
                   ),

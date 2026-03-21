@@ -34,7 +34,7 @@ class SankeyByMonth extends ConsumerWidget {
             return Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)));
           }
 
-          final initialScale = 0.7;
+          final initialScale = 1.0;
           final TransformationController controller = TransformationController(
             Matrix4.diagonal3Values(initialScale, initialScale, 1.0),
           );
@@ -50,7 +50,6 @@ class SankeyByMonth extends ConsumerWidget {
                 boundaryMargin: const EdgeInsets.all(20),
                 minScale: 0.1,
                 maxScale: 5.0,
-
                 child: SizedBox(
                   height: 1024,
                   width: !kIsWeb ? 760 : constraints.maxWidth,

@@ -4,6 +4,7 @@ import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_card.dart';
 import 'package:sprout/notification/widgets/home_notifications.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/transaction/widgets/dashboard_recent_transactions.dart';
 
@@ -15,8 +16,8 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final netWorth = ref.watch(totalNetWorthProvider);
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
+      child: SproutRouteWrapper(
+          child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Important notifications that the user needs to know
@@ -38,7 +39,7 @@ class DashboardPage extends ConsumerWidget {
           // Recent transactions
           const DashboardRecentTransactionsCard(),
         ],
-      ),
+      )),
     );
   }
 }

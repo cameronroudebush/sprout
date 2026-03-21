@@ -31,7 +31,6 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
                 Text(
                   "Recent Activity",
                   style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),

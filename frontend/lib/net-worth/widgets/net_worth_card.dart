@@ -83,14 +83,13 @@ class NetWorthDisplay extends ConsumerWidget {
             if (title != null)
               Text(
                 title!,
-                style: theme.textTheme.labelSmall?.copyWith(
+                style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             Text(
               value.toCurrency(isPrivate),
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall,
             ),
             SproutChangeWidget(
               totalChange: frame?.valueChange,

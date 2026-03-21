@@ -17,11 +17,18 @@ class SankeyPainter extends CustomPainter {
   final String? hoveredNode;
   final SankeyLink? hoveredLink;
   final Offset? hoverPosition;
+  final ThemeData theme;
 
   /// A formatter that allows us to customize how the value is displayed
   final String Function(num val)? formatter;
 
-  SankeyPainter({required this.data, this.hoveredNode, this.hoveredLink, this.hoverPosition, this.formatter});
+  SankeyPainter(
+      {required this.data,
+      required this.theme,
+      this.hoveredNode,
+      this.hoveredLink,
+      this.hoverPosition,
+      this.formatter});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -56,7 +63,7 @@ class SankeyPainter extends CustomPainter {
     });
 
     if (hoverPosition != null) {
-      _paintTooltip(canvas, size);
+      _paintTooltip(canvas, size, theme);
     }
   }
 
@@ -84,7 +91,7 @@ class SankeyPainter extends CustomPainter {
 
     final textSpan = TextSpan(
       text: '$name\n$displayVal',
-      style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold),
+      style: theme.textTheme.bodyMedium?.copyWith(color: textColor, fontSize: 12),
     );
     final textPainter = TextPainter(text: textSpan, textAlign: TextAlign.center, textDirection: ui.TextDirection.ltr)
       ..layout(minWidth: 0, maxWidth: rect.width);
@@ -94,7 +101,7 @@ class SankeyPainter extends CustomPainter {
   }
 
   /// Paints a styled tooltip that matches the provided image.
-  void _paintTooltip(Canvas canvas, Size size) {
+  void _paintTooltip(Canvas canvas, Size size, ThemeData theme) {
     if (hoverPosition == null) return;
 
     String title = '';
@@ -105,9 +112,8 @@ class SankeyPainter extends CustomPainter {
       final val = data.nodeValues[hoveredNode!] ?? 0.0;
       title = hoveredNode!;
       value = formatter != null ? formatter!(val) : val.toStringAsFixed(0);
-      description = data.links
-          .firstWhereOrNull((e) => e.source_ == hoveredNode || e.target == hoveredNode)
-          ?.description;
+      description =
+          data.links.firstWhereOrNull((e) => e.source_ == hoveredNode || e.target == hoveredNode)?.description;
     } else if (hoveredLink != null) {
       final link = hoveredLink!;
       title = '${link.source_} to ${link.target}';
@@ -122,8 +128,11 @@ class SankeyPainter extends CustomPainter {
     const double spacing = 4.0;
 
     // Define styles here to keep code clean
-    const titleStyle = TextStyle(color: _tooltipTitleColor, fontSize: 14);
-    const valueStyle = TextStyle(color: _tooltipValueColor, fontSize: 14, fontWeight: FontWeight.bold);
+    final titleStyle = theme.textTheme.bodyLarge!.copyWith(color: _tooltipTitleColor, fontSize: 14);
+    const valueStyle = TextStyle(
+      color: _tooltipValueColor,
+      fontSize: 14,
+    );
     const descStyle = TextStyle(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic);
 
     TextPainter createPainter(String text, TextStyle style) {

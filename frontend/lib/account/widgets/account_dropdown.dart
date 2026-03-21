@@ -20,7 +20,7 @@ class AccountDropdown extends ConsumerWidget {
       children: [
         Expanded(child: Text(account.name, overflow: TextOverflow.ellipsis, maxLines: 1)),
         const SizedBox(width: 8),
-        Text(account.balance.toCurrency(privateMode), style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(account.balance.toCurrency(privateMode)),
       ],
     );
   }

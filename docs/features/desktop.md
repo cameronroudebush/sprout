@@ -19,6 +19,10 @@ description: Desktop screenshots.
 
 <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/transactions.png" alt="Transactions" />
 
+### Transaction Rules
+
+<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/rules.png" alt="Transaction Rules" />
+
 ### Categories
 
 <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/categories.png" alt="Categories" />
@@ -27,14 +31,14 @@ description: Desktop screenshots.
 
 <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/subscriptions.png" alt="Subscriptions" />
 
-### Cash Flow
+### Reports
 
-<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/cash-flow.png" alt="Cash Flow" />
+<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/reports.png" alt="Reports" />
 
-### Cash Flow - Sankey
+### Holdings
 
-<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/cash-flow.sankey.png" alt="Cash Flow - Sankey" />
+<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/holdings.png" alt="Holdings" />
 
-### Login
+### Chat
 
-<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/login.png" alt="Login" />
+<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/chat.png" alt="Chat" />

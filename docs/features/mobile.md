@@ -11,14 +11,18 @@ description: Mobile screenshots.
 | :----------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/home.png" /> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/accounts.png" /> |
 
-| Transactions                                                                                                               | Categories                                                                                                             |
-| :------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/transactions.png" /> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/categories.png"> |
+| Transactions                                                                                                               | Transaction Rules                                                                                                 |
+| :------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/transactions.png" /> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/rules.png"> |
 
-| Subscriptions                                                                                                             | Login                                                                                                             |
-| :------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------- |
-| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/subscriptions.png"> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/login.png"> |
+| Holdings                                                                                                               | Categories                                                                                                             |
+| :--------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/holdings.png" /> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/categories.png"> |
 
-| Cash Flow                                                                                                             | Cash Flow - Sankey                                                                                                           |
-| :-------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/cash-flow.png"> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/cash-flow.sankey.png"> |
+| Subscriptions                                                                                                             | Chat                                                                                                             |
+| :------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------- |
+| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/subscriptions.png"> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/chat.png"> |
+
+| Reports                                                                                                             |
+| :------------------------------------------------------------------------------------------------------------------ |
+| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/reports.png"> |

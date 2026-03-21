@@ -85,7 +85,6 @@ class AccountGroupSection extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -99,12 +98,10 @@ class AccountGroupSection extends StatelessWidget {
             children: [
               Text(
                 total.toCurrency(isPrivate),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: isNegative ? Colors.redAccent : Colors.green,
                 ),
               ),
-
               if (percentChange != null)
                 SproutChangeWidget(
                   totalChange: totalChange,

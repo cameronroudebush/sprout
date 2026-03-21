@@ -150,7 +150,6 @@ class _MoreGridTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelMedium?.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               color: isSelected ? colorScheme.primary : colorScheme.onSurface,
             ),
           ),

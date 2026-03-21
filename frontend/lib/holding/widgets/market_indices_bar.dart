@@ -92,7 +92,6 @@ class _IndexTile extends ConsumerWidget {
         Text(
           data.name,
           style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.bold,
             color: theme.colorScheme.onSurfaceVariant,
             fontSize: 14,
           ),
@@ -100,7 +99,7 @@ class _IndexTile extends ConsumerWidget {
         if (showPrice)
           Text(
             data.price.toCurrency(isPrivate),
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 24),
+            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 24),
           ),
         SproutChangeWidget(
           totalChange: data.change,
@@ -147,7 +146,7 @@ class _StatusBadge extends StatelessWidget {
             ),
             Text(
               label,
-              style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: color, fontWeight: FontWeight.bold),
+              style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: color),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
@@ -28,7 +29,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
     return ListTile(
       contentPadding: EdgeInsets.only(left: (16.0 * depth) + 16, right: 16),
       leading: CategoryIcon(c),
-      title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(c.name, style: theme.textTheme.bodyLarge),
       onTap: () => _openEditSheet(c),
       trailing: Icon(Icons.chevron_right, color: theme.dividerColor),
     );
@@ -53,7 +54,8 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
       floatingActionButton: SproutSpeedDial(
         actions: [FABAction(icon: Icons.add, label: 'New Category', onTap: (context) => _openEditSheet(null))],
       ),
-      body: categoriesAsync.when(
+      body: SproutRouteWrapper(
+          child: categoriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text("Error: $err")),
         data: (categories) {
@@ -85,7 +87,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
             ),
           );
         },
-      ),
+      )),
     );
   }
 }

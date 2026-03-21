@@ -37,7 +37,9 @@ class SproutApp extends ConsumerWidget {
     final userConfigAsync = ref.watch(userConfigProvider);
 
     return initStatus.when(
-      loading: () => SproutLoadingIndicator(),
+      loading: () => Theme(
+          data: absoluteDarkTheme,
+          child: Directionality(textDirection: TextDirection.ltr, child: SproutLoadingIndicator())),
       error: (error, stackTrace) => MaterialApp(
         theme: absoluteDarkTheme,
         home: Scaffold(body: Center(child: Text('Failed to initialize: $error'))),
@@ -50,7 +52,12 @@ class SproutApp extends ConsumerWidget {
         final theme = userConfigNotifier.activeTheme(userConfig);
         final router = ref.watch(routerProvider);
 
-        return MaterialApp.router(routerConfig: router, title: "Sprout", theme: theme);
+        return MaterialApp.router(
+          routerConfig: router,
+          title: "Sprout",
+          theme: theme,
+          debugShowCheckedModeBanner: false,
+        );
       },
     );
   }
