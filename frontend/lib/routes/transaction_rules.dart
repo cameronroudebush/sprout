@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
@@ -70,37 +71,38 @@ class TransactionRulesPage extends ConsumerWidget {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 84),
-            child: Column(
-              spacing: 12,
-              children: [
-                /// Explanation Card
-                SproutCard(
-                  child: const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      "Transactions are categorized based on the rules below in descending order.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15),
+              padding: const EdgeInsets.only(bottom: 84),
+              child: SproutRouteWrapper(
+                child: Column(
+                  spacing: 12,
+                  children: [
+                    /// Explanation Card
+                    SproutCard(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          "Transactions are categorized based on the rules below in descending order.",
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelLarge,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                /// Rules List Card
-                SproutCard(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: prov.rules.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      return TransactionRuleRow(prov.rules[index], index: index);
-                    },
-                  ),
+                    /// Rules List Card
+                    SproutCard(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: prov.rules.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          return TransactionRuleRow(prov.rules[index], index: index);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
+              ));
         },
       ),
     );

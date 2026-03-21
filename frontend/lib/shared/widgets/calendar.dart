@@ -124,7 +124,6 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                 Text(
                   DateFormat.yMMMM().format(_focusedDate),
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
@@ -160,7 +159,6 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                   dayHeaders[index],
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onPrimary.withOpacity(0.6),
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               );
@@ -173,7 +171,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
-              childAspectRatio: isDesktop ? 2.5 : 1,
+              childAspectRatio: isDesktop ? 1.75 : 1,
             ),
             itemCount: days.length,
             itemBuilder: (context, index) {

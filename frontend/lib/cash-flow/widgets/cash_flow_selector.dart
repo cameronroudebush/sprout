@@ -23,6 +23,7 @@ class CashFlowSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SproutLayoutBuilder((isDesktop, context, constraints) {
+      final theme = Theme.of(context);
       final now = DateTime.now();
       final currentMonthEnd = DateTime(now.year, now.month + 1, 0);
       final isMonthly = currentView == CashFlowView.monthly;
@@ -51,7 +52,7 @@ class CashFlowSelector extends StatelessWidget {
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 16,
+                spacing: 8,
                 children: [
                   ToggleButtons(
                     isSelected: [currentView == CashFlowView.monthly, currentView == CashFlowView.yearly],
@@ -68,13 +69,13 @@ class CashFlowSelector extends StatelessWidget {
                       isDesktop
                           ? DateFormat('MMMM yyyy').format(selectedDate)
                           : DateFormat('MMM yyyy').format(selectedDate),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium,
                     ),
                   ],
                   if (currentView == CashFlowView.yearly)
                     Text(
                       selectedDate.year.toString(),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium,
                     ),
                 ],
               ),
@@ -99,15 +100,15 @@ class CashFlowSelector extends StatelessWidget {
                       icon: const Icon(Icons.keyboard_double_arrow_right),
                       onPressed: isMonthly
                           ? (selectedDate.month != currentMonthEnd.month || selectedDate.year != currentMonthEnd.year
-                                ? () {
-                                    var month = currentMonthEnd.month - selectedDate.month;
-                                    if (currentMonthEnd.year != selectedDate.year) {
-                                      month += (currentMonthEnd.year - selectedDate.year) * 12;
-                                    }
-
-                                    onMonthIncrementChanged(month);
+                              ? () {
+                                  var month = currentMonthEnd.month - selectedDate.month;
+                                  if (currentMonthEnd.year != selectedDate.year) {
+                                    month += (currentMonthEnd.year - selectedDate.year) * 12;
                                   }
-                                : null)
+
+                                  onMonthIncrementChanged(month);
+                                }
+                              : null)
                           : (selectedDate.year != now.year ? () => onYearChanged(now.year) : null),
                     ),
                   ),

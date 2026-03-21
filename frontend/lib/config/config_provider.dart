@@ -49,9 +49,8 @@ class UnsecureConfig extends _$UnsecureConfig {
       final api = await ref.watch(configApiProvider.future);
       return await api.configControllerGetUnsecure();
     } catch (e) {
-      debugPrint("Failed to fetch unsecure config: $e");
       _failedToConnect = true;
-      rethrow;
+      return null;
     }
   }
 

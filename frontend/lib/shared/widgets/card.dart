@@ -31,7 +31,7 @@ class SproutCard extends StatelessWidget {
       clipBehavior: clip ? Clip.antiAlias : Clip.none,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
-        side: BorderSide(color: borderColor ?? theme.dividerColor, width: 1),
+        side: BorderSide(color: borderColor ?? theme.dividerColor, width: 2),
       ),
       child: child,
     );

@@ -39,8 +39,8 @@ class _SankeyChartState extends State<SankeyChart> {
   SankeyPainterData? _painterData;
 
   /// Tracks which node is hovered so we can display the proper tooltip data
-  void _updateHover(Offset position, Size size) {
-    _painterData ??= _prepareData(size);
+  void _updateHover(Offset position, Size size, ThemeData theme) {
+    _painterData ??= _prepareData(size, theme);
     final data = _painterData!;
 
     String? newHoveredNode;
@@ -108,26 +108,28 @@ class _SankeyChartState extends State<SankeyChart> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        _painterData = _prepareData(constraints.biggest);
+        _painterData = _prepareData(constraints.biggest, theme);
 
         return MouseRegion(
           // Desktop/Web hover support
-          onHover: (event) => _updateHover(event.localPosition, constraints.biggest),
+          onHover: (event) => _updateHover(event.localPosition, constraints.biggest, theme),
           onExit: (_) => _clearHover(),
           child: GestureDetector(
             onTapUp: (details) => _handleTap(details.localPosition),
 
             // Mobile "Hold" logic
-            onLongPressStart: (details) => _updateHover(details.localPosition, constraints.biggest),
-            onLongPressMoveUpdate: (details) => _updateHover(details.localPosition, constraints.biggest),
+            onLongPressStart: (details) => _updateHover(details.localPosition, constraints.biggest, theme),
+            onLongPressMoveUpdate: (details) => _updateHover(details.localPosition, constraints.biggest, theme),
             onLongPressEnd: (_) => _clearHover(),
 
             child: CustomPaint(
               size: constraints.biggest,
               painter: SankeyPainter(
                 data: _painterData!,
+                theme: theme,
                 hoveredNode: _hoveredNode,
                 hoveredLink: _hoveredLink,
                 hoverPosition: _hoverPosition,
@@ -141,7 +143,7 @@ class _SankeyChartState extends State<SankeyChart> {
   }
 
   /// Prepares the data to compute how to display our sankey chart
-  SankeyPainterData _prepareData(Size size) {
+  SankeyPainterData _prepareData(Size size, ThemeData theme) {
     final Set<String> nodeNames = {};
     final Map<String, double> nodeValues = {};
     final Map<String, List<String>> nodeChildren = {};
@@ -173,9 +175,8 @@ class _SankeyChartState extends State<SankeyChart> {
 
     // Layering Algorithm
     final Map<String, int> nodeColumns = {};
-    List<String> currentColumnNodes = nodeNames
-        .where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty)
-        .toList();
+    List<String> currentColumnNodes =
+        nodeNames.where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty).toList();
     int column = 0;
 
     while (currentColumnNodes.isNotEmpty) {
@@ -216,7 +217,7 @@ class _SankeyChartState extends State<SankeyChart> {
     final textPainter = TextPainter(
       text: const TextSpan(
         text: 'Two\nLines',
-        style: TextStyle(color: Colors.black87, fontSize: 12, fontWeight: FontWeight.bold),
+        style: TextStyle(color: Colors.black87, fontSize: 12),
       ),
       textAlign: TextAlign.center,
       textDirection: ui.TextDirection.ltr,

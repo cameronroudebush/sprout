@@ -6,11 +6,11 @@ import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
 import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/combo.dart';
 import 'package:sprout/shared/widgets/layout.dart';
-import 'package:sprout/theme/helpers.dart';
 
 /// This page gives the user the ability to track habits over time and generate more useful data reports based on them
 class ReportsPage extends ConsumerStatefulWidget {
@@ -49,22 +49,18 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: ThemeHelpers.maxDesktopSize),
-        child: SingleChildScrollView(
+    return SingleChildScrollView(
+      child: SproutRouteWrapper(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 8,
-            children: [
-              _buildSpendingTrend(),
-              const Divider(indent: 16, endIndent: 16),
-              _buildTimeFrameSection(),
-              _buildDetailedAnalysis(theme),
-            ],
-          ),
-        ),
-      ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          _buildSpendingTrend(),
+          const Divider(indent: 16, endIndent: 16),
+          _buildTimeFrameSection(),
+          _buildDetailedAnalysis(theme),
+        ],
+      )),
     );
   }
 

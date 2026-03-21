@@ -57,7 +57,7 @@ class AccountSummaryView extends ConsumerWidget {
               spacing: 8,
               children: [
                 Icon(Icons.account_balance_wallet_outlined, size: 64, color: theme.colorScheme.primary),
-                Text("No accounts found", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text("No accounts found", style: theme.textTheme.titleLarge),
                 Text(
                   !individualCards
                       ? "You haven't added any accounts yet. Head over to the accounts page to get started."

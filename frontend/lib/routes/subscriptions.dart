@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/widgets/calendar.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -39,26 +40,15 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
 
         return SproutLayoutBuilder((isDesktop, context, constraints) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Column(
+            child: SproutRouteWrapper(
+                child: Column(
               spacing: 4,
               children: [
                 _buildTotal(subs, theme),
-                if (isDesktop)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 12,
-                    children: [
-                      Expanded(flex: 2, child: _buildCalendarCard(subs)),
-                      Expanded(flex: 3, child: _buildSelectedDayCard(eventsForCurrentDay)),
-                    ],
-                  )
-                else ...[
-                  _buildCalendarCard(subs),
-                  _buildSelectedDayCard(eventsForCurrentDay),
-                ],
+                _buildCalendarCard(subs),
+                _buildSelectedDayCard(eventsForCurrentDay),
               ],
-            ),
+            )),
           );
         });
       },
@@ -97,35 +87,29 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   /// Builds the calendar card to display in a calendar format of when the subs are
   Widget _buildCalendarCard(List<TransactionSubscription> subs) {
     return SproutCard(
-      child: SproutCalendar(
-        subs,
-        (day, event) => event.isBilledOn(day),
-        onDaySelected: (day, events) {
-          setState(() => _selectedDay = day);
-        },
-        dayDisplay: (context, events) {
-          return SproutLayoutBuilder((isDesktop, context, constraints) {
-            final double effectiveIconSize = isDesktop ? 18.0 : 14.0;
-            if (events.isEmpty) return const SizedBox.shrink();
+        child: SproutCalendar(subs, (day, event) => event.isBilledOn(day), onDaySelected: (day, events) {
+      setState(() => _selectedDay = day);
+    }, dayDisplay: (context, events) {
+      return SproutLayoutBuilder((isDesktop, context, constraints) {
+        final double effectiveIconSize = isDesktop ? 18.0 : 14.0;
+        if (events.isEmpty) return const SizedBox.shrink();
 
-            final maxLogos = (constraints.maxWidth / (effectiveIconSize + 4)).floor().clamp(0, events.length);
-            final displayedEvents = events.take(maxLogos).toList();
-            final remainingCount = events.length - displayedEvents.length;
+        final maxLogos = (constraints.maxWidth / (effectiveIconSize + 4)).floor().clamp(0, events.length);
+        final displayedEvents = events.take(maxLogos).toList();
+        final remainingCount = events.length - displayedEvents.length;
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 4,
-              children: [
-                ...displayedEvents.map(
-                  (e) => AccountLogo(e.account, height: effectiveIconSize, width: effectiveIconSize),
-                ),
-                if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: effectiveIconSize * 0.8)),
-              ],
-            );
-          });
-        },
-      ),
-    );
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 4,
+          children: [
+            ...displayedEvents.map(
+              (e) => AccountLogo(e.account, height: effectiveIconSize, width: effectiveIconSize),
+            ),
+            if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: effectiveIconSize * 0.8)),
+          ],
+        );
+      });
+    }));
   }
 
   /// Builds the card that shows what transaction subscriptions are available for the current day. This utilizes

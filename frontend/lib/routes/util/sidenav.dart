@@ -18,7 +18,7 @@ class SproutSideNav extends ConsumerWidget {
     return Row(
       children: [
         const SizedBox(
-          width: 280,
+          width: 260,
           child: _InternalSideNavContent(),
         ),
         VerticalDivider(
@@ -64,6 +64,7 @@ class _InternalSideNavContent extends ConsumerWidget {
                     const SizedBox.shrink(),
                   ],
                 )),
+            Divider(),
 
             // Navigation Items
             Expanded(
@@ -177,8 +178,7 @@ class _UserProfileTile extends StatelessWidget {
                       children: [
                         Text(
                           authUser.prettyName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             color: isSettings ? theme.colorScheme.onSecondaryContainer : null,
                           ),
                           overflow: TextOverflow.ellipsis,

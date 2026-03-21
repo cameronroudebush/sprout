@@ -155,11 +155,11 @@ class _SproutPieChartState extends State<SproutPieChart> {
       final double radius = isTouched ? 70 : 60;
       final double titleFontSize = widget.showPieTitle
           ? isTouched
-                ? 16
-                : 12
+              ? 16
+              : 12
           : isTouched
-          ? 16
-          : 0;
+              ? 16
+              : 0;
 
       return PieChartSectionData(
         color: color,
@@ -170,7 +170,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             : entry.key,
 
         radius: radius,
-        titleStyle: TextStyle(fontSize: titleFontSize, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: TextStyle(fontSize: titleFontSize, color: Colors.white),
       );
     }).toList();
   }
@@ -188,9 +188,8 @@ class _SproutPieChartState extends State<SproutPieChart> {
               children: widget.data!.entries.sortedBy((entry) => entry.value).reversed.map((entry) {
                 final category = entry.key;
                 // Find the corresponding color from the generated pie sections
-                final sectionIndex = widget.data!.entries
-                    .sortedBy((e) => e.value)
-                    .indexWhere((e) => e.key == entry.key);
+                final sectionIndex =
+                    widget.data!.entries.sortedBy((e) => e.value).indexWhere((e) => e.key == entry.key);
                 final color = sectionIndex != -1
                     ? _generatePieSections()[sectionIndex].color
                     : (widget.colorMapping?[entry.key] ?? colors[i % colors.length]);

@@ -64,8 +64,7 @@ class SproutBaseDialogWidget extends StatelessWidget {
           child: Row(
             children: [
               const Expanded(child: SizedBox.shrink()),
-              Text(dialogTitleText, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-
+              Text(dialogTitleText, style: theme.textTheme.titleLarge),
               if (!isMobile)
                 Expanded(
                   child: Align(
@@ -73,7 +72,6 @@ class SproutBaseDialogWidget extends StatelessWidget {
                     child: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
                   ),
                 ),
-
               if (isMobile) const Expanded(child: SizedBox.shrink()),
             ],
           ),

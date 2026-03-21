@@ -6,11 +6,11 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account_holding_list.dart';
 import 'package:sprout/holding/widgets/market_indices_bar.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
-import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// This page displays an overview of all holdings related to the current user
@@ -30,7 +30,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
     final theme = Theme.of(context);
     final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
 
-    return Column(
+    return SproutRouteWrapper(
+        child: Column(
       children: [
         // Major indices
         const MajorIndicesBarWidget(),
@@ -41,69 +42,63 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
 
         // The actual display content
         Expanded(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: ThemeHelpers.maxDesktopSize),
-              child: SingleChildScrollView(
-                child: Column(
-                  spacing: 8,
-                  children: [
-                    if (accounts.isEmpty)
-                      Center(
-                        child: SizedBox(
-                          height: 164,
-                          child: SproutCard(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: Column(
-                                spacing: 12,
-                                children: [
-                                  Icon(Icons.show_chart, size: 64, color: theme.colorScheme.primary),
-                                  const Text("No accounts found to choose from", style: TextStyle(fontSize: 18)),
-                                ],
-                              ),
-                            ),
+          child: SingleChildScrollView(
+            child: Column(
+              spacing: 8,
+              children: [
+                if (accounts.isEmpty)
+                  Center(
+                    child: SizedBox(
+                      height: 164,
+                      child: SproutCard(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            spacing: 12,
+                            children: [
+                              Icon(Icons.show_chart, size: 64, color: theme.colorScheme.primary),
+                              const Text("No accounts found to choose from", style: TextStyle(fontSize: 18)),
+                            ],
                           ),
                         ),
                       ),
-
-                    if (accounts.isNotEmpty)
-                      // Account Sections
-                      ...accounts.where((a) => a.type == AccountTypeEnum.investment).map((account) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 4,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Row(
-                                spacing: 12,
-                                children: [
-                                  AccountLogo(account),
-                                  Text(account.name, style: Theme.of(context).textTheme.titleMedium),
-                                ],
-                              ),
-                            ),
-                            AccountHoldingsList(
-                              accountId: account.id,
-                              selectedId: _selectedHolding?.id,
-                              onSelect: (holding) {
-                                setState(() {
-                                  _selectedHolding = holding;
-                                });
-                              },
-                            ),
-                          ],
-                        );
-                      }),
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+                if (accounts.isNotEmpty)
+                  // Account Sections
+                  ...accounts.where((a) => a.type == AccountTypeEnum.investment).map((account) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Row(
+                            spacing: 12,
+                            children: [
+                              AccountLogo(account),
+                              Text(account.name, style: Theme.of(context).textTheme.titleMedium),
+                            ],
+                          ),
+                        ),
+                        AccountHoldingsList(
+                          accountId: account.id,
+                          selectedId: _selectedHolding?.id,
+                          onSelect: (holding) {
+                            setState(() {
+                              _selectedHolding = holding;
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+              ],
             ),
           ),
         ),
       ],
-    );
+    ));
   }
 
   /// Builds the performance chart to display for the current selected symbol
@@ -137,13 +132,13 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                       children: [
                         Text(
                           _selectedHolding!.account.name,
-                          style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.labelMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           _selectedHolding!.symbol,
-                          style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.labelMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

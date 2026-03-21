@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/chat_bubble.dart';
+import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -35,17 +37,21 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final chatAsync = ref.watch(chatProvider);
+    final configAsync = ref.watch(secureConfigProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
 
-    return userConfigAsync.when(
+    return SproutRouteWrapper(
+        child: userConfigAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text("Error loading config: $err")),
       data: (userConfig) {
-        final bool llmConfigured = userConfig?.geminiKey?.isNotEmpty ?? false;
+        final bool llmConfigured =
+            configAsync.value?.chatKeyProvidedInBackend ?? userConfig?.geminiKey?.isNotEmpty ?? false;
 
         if (!llmConfigured) {
-          return _buildNoConfigState();
+          return _buildNoConfigState(theme);
         }
 
         return chatAsync.when(
@@ -80,11 +86,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           },
         );
       },
-    );
+    ));
   }
 
   /// Builds what to display when the AI isn't configured
-  Widget _buildNoConfigState() {
+  Widget _buildNoConfigState(ThemeData theme) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -96,14 +102,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               spacing: 16,
               children: [
                 Icon(Icons.auto_awesome_outlined, size: 48, color: Theme.of(context).colorScheme.primary),
-                const Text(
+                Text(
                   "AI Assistant Not Configured",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  style: theme.textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
-                const Text(
+                Text(
                   "To chat with Sprout and analyze your data, you'll need to provide an API key in your settings.",
-                  style: TextStyle(fontSize: 14),
+                  style: theme.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
               ],

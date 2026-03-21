@@ -33,12 +33,11 @@ class TransactionRuleRow extends ConsumerWidget {
         child: Text(
           rule.order.toString(),
           style: textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.bold,
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ),
       ),
-      title: _buildMatchText(effectiveStyle),
+      title: _buildMatchText(effectiveStyle, theme),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 4.0),
         child: _buildCatRow(disabledStyle, effectiveStyle, textTheme, disabledColor),
@@ -73,7 +72,7 @@ class TransactionRuleRow extends ConsumerWidget {
   }
 
   /// Builds the text to display how we're matching our content
-  Widget _buildMatchText(TextStyle? effectiveStyle) {
+  Widget _buildMatchText(TextStyle? effectiveStyle, ThemeData theme) {
     final value = rule.value.replaceAll('|', ' OR ');
     final String condition = rule.strict ? 'is' : 'contains';
     final String type = rule.type.value;
@@ -82,15 +81,15 @@ class TransactionRuleRow extends ConsumerWidget {
       TextSpan(
         style: effectiveStyle,
         children: [
-          const TextSpan(
+          TextSpan(
             text: 'IF ',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: theme.textTheme.labelMedium,
           ),
           if (rule.account != null) ...[
             const TextSpan(text: 'account is '),
             TextSpan(
               text: rule.account!.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+              style: theme.textTheme.labelMedium?.copyWith(decoration: TextDecoration.underline),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   NavigationProvider.redirectToAccount(rule.account!);
@@ -98,10 +97,10 @@ class TransactionRuleRow extends ConsumerWidget {
             ),
             const TextSpan(text: ' and '),
           ],
-          TextSpan(text: '$type $condition '),
+          TextSpan(text: '$type $condition ', style: theme.textTheme.labelMedium),
           TextSpan(
             text: '"$value"',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: theme.textTheme.labelMedium,
           ),
         ],
       ),

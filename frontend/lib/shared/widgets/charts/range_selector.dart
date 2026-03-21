@@ -51,9 +51,7 @@ class ChartRangeSelector extends ConsumerWidget {
             Text(
               ChartRangeUtility.asPretty(selectedRange),
               style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.bold,
                 color: colorScheme.onSecondaryContainer,
-                fontSize: 11,
               ),
             ),
             const SizedBox(width: 4),
@@ -73,7 +71,6 @@ class ChartRangeSelector extends ConsumerWidget {
               Text(
                 ChartRangeUtility.asPretty(range),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? colorScheme.primary : colorScheme.onSurface,
                 ),
               ),

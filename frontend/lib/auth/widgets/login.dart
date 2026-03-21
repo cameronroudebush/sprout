@@ -12,6 +12,7 @@ class LoginPage extends ConsumerWidget {
   const LoginPage({super.key, this.onLoginSuccess});
 
   Widget _buildForm(BuildContext context, WidgetRef ref, bool isDesktop) {
+    final theme = Theme.of(context);
     final config = ref.watch(unsecureConfigProvider).value;
 
     return ConstrainedBox(
@@ -32,13 +33,13 @@ class LoginPage extends ConsumerWidget {
                     fit: BoxFit.contain,
                   ),
                 ),
-                const Column(
+                Column(
                   spacing: 24,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
                       padding: EdgeInsets.only(top: 24),
-                      child: Text('Welcome Back!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      child: Text('Welcome Back!', style: theme.textTheme.headlineMedium),
                     ),
                     LoginForm(),
                   ],

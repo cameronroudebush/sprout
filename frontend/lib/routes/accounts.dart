@@ -5,6 +5,7 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/dialog/add_account_dialog.dart';
 import 'package:sprout/account/widgets/account_details.dart';
 import 'package:sprout/account/widgets/accounts_summary.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -37,7 +38,7 @@ class AccountsPage extends ConsumerWidget {
         }
 
         return Scaffold(
-          body: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 8), child: body),
+          body: SproutRouteWrapper(child: body),
           // Add a FAB button
           floatingActionButton: accountId != null
               ? null

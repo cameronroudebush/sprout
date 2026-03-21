@@ -12,7 +12,6 @@ import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/lifecycle_observer.dart';
 import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/shared/widgets/lock.dart';
-import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// A lightweight wrapper that provides persistent navigation (e.g., Side/Bottom Nav).
@@ -53,22 +52,14 @@ class SproutShell extends ConsumerWidget {
           return Scaffold(
             appBar: !isDesktop ? const SproutAppBar() : null,
             body: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: ThemeHelpers.maxDesktopSize),
-                child: isDesktop
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const SproutSideNav(),
-                          Padding(
-                              padding: EdgeInsetsGeometry.symmetric(horizontal: 0),
-                              child: ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: ThemeHelpers.maxWidth), child: child)),
-                          const SizedBox.shrink(),
-                        ],
-                      )
-                    : child,
-              ),
+              child: isDesktop
+                  ? Row(
+                      children: [
+                        const SproutSideNav(),
+                        Expanded(child: child),
+                      ],
+                    )
+                  : child,
             ),
             bottomNavigationBar:
                 isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),

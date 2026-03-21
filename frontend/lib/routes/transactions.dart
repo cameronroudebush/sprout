@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -115,7 +116,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     final filteredTransactions = ref.watch(filteredTransactionsProvider);
 
-    return Padding(
+    return SproutRouteWrapper(
       padding: widget.padding,
       child: Column(
         children: [
@@ -222,7 +223,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Text(date.toShortMonth, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+              child: Text(date.toShortMonth, style: theme.textTheme.titleSmall),
             ),
             SproutCard(
               child: ListView.separated(

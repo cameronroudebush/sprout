@@ -103,11 +103,9 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
           child: Column(
             children: [
               if (isDesktop) navWidget,
-
               Expanded(
                 child: IndexedStack(index: _selectedIndex, children: tabs.map((tab) => tab.child).toList()),
               ),
-
               if (!isDesktop) SafeArea(top: false, child: navWidget),
             ],
           ),
@@ -175,7 +173,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                             ),
                             Text(
                               widget.account.name,
-                              style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.labelLarge,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -238,7 +236,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                           Expanded(
                             child: Text(
                               "Account Sub-Type",
-                              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.titleSmall,
                             ),
                           ),
                           SizedBox(
@@ -262,7 +260,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                             Expanded(
                               child: Text(
                                 "Interest Rate",
-                                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.titleSmall,
                               ),
                             ),
                             SizedBox(
@@ -381,7 +379,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
           const SizedBox(width: 12),
           Text(label, style: theme.textTheme.bodyMedium),
           const Spacer(),
-          Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(value, style: theme.textTheme.bodyMedium),
         ],
       ),
     );
@@ -398,7 +396,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
       decoration: BoxDecoration(color: theme.colorScheme.secondary, borderRadius: BorderRadius.circular(8)),
       child: Text(
         typeString.toTitleCase,
-        style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSecondary),
+        style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSecondary),
       ),
     );
   }

@@ -103,6 +103,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SproutBaseDialogWidget(
       "Edit Transaction",
       showCloseDialogButton: true,
@@ -110,12 +111,15 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
       showSubmitButton: true,
       allowSubmitClick: _valHasChanged() && (_formKey.currentState?.validate() ?? false),
       onSubmitClick: _submit,
-      child: _getForm(context),
+      child: SizedBox(
+        width: 500,
+        child: _getForm(context, theme),
+      ),
     );
   }
 
   /// Builds the form that allows actually editing a transaction
-  Widget _getForm(BuildContext context) {
+  Widget _getForm(BuildContext context, ThemeData theme) {
     final helpStyle = const TextStyle(fontSize: 12, color: Colors.grey);
     final theme = Theme.of(context);
 
@@ -147,7 +151,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Description", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text("Description", style: theme.textTheme.titleMedium),
                       Tooltip(
                         message: "Add rule based on description",
                         child: IconButton(
@@ -178,7 +182,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  const Text("Amount", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Amount", style: theme.textTheme.titleMedium),
                   TextFormField(
                     controller: _amountController,
                     enabled: !widget.disableNonEditable && !widget.transaction.pending,
@@ -202,7 +206,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text("Category", style: theme.textTheme.titleMedium),
                       Tooltip(
                         message: "Add new category",
                         child: IconButton(
@@ -236,7 +240,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  const Text("Posted Date", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Posted Date", style: theme.textTheme.titleMedium),
                   Row(
                     children: [
                       Expanded(
@@ -244,9 +248,8 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.calendar_today),
-                        onPressed: widget.disableNonEditable || widget.transaction.pending
-                            ? null
-                            : () => _selectDate(context),
+                        onPressed:
+                            widget.disableNonEditable || widget.transaction.pending ? null : () => _selectDate(context),
                       ),
                     ],
                   ),
@@ -260,7 +263,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Pending", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text("Pending", style: theme.textTheme.titleMedium),
                         Text("If this transaction is still pending.", style: helpStyle),
                       ],
                     ),

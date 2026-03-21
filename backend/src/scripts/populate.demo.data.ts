@@ -8,6 +8,8 @@ import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
+import { ChartRange } from "@backend/user/model/chart.range.model";
+import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
@@ -109,6 +111,10 @@ async function createUser() {
   let demoUser = await User.findOne({ where: { username: "demo" } });
   if (!demoUser) {
     await User.createUser({ username: "demo", password: "Demodemo", admin: true });
+    // Update the user config
+    const userConfig = (await UserConfig.findOne({ where: { user: { username: "demo" } } }))!;
+    userConfig.netWorthRange = ChartRange.sevenDays;
+    await userConfig.update();
     demoUser = await User.findOne({ where: { username: "demo" } });
     logger.log("Created demo user and default categories.");
   } else {
@@ -118,7 +124,7 @@ async function createUser() {
 }
 
 /** Creates the institutions to associate accounts to */
-async function createInstitution() {
+async function createInstitution(user: User) {
   const logger = new Logger("demo:institution");
   const institutions = [
     Institution.fromPlain({ name: "Chase Bank", url: "https://www.chase.com", id: "www.chase.com", hasError: false }),
@@ -128,13 +134,14 @@ async function createInstitution() {
     Institution.fromPlain({ name: "Toyota Financial", url: "https://www.toyotafinancial.com", id: "www.toyotafinancial.com", hasError: false }),
   ];
   logger.log(`Creating ${institutions.length} institutions.`);
+  institutions.forEach((x) => (x.user = user));
   return await Institution.insertMany(institutions);
 }
 
 /** Creates necessary accounts */
 async function createAccounts(demoUser: User) {
   const logger = new Logger("demo:account");
-  const institutions = await createInstitution();
+  const institutions = await createInstitution(demoUser);
   const accounts = [
     // Depository
     new Account("Checking", "simple-fin", demoUser, institutions[0]!, 2500, 2400, AccountType.depository, "USD", AccountSubType.checking),

@@ -23,9 +23,8 @@ class TransactionRow extends ConsumerWidget {
     final isPrivate = userConfig?.privateMode ?? false;
 
     return InkWell(
-      onTap: !allowDialog
-          ? null
-          : () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
+      onTap:
+          !allowDialog ? null : () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
       child: Container(
         decoration: BoxDecoration(
           color: transaction.pending ? theme.colorScheme.primary.withValues(alpha: 0.15) : Colors.transparent,
@@ -44,7 +43,7 @@ class TransactionRow extends ConsumerWidget {
                   children: [
                     Text(
                       transaction.description,
-                      style: theme.textTheme.bodyLarge,
+                      style: theme.textTheme.bodyMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -65,8 +64,7 @@ class TransactionRow extends ConsumerWidget {
                 children: [
                   Text(
                     transaction.amount.toCurrency(isPrivate),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: theme.textTheme.labelLarge?.copyWith(
                       color: transaction.amount.toBalanceColor(theme),
                     ),
                   ),

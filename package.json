@@ -3,6 +3,7 @@
   "scripts": {
     "install:all": "npm i && npm i --prefix ./backend",
     "build:docker": "ts-node --project ./backend/tsconfig.build.json ./scripts/build.docker.ts",
+    "screenshot": "ts-node --project ./backend/tsconfig.build.json ./scripts/release.screenshots.ts",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write",
     "changelog:generate:md": "auto-changelog --template ./docs/changelog-templates/markdown.hbs",
@@ -12,12 +13,13 @@
     "adb:reverse": "adb reverse tcp:8001 tcp:8001",
     "adb:attach:logcat": "adb logcat | Select-String -Pattern \"flutter\", \"sprout\""
   },
-  "dependencies": {},
   "devDependencies": {
+    "@types/chrome-remote-interface": "^0.33.0",
     "auto-changelog": "^2.5.0",
+    "chrome-remote-interface": "^0.34.0",
+    "git-describe": "^4.1.1",
     "prettier": "^3.8.1",
-    "ts-node": "^10.9.2",
-    "git-describe": "^4.1.1"
+    "ts-node": "^10.9.2"
   },
   "auto-changelog": {
     "template": "./docs/changelog-template.hbs",

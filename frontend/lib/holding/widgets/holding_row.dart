@@ -72,7 +72,7 @@ class HoldingRow extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(holding.symbol, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(holding.symbol, style: theme.textTheme.labelLarge),
                   // Visual Status Indicator
                   Row(
                     spacing: 4,
@@ -90,7 +90,6 @@ class HoldingRow extends ConsumerWidget {
                         style: theme.textTheme.labelSmall?.copyWith(
                           letterSpacing: 0.5,
                           color: isLive ? theme.colorScheme.primary : theme.disabledColor,
-                          fontWeight: isLive ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -104,7 +103,6 @@ class HoldingRow extends ConsumerWidget {
                 Text(
                   marketValue.toCurrency(isPrivate),
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: isLive ? FontWeight.bold : FontWeight.normal,
                     color: isLive ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.8),
                   ),
                 ),

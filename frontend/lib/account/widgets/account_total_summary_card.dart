@@ -105,9 +105,8 @@ class _SummaryLabel extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
+          style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.bold,
           ),
         ),
         Text(amount.toCurrency(isPrivate), style: theme.textTheme.headlineSmall?.copyWith(color: color, fontSize: 18)),

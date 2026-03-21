@@ -24,11 +24,11 @@ class ChatBubble extends ConsumerWidget {
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: Theme.of(context).textTheme.copyWith(
-          headlineLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
-          headlineMedium: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-          headlineSmall: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-          titleLarge: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+              headlineLarge: const TextStyle(color: Colors.white, fontSize: 22),
+              headlineMedium: const TextStyle(color: Colors.white, fontSize: 20),
+              headlineSmall: const TextStyle(color: Colors.white, fontSize: 18),
+              titleLarge: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
       ),
       child: GptMarkdown(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
     );

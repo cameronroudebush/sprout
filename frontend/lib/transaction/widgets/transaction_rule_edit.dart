@@ -147,6 +147,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isEdit = widget.rule != null;
 
     return SproutBaseDialogWidget(
@@ -162,12 +163,12 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
               onPressed: () => _confirmDelete(context),
               icon: Icon(Icons.delete),
             ),
-      child: _getForm(isEdit),
+      child: _getForm(isEdit, theme),
     );
   }
 
   /// Builds the form for display based on type and editing capability
-  Widget _getForm(bool isEdit) {
+  Widget _getForm(bool isEdit, ThemeData theme) {
     String valueHintText = "e.g., 'Starbucks' or '15.50'";
     String valueHelpText = "Enter the specific text or numerical value to match.";
 
@@ -206,7 +207,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  const Text("Priority", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Priority", style: theme.textTheme.titleMedium),
                   TextFormField(
                     keyboardType: TextInputType.number,
                     controller: _priorityController,
@@ -231,7 +232,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  const Text("Rule Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Rule Type", style: theme.textTheme.titleMedium),
                   DropdownButtonFormField<TransactionRuleTypeEnum>(
                     dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     value: _type,
@@ -257,7 +258,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  const Text("Value", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Value", style: theme.textTheme.titleMedium),
                   TextFormField(
                     keyboardType: _type == TransactionRuleTypeEnum.amount
                         ? const TextInputType.numberWithOptions(decimal: true)
@@ -286,7 +287,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Category", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text("Category", style: theme.textTheme.titleMedium),
                       Tooltip(
                         message: "Add new category",
                         child: IconButton(
@@ -317,7 +318,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
                 children: [
-                  const Text("Account", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Account", style: theme.textTheme.titleMedium),
                   AccountDropdown(_account, (acc) {
                     setState(() => _account = acc);
                   }),
@@ -332,7 +333,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Strict Match", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text("Strict Match", style: theme.textTheme.titleMedium),
                         Text("Enables an exact match, rather than a partial match.", style: helpStyle),
                       ],
                     ),
@@ -348,7 +349,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Enabled", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text("Enabled", style: theme.textTheme.titleMedium),
                         Text("Toggle to enable or disable this rule.", style: helpStyle),
                       ],
                     ),
