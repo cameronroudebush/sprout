@@ -61,6 +61,7 @@ class SettingsPage extends ConsumerWidget {
     }
 
     return SingleChildScrollView(
+      padding: EdgeInsets.only(top: 8),
       child: SproutRouteWrapper(
         child: Column(
           spacing: 16,

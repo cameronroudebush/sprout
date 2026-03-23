@@ -63,7 +63,7 @@ class Auth extends _$Auth {
           final user = await loginOIDC();
           if (user != null) {
             // Wait for user config to load before proceeding
-            ref.watch(userConfigProvider);
+            ref.read(userConfigProvider);
             return user;
           } else {
             return null;
@@ -75,7 +75,7 @@ class Auth extends _$Auth {
             refreshToken: tokens.refreshToken,
           );
           if (result != null) {
-            ref.watch(userConfigProvider);
+            ref.read(userConfigProvider);
           }
           return result;
         }
@@ -96,7 +96,7 @@ class Auth extends _$Auth {
           final api = await ref.read(userApiProvider.future);
           await api.userControllerMe();
           // Wait for user config to load before proceeding
-          ref.watch(userConfigProvider);
+          ref.read(userConfigProvider);
         } catch (e) {
           if (e is ApiException && e.code == 404) await setup();
         }

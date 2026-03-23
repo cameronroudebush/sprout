@@ -78,11 +78,10 @@ class AccountSummaryView extends ConsumerWidget {
       );
     }
 
-    final groupedAccounts = config.keys.map((type) {
+    final groupedAccounts =
+        config.keys.where((type) => accounts.any((a) => a.type == type) && config[type] != null).map((type) {
       final groupAccounts = accounts.where((a) => a.type == type).toList();
-      final ui = config[type];
-
-      if (groupAccounts.isEmpty || ui == null) return const SizedBox.shrink();
+      final ui = config[type]!;
 
       // Calculate the weighted aggregate percentage change for this group
       double totalGroupValueChange = 0;

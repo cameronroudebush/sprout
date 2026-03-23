@@ -7,7 +7,7 @@ import 'package:sprout/shared/api/base_api.dart';
 part 'logo_provider.g.dart';
 
 /// Riverpod to cache and load the given image with the given data considering an authenticated API
-@riverpod
+@Riverpod(keepAlive: true)
 Future<Uint8List> logoImage(Ref ref, {String? faviconUrl, String? fullUrl}) async {
   final client = await ref.read(baseAuthenticatedClientProvider.future);
   final api = CoreApi(client);

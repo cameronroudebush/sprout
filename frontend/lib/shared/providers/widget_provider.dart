@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
@@ -9,6 +10,7 @@ import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dar
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/transaction/models/extensions/transaction_extensions.dart';
@@ -138,24 +140,25 @@ class WidgetSync extends _$WidgetSync {
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+    LoggerProvider.debug("Starting background widget update task");
+    WidgetsFlutterBinding.ensureInitialized();
     // Manually manage a ProviderContainer for the background isolate
     final container = ProviderContainer();
 
     try {
       // Apply default auth to grab data in the background of this isolate
       await container.read(authProvider.notifier).applyDefaultAuth();
+      await container.read(authProvider.future);
       // Force-refresh the futures to ensure the widget doesn't show stale data
-      await Future.wait([
-        container.read(userConfigProvider.future),
-        container.read(totalNetWorthProvider.future),
-        container.read(transactionsProvider.future),
-      ]);
-
+      await container.read(userConfigProvider.future);
+      await container.read(totalNetWorthProvider.future);
+      await container.read(transactionsProvider.future);
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).update();
-
+      LoggerProvider.debug("Background widget update successful");
       return true; // Task succeeded
     } catch (e) {
+      LoggerProvider.error(e);
       return false;
     } finally {
       container.dispose();
