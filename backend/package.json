@@ -37,7 +37,7 @@
     "rxjs": "^7.8.2",
     "sharp": "^0.34.3",
     "sharp-ico": "^0.1.5",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^6.0.1",
     "swagger-themes": "^1.4.3",
     "ts-mixer": "^6.0.4",
     "typeorm": "^0.3.20",
@@ -70,7 +70,7 @@
     "tsc-alias": "^1.8.8",
     "tsconfig-paths": "^4.2.0",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.2"
+    "typescript": "^6.0.2"
   },
   "overrides": {
     "google-auth-library": "^9.14.2"
