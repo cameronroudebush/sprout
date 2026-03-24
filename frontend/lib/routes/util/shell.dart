@@ -23,6 +23,7 @@ class SproutShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authNotifier = ref.read(authProvider.notifier);
     final authState = ref.watch(authProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
     final bioState = ref.watch(biometricsProvider);
@@ -55,7 +56,7 @@ class SproutShell extends ConsumerWidget {
               child: isDesktop
                   ? Row(
                       children: [
-                        const SproutSideNav(),
+                        if (!authNotifier.isSetupMode) const SproutSideNav(),
                         Expanded(child: child),
                       ],
                     )

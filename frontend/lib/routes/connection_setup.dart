@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/shared/widgets/icon.dart';
 
 /// This page allows a user to adjust their connection information for Sprout. Only available on mobile.
 class ConnectionSetupPage extends ConsumerStatefulWidget {
@@ -62,15 +63,14 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
                 key: _formKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 12,
                   children: [
                     // Branding
-                    Image.asset('assets/icon/color.png', height: 80, fit: BoxFit.contain),
-                    const SizedBox(height: 12),
+                    SproutIcon(128),
                     Text(
                       'Server Configuration',
                       style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 12),
                     Text(
                       'As a self-hosted platform, Sprout needs to know where your private instance is located. '
                       'Enter your server address below to sync your data. You can update this at any time.',
@@ -80,7 +80,7 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
                         height: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
 
                     // URL Input Field
                     TextFormField(
@@ -105,7 +105,7 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
 
                     // Action Button
                     SizedBox(
@@ -124,8 +124,6 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
                             : const Text('Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ),
-
-                    const SizedBox(height: 32),
                   ],
                 ),
               ),

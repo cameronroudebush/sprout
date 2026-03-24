@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/setup/widgets/pages/wrapper.dart';
+import 'package:sprout/shared/widgets/icon.dart';
 
 /// This page contains the initial page welcoming the user to the app
 class WelcomeSetupPage extends StatelessWidget {
@@ -19,17 +20,17 @@ class WelcomeSetupPage extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 600),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 16,
           children: <Widget>[
             // Hero Icon or Logo
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
-              child: Image.asset('assets/icon/color.png', height: 80, fit: BoxFit.contain),
+              child: SproutIcon(128),
             ),
-            const SizedBox(height: 16),
 
             // Main Title
             Text(
@@ -41,7 +42,6 @@ class WelcomeSetupPage extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
 
             // Subtitle / Intro text
             Padding(
@@ -52,7 +52,7 @@ class WelcomeSetupPage extends StatelessWidget {
                 style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
 
             // Descriptive Body
             Text(
@@ -63,8 +63,7 @@ class WelcomeSetupPage extends StatelessWidget {
                 fontSize: isDesktop ? 18 : 16,
               ),
             ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
 
             // Feature Pills
             Wrap(
