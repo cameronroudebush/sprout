@@ -21,8 +21,10 @@ class SettingSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 16, bottom: 8),
           child: Text(
-            title.toUpperCase(),
-            style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+            title,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
           ),
         ),
         Container(

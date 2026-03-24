@@ -336,8 +336,8 @@ class SproutLineChart extends StatelessWidget {
                 formatYAxis != null
                     ? formatYAxis!(value)
                     : formatValue != null
-                    ? formatValue!(value)
-                    : value.toStringAsFixed(2),
+                        ? formatValue!(value)
+                        : value.toStringAsFixed(2),
                 style: theme.textTheme.bodySmall,
               ),
             );
@@ -354,8 +354,6 @@ class SproutLineChart extends StatelessWidget {
     Color positiveColor,
     Color negativeColor,
   ) {
-    final colorScheme = theme.colorScheme;
-
     return LineTouchData(
       handleBuiltInTouches: true,
       touchTooltipData: LineTouchTooltipData(
@@ -375,14 +373,12 @@ class SproutLineChart extends StatelessWidget {
 
               return LineTooltipItem(
                 '${DateFormat('MMM dd, yyyy').format(date)}\n',
-                TextStyle(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
+                theme.textTheme.labelLarge!,
                 children: [
                   TextSpan(
                     text: formatValue != null ? formatValue!(flSpot.y) : flSpot.y.toString(),
-                    style: TextStyle(
+                    style: theme.textTheme.labelLarge?.copyWith(
                       color: flSpot.y >= 0 ? positiveColor : negativeColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
                     ),
                   ),
                 ],

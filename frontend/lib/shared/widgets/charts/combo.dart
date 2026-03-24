@@ -22,6 +22,7 @@ class ComboChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     if (spendingData.data.isEmpty) return const SizedBox();
     final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
 
@@ -42,7 +43,7 @@ class ComboChart extends ConsumerWidget {
       child: Column(
         spacing: 4,
         children: [
-          if (title != null) Text(title!, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          if (title != null) Text(title!, style: theme.textTheme.headlineSmall),
 
           Expanded(
             child: Stack(
@@ -65,7 +66,7 @@ class ComboChart extends ConsumerWidget {
                           dotData: const FlDotData(show: true),
                         ),
                       ],
-                      titlesData: _getSharedTitlesData(yInterval, privateMode, isVisibleLayer: false),
+                      titlesData: _getSharedTitlesData(theme, yInterval, privateMode, isVisibleLayer: false),
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
                     ),
@@ -79,7 +80,7 @@ class ComboChart extends ConsumerWidget {
                     maxY: maxY,
                     minY: 0,
                     barGroups: _getBarGroups(),
-                    titlesData: _getSharedTitlesData(yInterval, privateMode, isVisibleLayer: true),
+                    titlesData: _getSharedTitlesData(theme, yInterval, privateMode, isVisibleLayer: true),
                     gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: yInterval),
                     borderData: FlBorderData(show: false),
                     barTouchData: BarTouchData(
@@ -120,7 +121,7 @@ class ComboChart extends ConsumerWidget {
 
                           return BarTooltipItem(
                             '$categoryName\n',
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            theme.textTheme.labelLarge!,
                             children: <TextSpan>[
                               TextSpan(
                                 text: '${barValue.toCurrency(privateMode)}\n',
@@ -180,7 +181,8 @@ class ComboChart extends ConsumerWidget {
 
   /// Generates titles data.
   /// [isVisibleLayer] determines if we draw visible text or transparent text (spacer).
-  FlTitlesData _getSharedTitlesData(double yInterval, bool privateMode, {required bool isVisibleLayer}) {
+  FlTitlesData _getSharedTitlesData(ThemeData theme, double yInterval, bool privateMode,
+      {required bool isVisibleLayer}) {
     return FlTitlesData(
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -197,7 +199,7 @@ class ComboChart extends ConsumerWidget {
               meta: meta,
               child: Text(
                 spendingData.data[index].monthLabel,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: textColor),
+                style: theme.textTheme.labelLarge?.copyWith(color: textColor),
               ),
             );
           },
@@ -221,9 +223,8 @@ class ComboChart extends ConsumerWidget {
   }
 
   Widget _buildLegend() {
-    List<MonthlyCategoryData> categories = spendingData.data
-        .map((e) => e.categories)
-        .firstWhere((cats) => cats.isNotEmpty, orElse: () => []);
+    List<MonthlyCategoryData> categories =
+        spendingData.data.map((e) => e.categories).firstWhere((cats) => cats.isNotEmpty, orElse: () => []);
     return Wrap(
       spacing: 16,
       runSpacing: 10,
