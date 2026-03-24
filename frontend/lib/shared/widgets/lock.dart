@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/shared/widgets/icon.dart';
 
 /// This widget is intended to display when the app is locked by biometrics
 class SproutLockWidget extends ConsumerWidget {
@@ -24,7 +25,6 @@ class SproutLockWidget extends ConsumerWidget {
               child: Container(color: theme.scaffoldBackgroundColor.withValues(alpha: 0.8)),
             ),
           ),
-
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -35,10 +35,10 @@ class SproutLockWidget extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: Image.asset('assets/icon/color.png', width: 100, height: 100, fit: BoxFit.contain),
+                    child: const SproutIcon(96),
                   ),
                   const SizedBox(height: 16),
 

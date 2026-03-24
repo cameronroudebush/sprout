@@ -8,6 +8,7 @@ import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/connection_failure.dart';
 import 'package:sprout/routes/connection_setup.dart';
 import 'package:sprout/routes/setup.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
@@ -42,7 +43,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/setup',
-        pageBuilder: (context, state) => const NoTransitionPage(child: SproutShell(child: SetupPage())),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: SproutShell(child: SproutRouteWrapper(child: SetupPage()))),
       ),
       GoRoute(
         path: '/connection/setup',

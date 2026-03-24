@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/shared/widgets/icon.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 
 /// Reusable loading indicator to display when Sprout is still thinking
@@ -34,13 +35,7 @@ class SproutLoadingIndicator extends StatelessWidget {
                     ),
                   ),
                   // Sprout Logo
-                  Image.asset(
-                    'assets/icon/color.png',
-                    height: logoSize,
-                    width: logoSize,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
+                  Center(child: SproutIcon(logoSize)),
                 ],
               ),
             ),

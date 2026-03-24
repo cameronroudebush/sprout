@@ -5,6 +5,7 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
+import 'package:sprout/shared/widgets/logo.dart';
 import 'package:sprout/user/models/extensions/user_extensions.dart';
 
 /// A widget that is used to render the side navigation for Sprout. Only used on desktop displays.
@@ -58,10 +59,7 @@ class _InternalSideNavContent extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     const SizedBox.shrink(),
-                    Image.asset(
-                      'assets/logo/color-transparent-no-tag.png',
-                      height: 64,
-                    ),
+                    const SproutLogo(224),
                     const SizedBox.shrink(),
                   ],
                 )),

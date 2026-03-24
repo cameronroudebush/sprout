@@ -4,6 +4,7 @@ import 'package:sprout/auth/widgets/login_form.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
+import 'package:sprout/shared/widgets/logo.dart';
 
 /// A page that displays the login for a user to get into Sprout
 class LoginPage extends ConsumerWidget {
@@ -26,21 +27,14 @@ class LoginPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: isDesktop ? 48 : 12),
-                  child: Image.asset(
-                    'assets/logo/color-transparent-no-tag.png',
-                    width: isDesktop ? 600 : 400,
-                    fit: BoxFit.contain,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : 12),
+                  child: SproutLogo(isDesktop ? 600 : 400),
                 ),
                 Column(
                   spacing: 24,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 24),
-                      child: Text('Welcome Back!', style: theme.textTheme.headlineMedium),
-                    ),
+                    Text('Welcome Back!', style: theme.textTheme.headlineMedium),
                     LoginForm(),
                   ],
                 ),
