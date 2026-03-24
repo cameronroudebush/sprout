@@ -7,6 +7,7 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/notification/models/extensions/firebase_notification_extension.dart';
 import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// Global plugin instance for the background isolate.
@@ -19,6 +20,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   // Create a container to access Sprout providers in the background
   final container = ProviderContainer();
+  Notification? notification;
+  Importance importance = Importance.defaultImportance;
 
   try {
     // Re-configure Firebase for this isolate
@@ -27,39 +30,38 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     // Determine notification payload
     final payload = FirebaseNotificationDTO.fromJson(message.data)!;
+    importance = payload.importanceTyped;
 
     // Attempt to fetch full notification details from backend
-    Notification? notification;
-    try {
-      final api = await container.read(notificationApiProvider.future);
-      notification = await api.notificationControllerGetById(payload.notificationId);
-    } catch (e) {
-      // Fallback if network fails or token is expired
-      notification = Notification(
-        id: Uuid().v4(),
-        title: "New Activity",
-        message: "Sign in to view details.",
-        type: NotificationTypeEnum.info,
-        createdAt: DateTime.now(),
-      );
-    }
-
-    // Show the local notification
-    await _bgLocalNotifications.show(
-      id: DateTime.now().millisecond,
-      title: notification!.title,
-      body: notification.message,
-      payload: payload.notificationId,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          'secure_channel',
-          'Secure Notifications',
-          importance: payload.importanceTyped,
-          color: Color(0xFF141A1F),
-        ),
-      ),
+    final api = await container.read(notificationApiProvider.future);
+    notification = await api.notificationControllerGetById(payload.notificationId);
+  } catch (e) {
+    LoggerProvider.error(e);
+    // Fallback if network fails or token is expired
+    notification = Notification(
+      id: Uuid().v4(),
+      title: "New Activity",
+      message: "Sign in to view details.",
+      type: NotificationTypeEnum.info,
+      createdAt: DateTime.now(),
     );
-  } finally {
-    container.dispose();
   }
+
+  // Show the local notification
+  await _bgLocalNotifications.show(
+    id: DateTime.now().millisecond,
+    title: notification!.title,
+    body: notification.message,
+    payload: notification.id,
+    notificationDetails: NotificationDetails(
+      android: AndroidNotificationDetails(
+        'secure_channel',
+        'Secure Notifications',
+        importance: importance,
+        color: Color(0xFF141A1F),
+      ),
+    ),
+  );
+  // Cleanup
+  container.dispose();
 }

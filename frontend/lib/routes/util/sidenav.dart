@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/user/models/extensions/user_extensions.dart';
@@ -64,7 +65,9 @@ class _InternalSideNavContent extends ConsumerWidget {
                     const SizedBox.shrink(),
                   ],
                 )),
-            Divider(),
+            const Divider(),
+            const NotificationBell(isDesktop: true),
+            const Divider(),
 
             // Navigation Items
             Expanded(
@@ -108,6 +111,7 @@ class _InternalSideNavContent extends ConsumerWidget {
                                     : theme.colorScheme.onSurfaceVariant,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
+                              textAlign: TextAlign.start,
                             ),
                           ],
                         ),
@@ -117,7 +121,7 @@ class _InternalSideNavContent extends ConsumerWidget {
                 },
               ),
             ),
-
+            const Divider(),
             // User Profile Section
             _UserProfileTile(authUser: authUser!, onLogout: authNotifier.logout, currentPath: currentPath),
           ],

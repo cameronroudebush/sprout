@@ -63,7 +63,6 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
             ..sort((a, b) => a.name.compareTo(b.name));
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Column(
               spacing: 12,
               children: [

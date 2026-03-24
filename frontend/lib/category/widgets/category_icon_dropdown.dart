@@ -12,6 +12,10 @@ class CategoryIconDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
+    // Sort the icons alphabetically
+    final sortedIconEntries = CategoryIcon.iconLibrary.entries.toList()
+      ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
+
     return DropdownMenu<String>(
       initialSelection: icon,
       menuHeight: media.height * .4,
@@ -30,7 +34,7 @@ class CategoryIconDropdown extends StatelessWidget {
           onChanged(value);
         }
       },
-      dropdownMenuEntries: CategoryIcon.iconLibrary.entries.map((entry) {
+      dropdownMenuEntries: sortedIconEntries.map((entry) {
         return DropdownMenuEntry<String>(value: entry.key, label: entry.key, leadingIcon: Icon(entry.value));
       }).toList(),
     );

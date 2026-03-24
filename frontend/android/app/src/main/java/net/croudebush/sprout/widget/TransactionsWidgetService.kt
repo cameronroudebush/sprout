@@ -33,6 +33,11 @@ class TransactionsRemoteViewsFactory(private val context: Context) : RemoteViews
         val date = item.optString("date", "")
         val amountNumeric = item.optDouble("amountNumeric", 0.0)
         val isPending = item.optBoolean("pending", false)
+        val id = item.optString("id", "")
+
+        val fillInIntent = Intent() 
+        fillInIntent.putExtra("transaction_id", id)
+        views.setOnClickFillInIntent(R.id.transaction_item_root, fillInIntent)
 
         views.setTextViewText(R.id.item_merchant_name, merchant)
         views.setTextViewText(R.id.item_category, category.uppercase())
