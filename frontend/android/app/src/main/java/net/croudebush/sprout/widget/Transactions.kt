@@ -1,5 +1,6 @@
 package net.croudebush.sprout.widget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
@@ -9,6 +10,7 @@ import android.view.View
 import android.widget.RemoteViews
 import net.croudebush.sprout.R
 import androidx.core.net.toUri
+import net.croudebush.sprout.MainActivity
 
 class Transactions : AppWidgetProvider() {
 
@@ -24,6 +26,14 @@ class Transactions : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.transactions)
             views.setEmptyView(R.id.widget_transactions_list, R.id.widget_empty_view)
+
+            val clickIntent = Intent(context, MainActivity::class.java)
+            val clickPendingIntent = PendingIntent.getActivity(
+                context, 0, clickIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setPendingIntentTemplate(R.id.widget_transactions_list, clickPendingIntent)
+            views.setOnClickPendingIntent(R.id.widget_root, clickPendingIntent)
 
             val intent = Intent(context, TransactionsWidgetService::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
