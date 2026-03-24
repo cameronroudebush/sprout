@@ -48,7 +48,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       error: (err, _) => Center(child: Text("Error loading config: $err")),
       data: (userConfig) {
         final bool llmConfigured =
-            configAsync.value?.chatKeyProvidedInBackend ?? userConfig?.geminiKey?.isNotEmpty ?? false;
+            (configAsync.value?.chatKeyProvidedInBackend ?? false) || (userConfig?.geminiKey?.isNotEmpty ?? false);
 
         if (!llmConfigured) {
           return _buildNoConfigState(theme);
@@ -66,7 +66,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               children: [
                 Expanded(
                   child: messages.isEmpty
-                      ? _buildEmptyState()
+                      ? _buildEmptyState(theme)
                       : Scrollbar(
                           controller: _scrollController,
                           thumbVisibility: true,
@@ -121,7 +121,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   /// Builds a widget to display when there is no LLM history
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: SproutCard(
         child: Padding(
@@ -129,16 +129,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: 12,
-            children: const [
+            children: [
               Text(
                 "It's awfully quiet in here",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineSmall,
               ),
               Text(
                 "We haven't talked yet, but I'm ready when you are. Ask me a question below to kick things off. I promise I'm a great listener!",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: theme.textTheme.bodyLarge,
               ),
             ],
           ),

@@ -62,9 +62,10 @@ class SproutBaseDialogWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
+            spacing: 24,
             children: [
               const Expanded(child: SizedBox.shrink()),
-              Text(dialogTitleText, style: theme.textTheme.titleLarge),
+              Text(dialogTitleText, style: theme.textTheme.headlineMedium),
               if (!isMobile)
                 Expanded(
                   child: Align(
@@ -137,11 +138,11 @@ class SproutBaseDialogWidget extends StatelessWidget {
   Widget _buildDesktopDialog(BuildContext context, ThemeData theme) {
     return AlertDialog(
       insetPadding: EdgeInsets.zero,
-      titlePadding: const EdgeInsets.symmetric(vertical: 12),
+      titlePadding: const EdgeInsets.symmetric(vertical: 0),
       contentPadding: EdgeInsets.zero,
       title: _buildHeader(context, theme, false),
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
+        constraints: const BoxConstraints(maxWidth: 640),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -65,7 +65,7 @@ class AccountItemRow extends StatelessWidget {
               children: [
                 Text(
                   account.balance.toCurrency(isPrivate),
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium,
                 ),
                 SproutChangeWidget(
                   percentageChange: percentChange,

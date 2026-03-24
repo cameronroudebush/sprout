@@ -46,7 +46,6 @@ class SproutLockWidget extends ConsumerWidget {
                   Text(
                     "Sprout is Locked",
                     style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
@@ -79,7 +78,7 @@ class SproutLockWidget extends ConsumerWidget {
                       label: Text(bioState.isUnlocking ? "Verifying..." : "Unlock Sprout"),
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        textStyle: const TextStyle(fontSize: 18),
                       ),
                     ),
                   ),
@@ -88,7 +87,8 @@ class SproutLockWidget extends ConsumerWidget {
                   const SizedBox(height: 24),
                   TextButton(
                     onPressed: () => ref.read(authProvider.notifier).logout(),
-                    child: Text("Switch Account or Logout", style: TextStyle(color: theme.colorScheme.secondary)),
+                    child: Text("Switch Account or Logout",
+                        style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.secondary)),
                   ),
                 ],
               ),

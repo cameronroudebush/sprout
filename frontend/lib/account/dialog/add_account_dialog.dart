@@ -4,6 +4,7 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/selectable_account.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/widgets/provider_logo.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -44,7 +45,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         });
       }
     } catch (e) {
-      setState(() => _gettingAccountsError = e.toString());
+      setState(() => _gettingAccountsError = ref.read(notificationsProvider.notifier).parseOpenAPIException(e));
     } finally {
       setState(() => _gettingAccounts = false);
     }
@@ -52,6 +53,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // Watch the configuration provider for the list of available providers
     final config = ref.watch(secureConfigProvider).value;
     final accountsForProvider = _accountsPerProvider[_selectedProvider?.name];
@@ -61,11 +63,11 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     if (_gettingAccounts || _isAddingAccounts) {
       content = const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
     } else if (_gettingAccountsError != null) {
-      content = Text(_gettingAccountsError!, textAlign: TextAlign.center);
+      content = Text(_gettingAccountsError!, textAlign: TextAlign.center, style: theme.textTheme.bodyLarge);
     } else if (_selectedProvider == null) {
-      content = _getProvidersDisplay(context, config?.providers ?? []);
+      content = _getProvidersDisplay(theme, context, config?.providers ?? []);
     } else {
-      content = _getAccountsForProvider(context, _selectedProvider!);
+      content = _getAccountsForProvider(theme, context, _selectedProvider!);
     }
 
     return SproutBaseDialogWidget(
@@ -86,7 +88,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     );
   }
 
-  Widget _getAccountsForProvider(BuildContext context, ProviderConfig providerConfig) {
+  Widget _getAccountsForProvider(ThemeData theme, BuildContext context, ProviderConfig providerConfig) {
     final accounts = _accountsPerProvider[providerConfig.name] ?? [];
 
     return Column(
@@ -96,16 +98,18 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "Select accounts from ${providerConfig.name}",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: theme.textTheme.bodyLarge,
             ),
           ),
         if (accounts.isEmpty) _buildEmptyState(providerConfig),
         if (accounts.isNotEmpty)
-          SelectableAccountsWidget(
-            accounts: accounts,
-            displaySubTypes: true,
-            onSelectionChanged: (value) => setState(() => _selectedAccounts = value),
-          ),
+          SizedBox(
+              width: 500,
+              child: SelectableAccountsWidget(
+                accounts: accounts,
+                displaySubTypes: true,
+                onSelectionChanged: (value) => setState(() => _selectedAccounts = value),
+              )),
       ],
     );
   }
@@ -124,24 +128,23 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     );
   }
 
-  Widget _getProvidersDisplay(BuildContext context, List<ProviderConfig> providers) {
+  Widget _getProvidersDisplay(ThemeData theme, BuildContext context, List<ProviderConfig> providers) {
     if (providers.isEmpty) {
-      return const Text("No providers configured.", style: TextStyle(fontWeight: FontWeight.bold));
+      return Text("No providers configured.", style: theme.textTheme.bodyLarge);
     }
 
     return Column(
       spacing: 12,
       children: [
-        const Text("Select a provider", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text("Select a provider", style: theme.textTheme.bodyLarge),
         ...providers.map(
           (provider) => FilledButton(
-            onPressed: () => _setProvider(provider),
-            child: Row(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [FinanceProviderLogoWidget(provider), Text(provider.name), const SizedBox.shrink()],
-            ),
-          ),
+              onPressed: () => _setProvider(provider),
+              child: Row(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [FinanceProviderLogoWidget(provider), Text(provider.name), const SizedBox.shrink()],
+              )),
         ),
       ],
     );

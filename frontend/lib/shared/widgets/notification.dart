@@ -35,7 +35,6 @@ class SproutNotificationWidget extends StatelessWidget {
                       Text(
                         notification.message,
                         style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
                           color: notification.color,
                         ),
                         textAlign: TextAlign.center,

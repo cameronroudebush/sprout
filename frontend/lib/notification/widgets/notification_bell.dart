@@ -108,7 +108,6 @@ class NotificationBell extends ConsumerWidget {
               child: Text(
                 'Notifications',
                 style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),

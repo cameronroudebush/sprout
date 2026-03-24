@@ -77,9 +77,7 @@ class NotificationItem extends StatelessWidget {
                         notification.title,
                         maxLines: 5,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
-                        ),
+                        style: theme.textTheme.labelLarge?.copyWith(),
                       ),
                     ),
                     // Unread indicator

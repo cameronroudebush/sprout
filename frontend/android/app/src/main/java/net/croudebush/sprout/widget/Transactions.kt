@@ -11,6 +11,8 @@ import android.widget.RemoteViews
 import net.croudebush.sprout.R
 import androidx.core.net.toUri
 import net.croudebush.sprout.MainActivity
+import java.text.SimpleDateFormat
+import java.util.*
 
 class Transactions : AppWidgetProvider() {
 
@@ -21,7 +23,8 @@ class Transactions : AppWidgetProvider() {
     ) {
         val widgetData = WidgetUtils.getWidgetData(context)
         val transactions = widgetData?.optJSONArray("recentTransactions")
-        val hasData = transactions != null && transactions.length() > 0
+        val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
+        val currentTimestamp = sdf.format(Date()).replace("AM", "am").replace("PM", "pm")
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.transactions)
@@ -44,15 +47,13 @@ class Transactions : AppWidgetProvider() {
             // Commit the structural changes to the Launcher first
             appWidgetManager.updateAppWidget(appWidgetId, views)
 
-            // PARTIAL UPDATE: Force the text changes directly to bypass the launcher's layout engine
             val headerViews = RemoteViews(context.packageName, R.layout.transactions)
-            if (hasData) {
-                val timestamp = widgetData.optString("updateTime", "")
-                headerViews.setTextViewText(R.id.widget_last_updated, timestamp)
-                headerViews.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
-            } else {
-                headerViews.setViewVisibility(R.id.widget_last_updated, View.GONE)
-            }
+
+            val timestamp = widgetData?.optString("updateTime")?.takeIf { it.isNotEmpty() }
+                ?: currentTimestamp
+            headerViews.setTextViewText(R.id.widget_last_updated, timestamp)
+            headerViews.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
+
             appWidgetManager.partiallyUpdateAppWidget(appWidgetId, headerViews)
 
             appWidgetManager.notifyAppWidgetViewDataChanged(
