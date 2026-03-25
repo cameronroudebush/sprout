@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/account_tab_item.dart';
+import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
@@ -93,7 +94,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       final navWidget = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
         child: _buildNav(tabs, theme),
       );
 
@@ -193,10 +194,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
             child: NetWorthDisplay(
-              historyData: historyData,
-              timelineData: timelineData,
-              currentValue: AsyncValue.data(widget.account.balance),
-            ),
+                historyData: historyData,
+                timelineData: timelineData,
+                currentValue: AsyncValue.data(widget.account.balance),
+                invert: widget.account.isDebt),
           ),
         ],
       ),
