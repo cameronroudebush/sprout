@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/holding_logo.dart';
+import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -17,43 +18,22 @@ class HoldingRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final livePriceAsync = ref.watch(livePriceProvider(holding.symbol));
-
-    return livePriceAsync.when(
-      loading: () => _buildRow(context, ref, holding.marketValue, 0, 0, isLoading: true),
-      error: (_, __) => _buildRow(context, ref, holding.marketValue, 0, 0),
-      data: (liveData) {
-        final livePrice = liveData?.price ?? (holding.marketValue / holding.shares);
-        final liveMarketValue = livePrice * holding.shares;
-
-        // Compare Live Value vs Yesterday's Close (stored marketValue)
-        final dayValueChange = liveMarketValue - holding.marketValue;
-        final dayPercentChange = holding.marketValue != 0 ? (dayValueChange / holding.marketValue) * 100 : 0.0;
-
-        return _buildRow(
-          context,
-          ref,
-          liveMarketValue,
-          dayValueChange,
-          dayPercentChange,
-          isLive: liveData?.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
-        );
-      },
-    );
-  }
-
-  /// Builds the content row with our given data
-  Widget _buildRow(
-    BuildContext context,
-    WidgetRef ref,
-    num marketValue,
-    num change,
-    num percent, {
-    bool isLive = false,
-    bool isLoading = false,
-  }) {
     final theme = Theme.of(context);
-    final isPrivate = ref.watch(userConfigProvider).value?.privateMode ?? false;
+    final config = ref.watch(userConfigProvider).value;
+    final isPrivate = config?.privateMode ?? false;
+    final selectedRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
+
+    final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
+    final frame = holdingHistoryAsync.value?.getValueByFrame(selectedRange);
+    final livePriceAsync = ref.watch(livePriceProvider(holding.symbol));
+    final liveData = livePriceAsync.value;
+
+    final livePrice = liveData?.price ?? (holding.marketValue / holding.shares);
+    final liveMarketValue = livePrice * holding.shares;
+
+    final dayChange = liveMarketValue - holding.marketValue;
+    final dayPercent = holding.marketValue != 0 ? (dayChange / holding.marketValue) * 100 : 0.0;
+    final isLive = liveData?.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
 
     return InkWell(
       onTap: onSelect,
@@ -61,53 +41,85 @@ class HoldingRow extends ConsumerWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : Colors.transparent,
+          color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2) : Colors.transparent,
         ),
         child: Row(
           spacing: 12,
           children: [
-            // Logo
             HoldingLogo(holding),
+
+            // Market data
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4,
                 children: [
-                  Text(holding.symbol, style: theme.textTheme.labelLarge),
-                  // Visual Status Indicator
+                  // Symbol & Total Market Value
                   Row(
-                    spacing: 4,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isLive ? Colors.green : theme.disabledColor,
-                        ),
+                      Row(
+                        spacing: 8,
+                        children: [
+                          Text(holding.symbol, style: theme.textTheme.titleMedium),
+                        ],
                       ),
                       Text(
-                        isLive ? "LIVE" : "PREVIOUS CLOSE",
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          letterSpacing: 0.5,
-                          color: isLive ? theme.colorScheme.primary : theme.disabledColor,
-                        ),
+                        liveMarketValue.toCurrency(isPrivate),
+                        style: theme.textTheme.titleMedium,
                       ),
+                    ],
+                  ),
+
+                  // Price Type (Live/Prev) & Price Change
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        isLive ? 'Price' : 'Previous Close',
+                        style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                      SproutChangeWidget(
+                        totalChange: dayChange,
+                        percentageChange: dayPercent,
+                        fontSize: theme.textTheme.labelMedium!.fontSize!,
+                      ),
+                    ],
+                  ),
+
+                  // Provider Source
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        spacing: 4,
+                        children: [
+                          Text(
+                            "Source: ${holding.account.provider}",
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          Tooltip(
+                            message: "This data may be out of date",
+                            child: Icon(
+                              Icons.info_outline,
+                              size: 12,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (frame != null)
+                        SproutChangeWidget(
+                          totalChange: frame.valueChange,
+                          percentageChange: frame.percentChange,
+                          fontSize: theme.textTheme.labelMedium!.fontSize!,
+                        ),
                     ],
                   ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  marketValue.toCurrency(isPrivate),
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: isLive ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                  ),
-                ),
-                SproutChangeWidget(totalChange: change, percentageChange: percent),
-              ],
             ),
           ],
         ),

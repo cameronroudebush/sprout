@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 
@@ -31,8 +32,12 @@ class Categories extends _$Categories {
     final api = await ref.read(categoryApiProvider.future);
     final newCategory = await api.categoryControllerCreate(c);
     if (newCategory != null) {
-      ref.invalidateSelf();
+      state = AsyncData([
+        ...?state.value,
+        newCategory,
+      ]);
     }
+    ref.read(notificationsProvider.notifier).openFrontendOnly("Category added", type: NotificationTypeEnum.success);
     return newCategory;
   }
 

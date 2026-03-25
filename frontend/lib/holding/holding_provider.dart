@@ -32,13 +32,13 @@ class AccountHoldings extends _$AccountHoldings {
   }
 }
 
-/// Provides state to the account holding history per account id
+/// Provides state to the holding history per holding id
 @Riverpod(keepAlive: true)
-class AccountHoldingsHistory extends _$AccountHoldingsHistory {
+class AccountHoldingHistory extends _$AccountHoldingHistory {
   @override
-  Future<List<EntityHistory>> build(String accountId) async {
+  Future<EntityHistory?> build(String holdingId) async {
     final api = await ref.watch(holdingApiProvider.future);
-    return await api.holdingControllerGetHoldingHistory(accountId) ?? [];
+    return await api.holdingControllerGetSpecificHoldingHistory(holdingId);
   }
 }
 

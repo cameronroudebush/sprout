@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
@@ -43,6 +44,10 @@ class TransactionRules extends _$TransactionRules {
     if (addedRule != null && state.value != null) {
       final newList = [...state.value!.rules, addedRule];
       state = AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
+
+      ref
+          .read(notificationsProvider.notifier)
+          .openFrontendOnly("Transaction Rule Added", type: NotificationTypeEnum.success);
     } else {
       _setRunning(false);
     }

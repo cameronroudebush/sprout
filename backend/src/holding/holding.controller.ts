@@ -8,7 +8,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Controller, Get, NotFoundException, Param, ParseArrayPipe, Query } from "@nestjs/common";
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { EntityHistory, HistoricalDataPoint } from "../net-worth/model/api/entity.history.dto";
 
 /** This controller contains information about {@link Holding} models which is stock information. */
@@ -53,6 +53,28 @@ export class HoldingController {
     const account = await Account.findOne({ where: { id: accountId, user: { id: user.id }, type: AccountType.investment } });
     if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
     return (await this.netWorthService.getHistoryForHoldings(account)).map((x) => x.history);
+  }
+
+  @Get("history/:id")
+  @ApiOperation({
+    summary: "Get history for a specific holding.",
+    description: "Retrieves the value and performance history for a single holding given by its ID.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "The ID of the specific holding.",
+    type: String,
+  })
+  @ApiOkResponse({ description: "Holding history found successfully.", type: EntityHistory })
+  async getSpecificHoldingHistory(@Param("id") id: string, @CurrentUser() user: User) {
+    const holding = await Holding.findOne({
+      where: { id, account: { user: { id: user.id } } },
+      relations: ["account"],
+    });
+    if (!holding) throw new NotFoundException(`Failed to find holding with id ${id}`);
+    const history = await this.netWorthService.getHistoryForHolding(holding);
+    if (!history) throw new NotFoundException(`No historical data found for holding ${holding.symbol}`);
+    return history.history;
   }
 
   @Get("timeline/:id")

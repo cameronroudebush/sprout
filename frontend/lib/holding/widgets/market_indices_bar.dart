@@ -91,22 +91,21 @@ class _IndexTile extends ConsumerWidget {
       children: [
         Text(
           data.name,
-          style: theme.textTheme.labelMedium?.copyWith(
+          style: theme.textTheme.labelLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            fontSize: 14,
           ),
         ),
         if (showPrice)
           Text(
             data.price.toCurrency(isPrivate),
-            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 24),
+            style: theme.textTheme.labelLarge,
           ),
         SproutChangeWidget(
           totalChange: data.change,
           percentageChange: data.changePercent,
           mainAxisAlignment: MainAxisAlignment.center,
           showValue: false,
-          fontSize: 12,
+          fontSize: theme.textTheme.labelLarge!.fontSize!,
         ),
       ],
     );
@@ -130,7 +129,7 @@ class _StatusBadge extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("MARKET STATUS", style: theme.textTheme.labelSmall?.copyWith(fontSize: 10)),
+        Text("MARKET STATUS", style: theme.textTheme.labelSmall),
         Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 8,
@@ -146,7 +145,7 @@ class _StatusBadge extends StatelessWidget {
             ),
             Text(
               label,
-              style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: color),
+              style: theme.textTheme.labelSmall?.copyWith(color: color),
             ),
           ],
         ),
