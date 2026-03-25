@@ -74,10 +74,9 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
     );
 
     if (widget.category == null) {
+      final added = await ref.read(categoriesProvider.notifier).add(categoryToSave);
       if (widget.onAdd != null) {
-        widget.onAdd!(categoryToSave);
-      } else {
-        await ref.read(categoriesProvider.notifier).add(categoryToSave);
+        widget.onAdd!(added!);
       }
     } else {
       await ref.read(categoriesProvider.notifier).edit(categoryToSave);
@@ -119,11 +118,9 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                 decoration: const InputDecoration(labelText: "Category Name", border: OutlineInputBorder()),
                 onSubmitted: (_) => canSave ? _handleSave(context) : null,
               ),
-
               CategoryIconDropdown(_selectedIcon, (newValue) {
                 setState(() => _selectedIcon = newValue);
               }),
-
               CategoryDropdown(
                 _selectedParent,
                 (newValue) => setState(() => _selectedParent = newValue),

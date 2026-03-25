@@ -260,4 +260,44 @@ class NotificationApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
+
+  /// 
+  ///
+  /// Notifies all the current users devices with a test notification. Only available in dev mode.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> notificationControllerNotifyWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/notification/test/notify';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// 
+  ///
+  /// Notifies all the current users devices with a test notification. Only available in dev mode.
+  Future<void> notificationControllerNotify() async {
+    final response = await notificationControllerNotifyWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

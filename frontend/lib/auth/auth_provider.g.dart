@@ -115,7 +115,7 @@ final class AuthProvider extends $AsyncNotifierProvider<Auth, User?> {
   Auth create() => Auth();
 }
 
-String _$authHash() => r'0d8c2aeb743459cdb92ae8e165fc4575f002bd1c';
+String _$authHash() => r'f6fbb1c9422e1eb4210033e81a502c897b14c2e3';
 
 abstract class _$Auth extends $AsyncNotifier<User?> {
   FutureOr<User?> build();

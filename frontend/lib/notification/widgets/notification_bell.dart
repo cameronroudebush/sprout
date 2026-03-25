@@ -38,7 +38,7 @@ class NotificationBell extends ConsumerWidget {
       onOpened: () => _handleNotificationMenuOpened(ref),
       padding: EdgeInsets.zero,
       menuPadding: EdgeInsets.zero,
-      offset: const Offset(0, 50),
+      offset: Offset(isDesktop ? 250 : 0, isDesktop ? 0 : 50),
       constraints: BoxConstraints(
         maxHeight: size.height * 0.4,
         maxWidth: isDesktop ? 520 : 340,

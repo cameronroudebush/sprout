@@ -145,44 +145,43 @@ abstract class _$AccountHoldings extends $AsyncNotifier<List<Holding>> {
   }
 }
 
-/// Provides state to the account holding history per account id
+/// Provides state to the holding history per holding id
 
-@ProviderFor(AccountHoldingsHistory)
-final accountHoldingsHistoryProvider = AccountHoldingsHistoryFamily._();
+@ProviderFor(AccountHoldingHistory)
+final accountHoldingHistoryProvider = AccountHoldingHistoryFamily._();
 
-/// Provides state to the account holding history per account id
-final class AccountHoldingsHistoryProvider extends $AsyncNotifierProvider<
-    AccountHoldingsHistory, List<EntityHistory>> {
-  /// Provides state to the account holding history per account id
-  AccountHoldingsHistoryProvider._(
-      {required AccountHoldingsHistoryFamily super.from,
+/// Provides state to the holding history per holding id
+final class AccountHoldingHistoryProvider
+    extends $AsyncNotifierProvider<AccountHoldingHistory, EntityHistory?> {
+  /// Provides state to the holding history per holding id
+  AccountHoldingHistoryProvider._(
+      {required AccountHoldingHistoryFamily super.from,
       required String super.argument})
       : super(
           retry: null,
-          name: r'accountHoldingsHistoryProvider',
+          name: r'accountHoldingHistoryProvider',
           isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$accountHoldingsHistoryHash();
+  String debugGetCreateSourceHash() => _$accountHoldingHistoryHash();
 
   @override
   String toString() {
-    return r'accountHoldingsHistoryProvider'
+    return r'accountHoldingHistoryProvider'
         ''
         '($argument)';
   }
 
   @$internal
   @override
-  AccountHoldingsHistory create() => AccountHoldingsHistory();
+  AccountHoldingHistory create() => AccountHoldingHistory();
 
   @override
   bool operator ==(Object other) {
-    return other is AccountHoldingsHistoryProvider &&
-        other.argument == argument;
+    return other is AccountHoldingHistoryProvider && other.argument == argument;
   }
 
   @override
@@ -191,57 +190,51 @@ final class AccountHoldingsHistoryProvider extends $AsyncNotifierProvider<
   }
 }
 
-String _$accountHoldingsHistoryHash() =>
-    r'7fd340017cf003d047ba3d5041bdfbdedc3b9ecf';
+String _$accountHoldingHistoryHash() =>
+    r'3a6acfa792c9fcc70f85f965b8f75b494bcaa5e3';
 
-/// Provides state to the account holding history per account id
+/// Provides state to the holding history per holding id
 
-final class AccountHoldingsHistoryFamily extends $Family
+final class AccountHoldingHistoryFamily extends $Family
     with
-        $ClassFamilyOverride<
-            AccountHoldingsHistory,
-            AsyncValue<List<EntityHistory>>,
-            List<EntityHistory>,
-            FutureOr<List<EntityHistory>>,
-            String> {
-  AccountHoldingsHistoryFamily._()
+        $ClassFamilyOverride<AccountHoldingHistory, AsyncValue<EntityHistory?>,
+            EntityHistory?, FutureOr<EntityHistory?>, String> {
+  AccountHoldingHistoryFamily._()
       : super(
           retry: null,
-          name: r'accountHoldingsHistoryProvider',
+          name: r'accountHoldingHistoryProvider',
           dependencies: null,
           $allTransitiveDependencies: null,
           isAutoDispose: false,
         );
 
-  /// Provides state to the account holding history per account id
+  /// Provides state to the holding history per holding id
 
-  AccountHoldingsHistoryProvider call(
-    String accountId,
+  AccountHoldingHistoryProvider call(
+    String holdingId,
   ) =>
-      AccountHoldingsHistoryProvider._(argument: accountId, from: this);
+      AccountHoldingHistoryProvider._(argument: holdingId, from: this);
 
   @override
-  String toString() => r'accountHoldingsHistoryProvider';
+  String toString() => r'accountHoldingHistoryProvider';
 }
 
-/// Provides state to the account holding history per account id
+/// Provides state to the holding history per holding id
 
-abstract class _$AccountHoldingsHistory
-    extends $AsyncNotifier<List<EntityHistory>> {
+abstract class _$AccountHoldingHistory extends $AsyncNotifier<EntityHistory?> {
   late final _$args = ref.$arg as String;
-  String get accountId => _$args;
+  String get holdingId => _$args;
 
-  FutureOr<List<EntityHistory>> build(
-    String accountId,
+  FutureOr<EntityHistory?> build(
+    String holdingId,
   );
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref =
-        this.ref as $Ref<AsyncValue<List<EntityHistory>>, List<EntityHistory>>;
+    final ref = this.ref as $Ref<AsyncValue<EntityHistory?>, EntityHistory?>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<List<EntityHistory>>, List<EntityHistory>>,
-        AsyncValue<List<EntityHistory>>,
+        AnyNotifier<AsyncValue<EntityHistory?>, EntityHistory?>,
+        AsyncValue<EntityHistory?>,
         Object?,
         Object?>;
     element.handleCreate(

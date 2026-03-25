@@ -29,7 +29,7 @@ final class LogoImageProvider extends $FunctionalProvider<AsyncValue<Uint8List>,
       : super(
           retry: null,
           name: r'logoImageProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -73,7 +73,7 @@ final class LogoImageProvider extends $FunctionalProvider<AsyncValue<Uint8List>,
   }
 }
 
-String _$logoImageHash() => r'c55adeb7bb380e596e5ce01cc2627d4c768bb329';
+String _$logoImageHash() => r'0b9c79d18d3b58804e7f66d6fe4de06e48d99c48';
 
 /// Riverpod to cache and load the given image with the given data considering an authenticated API
 
@@ -91,7 +91,7 @@ final class LogoImageFamily extends $Family
           name: r'logoImageProvider',
           dependencies: null,
           $allTransitiveDependencies: null,
-          isAutoDispose: true,
+          isAutoDispose: false,
         );
 
   /// Riverpod to cache and load the given image with the given data considering an authenticated API
