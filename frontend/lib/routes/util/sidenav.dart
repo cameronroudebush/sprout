@@ -63,9 +63,9 @@ class _InternalSideNavContent extends ConsumerWidget {
                     const SizedBox.shrink(),
                   ],
                 )),
-            const Divider(),
+            Divider(color: theme.dividerColor),
             const NotificationBell(isDesktop: true),
-            const Divider(),
+            Divider(color: theme.dividerColor),
 
             // Navigation Items
             Expanded(
@@ -119,7 +119,7 @@ class _InternalSideNavContent extends ConsumerWidget {
                 },
               ),
             ),
-            const Divider(),
+            Divider(color: theme.dividerColor),
             // User Profile Section
             _UserProfileTile(authUser: authUser!, onLogout: authNotifier.logout, currentPath: currentPath),
           ],

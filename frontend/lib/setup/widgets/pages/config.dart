@@ -30,13 +30,13 @@ class _UserConfigSetupPageState extends State<UserConfigSetupPage> {
         children: <Widget>[
           Text(
             'User Configuration',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 64 : 36),
+            style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           Text(
             "Now that we have your user info, feel free to customize Sprout a bit below. You can always update these later.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: widget.isDesktop ? 20 : 16),
+            style: theme.textTheme.bodyLarge,
           ),
           if (_message.isNotEmpty)
             SproutNotificationWidget(SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError)),

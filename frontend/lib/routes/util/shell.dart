@@ -36,7 +36,7 @@ class SproutShell extends ConsumerWidget {
     final isLoading =
         authState.isLoading || (!userConfigAsync.hasValue && userConfigAsync.isLoading) || !bioState.hasInitialized;
 
-    if (isLoading) return const SproutLoadingIndicator(key: ValueKey('sprout_loading'));
+    if (!authNotifier.isSetupMode && isLoading) return const SproutLoadingIndicator(key: ValueKey('sprout_loading'));
 
     if (needsBioCheck && bioState.isLocked) {
       return const SproutLockWidget(key: ValueKey('sprout_locked_screen'));
@@ -51,7 +51,7 @@ class SproutShell extends ConsumerWidget {
         ),
         child: SproutLayoutBuilder((isDesktop, context, constraints) {
           return Scaffold(
-            appBar: !isDesktop ? const SproutAppBar() : null,
+            appBar: !isDesktop && !authNotifier.isSetupMode ? const SproutAppBar() : null,
             body: Center(
               child: isDesktop
                   ? Row(

@@ -65,10 +65,10 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
                 }),
               )
             ).data;
-          }
 
-          // Cache our data so we don't over-request. Save it for 5 minutes.
-          await this.cacheManager.set(cacheKey, profileData, 5 * 60000);
+            // Cache our data so we don't over-request. Save it for 5 minutes.
+            await this.cacheManager.set(cacheKey, profileData, 5 * 60000);
+          }
         } catch (e) {
           this.logger.error(`Failed to fetch UserInfo: ${e}`);
         }

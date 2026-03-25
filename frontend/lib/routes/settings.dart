@@ -60,83 +60,78 @@ class SettingsPage extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // Define child lists for conditional sections
+    final appearanceChildren = [
+      ActionSettingTile(
+        title: "App Theme",
+        subtitle: "Customize how Sprout looks",
+        icon: Icons.palette_outlined,
+        trailing: DropdownButtonHideUnderline(
+          child: DropdownButton<ThemeStyleEnum>(
+            value: userConfig.themeStyle,
+            alignment: Alignment.centerRight,
+            onChanged: (ThemeStyleEnum? newValue) {
+              if (newValue != null) {
+                _update(ref, (c) => c.themeStyle = newValue);
+              }
+            },
+            items: ThemeStyleEnum.values
+                .map((style) => DropdownMenuItem(value: style, child: Text(style.value.toTitleCase)))
+                .toList(),
+          ),
+        ),
+      ),
+    ];
+
+    final privacyChildren = [
+      if (!onlyShowSetup)
+        SwitchSettingTile(
+          title: "Private Mode",
+          subtitle: "Hide balances across the app",
+          icon: Icons.visibility_off_outlined,
+          value: userConfig.privateMode,
+          onChanged: (val) => _update(ref, (c) => c.privateMode = val),
+        ),
+      if (!kIsWeb)
+        SwitchSettingTile(
+          title: "Allow Widgets",
+          subtitle: "Enable home screen widgets to access account data",
+          icon: Icons.widgets_outlined,
+          value: userConfig.allowWidgets,
+          onChanged: (val) async {
+            await _update(ref, (c) => c.allowWidgets = val);
+            await ref.read(widgetSyncProvider.notifier).update();
+          },
+        ),
+      if (!kIsWeb && !onlyShowSetup)
+        SwitchSettingTile(
+          title: "Biometric Lock",
+          subtitle: "Require fingerprint to open Sprout",
+          icon: Icons.fingerprint,
+          value: userConfig.secureMode,
+          onChanged: (val) async {
+            try {
+              await ref.read(biometricsProvider.notifier).toggleSecureMode(val);
+              onConfigChanged?.call();
+            } catch (e) {
+              ref.read(notificationsProvider.notifier).openWithAPIException(e);
+              onConfigFailure?.call(e);
+            }
+          },
+        ),
+    ];
+
     return SingleChildScrollView(
       padding: EdgeInsets.only(top: 8),
       child: SproutRouteWrapper(
         child: Column(
           spacing: 16,
           children: [
-            // Appearance Settings
-            SettingSection(
-              title: "Appearance",
-              children: [
-                ActionSettingTile(
-                  title: "App Theme",
-                  subtitle: "Customize how Sprout looks",
-                  icon: Icons.palette_outlined,
-                  trailing: DropdownButtonHideUnderline(
-                    child: DropdownButton<ThemeStyleEnum>(
-                      value: userConfig.themeStyle,
-                      alignment: Alignment.centerRight,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                      onChanged: (ThemeStyleEnum? newValue) {
-                        if (newValue != null) {
-                          _update(ref, (c) => c.themeStyle = newValue);
-                        }
-                      },
-                      items: ThemeStyleEnum.values
-                          .map((style) => DropdownMenuItem(value: style, child: Text(style.value.toTitleCase)))
-                          .toList(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            // Privacy and security
-            SettingSection(
-              title: "Privacy & Security",
-              children: [
-                if (!onlyShowSetup)
-                  SwitchSettingTile(
-                    title: "Private Mode",
-                    subtitle: "Hide balances across the app",
-                    icon: Icons.visibility_off_outlined,
-                    value: userConfig.privateMode,
-                    onChanged: (val) => _update(ref, (c) => c.privateMode = val),
-                  ),
-                if (!kIsWeb)
-                  SwitchSettingTile(
-                    title: "Allow Widgets",
-                    subtitle: "Enable home screen widgets to access account data",
-                    icon: Icons.widgets_outlined,
-                    value: userConfig.allowWidgets,
-                    onChanged: (val) async {
-                      await _update(ref, (c) => c.allowWidgets = val);
-                      // Trigger the native widget update service
-                      await ref.read(widgetSyncProvider.notifier).update();
-                    },
-                  ),
-                if (!kIsWeb && !onlyShowSetup)
-                  SwitchSettingTile(
-                    title: "Biometric Lock",
-                    subtitle: "Require fingerprint to open Sprout",
-                    icon: Icons.fingerprint,
-                    value: userConfig.secureMode,
-                    onChanged: (val) async {
-                      try {
-                        await ref.read(biometricsProvider.notifier).toggleSecureMode(val);
-                        onConfigChanged?.call();
-                      } catch (e) {
-                        ref.read(notificationsProvider.notifier).openWithAPIException(e);
-                        onConfigFailure?.call(e);
-                      }
-                    },
-                  ),
-              ],
-            ),
+            // Appearance (Always shown as it has children)
+            SettingSection(title: "Appearance", children: appearanceChildren),
+
+            // Privacy & Security (Only shown if children exist)
+            if (privacyChildren.isNotEmpty) SettingSection(title: "Privacy & Security", children: privacyChildren),
 
             // Integrations
             SettingSection(

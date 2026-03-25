@@ -135,7 +135,6 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: widget.isDesktop ? 18 : 14),
           ),
-
           if (_message.isNotEmpty)
             SproutNotificationWidget(
               SproutNotification(
@@ -145,7 +144,6 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
               ),
               allowMultiLine: true,
             ),
-
           AutofillGroup(
             child: Column(
               spacing: 16,
