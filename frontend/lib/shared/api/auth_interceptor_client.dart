@@ -8,7 +8,9 @@ class AuthInterceptorClient extends http.BaseClient {
   final http.Client _inner;
   final Ref _ref;
 
-  AuthInterceptorClient({required http.Client innerClient, required Ref ref}) : _inner = innerClient, _ref = ref;
+  AuthInterceptorClient({required http.Client innerClient, required Ref ref})
+      : _inner = innerClient,
+        _ref = ref;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {

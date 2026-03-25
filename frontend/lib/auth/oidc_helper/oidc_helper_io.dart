@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 
 import 'oidc_helper_stub.dart' as stub;
 
 class OIDCHelper implements stub.OIDCHelper {
   @override
-  Future<Map<String, String>?> authenticate() async {
+  Future<Map<String, String>?> authenticate(String basePath) async {
     try {
-      final backendLoginUrl = "${defaultApiClient.basePath}/auth/oidc/login";
+      final backendLoginUrl = "$basePath/auth/oidc/login";
       final callbackScheme = 'net.croudebush.sprout'; // Our own custom callback as defined from the manifest
 
       final loginUrl = Uri.parse(

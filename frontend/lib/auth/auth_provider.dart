@@ -53,35 +53,39 @@ class Auth extends _$Auth {
     final config = await ref.watch(unsecureConfigProvider.future);
     final tokens = await ref.read(authTokensProvider.future);
 
-    if (config == null) return null;
+    if (config == null || isSetupMode) return null;
 
     // OIDC
     if (config.authMode == UnsecureAppConfigurationAuthModeEnum.oidc) {
-      // Mobile - Restore
-      if (!kIsWeb && tokens.idToken != null) {
-        if (JwtDecoder.isExpired(tokens.idToken!)) {
-          final user = await loginOIDC();
-          if (user != null) {
-            // Wait for user config to load before proceeding
-            ref.read(userConfigProvider);
-            return user;
+      try {
+        // Mobile - Restore
+        if (!kIsWeb) {
+          if (tokens.idToken == null || tokens.idToken == "" || JwtDecoder.isExpired(tokens.idToken!)) {
+            final user = await loginOIDC();
+            if (user != null) {
+              // Wait for user config to load before proceeding
+              ref.read(userConfigProvider);
+              return user;
+            } else {
+              return null;
+            }
           } else {
-            return null;
+            final result = await _applyAuth(
+              idToken: tokens.idToken,
+              accessToken: tokens.accessToken,
+              refreshToken: tokens.refreshToken,
+            );
+            if (result != null) {
+              ref.read(userConfigProvider);
+            }
+            return result;
           }
         } else {
-          final result = await _applyAuth(
-            idToken: tokens.idToken,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-          );
-          if (result != null) {
-            ref.read(userConfigProvider);
-          }
-          return result;
+          // Web - Restore
+          return await _applyAuth();
         }
-      } else if (kIsWeb) {
-        // Web - Restore
-        return await _applyAuth();
+      } catch (e) {
+        if (e is ApiException && e.code == 404) await setup();
       }
 
       // Base case. Don't try to auto login to prevent loops from failures
@@ -130,9 +134,9 @@ class Auth extends _$Auth {
 
   /// If called, assumes we need to go to setup for new user creation. Runs some initial checks before trying that.
   Future<void> setup() async {
-    isSetupMode = true;
     final config = ref.read(unsecureConfigProvider).value;
     if (config != null && config.allowUserCreation) {
+      isSetupMode = true;
       LoggerProvider.debug("Initiating setup for new user with strategy ${config.authMode.toString()}.");
       NavigationProvider.redirect("setup");
     }
@@ -174,11 +178,35 @@ class Auth extends _$Auth {
 
   /// Attempts a login via OIDC using the OIDC helper
   Future<User?> loginOIDC() async {
-    final tokens = await _oidcHelper.authenticate();
+    final tokens = ref.read(authTokensProvider).value;
+
+    // Mobile Shortcut: If tokens exist and are valid, return current state
+    if (!kIsWeb && tokens?.idToken != null && tokens?.idToken != "" && !JwtDecoder.isExpired(tokens!.idToken!)) {
+      return await _applyAuth();
+    }
+
+    // Web Shortcut: Try to restore session from cookies
+    if (kIsWeb) {
+      try {
+        return await _applyAuth();
+      } catch (e) {
+        LoggerProvider.debug("Web cookie restoration failed, proceeding to OIDC redirect.");
+      }
+    }
+
+    // Fallback: Full OIDC Authentication
+    final basePath = await ref.read(connectionUrlProvider.future);
+    final resultTokens = await _oidcHelper.authenticate(basePath ?? "");
+    ref.read(sessionStatusProvider.notifier).markAsManualLogin();
+
+    // If resultTokens is null, it usually means a web redirect is occurring
+    // or the user cancelled/closed the flow.
+    if (resultTokens == null) return null;
+
     return await _applyAuth(
-      idToken: tokens?['id_token'],
-      accessToken: tokens?['access_token'],
-      refreshToken: tokens?['refresh_token'],
+      idToken: resultTokens['id_token'],
+      accessToken: resultTokens['access_token'],
+      refreshToken: resultTokens['refresh_token'],
     );
   }
 
@@ -208,6 +236,7 @@ class Auth extends _$Auth {
 
   /// Handles trying to refresh the tokens with the refresh token
   Future<bool> silentRefresh() async {
+    if (_isLoggingOut) return false;
     // If a refresh is already in progress, return the existing future
     if (_refreshCompleter != null) return _refreshCompleter!.future;
     _refreshCompleter = Completer<bool>();
@@ -225,7 +254,7 @@ class Auth extends _$Auth {
 
       // Token Acquisition
       final tokens = ref.read(authTokensProvider).value;
-      final refreshToken = kIsWeb ? "" : tokens?.refreshToken;
+      final refreshToken = kIsWeb ? null : tokens?.refreshToken;
 
       if (!kIsWeb && (refreshToken == null || refreshToken.isEmpty)) {
         _refreshCompleter!.complete(false);
