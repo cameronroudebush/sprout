@@ -23,13 +23,16 @@ class NetWorthDisplay extends ConsumerWidget {
   /// The list of points used to render the sparkline
   final AsyncValue<List<HistoricalDataPoint>?> timelineData;
 
-  const NetWorthDisplay({
-    super.key,
-    this.title,
-    required this.historyData,
-    required this.timelineData,
-    required this.currentValue,
-  });
+  /// If we should inverse the value and percentage changes
+  final bool invert;
+
+  const NetWorthDisplay(
+      {super.key,
+      this.title,
+      required this.historyData,
+      required this.timelineData,
+      required this.currentValue,
+      this.invert = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,16 +92,16 @@ class NetWorthDisplay extends ConsumerWidget {
               ),
             Text(
               value.toCurrency(isPrivate),
-              style: theme.textTheme.headlineSmall,
+              style: theme.textTheme.headlineSmall?.copyWith(color: value.toBalanceColor(theme)),
             ),
             SproutChangeWidget(
-              totalChange: frame?.valueChange,
-              percentageChange: frame?.percentChange,
-              mainAxisAlignment: MainAxisAlignment.start,
-              useExtendedPeriodString: false,
-              period: range,
-              fontSize: 11,
-            ),
+                totalChange: frame?.valueChange,
+                percentageChange: frame?.percentChange,
+                mainAxisAlignment: MainAxisAlignment.start,
+                useExtendedPeriodString: false,
+                period: range,
+                fontSize: 11,
+                invert: invert),
           ],
         ),
         ChartRangeSelector(),

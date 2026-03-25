@@ -11,4 +11,14 @@ extension AccountExtensions on Account {
     AccountTypeEnum.credit: (title: "Credit Cards", color: Colors.red, isNegative: true),
     AccountTypeEnum.loan: (title: "Loans", color: Colors.orangeAccent, isNegative: true),
   };
+
+  /// Returns true if the account type represents a debt (Credit or Loan).
+  bool get isDebt {
+    return type == AccountTypeEnum.credit || type == AccountTypeEnum.loan;
+  }
+
+  /// Optional: Returns true if the account is an asset (Depository, Investment, etc.)
+  bool get isAsset {
+    return !isDebt;
+  }
 }

@@ -129,8 +129,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                               isInitializing
                                   ? "Checking Session..."
                                   : isOIDC
-                                  ? "Login with OIDC"
-                                  : "Login",
+                                      ? "Login"
+                                      : "Login",
                             ),
                           ],
                         ),

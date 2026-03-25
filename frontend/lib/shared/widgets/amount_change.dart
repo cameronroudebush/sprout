@@ -16,17 +16,20 @@ class SproutChangeWidget extends ConsumerWidget {
   final bool showValue;
   final double fontSize;
 
-  const SproutChangeWidget({
-    super.key,
-    required this.totalChange,
-    this.percentageChange,
-    this.period,
-    this.useExtendedPeriodString = true,
-    this.mainAxisAlignment = MainAxisAlignment.end,
-    this.showPercentage = true,
-    this.showValue = true,
-    this.fontSize = 12,
-  });
+  /// If we should inverse the value and percentage changes
+  final bool invert;
+
+  const SproutChangeWidget(
+      {super.key,
+      required this.totalChange,
+      this.percentageChange,
+      this.period,
+      this.useExtendedPeriodString = true,
+      this.mainAxisAlignment = MainAxisAlignment.end,
+      this.showPercentage = true,
+      this.showValue = true,
+      this.fontSize = 12,
+      this.invert = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,8 +39,10 @@ class SproutChangeWidget extends ConsumerWidget {
     if (totalChange == null && percentageChange == null) return const SizedBox.shrink();
 
     // Use our extension for semantic coloring
-    final changeColor = (totalChange ?? percentageChange ?? 0).toBalanceColor(theme);
-    final icon = (percentageChange ?? totalChange ?? 0).toChangeIcon();
+    final total = (totalChange ?? 0) * (invert ? -1 : 1);
+    final percent = (percentageChange ?? 0) * (invert ? -1 : 1);
+    final changeColor = (total).toBalanceColor(theme);
+    final icon = (total).toChangeIcon();
 
     return Row(
       mainAxisAlignment: mainAxisAlignment,
@@ -52,12 +57,12 @@ class SproutChangeWidget extends ConsumerWidget {
             children: [
               if (showValue && totalChange != null)
                 Text(
-                  totalChange!.toCurrency(isPrivate),
+                  total.toCurrency(isPrivate),
                   style: TextStyle(color: changeColor, fontSize: fontSize),
                 ),
               if (showPercentage && percentageChange != null)
                 Text(
-                  _formatPercent(percentageChange!, showValue),
+                  _formatPercent(percent, showValue),
                   style: TextStyle(color: changeColor, fontSize: showValue ? fontSize - 2 : fontSize),
                 ),
               if (period != null)
