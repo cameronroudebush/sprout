@@ -105,7 +105,7 @@ class _IndexTile extends ConsumerWidget {
           percentageChange: data.changePercent,
           mainAxisAlignment: MainAxisAlignment.center,
           showValue: false,
-          fontSize: theme.textTheme.labelLarge!.fontSize!,
+          fontSize: theme.textTheme.labelMedium!.fontSize!,
         ),
       ],
     );
@@ -129,10 +129,10 @@ class _StatusBadge extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("MARKET STATUS", style: theme.textTheme.labelSmall),
+        Text("MARKET", style: theme.textTheme.labelSmall),
         Row(
           mainAxisSize: MainAxisSize.min,
-          spacing: 8,
+          spacing: 4,
           children: [
             Container(
               width: 8,
