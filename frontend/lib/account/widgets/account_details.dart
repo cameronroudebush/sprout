@@ -94,7 +94,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       final navWidget = Padding(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+        padding: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: isDesktop ? 12 : 0),
         child: _buildNav(tabs, theme),
       );
 
