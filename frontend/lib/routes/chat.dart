@@ -84,11 +84,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
                     border: Border(top: BorderSide(color: theme.dividerColor, width: 0.5)),
                   ),
                   child: SproutRouteWrapper(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    padding: const EdgeInsets.only(top: 4),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       spacing: 8,

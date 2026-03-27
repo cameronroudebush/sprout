@@ -24,11 +24,35 @@ class HoldingsPage extends ConsumerStatefulWidget {
 class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   /// The selected holding we're showing the performance of
   Holding? _selectedHolding;
+  bool _hasInitialSelection = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
+
+    // Auto select default holding
+    if (accounts.isNotEmpty) {
+      final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
+
+      if (!_hasInitialSelection && investmentAccounts.isNotEmpty) {
+        final firstAccount = investmentAccounts.first;
+        final holdingsAsync = ref.watch(accountHoldingsProvider(firstAccount.id));
+
+        holdingsAsync.whenData((holdings) {
+          if (holdings.isNotEmpty && _selectedHolding == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  _selectedHolding = holdings.first;
+                  _hasInitialSelection = true;
+                });
+              }
+            });
+          }
+        });
+      }
+    }
 
     return SproutRouteWrapper(
         child: Column(
