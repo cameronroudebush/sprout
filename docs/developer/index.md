@@ -24,8 +24,13 @@ npm run docker:build
 npm run prettier:write
 # Serves mkdocs locally for doc updating
 npm run docs:serve
-# Creates a reverse TCP proxy for the android emulator so localhost:8001 of the emulator = localhost:8001 of the computer.
+# Creates a reverse TCP proxy for the android emulator so localhost:8001 of the
+#   emulator = localhost:8001 of the computer.
 npm run adb:reverse
+# Generates screenshots of the app and updates the respective doc images. This
+#   must be run in developer mode using the web device and with data you would
+#   want shown on the screenshots (no personal data!).
+npm run screenshot
 ```
 
 ## Contributions

@@ -3,11 +3,14 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
 import { Category } from "@backend/category/model/category.model";
+import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
+import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
+import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
 import { ChartRange } from "@backend/user/model/chart.range.model";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
@@ -97,8 +100,10 @@ export async function populateDemoData(daysToGenerate: number = 90) {
   const accounts = await createAccounts(user);
   await createAccountHistory(accounts, daysToGenerate);
   await createTransactions(user, accounts, daysToGenerate);
+  await populateTransactionRules(user);
   const holdings = await createHoldings(accounts);
   await createHoldingHistory(holdings, daysToGenerate);
+  await populateChat(user);
 
   logger.log("Demo data population complete!");
   await app.close();
@@ -458,6 +463,40 @@ async function createHoldings(accounts: Account[]): Promise<Holding[]> {
 
   logger.log(`Inserting ${allHoldings.length} holdings.`);
   return await Holding.insertMany(allHoldings);
+}
+
+/** Populates some sample transaction rules */
+async function populateTransactionRules(user: User) {
+  const logger = new Logger("demo:transaction:rules");
+  logger.log(`Inserting sample transaction rules.`);
+  const categories = await Category.find({ where: { user: { id: user.id } } });
+  await TransactionRule.insertMany([
+    new TransactionRule(
+      user,
+      TransactionRuleType.description,
+      "mcdonalds",
+      categories.find((x) => x.name === "Food"),
+    ),
+  ]);
+}
+
+/** Populates some sample chat data */
+async function populateChat(user: User) {
+  const logger = new Logger("demo:chat");
+  logger.log(`Inserting sample AI chat messages.`);
+  const firstMessageDate = new Date(new Date().getTime() - 10000);
+  await ChatHistory.insertMany([
+    new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth", "user", firstMessageDate, false),
+    new ChatHistory(
+      user,
+      `1. Use $20,000 from High-Yield Savings to pay off the personal loan (Car Loan) to eliminate interest expenses and reduce total liabilities.
+       2. Reduce discretionary spending in the "Shopping" and "Entertainment" categories across Visa Credit Card and Checking, redirecting those funds into investment Brokerage to maximize compound growth.
+       Consult a financial advisor before making decisions.`,
+      "model",
+      new Date(firstMessageDate.getTime() + 1000),
+      false,
+    ),
+  ]);
 }
 
 /** Creates holdings for investment accounts picked from the given accounts */
