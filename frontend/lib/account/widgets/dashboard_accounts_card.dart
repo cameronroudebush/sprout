@@ -19,8 +19,6 @@ class DashboardAccountsCard extends ConsumerWidget {
         accounts: state.accounts,
         isPrivate: isPrivate,
         individualCards: false,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('Error: $err')),

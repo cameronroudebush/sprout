@@ -54,8 +54,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
       floatingActionButton: SproutSpeedDial(
         actions: [FABAction(icon: Icons.add, label: 'New Category', onTap: (context) => _openEditSheet(null))],
       ),
-      body: SproutRouteWrapper(
-          child: categoriesAsync.when(
+      body: categoriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text("Error: $err")),
         data: (categories) {
@@ -63,30 +62,44 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
             ..sort((a, b) => a.name.compareTo(b.name));
 
           return SingleChildScrollView(
-            child: Column(
-              spacing: 12,
-              children: [
-                SproutCard(
-                  child: const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text("Manage your categories and spending buckets.", textAlign: TextAlign.center),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SproutRouteWrapper(
+              child: Column(
+                spacing: 12,
+                children: [
+                  SproutCard(
+                    child: const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          "Manage your categories and spending buckets.",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                SproutCard(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: topLevel.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) =>
-                        Column(children: _buildCategoryTree(topLevel[index], categories, 0)),
+                  SproutCard(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: topLevel.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: _buildCategoryTree(topLevel[index], categories, 0),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                  // Padding for FAB
+                  const SizedBox(height: 80),
+                ],
+              ),
             ),
           );
         },
-      )),
+      ),
     );
   }
 }

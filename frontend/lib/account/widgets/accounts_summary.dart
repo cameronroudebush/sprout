@@ -10,6 +10,7 @@ import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a grouped overview of all user accounts.
@@ -26,16 +27,11 @@ class AccountSummaryView extends ConsumerWidget {
   /// If each grouping should be rendered as it's own card. We use this heavily to determine if this is displayed on the dashboard vs it's own page
   final bool individualCards;
 
-  final ScrollPhysics? physics;
-  final bool shrinkWrap;
-
   const AccountSummaryView({
     super.key,
     required this.accounts,
     required this.isPrivate,
     this.individualCards = true,
-    this.physics,
-    this.shrinkWrap = false,
   });
 
   @override
@@ -95,15 +91,18 @@ class AccountSummaryView extends ConsumerWidget {
         final groupHistories = historyList.where((h) => groupAccounts.any((a) => a.id == h.connectedId));
 
         for (final h in groupHistories) {
-          // Use the helper to get the correct data point for the range
           final dataPoint = h.getValueByFrame(selectedRange);
-
-          // Use the balance of the account to weight the percentage
           final account = groupAccounts.firstWhere((a) => a.id == h.connectedId);
-          final balance = account.balance.abs();
-          totalGroupValueChange += dataPoint.valueChange.toDouble();
-          totalWeightedPercent += ((dataPoint.percentChange?.toDouble() ?? 0) * balance);
-          totalBalance += balance;
+          final multiplier = account.isDebt ? -1.0 : 1.0;
+
+          final currentBalance = account.balance.abs();
+          final changeAmount = dataPoint.valueChange.toDouble().abs();
+          final weight = currentBalance > 0 ? currentBalance : changeAmount;
+          final percentChange = (dataPoint.percentChange?.toDouble() ?? 0) * multiplier;
+
+          totalGroupValueChange += dataPoint.valueChange.toDouble() * multiplier;
+          totalWeightedPercent += (percentChange * weight);
+          totalBalance += weight;
         }
       });
 
@@ -125,35 +124,45 @@ class AccountSummaryView extends ConsumerWidget {
       );
     }).toList();
 
-    return ListView(
-      physics: physics,
-      shrinkWrap: shrinkWrap,
-      children: [
-        TotalSummary(accounts: accounts, isPrivate: isPrivate),
-        if (individualCards)
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: ChartRangeSelector(large: true),
-          ),
-        if (!individualCards)
-          SproutCard(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...groupedAccounts
-                    .mapIndexed(
-                      (index, widget) => [
-                        widget,
-                        if (index < groupedAccounts.length - 1) const Divider(height: 0.5, indent: 16, endIndent: 16),
-                      ],
-                    )
-                    .expand((widgets) => widgets),
-              ],
-            ),
-          )
-        else
-          ...groupedAccounts,
-      ],
+    return SproutLayoutBuilder(
+      (isDesktop, context, constraints) {
+        return Column(
+          children: [
+            TotalSummary(accounts: accounts, isPrivate: isPrivate),
+            if (individualCards)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: ChartRangeSelector(large: true),
+              ),
+            if (individualCards)
+              Expanded(
+                child: ListView.builder(
+                  padding: !isDesktop ? const EdgeInsets.only(bottom: 84) : null, // Space for FAB
+                  itemCount: groupedAccounts.length,
+                  itemBuilder: (context, index) => groupedAccounts[index],
+                ),
+              )
+            else
+              // Dashboard view logic (usually nested in another scrollview, so no Expanded here)
+              SproutCard(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...groupedAccounts
+                        .mapIndexed(
+                          (index, widget) => [
+                            widget,
+                            if (index < groupedAccounts.length - 1)
+                              const Divider(height: 0.5, indent: 16, endIndent: 16),
+                          ],
+                        )
+                        .expand((widgets) => widgets),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

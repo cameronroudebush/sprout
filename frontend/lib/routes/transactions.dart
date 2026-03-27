@@ -113,38 +113,38 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final masterAsync = ref.watch(transactionsProvider);
-
     final filteredTransactions = ref.watch(filteredTransactionsProvider);
 
-    return SproutRouteWrapper(
-      padding: widget.padding,
-      child: Column(
-        children: [
-          if (widget.allowFiltering) _buildFilters(theme),
-          Expanded(
-            child: masterAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text("Error: $err")),
-              data: (masterState) {
-                if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
-                  return const Center(child: Text("No matching transactions found."));
-                }
-
-                return RefreshIndicator(
-                  color: theme.colorScheme.onSecondaryContainer,
-                  backgroundColor: theme.colorScheme.secondaryContainer,
-                  onRefresh: () async {
-                    await _fetchPage(reset: true);
-                  },
-                  child: widget.separateByDate
-                      ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
-                      : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
-                );
-              },
+    return Column(
+      children: [
+        if (widget.allowFiltering)
+          Container(
+            width: double.infinity,
+            color: theme.scaffoldBackgroundColor,
+            child: SproutRouteWrapper(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: _buildFilters(theme),
             ),
           ),
-        ],
-      ),
+        Expanded(
+          child: masterAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(child: Text("Error: $err")),
+            data: (masterState) {
+              if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
+                return const Center(child: Text("No matching transactions found."));
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async => await _fetchPage(reset: true),
+                child: widget.separateByDate
+                    ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
+                    : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -205,37 +205,40 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     return ListView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      // Add one to index for the bottom loader
       itemCount: grouped.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == grouped.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
+          return const SproutRouteWrapper(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
           );
         }
 
         final date = grouped.keys.elementAt(index);
         final dayTransactions = grouped.values.elementAt(index);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Text(date.toShortMonth, style: theme.textTheme.titleSmall),
-            ),
-            SproutCard(
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: dayTransactions.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, tIndex) => TransactionRow(dayTransactions[tIndex]),
+        return SproutRouteWrapper(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 4, top: 12),
+                child: Text(date.toShortMonth, style: theme.textTheme.titleSmall),
               ),
-            ),
-            const SizedBox(height: 8),
-          ],
+              SproutCard(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: dayTransactions.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, tIndex) => TransactionRow(dayTransactions[tIndex]),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

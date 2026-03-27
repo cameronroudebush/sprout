@@ -42,8 +42,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final configAsync = ref.watch(secureConfigProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
 
-    return SproutRouteWrapper(
-        child: userConfigAsync.when(
+    return userConfigAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text("Error loading config: $err")),
       data: (userConfig) {
@@ -51,42 +50,61 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             (configAsync.value?.chatKeyProvidedInBackend ?? false) || (userConfig?.geminiKey?.isNotEmpty ?? false);
 
         if (!llmConfigured) {
-          return _buildNoConfigState(theme);
+          return SproutRouteWrapper(child: _buildNoConfigState(theme));
         }
 
         return chatAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text("Error loading chat: $err")),
-          data: (messagesList) {
-            final messages = messagesList;
+          data: (messages) {
             final bool isLoading = messages.any((m) => m.isThinking);
 
             return Column(
-              spacing: 4,
               children: [
                 Expanded(
                   child: messages.isEmpty
-                      ? _buildEmptyState(theme)
+                      ? SproutRouteWrapper(child: _buildEmptyState(theme))
                       : Scrollbar(
                           controller: _scrollController,
                           thumbVisibility: true,
                           child: ListView.builder(
                             controller: _scrollController,
                             reverse: true,
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             itemCount: messages.length,
-                            itemBuilder: (context, index) => ChatBubble(message: messages[index]),
+                            itemBuilder: (context, index) {
+                              return SproutRouteWrapper(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                child: ChatBubble(message: messages[index]),
+                              );
+                            },
                           ),
                         ),
                 ),
-                _buildQuickActions(isLoading),
-                _buildInputArea(isLoading),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    border: Border(top: BorderSide(color: theme.dividerColor, width: 0.5)),
+                  ),
+                  child: SproutRouteWrapper(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 8,
+                      children: [
+                        _buildQuickActions(isLoading),
+                        _buildInputArea(isLoading),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             );
           },
         );
       },
-    ));
+    );
   }
 
   /// Builds what to display when the AI isn't configured
