@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
@@ -68,12 +69,12 @@ class AccountItemRow extends StatelessWidget {
                   style: theme.textTheme.bodyMedium,
                 ),
                 SproutChangeWidget(
-                  percentageChange: percentChange,
-                  totalChange: valueChange,
-                  period: period ?? ChartRangeEnum.oneDay,
-                  useExtendedPeriodString: false,
-                  fontSize: 12,
-                ),
+                    percentageChange: percentChange,
+                    totalChange: valueChange,
+                    period: period ?? ChartRangeEnum.oneDay,
+                    useExtendedPeriodString: false,
+                    fontSize: 12,
+                    invert: account.isDebt),
               ],
             ),
             Icon(Icons.chevron_right, size: 16, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3)),

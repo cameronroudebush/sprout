@@ -21,7 +21,7 @@ class HoldingRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final config = ref.watch(userConfigProvider).value;
     final isPrivate = config?.privateMode ?? false;
-    final selectedRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
+    final selectedRange = ChartRangeEnum.oneDay;
 
     final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
     final frame = holdingHistoryAsync.value?.getValueByFrame(selectedRange);
@@ -80,10 +80,11 @@ class HoldingRow extends ConsumerWidget {
                         style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       ),
                       SproutChangeWidget(
-                        totalChange: dayChange,
-                        percentageChange: dayPercent,
-                        fontSize: theme.textTheme.labelMedium!.fontSize!,
-                      ),
+                          totalChange: dayChange,
+                          percentageChange: dayPercent,
+                          fontSize: theme.textTheme.labelMedium!.fontSize!,
+                          useExtendedPeriodString: false,
+                          period: selectedRange),
                     ],
                   ),
 
@@ -112,10 +113,11 @@ class HoldingRow extends ConsumerWidget {
                       ),
                       if (frame != null)
                         SproutChangeWidget(
-                          totalChange: frame.valueChange,
-                          percentageChange: frame.percentChange,
-                          fontSize: theme.textTheme.labelMedium!.fontSize!,
-                        ),
+                            totalChange: frame.valueChange,
+                            percentageChange: frame.percentChange,
+                            fontSize: theme.textTheme.labelMedium!.fontSize!,
+                            useExtendedPeriodString: false,
+                            period: selectedRange),
                     ],
                   ),
                 ],

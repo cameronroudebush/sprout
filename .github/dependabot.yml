@@ -5,6 +5,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 14
     groups:
       workspace-dependencies:
         patterns:
@@ -15,6 +17,8 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 14
     groups:
       backend-dependencies:
         patterns:
@@ -25,6 +29,8 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 14
     groups:
       flutter-dependencies:
         patterns:
@@ -35,6 +41,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 14
     groups:
       docker-dependencies:
         patterns:
@@ -45,6 +53,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 14
     groups:
       actions-dependencies:
         patterns:

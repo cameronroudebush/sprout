@@ -51,18 +51,21 @@ class TransactionRulesPage extends ConsumerWidget {
         error: (err, _) => Center(child: Text("Error: $err")),
         data: (prov) {
           if (prov.rules.isEmpty) {
-            return Center(
-              child: SizedBox(
-                height: 164,
-                child: SproutCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      spacing: 12,
-                      children: [
-                        Icon(Icons.rule_folder_outlined, size: 64, color: theme.colorScheme.primary),
-                        const Text("No rules found. Add one to start organizing!", style: TextStyle(fontSize: 18)),
-                      ],
+            return SproutRouteWrapper(
+              child: Center(
+                child: SizedBox(
+                  height: 164,
+                  child: SproutCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        spacing: 12,
+                        children: [
+                          Icon(Icons.rule_folder_outlined, size: 64, color: theme.colorScheme.primary),
+                          const Text("No rules found. Add one to start organizing!",
+                              textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -71,38 +74,39 @@ class TransactionRulesPage extends ConsumerWidget {
           }
 
           return SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 84),
-              child: SproutRouteWrapper(
-                child: Column(
-                  spacing: 12,
-                  children: [
-                    /// Explanation Card
-                    SproutCard(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(
-                          "Transactions are categorized based on the rules below in descending order.",
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.labelLarge,
-                        ),
+            padding: EdgeInsetsGeometry.only(bottom: 84),
+            child: SproutRouteWrapper(
+              child: Column(
+                spacing: 12,
+                children: [
+                  /// Explanation Card
+                  SproutCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        "Transactions are categorized based on the rules below in descending order.",
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelLarge,
                       ),
                     ),
+                  ),
 
-                    /// Rules List Card
-                    SproutCard(
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: prov.rules.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          return TransactionRuleRow(prov.rules[index], index: index);
-                        },
-                      ),
+                  /// Rules List Card
+                  SproutCard(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: prov.rules.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        return TransactionRuleRow(prov.rules[index], index: index);
+                      },
                     ),
-                  ],
-                ),
-              ));
+                  ),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );

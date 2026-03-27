@@ -38,8 +38,9 @@ class AccountsPage extends ConsumerWidget {
         }
 
         return Scaffold(
-          body: SproutRouteWrapper(child: body),
-          // Add a FAB button
+          body: SproutRouteWrapper(
+            child: body,
+          ),
           floatingActionButton: accountId != null
               ? null
               : SproutSpeedDial(

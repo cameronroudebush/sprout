@@ -65,7 +65,7 @@ class AccountGroupSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final total = accounts.fold(0.0, (sum, a) => sum + (isNegative ? a.balance.abs() : a.balance));
+    final total = accounts.fold(0.0, (sum, a) => sum + a.balance);
     final bool groupHasError = accounts.any((a) => a.institution.hasError);
 
     final innerContent = Padding(
@@ -99,7 +99,7 @@ class AccountGroupSection extends StatelessWidget {
               Text(
                 total.toCurrency(isPrivate),
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: isNegative ? Colors.redAccent : Colors.green,
+                  color: total.toBalanceColor(theme),
                 ),
               ),
               if (percentChange != null)
