@@ -47,8 +47,8 @@ COPY --from=backend-build --chmod=0755 /app/sprout /sprout-backend
 
 # Confirm that we maintain a healthy status
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ && \
-      wget --no-verbose --tries=1 --spider http://localhost:8001/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:80/ && \
+      wget --no-verbose --tries=1 --spider http://127.0.0.1:8001/api/core/heartbeat || exit 1
 
 # Start nginx along side backend. Frontend is hosted via nginx, backend runs it's own internal API
 ENTRYPOINT ["/bin/sh", "-c" , "nginx & ./sprout-backend"]
