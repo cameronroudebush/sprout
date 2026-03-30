@@ -1,4 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { SproutLogger } from "@backend/core/logger";
+import { Injectable } from "@nestjs/common";
 import fs from "fs";
 import { set } from "lodash";
 import path from "path";
@@ -9,7 +10,9 @@ import { ConfigurationMetadata } from "./model/configuration.metadata";
 /** This class controls loading configuration options from the config file and handles some other functionality associated to it. */
 @Injectable()
 export class ConfigurationService {
-  private readonly logger = new Logger(ConfigurationService.name);
+  constructor(private logger: SproutLogger) {
+    logger.setContext("config");
+  }
 
   /** Separator used for env variable lookup */
   static readonly ENV_VARIABLE_SEPARATOR = "_";
@@ -43,7 +46,22 @@ export class ConfigurationService {
       // Ignore non enabled keys
       if (metadata == null || metadata?.externalControlDisabled) continue;
       // Ignore non restricted values
-      else if (metadata.restrictedValues != null && !metadata.restrictedValues.includes(value)) continue;
+      else if (metadata.restrictedValues != null) {
+        const warnMessage = `Configuration key "${key}" contains invalid values and will be ignored. Allowed: [${metadata.restrictedValues.join(", ")}]`;
+        // Check each array element individually
+        if (Array.isArray(value)) {
+          const allValuesAllowed = value.every((item) => metadata.restrictedValues!.includes(item));
+          if (!allValuesAllowed) {
+            this.logger.warn(warnMessage);
+            continue;
+          } else objToUpdate[key] = value;
+        } else {
+          // Standard primitive check
+          if (!metadata.restrictedValues.includes(value)) {
+            this.logger.warn(warnMessage);
+          } else objToUpdate[key] = value;
+        }
+      }
       // Ignore non matching types
       else if (objToUpdate[key] != null && typeof value !== typeof objToUpdate[key]) continue;
       // Recursively call the update
@@ -138,6 +156,12 @@ export class ConfigurationService {
       if (lower === "true") value = true;
       if (lower === "false") value = false;
     }
+
+    // Split arrays
+    if (Array.isArray(targetData) && typeof value === "string") {
+      value = value.split(",").map((item) => item.trim());
+    }
+
     return value;
   }
 }

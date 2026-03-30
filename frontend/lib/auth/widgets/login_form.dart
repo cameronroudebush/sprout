@@ -50,7 +50,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
     try {
       final user = isOIDC
-          ? await authNotifier.loginOIDC()
+          ? await authNotifier.loginOIDC(manualLogin: true)
           : await authNotifier.login(_usernameController.text.trim(), _passwordController.text.trim());
 
       if (user == null) {

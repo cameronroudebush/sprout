@@ -17,6 +17,11 @@ Sprout is designed to be flexible. You can configure the application using eithe
     `server.port` becomes `sprout_server_port`.
     ```
 
+    You can also use comma separated lists for array values like so:
+    ```
+    sprout_server_logLevels=verbose,debug,error
+    ```
+
 ## Core Settings
 
 These are the fundamental settings required for Sprout to secure your data and start up.
