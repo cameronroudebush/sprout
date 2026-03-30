@@ -13,7 +13,7 @@ class SproutMoreSheet extends ConsumerWidget {
   /// Returns a greeting for our user
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Top of the morning,';
+    if (hour < 12) return 'Good morning,';
     if (hour < 17) return 'Good afternoon,';
     return 'Evening,';
   }

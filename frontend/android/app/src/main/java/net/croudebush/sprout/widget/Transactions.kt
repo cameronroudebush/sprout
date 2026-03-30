@@ -12,7 +12,9 @@ import net.croudebush.sprout.R
 import androidx.core.net.toUri
 import net.croudebush.sprout.MainActivity
 import java.text.SimpleDateFormat
+import android.graphics.Color
 import java.util.*
+import androidx.core.graphics.toColorInt
 
 class Transactions : AppWidgetProvider() {
 
@@ -29,6 +31,18 @@ class Transactions : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.transactions)
             views.setEmptyView(R.id.widget_transactions_list, R.id.widget_empty_view)
+
+            if (widgetData != null) {
+                val bgColor = widgetData.optString("bgColor", "#141A1F").toColorInt()
+                val txtColor = widgetData.optString("txtColor", "#FFFFFF").toColorInt()
+                val txtMuted = widgetData.optString("txtColorMuted", "#A0A0A0").toColorInt()
+
+                // Apply Theme to Container
+                views.setInt(R.id.widget_root, "setBackgroundColor", bgColor)
+                views.setTextColor(R.id.widget_title, txtColor)
+                views.setTextColor(R.id.widget_last_updated, txtMuted)
+                views.setTextColor(R.id.widget_empty_view, txtMuted)
+            }
 
             val clickIntent = Intent(context, MainActivity::class.java)
             val clickPendingIntent = PendingIntent.getActivity(
