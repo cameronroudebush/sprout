@@ -177,11 +177,15 @@ class Auth extends _$Auth {
   }
 
   /// Attempts a login via OIDC using the OIDC helper
-  Future<User?> loginOIDC() async {
+  Future<User?> loginOIDC({bool manualLogin = false}) async {
     final tokens = ref.read(authTokensProvider).value;
 
     // Mobile Shortcut: If tokens exist and are valid, return current state
-    if (!kIsWeb && tokens?.idToken != null && tokens?.idToken != "" && !JwtDecoder.isExpired(tokens!.idToken!)) {
+    if (!manualLogin &&
+        !kIsWeb &&
+        tokens?.idToken != null &&
+        tokens?.idToken != "" &&
+        !JwtDecoder.isExpired(tokens!.idToken!)) {
       return await _applyAuth();
     }
 

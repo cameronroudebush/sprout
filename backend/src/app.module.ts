@@ -8,6 +8,7 @@ import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
 import { CoreController } from "@backend/core/core.controller";
 import { ImageProxyController } from "@backend/core/image.proxy.controller";
+import { SproutLogger } from "@backend/core/logger";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { DatabaseService } from "@backend/database/database.service";
 import { HoldingModule } from "@backend/holding/holding.module";
@@ -62,6 +63,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     DatabaseService,
     CategoryService,
     CashFlowService,
+    SproutLogger,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

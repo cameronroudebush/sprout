@@ -1,11 +1,15 @@
 import { Configuration } from "@backend/config/core";
+import { startCase } from "lodash";
+import { name } from "../package.json";
 import { ConfigurationService } from "./config/config.service";
+import { SproutLogger } from "./core/logger";
 
 /**
  *  Manually load configuration before any of the rest of the app is loaded. This is because we reference the config
  *    very early in a lot of class construction.
  */
-new ConfigurationService().load();
+const projName = startCase(name);
+new ConfigurationService(new SproutLogger(projName, { logLevels: ["verbose"] })).load();
 Configuration.isRunningScript = (Configuration.isDevBuild as any) && process.argv[2] != null;
 
 import { TimeZone } from "@backend/config/model/tz";
@@ -20,11 +24,8 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import { startCase } from "lodash";
 import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
-import { name } from "../package.json";
 import { AppModule } from "./app.module";
-import { SproutLogger } from "./core/logger";
 import { generateOpenApiSpec } from "./scripts/generate.api-spec";
 import { populateDemoData } from "./scripts/populate.demo.data";
 
@@ -96,7 +97,6 @@ async function main() {
   // Check if we have scripts to run
   if (Configuration.isRunningScript) await checkScript();
 
-  const projName = startCase(name);
   const swaggerTitle = `${projName} API`;
   const logger = new Logger("main");
   try {
