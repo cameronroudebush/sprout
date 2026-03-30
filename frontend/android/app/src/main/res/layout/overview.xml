@@ -14,7 +14,6 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:alpha="0.7"
-        android:textColor="@color/sprout_text_secondary"
         android:textSize="10sp"
         tools:text="Jan 01, 1:00 PM" />
 
@@ -25,7 +24,7 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="12dp"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/icon_color_transparent" />
 
     <LinearLayout
         android:id="@+id/data_container"
@@ -38,12 +37,12 @@
         tools:visibility="visible">
 
         <TextView
+            android:id="@+id/widget_label_networth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:letterSpacing="0.05"
             android:text="Net Worth"
             android:textAllCaps="true"
-            android:textColor="@color/sprout_text_secondary"
             android:textSize="10sp"
             android:textStyle="bold" />
 
@@ -52,7 +51,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:includeFontPadding="false"
-            android:textColor="@color/sprout_text_primary"
             android:textSize="24sp"
             android:textStyle="bold"
             tools:text="$12,345.67" />
@@ -74,7 +72,6 @@
                 android:id="@+id/widget_nw_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/sprout_accent_green"
                 android:textSize="11sp"
                 tools:text="$1,234.56 (7.89%)" />
         </LinearLayout>
@@ -88,7 +85,6 @@
         android:gravity="center"
         android:lineSpacingExtra="2dp"
         android:text="@string/widget_no_data"
-        android:textColor="@color/sprout_text_secondary"
         android:textSize="13sp"
         tools:visibility="gone" />
 

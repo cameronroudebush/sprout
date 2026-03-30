@@ -8,6 +8,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
+import 'package:sprout/shared/models/extensions/color_extensions.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
@@ -88,7 +89,8 @@ class WidgetSync extends _$WidgetSync {
     final netWorth = ref.read(totalNetWorthProvider).value;
     final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
     final userConfig = ref.read(userConfigProvider).value;
-    final theme = ref.read(userConfigProvider.notifier).getTheme(userConfig);
+    final userConfigAsync = ref.read(userConfigProvider.notifier);
+    final theme = userConfigAsync.activeTheme(userConfig);
     final isPrivate = false; // Set to false so widget info always shows real values
     if (netWorth == null) return null;
 
@@ -120,7 +122,15 @@ class WidgetSync extends _$WidgetSync {
       "numericChange": pastNetWorthChange,
       "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
       "recentTransactions": recent,
-      "theme": theme.value,
+      // Theme info
+      "bgColor": theme.appBarTheme.backgroundColor!.toHex(),
+      "cardColor": theme.cardColor.toHex(),
+      "txtColor": (theme.textTheme.bodyLarge?.color ?? Colors.white).toHex(),
+      "txtColorMuted": (theme.textTheme.bodySmall?.color ?? Colors.grey).toHex(),
+      "primaryColor": theme.primaryColor.toHex(),
+      "accentColor": theme.colorScheme.secondary.toHex(),
+      "statusColor": (pastNetWorthChange >= 0 ? Colors.greenAccent : theme.colorScheme.error).toHex(),
+      "dividerColor": theme.dividerColor.toHex(),
     };
   }
 

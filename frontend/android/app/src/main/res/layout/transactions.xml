@@ -19,9 +19,10 @@
             android:layout_height="20dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@drawable/icon_color_transparent" />
 
         <TextView
+            android:id="@+id/widget_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

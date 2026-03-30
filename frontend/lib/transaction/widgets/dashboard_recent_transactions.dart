@@ -24,7 +24,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
         spacing: 4,
         children: [
           Padding(
-            padding: EdgeInsetsGeometry.fromLTRB(12, 12, 12, 0),
+            padding: EdgeInsetsGeometry.fromLTRB(12, 8, 12, 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -44,9 +44,6 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-          Divider(
-            height: 1,
           ),
           transactionsAsync.when(
             data: (state) {

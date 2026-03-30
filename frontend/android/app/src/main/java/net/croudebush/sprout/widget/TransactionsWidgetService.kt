@@ -7,7 +7,10 @@ import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.core.content.ContextCompat
 import net.croudebush.sprout.R
+import android.graphics.Color
 import org.json.JSONArray
+import androidx.core.graphics.toColorInt
+import org.json.JSONObject
 
 class TransactionsWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
@@ -15,17 +18,25 @@ class TransactionsWidgetService : RemoteViewsService() {
     }
 }
 
-class TransactionsRemoteViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
+class TransactionsRemoteViewsFactory(private val context: Context) :
+    RemoteViewsService.RemoteViewsFactory {
     private var transactions = JSONArray()
+    private var themeData: JSONObject? = null
 
     override fun onDataSetChanged() {
         val data = WidgetUtils.getWidgetData(context)
+        themeData = data
         transactions = data?.optJSONArray("recentTransactions") ?: JSONArray()
     }
 
     override fun getViewAt(position: Int): RemoteViews {
         val item = transactions.getJSONObject(position)
         val views = RemoteViews(context.packageName, R.layout.transaction_item)
+
+        // Get Theme Colors from the parent data
+        val txtColor = themeData?.optString("txtColor", "#FFFFFF")?.toColorInt()
+        val txtMuted = themeData?.optString("txtColorMuted", "#A0A0A0")?.toColorInt()
+        val amountColor = item.optString("amountColor", "#FF0000").toColorInt()
 
         val merchant = item.optString("merchant", "Unknown")
         val category = item.optString("category", "General")
@@ -35,12 +46,22 @@ class TransactionsRemoteViewsFactory(private val context: Context) : RemoteViews
         val isPending = item.optBoolean("pending", false)
         val id = item.optString("id", "")
 
-        val fillInIntent = Intent() 
+        if (txtColor != null) {
+            views.setTextColor(R.id.item_merchant_name, txtColor)
+        }
+        if (txtMuted != null) {
+            views.setTextColor(R.id.item_category, txtMuted)
+            views.setTextColor(R.id.item_date, txtMuted)
+            views.setTextColor(R.id.item_pending, txtMuted)
+        }
+        views.setTextColor(R.id.item_amount, amountColor)
+
+        val fillInIntent = Intent()
         fillInIntent.putExtra("transaction_id", id)
         views.setOnClickFillInIntent(R.id.transaction_item_root, fillInIntent)
 
         views.setTextViewText(R.id.item_merchant_name, merchant)
-        views.setTextViewText(R.id.item_category, category.uppercase())
+        views.setTextViewText(R.id.item_category, category)
         views.setTextViewText(R.id.item_amount, amountText)
         views.setTextViewText(R.id.item_date, date)
 

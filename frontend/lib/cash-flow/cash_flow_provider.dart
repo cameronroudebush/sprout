@@ -51,7 +51,7 @@ class MonthlySpending extends _$MonthlySpending {
   @override
   Future<CashFlowSpending?> build({int months = 4, int? categories}) async {
     // Default categories based on platform if not provided
-    final categoryCount = categories ?? (kIsWeb ? 5 : 3);
+    final categoryCount = categories ?? (kIsWeb ? 5 : 2);
 
     final api = await ref.watch(cashFlowApiProvider.future);
     return await api.cashFlowControllerGetSpending(months, categoryCount);

@@ -54,12 +54,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     body: notification.message,
     payload: notification.id,
     notificationDetails: NotificationDetails(
-      android: AndroidNotificationDetails(
-        'secure_channel',
-        'Secure Notifications',
-        importance: importance,
-        color: Color(0xFF141A1F),
-      ),
+      android: AndroidNotificationDetails('secure_channel', 'Secure Notifications',
+          importance: importance, color: Color(0xFF141A1F), colorized: true),
     ),
   );
   // Cleanup
