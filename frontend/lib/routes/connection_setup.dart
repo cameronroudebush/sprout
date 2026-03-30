@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/icon.dart';
 
 /// This page allows a user to adjust their connection information for Sprout. Only available on mobile.
@@ -41,6 +42,7 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
     try {
       final url = _controller.text.trim();
       await ref.read(unsecureConfigProvider.notifier).setConnectionUrl(url);
+      NavigationProvider.redirect("/login");
     } catch (e) {
       setState(() => _error = "Could not reach server. Verify the URL and try again.");
     } finally {
