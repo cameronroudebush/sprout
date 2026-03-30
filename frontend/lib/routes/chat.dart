@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/chat_bubble.dart';
+import 'package:sprout/chat/widgets/chat_input.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -24,15 +25,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  /// Sends the current message
-  void _send() {
-    final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      ref.read(chatProvider.notifier).sendMessage(text);
-      _controller.clear();
-    }
   }
 
   @override
@@ -93,7 +85,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       spacing: 8,
                       children: [
                         _buildQuickActions(isLoading),
-                        _buildInputArea(isLoading),
+                        ChatInput(isLoading: isLoading),
                       ],
                     ),
                   ),
@@ -187,35 +179,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
             )
             .toList(),
-      ),
-    );
-  }
-
-  /// Builds the input area for sending a custom message
-  Widget _buildInputArea(bool isLoading) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
-      child: Row(
-        spacing: 8,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              enabled: !isLoading,
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: "Ask Sprout anything...",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _send(),
-            ),
-          ),
-          FloatingActionButton(
-            onPressed: isLoading ? null : _send,
-            child: isLoading ? const CircularProgressIndicator() : const Icon(Icons.send),
-          ),
-        ],
       ),
     );
   }

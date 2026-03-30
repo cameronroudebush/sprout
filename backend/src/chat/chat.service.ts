@@ -71,10 +71,10 @@ export class ChatService {
   async buildPrompt(user: User) {
     await this.cleanupUserMax(user);
     const rawHistory = await ChatHistory.find({ where: { user: { id: user.id } }, order: { time: "ASC" } });
-    const sanitizedHistory = this.formatCleanHistory(rawHistory);
 
     const idMap = new Map<string, string>();
     const data = await this.buildUserAccountDetails(user, idMap);
+    const sanitizedHistory = this.formatCleanHistory(rawHistory, idMap);
 
     return {
       idMap,
@@ -94,7 +94,14 @@ export class ChatService {
                  - Holdings: hol (s=Symbol, v=Value)
                  - History: his (b=Balance, d=Date)
                  - Transactions: d=Date, n=Description ID, a=Amount, c=Category, acc=Account ID
-              7. Always include: "Consult a financial advisor before making decisions."
+              7. MANDATORY ENTITY FORMATTING:
+                - User references will be in the format '@ID'.
+                - You MUST respond using that exact '@ID' format.
+                - CRITICAL: Never strip the '@' prefix. If you write the ID without the '@' prefix, the user's interface will break.
+                - Example Correct: "Analysis for @Account_0"
+                - Example Incorrect: "Analysis for Account_0"
+                - Do not guess names; only use the @ID provided in the mapping.
+              8. Always include: "Consult a financial advisor before making decisions."
               
               CONTEXTUAL DATA:
               ${JSON.stringify(data)}`,
@@ -106,7 +113,11 @@ export class ChatService {
     };
   }
 
-  /** Builds a set of account details for the LLM to know their current finance state */
+  /**
+   * Builds a set of account details for the LLM to know their current finance
+   *  state. De-identifies all data by using generic ID's for transaction
+   *  descriptions and account names.
+   */
   private async buildUserAccountDetails(user: User, idMap: Map<string, string>) {
     const historicalTimeFrame = subDays(new Date(), 90);
     const accounts = Utility.shuffleArray(await Account.find({ where: { user: { id: user.id } } }));
@@ -120,7 +131,7 @@ export class ChatService {
     const accountData = await Promise.all(
       accounts.map(async (acc) => {
         const genericId = `Account_${randomBytes(2).toString("hex")}`;
-        idMap.set(acc.name, genericId);
+        idMap.set(acc.id, genericId);
 
         const holdings = await Holding.find({ where: { account: { id: acc.id } } });
         const history = await AccountHistory.find({
@@ -145,7 +156,7 @@ export class ChatService {
       accounts: accountData,
       transactions: transactions.map((t) => {
         const genericDescriptionId = `desc_${randomBytes(2).toString("hex")}`;
-        idMap.set(t.description, genericDescriptionId);
+        idMap.set(t.id, genericDescriptionId);
         return { d: formatDate(t.posted, "P"), n: genericDescriptionId, a: t.amount, c: t.category?.name, acc: idMap.get(t.account.name) };
       }),
     };
@@ -165,8 +176,8 @@ export class ChatService {
    * Cleans and formats chat history to prevent context poisoning and
    * ensures strict user/model alternation.
    */
-  private formatCleanHistory(history: ChatHistory[]): any[] {
-    const formatted: any[] = [];
+  private formatCleanHistory(history: ChatHistory[], idMap: Map<string, string>) {
+    const formatted: { role: string; parts: Array<{ text: string }> }[] = [];
 
     for (const msg of history) {
       let text = msg.text.trim();
@@ -178,9 +189,11 @@ export class ChatService {
       // Double check after scrubbing that we still have text
       if (text === "") continue;
 
-      // Ensure role alternation (Gemini requirement: user -> model -> user)
+      if (idMap) text = msg.deIdentifyText(idMap);
+
+      // Ensure role alternation (AI requirement: user -> model -> user)
       // If the last added message has the same role as the current one, replace it.
-      if (formatted.length > 0 && formatted[formatted.length - 1].role === msg.role) formatted[formatted.length - 1].parts = [{ text }];
+      if (formatted.length > 0 && formatted[formatted.length - 1]?.role === msg.role) formatted[formatted.length - 1]!.parts = [{ text }];
       else
         formatted.push({
           role: msg.role === "user" ? "user" : "model",

@@ -323,7 +323,7 @@ final class MonthlySpendingProvider
   }
 }
 
-String _$monthlySpendingHash() => r'2b8e7c65de1689f8ec7f6e5a2059ff7fcaf673b4';
+String _$monthlySpendingHash() => r'7c07c34194ef33ce7c896a702a8a9b929922605a';
 
 /// Monthly spending state
 
