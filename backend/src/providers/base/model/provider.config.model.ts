@@ -1,6 +1,6 @@
 import { Base } from "@backend/core/model/base";
 
-export type PROVIDER_OPTIONS = "simple-fin";
+export type PROVIDER_OPTIONS = "simple-fin" | "zillow";
 
 /** This class represents a finance provider and some metadata on their connection */
 export class ProviderConfig extends Base {
