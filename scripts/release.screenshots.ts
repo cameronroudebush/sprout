@@ -101,6 +101,37 @@ export async function getBackground(width: number, height: number, layout: "stra
     .toBuffer();
 }
 
+/** Builds a screenshot with some nice highlighting gradient across it with rounded borders */
+async function buildScreenshot(screenshot: Buffer, corner: number) {
+  const scMeta = await sharp(screenshot).metadata();
+  return await sharp(screenshot)
+    .composite([
+      {
+        input: Buffer.from(`
+          <svg width="${scMeta.width}" height="${scMeta.height}">
+            <defs>
+              <linearGradient id="glare" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
+                <stop offset="35%" stop-color="#ffffff" stop-opacity="0.01"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="${scMeta.width}" height="${scMeta.height}" rx="${corner}" ry="${corner}" fill="url(#glare)"/>
+          </svg>
+        `),
+        blend: "over",
+      },
+      {
+        input: Buffer.from(`
+          <svg width="${scMeta.width}" height="${scMeta.height}">
+            <rect x="0" y="0" width="${scMeta.width}" height="${scMeta.height}" rx="${corner}" ry="${corner}" />
+          </svg>
+        `),
+        blend: "dest-in",
+      },
+    ])
+    .toBuffer();
+}
+
 /** This function takes in a screenshot buffer of an app screen shot along with other info and creates a picture intended for the google play store. */
 async function createStoreScreenshot(
   screenshotBuffer: Buffer,
@@ -120,33 +151,7 @@ async function createStoreScreenshot(
 
   // Build the flat screenshot device with shadow
   const resizedScreenshot = await sharp(screenshotBuffer).resize(c.width).toBuffer();
-  const scMeta = await sharp(resizedScreenshot).metadata();
-  const flatScreenshot = await sharp(resizedScreenshot)
-    .composite([
-      {
-        input: Buffer.from(`
-          <svg width="${scMeta.width}" height="${scMeta.height}">
-            <defs>
-              <linearGradient id="glare" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
-                <stop offset="35%" stop-color="#ffffff" stop-opacity="0.01"/>
-              </linearGradient>
-            </defs>
-            <rect x="0" y="0" width="${scMeta.width}" height="${scMeta.height}" rx="${c.corner}" ry="${c.corner}" fill="url(#glare)"/>
-          </svg>
-        `),
-        blend: "over",
-      },
-      {
-        input: Buffer.from(`
-          <svg width="${scMeta.width}" height="${scMeta.height}">
-            <rect x="0" y="0" width="${scMeta.width}" height="${scMeta.height}" rx="${c.corner}" ry="${c.corner}" />
-          </svg>
-        `),
-        blend: "dest-in",
-      },
-    ])
-    .toBuffer();
+  const flatScreenshot = await buildScreenshot(resizedScreenshot, c.corner);
 
   // Apply our perspective based on our mode
   const affineMatrix = layout === "right" ? [0.96, 0.08, -0.06, 0.96] : layout === "left" ? [0.96, -0.08, 0.06, 0.96] : [1.0, 0.0, 0.0, 1.0];
@@ -193,6 +198,47 @@ async function createStoreScreenshot(
   // Combine the text + the screenshot and write it to a buffer
   return sharp(background)
     .composite([{ input: safeScreenshot, top: c.height * 0.18, left: Math.floor((c.width - screenshotMeta.width) / 2) }, { input: typography }])
+    .toBuffer();
+}
+
+/** Creates a high-level overview image with the logo and key bullet points */
+async function createMainOverview(c = { width: 1200, height: 1900, corner: 20 }) {
+  const logoPath = path.join("frontend", "assets", "logo", "color-transparent.png");
+  const background = await getBackground(c.width, c.height, "straight");
+  const logoWidth = 1000;
+  const logoBuffer = await sharp(logoPath).resize({ width: logoWidth, fit: "inside" }).png().toBuffer();
+  const overviewWidth = 800;
+  const resizedOverview = await sharp(routes[0]!.getImagePathOutput("mobile")).resize({ width: overviewWidth, fit: "inside" }).png().toBuffer();
+  const overview = await buildScreenshot(resizedOverview, c.corner);
+
+  const textOverlay = Buffer.from(`
+    <svg width="${c.width}" height="${c.height}" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .title { fill: white; font-size: 80px; font-weight: bold; font-family: 'Sprout'; }
+        .bullet { fill: #4ade80; font-size: 45px; font-weight: bold; font-family: 'Sprout'; }
+        .body { fill: #e2e8f0; font-size: 40px; font-family: 'Sprout'; }
+      </style>
+      <text x="150" y="50" class="bullet">✔</text>
+      <text x="220" y="50" class="body">Self-Hostable Finance Tracking</text>
+      
+      <text x="150" y="150" class="bullet">✔</text>
+      <text x="220" y="150" class="body">Crystal-clear Net Worth View</text>
+      
+      <text x="150" y="250" class="bullet">✔</text>
+      <text x="220" y="250" class="body">Full Transaction History</text>
+      
+      <text x="50%" y="350" text-anchor="middle" class="body" style="font-style: italic; fill: #94a3b8;">
+        Your journey to financial growth starts here.
+      </text>
+    </svg>
+  `);
+
+  return sharp(background)
+    .composite([
+      { input: logoBuffer, top: 50, left: (c.width - logoWidth) / 2 },
+      { input: textOverlay, top: 500, left: 0 },
+      { input: overview, top: 1000, left: (c.width - overviewWidth) / 2 },
+    ])
     .toBuffer();
 }
 
@@ -262,7 +308,7 @@ async function createHorizontalBanner(
   return sharp(background)
     .composite([
       { input: brandingOverlay, top: 0, left: 0 },
-      { input: logoBuffer, top: 140, left: 120 },
+      { input: logoBuffer, top: 140, left: 60 },
       { input: badgeBuffer, top: 680, left: 130 },
       { input: card1Rotated, top: yPos, left: xPos - 300 },
       { input: card2Rotated, top: yPos, left: xPos + 40 },
@@ -330,7 +376,7 @@ async function captureScreenshots() {
 
 /** Iterates over every route that wants store screenshots and saves them */
 async function buildStoreScreenshots() {
-  console.log(`--- Capturing Store Screenshots ---`);
+  console.log(`--- Building Store Screenshots ---`);
   const storeRoutes = routes.filter((x) => x.store);
 
   const storeTargetPath = path.join("docs", "images", "store");
@@ -339,7 +385,7 @@ async function buildStoreScreenshots() {
   for (let i = 0; i < storeRoutes.length; i++) {
     const route = storeRoutes[i]!;
     const asset = route.store!;
-    console.log(`Capturing ${route.path}`);
+    console.log(`Building ${route.path}`);
     // Load the data in from it's mobile viewport counterpart
     const buffer = fs.readFileSync(route.getImagePathOutput("mobile"));
 
@@ -366,6 +412,13 @@ async function buildStoreScreenshots() {
       ),
     ),
   );
+
+  console.log(`--- Generating Overview ---`);
+  // Generate overview main store screenshot
+  const overviewBuffer = await createMainOverview();
+  const overviewOutputPath = path.join("docs", "images", "store", "overview.png");
+  if (!fs.existsSync(path.dirname(overviewOutputPath))) fs.mkdirSync(path.dirname(overviewOutputPath), { recursive: true });
+  fs.writeFileSync(overviewOutputPath, new Uint8Array(overviewBuffer));
 }
 
 /** The main app */
