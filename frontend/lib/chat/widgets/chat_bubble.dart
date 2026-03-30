@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/chat/models/extensions/chat_history_extensions.dart';
 import 'package:sprout/chat/widgets/chat_typing_indicator.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -15,22 +17,32 @@ class ChatBubble extends ConsumerWidget {
 
   /// Renders the message data using GPT markdown
   Widget _getGPTMarkdown(BuildContext context, WidgetRef ref) {
-    final userConfig = ref.watch(userConfigProvider).value;
-    final isPrivate = userConfig?.privateMode ?? false;
+    final userConfigAsync = ref.watch(userConfigProvider);
+    final accountsAsync = ref.watch(accountsProvider);
 
-    // Use the formatter to mask currency if privacy mode is active
-    final text = isPrivate ? message.text.deIdentifyCurrency() : message.text;
+    // If accounts are still loading, don't render the text yet to avoid flashing raw IDs
+    return accountsAsync.when(
+      loading: () => const TypingIndicator(),
+      error: (err, _) => Text("Error: $err", style: const TextStyle(color: Colors.white)),
+      data: (accountState) {
+        final isPrivate = userConfigAsync.value?.privateMode ?? false;
+        final accounts = accountState.accounts;
+        String processedText = message.text;
+        processedText = processedText.deIdentifyAccounts(accounts);
+        final finalText = isPrivate ? processedText.deIdentifyCurrency() : processedText;
 
-    return Theme(
-      data: Theme.of(context).copyWith(
-        textTheme: Theme.of(context).textTheme.copyWith(
-              headlineLarge: const TextStyle(color: Colors.white, fontSize: 22),
-              headlineMedium: const TextStyle(color: Colors.white, fontSize: 20),
-              headlineSmall: const TextStyle(color: Colors.white, fontSize: 18),
-              titleLarge: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-      ),
-      child: GptMarkdown(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+        return Theme(
+          data: Theme.of(context).copyWith(
+            textTheme: Theme.of(context).textTheme.copyWith(
+                  headlineLarge: const TextStyle(color: Colors.white, fontSize: 22),
+                  headlineMedium: const TextStyle(color: Colors.white, fontSize: 20),
+                  headlineSmall: const TextStyle(color: Colors.white, fontSize: 18),
+                  titleLarge: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+          ),
+          child: GptMarkdown(finalText, style: const TextStyle(color: Colors.white, fontSize: 14)),
+        );
+      },
     );
   }
 
