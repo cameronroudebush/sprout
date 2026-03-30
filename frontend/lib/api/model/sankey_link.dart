@@ -76,10 +76,12 @@ class SankeyLink {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "SankeyLink[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "SankeyLink[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'source'), 'Required key "SankeyLink[source]" is missing from JSON.');
+        assert(json[r'source'] != null, 'Required key "SankeyLink[source]" has a null value in JSON.');
+        assert(json.containsKey(r'target'), 'Required key "SankeyLink[target]" is missing from JSON.');
+        assert(json[r'target'] != null, 'Required key "SankeyLink[target]" has a null value in JSON.');
+        assert(json.containsKey(r'value'), 'Required key "SankeyLink[value]" is missing from JSON.');
+        assert(json[r'value'] != null, 'Required key "SankeyLink[value]" has a null value in JSON.');
         return true;
       }());
 

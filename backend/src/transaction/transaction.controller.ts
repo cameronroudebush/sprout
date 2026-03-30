@@ -78,6 +78,9 @@ export class TransactionController {
   })
   @ApiQuery({ name: "description", required: false, type: String, description: "A partial description to filter transactions." })
   @ApiQuery({ name: "date", required: false, type: String, format: "date", description: "A specific date to filter transactions." })
+  @ApiQuery({ name: "startDate", required: false, type: String, format: "date" })
+  @ApiQuery({ name: "endDate", required: false, type: String, format: "date" })
+  @ApiQuery({ name: "pending", required: false, type: Boolean })
   async getByQuery(
     @CurrentUser() user: User,
     @Query("startIndex") startIndex?: number,
@@ -86,6 +89,9 @@ export class TransactionController {
     @Query("category") category?: string,
     @Query("description") description?: string,
     @Query("date") date?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
+    @Query("pending") pending?: boolean,
   ) {
     // Define category clause of this search
     let categoryQuery;
@@ -117,6 +123,13 @@ export class TransactionController {
       categoryQuery = { id: In(allIds) };
     }
 
+    let dateFilter;
+    if (date) {
+      dateFilter = Between(startOfDay(new Date(date)), endOfDay(new Date(date)));
+    } else if (startDate && endDate) {
+      dateFilter = Between(startOfDay(new Date(startDate)), endOfDay(new Date(endDate)));
+    }
+
     return await Transaction.find({
       skip: startIndex,
       take: endIndex,
@@ -124,7 +137,8 @@ export class TransactionController {
         account: { id: accountId, user: { id: user.id } },
         category: categoryQuery,
         description: description ? Like(`%${description}%`) : undefined,
-        posted: date != null ? Between(startOfDay(new Date(date)), endOfDay(new Date(date))) : undefined,
+        posted: dateFilter,
+        pending: pending === undefined ? undefined : pending,
       },
       order: { posted: "DESC", pending: "DESC", description: "ASC" },
       relations: ["category", "category.parentCategory"],

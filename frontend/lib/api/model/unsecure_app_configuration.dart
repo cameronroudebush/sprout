@@ -60,10 +60,12 @@ class UnsecureAppConfiguration {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UnsecureAppConfiguration[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UnsecureAppConfiguration[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'authMode'), 'Required key "UnsecureAppConfiguration[authMode]" is missing from JSON.');
+        assert(json[r'authMode'] != null, 'Required key "UnsecureAppConfiguration[authMode]" has a null value in JSON.');
+        assert(json.containsKey(r'version'), 'Required key "UnsecureAppConfiguration[version]" is missing from JSON.');
+        assert(json[r'version'] != null, 'Required key "UnsecureAppConfiguration[version]" has a null value in JSON.');
+        assert(json.containsKey(r'allowUserCreation'), 'Required key "UnsecureAppConfiguration[allowUserCreation]" is missing from JSON.');
+        assert(json[r'allowUserCreation'] != null, 'Required key "UnsecureAppConfiguration[allowUserCreation]" has a null value in JSON.');
         return true;
       }());
 

@@ -78,10 +78,12 @@ class ProviderConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ProviderConfig[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ProviderConfig[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'dbType'), 'Required key "ProviderConfig[dbType]" is missing from JSON.');
+        assert(json[r'dbType'] != null, 'Required key "ProviderConfig[dbType]" has a null value in JSON.');
+        assert(json.containsKey(r'name'), 'Required key "ProviderConfig[name]" is missing from JSON.');
+        assert(json[r'name'] != null, 'Required key "ProviderConfig[name]" has a null value in JSON.');
+        assert(json.containsKey(r'logoUrl'), 'Required key "ProviderConfig[logoUrl]" is missing from JSON.');
+        assert(json[r'logoUrl'] != null, 'Required key "ProviderConfig[logoUrl]" has a null value in JSON.');
         return true;
       }());
 

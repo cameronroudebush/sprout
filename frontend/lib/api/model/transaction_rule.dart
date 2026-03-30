@@ -122,10 +122,20 @@ class TransactionRule {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "TransactionRule[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "TransactionRule[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "TransactionRule[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "TransactionRule[id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'), 'Required key "TransactionRule[type]" is missing from JSON.');
+        assert(json[r'type'] != null, 'Required key "TransactionRule[type]" has a null value in JSON.');
+        assert(json.containsKey(r'value'), 'Required key "TransactionRule[value]" is missing from JSON.');
+        assert(json[r'value'] != null, 'Required key "TransactionRule[value]" has a null value in JSON.');
+        assert(json.containsKey(r'strict'), 'Required key "TransactionRule[strict]" is missing from JSON.');
+        assert(json[r'strict'] != null, 'Required key "TransactionRule[strict]" has a null value in JSON.');
+        assert(json.containsKey(r'matches'), 'Required key "TransactionRule[matches]" is missing from JSON.');
+        assert(json[r'matches'] != null, 'Required key "TransactionRule[matches]" has a null value in JSON.');
+        assert(json.containsKey(r'order'), 'Required key "TransactionRule[order]" is missing from JSON.');
+        assert(json[r'order'] != null, 'Required key "TransactionRule[order]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'), 'Required key "TransactionRule[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null, 'Required key "TransactionRule[enabled]" has a null value in JSON.');
         return true;
       }());
 

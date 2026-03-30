@@ -140,10 +140,22 @@ class Account {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Account[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Account[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "Account[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "Account[id]" has a null value in JSON.');
+        assert(json.containsKey(r'name'), 'Required key "Account[name]" is missing from JSON.');
+        assert(json[r'name'] != null, 'Required key "Account[name]" has a null value in JSON.');
+        assert(json.containsKey(r'provider'), 'Required key "Account[provider]" is missing from JSON.');
+        assert(json[r'provider'] != null, 'Required key "Account[provider]" has a null value in JSON.');
+        assert(json.containsKey(r'institution'), 'Required key "Account[institution]" is missing from JSON.');
+        assert(json[r'institution'] != null, 'Required key "Account[institution]" has a null value in JSON.');
+        assert(json.containsKey(r'currency'), 'Required key "Account[currency]" is missing from JSON.');
+        assert(json[r'currency'] != null, 'Required key "Account[currency]" has a null value in JSON.');
+        assert(json.containsKey(r'balance'), 'Required key "Account[balance]" is missing from JSON.');
+        assert(json[r'balance'] != null, 'Required key "Account[balance]" has a null value in JSON.');
+        assert(json.containsKey(r'availableBalance'), 'Required key "Account[availableBalance]" is missing from JSON.');
+        assert(json[r'availableBalance'] != null, 'Required key "Account[availableBalance]" has a null value in JSON.');
+        assert(json.containsKey(r'type'), 'Required key "Account[type]" is missing from JSON.');
+        assert(json[r'type'] != null, 'Required key "Account[type]" has a null value in JSON.');
         return true;
       }());
 

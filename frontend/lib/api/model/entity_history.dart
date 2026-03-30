@@ -100,10 +100,20 @@ class EntityHistory {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EntityHistory[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EntityHistory[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'last1Day'), 'Required key "EntityHistory[last1Day]" is missing from JSON.');
+        assert(json[r'last1Day'] != null, 'Required key "EntityHistory[last1Day]" has a null value in JSON.');
+        assert(json.containsKey(r'last7Days'), 'Required key "EntityHistory[last7Days]" is missing from JSON.');
+        assert(json[r'last7Days'] != null, 'Required key "EntityHistory[last7Days]" has a null value in JSON.');
+        assert(json.containsKey(r'lastMonth'), 'Required key "EntityHistory[lastMonth]" is missing from JSON.');
+        assert(json[r'lastMonth'] != null, 'Required key "EntityHistory[lastMonth]" has a null value in JSON.');
+        assert(json.containsKey(r'lastThreeMonths'), 'Required key "EntityHistory[lastThreeMonths]" is missing from JSON.');
+        assert(json[r'lastThreeMonths'] != null, 'Required key "EntityHistory[lastThreeMonths]" has a null value in JSON.');
+        assert(json.containsKey(r'lastSixMonths'), 'Required key "EntityHistory[lastSixMonths]" is missing from JSON.');
+        assert(json[r'lastSixMonths'] != null, 'Required key "EntityHistory[lastSixMonths]" has a null value in JSON.');
+        assert(json.containsKey(r'lastYear'), 'Required key "EntityHistory[lastYear]" is missing from JSON.');
+        assert(json[r'lastYear'] != null, 'Required key "EntityHistory[lastYear]" has a null value in JSON.');
+        assert(json.containsKey(r'allTime'), 'Required key "EntityHistory[allTime]" is missing from JSON.');
+        assert(json[r'allTime'] != null, 'Required key "EntityHistory[allTime]" has a null value in JSON.');
         return true;
       }());
 

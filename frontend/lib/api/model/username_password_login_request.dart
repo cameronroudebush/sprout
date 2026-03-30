@@ -53,10 +53,10 @@ class UsernamePasswordLoginRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UsernamePasswordLoginRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UsernamePasswordLoginRequest[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'username'), 'Required key "UsernamePasswordLoginRequest[username]" is missing from JSON.');
+        assert(json[r'username'] != null, 'Required key "UsernamePasswordLoginRequest[username]" has a null value in JSON.');
+        assert(json.containsKey(r'password'), 'Required key "UsernamePasswordLoginRequest[password]" is missing from JSON.');
+        assert(json[r'password'] != null, 'Required key "UsernamePasswordLoginRequest[password]" has a null value in JSON.');
         return true;
       }());
 

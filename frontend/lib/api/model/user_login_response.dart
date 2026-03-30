@@ -63,10 +63,8 @@ class UserLoginResponse {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserLoginResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserLoginResponse[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'user'), 'Required key "UserLoginResponse[user]" is missing from JSON.');
+        assert(json[r'user'] != null, 'Required key "UserLoginResponse[user]" has a null value in JSON.');
         return true;
       }());
 

@@ -65,10 +65,14 @@ class FirebaseConfigDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "FirebaseConfigDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "FirebaseConfigDTO[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'apiKey'), 'Required key "FirebaseConfigDTO[apiKey]" is missing from JSON.');
+        assert(json[r'apiKey'] != null, 'Required key "FirebaseConfigDTO[apiKey]" has a null value in JSON.');
+        assert(json.containsKey(r'appId'), 'Required key "FirebaseConfigDTO[appId]" is missing from JSON.');
+        assert(json[r'appId'] != null, 'Required key "FirebaseConfigDTO[appId]" has a null value in JSON.');
+        assert(json.containsKey(r'projectNumber'), 'Required key "FirebaseConfigDTO[projectNumber]" is missing from JSON.');
+        assert(json[r'projectNumber'] != null, 'Required key "FirebaseConfigDTO[projectNumber]" has a null value in JSON.');
+        assert(json.containsKey(r'projectId'), 'Required key "FirebaseConfigDTO[projectId]" is missing from JSON.');
+        assert(json[r'projectId'] != null, 'Required key "FirebaseConfigDTO[projectId]" has a null value in JSON.');
         return true;
       }());
 

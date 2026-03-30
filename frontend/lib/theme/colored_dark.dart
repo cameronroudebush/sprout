@@ -55,4 +55,9 @@ final ThemeData coloredDarkTheme = FlexThemeData.dark(
     waitDuration: const Duration(milliseconds: 500),
     showDuration: const Duration(seconds: 2),
   ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+    foregroundColor: Colors.white,
+    side: const BorderSide(color: Colors.white, width: 1),
+  )),
 );

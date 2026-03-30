@@ -90,10 +90,20 @@ class TransactionSubscription {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "TransactionSubscription[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "TransactionSubscription[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'account'), 'Required key "TransactionSubscription[account]" is missing from JSON.');
+        assert(json[r'account'] != null, 'Required key "TransactionSubscription[account]" has a null value in JSON.');
+        assert(json.containsKey(r'transaction'), 'Required key "TransactionSubscription[transaction]" is missing from JSON.');
+        assert(json[r'transaction'] != null, 'Required key "TransactionSubscription[transaction]" has a null value in JSON.');
+        assert(json.containsKey(r'description'), 'Required key "TransactionSubscription[description]" is missing from JSON.');
+        assert(json[r'description'] != null, 'Required key "TransactionSubscription[description]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'), 'Required key "TransactionSubscription[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null, 'Required key "TransactionSubscription[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'count'), 'Required key "TransactionSubscription[count]" is missing from JSON.');
+        assert(json[r'count'] != null, 'Required key "TransactionSubscription[count]" has a null value in JSON.');
+        assert(json.containsKey(r'period'), 'Required key "TransactionSubscription[period]" is missing from JSON.');
+        assert(json[r'period'] != null, 'Required key "TransactionSubscription[period]" has a null value in JSON.');
+        assert(json.containsKey(r'startDate'), 'Required key "TransactionSubscription[startDate]" is missing from JSON.');
+        assert(json[r'startDate'] != null, 'Required key "TransactionSubscription[startDate]" has a null value in JSON.');
         return true;
       }());
 

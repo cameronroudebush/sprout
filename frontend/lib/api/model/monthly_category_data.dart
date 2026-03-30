@@ -62,10 +62,12 @@ class MonthlyCategoryData {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MonthlyCategoryData[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MonthlyCategoryData[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'name'), 'Required key "MonthlyCategoryData[name]" is missing from JSON.');
+        assert(json[r'name'] != null, 'Required key "MonthlyCategoryData[name]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'), 'Required key "MonthlyCategoryData[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null, 'Required key "MonthlyCategoryData[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'color'), 'Required key "MonthlyCategoryData[color]" is missing from JSON.');
+        assert(json[r'color'] != null, 'Required key "MonthlyCategoryData[color]" has a null value in JSON.');
         return true;
       }());
 

@@ -121,10 +121,18 @@ class Transaction {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Transaction[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Transaction[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "Transaction[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "Transaction[id]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'), 'Required key "Transaction[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null, 'Required key "Transaction[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'description'), 'Required key "Transaction[description]" is missing from JSON.');
+        assert(json[r'description'] != null, 'Required key "Transaction[description]" has a null value in JSON.');
+        assert(json.containsKey(r'pending'), 'Required key "Transaction[pending]" is missing from JSON.');
+        assert(json[r'pending'] != null, 'Required key "Transaction[pending]" has a null value in JSON.');
+        assert(json.containsKey(r'posted'), 'Required key "Transaction[posted]" is missing from JSON.');
+        assert(json[r'posted'] != null, 'Required key "Transaction[posted]" has a null value in JSON.');
+        assert(json.containsKey(r'account'), 'Required key "Transaction[account]" is missing from JSON.');
+        assert(json[r'account'] != null, 'Required key "Transaction[account]" has a null value in JSON.');
         return true;
       }());
 

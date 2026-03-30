@@ -69,10 +69,10 @@ class RefreshResponseDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "RefreshResponseDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "RefreshResponseDTO[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'idToken'), 'Required key "RefreshResponseDTO[idToken]" is missing from JSON.');
+        assert(json[r'idToken'] != null, 'Required key "RefreshResponseDTO[idToken]" has a null value in JSON.');
+        assert(json.containsKey(r'accessToken'), 'Required key "RefreshResponseDTO[accessToken]" is missing from JSON.');
+        assert(json[r'accessToken'] != null, 'Required key "RefreshResponseDTO[accessToken]" has a null value in JSON.');
         return true;
       }());
 

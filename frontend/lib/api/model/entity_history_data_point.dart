@@ -70,10 +70,10 @@ class EntityHistoryDataPoint {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EntityHistoryDataPoint[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EntityHistoryDataPoint[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'start'), 'Required key "EntityHistoryDataPoint[start]" is missing from JSON.');
+        assert(json[r'start'] != null, 'Required key "EntityHistoryDataPoint[start]" has a null value in JSON.');
+        assert(json.containsKey(r'valueChange'), 'Required key "EntityHistoryDataPoint[valueChange]" is missing from JSON.');
+        assert(json[r'valueChange'] != null, 'Required key "EntityHistoryDataPoint[valueChange]" has a null value in JSON.');
         return true;
       }());
 

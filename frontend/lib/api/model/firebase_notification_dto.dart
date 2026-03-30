@@ -60,10 +60,12 @@ class FirebaseNotificationDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "FirebaseNotificationDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "FirebaseNotificationDTO[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'notificationId'), 'Required key "FirebaseNotificationDTO[notificationId]" is missing from JSON.');
+        assert(json[r'notificationId'] != null, 'Required key "FirebaseNotificationDTO[notificationId]" has a null value in JSON.');
+        assert(json.containsKey(r'type'), 'Required key "FirebaseNotificationDTO[type]" is missing from JSON.');
+        assert(json[r'type'] != null, 'Required key "FirebaseNotificationDTO[type]" has a null value in JSON.');
+        assert(json.containsKey(r'importance'), 'Required key "FirebaseNotificationDTO[importance]" is missing from JSON.');
+        assert(json[r'importance'] != null, 'Required key "FirebaseNotificationDTO[importance]" has a null value in JSON.');
         return true;
       }());
 
