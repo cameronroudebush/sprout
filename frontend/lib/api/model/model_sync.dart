@@ -94,10 +94,12 @@ class ModelSync {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ModelSync[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ModelSync[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "ModelSync[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "ModelSync[id]" has a null value in JSON.');
+        assert(json.containsKey(r'status'), 'Required key "ModelSync[status]" is missing from JSON.');
+        assert(json[r'status'] != null, 'Required key "ModelSync[status]" has a null value in JSON.');
+        assert(json.containsKey(r'time'), 'Required key "ModelSync[time]" is missing from JSON.');
+        assert(json[r'time'] != null, 'Required key "ModelSync[time]" has a null value in JSON.');
         return true;
       }());
 

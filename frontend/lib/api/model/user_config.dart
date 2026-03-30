@@ -116,10 +116,18 @@ class UserConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UserConfig[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UserConfig[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "UserConfig[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "UserConfig[id]" has a null value in JSON.');
+        assert(json.containsKey(r'netWorthRange'), 'Required key "UserConfig[netWorthRange]" is missing from JSON.');
+        assert(json[r'netWorthRange'] != null, 'Required key "UserConfig[netWorthRange]" has a null value in JSON.');
+        assert(json.containsKey(r'themeStyle'), 'Required key "UserConfig[themeStyle]" is missing from JSON.');
+        assert(json[r'themeStyle'] != null, 'Required key "UserConfig[themeStyle]" has a null value in JSON.');
+        assert(json.containsKey(r'privateMode'), 'Required key "UserConfig[privateMode]" is missing from JSON.');
+        assert(json[r'privateMode'] != null, 'Required key "UserConfig[privateMode]" has a null value in JSON.');
+        assert(json.containsKey(r'secureMode'), 'Required key "UserConfig[secureMode]" is missing from JSON.');
+        assert(json[r'secureMode'] != null, 'Required key "UserConfig[secureMode]" has a null value in JSON.');
+        assert(json.containsKey(r'allowWidgets'), 'Required key "UserConfig[allowWidgets]" is missing from JSON.');
+        assert(json[r'allowWidgets'] != null, 'Required key "UserConfig[allowWidgets]" has a null value in JSON.');
         return true;
       }());
 

@@ -75,10 +75,16 @@ class ChatHistory {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "ChatHistory[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "ChatHistory[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "ChatHistory[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "ChatHistory[id]" has a null value in JSON.');
+        assert(json.containsKey(r'role'), 'Required key "ChatHistory[role]" is missing from JSON.');
+        assert(json[r'role'] != null, 'Required key "ChatHistory[role]" has a null value in JSON.');
+        assert(json.containsKey(r'time'), 'Required key "ChatHistory[time]" is missing from JSON.');
+        assert(json[r'time'] != null, 'Required key "ChatHistory[time]" has a null value in JSON.');
+        assert(json.containsKey(r'text'), 'Required key "ChatHistory[text]" is missing from JSON.');
+        assert(json[r'text'] != null, 'Required key "ChatHistory[text]" has a null value in JSON.');
+        assert(json.containsKey(r'isThinking'), 'Required key "ChatHistory[isThinking]" is missing from JSON.');
+        assert(json[r'isThinking'] != null, 'Required key "ChatHistory[isThinking]" has a null value in JSON.');
         return true;
       }());
 

@@ -67,10 +67,14 @@ class Institution {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Institution[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Institution[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "Institution[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "Institution[id]" has a null value in JSON.');
+        assert(json.containsKey(r'url'), 'Required key "Institution[url]" is missing from JSON.');
+        assert(json[r'url'] != null, 'Required key "Institution[url]" has a null value in JSON.');
+        assert(json.containsKey(r'name'), 'Required key "Institution[name]" is missing from JSON.');
+        assert(json[r'name'] != null, 'Required key "Institution[name]" has a null value in JSON.');
+        assert(json.containsKey(r'hasError'), 'Required key "Institution[hasError]" is missing from JSON.');
+        assert(json[r'hasError'] != null, 'Required key "Institution[hasError]" has a null value in JSON.');
         return true;
       }());
 

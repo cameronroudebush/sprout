@@ -55,10 +55,10 @@ class HistoricalDataPoint {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "HistoricalDataPoint[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "HistoricalDataPoint[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'date'), 'Required key "HistoricalDataPoint[date]" is missing from JSON.');
+        assert(json[r'date'] != null, 'Required key "HistoricalDataPoint[date]" has a null value in JSON.');
+        assert(json.containsKey(r'value'), 'Required key "HistoricalDataPoint[value]" is missing from JSON.');
+        assert(json[r'value'] != null, 'Required key "HistoricalDataPoint[value]" has a null value in JSON.');
         return true;
       }());
 

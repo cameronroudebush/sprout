@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
@@ -52,6 +53,8 @@ class Transactions extends _$Transactions {
     String? accountId,
     String? catId,
     String? search,
+    DateTimeRange? dateRange,
+    bool? pending,
     bool resetList = false,
   }) async {
     final current = state.value;
@@ -60,7 +63,6 @@ class Transactions extends _$Transactions {
     try {
       final api = await ref.read(transactionApiProvider.future);
 
-      // Slight category adjustment
       String? apiCategory = catId == "all" ? null : catId;
 
       final nextItems = await api.transactionControllerGetByQuery(
@@ -69,6 +71,9 @@ class Transactions extends _$Transactions {
         accountId: accountId,
         category: apiCategory,
         description: search,
+        startDate: dateRange?.start,
+        endDate: dateRange?.end,
+        pending: pending,
       );
 
       if (nextItems != null) {
@@ -133,10 +138,23 @@ List<Transaction> filteredTransactions(Ref ref) {
 
     // Filter by Category
     if (filter.categoryId != null && filter.categoryId != CategoryDropdown.fakeAllCategory.id) {
-      // If filtering for null in DB
-      if (filter.categoryId == "unknown") return t.category == null;
-      // Normal category match
-      if (t.category?.id != filter.categoryId) return false;
+      if (filter.categoryId == "unknown") {
+        if (t.category != null) return false;
+      } else if (t.category?.id != filter.categoryId) {
+        return false;
+      }
+    }
+
+    // Filter by Pending Status
+    if (filter.pending != null && t.pending != filter.pending) {
+      return false;
+    }
+
+    // Filter by Time Frame (Local check)
+    if (filter.dateRange != null) {
+      if (t.posted.isBefore(filter.dateRange!.start) || t.posted.isAfter(filter.dateRange!.end)) {
+        return false;
+      }
     }
 
     return true;

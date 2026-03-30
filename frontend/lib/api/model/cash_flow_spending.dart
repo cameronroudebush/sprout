@@ -54,10 +54,10 @@ class CashFlowSpending {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CashFlowSpending[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CashFlowSpending[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'data'), 'Required key "CashFlowSpending[data]" is missing from JSON.');
+        assert(json[r'data'] != null, 'Required key "CashFlowSpending[data]" has a null value in JSON.');
+        assert(json.containsKey(r'topCategoryNames'), 'Required key "CashFlowSpending[topCategoryNames]" is missing from JSON.');
+        assert(json[r'topCategoryNames'] != null, 'Required key "CashFlowSpending[topCategoryNames]" has a null value in JSON.');
         return true;
       }());
 

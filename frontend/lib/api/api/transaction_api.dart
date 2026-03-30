@@ -101,8 +101,13 @@ class TransactionApi {
   ///   A partial description to filter transactions.
   ///
   /// * [DateTime] date:
-  ///   A specific date to filter transactions.
-  Future<Response> transactionControllerGetByQueryWithHttpInfo({ num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, }) async {
+  ///
+  /// * [DateTime] startDate:
+  ///
+  /// * [DateTime] endDate:
+  ///
+  /// * [bool] pending:
+  Future<Response> transactionControllerGetByQueryWithHttpInfo({ num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction';
 
@@ -130,6 +135,15 @@ class TransactionApi {
     }
     if (date != null) {
       queryParams.addAll(_queryParams('', 'date', date));
+    }
+    if (startDate != null) {
+      queryParams.addAll(_queryParams('', 'startDate', startDate));
+    }
+    if (endDate != null) {
+      queryParams.addAll(_queryParams('', 'endDate', endDate));
+    }
+    if (pending != null) {
+      queryParams.addAll(_queryParams('', 'pending', pending));
     }
 
     const contentTypes = <String>[];
@@ -168,9 +182,14 @@ class TransactionApi {
   ///   A partial description to filter transactions.
   ///
   /// * [DateTime] date:
-  ///   A specific date to filter transactions.
-  Future<List<Transaction>?> transactionControllerGetByQuery({ num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, }) async {
-    final response = await transactionControllerGetByQueryWithHttpInfo( startIndex: startIndex, endIndex: endIndex, accountId: accountId, category: category, description: description, date: date, );
+  ///
+  /// * [DateTime] startDate:
+  ///
+  /// * [DateTime] endDate:
+  ///
+  /// * [bool] pending:
+  Future<List<Transaction>?> transactionControllerGetByQuery({ num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, }) async {
+    final response = await transactionControllerGetByQueryWithHttpInfo( startIndex: startIndex, endIndex: endIndex, accountId: accountId, category: category, description: description, date: date, startDate: startDate, endDate: endDate, pending: pending, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

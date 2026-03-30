@@ -97,10 +97,14 @@ class User {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "User[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "User[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "User[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "User[id]" has a null value in JSON.');
+        assert(json.containsKey(r'username'), 'Required key "User[username]" is missing from JSON.');
+        assert(json[r'username'] != null, 'Required key "User[username]" has a null value in JSON.');
+        assert(json.containsKey(r'admin'), 'Required key "User[admin]" is missing from JSON.');
+        assert(json[r'admin'] != null, 'Required key "User[admin]" has a null value in JSON.');
+        assert(json.containsKey(r'config'), 'Required key "User[config]" is missing from JSON.');
+        assert(json[r'config'] != null, 'Required key "User[config]" has a null value in JSON.');
         return true;
       }());
 

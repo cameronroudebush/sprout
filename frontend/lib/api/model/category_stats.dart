@@ -55,10 +55,10 @@ class CategoryStats {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CategoryStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CategoryStats[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'categoryCount'), 'Required key "CategoryStats[categoryCount]" is missing from JSON.');
+        assert(json[r'categoryCount'] != null, 'Required key "CategoryStats[categoryCount]" has a null value in JSON.');
+        assert(json.containsKey(r'colorMapping'), 'Required key "CategoryStats[colorMapping]" is missing from JSON.');
+        assert(json[r'colorMapping'] != null, 'Required key "CategoryStats[colorMapping]" has a null value in JSON.');
         return true;
       }());
 

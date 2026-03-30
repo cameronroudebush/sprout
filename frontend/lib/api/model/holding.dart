@@ -101,10 +101,24 @@ class Holding {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Holding[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Holding[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'id'), 'Required key "Holding[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "Holding[id]" has a null value in JSON.');
+        assert(json.containsKey(r'account'), 'Required key "Holding[account]" is missing from JSON.');
+        assert(json[r'account'] != null, 'Required key "Holding[account]" has a null value in JSON.');
+        assert(json.containsKey(r'currency'), 'Required key "Holding[currency]" is missing from JSON.');
+        assert(json[r'currency'] != null, 'Required key "Holding[currency]" has a null value in JSON.');
+        assert(json.containsKey(r'costBasis'), 'Required key "Holding[costBasis]" is missing from JSON.');
+        assert(json[r'costBasis'] != null, 'Required key "Holding[costBasis]" has a null value in JSON.');
+        assert(json.containsKey(r'description'), 'Required key "Holding[description]" is missing from JSON.');
+        assert(json[r'description'] != null, 'Required key "Holding[description]" has a null value in JSON.');
+        assert(json.containsKey(r'marketValue'), 'Required key "Holding[marketValue]" is missing from JSON.');
+        assert(json[r'marketValue'] != null, 'Required key "Holding[marketValue]" has a null value in JSON.');
+        assert(json.containsKey(r'purchasePrice'), 'Required key "Holding[purchasePrice]" is missing from JSON.');
+        assert(json[r'purchasePrice'] != null, 'Required key "Holding[purchasePrice]" has a null value in JSON.');
+        assert(json.containsKey(r'shares'), 'Required key "Holding[shares]" is missing from JSON.');
+        assert(json[r'shares'] != null, 'Required key "Holding[shares]" has a null value in JSON.');
+        assert(json.containsKey(r'symbol'), 'Required key "Holding[symbol]" is missing from JSON.');
+        assert(json[r'symbol'] != null, 'Required key "Holding[symbol]" has a null value in JSON.');
         return true;
       }());
 

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 
 /// The transactions state that tracks our available transactions in the frontend
@@ -31,17 +32,33 @@ class TransactionState {
 
 /// A state utilized by the transaction provider
 class TransactionFilter {
-  final String? accountId;
-  final String? categoryId;
-  final String search;
+  String? accountId;
+  String? categoryId;
+  String search;
+  DateTimeRange? dateRange;
+  bool? pending;
 
-  TransactionFilter({this.accountId, this.categoryId, this.search = ''});
+  TransactionFilter({
+    this.accountId,
+    this.categoryId,
+    this.search = '',
+    this.dateRange,
+    this.pending,
+  });
 
-  TransactionFilter copyWith({String? accountId, String? categoryId, String? search}) {
+  TransactionFilter copyWith({
+    String? accountId,
+    String? categoryId,
+    String? search,
+    DateTimeRange? dateRange,
+    bool? pending,
+  }) {
     return TransactionFilter(
       accountId: accountId ?? this.accountId,
       categoryId: categoryId ?? this.categoryId,
       search: search ?? this.search,
+      dateRange: dateRange ?? this.dateRange,
+      pending: pending ?? this.pending,
     );
   }
 }

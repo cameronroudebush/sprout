@@ -151,10 +151,18 @@ class MarketIndexDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MarketIndexDto[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MarketIndexDto[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'symbol'), 'Required key "MarketIndexDto[symbol]" is missing from JSON.');
+        assert(json[r'symbol'] != null, 'Required key "MarketIndexDto[symbol]" has a null value in JSON.');
+        assert(json.containsKey(r'name'), 'Required key "MarketIndexDto[name]" is missing from JSON.');
+        assert(json[r'name'] != null, 'Required key "MarketIndexDto[name]" has a null value in JSON.');
+        assert(json.containsKey(r'price'), 'Required key "MarketIndexDto[price]" is missing from JSON.');
+        assert(json[r'price'] != null, 'Required key "MarketIndexDto[price]" has a null value in JSON.');
+        assert(json.containsKey(r'change'), 'Required key "MarketIndexDto[change]" is missing from JSON.');
+        assert(json[r'change'] != null, 'Required key "MarketIndexDto[change]" has a null value in JSON.');
+        assert(json.containsKey(r'changePercent'), 'Required key "MarketIndexDto[changePercent]" is missing from JSON.');
+        assert(json[r'changePercent'] != null, 'Required key "MarketIndexDto[changePercent]" has a null value in JSON.');
+        assert(json.containsKey(r'lastUpdated'), 'Required key "MarketIndexDto[lastUpdated]" is missing from JSON.');
+        assert(json[r'lastUpdated'] != null, 'Required key "MarketIndexDto[lastUpdated]" has a null value in JSON.');
         return true;
       }());
 

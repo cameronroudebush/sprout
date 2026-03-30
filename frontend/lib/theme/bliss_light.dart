@@ -49,4 +49,9 @@ final ThemeData blissLightTheme = FlexThemeData.light(
     waitDuration: const Duration(milliseconds: 500),
     showDuration: const Duration(seconds: 2),
   ),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+    foregroundColor: Colors.black,
+    side: const BorderSide(color: Colors.black, width: 1),
+  )),
 );

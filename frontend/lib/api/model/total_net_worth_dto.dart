@@ -59,10 +59,12 @@ class TotalNetWorthDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "TotalNetWorthDTO[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "TotalNetWorthDTO[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'value'), 'Required key "TotalNetWorthDTO[value]" is missing from JSON.');
+        assert(json[r'value'] != null, 'Required key "TotalNetWorthDTO[value]" has a null value in JSON.');
+        assert(json.containsKey(r'history'), 'Required key "TotalNetWorthDTO[history]" is missing from JSON.');
+        assert(json[r'history'] != null, 'Required key "TotalNetWorthDTO[history]" has a null value in JSON.');
+        assert(json.containsKey(r'timeline'), 'Required key "TotalNetWorthDTO[timeline]" is missing from JSON.');
+        assert(json[r'timeline'] != null, 'Required key "TotalNetWorthDTO[timeline]" has a null value in JSON.');
         return true;
       }());
 

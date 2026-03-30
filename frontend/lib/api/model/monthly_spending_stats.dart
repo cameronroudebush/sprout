@@ -76,10 +76,16 @@ class MonthlySpendingStats {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "MonthlySpendingStats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "MonthlySpendingStats[$key]" has a null value in JSON.');
-        });
+        assert(json.containsKey(r'categories'), 'Required key "MonthlySpendingStats[categories]" is missing from JSON.');
+        assert(json[r'categories'] != null, 'Required key "MonthlySpendingStats[categories]" has a null value in JSON.');
+        assert(json.containsKey(r'monthLabel'), 'Required key "MonthlySpendingStats[monthLabel]" is missing from JSON.');
+        assert(json[r'monthLabel'] != null, 'Required key "MonthlySpendingStats[monthLabel]" has a null value in JSON.');
+        assert(json.containsKey(r'date'), 'Required key "MonthlySpendingStats[date]" is missing from JSON.');
+        assert(json[r'date'] != null, 'Required key "MonthlySpendingStats[date]" has a null value in JSON.');
+        assert(json.containsKey(r'totalSpending'), 'Required key "MonthlySpendingStats[totalSpending]" is missing from JSON.');
+        assert(json[r'totalSpending'] != null, 'Required key "MonthlySpendingStats[totalSpending]" has a null value in JSON.');
+        assert(json.containsKey(r'periodAverage'), 'Required key "MonthlySpendingStats[periodAverage]" is missing from JSON.');
+        assert(json[r'periodAverage'] != null, 'Required key "MonthlySpendingStats[periodAverage]" has a null value in JSON.');
         return true;
       }());
 

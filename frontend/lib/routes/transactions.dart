@@ -4,16 +4,14 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sprout/api/api.dart';
-import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
+import 'package:sprout/transaction/widgets/transactions_filter_bar.dart';
 
 /// A page that allows displaying all transactions, or ones given by a specific account
 class TransactionsPage extends ConsumerStatefulWidget {
@@ -39,8 +37,6 @@ class TransactionsPage extends ConsumerStatefulWidget {
 
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
-  Timer? _debounce;
   int _filteredOffset = 0;
 
   @override
@@ -62,29 +58,21 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
   /// Fetches the content that needs based on our current filter
   Future<void> _fetchPage({bool reset = false}) async {
     final filters = ref.read(transactionFilterStateProvider);
-
     await ref.read(transactionsProvider.notifier).fetchFilteredPage(
           startIndex: reset ? 0 : _filteredOffset,
           resetList: reset,
           accountId: filters.accountId,
           catId: filters.categoryId,
           search: filters.search,
+          dateRange: filters.dateRange,
+          pending: filters.pending,
         );
-  }
-
-  /// What to do when the category dropdown changes
-  void _onFilterChanged(String? newCatId) {
-    final notifier = ref.read(transactionFilterStateProvider.notifier);
-    notifier.update(ref.read(transactionFilterStateProvider).copyWith(categoryId: newCatId));
-
-    _fetchPage(reset: true);
   }
 
   /// What to do as we scroll down the page
@@ -96,17 +84,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       _filteredOffset += Transactions.pageSize;
       _fetchPage(); // Append next page
     }
-  }
-
-  /// What to do when the search term string changes
-  void _onSearchChanged(String val) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      final notifier = ref.read(transactionFilterStateProvider.notifier);
-      notifier.update(ref.read(transactionFilterStateProvider).copyWith(search: val));
-
-      _fetchPage(reset: true);
-    });
   }
 
   @override
@@ -123,7 +100,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             color: theme.scaffoldBackgroundColor,
             child: SproutRouteWrapper(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: _buildFilters(theme),
+              child: TransactionFilterBar(
+                accountId: widget.accountId,
+                onFilterChanged: () => _fetchPage(reset: true),
+              ),
             ),
           ),
         Expanded(
@@ -145,56 +125,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ),
       ],
-    );
-  }
-
-  /// Builds the filters for the top row to decide what to render
-  Widget _buildFilters(ThemeData theme) {
-    final categories = ref.watch(categoriesProvider).value ?? [];
-    final currentFilters = ref.watch(transactionFilterStateProvider);
-    final selectedId = currentFilters.categoryId;
-
-    return Padding(
-      padding: widget.padding,
-      child: SproutLayoutBuilder((isDesktop, context, constraints) {
-        final searchField = TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: 'Search description...',
-            prefixIcon: Icon(Icons.search),
-            isDense: true,
-            border: OutlineInputBorder(),
-          ),
-          onChanged: _onSearchChanged,
-        );
-
-        Category initialCategory;
-        if (selectedId == CategoryDropdown.fakeAllCategory.id) {
-          initialCategory = CategoryDropdown.fakeAllCategory;
-        } else if (selectedId == CategoryDropdown.unknownCategory.id) {
-          initialCategory = CategoryDropdown.unknownCategory;
-        } else {
-          initialCategory = categories.firstWhereOrNull((c) => c.id == selectedId) ?? CategoryDropdown.fakeAllCategory;
-        }
-
-        final categoryField = CategoryDropdown(
-          initialCategory,
-          (cat) => _onFilterChanged(cat?.id),
-          displayAllCategoryButton: true,
-        );
-
-        if (isDesktop) {
-          return Row(
-            spacing: 12,
-            children: [
-              Expanded(child: searchField),
-              Expanded(child: categoryField),
-            ],
-          );
-        }
-
-        return Column(spacing: 8, children: [searchField, categoryField]);
-      }),
     );
   }
 
