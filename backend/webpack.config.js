@@ -2,6 +2,7 @@ const { gitDescribeSync } = require("git-describe");
 const glob = require("glob");
 const webpack = require("webpack");
 const path = require("path");
+const nodeExternals = require("webpack-node-externals");
 
 /** Determines the version of our app via `git-describe` */
 function getVersion() {
@@ -21,6 +22,7 @@ module.exports = function (options, argv) {
 
   return {
     ...options,
+    externals: [nodeExternals()],
     output: {
       ...options.output,
       filename: "[name].js",
