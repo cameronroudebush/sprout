@@ -9,17 +9,15 @@ import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
-/// Provider that fires first
-final initializationProvider = FutureProvider<void>((ref) async {
-  // Setup firebase, using cached credentials as provided
-  await ref.read(firebaseProvider.notifier).configure();
-});
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
 
   final container = ProviderContainer();
+  // Setup firebase, using cached credentials as provided
+  await container.read(firebaseProvider.notifier).configure();
+  // Setup widget provider
+  await container.read(widgetSyncProvider.notifier).initializeBackground();
   // Make sure the widget provider is syncing
   container.read(widgetSyncProvider);
   // Make sure the user provider is tracked
@@ -33,10 +31,9 @@ class SproutApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final initStatus = ref.watch(initializationProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
 
-    return initStatus.when(
+    return userConfigAsync.when(
       loading: () => Theme(
           data: absoluteDarkTheme,
           child: Directionality(textDirection: TextDirection.ltr, child: SproutLoadingIndicator())),

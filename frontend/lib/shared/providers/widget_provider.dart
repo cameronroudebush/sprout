@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_bg_trigger.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
@@ -33,8 +34,6 @@ class WidgetSync extends _$WidgetSync {
         _saveToNative(null); // On logout, wipe data
       } else if (next.value != null) {
         update();
-        // Initialize background waiter
-        initializeBackground();
       }
     });
 
@@ -161,9 +160,8 @@ void callbackDispatcher() {
     final container = ProviderContainer();
 
     try {
-      // Apply default auth to grab data in the background of this isolate
-      await container.read(authProvider.notifier).applyDefaultAuth();
-      await container.read(authProvider.future);
+      final user = await AuthBackgroundTrigger.ensureAuthenticated(container);
+      if (user == null) return false;
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
