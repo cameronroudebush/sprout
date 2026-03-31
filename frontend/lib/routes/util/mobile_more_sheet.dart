@@ -28,6 +28,7 @@ class SproutMoreSheet extends ConsumerWidget {
 
     return SproutBaseDialogWidget(
       "${_getGreeting()} ${user?.username ?? 'User'}!",
+      titleStyle: theme.textTheme.headlineSmall,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         spacing: 24,

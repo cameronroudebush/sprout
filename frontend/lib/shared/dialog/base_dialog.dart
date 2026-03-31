@@ -18,24 +18,24 @@ class SproutBaseDialogWidget extends StatelessWidget {
   final bool allowSubmitClick;
   final VoidCallback? onSubmitClick;
   final ButtonStyle? submitButtonStyle;
+  final TextStyle? titleStyle;
 
   /// Extra buttons to display on our bottom row as necessary
   final Widget? extraButtons;
 
-  const SproutBaseDialogWidget(
-    this.dialogTitleText, {
-    super.key,
-    this.child,
-    this.showCloseDialogButton = false,
-    this.closeButtonText = "Close",
-    this.closeButtonStyle,
-    this.showSubmitButton = false,
-    this.submitButtonText = "Submit",
-    this.allowSubmitClick = true,
-    this.submitButtonStyle,
-    this.onSubmitClick,
-    this.extraButtons,
-  });
+  const SproutBaseDialogWidget(this.dialogTitleText,
+      {super.key,
+      this.child,
+      this.showCloseDialogButton = false,
+      this.closeButtonText = "Close",
+      this.closeButtonStyle,
+      this.showSubmitButton = false,
+      this.submitButtonText = "Submit",
+      this.allowSubmitClick = true,
+      this.submitButtonStyle,
+      this.onSubmitClick,
+      this.extraButtons,
+      this.titleStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class SproutBaseDialogWidget extends StatelessWidget {
             spacing: 24,
             children: [
               const Expanded(child: SizedBox.shrink()),
-              Text(dialogTitleText, style: theme.textTheme.headlineMedium),
+              Text(dialogTitleText, style: titleStyle ?? theme.textTheme.headlineMedium),
               if (!isMobile)
                 Expanded(
                   child: Align(

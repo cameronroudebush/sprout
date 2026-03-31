@@ -24,9 +24,10 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
     private var themeData: JSONObject? = null
 
     override fun onDataSetChanged() {
-        val data = WidgetUtils.getWidgetData(context)
-        themeData = data
-        transactions = data?.optJSONArray("recentTransactions") ?: JSONArray()
+        val root = WidgetUtils.getWidgetData(context)
+        themeData = root?.optJSONObject("theme")
+        val dataObj = root?.optJSONObject("data")
+        transactions = dataObj?.optJSONArray("recentTransactions") ?: JSONArray()
     }
 
     override fun getViewAt(position: Int): RemoteViews {

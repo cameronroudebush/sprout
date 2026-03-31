@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_token_provider.dart';
@@ -55,12 +54,14 @@ class Auth extends _$Auth {
 
     if (config == null || isSetupMode) return null;
 
+    final isOIDC = config.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+
     // OIDC
-    if (config.authMode == UnsecureAppConfigurationAuthModeEnum.oidc) {
+    if (isOIDC) {
       try {
         // Mobile - Restore
         if (!kIsWeb) {
-          if (tokens.idToken == null || tokens.idToken == "" || JwtDecoder.isExpired(tokens.idToken!)) {
+          if (tokens.idToken == null || tokens.idToken == "") {
             final user = await loginOIDC();
             if (user != null) {
               // Wait for user config to load before proceeding
@@ -70,15 +71,24 @@ class Auth extends _$Auth {
               return null;
             }
           } else {
-            final result = await _applyAuth(
-              idToken: tokens.idToken,
-              accessToken: tokens.accessToken,
-              refreshToken: tokens.refreshToken,
-            );
-            if (result != null) {
-              ref.read(userConfigProvider);
+            try {
+              final result = await _applyAuth(
+                idToken: tokens.idToken,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+              );
+              if (result != null) {
+                ref.read(userConfigProvider);
+              }
+              return result;
+            } catch (e) {
+              // If applyAuth fails (e.g. 401), try a refresh
+              if (isOIDC) {
+                final success = await silentRefresh();
+                if (success) return await build(); // Retry build after refresh
+              }
+              return null;
             }
-            return result;
           }
         } else {
           // Web - Restore
@@ -179,14 +189,19 @@ class Auth extends _$Auth {
   /// Attempts a login via OIDC using the OIDC helper
   Future<User?> loginOIDC({bool manualLogin = false}) async {
     final tokens = ref.read(authTokensProvider).value;
-
-    // Mobile Shortcut: If tokens exist and are valid, return current state
-    if (!manualLogin &&
-        !kIsWeb &&
-        tokens?.idToken != null &&
-        tokens?.idToken != "" &&
-        !JwtDecoder.isExpired(tokens!.idToken!)) {
-      return await _applyAuth();
+    // Mobile Shortcut: If we have a refresh token, try to use it or refresh it
+    if (!manualLogin && !kIsWeb && tokens?.refreshToken != null && tokens!.refreshToken!.isNotEmpty) {
+      try {
+        return await _applyAuth();
+      } catch (e) {
+        LoggerProvider.debug("Initial OIDC apply failed, attempting silent refresh...");
+        final refreshSuccess = await silentRefresh();
+        if (refreshSuccess) {
+          return await _applyAuth();
+        }
+        // If refresh failed, we fall through to the full OIDC flow below
+        LoggerProvider.debug("Silent refresh failed, proceeding to full OIDC login.");
+      }
     }
 
     // Web Shortcut: Try to restore session from cookies
@@ -271,7 +286,8 @@ class Auth extends _$Auth {
       if (response != null) {
         if (!kIsWeb) {
           // Update storage with the new tokens
-          await _applyAuth(accessToken: response.accessToken, refreshToken: response.refreshToken);
+          await _applyAuth(
+              idToken: response.idToken, accessToken: response.accessToken, refreshToken: response.refreshToken);
         } else {
           // Web cookies are updated automatically by the browser/server
           state = AsyncData(state.value); // Refresh state to notify listeners

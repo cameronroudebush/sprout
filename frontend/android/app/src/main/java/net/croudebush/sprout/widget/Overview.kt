@@ -19,7 +19,10 @@ class Overview : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val data = WidgetUtils.getWidgetData(context)
+        val rootData = WidgetUtils.getWidgetData(context)
+        val dataObj = rootData?.optJSONObject("data")
+        val themeObj = rootData?.optJSONObject("theme")
+
         val pendingIntent = PendingIntent.getActivity(
             context, 0,
             Intent(context, MainActivity::class.java),
@@ -30,7 +33,30 @@ class Overview : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.overview)
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
-            if (data == null || data.length() == 0) {
+            // Apply theme
+            if (themeObj != null) {
+                val bgColor = themeObj.optString("bgColor", "#141A1F").toColorInt()
+                val txtColor = themeObj.optString("txtColor", "#FFFFFF").toColorInt()
+                val txtMuted = themeObj.optString("txtColorMuted", "#A0A0A0").toColorInt()
+                val statusColor = themeObj.optString("statusColor", "#00FF00").toColorInt()
+
+                // Background
+                views.setInt(R.id.widget_root, "setBackgroundColor", bgColor)
+
+                // Text Colors
+                views.setTextColor(R.id.widget_nw_value, txtColor)
+                views.setTextColor(R.id.widget_label_networth, txtMuted)
+                views.setTextColor(R.id.widget_last_updated, txtMuted)
+                
+                // Ensure empty state matches theme
+                views.setTextColor(R.id.empty_state_container, txtMuted)
+                
+                // Store status color for data use below
+                views.setTextColor(R.id.widget_nw_change, statusColor)
+            }
+
+            // Handle Data Display
+            if (dataObj == null || dataObj.length() == 0) {
                 views.setViewVisibility(R.id.data_container, View.GONE)
                 views.setViewVisibility(R.id.empty_state_container, View.VISIBLE)
                 views.setViewVisibility(R.id.widget_last_updated, View.GONE)
@@ -39,38 +65,18 @@ class Overview : AppWidgetProvider() {
                 views.setViewVisibility(R.id.empty_state_container, View.GONE)
                 views.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
 
-                val netWorth = data.optString("netWorth", "$0.00")
-                val timestamp = data.optString("updateTime", "")
-                val numericChange = data.optDouble("numericChange", 0.0)
-
-                // Color Hexes from Flutter
-                val bgColor = data.optString("bgColor", "#141A1F")
-                val txtColor = data.optString("txtColor", "#FFFFFF")
-                val txtMuted = data.optString("txtColorMuted", "#A0A0A0")
-                val statusColor = data.optString("statusColor", "#00FF00")
-
-                // Apply Theme Colors
-                val parsedBg = bgColor.toColorInt()
-                val parsedTxt = txtColor.toColorInt()
-                val parsedMuted = txtMuted.toColorInt()
-                val parsedStatus = statusColor.toColorInt()
-
-                // Background tint (Requires API 21+)
-                views.setInt(R.id.widget_root, "setBackgroundColor", parsedBg)
-
-                // Text Colors
-                views.setTextColor(R.id.widget_nw_value, parsedTxt)
-                views.setTextColor(R.id.widget_label_networth, parsedMuted)
-                views.setTextColor(R.id.widget_last_updated, parsedMuted)
-                views.setTextColor(R.id.empty_state_container, parsedMuted)
-
-                // Status Color (Gains/Losses)
-                views.setTextColor(R.id.widget_nw_change, parsedStatus)
+                val netWorth = dataObj.optString("netWorth", "$0.00")
+                val timestamp = dataObj.optString("updateTime", "")
+                val numericChange = dataObj.optDouble("numericChange", 0.0)
+                val changeAmount = dataObj.optString("changeAmount", "$0.00")
+                val changePercent = dataObj.optString("changePercent", "0.00%")
+                
+                // Get status color from theme or fallback
+                val parsedStatus = themeObj?.optString("statusColor", "#00FF00")?.toColorInt() ?: Color.GREEN
 
                 // Set Content
                 views.setTextViewText(R.id.widget_nw_value, netWorth)
-                val changeStr =
-                    "${data.optString("changeAmount")} (${data.optString("changePercent")})"
+                val changeStr = "$changeAmount ($changePercent)"
                 views.setTextViewText(R.id.widget_nw_change, changeStr)
                 views.setTextViewText(R.id.widget_last_updated, timestamp)
 

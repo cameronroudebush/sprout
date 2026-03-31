@@ -32,7 +32,14 @@ class CategoryDropdown extends ConsumerWidget {
       spacing: 8,
       children: [
         CategoryIcon(category, avatarSize: 16),
-        Flexible(child: Text(category.name, overflow: TextOverflow.ellipsis, maxLines: 1)),
+        Expanded(
+          child: Text(
+            category.name,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            softWrap: false,
+          ),
+        ),
       ],
     );
   }
@@ -89,23 +96,23 @@ class CategoryDropdown extends ConsumerWidget {
 
         // Build the display list
         // Filter out special IDs and parents to get "clean" top-level categories
-        final topLevel =
-            cats
-                .where(
-                  (c) =>
-                      c.parentCategory == null &&
-                      c.id != editingCategoryId &&
-                      c.id != fakeAllCategory.id &&
-                      c.id != unknownCategory.id,
-                )
-                .toList()
-              ..sort((a, b) => a.name.compareTo(b.name));
+        final topLevel = cats
+            .where(
+              (c) =>
+                  c.parentCategory == null &&
+                  c.id != editingCategoryId &&
+                  c.id != fakeAllCategory.id &&
+                  c.id != unknownCategory.id,
+            )
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
 
         // Pin the specials back to the TOP of the display list
         topLevel.insert(0, unknownCategory);
         if (displayAllCategoryButton) topLevel.insert(0, fakeAllCategory);
 
         return DropdownButtonFormField<Category>(
+          isExpanded: true,
           menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
           dropdownColor: theme.colorScheme.surfaceContainerHighest,
           value: selectedValue,

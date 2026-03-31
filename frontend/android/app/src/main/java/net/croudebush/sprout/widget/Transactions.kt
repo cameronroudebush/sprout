@@ -23,8 +23,11 @@ class Transactions : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val widgetData = WidgetUtils.getWidgetData(context)
-        val transactions = widgetData?.optJSONArray("recentTransactions")
+        val rootData = WidgetUtils.getWidgetData(context)
+        val dataObj = rootData?.optJSONObject("data")
+        val themeObj = rootData?.optJSONObject("theme")
+
+        // Fallback timestamp if data is missing
         val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
         val currentTimestamp = sdf.format(Date()).replace("AM", "am").replace("PM", "pm")
 
@@ -32,12 +35,12 @@ class Transactions : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.transactions)
             views.setEmptyView(R.id.widget_transactions_list, R.id.widget_empty_view)
 
-            if (widgetData != null) {
-                val bgColor = widgetData.optString("bgColor", "#141A1F").toColorInt()
-                val txtColor = widgetData.optString("txtColor", "#FFFFFF").toColorInt()
-                val txtMuted = widgetData.optString("txtColorMuted", "#A0A0A0").toColorInt()
+            // Apply Theme
+            if (themeObj != null) {
+                val bgColor = themeObj.optString("bgColor", "#141A1F").toColorInt()
+                val txtColor = themeObj.optString("txtColor", "#FFFFFF").toColorInt()
+                val txtMuted = themeObj.optString("txtColorMuted", "#A0A0A0").toColorInt()
 
-                // Apply Theme to Container
                 views.setInt(R.id.widget_root, "setBackgroundColor", bgColor)
                 views.setTextColor(R.id.widget_title, txtColor)
                 views.setTextColor(R.id.widget_last_updated, txtMuted)
@@ -58,17 +61,13 @@ class Transactions : AppWidgetProvider() {
             }
             views.setRemoteAdapter(R.id.widget_transactions_list, intent)
 
+            val timestamp = dataObj?.optString("updateTime")?.takeIf { it.isNotEmpty() }
+                ?: currentTimestamp
+            views.setTextViewText(R.id.widget_last_updated, timestamp)
+            views.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
+
             // Commit the structural changes to the Launcher first
             appWidgetManager.updateAppWidget(appWidgetId, views)
-
-            val headerViews = RemoteViews(context.packageName, R.layout.transactions)
-
-            val timestamp = widgetData?.optString("updateTime")?.takeIf { it.isNotEmpty() }
-                ?: currentTimestamp
-            headerViews.setTextViewText(R.id.widget_last_updated, timestamp)
-            headerViews.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
-
-            appWidgetManager.partiallyUpdateAppWidget(appWidgetId, headerViews)
 
             appWidgetManager.notifyAppWidgetViewDataChanged(
                 appWidgetId,
