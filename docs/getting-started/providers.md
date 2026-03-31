@@ -48,3 +48,24 @@ Connecting Sprout to SimpleFIN is easy and only needs to be done once.
 - **Affordable:** It offers a very low-cost subscription model compared to enterprise aggregators.
 
 For more details on their service and pricing, visit the official [SimpleFIN Website](https://www.simplefin.org/).
+
+## Zillow
+
+<p align="center">
+    <img src="https://www.zillow.com/apple-touch-icon.png" width="15%">
+</p>
+
+Sprout uses Zillow to provide automatic valuation updates for your real estate assets. By linking a property via its physical address, Sprout can fetch the current **Zestimate** to ensure your net worth reflects the most up-to-date market data for your home or investment properties.
+
+!!! warning
+
+    **Zestimates** are not always the most accurate representations of your property value. Only use these as a suggestion for trend tracking.
+
+### How it Works
+
+Unlike many financial integrations, Zillow support in Sprout is designed to be "plug-and-play."
+
+- **No API Keys Required**: You do not need to sign up for a developer account or manage complex API keys. Sprout handles the data retrieval internally.
+- **Address-Based Tracking**: Simply provide the street address, city, state, and zip code of your property.
+    - We'll locate the Zillow Property ID and keep this for later updates
+- **Automatic Updates**: Once a property is linked, Sprout will periodically refresh the valuation, tracking changes in your home equity over time without any manual input.
