@@ -22,6 +22,7 @@ export class SimpleFINProviderService extends ProviderBase {
   config = new ProviderConfig(
     "SimpleFIN",
     ProviderType.simpleFin,
+    "https://www.simplefin.org/",
     "https://beta-bridge.simplefin.org/static/logo.svg",
     "https://beta-bridge.simplefin.org/my-account",
   );

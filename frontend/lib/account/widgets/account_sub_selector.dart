@@ -37,6 +37,8 @@ class AccountSubTypeSelect extends StatelessWidget {
         return Icons.person_outline;
       case AccountSubTypeEnum.wallet:
         return Icons.currency_bitcoin;
+      case AccountSubTypeEnum.house:
+        return Icons.house;
       default:
         return Icons.account_tree_outlined;
     }
@@ -57,6 +59,9 @@ class AccountSubTypeSelect extends StatelessWidget {
         AccountSubTypeEnum.mortgage,
         AccountSubTypeEnum.personal,
         AccountSubTypeEnum.auto,
+      ],
+      AccountTypeEnum.asset: [
+        AccountSubTypeEnum.house,
       ],
       AccountTypeEnum.credit: [AccountSubTypeEnum.travel, AccountSubTypeEnum.cashBack],
       AccountTypeEnum.crypto: [AccountSubTypeEnum.wallet, AccountSubTypeEnum.staking],

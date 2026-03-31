@@ -1,6 +1,7 @@
 import { Configuration } from "@backend/config/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderType } from "@backend/providers/base/provider.type";
+import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import puppeteer from "puppeteer-extra";
@@ -13,7 +14,7 @@ import { ProviderRateLimit } from "../base/rate-limit";
  */
 @Injectable()
 export class ZillowProviderService extends ProviderBase {
-  config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com/apple-touch-icon.png");
+  config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com", "https://www.zillow.com/apple-touch-icon.png");
 
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.zillow, Configuration.providers.zillow.rateLimit, user);
 
@@ -51,12 +52,10 @@ export class ZillowProviderService extends ProviderBase {
       const zpid = match?.[1]?.replace('"zpid":', "");
       // Find the zestimate data
       const zestMatch = content.match(/Zestimate.*?\$([\d,]+)/);
+      const zestimate = this.cleanNumber(zestMatch?.[1]) ?? 0;
       const rentMatch = content.match(/Rent Zestimate.*?\$([\d,]+)/);
-      return {
-        zpid,
-        zestimate: zestMatch ? this.cleanNumber(zestMatch[1]) : null,
-        rentZestimate: rentMatch ? this.cleanNumber(rentMatch[1]) : null,
-      };
+      const rentZestimate = this.cleanNumber(rentMatch?.[1]) ?? 0;
+      return new ZillowPropertyResultDto(zpid!, zestimate, rentZestimate);
     } finally {
       await browser.close();
     }
