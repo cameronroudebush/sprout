@@ -70,3 +70,41 @@ While SimpleFIN is fantastic for its intended purpose, it occupies a specific ni
 | **Simplicity:** The REST API is incredibly straightforward and easy to debug.                  | **Data Freshness:** Syncs are not always real-time. Data is cached and refreshed periodically (usually daily), which prevents "instant" update experiences.                                                                                                                 |
 | **Cost:** It is significantly cheaper than enterprise alternatives, making it very accessible. | **Metadata Richness:** Transaction data is sometimes sparse. Merchant logos, precise geolocations, and categorized merchant codes are often missing or less detailed.                                                                                                       |
 | **Privacy:** It acts as a strict read-only proxy, reducing the risk surface for developers.    | **Connection Stability:** As a bridge often relying on other aggregators (like MX) under the hood, connection stability is dependent on the upstream provider, not just SimpleFIN itself. We've experienced many times where data just doesn't update for days due to this. |
+
+## Zillow
+
+<p align="center">
+    <img src="https://www.zillow.com/apple-touch-icon.png" width="15%">
+</p>
+
+While SimpleFIN handles the **liquid** side of a user's net worth, Zillow integration brings in the **illiquid** real estate assets. In Sprout, Zillow serves as a zero-config valuation engine. If a user provides a valid US-based property address, Sprout can track its **Zestimate** automatically.
+
+### How it Works
+
+Sprout uses a localized scraping/lookup strategy. Instead of a standard REST endpoint with an Authorization header, Sprout identifies a property's unique **ZPID** (Zillow Property ID) based on the address provided and produces the following info:
+
+```json linenums="1"
+{
+    "zpid": "3572154",
+    "zestimate": "20942385",
+    "rentZestimate": "1700"
+}
+```
+
+### Development Testing
+
+Because Zillow doesn't require a login, testing is straightforward. You can use any valid residential US address to test the ingestion flow.
+
+!!! note
+
+    During development, be mindful of rate-limiting. Since we aren't using an official API key, excessive rapid polling from a single IP can lead to temporary blocks. Sprout handles this by using some pretty aggressive rate limiting per day.
+
+### Takeaways & Improvements
+
+Zillow is a powerful tool for completing the "Full Net Worth" picture, but it has specific constraints.
+
+| **Strength**                                                                                 | **Area for Improvement**                                                                                                                        |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Zero Friction**: No signup, no keys, and no tokens for the user or the developer.          | **Geographic Limit**: Currently only supports properties within the United States.                                                              |
+| **Persistence**: Once an address is linked, it almost never "breaks" or requires re-linking. | **Estimation Accuracy**: The **Zestimate** is an algorithm, not a formal appraisal. It can fluctuate significantly based on local market noise. |
+|                                                                                              | **Gray Area**: We don't utilize Zillow's API directly as it's intended for commercial use. Instead we rely on data scraping                     |
