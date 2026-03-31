@@ -19,13 +19,15 @@ export class JobsService {
   ) {}
 
   /** A dictionary of registered background jobs */
-  jobs: { dbBackup?: DatabaseBackup; pendingTransaction: PendingTransactionJob; userDevice: UserDeviceJob; providerSync: ProviderSyncJob } = {} as any;
+  jobs: { dbBackup?: DatabaseBackup; pendingTransaction: PendingTransactionJob; userDevice: UserDeviceJob; providerSyncs: ProviderSyncJob[] } = {} as any;
 
   /** Starts the background jobs */
   async start() {
     if (Configuration.database.backup.enabled) this.jobs.dbBackup = await new DatabaseBackup().start();
     this.jobs.pendingTransaction = await new PendingTransactionJob().start();
     this.jobs.userDevice = await new UserDeviceJob().start();
-    this.jobs.providerSync = await new ProviderSyncJob(this.transactionRuleService, this.notificationService, this.providers).start();
+    this.jobs.providerSyncs = await Promise.all(
+      this.providers.map(async (x) => await new ProviderSyncJob(this.transactionRuleService, this.notificationService, x).start()),
+    );
   }
 }

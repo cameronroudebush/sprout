@@ -1,5 +1,6 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { User } from "@backend/user/model/user.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
@@ -21,6 +22,9 @@ export class Sync extends DatabaseBase {
 
   @DatabaseDecorators.column({ nullable: true })
   declare failureReason?: string;
+
+  @DatabaseDecorators.column({ nullable: true })
+  declare provider?: ProviderType;
 
   /** This user properly allows us to track if this sync was for a specific user */
   @ManyToOne(() => User, { nullable: true, onDelete: "CASCADE", eager: false })

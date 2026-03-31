@@ -203,7 +203,7 @@ final class SecureConfigProvider
   SecureConfig create() => SecureConfig();
 }
 
-String _$secureConfigHash() => r'22b69248af09401d52b9e96d6b432391b03d9c41';
+String _$secureConfigHash() => r'91612664387396aaeac29f0280ea93d9d1c7b6e9';
 
 /// Extension upon secure config that allows state management using riverpod
 

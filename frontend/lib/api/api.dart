@@ -64,7 +64,6 @@ part 'model/holding.dart';
 part 'model/institution.dart';
 part 'model/jwt_login_request.dart';
 part 'model/market_index_dto.dart';
-part 'model/model_sync.dart';
 part 'model/monthly_category_data.dart';
 part 'model/monthly_spending_stats.dart';
 part 'model/notification.dart';

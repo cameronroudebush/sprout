@@ -1,10 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/account/models/account_state.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
-import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 
 part 'account_provider.g.dart';
@@ -25,17 +23,9 @@ class Accounts extends _$Accounts {
       if (data == null) return;
 
       if (data.event == SSEDataEventEnum.sync_) {
-        final sync = ModelSync.fromJson(data.payload);
-        if (sync != null) {
-          // Update the global config for the "Last Synced" UI
-          ref.read(secureConfigProvider.notifier).updateLastSync(sync);
-
-          // Mark manual sync as finished and refresh the list
-          state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
-          ref.invalidateSelf();
-        } else {
-          LoggerProvider.debug("Encountered an unexpected null sse data for force sync.");
-        }
+        // Mark manual sync as finished and refresh the list
+        state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
+        ref.invalidateSelf();
       }
 
       if (data.event == SSEDataEventEnum.forceUpdate) {

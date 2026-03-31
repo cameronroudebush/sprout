@@ -13,19 +13,9 @@ part of openapi.api;
 class APIConfig {
   /// Returns a new [APIConfig] instance.
   APIConfig({
-    this.lastSchedulerRun,
     this.providers = const [],
     required this.chatKeyProvidedInBackend,
   });
-
-  /// The status of the last sync we ran
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  ModelSync? lastSchedulerRun;
 
   /// List of providers that this application has configured and is supported
   List<ProviderConfig> providers;
@@ -35,27 +25,20 @@ class APIConfig {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
-    other.lastSchedulerRun == lastSchedulerRun &&
     _deepEquality.equals(other.providers, providers) &&
     other.chatKeyProvidedInBackend == chatKeyProvidedInBackend;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (lastSchedulerRun == null ? 0 : lastSchedulerRun!.hashCode) +
     (providers.hashCode) +
     (chatKeyProvidedInBackend.hashCode);
 
   @override
-  String toString() => 'APIConfig[lastSchedulerRun=$lastSchedulerRun, providers=$providers, chatKeyProvidedInBackend=$chatKeyProvidedInBackend]';
+  String toString() => 'APIConfig[providers=$providers, chatKeyProvidedInBackend=$chatKeyProvidedInBackend]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.lastSchedulerRun != null) {
-      json[r'lastSchedulerRun'] = this.lastSchedulerRun;
-    } else {
-      json[r'lastSchedulerRun'] = null;
-    }
       json[r'providers'] = this.providers;
       json[r'chatKeyProvidedInBackend'] = this.chatKeyProvidedInBackend;
     return json;
@@ -80,7 +63,6 @@ class APIConfig {
       }());
 
       return APIConfig(
-        lastSchedulerRun: ModelSync.fromJson(json[r'lastSchedulerRun']),
         providers: ProviderConfig.listFromJson(json[r'providers']),
         chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
       );

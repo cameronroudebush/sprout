@@ -3,7 +3,6 @@ import { Configuration } from "@backend/config/core";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { PROVIDER_LIST_TOKEN } from "@backend/providers/provider.module";
 import { User } from "@backend/user/model/user.model";
@@ -27,15 +26,8 @@ export class ConfigController {
   })
   @AuthGuard.attach()
   @ApiOkResponse({ description: "The configuration that external services may want to know about.", type: APIConfig })
-  async get(@CurrentUser() user: User) {
-    let lastSync = (await Sync.find({ order: { time: "DESC" } }))[0];
-    const lastUserSync = (await Sync.find({ where: { user: { id: user.id } }, order: { time: "DESC" } }))[0];
-    if (lastUserSync != null && (lastSync == null || lastUserSync.time > lastSync.time)) {
-      lastSync = lastUserSync;
-    }
-
+  async get(@CurrentUser() _user: User) {
     return new APIConfig(
-      lastSync,
       this.providers.map((x) => x.config),
       Configuration.server.prompt.hasChatKey,
     );
