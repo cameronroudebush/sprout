@@ -5,7 +5,6 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/config/config_provider.dart';
-import 'package:sprout/config/models/extensions/config_extension.dart';
 import 'package:sprout/config/widgets/settings_section.dart';
 import 'package:sprout/config/widgets/tiles/action_tile.dart';
 import 'package:sprout/config/widgets/tiles/switch_tile.dart';
@@ -170,7 +169,7 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   ActionSettingTile(
                     title: "Background Sync",
-                    subtitle: config.syncStatusString,
+                    subtitle: "Request a fresh sync of all providers",
                     icon: Icons.schedule,
                     trailing: isSyncing
                         ? const Padding(
@@ -199,6 +198,7 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   ActionSettingTile(
                     title: "Connection Url",
+                    subtitle: "The Url of the server we're connected to.",
                     icon: Icons.http,
                     trailing: Text(backendUrl ?? "", style: Theme.of(context).textTheme.labelMedium),
                   ),

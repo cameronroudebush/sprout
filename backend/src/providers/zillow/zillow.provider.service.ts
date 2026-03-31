@@ -17,6 +17,7 @@ import { ProviderRateLimit } from "../base/rate-limit";
  */
 @Injectable()
 export class ZillowProviderService extends ProviderBase {
+  override getAppConfiguration = () => Configuration.providers.zillow;
   private readonly logger = new Logger("provider:service:zillow");
   config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com", "https://www.zillow.com/apple-touch-icon.png");
 

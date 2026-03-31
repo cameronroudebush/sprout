@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/config/models/extensions/config_extension.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';
 
@@ -90,23 +89,5 @@ class SecureConfig extends _$SecureConfig {
     final config = await api.configControllerGet();
     state = AsyncData(config);
     return config;
-  }
-
-  /// Returns the formatted sync status string from the current state
-  String getLastSyncStatus() {
-    // Calling the extension property on the state value
-    return state.value?.syncStatusString ?? "N/A";
-  }
-
-  /// Updates the local state with a new sync status from an SSE event
-  void updateLastSync(ModelSync sync) {
-    final currentConfig = state.value;
-    if (currentConfig != null) {
-      // Update the property on the existing object
-      currentConfig.lastSchedulerRun = sync;
-
-      // Re-emit the state as AsyncData so all listeners (like the Home Notification) rebuild
-      state = AsyncData(currentConfig);
-    }
   }
 }

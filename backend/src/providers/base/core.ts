@@ -1,5 +1,6 @@
 import { Account } from "@backend/account/model/account.model";
 import { Holding } from "@backend/holding/model/holding.model";
+import { BaseProviderConfig } from "@backend/providers/base/config";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
@@ -13,6 +14,9 @@ import { ProviderRateLimit } from "./rate-limit";
 export abstract class ProviderBase {
   /** The configuration related to this provider */
   abstract config: ProviderConfig;
+
+  /** Gets the app configuration via the Configuration class */
+  abstract getAppConfiguration: { (): BaseProviderConfig };
 
   constructor(public httpService: HttpService) {}
 

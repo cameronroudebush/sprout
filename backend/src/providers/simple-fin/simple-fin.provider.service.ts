@@ -19,6 +19,7 @@ import { ProviderRateLimit } from "../base/rate-limit";
  */
 @Injectable()
 export class SimpleFINProviderService extends ProviderBase {
+  override getAppConfiguration = () => Configuration.providers.simpleFIN;
   config = new ProviderConfig(
     "SimpleFIN",
     ProviderType.simpleFin,

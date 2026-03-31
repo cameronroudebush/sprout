@@ -2,7 +2,6 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
-import { TimeZone } from "@backend/config/model/tz";
 import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -23,9 +22,9 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
   constructor(
     private transactionRuleService: TransactionRuleService,
     private notificationService: NotificationService,
-    private readonly providers: ProviderBase[],
+    private readonly provider: ProviderBase,
   ) {
-    super("account:sync", Configuration.providers.updateTime);
+    super(`provider:sync:${provider.config.dbType}`, provider.getAppConfiguration().syncFrequency);
   }
 
   public override async updateNow(user?: User) {
@@ -33,26 +32,29 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
   }
 
   protected async update(user?: User) {
-    this.logger.log("Starting sync for all providers." + (user ? ` Only for user: ${user?.username}` : ""));
+    const providerName = this.provider.config.name;
+    this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
 
-    let allSuccessful = true;
-    for (const provider of this.providers) {
-      const success = await this.updateProvider(provider, user);
-      if (!success) allSuccessful = false;
-    }
+    const success = await this.updateProvider(this.provider, user);
 
-    // If everything was successful (and we have a user to notify), send a single success notification
-    if (allSuccessful && user) {
-      const msg = this.randomSuccessMessage;
-      this.logger.log(`Successfully updated all providers for: ${user.username}`);
+    // If a specific user triggered this and it was successful, notify them specifically
+    if (success && user) {
+      const msg = this.getSuccessMessage(providerName);
+      this.logger.log(`Sync successful for user: ${user.username}`);
       await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
     }
 
     // Cleanup
     await this.cleanupOldSyncs();
+
     // If we we're given a single user, find their most recent sync status
-    if (user) return await Sync.findOne({ where: { user: { id: user.id } }, order: { time: "DESC" } });
-    else return null;
+    if (user) {
+      return await Sync.findOne({
+        where: { user: { id: user.id } },
+        order: { time: "DESC" },
+      });
+    }
+    return null;
   }
 
   /**
@@ -62,8 +64,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
    * @returns boolean indicating if the provider sync was successful for all users
    */
   private async updateProvider(provider: ProviderBase, specificUser?: User): Promise<boolean> {
-    this.logger.log(`Syncing ${provider.config.name}`);
-    let providerSuccess = true;
+    let allUsersSuccessful = true;
     // Handle each user, or only the given user
     const users = specificUser ? [specificUser] : await User.find({});
     // Handle each user's accounts
@@ -72,6 +73,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
       const sync = await Sync.fromPlain({
         time: new Date(),
         status: "in-progress",
+        provider: provider.config.dbType,
       }).insert();
       sync.user = user;
       try {
@@ -84,13 +86,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
           continue;
         }
 
-        let accounts;
-        try {
-          accounts = await provider.get(user, false);
-        } catch (err) {
-          throw new Error(`Provider connection failed: ${(err as Error).message}`);
-        }
-
+        const accounts = await provider.get(user, false);
         let userHadSuccessfulUpdate = false;
         let hasAccountErrors = false;
         const institutionErrors = new Set<string>();
@@ -143,14 +139,13 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
           sync.status = "failed";
           sync.failureReason = `Connection lost with ${names.join(", ")}`;
           await this.notificationService.notifyUser(user, sync.failureReason, "Connection Update Required", NotificationType.error);
-          providerSuccess = false;
+          allUsersSuccessful = false;
         } else if (userHadSuccessfulUpdate) {
           sync.status = "complete";
-          if (hasAccountErrors) providerSuccess = false;
+          if (hasAccountErrors) allUsersSuccessful = false;
         } else {
-          sync.status = "failed";
-          sync.failureReason = "No accounts were updated. Check provider logs.";
-          providerSuccess = false;
+          // Ignore if we had no accounts, because there was nothing to update!
+          sync.status = "complete";
         }
         // Finalize by updating the sync
         await sync.update();
@@ -160,10 +155,10 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
         sync.failureReason = (e as Error).message;
         await sync.update();
         this.logger.error(`Sync failed for ${user.username}: ${sync.failureReason}`);
-        providerSuccess = false;
+        allUsersSuccessful = false;
       }
     }
-    return providerSuccess;
+    return allUsersSuccessful;
   }
 
   /** Updates all transaction data for the given account that matches the given transaction */
@@ -254,13 +249,8 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
     }
   }
 
-  /** Returns a random success message for the user */
-  private get randomSuccessMessage() {
-    return Utility.randomFromArray([
-      { title: "Sync Success", body: `Your financial overview is now up to date for ${TimeZone.formatDate(new Date(), "PPP")}.` },
-      { title: "Data Refreshed", body: "We've pulled in your latest transactions. Take a look at your updated balances!" },
-      { title: "You're All Caught Up", body: "Your accounts have been synced. Your dashboard is now current." },
-      { title: "Financial Pulse Update", body: "New data is ready! See how your finances look today." },
-    ]);
+  /** Returns the message for a success when this provider is updated */
+  private getSuccessMessage(providerName: string) {
+    return Utility.randomFromArray([{ title: `${providerName} Synced`, body: `Your ${providerName} accounts are up to date.` }]);
   }
 }

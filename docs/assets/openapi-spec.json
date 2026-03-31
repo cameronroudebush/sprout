@@ -2371,7 +2371,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.3.0-8-g398537d",
+    "version": "v0.3.0-12-g39b404c",
     "contact": {}
   },
   "tags": [
@@ -2618,115 +2618,6 @@
         },
         "required": ["categoryCount", "colorMapping"]
       },
-      "ChartRangeEnum": {
-        "type": "string",
-        "enum": ["oneDay", "sevenDays", "oneMonth", "threeMonths", "sixMonths", "oneYear", "allTime"],
-        "description": "The net worth range to display by default"
-      },
-      "ThemeStyleEnum": {
-        "type": "string",
-        "enum": ["bliss", "absolute", "colored"],
-        "description": "The visual theme style selected by the user"
-      },
-      "UserConfig": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "netWorthRange": {
-            "description": "The net worth range to display by default",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ChartRangeEnum"
-              }
-            ]
-          },
-          "themeStyle": {
-            "description": "The visual theme style selected by the user",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ThemeStyleEnum"
-              }
-            ]
-          },
-          "privateMode": {
-            "type": "boolean",
-            "description": "If we should hide balances on the users display"
-          },
-          "simpleFinToken": {
-            "type": "string",
-            "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
-          },
-          "geminiKey": {
-            "type": "string",
-            "description": "This property defines the Gemini API token for LLM use."
-          },
-          "secureMode": {
-            "type": "boolean",
-            "description": "If we should require biometrics to view the app and if we should hide the app in the background"
-          },
-          "allowWidgets": {
-            "type": "boolean",
-            "description": "If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once."
-          }
-        },
-        "required": ["id", "netWorthRange", "themeStyle", "privateMode", "secureMode", "allowWidgets"]
-      },
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "admin": {
-            "type": "boolean"
-          },
-          "config": {
-            "$ref": "#/components/schemas/UserConfig"
-          }
-        },
-        "required": ["id", "username", "admin", "config"]
-      },
-      "Sync": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["in-progress", "complete", "failed"],
-            "description": "The status of the sync job"
-          },
-          "time": {
-            "format": "date-time",
-            "type": "string",
-            "description": "When this was started"
-          },
-          "failureReason": {
-            "type": "string"
-          },
-          "user": {
-            "description": "This user properly allows us to track if this sync was for a specific user",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              }
-            ]
-          }
-        },
-        "required": ["id", "status", "time"]
-      },
       "ProviderConfig": {
         "type": "object",
         "properties": {
@@ -2759,14 +2650,6 @@
       "APIConfig": {
         "type": "object",
         "properties": {
-          "lastSchedulerRun": {
-            "description": "The status of the last sync we ran",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Sync"
-              }
-            ]
-          },
           "providers": {
             "description": "List of providers that this application has configured and is supported",
             "type": "array",
@@ -2992,6 +2875,85 @@
           }
         },
         "required": ["username", "password"]
+      },
+      "ChartRangeEnum": {
+        "type": "string",
+        "enum": ["oneDay", "sevenDays", "oneMonth", "threeMonths", "sixMonths", "oneYear", "allTime"],
+        "description": "The net worth range to display by default"
+      },
+      "ThemeStyleEnum": {
+        "type": "string",
+        "enum": ["bliss", "absolute", "colored"],
+        "description": "The visual theme style selected by the user"
+      },
+      "UserConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "netWorthRange": {
+            "description": "The net worth range to display by default",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChartRangeEnum"
+              }
+            ]
+          },
+          "themeStyle": {
+            "description": "The visual theme style selected by the user",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ThemeStyleEnum"
+              }
+            ]
+          },
+          "privateMode": {
+            "type": "boolean",
+            "description": "If we should hide balances on the users display"
+          },
+          "simpleFinToken": {
+            "type": "string",
+            "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
+          },
+          "geminiKey": {
+            "type": "string",
+            "description": "This property defines the Gemini API token for LLM use."
+          },
+          "secureMode": {
+            "type": "boolean",
+            "description": "If we should require biometrics to view the app and if we should hide the app in the background"
+          },
+          "allowWidgets": {
+            "type": "boolean",
+            "description": "If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once."
+          }
+        },
+        "required": ["id", "netWorthRange", "themeStyle", "privateMode", "secureMode", "allowWidgets"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "admin": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/UserConfig"
+          }
+        },
+        "required": ["id", "username", "admin", "config"]
       },
       "UserLoginResponse": {
         "type": "object",
@@ -3492,7 +3454,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-03-31T02:00:20.738Z"
+            "default": "2026-03-31T19:54:19.494Z"
           },
           "isRead": {
             "type": "boolean",

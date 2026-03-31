@@ -49,7 +49,7 @@ export class AccountController {
     if (matchingAccountForUser == null) throw new NotFoundException(`Account with ID ${id} not found or does not belong to the user.`);
     const deleteResult = await Account.deleteById(id);
     if (deleteResult.affected === 0) throw new InternalServerErrorException(`No results when deleting account with ${id}`);
-    this.sseService.sendToUser(user, SSEEventType.SYNC);
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
     return `Account with ID ${id} deleted successfully.`;
   }
 
@@ -71,7 +71,7 @@ export class AccountController {
     matchingAccount.interestRate = updatedAccount.interestRate ?? (matchingAccount.interestRate as any);
     // Perform the update, return the result.
     const result = await matchingAccount.update();
-    this.sseService.sendToUser(user, SSEEventType.SYNC);
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
     return result;
   }
 
@@ -104,10 +104,12 @@ export class AccountController {
       throw new InternalServerErrorException("A sync is already in progress. Please wait for it to complete.");
     }
 
-    const sync = (await this.jobService.jobs.providerSync.updateNow(user))!;
+    // Update all providers for user
+    const syncs = (await Promise.all(this.jobService.jobs.providerSyncs.map(async (x) => await x.updateNow(user)))).filter((x) => x) as Sync[];
     // Inform of the completed sync
-    this.sseService.sendToUser(user, SSEEventType.SYNC, sync);
-    // Tell to re-request data
-    if (sync.status !== "failed") this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+    this.sseService.sendToUser(user, SSEEventType.SYNC);
+    // Tell to re-request data if we had any success
+    const hasSuccess = syncs.find((x) => x.status !== "failed");
+    if (hasSuccess) this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
   }
 }
