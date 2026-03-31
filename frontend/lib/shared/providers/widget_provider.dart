@@ -70,67 +70,72 @@ class WidgetSync extends _$WidgetSync {
   /// Checks the user's [allowWidgets] preference before proceeding. If disabled,
   /// it clears the widget data to ensure privacy.
   Future<void> update() async {
-    final config = await ref.read(userConfigProvider.future);
-
-    // Safety check: If widgets aren't allowed, clear existing data
-    if (config == null || !config.allowWidgets) {
-      await _saveToNative(null);
-      return;
-    }
-
     final data = await _prepareData();
-    if (data != null) {
-      await _saveToNative(data);
-    }
+    await _saveToNative(data);
   }
 
   /// Aggregates data from [NetWorth] and [Transactions] providers.
-  Future<Map<String, dynamic>?> _prepareData() async {
-    final netWorth = ref.read(totalNetWorthProvider).value;
-    final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
+  Future<Map<String, dynamic>> _prepareData() async {
     final userConfig = ref.read(userConfigProvider).value;
     final userConfigAsync = ref.read(userConfigProvider.notifier);
     final theme = userConfigAsync.activeTheme(userConfig);
-    final isPrivate = false; // Set to false so widget info always shows real values
-    if (netWorth == null) return null;
+    Map<String, Object>? data;
+    num? pastNetWorthChange;
 
-    final monthFrame = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
-    final dayRange = ChartRangeEnum.oneMonth;
-    final pastValueRange = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
-    final pastNetWorthChange = pastValueRange.valueChange;
+    // Safety check: If widgets aren't allowed, clear existing data
+    if (userConfig != null && userConfig.allowWidgets) {
+      final netWorth = ref.read(totalNetWorthProvider).value;
+      final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
+      final isPrivate = false; // Set to false so widget info always shows real values
+      if (netWorth == null) {
+        data = null;
+      } else {
+        final monthFrame = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+        final dayRange = ChartRangeEnum.oneMonth;
+        final pastValueRange = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+        pastNetWorthChange = pastValueRange.valueChange;
 
-    // Map the 10 most recent transactions into a widget-friendly format
-    final recent = transactions
-        .take(10)
-        .map(
-          (t) => {
-            "merchant": t.description,
-            "category": t.category?.name ?? "Unknown",
-            "amount": t.amount.toCurrency(isPrivate),
-            "amountNumeric": t.amount,
-            "date": t.timeText,
-            "pending": t.pending,
-          },
-        )
-        .toList();
+        // Map the 10 most recent transactions into a widget-friendly format
+        final recent = transactions
+            .take(10)
+            .map(
+              (t) => {
+                "merchant": t.description,
+                "category": t.category?.name ?? "Unknown",
+                "amount": t.amount.toCurrency(isPrivate),
+                "amountNumeric": t.amount,
+                "date": t.timeText,
+                "pending": t.pending,
+              },
+            )
+            .toList();
+
+        data = {
+          "updateTime": DateTime.now().toShortMonthWithTime,
+          "netWorth": netWorth.value.toCurrency(isPrivate),
+          "changeAmount": monthFrame.valueChange.toCurrency(isPrivate),
+          "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
+          "numericChange": pastNetWorthChange,
+          "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
+          "recentTransactions": recent,
+        };
+      }
+    }
 
     return {
-      "updateTime": DateTime.now().toShortMonthWithTime,
-      "netWorth": netWorth.value.toCurrency(isPrivate),
-      "changeAmount": monthFrame.valueChange.toCurrency(isPrivate),
-      "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
-      "numericChange": pastNetWorthChange,
-      "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
-      "recentTransactions": recent,
-      // Theme info
-      "bgColor": theme.appBarTheme.backgroundColor!.toHex(),
-      "cardColor": theme.cardColor.toHex(),
-      "txtColor": (theme.textTheme.bodyLarge?.color ?? Colors.white).toHex(),
-      "txtColorMuted": (theme.textTheme.bodySmall?.color ?? Colors.grey).toHex(),
-      "primaryColor": theme.primaryColor.toHex(),
-      "accentColor": theme.colorScheme.secondary.toHex(),
-      "statusColor": (pastNetWorthChange >= 0 ? Colors.greenAccent : theme.colorScheme.error).toHex(),
-      "dividerColor": theme.dividerColor.toHex(),
+      "data": data,
+      "theme": {
+        "bgColor": theme.appBarTheme.backgroundColor!.toHex(),
+        "cardColor": theme.cardColor.toHex(),
+        "txtColor": (theme.textTheme.bodyLarge?.color ?? Colors.white).toHex(),
+        "txtColorMuted": (theme.textTheme.bodySmall?.color ?? Colors.grey).toHex(),
+        "primaryColor": theme.primaryColor.toHex(),
+        "accentColor": theme.colorScheme.secondary.toHex(),
+        "statusColor":
+            (pastNetWorthChange != null && pastNetWorthChange >= 0 ? Colors.greenAccent : theme.colorScheme.error)
+                .toHex(),
+        "dividerColor": theme.dividerColor.toHex(),
+      }
     };
   }
 

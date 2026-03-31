@@ -43,7 +43,7 @@ final class SseProvider extends $NotifierProvider<Sse, SseConnectionState> {
   }
 }
 
-String _$sseHash() => r'b95a6d42cebf3bc23ed3fbdba4d8abd5fe075fce';
+String _$sseHash() => r'872514b6289e7ce316ddbb96ace2edb0b5bb9e69';
 
 /// Defines an SSE riverpod that tracks our current SSE info
 

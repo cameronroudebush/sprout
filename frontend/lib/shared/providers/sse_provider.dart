@@ -5,9 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/auth_token_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/models/sse_state.dart';
-import 'package:sprout/shared/providers/secure_storage_provider.dart';
 
 part 'sse_provider.g.dart';
 
@@ -20,16 +20,25 @@ class Sse extends _$Sse {
 
   @override
   SseConnectionState build() {
-    final authState = ref.watch(authProvider);
+    ref.listen(authProvider, (previous, next) {
+      if (next.value != null && previous?.value == null) {
+        // User just logged in
+        _startSSE();
+      } else if (next.value == null) {
+        // User logged out
+        _stopSSE();
+      }
+    });
+
+    final currentAuth = ref.read(authProvider).value;
+    if (currentAuth != null) {
+      Future.microtask(() => _startSSE());
+    }
 
     // Cleanup on logout or disposal
     ref.onDispose(() {
       Future.microtask(() => _stopSSE());
     });
-
-    if (authState.value != null) {
-      Future.microtask(() => _startSSE());
-    }
 
     return SseConnectionState();
   }
@@ -42,8 +51,11 @@ class Sse extends _$Sse {
     _reconnectTimer?.cancel();
 
     try {
-      final client = await ref.read(baseApiClientProvider.future);
-      final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
+      final client = await ref.read(baseAuthenticatedClientProvider.future);
+
+      // Get current tokens from the provider state
+      var tokens = ref.read(authTokensProvider).value;
+      var idToken = tokens?.idToken;
 
       final url = Uri.parse('${client.basePath}/sse');
       final request = http.Request('GET', url);

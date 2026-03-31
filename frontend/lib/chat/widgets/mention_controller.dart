@@ -8,31 +8,28 @@ class MentionController extends TextEditingController {
 
   @override
   set selection(TextSelection newSelection) {
-    if (!newSelection.isCollapsed) {
+    // Only apply logic if the selection is a collapsed cursor and we have existing text
+    if (!newSelection.isCollapsed || text.isEmpty) {
       super.selection = newSelection;
       return;
     }
 
-    // Regex to find @ followed by any non-whitespace characters
     final pattern = RegExp(r'@(\S+)');
     final matches = pattern.allMatches(text);
 
     for (final match in matches) {
       final id = match.group(1);
 
-      // Only guard if this is a valid account ID
       if (idToNameMap.containsKey(id)) {
-        // If cursor is anywhere from the '@' to exactly the end of the ID
-        if (newSelection.baseOffset >= match.start && newSelection.baseOffset <= match.end) {
-          if (match.end == text.length || text[match.end] != ' ') {
-            final newText = text.replaceRange(match.end, match.end, " ");
-            this.value = TextEditingValue(
-              text: newText,
-              selection: TextSelection.collapsed(offset: match.end + 1),
-            );
-            return;
+        // Check if the cursor is attempting to land inside the @id
+        if (newSelection.baseOffset > match.start && newSelection.baseOffset < match.end) {
+          final isMovingBackward = newSelection.baseOffset < selection.baseOffset;
+
+          if (isMovingBackward) {
+            super.selection = TextSelection.collapsed(offset: match.start);
+          } else {
+            super.selection = TextSelection.collapsed(offset: match.end);
           }
-          super.selection = TextSelection.collapsed(offset: match.end + 1);
           return;
         }
       }

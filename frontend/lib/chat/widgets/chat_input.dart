@@ -99,7 +99,10 @@ class _ChatInputState extends ConsumerState<ChatInput> {
             clipBehavior: Clip.antiAlias,
             child: Container(
               constraints: const BoxConstraints(maxHeight: 200),
-              decoration: BoxDecoration(color: theme.cardTheme.color, border: BoxBorder.all(color: theme.dividerColor)),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: theme.cardTheme.color,
+                  border: BoxBorder.all(width: 2, color: theme.dividerColor)),
               child: Consumer(
                 builder: (context, ref, _) {
                   final items = ref.watch(accountsProvider).value?.accounts ?? [];

@@ -81,7 +81,8 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
       default:
         range = null;
     }
-    _updateFilter(filters.copyWith(dateRange: range));
+    filters.dateRange = range;
+    _updateFilter(filters);
   }
 
   @override
@@ -150,7 +151,7 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
         style: FilledButton.styleFrom(
             backgroundColor: !isFiltered ? theme.scaffoldBackgroundColor : theme.colorScheme.primary,
             foregroundColor: !isFiltered ? theme.colorScheme.onBackground : theme.colorScheme.onPrimary,
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             shape: RoundedRectangleBorder(
               side: BorderSide(color: theme.colorScheme.onBackground, width: 1),
               borderRadius: radius,
