@@ -19,7 +19,7 @@ class ProviderConfig {
     this.accountFixUrl,
   });
 
-  String dbType;
+  ProviderTypeEnum dbType;
 
   /// The name of this provider
   String name;
@@ -88,7 +88,7 @@ class ProviderConfig {
       }());
 
       return ProviderConfig(
-        dbType: mapValueOfType<String>(json, r'dbType')!,
+        dbType: ProviderTypeEnum.fromJson(json[r'dbType'])!,
         name: mapValueOfType<String>(json, r'name')!,
         logoUrl: mapValueOfType<String>(json, r'logoUrl')!,
         accountFixUrl: mapValueOfType<String>(json, r'accountFixUrl'),

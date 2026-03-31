@@ -4,10 +4,11 @@ import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { Sync } from "@backend/jobs/model/sync.model";
-import { ProviderService } from "@backend/providers/provider.service";
+import { ProviderBase } from "@backend/providers/base/core";
+import { PROVIDER_LIST_TOKEN } from "@backend/providers/provider.module";
 import { User } from "@backend/user/model/user.model";
 import { UserService } from "@backend/user/user.service";
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Inject } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 /** This class provides endpoints for getting the current configuration of the backend. */
@@ -15,8 +16,8 @@ import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 @ApiTags("Config")
 export class ConfigController {
   constructor(
-    private readonly providerService: ProviderService,
     private readonly userService: UserService,
+    @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
   ) {}
 
   @Get()
@@ -33,10 +34,9 @@ export class ConfigController {
       lastSync = lastUserSync;
     }
 
-    const providers = this.providerService.getAll();
     return new APIConfig(
       lastSync,
-      providers.map((x) => x.config),
+      this.providers.map((x) => x.config),
       Configuration.server.prompt.hasChatKey,
     );
   }

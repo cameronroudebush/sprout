@@ -14,10 +14,10 @@ class Account {
   /// Returns a new [Account] instance.
   Account({
     required this.id,
+    required this.provider,
     this.subType,
     this.interestRate,
     required this.name,
-    required this.provider,
     required this.institution,
     required this.currency,
     required this.balance,
@@ -27,6 +27,8 @@ class Account {
   });
 
   String id;
+
+  ProviderTypeEnum provider;
 
   /// The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.
   ///
@@ -41,9 +43,6 @@ class Account {
   num? interestRate;
 
   String name;
-
-  /// Where this account came from
-  String provider;
 
   /// The institution associated to this account
   Institution institution;
@@ -72,10 +71,10 @@ class Account {
   @override
   bool operator ==(Object other) => identical(this, other) || other is Account &&
     other.id == id &&
+    other.provider == provider &&
     other.subType == subType &&
     other.interestRate == interestRate &&
     other.name == name &&
-    other.provider == provider &&
     other.institution == institution &&
     other.currency == currency &&
     other.balance == balance &&
@@ -87,10 +86,10 @@ class Account {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (provider.hashCode) +
     (subType == null ? 0 : subType!.hashCode) +
     (interestRate == null ? 0 : interestRate!.hashCode) +
     (name.hashCode) +
-    (provider.hashCode) +
     (institution.hashCode) +
     (currency.hashCode) +
     (balance.hashCode) +
@@ -99,11 +98,12 @@ class Account {
     (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, subType=$subType, interestRate=$interestRate, name=$name, provider=$provider, institution=$institution, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
+  String toString() => 'Account[id=$id, provider=$provider, subType=$subType, interestRate=$interestRate, name=$name, institution=$institution, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+      json[r'provider'] = this.provider;
     if (this.subType != null) {
       json[r'subType'] = this.subType;
     } else {
@@ -115,7 +115,6 @@ class Account {
       json[r'interestRate'] = null;
     }
       json[r'name'] = this.name;
-      json[r'provider'] = this.provider;
       json[r'institution'] = this.institution;
       json[r'currency'] = this.currency;
       json[r'balance'] = this.balance;
@@ -142,10 +141,10 @@ class Account {
       assert(() {
         assert(json.containsKey(r'id'), 'Required key "Account[id]" is missing from JSON.');
         assert(json[r'id'] != null, 'Required key "Account[id]" has a null value in JSON.');
-        assert(json.containsKey(r'name'), 'Required key "Account[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "Account[name]" has a null value in JSON.');
         assert(json.containsKey(r'provider'), 'Required key "Account[provider]" is missing from JSON.');
         assert(json[r'provider'] != null, 'Required key "Account[provider]" has a null value in JSON.');
+        assert(json.containsKey(r'name'), 'Required key "Account[name]" is missing from JSON.');
+        assert(json[r'name'] != null, 'Required key "Account[name]" has a null value in JSON.');
         assert(json.containsKey(r'institution'), 'Required key "Account[institution]" is missing from JSON.');
         assert(json[r'institution'] != null, 'Required key "Account[institution]" has a null value in JSON.');
         assert(json.containsKey(r'currency'), 'Required key "Account[currency]" is missing from JSON.');
@@ -161,12 +160,12 @@ class Account {
 
       return Account(
         id: mapValueOfType<String>(json, r'id')!,
+        provider: ProviderTypeEnum.fromJson(json[r'provider'])!,
         subType: AccountSubTypeEnum.fromJson(json[r'subType']),
         interestRate: json[r'interestRate'] == null
             ? null
             : num.parse('${json[r'interestRate']}'),
         name: mapValueOfType<String>(json, r'name')!,
-        provider: mapValueOfType<String>(json, r'provider')!,
         institution: Institution.fromJson(json[r'institution'])!,
         currency: mapValueOfType<String>(json, r'currency')!,
         balance: num.parse('${json[r'balance']}'),
@@ -221,8 +220,8 @@ class Account {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'id',
-    'name',
     'provider',
+    'name',
     'institution',
     'currency',
     'balance',

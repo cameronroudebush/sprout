@@ -8,6 +8,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
@@ -149,18 +150,18 @@ async function createAccounts(demoUser: User) {
   const institutions = await createInstitution(demoUser);
   const accounts = [
     // Depository
-    new Account("Checking", "simple-fin", demoUser, institutions[0]!, 2500, 2400, AccountType.depository, "USD", AccountSubType.checking),
-    new Account("Savings", "simple-fin", demoUser, institutions[0]!, 15000, 15000, AccountType.depository, "USD", AccountSubType.savings),
-    new Account("High-Yield Savings", "simple-fin", demoUser, institutions[0]!, 50000, 50000, AccountType.depository, "USD", AccountSubType.hysa),
+    new Account("Checking", ProviderType.simpleFin, demoUser, institutions[0]!, 2500, 2400, AccountType.depository, "USD", AccountSubType.checking),
+    new Account("Savings", ProviderType.simpleFin, demoUser, institutions[0]!, 15000, 15000, AccountType.depository, "USD", AccountSubType.savings),
+    new Account("High-Yield Savings", ProviderType.simpleFin, demoUser, institutions[0]!, 50000, 50000, AccountType.depository, "USD", AccountSubType.hysa),
     // Credit
-    new Account("Visa Credit Card", "simple-fin", demoUser, institutions[0]!, -500, 4500, AccountType.credit, "USD", AccountSubType.cashBack),
+    new Account("Visa Credit Card", ProviderType.simpleFin, demoUser, institutions[0]!, -500, 4500, AccountType.credit, "USD", AccountSubType.cashBack),
     // Loan
-    new Account("Car Loan", "simple-fin", demoUser, institutions[4]!, -20000, 0, AccountType.loan, "USD", AccountSubType.personal),
-    new Account("Mortgage", "simple-fin", demoUser, institutions[0]!, -250000, 0, AccountType.loan, "USD", AccountSubType.mortgage),
+    new Account("Car Loan", ProviderType.simpleFin, demoUser, institutions[4]!, -20000, 0, AccountType.loan, "USD", AccountSubType.personal),
+    new Account("Mortgage", ProviderType.simpleFin, demoUser, institutions[0]!, -250000, 0, AccountType.loan, "USD", AccountSubType.mortgage),
     // Investment
-    new Account("Brokerage", "simple-fin", demoUser, institutions[1]!, 12000, 12000, AccountType.investment, "USD", AccountSubType.brokerage),
-    new Account("401(k)", "simple-fin", demoUser, institutions[2]!, 275000, 75000, AccountType.investment, "USD", AccountSubType["401k"]),
-    new Account("Roth IRA", "simple-fin", demoUser, institutions[2]!, 30000, 30000, AccountType.investment, "USD", AccountSubType.ira),
+    new Account("Brokerage", ProviderType.simpleFin, demoUser, institutions[1]!, 12000, 12000, AccountType.investment, "USD", AccountSubType.brokerage),
+    new Account("401(k)", ProviderType.simpleFin, demoUser, institutions[2]!, 275000, 75000, AccountType.investment, "USD", AccountSubType["401k"]),
+    new Account("Roth IRA", ProviderType.simpleFin, demoUser, institutions[2]!, 30000, 30000, AccountType.investment, "USD", AccountSubType.ira),
   ];
   logger.log(`Creating ${accounts.length} accounts.`);
 

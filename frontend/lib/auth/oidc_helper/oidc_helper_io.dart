@@ -17,7 +17,13 @@ class OIDCHelper implements stub.OIDCHelper {
       ).replace(queryParameters: {'target_url': '$callbackScheme://callback'});
 
       // Open the Browser and Wait for Result
-      final result = await FlutterWebAuth2.authenticate(url: loginUrl.toString(), callbackUrlScheme: callbackScheme);
+      final result = await FlutterWebAuth2.authenticate(
+        url: loginUrl.toString(),
+        callbackUrlScheme: callbackScheme,
+        options: const FlutterWebAuth2Options(
+          preferEphemeral: true,
+        ),
+      );
       final uri = Uri.parse(result);
       // Pull out our tokens
       String fragment = uri.fragment;

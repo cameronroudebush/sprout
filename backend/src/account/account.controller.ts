@@ -2,18 +2,12 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountEditRequest } from "@backend/account/model/api/edit.request.dto";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { Holding } from "@backend/holding/model/holding.model";
-import { Institution } from "@backend/institution/model/institution.model";
 import { JobsService } from "@backend/jobs/jobs.service";
 import { Sync } from "@backend/jobs/model/sync.model";
-import { ProviderService } from "@backend/providers/provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
-import { Transaction } from "@backend/transaction/model/transaction.model";
-import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Post, Put, Query } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { randomUUID } from "crypto";
+import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Put, Query } from "@nestjs/common";
+import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { startOfDay } from "date-fns";
 import { MoreThanOrEqual } from "typeorm";
 import { SSEService } from "../sse/sse.service";
@@ -27,8 +21,6 @@ import { SSEService } from "../sse/sse.service";
 export class AccountController {
   constructor(
     private readonly sseService: SSEService,
-    private readonly providerService: ProviderService,
-    private readonly transactionRuleService: TransactionRuleService,
     private readonly jobService: JobsService,
   ) {}
 
@@ -91,72 +83,6 @@ export class AccountController {
   @ApiOkResponse({ description: "Accounts found successfully.", type: [Account] })
   async getAccounts(@CurrentUser() user: User) {
     return await Account.find({ where: { user: { id: user.id } } });
-  }
-
-  @Get("provider/:name")
-  @ApiOperation({
-    summary: "Get accounts from a provider that are not yet synced.",
-    description: "Retrieves accounts from a specified provider that the user has not yet linked.",
-  })
-  @ApiOkResponse({ description: "Provider accounts found successfully.", type: [Account] })
-  @ApiNotFoundResponse({ description: "Provider with the specified name not found." })
-  async getProviderAccounts(@Param("name") name: string, @CurrentUser() user: User) {
-    const matchingProvider = this.providerService.getAll().find((x) => x.config.name === name);
-    if (matchingProvider == null) throw new NotFoundException(`Failed to locate matching provider for ${name}`);
-    const existingAccounts = await Account.find({ where: { user: { id: user.id } } });
-    const providerAccounts = await Promise.all(
-      (await matchingProvider.get(user, true)).map(async (x) => {
-        const account = x.account;
-        const matchingInstitution = await Institution.findOne({ where: { user: { id: user.id }, name: account.institution.name } });
-        if (matchingInstitution == null) {
-          // New institution
-          account.institution.id = randomUUID();
-        } else account.institution = matchingInstitution;
-        return x.account;
-      }),
-    );
-    return providerAccounts.filter((providerAccount) => !existingAccounts.some((existingAccount) => existingAccount.id === providerAccount.id));
-  }
-
-  @Post("provider/:name/link")
-  @ApiOperation({
-    summary: "Link the new given accounts from a provider.",
-    description: "Given some accounts and the provider info, links new accounts to the current user.",
-  })
-  @ApiCreatedResponse({ description: "Provider accounts linked successfully.", type: [Account] })
-  @ApiBody({ type: [Account] })
-  async linkProviderAccounts(@Param("name") name: string, @Body() accountsToLink: [Account], @CurrentUser() user: User) {
-    const providerMatch = this.providerService.getAll().find((x) => x.config.name === name);
-    if (providerMatch == null) throw new Error("Failed to locate matching provider");
-    // We need to grab all the provider accounts again because we want to make sure we have correct data and the API isn't being malicious
-    const providerAccounts = await providerMatch.get(user, true);
-    // Add these new accounts to the database
-    const addedAccounts: Account[] = [];
-    for (const account of accountsToLink) {
-      const matchingAccount = providerAccounts.find((z) => z.account.name === account.name);
-      if (matchingAccount) {
-        matchingAccount.account.user = user;
-        // Try to find a matching institution first if it exists
-        const matchingInstitution = await Institution.findOne({ where: { user: { id: user.id }, name: matchingAccount.account.institution.name } });
-        if (matchingInstitution) matchingAccount.account.institution = matchingInstitution;
-        else matchingAccount.account.institution.user = user; // Enforce user for our institution to not allow overwrites
-        matchingAccount.account.subType = account.subType;
-        if (account.subType != null) Account.validateSubType(account.subType);
-        await matchingAccount.account.insert(false);
-        // Insert matching transactions
-        matchingAccount.transactions.map((x) => (x.account = matchingAccount.account));
-        await Transaction.insertMany(matchingAccount.transactions);
-        // Run transaction rules
-        await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
-        // Insert holdings
-        matchingAccount.holdings.map((x) => (x.account = matchingAccount.account));
-        await Holding.insertMany(matchingAccount.holdings);
-        addedAccounts.push(matchingAccount.account);
-      }
-    }
-    this.sseService.sendToUser(user, SSEEventType.SYNC);
-    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
-    return addedAccounts;
   }
 
   @Put("sync")

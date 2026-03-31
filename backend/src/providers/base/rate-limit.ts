@@ -1,6 +1,9 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { User } from "@backend/user/model/user.model";
+import { HttpException, HttpStatus } from "@nestjs/common";
+import { ApiProperty } from "@nestjs/swagger";
 import { ManyToOne } from "typeorm";
 
 /**
@@ -14,7 +17,11 @@ export class ProviderRateLimit extends DatabaseBase {
 
   /** The unique name of this provider */
   @DatabaseDecorators.column({ nullable: false, unique: true })
-  name: string;
+  @ApiProperty({
+    enum: ProviderType,
+    enumName: "ProviderTypeEnum",
+  })
+  name: ProviderType;
 
   /** The last day this was updated */
   @DatabaseDecorators.column({ nullable: false })
@@ -28,7 +35,7 @@ export class ProviderRateLimit extends DatabaseBase {
   @ManyToOne(() => User, (a) => a.id, { onDelete: "CASCADE", nullable: true })
   user?: User;
 
-  constructor(name: string, maxCallsPerDay: number, user?: User) {
+  constructor(name: ProviderType, maxCallsPerDay: number, user?: User) {
     super();
     this.name = name;
     this.MAX_CALLS_PER_DAY = maxCallsPerDay;
@@ -46,7 +53,7 @@ export class ProviderRateLimit extends DatabaseBase {
     }
     // Else handle like normally
     else if (inDb.count >= this.MAX_CALLS_PER_DAY && inDb.lastUpdated.toDateString() === today.toDateString()) {
-      throw new Error(`Rate limit exceeded for provider ${this.name}. Max calls per day: ${this.MAX_CALLS_PER_DAY}`);
+      throw new HttpException(`Rate limit exceeded for provider ${this.name}. Max calls per day: ${this.MAX_CALLS_PER_DAY}`, HttpStatus.TOO_MANY_REQUESTS);
     } else if (inDb.lastUpdated.toDateString() !== today.toDateString()) {
       inDb.count = 1;
       inDb.lastUpdated = today;

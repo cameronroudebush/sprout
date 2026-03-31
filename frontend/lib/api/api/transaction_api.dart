@@ -101,6 +101,7 @@ class TransactionApi {
   ///   A partial description to filter transactions.
   ///
   /// * [DateTime] date:
+  ///   A specific date to filter transactions.
   ///
   /// * [DateTime] startDate:
   ///
@@ -182,6 +183,7 @@ class TransactionApi {
   ///   A partial description to filter transactions.
   ///
   /// * [DateTime] date:
+  ///   A specific date to filter transactions.
   ///
   /// * [DateTime] startDate:
   ///

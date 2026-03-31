@@ -1,10 +1,14 @@
 import { Base } from "@backend/core/model/base";
-
-export type PROVIDER_OPTIONS = "simple-fin" | "zillow";
+import { ProviderType } from "@backend/providers/base/provider.type";
+import { ApiProperty } from "@nestjs/swagger";
 
 /** This class represents a finance provider and some metadata on their connection */
 export class ProviderConfig extends Base {
-  dbType: PROVIDER_OPTIONS;
+  @ApiProperty({
+    enum: ProviderType,
+    enumName: "ProviderTypeEnum",
+  })
+  dbType: ProviderType;
   /** The name of this provider */
   name: string;
   /** An endpoint of where to get this logo */
@@ -12,7 +16,7 @@ export class ProviderConfig extends Base {
   /** The URL to be able to fix accounts */
   accountFixUrl?: string;
 
-  constructor(name: string, dbType: PROVIDER_OPTIONS, logoUrl: string, accountFixUrl?: string) {
+  constructor(name: string, dbType: ProviderType, logoUrl: string, accountFixUrl?: string) {
     super();
     this.name = name;
     this.dbType = dbType;
