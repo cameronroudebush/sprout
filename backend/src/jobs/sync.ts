@@ -34,7 +34,20 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
   protected async update(user?: User) {
     this.logger.log("Starting sync for all providers." + (user ? ` Only for user: ${user?.username}` : ""));
-    for (const provider of this.providers) await this.updateProvider(provider, user);
+
+    let allSuccessful = true;
+    for (const provider of this.providers) {
+      const success = await this.updateProvider(provider, user);
+      if (!success) allSuccessful = false;
+    }
+
+    // If everything was successful (and we have a user to notify), send a single success notification
+    if (allSuccessful && user) {
+      const msg = this.randomSuccessMessage;
+      this.logger.log(`Successfully updated all providers for: ${user.username}`);
+      await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
+    }
+
     // Cleanup
     await this.cleanupOldSyncs();
     // If we we're given a single user, find their most recent sync status
@@ -46,9 +59,11 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
    * Starts an update for the given provider.
    *
    * @param specificUser If given, will only process this user
+   * @returns boolean indicating if the provider sync was successful for all users
    */
-  private async updateProvider(provider: ProviderBase, specificUser?: User) {
+  private async updateProvider(provider: ProviderBase, specificUser?: User): Promise<boolean> {
     this.logger.log(`Syncing ${provider.config.name}`);
+    let providerSuccess = true;
     // Handle each user, or only the given user
     const users = specificUser ? [specificUser] : await User.find({});
     // Handle each user's accounts
@@ -60,7 +75,6 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
       }).insert();
       sync.user = user;
       try {
-        this.logger.log(`Updating ${provider.config.name} for: ${user.username}`);
         // Sync transactions and account balances. Only do it for existing accounts.
         const userAccounts = await Account.getForUser(user);
         // If we don't have any user accounts, don't bother querying because we'll have nothing to update
@@ -78,6 +92,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
         }
 
         let userHadSuccessfulUpdate = false;
+        let hasAccountErrors = false;
         const institutionErrors = new Set<string>();
 
         for (const data of accounts) {
@@ -107,13 +122,14 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
             // Check if the institution reports an error
             if (data.account.institution.hasError) institutionErrors.add(data.account.institution.name);
             // Sync transactions
-            if (data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions);
+            if (data.transactions && data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions!);
             // Sync holdings if investment type
-            if (accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
+            if (data.holdings && accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
 
             // If we reached this point, this specific account sync was valid
             userHadSuccessfulUpdate = true;
           } catch (e) {
+            hasAccountErrors = true;
             this.logger.error(`Account error: ${(e as Error).message}`);
           }
         }
@@ -127,13 +143,14 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
           sync.status = "failed";
           sync.failureReason = `Connection lost with ${names.join(", ")}`;
           await this.notificationService.notifyUser(user, sync.failureReason, "Connection Update Required", NotificationType.error);
+          providerSuccess = false;
         } else if (userHadSuccessfulUpdate) {
           sync.status = "complete";
-          const msg = this.randomSuccessMessage;
-          await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
+          if (hasAccountErrors) providerSuccess = false;
         } else {
           sync.status = "failed";
           sync.failureReason = "No accounts were updated. Check provider logs.";
+          providerSuccess = false;
         }
         // Finalize by updating the sync
         await sync.update();
@@ -143,8 +160,10 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
         sync.failureReason = (e as Error).message;
         await sync.update();
         this.logger.error(`Sync failed for ${user.username}: ${sync.failureReason}`);
+        providerSuccess = false;
       }
     }
+    return providerSuccess;
   }
 
   /** Updates all transaction data for the given account that matches the given transaction */
