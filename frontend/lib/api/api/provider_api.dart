@@ -125,4 +125,116 @@ class ProviderApi {
     }
     return null;
   }
+
+  /// Link a Zillow property as an account.
+  ///
+  /// Verifies property info and creates a tracked account with Zestimate value.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
+  Future<Response> zillowProviderControllerLinkWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/zillow/link';
+
+    // ignore: prefer_final_locals
+    Object? postBody = zillowPropertyDTO;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Link a Zillow property as an account.
+  ///
+  /// Verifies property info and creates a tracked account with Zestimate value.
+  ///
+  /// Parameters:
+  ///
+  /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
+  Future<Account?> zillowProviderControllerLink(ZillowPropertyDTO zillowPropertyDTO,) async {
+    final response = await zillowProviderControllerLinkWithHttpInfo(zillowPropertyDTO,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
+    
+    }
+    return null;
+  }
+
+  /// Get property info from Zillow
+  ///
+  /// Grabs data from zillow for Zpid, Zestimate, and Rent Zestimate based on address.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
+  Future<Response> zillowProviderControllerLookupPropertyWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/zillow/lookup';
+
+    // ignore: prefer_final_locals
+    Object? postBody = zillowPropertyDTO;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get property info from Zillow
+  ///
+  /// Grabs data from zillow for Zpid, Zestimate, and Rent Zestimate based on address.
+  ///
+  /// Parameters:
+  ///
+  /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
+  Future<ZillowPropertyResultDto?> zillowProviderControllerLookupProperty(ZillowPropertyDTO zillowPropertyDTO,) async {
+    final response = await zillowProviderControllerLookupPropertyWithHttpInfo(zillowPropertyDTO,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ZillowPropertyResultDto',) as ZillowPropertyResultDto;
+    
+    }
+    return null;
+  }
 }

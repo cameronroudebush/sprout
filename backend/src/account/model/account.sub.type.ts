@@ -20,4 +20,6 @@ export enum AccountSubType {
   // Crypto
   wallet = "Wallet",
   staking = "Staking",
+  // Assets
+  house = "House",
 }

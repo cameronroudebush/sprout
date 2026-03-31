@@ -5,6 +5,7 @@ import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/widgets/dialog/provider_selection.dart';
 import 'package:sprout/provider/widgets/simple-fin/simple_fin_accounts.dart';
+import 'package:sprout/provider/widgets/zillow/zillow_property_selector.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 
 /// This dialog provides the ability to select from providers and add accounts related to those providers after filling
@@ -18,8 +19,11 @@ class ProviderDialog extends ConsumerStatefulWidget {
 
 class _ProviderDialogState extends ConsumerState<ProviderDialog> {
   ProviderConfig? _selectedProvider;
-  List<Account> _selectedAccounts = [];
   bool _isSubmitting = false;
+
+// Data from the providers
+  List<Account> _selectedAccounts = [];
+  ZillowPropertyDTO? _zillowPayload;
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +36,27 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
         onProviderSelected: (p) => setState(() => _selectedProvider = p),
       );
     } else {
-      content = SimpleFinAccountSelector(
-        provider: _selectedProvider!,
-        onSelectionChanged: (accounts) => setState(() => _selectedAccounts = accounts),
-      );
+      // Switch content based on provider type
+      switch (_selectedProvider!.dbType) {
+        case ProviderTypeEnum.zillow:
+          content = ZillowPropertySelector(
+            provider: _selectedProvider!,
+            onPropertyFound: (dto) => setState(() => _zillowPayload = dto),
+          );
+          break;
+        default:
+          content = SimpleFinAccountSelector(
+            provider: _selectedProvider!,
+            onSelectionChanged: (accounts) => setState(() => _selectedAccounts = accounts),
+          );
+      }
     }
 
     return SproutBaseDialogWidget(
-      "Add Accounts",
+      _selectedProvider?.dbType == ProviderTypeEnum.zillow ? "Add Asset" : "Add Accounts",
       showCloseDialogButton: !_isSubmitting,
       showSubmitButton: _selectedProvider != null,
-      allowSubmitClick: _selectedAccounts.isNotEmpty && !_isSubmitting,
+      allowSubmitClick: (_selectedAccounts.isNotEmpty || _zillowPayload != null) && !_isSubmitting,
       onSubmitClick: _handleSubmit,
       child: _isSubmitting ? const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())) : content,
     );
@@ -50,18 +64,17 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
 
   /// What to do when we click submit, per provider
   Future<void> _handleSubmit() async {
-    if (_selectedProvider == null || _selectedAccounts.isEmpty) return;
-
     setState(() => _isSubmitting = true);
 
     try {
       switch (_selectedProvider!.dbType) {
         case ProviderTypeEnum.simpleFin:
+          if (_selectedProvider == null || _selectedAccounts.isEmpty) return;
           await SimpleFinAccountSelector.link(ref, _selectedAccounts);
           break;
         case ProviderTypeEnum.zillow:
-          // TODO
-          // await ProviderLinkHandlers.linkPlaid(ref, _selectedAccounts);
+          if (_zillowPayload == null) return;
+          await ZillowPropertySelector.link(ref, _zillowPayload!);
           break;
       }
 

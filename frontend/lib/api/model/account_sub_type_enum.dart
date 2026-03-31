@@ -38,6 +38,7 @@ class AccountSubTypeEnum {
   static const cashBack = AccountSubTypeEnum._(r'Cash Back');
   static const wallet = AccountSubTypeEnum._(r'Wallet');
   static const staking = AccountSubTypeEnum._(r'Staking');
+  static const house = AccountSubTypeEnum._(r'House');
 
   /// List of all possible values in this [enum][AccountSubTypeEnum].
   static const values = <AccountSubTypeEnum>[
@@ -56,6 +57,7 @@ class AccountSubTypeEnum {
     cashBack,
     wallet,
     staking,
+    house,
   ];
 
   static AccountSubTypeEnum? fromJson(dynamic value) => AccountSubTypeEnumTypeTransformer().decode(value);
@@ -109,6 +111,7 @@ class AccountSubTypeEnumTypeTransformer {
         case r'Cash Back': return AccountSubTypeEnum.cashBack;
         case r'Wallet': return AccountSubTypeEnum.wallet;
         case r'Staking': return AccountSubTypeEnum.staking;
+        case r'House': return AccountSubTypeEnum.house;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

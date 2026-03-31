@@ -1218,6 +1218,84 @@
         "tags": ["Provider"]
       }
     },
+    "/provider/zillow/lookup": {
+      "post": {
+        "description": "Grabs data from zillow for Zpid, Zestimate, and Rent Zestimate based on address.",
+        "operationId": "ZillowProviderController_lookupProperty",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZillowPropertyDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Property data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZillowPropertyResultDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get property info from Zillow",
+        "tags": ["Provider"]
+      }
+    },
+    "/provider/zillow/link": {
+      "post": {
+        "description": "Verifies property info and creates a tracked account with Zestimate value.",
+        "operationId": "ZillowProviderController_link",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZillowPropertyDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Zillow property linked successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link a Zillow property as an account.",
+        "tags": ["Provider"]
+      }
+    },
     "/sse": {
       "get": {
         "operationId": "SSEController_sse",
@@ -2293,7 +2371,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.3.0-7-ga6deeea",
+    "version": "v0.3.0-8-g398537d",
     "contact": {}
   },
   "tags": [
@@ -2390,7 +2468,8 @@
           "Travel",
           "Cash Back",
           "Wallet",
-          "Staking"
+          "Staking",
+          "House"
         ],
         "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
       },
@@ -2465,7 +2544,7 @@
           },
           "type": {
             "description": "The type of this account to better separate it from the others.",
-            "enum": ["depository", "credit", "loan", "investment", "crypto"],
+            "enum": ["depository", "credit", "asset", "loan", "investment", "crypto"],
             "type": "string"
           },
           "extra": {
@@ -2662,6 +2741,10 @@
             "type": "string",
             "description": "The name of this provider"
           },
+          "url": {
+            "type": "string",
+            "description": "Link to this provider"
+          },
           "logoUrl": {
             "type": "string",
             "description": "An endpoint of where to get this logo"
@@ -2671,7 +2754,7 @@
             "description": "The URL to be able to fix accounts"
           }
         },
-        "required": ["dbType", "name", "logoUrl"]
+        "required": ["dbType", "name", "url", "logoUrl"]
       },
       "APIConfig": {
         "type": "object",
@@ -2992,6 +3075,45 @@
           }
         },
         "required": ["token"]
+      },
+      "ZillowPropertyDTO": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "123 Main St"
+          },
+          "city": {
+            "type": "string",
+            "example": "Seattle"
+          },
+          "state": {
+            "type": "string",
+            "example": "WA"
+          },
+          "zip": {
+            "type": "number",
+            "example": 98101
+          }
+        },
+        "required": ["address", "city", "state", "zip"]
+      },
+      "ZillowPropertyResultDto": {
+        "type": "object",
+        "properties": {
+          "zestimate": {
+            "type": "number",
+            "example": "123 Main St"
+          },
+          "rentZestimate": {
+            "type": "number",
+            "example": "Seattle"
+          },
+          "zpid": {
+            "type": "string"
+          }
+        },
+        "required": ["zestimate", "rentZestimate", "zpid"]
       },
       "Base": {
         "type": "object",
@@ -3370,7 +3492,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-03-31T01:02:38.643Z"
+            "default": "2026-03-31T02:00:20.738Z"
           },
           "isRead": {
             "type": "boolean",

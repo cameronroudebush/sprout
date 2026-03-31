@@ -90,6 +90,8 @@ part 'model/user_creation_request.dart';
 part 'model/user_creation_response.dart';
 part 'model/user_login_response.dart';
 part 'model/username_password_login_request.dart';
+part 'model/zillow_property_dto.dart';
+part 'model/zillow_property_result_dto.dart';
 
 
 /// An [ApiClient] instance that uses the default values obtained from

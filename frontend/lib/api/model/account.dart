@@ -245,6 +245,7 @@ class AccountTypeEnum {
 
   static const depository = AccountTypeEnum._(r'depository');
   static const credit = AccountTypeEnum._(r'credit');
+  static const asset = AccountTypeEnum._(r'asset');
   static const loan = AccountTypeEnum._(r'loan');
   static const investment = AccountTypeEnum._(r'investment');
   static const crypto = AccountTypeEnum._(r'crypto');
@@ -253,6 +254,7 @@ class AccountTypeEnum {
   static const values = <AccountTypeEnum>[
     depository,
     credit,
+    asset,
     loan,
     investment,
     crypto,
@@ -296,6 +298,7 @@ class AccountTypeEnumTypeTransformer {
       switch (data) {
         case r'depository': return AccountTypeEnum.depository;
         case r'credit': return AccountTypeEnum.credit;
+        case r'asset': return AccountTypeEnum.asset;
         case r'loan': return AccountTypeEnum.loan;
         case r'investment': return AccountTypeEnum.investment;
         case r'crypto': return AccountTypeEnum.crypto;

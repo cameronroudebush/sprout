@@ -13,9 +13,7 @@ import { Body, Controller, Get, Post } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { randomUUID } from "crypto";
 
-/**
- * This controller provides the endpoint for all Account related content
- */
+/** This controller provides endpoints for simple-fin specific provider content */
 @Controller("provider/simple-fin")
 @ApiTags("Provider")
 @AuthGuard.attach()
