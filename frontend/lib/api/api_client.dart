@@ -234,6 +234,8 @@ class ApiClient {
           return NotificationSSEDTO.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
+        case 'ProviderTypeEnum':
+          return ProviderTypeEnumTypeTransformer().decode(value);
         case 'RefreshRequestDTO':
           return RefreshRequestDTO.fromJson(value);
         case 'RefreshResponseDTO':

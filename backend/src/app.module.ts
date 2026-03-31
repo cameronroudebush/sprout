@@ -17,10 +17,7 @@ import { NetWorthModule } from "@backend/net-worth/net-worth.module";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
 import { SSEModule } from "@backend/sse/sse.module";
-import { TransactionController } from "@backend/transaction/transaction.controller";
-import { TransactionRuleController } from "@backend/transaction/transaction.rule.controller";
-import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
-import { TransactionService } from "@backend/transaction/transaction.service";
+import { TransactionModule } from "@backend/transaction/transaction.module";
 import { UserModule } from "@backend/user/user.module";
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
@@ -38,6 +35,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     SSEModule,
     NotificationModule,
     NetWorthModule,
+    ProviderModule,
+    TransactionModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -45,19 +44,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
       },
     ]),
   ],
-  controllers: [
-    CoreController,
-    AccountController,
-    TransactionController,
-    TransactionRuleController,
-    CategoryController,
-    ConfigController,
-    CashFlowController,
-    ImageProxyController,
-  ],
+  controllers: [CoreController, AccountController, CategoryController, ConfigController, CashFlowController, ImageProxyController],
   providers: [
-    TransactionService,
-    TransactionRuleService,
     ConfigurationService,
     JobsService,
     DatabaseService,

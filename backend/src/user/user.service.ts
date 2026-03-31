@@ -1,13 +1,13 @@
 import { Configuration } from "@backend/config/core";
 import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
-import { ProviderService } from "@backend/providers/provider.service";
+import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly providerService: ProviderService) {}
+  constructor(private readonly simpleFinProviderService: SimpleFINProviderService) {}
 
   /** Returns if users are allowed to be created because either it's first time setup or OIDC mode and new users are allowed. */
   async allowUserCreation() {
@@ -27,7 +27,7 @@ export class UserService {
           (incoming as any)[key] = existing[key];
         } else if (key === "simpleFinToken" && incoming[key]) {
           // Convert simpleFin token as needed
-          incoming[key] = await this.providerService.providers.simpleFin.convertSetupToken(incoming[key]);
+          incoming[key] = await this.simpleFinProviderService.convertSetupToken(incoming[key]);
         }
       }
     }

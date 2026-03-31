@@ -4,6 +4,7 @@ import { AccountType } from "@backend/account/model/account.type";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { Institution } from "@backend/institution/model/institution.model";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
@@ -15,9 +16,12 @@ export class Account extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false, unique: true })
   name: string;
 
-  /** Where this account came from */
   @DatabaseDecorators.column({ nullable: false })
-  provider: "simple-fin";
+  @ApiProperty({
+    enum: ProviderType,
+    enumName: "ProviderTypeEnum",
+  })
+  provider: ProviderType;
 
   /** The institution associated to this account */
   @ManyToOne(() => Institution, (i) => i.id, { eager: true, cascade: true })

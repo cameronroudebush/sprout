@@ -17,7 +17,6 @@ import { EncryptionTransformer } from "@backend/core/decorator/encryption.decora
 import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { JobsService } from "@backend/jobs/jobs.service";
-import { ProviderService } from "@backend/providers/provider.service";
 import { ClassSerializerInterceptor, INestApplication, Logger, LogLevel, ValidationPipe } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -77,6 +76,7 @@ export function createSwaggerDoc(app: INestApplication) {
     .addTag("Net Worth", "Provides endpoints to track and visualize a user's net worth over time.")
     .addTag("Cash Flow", "Provides endpoints to analyze and visualize cash flow, showing how money moves between income and expenses using categories.")
     .addTag("Chat", "Provides endpoints to allow querying an LLM with your account data.")
+    .addTag("Provider", "Provides endpoints for the various sources that can provide data to Sprout.")
     .build();
   return () => {
     const document = SwaggerModule.createDocument(app, config);
@@ -158,8 +158,6 @@ async function main() {
     const databaseService = app.get(DatabaseService);
     await databaseService.init();
     DatabaseBase.database = databaseService;
-    // Init our providers
-    await app.get(ProviderService).init();
     // Initialize background jobs
     await app.get(JobsService).start();
     await app.listen(Configuration.server.port);

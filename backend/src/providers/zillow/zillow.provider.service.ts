@@ -1,17 +1,21 @@
 import { Configuration } from "@backend/config/core";
+import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { User } from "@backend/user/model/user.model";
+import { Injectable } from "@nestjs/common";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
 
 /**
- * This provider adds automated property lookup via the Zillow API
+ * This provider adds automated property lookup via Zillow.
  */
-export class ZillowProvider extends ProviderBase {
-  // private logger = new Logger("provider:zillow");
+@Injectable()
+export class ZillowProviderService extends ProviderBase {
+  config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com/apple-touch-icon.png");
 
-  override rateLimit = (user?: User) => new ProviderRateLimit("zillow", Configuration.providers.zillow.rateLimit, user);
+  override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.zillow, Configuration.providers.zillow.rateLimit, user);
 
   override async get(_user: User, _accountsOnly: boolean) {
     return [];
@@ -24,7 +28,8 @@ export class ZillowProvider extends ProviderBase {
   }
 
   /**
-   * Gets property info for the given address information. This includes the zestimates and the zid
+   * Gets property info for the given address information. This includes the zestimates and the zid. This is accomplished using
+   *  web scraping.
    * @param address The street address
    * @param city The city of the property
    * @param state The state in a two digit state code
@@ -57,5 +62,3 @@ export class ZillowProvider extends ProviderBase {
     }
   }
 }
-
-// TODO: Reduce how often we sync, make it configurable per provider

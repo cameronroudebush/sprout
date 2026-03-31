@@ -61,6 +61,9 @@ String parameterToString(dynamic value) {
   if (value is ChartRangeEnum) {
     return ChartRangeEnumTypeTransformer().encode(value).toString();
   }
+  if (value is ProviderTypeEnum) {
+    return ProviderTypeEnumTypeTransformer().encode(value).toString();
+  }
   if (value is ThemeStyleEnum) {
     return ThemeStyleEnumTypeTransformer().encode(value).toString();
   }

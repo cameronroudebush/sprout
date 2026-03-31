@@ -67,5 +67,11 @@ http.Client _createHttpClient() {
   } else {
     inner = http.Client();
   }
-  return RetryClient(inner, retries: 2);
+  return RetryClient(
+    inner,
+    retries: 2,
+    when: (http.BaseResponse response) {
+      return (response.statusCode >= 500 && response.statusCode <= 599);
+    },
+  );
 }

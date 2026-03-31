@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/dialog/add_account_dialog.dart';
 import 'package:sprout/account/widgets/account_details.dart';
 import 'package:sprout/account/widgets/accounts_summary.dart';
+import 'package:sprout/provider/widgets/dialog/provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
@@ -48,7 +48,7 @@ class AccountsPage extends ConsumerWidget {
                     FABAction(
                       icon: Icons.add,
                       label: 'Add Account',
-                      onTap: (context) => showSproutPopup(context: context, builder: (_) => const AddAccountDialog()),
+                      onTap: (context) => showSproutPopup(context: context, builder: (_) => const ProviderDialog()),
                     ),
                     FABAction(
                       icon: Icons.refresh,

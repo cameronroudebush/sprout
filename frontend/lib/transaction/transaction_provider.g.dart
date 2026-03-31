@@ -71,7 +71,7 @@ final class TransactionsProvider
   Transactions create() => Transactions();
 }
 
-String _$transactionsHash() => r'f61a960b9ab90f8e5f6fafeb016499d782bebb01';
+String _$transactionsHash() => r'a639f129fb90e27ba508c7b4ca63214908a54e3a';
 
 abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
   FutureOr<TransactionState> build();
@@ -186,7 +186,7 @@ final class FilteredTransactionsProvider extends $FunctionalProvider<
 }
 
 String _$filteredTransactionsHash() =>
-    r'4788f7e8119aa8bbd4c558aae10bedd7dbeac240';
+    r'1b389fa7e921f449c5484b1d952850a3301315f5';
 
 /// Provider to track transaction subscriptions
 

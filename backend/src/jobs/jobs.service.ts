@@ -2,9 +2,10 @@ import { Configuration } from "@backend/config/core";
 import { ProviderSyncJob } from "@backend/jobs/sync";
 import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationService } from "@backend/notification/notification.service";
-import { ProviderService } from "@backend/providers/provider.service";
+import { ProviderBase } from "@backend/providers/base/core";
+import { PROVIDER_LIST_TOKEN } from "@backend/providers/provider.module";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { DatabaseBackup } from "./backup";
 import { PendingTransactionJob } from "./pending.transaction";
 
@@ -12,9 +13,9 @@ import { PendingTransactionJob } from "./pending.transaction";
 @Injectable()
 export class JobsService {
   constructor(
-    private readonly providerService: ProviderService,
     private readonly transactionRuleService: TransactionRuleService,
     private readonly notificationService: NotificationService,
+    @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
   ) {}
 
   /** A dictionary of registered background jobs */
@@ -25,6 +26,6 @@ export class JobsService {
     if (Configuration.database.backup.enabled) this.jobs.dbBackup = await new DatabaseBackup().start();
     this.jobs.pendingTransaction = await new PendingTransactionJob().start();
     this.jobs.userDevice = await new UserDeviceJob().start();
-    this.jobs.providerSync = await new ProviderSyncJob(this.providerService, this.transactionRuleService, this.notificationService).start();
+    this.jobs.providerSync = await new ProviderSyncJob(this.transactionRuleService, this.notificationService, this.providers).start();
   }
 }

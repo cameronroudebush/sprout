@@ -11,10 +11,10 @@ import { ProviderRateLimit } from "./rate-limit";
  *  for automatically loading finance information.
  */
 export abstract class ProviderBase {
-  constructor(
-    public config: ProviderConfig,
-    public httpService: HttpService,
-  ) {}
+  /** The configuration related to this provider */
+  abstract config: ProviderConfig;
+
+  constructor(public httpService: HttpService) {}
 
   /** The rate limit class for this provider */
   abstract readonly rateLimit: { (user?: User): ProviderRateLimit };

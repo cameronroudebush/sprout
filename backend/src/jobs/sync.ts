@@ -10,7 +10,6 @@ import { Sync } from "@backend/jobs/model/sync.model";
 import { NotificationType } from "@backend/notification/model/notification.type";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
-import { ProviderService } from "@backend/providers/provider.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
@@ -22,9 +21,9 @@ import { BackgroundJob } from "./base";
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
 export class ProviderSyncJob extends BackgroundJob<Sync | null> {
   constructor(
-    private providerService: ProviderService,
     private transactionRuleService: TransactionRuleService,
     private notificationService: NotificationService,
+    private readonly providers: ProviderBase[],
   ) {
     super("account:sync", Configuration.providers.updateTime);
   }
@@ -35,8 +34,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
   protected async update(user?: User) {
     this.logger.log("Starting sync for all providers." + (user ? ` Only for user: ${user?.username}` : ""));
-    const providers = this.providerService.getAll();
-    for (const provider of providers) await this.updateProvider(provider, user);
+    for (const provider of this.providers) await this.updateProvider(provider, user);
     // Cleanup
     await this.cleanupOldSyncs();
     // If we we're given a single user, find their most recent sync status

@@ -4,10 +4,12 @@ import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
+import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
@@ -15,8 +17,16 @@ import { ProviderRateLimit } from "../base/rate-limit";
 /**
  * This provider adds automated account syncing using the SimpleFIN provider.
  */
-export class SimpleFINProvider extends ProviderBase {
-  override rateLimit = (user?: User) => new ProviderRateLimit("simple-fin", Configuration.providers.simpleFIN.rateLimit, user);
+@Injectable()
+export class SimpleFINProviderService extends ProviderBase {
+  config = new ProviderConfig(
+    "SimpleFIN",
+    ProviderType.simpleFin,
+    "https://beta-bridge.simplefin.org/static/logo.svg",
+    "https://beta-bridge.simplefin.org/my-account",
+  );
+
+  override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.simpleFin, Configuration.providers.simpleFIN.rateLimit, user);
 
   override async get(user: User, accountsOnly: boolean) {
     return this.convertData(await this.fetchData(undefined, undefined, accountsOnly, user), user);
@@ -44,7 +54,7 @@ export class SimpleFINProvider extends ProviderBase {
           id: x.id,
           type,
           currency: x.currency,
-          provider: "simple-fin",
+          provider: ProviderType.simpleFin,
           balance,
           availableBalance,
           institution,
