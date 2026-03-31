@@ -9,7 +9,6 @@ import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
-import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
@@ -130,16 +129,6 @@ class Auth extends _$Auth {
     }
 
     return null;
-  }
-
-  /// Grabs the tokens from the secure storage and tries to setup authentication using only those tokens.
-  Future<void> applyDefaultAuth() async {
-    final idToken = await SecureStorageProvider.getValue(SecureStorageProvider.idToken);
-    final accessToken = await SecureStorageProvider.getValue(SecureStorageProvider.accessToken);
-    final refreshToken = await SecureStorageProvider.getValue(SecureStorageProvider.refreshToken);
-    if (idToken != null) {
-      await _applyAuth(idToken: idToken, accessToken: accessToken, refreshToken: refreshToken);
-    }
   }
 
   /// If called, assumes we need to go to setup for new user creation. Runs some initial checks before trying that.
