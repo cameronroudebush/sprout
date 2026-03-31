@@ -18,7 +18,7 @@ import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swag
 @ApiTags("Provider")
 @AuthGuard.attach()
 export class ZillowProviderController {
-  private readonly logger = new Logger("controller:provider:zillow");
+  private readonly logger = new Logger("provider:controller:zillow");
   constructor(private readonly zillowProviderService: ZillowProviderService) {}
 
   @Post("lookup")
@@ -28,11 +28,11 @@ export class ZillowProviderController {
   })
   @ApiCreatedResponse({ description: "Property data retrieved successfully.", type: ZillowPropertyResultDto })
   @ApiBody({ type: ZillowPropertyDTO })
-  async lookupProperty(@Body() lookupDto: ZillowPropertyDTO) {
-    let data: Awaited<ReturnType<ZillowProviderService["getPropertyInfo"]>> | undefined;
+  async lookupProperty(@CurrentUser() user: User, @Body() lookupDto: ZillowPropertyDTO) {
+    let data: Awaited<ReturnType<ZillowProviderService["getInfoByAddress"]>> | undefined;
     try {
       const { address, city, state, zip } = lookupDto;
-      data = await this.zillowProviderService.getPropertyInfo(address, city, state, zip);
+      data = await this.zillowProviderService.getInfoByAddress(user, address, city, state, zip);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException("Failed to fetch property data from Zillow.");
@@ -53,7 +53,7 @@ export class ZillowProviderController {
     const { address, city, state, zip } = linkDto;
 
     // Re-call getPropertyInfo to ensure data integrity
-    const propertyInfo = await this.zillowProviderService.getPropertyInfo(address, city, state, zip);
+    const propertyInfo = await this.zillowProviderService.getInfoByAddress(user, address, city, state, zip);
 
     if (!propertyInfo.zpid || propertyInfo.zestimate === null) {
       throw new BadRequestException("Could not verify property information with Zillow.");
