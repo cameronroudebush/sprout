@@ -55,13 +55,15 @@ class WidgetSync extends _$WidgetSync {
   /// This task runs hourly to ensure the Home Screen widget stays up to date
   /// even when the app is not in the foreground.
   Future<void> initializeBackground() async {
-    Workmanager().initialize(callbackDispatcher);
-    Workmanager().registerPeriodicTask(
-      "widget-update-background",
-      "widget-update-task",
-      frequency: const Duration(hours: 1),
-      constraints: Constraints(networkType: NetworkType.connected),
-    );
+    if (!kIsWeb) {
+      Workmanager().initialize(callbackDispatcher);
+      Workmanager().registerPeriodicTask(
+        "widget-update-background",
+        "widget-update-task",
+        frequency: const Duration(hours: 1),
+        constraints: Constraints(networkType: NetworkType.connected),
+      );
+    }
   }
 
   /// The primary entry point for updating native widget data.

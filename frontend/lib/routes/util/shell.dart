@@ -36,12 +36,6 @@ class SproutShell extends ConsumerWidget {
     final isLoading =
         authState.isLoading || (!userConfigAsync.hasValue && userConfigAsync.isLoading) || !bioState.hasInitialized;
 
-    if (!authNotifier.isSetupMode && isLoading) return const SproutLoadingIndicator(key: ValueKey('sprout_loading'));
-
-    if (needsBioCheck && bioState.isLocked) {
-      return const SproutLockWidget(key: ValueKey('sprout_locked_screen'));
-    }
-
     return SproutLifecycleObserver(
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
@@ -50,20 +44,30 @@ class SproutShell extends ConsumerWidget {
               theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white ? Brightness.light : Brightness.dark,
         ),
         child: SproutLayoutBuilder((isDesktop, context, constraints) {
-          return Scaffold(
-            appBar: !isDesktop && !authNotifier.isSetupMode ? const SproutAppBar() : null,
-            body: Center(
-              child: isDesktop
-                  ? Row(
-                      children: [
-                        if (!authNotifier.isSetupMode) const SproutSideNav(),
-                        Expanded(child: child),
-                      ],
-                    )
-                  : child,
-            ),
-            bottomNavigationBar:
-                isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
+          return Stack(
+            children: [
+              Scaffold(
+                appBar: !isDesktop && !authNotifier.isSetupMode ? const SproutAppBar() : null,
+                body: isDesktop
+                    ? Row(
+                        children: [
+                          if (!authNotifier.isSetupMode) const SproutSideNav(),
+                          Expanded(child: child),
+                        ],
+                      )
+                    : child,
+                bottomNavigationBar:
+                    isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
+              ),
+              if (!authNotifier.isSetupMode && isLoading)
+                const Positioned.fill(
+                  child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),
+                ),
+              if (needsBioCheck && bioState.isLocked)
+                const Positioned.fill(
+                  child: SproutLockWidget(key: ValueKey('sprout_locked_screen')),
+                ),
+            ],
           );
         }),
       ),
