@@ -121,7 +121,7 @@ class _InternalSideNavContent extends ConsumerWidget {
             ),
             Divider(color: theme.dividerColor),
             // User Profile Section
-            _UserProfileTile(authUser: authUser!, onLogout: authNotifier.logout, currentPath: currentPath),
+            _UserProfileTile(authUser: authUser, onLogout: authNotifier.logout, currentPath: currentPath),
           ],
         ));
   }
@@ -130,7 +130,7 @@ class _InternalSideNavContent extends ConsumerWidget {
 /// The user profile tile that allows configuration based on the user with a settings menu
 class _UserProfileTile extends StatelessWidget {
   /// The current authorized user
-  final User authUser;
+  final User? authUser;
 
   /// What to do on logout
   final VoidCallback onLogout;
@@ -169,7 +169,7 @@ class _UserProfileTile extends StatelessWidget {
                     radius: 16,
                     backgroundColor: theme.colorScheme.primary,
                     child: Text(
-                      authUser.prettyName[0].toUpperCase(),
+                      authUser?.prettyName[0].toUpperCase() ?? "",
                       style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
                     ),
                   ),
@@ -179,7 +179,7 @@ class _UserProfileTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          authUser.prettyName,
+                          authUser?.prettyName ?? "",
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: isSettings ? theme.colorScheme.onSecondaryContainer : null,
                           ),

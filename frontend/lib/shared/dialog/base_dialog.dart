@@ -136,20 +136,22 @@ class SproutBaseDialogWidget extends StatelessWidget {
 
   /// Builds a standard desktop dialog
   Widget _buildDesktopDialog(BuildContext context, ThemeData theme) {
-    return AlertDialog(
-      insetPadding: EdgeInsets.zero,
-      titlePadding: const EdgeInsets.symmetric(vertical: 0),
-      contentPadding: EdgeInsets.zero,
-      title: _buildHeader(context, theme, false),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 640),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(child: _buildContent(context)),
-            _buildActions(context),
-          ],
-        ),
+    return Container(
+      constraints: const BoxConstraints(
+        maxWidth: 640,
+      ),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildHeader(context, theme, false),
+          Flexible(child: _buildContent(context)),
+          _buildActions(context),
+        ],
       ),
     );
   }
