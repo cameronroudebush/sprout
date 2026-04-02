@@ -34,6 +34,7 @@ class SproutApp extends ConsumerWidget {
     final userConfigAsync = ref.watch(userConfigProvider);
 
     return userConfigAsync.when(
+      skipLoadingOnReload: true,
       loading: () => Theme(
           data: absoluteDarkTheme,
           child: Directionality(textDirection: TextDirection.ltr, child: SproutLoadingIndicator())),
@@ -42,8 +43,6 @@ class SproutApp extends ConsumerWidget {
         home: Scaffold(body: Center(child: Text('Failed to initialize: $error'))),
       ),
       data: (_) {
-        if (userConfigAsync.isLoading && !userConfigAsync.hasValue) return SproutLoadingIndicator();
-
         final userConfig = ref.watch(userConfigProvider).value;
         final userConfigNotifier = ref.read(userConfigProvider.notifier);
         final theme = userConfigNotifier.activeTheme(userConfig);
