@@ -10,7 +10,7 @@ class OIDCHelper implements stub.OIDCHelper {
   Future<Map<String, String>?> authenticate(String basePath) async {
     try {
       final backendLoginUrl = "$basePath/auth/oidc/login";
-      final callbackScheme = 'net.croudebush.sprout'; // Our own custom callback as defined from the manifest
+      final callbackScheme = 'net.croudebush.sprout';
 
       final loginUrl = Uri.parse(
         backendLoginUrl,
@@ -18,12 +18,16 @@ class OIDCHelper implements stub.OIDCHelper {
 
       // Open the Browser and Wait for Result
       final result = await FlutterWebAuth2.authenticate(
-        url: loginUrl.toString(),
-        callbackUrlScheme: callbackScheme,
-        options: const FlutterWebAuth2Options(
-          preferEphemeral: true,
-        ),
-      );
+          url: loginUrl.toString(),
+          callbackUrlScheme: callbackScheme,
+          options: FlutterWebAuth2Options(
+            customTabsPackageOrder: [
+              'com.android.chrome',
+              'com.chrome.beta',
+              'com.sec.android.app.sbrowser',
+              'com.brave.browser',
+            ],
+          ));
       final uri = Uri.parse(result);
       // Pull out our tokens
       String fragment = uri.fragment;
