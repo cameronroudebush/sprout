@@ -61,14 +61,19 @@ class Transactions : AppWidgetProvider() {
             }
             views.setRemoteAdapter(R.id.widget_transactions_list, intent)
 
-            val timestamp = dataObj?.optString("updateTime")?.takeIf { it.isNotEmpty() }
-                ?: currentTimestamp
-            views.setTextViewText(R.id.widget_last_updated, timestamp)
-            views.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
-
             // Commit the structural changes to the Launcher first
             appWidgetManager.updateAppWidget(appWidgetId, views)
 
+            // Create a separate, slim RemoteViews just for the time update
+            val headerViews = RemoteViews(context.packageName, R.layout.transactions)
+            val timestamp = dataObj?.optString("updateTime")?.takeIf { it.isNotEmpty() } ?: ""
+            headerViews.setTextViewText(R.id.widget_last_updated, timestamp)
+            headerViews.setViewVisibility(R.id.widget_last_updated, View.VISIBLE)
+
+            // Push only the text change
+            appWidgetManager.partiallyUpdateAppWidget(appWidgetId, headerViews)
+
+            // Finally, kick the list to refresh its rows
             appWidgetManager.notifyAppWidgetViewDataChanged(
                 appWidgetId,
                 R.id.widget_transactions_list

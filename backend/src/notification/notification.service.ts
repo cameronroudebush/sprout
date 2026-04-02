@@ -76,11 +76,10 @@ export class NotificationService implements OnModuleInit {
       try {
         await admin.messaging().send(message);
       } catch (error) {
-        this.logger.error(error);
         // If the token is invalid (app uninstalled), clean it up immediately
         if ((error as any).code === "messaging/registration-token-not-registered") {
           await UserDevice.delete({ fcmToken: device.fcmToken });
-        }
+        } else this.logger.error(error);
       }
     }
   }
