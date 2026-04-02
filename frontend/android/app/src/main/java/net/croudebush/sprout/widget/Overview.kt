@@ -67,6 +67,7 @@ class Overview : AppWidgetProvider() {
 
                 val netWorth = dataObj.optString("netWorth", "$0.00")
                 val timestamp = dataObj.optString("updateTime", "")
+                val dayRange = dataObj.optString("dayRange", "")
                 val numericChange = dataObj.optDouble("numericChange", 0.0)
                 val changeAmount = dataObj.optString("changeAmount", "$0.00")
                 val changePercent = dataObj.optString("changePercent", "0.00%")
@@ -76,7 +77,7 @@ class Overview : AppWidgetProvider() {
 
                 // Set Content
                 views.setTextViewText(R.id.widget_nw_value, netWorth)
-                val changeStr = "$changeAmount ($changePercent)"
+                val changeStr = "$changeAmount ($changePercent) $dayRange"
                 views.setTextViewText(R.id.widget_nw_change, changeStr)
                 views.setTextViewText(R.id.widget_last_updated, timestamp)
 
