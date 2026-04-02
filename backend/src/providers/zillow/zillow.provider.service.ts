@@ -6,9 +6,8 @@ import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zil
 import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
+import { Impit } from "impit";
 import { cloneDeep } from "lodash";
-import puppeteer from "puppeteer-extra";
-import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
 
@@ -20,8 +19,9 @@ export class ZillowProviderService extends ProviderBase {
   override getAppConfiguration = () => Configuration.providers.zillow;
   private readonly logger = new Logger("provider:service:zillow");
   config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com", "https://www.zillow.com/apple-touch-icon.png");
-
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.zillow, Configuration.providers.zillow.rateLimit, user);
+  /** Impit instance used for scraping */
+  private readonly impit = new Impit({ browser: "chrome" });
 
   override async get(user: User, _accountsOnly: boolean) {
     const accounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.zillow } });
@@ -73,17 +73,10 @@ export class ZillowProviderService extends ProviderBase {
   async getInfoByAddress(user: User, address: string, city: string, state: string, zip: number) {
     await this.rateLimit(user).incrementOrError();
     const completeAddress = `${address} ${city}, ${state} ${zip}`.replace(/\s+/g, "-");
-    puppeteer.use(StealthPlugin());
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    try {
-      const searchUrl = `https://www.zillow.com/homes/${completeAddress}_rb/`;
-      await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
-      const content = await page.content();
-      return this.resultFromContent(content);
-    } finally {
-      await browser.close();
-    }
+    const searchUrl = `https://www.zillow.com/homes/${completeAddress}_rb/`;
+    const response = await this.impit.fetch(searchUrl);
+    const content = await response.text();
+    return this.resultFromContent(content);
   }
 
   /**
@@ -92,16 +85,9 @@ export class ZillowProviderService extends ProviderBase {
    */
   async getInfoByZpid(user: User, zpid: string) {
     await this.rateLimit(user).incrementOrError();
-    puppeteer.use(StealthPlugin());
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    try {
-      const searchUrl = `https://www.zillow.com/homes/${zpid}_zpid/`;
-      await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
-      const content = await page.content();
-      return this.resultFromContent(content);
-    } finally {
-      await browser.close();
-    }
+    const searchUrl = `https://www.zillow.com/homes/${zpid}_zpid/`;
+    const response = await this.impit.fetch(searchUrl);
+    const content = await response.text();
+    return this.resultFromContent(content);
   }
 }

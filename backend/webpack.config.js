@@ -23,6 +23,15 @@ module.exports = function (options, argv) {
   return {
     ...options,
     externals: [nodeExternals()],
+    module: {
+      rules: [
+        ...options.module.rules,
+        {
+          test: /\.node$/,
+          loader: "node-loader",
+        },
+      ],
+    },
     output: {
       ...options.output,
       filename: "[name].js",
