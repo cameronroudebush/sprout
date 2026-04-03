@@ -9,6 +9,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_card.dart';
 import 'package:sprout/routes/transactions.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/models/notification.dart';
@@ -316,6 +317,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                                 onSubmitClick: () async {
                                   Navigator.of(context).pop();
                                   await accountProvider.delete(account.id);
+                                  await NavigationProvider.redirect("/accounts");
                                 },
                                 child: Text(
                                   "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",

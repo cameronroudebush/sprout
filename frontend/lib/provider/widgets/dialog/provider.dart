@@ -80,7 +80,7 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
 
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+      ref.read(notificationsProvider.notifier).openWithAPIException(e);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

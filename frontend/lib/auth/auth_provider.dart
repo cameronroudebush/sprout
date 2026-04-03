@@ -91,7 +91,15 @@ class Auth extends _$Auth {
           }
         } else {
           // Web - Restore
-          return await _applyAuth();
+          try {
+            return await _applyAuth();
+          } catch (e) {
+            if (isOIDC && e is ApiException && e.code == 401) {
+              await loginOIDC();
+            } else {
+              rethrow;
+            }
+          }
         }
       } catch (e) {
         if (e is ApiException && e.code == 404) await setup();
