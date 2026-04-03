@@ -27,8 +27,8 @@ export class SimpleFINProviderService extends ProviderBase {
     "https://beta-bridge.simplefin.org/static/logo.svg",
     "https://beta-bridge.simplefin.org/my-account",
   );
-
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.simpleFin, Configuration.providers.simpleFIN.rateLimit, user);
+  override isAvailable = async (user: User) => !!user.config.simpleFinToken;
 
   override async get(user: User, accountsOnly: boolean) {
     return this.convertData(await this.fetchData(undefined, undefined, accountsOnly, user), user);
@@ -109,7 +109,7 @@ export class SimpleFINProviderService extends ProviderBase {
     endpoint = "/accounts",
     params = {
       /** The start date to look for transactions of */
-      transactionStartDate: subDays(new Date(), Configuration.providers.simpleFIN.lookBackDays),
+      transactionStartDate: subDays(new Date(), Configuration.providers.lookBackDays),
       /** If we want pending transactions */
       pending: true,
     },

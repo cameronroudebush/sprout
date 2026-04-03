@@ -1,5 +1,6 @@
 /// This file contains types for each account so we can better identify what these belong to
 export enum AccountSubType {
+  other = "other",
   // Depository
   savings = "Savings",
   checking = "Checking",

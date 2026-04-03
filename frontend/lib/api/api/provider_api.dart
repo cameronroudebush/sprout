@@ -16,6 +16,109 @@ class ProviderApi {
 
   final ApiClient apiClient;
 
+  /// Create a Plaid link token
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/plaid/create-link-token';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Create a Plaid link token
+  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken() async {
+    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'PlaidLinkTokenDTO',) as PlaidLinkTokenDTO;
+    
+    }
+    return null;
+  }
+
+  /// Exchange Public Token
+  ///
+  /// Finalizes the link by exchanging the public token and saving accounts to the DB.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [PlaidLinkDTO] plaidLinkDTO (required):
+  Future<Response> plaidProviderControllerExchangeAndLinkWithHttpInfo(PlaidLinkDTO plaidLinkDTO,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/plaid/exchange-token';
+
+    // ignore: prefer_final_locals
+    Object? postBody = plaidLinkDTO;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Exchange Public Token
+  ///
+  /// Finalizes the link by exchanging the public token and saving accounts to the DB.
+  ///
+  /// Parameters:
+  ///
+  /// * [PlaidLinkDTO] plaidLinkDTO (required):
+  Future<List<Account>?> plaidProviderControllerExchangeAndLink(PlaidLinkDTO plaidLinkDTO,) async {
+    final response = await plaidProviderControllerExchangeAndLinkWithHttpInfo(plaidLinkDTO,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
+        .cast<Account>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get accounts from the simple-fin provider that are not yet synced.
   ///
   /// Retrieves accounts that the user has not yet linked.
@@ -122,6 +225,65 @@ class ProviderApi {
         .cast<Account>()
         .toList(growable: false);
 
+    }
+    return null;
+  }
+
+  /// Get property info from Zillow
+  ///
+  /// Grabs zillow asset data based on the account given.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId (required):
+  ///   The ID of the account to lookup
+  Future<Response> zillowProviderControllerGetByAccountWithHttpInfo(String accountId,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/zillow/{accountId}'
+      .replaceAll('{accountId}', accountId);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get property info from Zillow
+  ///
+  /// Grabs zillow asset data based on the account given.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId (required):
+  ///   The ID of the account to lookup
+  Future<ZillowAsset?> zillowProviderControllerGetByAccount(String accountId,) async {
+    final response = await zillowProviderControllerGetByAccountWithHttpInfo(accountId,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ZillowAsset',) as ZillowAsset;
+    
     }
     return null;
   }

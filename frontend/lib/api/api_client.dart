@@ -230,6 +230,16 @@ class ApiClient {
           return Notification.fromJson(value);
         case 'NotificationSSEDTO':
           return NotificationSSEDTO.fromJson(value);
+        case 'PlaidAccountDTO':
+          return PlaidAccountDTO.fromJson(value);
+        case 'PlaidInstitutionDTO':
+          return PlaidInstitutionDTO.fromJson(value);
+        case 'PlaidLinkDTO':
+          return PlaidLinkDTO.fromJson(value);
+        case 'PlaidLinkTokenDTO':
+          return PlaidLinkTokenDTO.fromJson(value);
+        case 'PlaidMetadataDTO':
+          return PlaidMetadataDTO.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
         case 'ProviderTypeEnum':
@@ -272,6 +282,8 @@ class ApiClient {
           return UserLoginResponse.fromJson(value);
         case 'UsernamePasswordLoginRequest':
           return UsernamePasswordLoginRequest.fromJson(value);
+        case 'ZillowAsset':
+          return ZillowAsset.fromJson(value);
         case 'ZillowPropertyDTO':
           return ZillowPropertyDTO.fromJson(value);
         case 'ZillowPropertyResultDto':

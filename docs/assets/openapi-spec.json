@@ -1218,6 +1218,45 @@
         "tags": ["Provider"]
       }
     },
+    "/provider/zillow/{accountId}": {
+      "get": {
+        "description": "Grabs zillow asset data based on the account given.",
+        "operationId": "ZillowProviderController_getByAccount",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the account to lookup",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Property data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZillowAsset"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get property info from Zillow",
+        "tags": ["Provider"]
+      }
+    },
     "/provider/zillow/lookup": {
       "post": {
         "description": "Grabs data from zillow for Zpid, Zestimate, and Rent Zestimate based on address.",
@@ -1293,6 +1332,76 @@
           }
         ],
         "summary": "Link a Zillow property as an account.",
+        "tags": ["Provider"]
+      }
+    },
+    "/provider/plaid/create-link-token": {
+      "post": {
+        "operationId": "PlaidProviderController_createLinkToken",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Link created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaidLinkTokenDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a Plaid link token",
+        "tags": ["Provider"]
+      }
+    },
+    "/provider/plaid/exchange-token": {
+      "post": {
+        "description": "Finalizes the link by exchanging the public token and saving accounts to the DB.",
+        "operationId": "PlaidProviderController_exchangeAndLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaidLinkDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Accounts linked successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exchange Public Token",
         "tags": ["Provider"]
       }
     },
@@ -2371,7 +2480,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.3.0-12-g39b404c",
+    "version": "v0.3.0-19-g5f02e0c",
     "contact": {}
   },
   "tags": [
@@ -2449,11 +2558,12 @@
     "schemas": {
       "ProviderTypeEnum": {
         "type": "string",
-        "enum": ["simple-fin", "zillow"]
+        "enum": ["simple-fin", "zillow", "plaid"]
       },
       "AccountSubTypeEnum": {
         "type": "string",
         "enum": [
+          "other",
           "Savings",
           "Checking",
           "HYSA",
@@ -2544,7 +2654,7 @@
           },
           "type": {
             "description": "The type of this account to better separate it from the others.",
-            "enum": ["depository", "credit", "asset", "loan", "investment", "crypto"],
+            "enum": ["other", "depository", "credit", "asset", "loan", "investment", "crypto"],
             "type": "string"
           },
           "extra": {
@@ -2643,9 +2753,14 @@
           "accountFixUrl": {
             "type": "string",
             "description": "The URL to be able to fix accounts"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "If this provider is available to this user. Only used during frontend communication",
+            "default": false
           }
         },
-        "required": ["dbType", "name", "url", "logoUrl"]
+        "required": ["dbType", "name", "url", "logoUrl", "enabled"]
       },
       "APIConfig": {
         "type": "object",
@@ -3038,6 +3153,19 @@
         },
         "required": ["token"]
       },
+      "ZillowAsset": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "zpid": {
+            "type": "string",
+            "description": "The zillow property ID"
+          }
+        },
+        "required": ["id", "zpid"]
+      },
       "ZillowPropertyDTO": {
         "type": "object",
         "properties": {
@@ -3076,6 +3204,78 @@
           }
         },
         "required": ["zestimate", "rentZestimate", "zpid"]
+      },
+      "PlaidLinkTokenDTO": {
+        "type": "object",
+        "properties": {
+          "linkToken": {
+            "type": "string"
+          }
+        },
+        "required": ["linkToken"]
+      },
+      "PlaidInstitutionDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "institution_id": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "institution_id"]
+      },
+      "PlaidAccountDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mask": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "subtype": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "name", "type", "subtype"]
+      },
+      "PlaidMetadataDTO": {
+        "type": "object",
+        "properties": {
+          "institution": {
+            "$ref": "#/components/schemas/PlaidInstitutionDTO"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaidAccountDTO"
+            }
+          },
+          "link_session_id": {
+            "type": "string"
+          }
+        },
+        "required": ["institution", "accounts", "link_session_id"]
+      },
+      "PlaidLinkDTO": {
+        "type": "object",
+        "properties": {
+          "publicToken": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/PlaidMetadataDTO"
+          }
+        },
+        "required": ["publicToken", "metadata"]
       },
       "Base": {
         "type": "object",
@@ -3454,7 +3654,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-03-31T19:54:19.494Z"
+            "default": "2026-04-03T02:10:11.635Z"
           },
           "isRead": {
             "type": "boolean",

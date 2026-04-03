@@ -243,6 +243,7 @@ class AccountTypeEnum {
 
   String toJson() => value;
 
+  static const other = AccountTypeEnum._(r'other');
   static const depository = AccountTypeEnum._(r'depository');
   static const credit = AccountTypeEnum._(r'credit');
   static const asset = AccountTypeEnum._(r'asset');
@@ -252,6 +253,7 @@ class AccountTypeEnum {
 
   /// List of all possible values in this [enum][AccountTypeEnum].
   static const values = <AccountTypeEnum>[
+    other,
     depository,
     credit,
     asset,
@@ -296,6 +298,7 @@ class AccountTypeEnumTypeTransformer {
   AccountTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
+        case r'other': return AccountTypeEnum.other;
         case r'depository': return AccountTypeEnum.depository;
         case r'credit': return AccountTypeEnum.credit;
         case r'asset': return AccountTypeEnum.asset;

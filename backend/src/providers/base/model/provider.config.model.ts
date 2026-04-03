@@ -17,6 +17,8 @@ export class ProviderConfig extends Base {
   logoUrl: string;
   /** The URL to be able to fix accounts */
   accountFixUrl?: string;
+  /** If this provider is available to this user. Only used during frontend communication */
+  enabled: boolean = false;
 
   constructor(name: string, dbType: ProviderType, url: string, logoUrl: string, accountFixUrl?: string) {
     super();

@@ -5,6 +5,7 @@ import { ProviderConfig } from "@backend/providers/base/model/provider.config.mo
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
+import { Inject } from "@nestjs/common";
 import { ProviderRateLimit } from "./rate-limit";
 
 /**
@@ -12,16 +13,18 @@ import { ProviderRateLimit } from "./rate-limit";
  *  for automatically loading finance information.
  */
 export abstract class ProviderBase {
+  protected readonly httpService = Inject(HttpService);
   /** The configuration related to this provider */
   abstract config: ProviderConfig;
 
   /** Gets the app configuration via the Configuration class */
   abstract getAppConfiguration: { (): BaseProviderConfig };
 
-  constructor(public httpService: HttpService) {}
-
   /** The rate limit class for this provider */
   abstract readonly rateLimit: { (user?: User): ProviderRateLimit };
+
+  /** If this provider is available to the given user. Used so the frontend can gray out buttons of unavailable providers. */
+  abstract isAvailable: { (user: User): Promise<boolean> };
 
   /**
    * Returns data from the provider to satisfy updated transaction, holdings, and accounts

@@ -4,6 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/widgets/dialog/provider_selection.dart';
+import 'package:sprout/provider/widgets/plaid/plaid_account_selector.dart';
 import 'package:sprout/provider/widgets/simple-fin/simple_fin_accounts.dart';
 import 'package:sprout/provider/widgets/zillow/zillow_property_selector.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -29,7 +30,7 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
   Widget build(BuildContext context) {
     final config = ref.watch(secureConfigProvider).value;
 
-    Widget content;
+    Widget content = SizedBox.shrink();
     if (_selectedProvider == null) {
       content = ProviderSelectionList(
         providers: config?.providers ?? [],
@@ -44,10 +45,15 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
             onPropertyFound: (dto) => setState(() => _zillowPayload = dto),
           );
           break;
-        default:
+        case ProviderTypeEnum.simpleFin:
           content = SimpleFinAccountSelector(
             provider: _selectedProvider!,
             onSelectionChanged: (accounts) => setState(() => _selectedAccounts = accounts),
+          );
+        case ProviderTypeEnum.plaid:
+          content = PlaidAccountSelector(
+            provider: _selectedProvider!,
+            onSuccess: () => _handleSubmit(),
           );
       }
     }
@@ -75,6 +81,9 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
         case ProviderTypeEnum.zillow:
           if (_zillowPayload == null) return;
           await ZillowPropertySelector.link(ref, _zillowPayload!);
+          break;
+        case ProviderTypeEnum.plaid:
+          // Plaid handles it's own submission via the their implementation
           break;
       }
 

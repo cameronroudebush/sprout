@@ -209,6 +209,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   Widget _buildOverviewSection(ThemeData theme) {
     final account = widget.account;
     final accountProvider = ref.read(accountsProvider.notifier);
+    final zillowAsset =
+        account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
 
     final allHistory = ref.watch(historicalAccountDataProvider);
     final timeline = ref.watch(accountTimelineProvider(widget.account.id));
@@ -298,42 +300,66 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
                       const Divider(),
 
-                      // Delete
-                      SizedBox(
-                        width: 240,
-                        height: 32,
-                        child: FilledButton(
-                          onPressed: () {
-                            // Confirmation dialog
-                            showSproutPopup(
-                              context: context,
-                              builder: (ctx) => SproutBaseDialogWidget(
-                                'Delete Account',
-                                showCloseDialogButton: true,
-                                closeButtonStyle: ThemeHelpers.primaryButton,
-                                showSubmitButton: true,
-                                submitButtonText: "Delete",
-                                submitButtonStyle: ThemeHelpers.errorButton,
-                                onSubmitClick: () async {
-                                  Navigator.of(context).pop();
-                                  await accountProvider.delete(account.id);
-                                  await NavigationProvider.redirect("/accounts");
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8,
+                        children: [
+                          if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
+                            SizedBox(
+                              width: 240,
+                              height: 32,
+                              child: FilledButton(
+                                onPressed: () async {
+                                  final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
+                                  await launchUrl(url, mode: LaunchMode.externalApplication);
                                 },
-                                child: Text(
-                                  "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
-                                  textAlign: TextAlign.center,
+                                style: ThemeHelpers.primaryButton,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 8,
+                                  children: [Icon(Icons.house), Text("View on Zillow")],
                                 ),
                               ),
-                            );
-                          },
-                          style: ThemeHelpers.errorButton,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 8,
-                            children: [Icon(Icons.delete), Text("Delete")],
+                            ),
+
+                          // Delete
+                          SizedBox(
+                            width: 240,
+                            height: 32,
+                            child: FilledButton(
+                              onPressed: () {
+                                // Confirmation dialog
+                                showSproutPopup(
+                                  context: context,
+                                  builder: (ctx) => SproutBaseDialogWidget(
+                                    'Delete Account',
+                                    showCloseDialogButton: true,
+                                    closeButtonStyle: ThemeHelpers.primaryButton,
+                                    showSubmitButton: true,
+                                    submitButtonText: "Delete",
+                                    submitButtonStyle: ThemeHelpers.errorButton,
+                                    onSubmitClick: () async {
+                                      Navigator.of(context).pop();
+                                      await accountProvider.delete(account.id);
+                                      await NavigationProvider.redirect("/accounts");
+                                    },
+                                    child: Text(
+                                      "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              },
+                              style: ThemeHelpers.errorButton,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 8,
+                                children: [Icon(Icons.delete), Text("Delete")],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        ],
+                      )
                     ],
                   ),
                 ),

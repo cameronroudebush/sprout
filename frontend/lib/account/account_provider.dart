@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/account/models/account_state.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 
@@ -100,4 +101,11 @@ class Accounts extends _$Accounts {
       notifications.openWithAPIException(e);
     }
   }
+}
+
+/// Riverpod to provide zillow info based on an account ID
+@riverpod
+Future<ZillowAsset?> zillowInfo(Ref ref, String accountId) async {
+  final api = await ref.watch(providerApiProvider.future);
+  return await api.zillowProviderControllerGetByAccount(accountId);
 }

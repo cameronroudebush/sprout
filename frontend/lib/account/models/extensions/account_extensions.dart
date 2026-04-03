@@ -11,6 +11,7 @@ extension AccountExtensions on Account {
     AccountTypeEnum.crypto: (title: "Crypto", color: Colors.blue, isNegative: false),
     AccountTypeEnum.credit: (title: "Credit Card", color: Colors.red, isNegative: true),
     AccountTypeEnum.loan: (title: "Loan", color: Colors.orangeAccent, isNegative: true),
+    AccountTypeEnum.other: (title: "Other", color: Colors.teal, isNegative: false),
   };
 
   /// Returns true if the account type represents a debt (Credit or Loan).

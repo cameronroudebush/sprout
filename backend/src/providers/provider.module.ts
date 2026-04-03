@@ -1,3 +1,5 @@
+import { PlaidProviderController } from "@backend/providers/plaid/plaid.controller";
+import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { SimpleFinProviderController } from "@backend/providers/simple-fin/simple-fin.controller";
 import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
 import { ZillowProviderController } from "@backend/providers/zillow/zillow.controller";
@@ -10,14 +12,13 @@ import { Module } from "@nestjs/common";
 /** Token for grabbing the list of providers */
 export const PROVIDER_LIST_TOKEN = "PROVIDER_LIST_TOKEN";
 
-const ALL_PROVIDERS = [SimpleFINProviderService, ZillowProviderService];
+const ALL_PROVIDERS = [SimpleFINProviderService, ZillowProviderService, PlaidProviderService];
 
 @Module({
   imports: [HttpModule, SSEModule, TransactionModule],
-  controllers: [SimpleFinProviderController, ZillowProviderController],
+  controllers: [SimpleFinProviderController, ZillowProviderController, PlaidProviderController],
   providers: [
-    SimpleFINProviderService,
-    ZillowProviderService,
+    ...ALL_PROVIDERS,
     {
       provide: PROVIDER_LIST_TOKEN,
       useFactory: (...instances) => instances,
