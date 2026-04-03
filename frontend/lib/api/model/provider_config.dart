@@ -18,6 +18,7 @@ class ProviderConfig {
     required this.url,
     required this.logoUrl,
     this.accountFixUrl,
+    this.enabled = false,
   });
 
   ProviderTypeEnum dbType;
@@ -40,13 +41,17 @@ class ProviderConfig {
   ///
   String? accountFixUrl;
 
+  /// If this provider is available to this user. Only used during frontend communication
+  bool enabled;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is ProviderConfig &&
     other.dbType == dbType &&
     other.name == name &&
     other.url == url &&
     other.logoUrl == logoUrl &&
-    other.accountFixUrl == accountFixUrl;
+    other.accountFixUrl == accountFixUrl &&
+    other.enabled == enabled;
 
   @override
   int get hashCode =>
@@ -55,10 +60,11 @@ class ProviderConfig {
     (name.hashCode) +
     (url.hashCode) +
     (logoUrl.hashCode) +
-    (accountFixUrl == null ? 0 : accountFixUrl!.hashCode);
+    (accountFixUrl == null ? 0 : accountFixUrl!.hashCode) +
+    (enabled.hashCode);
 
   @override
-  String toString() => 'ProviderConfig[dbType=$dbType, name=$name, url=$url, logoUrl=$logoUrl, accountFixUrl=$accountFixUrl]';
+  String toString() => 'ProviderConfig[dbType=$dbType, name=$name, url=$url, logoUrl=$logoUrl, accountFixUrl=$accountFixUrl, enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -71,6 +77,7 @@ class ProviderConfig {
     } else {
       json[r'accountFixUrl'] = null;
     }
+      json[r'enabled'] = this.enabled;
     return json;
   }
 
@@ -93,6 +100,8 @@ class ProviderConfig {
         assert(json[r'url'] != null, 'Required key "ProviderConfig[url]" has a null value in JSON.');
         assert(json.containsKey(r'logoUrl'), 'Required key "ProviderConfig[logoUrl]" is missing from JSON.');
         assert(json[r'logoUrl'] != null, 'Required key "ProviderConfig[logoUrl]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'), 'Required key "ProviderConfig[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null, 'Required key "ProviderConfig[enabled]" has a null value in JSON.');
         return true;
       }());
 
@@ -102,6 +111,7 @@ class ProviderConfig {
         url: mapValueOfType<String>(json, r'url')!,
         logoUrl: mapValueOfType<String>(json, r'logoUrl')!,
         accountFixUrl: mapValueOfType<String>(json, r'accountFixUrl'),
+        enabled: mapValueOfType<bool>(json, r'enabled')!,
       );
     }
     return null;
@@ -153,6 +163,7 @@ class ProviderConfig {
     'name',
     'url',
     'logoUrl',
+    'enabled',
   };
 }
 

@@ -50,12 +50,13 @@ class ProviderSelectionList extends StatelessWidget {
                 margin: EdgeInsets.zero,
                 clipBehavior: Clip.antiAlias,
                 elevation: 0,
+                color: theme.colorScheme.secondary.withOpacity(!provider.enabled ? .4 : 1),
                 shape: RoundedRectangleBorder(
                   side: BorderSide(color: theme.dividerColor.withOpacity(0.15)),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: InkWell(
-                  onTap: () => onProviderSelected(provider),
+                  onTap: !provider.enabled ? null : () => onProviderSelected(provider),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Column(
@@ -72,17 +73,25 @@ class ProviderSelectionList extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Small text
+                        // Name
                         Text(
                           provider.name,
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          style: theme.textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        if (!provider.enabled)
+                          Text(
+                            "Not Configured",
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                       ],
                     ),
                   ),

@@ -13,8 +13,8 @@ import { ZillowProviderService } from "@backend/providers/zillow/zillow.provider
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, Controller, InternalServerErrorException, Logger, Post } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { BadRequestException, Body, Controller, Get, InternalServerErrorException, Logger, Param, Post } from "@nestjs/common";
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides endpoints for zillow specific functionality */
 @Controller("provider/zillow")
@@ -26,6 +26,17 @@ export class ZillowProviderController {
     private readonly sseService: SSEService,
     private readonly zillowProviderService: ZillowProviderService,
   ) {}
+
+  @Get(":accountId")
+  @ApiOperation({
+    summary: "Get property info from Zillow",
+    description: "Grabs zillow asset data based on the account given.",
+  })
+  @ApiOkResponse({ description: "Property data retrieved successfully.", type: ZillowAsset })
+  @ApiParam({ name: "accountId", description: "The ID of the account to lookup", type: String })
+  async getByAccount(@CurrentUser() user: User, @Param("accountId") accountId: string) {
+    return await ZillowAsset.findOne({ where: { account: { id: accountId, user: { id: user.id } } } });
+  }
 
   @Post("lookup")
   @ApiOperation({

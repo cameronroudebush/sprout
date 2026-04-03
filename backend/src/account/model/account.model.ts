@@ -13,7 +13,7 @@ import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
 export class Account extends DatabaseBase {
-  @DatabaseDecorators.column({ nullable: false, unique: true })
+  @DatabaseDecorators.column({ nullable: false })
   name: string;
 
   @DatabaseDecorators.column({ nullable: false })

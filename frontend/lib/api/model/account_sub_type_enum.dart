@@ -23,6 +23,7 @@ class AccountSubTypeEnum {
 
   String toJson() => value;
 
+  static const other = AccountSubTypeEnum._(r'other');
   static const savings = AccountSubTypeEnum._(r'Savings');
   static const checking = AccountSubTypeEnum._(r'Checking');
   static const HYSA = AccountSubTypeEnum._(r'HYSA');
@@ -42,6 +43,7 @@ class AccountSubTypeEnum {
 
   /// List of all possible values in this [enum][AccountSubTypeEnum].
   static const values = <AccountSubTypeEnum>[
+    other,
     savings,
     checking,
     HYSA,
@@ -96,6 +98,7 @@ class AccountSubTypeEnumTypeTransformer {
   AccountSubTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
+        case r'other': return AccountSubTypeEnum.other;
         case r'Savings': return AccountSubTypeEnum.savings;
         case r'Checking': return AccountSubTypeEnum.checking;
         case r'HYSA': return AccountSubTypeEnum.HYSA;

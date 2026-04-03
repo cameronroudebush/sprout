@@ -2,4 +2,5 @@
 export enum ProviderType {
   simpleFin = "simple-fin",
   zillow = "zillow",
+  plaid = "plaid",
 }

@@ -20,6 +20,7 @@ export class ZillowProviderService extends ProviderBase {
   private readonly logger = new Logger("provider:service:zillow");
   config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com", "https://www.zillow.com/apple-touch-icon.png");
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.zillow, Configuration.providers.zillow.rateLimit, user);
+  override isAvailable = async (_user: User) => true;
   /** Impit instance used for scraping */
   private readonly impit = new Impit({ browser: "chrome" });
 

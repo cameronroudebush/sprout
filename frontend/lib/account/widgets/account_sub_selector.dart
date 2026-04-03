@@ -68,6 +68,7 @@ class AccountSubTypeSelect extends StatelessWidget {
     };
 
     final items = typeToSubTypeMap[account.type] ?? [];
+    items.add(AccountSubTypeEnum.other); // Everyone gets other as an option
     if (items.isEmpty) return const SizedBox.shrink();
 
     return DropdownButtonFormField<AccountSubTypeEnum>(

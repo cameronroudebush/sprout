@@ -86,3 +86,86 @@ abstract class _$Accounts extends $AsyncNotifier<AccountState> {
     element.handleCreate(ref, build);
   }
 }
+
+/// Riverpod to provide zillow info based on an account ID
+
+@ProviderFor(zillowInfo)
+final zillowInfoProvider = ZillowInfoFamily._();
+
+/// Riverpod to provide zillow info based on an account ID
+
+final class ZillowInfoProvider extends $FunctionalProvider<
+        AsyncValue<ZillowAsset?>, ZillowAsset?, FutureOr<ZillowAsset?>>
+    with $FutureModifier<ZillowAsset?>, $FutureProvider<ZillowAsset?> {
+  /// Riverpod to provide zillow info based on an account ID
+  ZillowInfoProvider._(
+      {required ZillowInfoFamily super.from, required String super.argument})
+      : super(
+          retry: null,
+          name: r'zillowInfoProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$zillowInfoHash();
+
+  @override
+  String toString() {
+    return r'zillowInfoProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<ZillowAsset?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ZillowAsset?> create(Ref ref) {
+    final argument = this.argument as String;
+    return zillowInfo(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ZillowInfoProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$zillowInfoHash() => r'8f25b60932667024a617d1aa7a5a0824eab8ff68';
+
+/// Riverpod to provide zillow info based on an account ID
+
+final class ZillowInfoFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<ZillowAsset?>, String> {
+  ZillowInfoFamily._()
+      : super(
+          retry: null,
+          name: r'zillowInfoProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Riverpod to provide zillow info based on an account ID
+
+  ZillowInfoProvider call(
+    String accountId,
+  ) =>
+      ZillowInfoProvider._(argument: accountId, from: this);
+
+  @override
+  String toString() => r'zillowInfoProvider';
+}

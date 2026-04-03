@@ -26,11 +26,15 @@ export class ConfigController {
   })
   @AuthGuard.attach()
   @ApiOkResponse({ description: "The configuration that external services may want to know about.", type: APIConfig })
-  async get(@CurrentUser() _user: User) {
-    return new APIConfig(
-      this.providers.map((x) => x.config),
-      Configuration.server.prompt.hasChatKey,
+  async get(@CurrentUser() user: User) {
+    const providerConfigs = await Promise.all(
+      this.providers.map(async (x) => {
+        const config = x.config;
+        config.enabled = await x.isAvailable(user);
+        return config;
+      }),
     );
+    return new APIConfig(providerConfigs, Configuration.server.prompt.hasChatKey);
   }
 
   @Get("unsecure")
