@@ -43,7 +43,8 @@ class NavigationProvider {
     final bool isSamePath = currentPage == path || currentPage == '/$path';
     const MapEquality mapEquality = MapEquality();
     final bool isSameParams = mapEquality.equals(router.state.pathParameters, queryParameters ?? {});
-    if (isSamePath && isSameParams) {
+    final bool isSameQuery = mapEquality.equals(router.state.uri.queryParameters, queryParameters ?? {});
+    if (isSamePath && isSameParams && isSameQuery) {
       return;
     }
     final uri = Uri(path: target, queryParameters: params).toString();

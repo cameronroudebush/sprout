@@ -271,10 +271,7 @@ export class NetWorthService {
 
   /** Pushes a synthetic "Now" entry based on the live Account entity */
   private appendLiveAccountEntry(history: AccountHistory[], account: Account) {
-    const liveEntry = new AccountHistory();
-    liveEntry.time = new Date(); // Right now
-    liveEntry.balance = account.balance;
-    liveEntry.account = account;
+    const liveEntry = new AccountHistory(account, new Date(), account.balance, account.balance);
     history.push(liveEntry);
   }
 

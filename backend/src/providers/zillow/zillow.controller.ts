@@ -1,3 +1,4 @@
+import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
@@ -9,6 +10,8 @@ import { ZillowPropertyDTO } from "@backend/providers/zillow/model/api/zillow.lo
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
 import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { ZillowProviderService } from "@backend/providers/zillow/zillow.provider.service";
+import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Body, Controller, InternalServerErrorException, Logger, Post } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -19,7 +22,10 @@ import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swag
 @AuthGuard.attach()
 export class ZillowProviderController {
   private readonly logger = new Logger("provider:controller:zillow");
-  constructor(private readonly zillowProviderService: ZillowProviderService) {}
+  constructor(
+    private readonly sseService: SSEService,
+    private readonly zillowProviderService: ZillowProviderService,
+  ) {}
 
   @Post("lookup")
   @ApiOperation({
@@ -78,6 +84,9 @@ export class ZillowProviderController {
     ).insert();
     // Link Zillow Metadata to the account
     await new ZillowAsset(newAccount, propertyInfo.zpid).insert();
+    // Insert one day old history
+    AccountHistory.insertForNewAccount(newAccount);
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
     return newAccount;
   }
 }

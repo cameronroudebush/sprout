@@ -1,3 +1,4 @@
+import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
@@ -68,7 +69,9 @@ export class SimpleFinProviderController {
         else matchingAccount.account.institution.user = user; // Enforce user for our institution to not allow overwrites
         matchingAccount.account.subType = account.subType;
         if (account.subType != null) Account.validateSubType(account.subType);
-        await matchingAccount.account.insert(false);
+        const newAccount = await matchingAccount.account.insert(false);
+        // Insert one day old history
+        AccountHistory.insertForNewAccount(newAccount);
         // Insert matching transactions
         matchingAccount.transactions.map((x) => (x.account = matchingAccount.account));
         await Transaction.insertMany(matchingAccount.transactions);

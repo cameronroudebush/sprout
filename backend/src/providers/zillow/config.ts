@@ -7,5 +7,5 @@ export class ZillowConfig extends BaseProviderConfig {
   override syncFrequency: string = "0 6 * * 0";
 
   @ConfigurationMetadata.assign({ comment: "How many API calls we allow per day, per user, for this provider." })
-  rateLimit: number = 4;
+  rateLimit: number = 10;
 }
