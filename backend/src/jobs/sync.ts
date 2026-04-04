@@ -33,7 +33,6 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
   }
 
   protected async update(user?: User) {
-    const providerName = this.provider.config.name;
     this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
 
     const success = await this.updateProvider(this.provider, user);
@@ -50,7 +49,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
       });
 
       if (!recentNotification) {
-        const msg = this.getSuccessMessage(providerName);
+        const msg = this.getSuccessMessage();
         this.logger.log(`Sync successful for user: ${user.username}. Sending notification.`);
         await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
       } else {
@@ -264,7 +263,10 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
   }
 
   /** Returns the message for a success when this provider is updated */
-  private getSuccessMessage(providerName: string) {
-    return Utility.randomFromArray([{ title: `${providerName} Synced`, body: `Your ${providerName} accounts are up to date.` }]);
+  private getSuccessMessage() {
+    return Utility.randomFromArray([
+      { title: `Accounts Synced`, body: `Your accounts are up to date.` },
+      { title: "You're All Caught Up", body: "We've finished syncing your accounts." },
+    ]);
   }
 }

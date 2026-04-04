@@ -82,6 +82,10 @@ Unlike many financial integrations, Zillow support in Sprout is designed to be "
 
 To use Plaid with your self-hosted instance of Sprout, you must provide your own API credentials. This ensures your financial data remains private to your server.
 
+!!! warning
+
+    While I've added support for it based on a requirement I set for myself, the price alone makes it not worth it. This may be removed in the future due to said cost. We highly recommend using SimpleFin.
+
 !!! danger "Security Warning"
 
     Never share your Plaid **Client ID** or **Secret**. These keys grant access to your financial integrations. If you are using version control (like GitHub) to manage your Sprout deployment, ensure these variables are stored in a secure .env file or as encrypted secrets.
