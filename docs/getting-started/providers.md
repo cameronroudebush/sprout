@@ -69,3 +69,52 @@ Unlike many financial integrations, Zillow support in Sprout is designed to be "
 - **Address-Based Tracking**: Simply provide the street address, city, state, and zip code of your property.
     - We'll locate the Zillow Property ID and keep this for later updates
 - **Automatic Updates**: Once a property is linked, Sprout will periodically refresh the valuation, tracking changes in your home equity over time without any manual input.
+
+## Plaid
+
+<p align="center">
+    <img src="https://plaid.com/assets/img/favicons/apple-touch-icon.png" width="15%">
+</p>
+
+**Plaid** is one of the most widely used financial data aggregators in the world. It provides high-fidelity connections to over 12,000 financial institutions across North America and Europe, supporting everything from traditional bank accounts to credit cards and investment holdings.
+
+### Self-Hosting Configuration
+
+To use Plaid with your self-hosted instance of Sprout, you must provide your own API credentials. This ensures your financial data remains private to your server.
+
+!!! danger "Security Warning"
+
+    Never share your Plaid **Client ID** or **Secret**. These keys grant access to your financial integrations. If you are using version control (like GitHub) to manage your Sprout deployment, ensure these variables are stored in a secure .env file or as encrypted secrets.
+
+| Variable                          | Description                                                  |
+| --------------------------------- | ------------------------------------------------------------ |
+| `sprout_providers_plaid_clientId` | Your unique Plaid Client ID found in the dashboard.          |
+| `sprout_providers_plaid_secret`   | Your Plaid Secret key (Sandbox, Development, or Production). |
+
+### Setup Instructions
+
+Follow these steps to get your credentials and connect your first account:
+
+1. Create a **Plaid Developer Account**
+    - Go to the Plaid Dashboard and create an account.
+    - Complete the initial onboarding profile to gain access to the Sandbox environment.
+    - Elevate your account by acquiring production access. This will be required for you to use real data, as often as you want.
+2. Add support for apps
+    - If you intend on using the Sprout app, go to Developers -> API.
+    - Select **Allowed Android package names**, select **configure**.
+    - Enter the name `sprout.croudebush.net`. Click submit.
+3. Get Your API Keys
+    - Navigate to Team Settings > Keys.
+    - Copy your Client ID.
+    - Under Secrets, reveal and copy the secret that matches your intended environment. You'll probably want production.
+4. Configure Sprout
+    - Add the copied keys to your environment variables `sprout_providers_plaid_clientId` and `sprout_providers_plaid_secret`.
+    - Restart your Sprout server to apply the changes.
+5. Link Your Accounts
+    - In the Sprout app, go to Add Account and select Plaid.
+    - Use the secure Plaid Link UI to log in to your bank.
+
+### Why Choose Plaid?
+
+- **Real-time Sync**: Plaid offers robust support for transaction "Sync," allowing us to update your data often.
+- **Industry Standard**: Most major US banks have "OAuth" integrations with Plaid, meaning you often don't have to share your bank password with Plaid at all—you simply authorize Sprout through your bank's own website.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/account_tab_item.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
@@ -8,6 +9,8 @@ import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/net-worth/widgets/net_worth_card.dart';
+import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -55,32 +58,63 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
     // When the user returns to the app after clicking the notification
     if (state == AppLifecycleState.resumed && _expectingReturnFromFix) {
       _expectingReturnFromFix = false;
-      showSproutPopup(
-        context: context,
-        builder: (ctx) => SproutBaseDialogWidget(
-          'Re-Sync',
-          showCloseDialogButton: true,
-          showSubmitButton: true,
-          submitButtonText: "Sync",
-          onSubmitClick: () async {
-            Navigator.of(context).pop();
-            await ref.read(accountsProvider.notifier).manualSync();
-          },
-          child: Text(
-            'Welcome back! Would you like to re-sync your accounts to get updated data from fixed accounts?',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+      _showReSyncPopup();
     }
   }
 
-  /// Launch the external SimpleFin bridge to fix the connection
-  Future<void> _launchFixUrl() async {
-    final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
-    _expectingReturnFromFix = true;
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      _expectingReturnFromFix = false;
+  /// Renders the popup to ask the user if they want to sync
+  void _showReSyncPopup() {
+    showSproutPopup(
+      context: context,
+      builder: (ctx) => SproutBaseDialogWidget(
+        'Re-Sync',
+        showCloseDialogButton: true,
+        showSubmitButton: true,
+        submitButtonText: "Sync",
+        onSubmitClick: () async {
+          Navigator.of(context).pop();
+          await ref.read(accountsProvider.notifier).manualSync();
+        },
+        child: Text(
+          'Welcome back! Would you like to re-sync your accounts to get updated data from fixed accounts?',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  /// Launches the necessary content to fix an institution that has an error
+  Future<void> _fixInstitution() async {
+    final provider = widget.account.provider;
+
+    if (provider == ProviderTypeEnum.plaid) {
+      try {
+        final api = await ref.read(providerApiProvider.future);
+        final response = await api.plaidProviderControllerCreateLinkToken(
+          institutionId: widget.account.institution.id,
+        );
+
+        if (response?.linkToken != null) {
+          // Open Plaid SDK in update mode
+          LinkTokenConfiguration configuration = LinkTokenConfiguration(
+            token: response!.linkToken,
+          );
+          await PlaidLink.create(configuration: configuration);
+          PlaidLink.onSuccess.first.then((_) {
+            _showReSyncPopup();
+          });
+          PlaidLink.open();
+        }
+      } catch (e) {
+        ref.read(notificationsProvider.notifier).parseOpenAPIException((e));
+      }
+    } else if (provider == ProviderTypeEnum.simpleFin) {
+      // Handle SimpleFin which is just a simple URL
+      final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
+      _expectingReturnFromFix = true;
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        _expectingReturnFromFix = false;
+      }
     }
   }
 
@@ -384,7 +418,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
             theme.colorScheme.error,
             theme.colorScheme.onError,
             icon: Icons.warning_amber_rounded,
-            onClick: _launchFixUrl,
+            onClick: _fixInstitution,
           ),
           allowMultiLine: true,
         ),

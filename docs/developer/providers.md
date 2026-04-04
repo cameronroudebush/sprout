@@ -108,3 +108,50 @@ Zillow is a powerful tool for completing the "Full Net Worth" picture, but it ha
 | **Zero Friction**: No signup, no keys, and no tokens for the user or the developer.          | **Geographic Limit**: Currently only supports properties within the United States.                                                              |
 | **Persistence**: Once an address is linked, it almost never "breaks" or requires re-linking. | **Estimation Accuracy**: The **Zestimate** is an algorithm, not a formal appraisal. It can fluctuate significantly based on local market noise. |
 |                                                                                              | **Gray Area**: We don't utilize Zillow's API directly as it's intended for commercial use. Instead we rely on data scraping                     |
+
+## Plaid
+
+<p align="center">
+    <img src="https://plaid.com/assets/img/favicons/apple-touch-icon.png" width="15%">
+</p>
+
+If **SimpleFIN** is the "developer-friendly" bridge, **Plaid** is the enterprise-grade powerhouse. It is the industry standard for financial connectivity, powering massive apps like Venmo and Robinhood. In Sprout, Plaid provides a level of data depth and sync frequency that other providers simply cannot match, though it comes at the cost of significantly higher complexity and overhead.
+
+### The Developer's Burden: Complexity & Maintenance
+
+Integrating Plaid is a major undertaking compared to SimpleFIN. It is not a "one-and-done" REST call; it is a full-lifecycle management system.
+
+**1. The Link Flow (OAuth)**
+Unlike SimpleFIN’s setup tokens, Plaid requires a coordinated dance between your frontend and backend. You must generate a short-lived `link_token` on the server, pass it to the frontend to initialize the **Plaid Link SDK**, and then catch a `public_token` on success to exchange it back on the server for a permanent `access_token`.
+
+**2. Token Management & Rotation**
+`access_tokens` are critical PII. In Sprout, we must:
+
+- Encrypt them at rest, **which we do**.
+- Handle **Update Mode** when a user changes their bank password, which requires re-launching the Link SDK to repair the existing Item.
+
+**3. Product Readiness**
+Plaid data is partitioned into **Products** (Transactions, Investments, Liabilities). When a user first links an account, you cannot simply grab data immediately. You often have to wait for an initial background pull to complete, which can lead to `PRODUCT_NOT_READY` errors if your sync logic is too aggressive.
+
+### The Payoff: Real-Time Data & Rich Metadata
+
+Despite the maintenance **tax**, Plaid is the only provider that offers a truly **live** experience.
+
+**Sync Frequency**
+While SimpleFIN is typically limited to daily refreshes due to upstream caching, **Plaid can be synced up to 4 times per day** in our background workers. This ensures that a morning coffee purchase shows up in Sprout by lunchtime.
+
+### Takeaways & Improvements
+
+Plaid is a **high-maintenance**, **high-reward** provider. It is the best choice for users who want a "set it and forget it" experience with maximum detail.
+
+| **Strength**                                                                                                                                | **Area for Improvement**                                                                                                                               |
+| :------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Data Freshness:** Supports up to 4 syncs per day, providing near real-time updates.                                                       | **High Cost:** Plaid is significantly more expensive. While they have a free "Development" tier, Production usage carries per-item and per-call costs. |
+| **Rich Metadata:** Includes merchant logos, high-fidelity categories, and investment holdings (shares, cost basis, etc.).                   | **Integration Heavy:** Requires SDKs for both frontend (Flutter) and backend (Node/TS), plus complex token exchange logic.                             |
+| **Reliability:** Direct OAuth integrations with major banks (Chase, Wells Fargo) mean fewer "broken" connections compared to proxy bridges. |                                                                                                                                                        |
+
+### Development Testing
+
+Plaid provides a robust **Sandbox** environment that simulates almost every banking scenario. You can use auto populated link phone numbers/logins to get examples of accounts easily, just with sandbox tokens.
+
+A key part of developing for Plaid in Sprout is handling the transition from Sandbox to **Development** (real data, limited accounts) and finally **Production**. Each environment requires its own secret key, which should be managed strictly via environment variables.

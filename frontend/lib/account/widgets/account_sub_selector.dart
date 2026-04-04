@@ -67,7 +67,7 @@ class AccountSubTypeSelect extends StatelessWidget {
       AccountTypeEnum.crypto: [AccountSubTypeEnum.wallet, AccountSubTypeEnum.staking],
     };
 
-    final items = typeToSubTypeMap[account.type] ?? [];
+    final List<AccountSubTypeEnum> items = [...typeToSubTypeMap[account.type] ?? []];
     items.add(AccountSubTypeEnum.other); // Everyone gets other as an option
     if (items.isEmpty) return const SizedBox.shrink();
 

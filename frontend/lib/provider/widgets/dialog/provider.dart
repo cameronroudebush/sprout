@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/provider/widgets/dialog/provider_selection.dart';
 import 'package:sprout/provider/widgets/plaid/plaid_account_selector.dart';
 import 'package:sprout/provider/widgets/simple-fin/simple_fin_accounts.dart';
@@ -28,12 +28,12 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final config = ref.watch(secureConfigProvider).value;
+    final providers = ref.watch(providerConfigProvider).value;
 
     Widget content = SizedBox.shrink();
     if (_selectedProvider == null) {
       content = ProviderSelectionList(
-        providers: config?.providers ?? [],
+        providers: providers ?? [],
         onProviderSelected: (p) => setState(() => _selectedProvider = p),
       );
     } else {
@@ -84,6 +84,10 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
           break;
         case ProviderTypeEnum.plaid:
           // Plaid handles it's own submission via the their implementation
+
+          ref.read(notificationsProvider.notifier).openFrontendOnly(
+              "Plaid accounts linked successfully. Transactions will be available during the next scheduled sync.",
+              type: NotificationTypeEnum.success);
           break;
       }
 

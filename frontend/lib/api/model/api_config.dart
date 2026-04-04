@@ -13,33 +13,26 @@ part of openapi.api;
 class APIConfig {
   /// Returns a new [APIConfig] instance.
   APIConfig({
-    this.providers = const [],
     required this.chatKeyProvidedInBackend,
   });
-
-  /// List of providers that this application has configured and is supported
-  List<ProviderConfig> providers;
 
   /// Determines if the chat key is already provided and users shouldn't be able to set theirs then.
   bool chatKeyProvidedInBackend;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
-    _deepEquality.equals(other.providers, providers) &&
     other.chatKeyProvidedInBackend == chatKeyProvidedInBackend;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (providers.hashCode) +
     (chatKeyProvidedInBackend.hashCode);
 
   @override
-  String toString() => 'APIConfig[providers=$providers, chatKeyProvidedInBackend=$chatKeyProvidedInBackend]';
+  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'providers'] = this.providers;
       json[r'chatKeyProvidedInBackend'] = this.chatKeyProvidedInBackend;
     return json;
   }
@@ -55,15 +48,12 @@ class APIConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'providers'), 'Required key "APIConfig[providers]" is missing from JSON.');
-        assert(json[r'providers'] != null, 'Required key "APIConfig[providers]" has a null value in JSON.');
         assert(json.containsKey(r'chatKeyProvidedInBackend'), 'Required key "APIConfig[chatKeyProvidedInBackend]" is missing from JSON.');
         assert(json[r'chatKeyProvidedInBackend'] != null, 'Required key "APIConfig[chatKeyProvidedInBackend]" has a null value in JSON.');
         return true;
       }());
 
       return APIConfig(
-        providers: ProviderConfig.listFromJson(json[r'providers']),
         chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
       );
     }
@@ -112,7 +102,6 @@ class APIConfig {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'providers',
     'chatKeyProvidedInBackend',
   };
 }

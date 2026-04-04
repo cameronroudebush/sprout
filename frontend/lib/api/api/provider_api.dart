@@ -16,10 +16,65 @@ class ProviderApi {
 
   final ApiClient apiClient;
 
+  /// Get provider configuration.
+  ///
+  /// Returns the provider configuration so we know what providers are available.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> baseProviderControllerGetConfigWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/config';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get provider configuration.
+  ///
+  /// Returns the provider configuration so we know what providers are available.
+  Future<List<ProviderConfig>?> baseProviderControllerGetConfig() async {
+    final response = await baseProviderControllerGetConfigWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<ProviderConfig>') as List)
+        .cast<ProviderConfig>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Create a Plaid link token
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [String] institutionId:
+  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo({ String? institutionId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/plaid/create-link-token';
 
@@ -29,6 +84,10 @@ class ProviderApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (institutionId != null) {
+      queryParams.addAll(_queryParams('', 'institutionId', institutionId));
+    }
 
     const contentTypes = <String>[];
 
@@ -45,8 +104,12 @@ class ProviderApi {
   }
 
   /// Create a Plaid link token
-  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken() async {
-    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo();
+  ///
+  /// Parameters:
+  ///
+  /// * [String] institutionId:
+  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken({ String? institutionId, }) async {
+    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo( institutionId: institutionId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

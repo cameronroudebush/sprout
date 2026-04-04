@@ -20,3 +20,12 @@ Future<List<Account>?> simpleFinAccounts(Ref ref) async {
   }
   return await api.simpleFinProviderControllerGetAccounts();
 }
+
+@Riverpod(retry: riverpodRetry)
+Future<List<ProviderConfig>?> providerConfig(Ref ref) async {
+  final api = ref.watch(providerApiProvider).value;
+  if (api == null) {
+    return [];
+  }
+  return await api.baseProviderControllerGetConfig();
+}

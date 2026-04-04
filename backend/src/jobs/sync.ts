@@ -6,15 +6,16 @@ import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
+import { Notification } from "@backend/notification/model/notification.model";
 import { NotificationType } from "@backend/notification/model/notification.type";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { subDays } from "date-fns";
+import { subDays, subMinutes } from "date-fns";
 import { merge } from "lodash";
-import { LessThan } from "typeorm";
+import { LessThan, MoreThan } from "typeorm";
 import { BackgroundJob } from "./base";
 
 /** This class is used to schedule updates to query for data at routine intervals from the available providers. */
@@ -39,9 +40,22 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
     // If a specific user triggered this and it was successful, notify them specifically
     if (success && user) {
-      const msg = this.getSuccessMessage(providerName);
-      this.logger.log(`Sync successful for user: ${user.username}`);
-      await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
+      const recentNotification = await Notification.findOne({
+        where: {
+          user: { id: user.id },
+          type: NotificationType.success,
+          // Check if a success notification was sent in the last 5 minutes
+          createdAt: MoreThan(subMinutes(new Date(), 5)),
+        },
+      });
+
+      if (!recentNotification) {
+        const msg = this.getSuccessMessage(providerName);
+        this.logger.log(`Sync successful for user: ${user.username}. Sending notification.`);
+        await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
+      } else {
+        this.logger.log(`Sync successful for ${user.username}, but suppressed notification to avoid spam.`);
+      }
     }
 
     // Cleanup
