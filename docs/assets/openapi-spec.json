@@ -502,7 +502,7 @@
     },
     "/config/unsecure": {
       "get": {
-        "description": "Returns the unsecure app configuration. This won't contain any sensitive information but tells endpoints if the first time setup needs ran.",
+        "description": "Returns the unsecure app configuration. This won't contain any sensitive information but gives required metadata for the app to properly configure itself.",
         "operationId": "ConfigController_getUnsecure",
         "parameters": [],
         "responses": {
@@ -1138,6 +1138,41 @@
         "tags": ["User Config"]
       }
     },
+    "/provider/config": {
+      "get": {
+        "description": "Returns the provider configuration so we know what providers are available.",
+        "operationId": "BaseProviderController_getConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The list of available providers and their status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderConfig"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get provider configuration.",
+        "tags": ["Provider"]
+      }
+    },
     "/provider/simple-fin": {
       "get": {
         "description": "Retrieves accounts that the user has not yet linked.",
@@ -1338,7 +1373,16 @@
     "/provider/plaid/create-link-token": {
       "post": {
         "operationId": "PlaidProviderController_createLinkToken",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "institutionId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Link created successfully.",
@@ -2480,7 +2524,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.3.0-19-g5f02e0c",
+    "version": "v0.3.0-20-g6c5cd3d",
     "contact": {}
   },
   "tags": [
@@ -2728,56 +2772,15 @@
         },
         "required": ["categoryCount", "colorMapping"]
       },
-      "ProviderConfig": {
-        "type": "object",
-        "properties": {
-          "dbType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProviderTypeEnum"
-              }
-            ]
-          },
-          "name": {
-            "type": "string",
-            "description": "The name of this provider"
-          },
-          "url": {
-            "type": "string",
-            "description": "Link to this provider"
-          },
-          "logoUrl": {
-            "type": "string",
-            "description": "An endpoint of where to get this logo"
-          },
-          "accountFixUrl": {
-            "type": "string",
-            "description": "The URL to be able to fix accounts"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "If this provider is available to this user. Only used during frontend communication",
-            "default": false
-          }
-        },
-        "required": ["dbType", "name", "url", "logoUrl", "enabled"]
-      },
       "APIConfig": {
         "type": "object",
         "properties": {
-          "providers": {
-            "description": "List of providers that this application has configured and is supported",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProviderConfig"
-            }
-          },
           "chatKeyProvidedInBackend": {
             "type": "boolean",
             "description": "Determines if the chat key is already provided and users shouldn't be able to set theirs then."
           }
         },
-        "required": ["providers", "chatKeyProvidedInBackend"]
+        "required": ["chatKeyProvidedInBackend"]
       },
       "UnsecureAppConfiguration": {
         "type": "object",
@@ -3152,6 +3155,40 @@
           }
         },
         "required": ["token"]
+      },
+      "ProviderConfig": {
+        "type": "object",
+        "properties": {
+          "dbType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProviderTypeEnum"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of this provider"
+          },
+          "url": {
+            "type": "string",
+            "description": "Link to this provider"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "An endpoint of where to get this logo"
+          },
+          "accountFixUrl": {
+            "type": "string",
+            "description": "The URL to be able to fix accounts"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "If this provider is available to this user. Only used during frontend communication",
+            "default": false
+          }
+        },
+        "required": ["dbType", "name", "url", "logoUrl", "enabled"]
       },
       "ZillowAsset": {
         "type": "object",
@@ -3654,7 +3691,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-04-03T02:10:11.635Z"
+            "default": "2026-04-04T00:49:29.935Z"
           },
           "isRead": {
             "type": "boolean",

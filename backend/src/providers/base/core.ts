@@ -27,7 +27,8 @@ export abstract class ProviderBase {
   abstract isAvailable: { (user: User): Promise<boolean> };
 
   /**
-   * Returns data from the provider to satisfy updated transaction, holdings, and accounts
+   * Returns data from the provider to satisfy updated transaction, holdings, and accounts. You
+   *  do not need to perform any data insertion, just data gathering. The result of this function will handle the insertion.
    *
    * @param user The user we want accounts for.
    * @param accountsOnly If we only want accounts and not included holdings or transactions.

@@ -7,8 +7,8 @@ import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.se
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { Body, Controller, InternalServerErrorException, Logger, Post } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, InternalServerErrorException, Logger, Post, Query } from "@nestjs/common";
+import { ApiBody, ApiCreatedResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides endpoints for plaid specific functionality */
 @Controller("provider/plaid")
@@ -24,9 +24,10 @@ export class PlaidProviderController {
   @Post("create-link-token")
   @ApiOperation({ summary: "Create a Plaid link token" })
   @ApiCreatedResponse({ description: "Link created successfully.", type: PlaidLinkTokenDTO })
-  async createLinkToken(@CurrentUser() user: User) {
+  @ApiQuery({ name: "institutionId", required: false, type: String })
+  async createLinkToken(@CurrentUser() user: User, @Query("institutionId") institutionId?: string) {
     try {
-      return await this.plaidProviderService.generateLinkToken(user);
+      return await this.plaidProviderService.generateLinkToken(user, institutionId);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException("Failed to generate Plaid link token.");

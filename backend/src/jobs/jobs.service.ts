@@ -3,7 +3,7 @@ import { ProviderSyncJob } from "@backend/jobs/sync";
 import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
-import { PROVIDER_LIST_TOKEN } from "@backend/providers/provider.module";
+import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { Inject, Injectable } from "@nestjs/common";
 import { DatabaseBackup } from "./backup";

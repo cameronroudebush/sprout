@@ -42,7 +42,7 @@ class NotificationItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: notification.isRead ? null : color.withValues(alpha: 0.05),
         border: isFloating ? Border.all(color: theme.dividerColor, width: 1) : null,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

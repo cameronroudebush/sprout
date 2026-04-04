@@ -1,34 +1,30 @@
-import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
+import { Account } from "@backend/account/model/account.model";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { Institution } from "@backend/institution/model/institution.model";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { IsString } from "class-validator";
 import { JoinColumn, OneToOne } from "typeorm";
 
-/** Database model that allows us to track plaid metadata related to an institution so we can request updated data. */
+/** Database model that allows us to track plaid metadata specific to an account */
 @DatabaseDecorators.entity()
 export class PlaidAsset extends DatabaseBase {
-  @OneToOne(() => Institution, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "institutionId" })
+  /** The account Id related to plaid to link back to our specific account */
+  @DatabaseDecorators.column({ nullable: false, unique: true })
+  @ApiProperty({ description: "The plaid account ID" })
+  @IsString()
+  plaidAccountId: string;
+
+  /** The account this metadata belongs to */
+  @OneToOne(() => Account, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "accountId" })
   @ApiHideProperty()
   @Exclude()
-  institution: Institution;
+  account: Account;
 
-  /** The key to the users data. Encrypted in the database. */
-  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
-  @EncryptionTransformer.decorateAPIProperty()
-  @IsString()
-  accessToken: string;
-
-  @DatabaseDecorators.column({ nullable: false })
-  itemId: string;
-
-  constructor(institution: Institution, accessToken: string, itemId: string) {
+  constructor(account: Account, plaidAccountId: string) {
     super();
-    this.institution = institution;
-    this.accessToken = accessToken;
-    this.itemId = itemId;
+    this.account = account;
+    this.plaidAccountId = plaidAccountId;
   }
 }

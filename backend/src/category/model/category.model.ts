@@ -92,11 +92,11 @@ export class Category extends DatabaseBase {
 
   /** Get's a category by the given name or returns the existing one if it's found. */
   static async getOrCreate(category: string | undefined, user: User) {
-    if (category == null) return await this.getUnknownCategory(user);
+    if (category == null) return (await this.getUnknownCategory(user))!;
     else {
       const name = startCase(category);
-      const matchingCategory = Category.findOne({ where: { name: name, user: { id: user.id } } });
-      if (matchingCategory) return matchingCategory;
+      const matchingCategory = await Category.findOne({ where: { name: name, user: { id: user.id } } });
+      if (matchingCategory) return matchingCategory!;
       else return await Category.fromPlain({ name, user }).insert();
     }
   }

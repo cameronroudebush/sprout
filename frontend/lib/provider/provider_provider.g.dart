@@ -80,3 +80,41 @@ final class SimpleFinAccountsProvider extends $FunctionalProvider<
 }
 
 String _$simpleFinAccountsHash() => r'92df5f92bee28fb0f62714d1041d24a7ba280549';
+
+@ProviderFor(providerConfig)
+final providerConfigProvider = ProviderConfigProvider._();
+
+final class ProviderConfigProvider extends $FunctionalProvider<
+        AsyncValue<List<ProviderConfig>?>,
+        List<ProviderConfig>?,
+        FutureOr<List<ProviderConfig>?>>
+    with
+        $FutureModifier<List<ProviderConfig>?>,
+        $FutureProvider<List<ProviderConfig>?> {
+  ProviderConfigProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: riverpodRetry,
+          name: r'providerConfigProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$providerConfigHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<ProviderConfig>?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<ProviderConfig>?> create(Ref ref) {
+    return providerConfig(ref);
+  }
+}
+
+String _$providerConfigHash() => r'2c26bf69c9ffb743755996716b1903818857596c';

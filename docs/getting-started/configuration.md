@@ -22,11 +22,15 @@ For a complete list of all available options, please see the **[Advanced Configu
 | -------------------------------------------- | :------: | :-----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sprout_encryptionKey`                       |   Yes    |               | A 64-character hex string used to encrypt sensitive database fields. See [generating an encryption key](#generating-an-encryption-key) below.             |
 | `TZ`                                         |    No    | `TZ/New_York` | Sets the timezone for the container. A [list of valid TZ values](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is available on Wikipedia. |
+| **Auth**                                     |          |               |                                                                                                                                                           |
 | `sprout_server_auth_type`                    |   Yes    |    `local`    | Set to `oidc` to enable OpenID Connect authentication                                                                                                     |
 | `sprout_server_auth_oidc_issuer`             |    No    |               | The base URL of your OIDC provider (e.g., https://auth.example.com)                                                                                       |
 | `sprout_server_auth_oidc_clientId`           |    No    |               | The Client ID configured in your OIDC provider.                                                                                                           |
 | `sprout_server_auth_oidc_secret`             |    No    |               | The secret string used to generate the private client hash. See [auth](./auth.md#configuration) for more info                                             |
 | `sprout_server_auth_local_jwtExpirationTime` |    No    |     `30m`     | The duration for which a login session remains valid for the local authentication strategy. Examples: `24h`, `30d`.                                       |
+| **Provider - Plaid**                         |          |               |                                                                                                                                                           |
+| `sprout_providers_plaid_clientId`            |    No    |               | Your unique Plaid Client ID found in the dashboard.                                                                                                       |
+| `sprout_providers_plaid_secret`              |    No    |               | Your Plaid Secret key (Sandbox, Development, or Production).                                                                                              |
 
 # Generating an Encryption Key
 

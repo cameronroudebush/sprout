@@ -66,7 +66,7 @@ class ConfigApi {
 
   /// Get unsecure app configuration.
   ///
-  /// Returns the unsecure app configuration. This won't contain any sensitive information but tells endpoints if the first time setup needs ran.
+  /// Returns the unsecure app configuration. This won't contain any sensitive information but gives required metadata for the app to properly configure itself.
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> configControllerGetUnsecureWithHttpInfo() async {
@@ -96,7 +96,7 @@ class ConfigApi {
 
   /// Get unsecure app configuration.
   ///
-  /// Returns the unsecure app configuration. This won't contain any sensitive information but tells endpoints if the first time setup needs ran.
+  /// Returns the unsecure app configuration. This won't contain any sensitive information but gives required metadata for the app to properly configure itself.
   Future<UnsecureAppConfiguration?> configControllerGetUnsecure() async {
     final response = await configControllerGetUnsecureWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
