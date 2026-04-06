@@ -30,16 +30,11 @@ class Transactions extends _$Transactions {
     ref.listen(sseProvider, (prev, next) {
       final data = next.latestData;
       if (data?.event == SSEDataEventEnum.forceUpdate) {
-        // SSE Triggered: Grab current filters from the other provider
-        final currentFilters = ref.read(transactionFilterStateProvider);
-
-        // Re-fetch the first page using current parameters
+        // Re-fetch the first page
         fetchFilteredPage(
           startIndex: 0,
           resetList: true, // We need to clear the list for a force update
-          accountId: currentFilters.accountId,
-          catId: currentFilters.categoryId,
-          search: currentFilters.search,
+          // Do not include additional filters so we grab all data
         );
       }
     });

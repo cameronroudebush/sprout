@@ -82,6 +82,10 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
     const users = specificUser ? [specificUser] : await User.find({});
     // Handle each user's accounts
     for (const user of users) {
+      if (!provider.isAvailable(user)) {
+        this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
+        continue;
+      }
       // Create unique sync status
       const sync = await Sync.fromPlain({
         time: new Date(),
@@ -254,6 +258,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
       const thirtyDaysAgo = subDays(new Date(), days);
       const result = await Sync.delete({
         time: LessThan(thirtyDaysAgo),
+        provider: this.provider.config.dbType,
       });
       const cleaned = result.affected;
       this.logger.log(`Removed ${cleaned} old sync record${cleaned !== 1 ? "s" : ""}.`);

@@ -148,55 +148,42 @@ export class NetWorthService {
       return "unknown";
     };
 
-    // DEDUPLICATION
-    // We must ensure we only take the LAST entry for a specific Account/Holding on a specific Day.
-    const uniqueDailyValues = new Map<string, number>();
-
+    // Group all raw data by date so we can process the timeline day-by-day
+    const historyByDate = new Map<string, T[]>();
     for (const entry of rawHistory) {
       const dateKey = format(entry.time, "yyyy-MM-dd");
-      const sourceId = getSourceId(entry);
-      const uniqueKey = `${sourceId}|${dateKey}`;
-
-      let val = getValue(entry);
-
-      // Overwrite previous value for this specific account on this specific day.
-      // Since rawHistory is sorted ASC, the last value set here is the end-of-day value.
-      uniqueDailyValues.set(uniqueKey, val);
+      if (!historyByDate.has(dateKey)) historyByDate.set(dateKey, []);
+      historyByDate.get(dateKey)!.push(entry);
     }
 
-    // AGGREGATION
-    // Now sum up all unique account values for each day into a single daily total.
-    const dailyTotals = new Map<string, number>();
-    for (const [key, val] of uniqueDailyValues) {
-      const [_, dateStr] = key.split("|");
-      const currentTotal = dailyTotals.get(dateStr!) || 0;
-      dailyTotals.set(dateStr!, currentTotal + val);
-    }
-
-    // TIMELINE GENERATION
+    // Setup timeline boundaries
     const today = startOfDay(new Date());
     const firstHistoryDate = startOfDay(rawHistory[0]!.time);
     const totalDaysDiff = differenceInDays(today, firstHistoryDate);
     const daysToGenerate = Math.max(totalDaysDiff, 365);
     const startDate = subDays(today, daysToGenerate);
-
-    const dailySnapshots: NetWorthSnapshot[] = [];
-    let currentNetWorth = 0;
-
-    // Initialize start value
-    const startKey = format(startDate, "yyyy-MM-dd");
-    if (dailyTotals.has(startKey)) currentNetWorth = dailyTotals.get(startKey)!;
-
     const allDays = eachDayOfInterval({ start: startDate, end: today });
 
+    const dailySnapshots: NetWorthSnapshot[] = [];
+
+    // Keep track of the latest known value for EVERY account/holding.
+    const lastKnownValuesBySource = new Map<string, number>();
+
     for (const day of allDays) {
-      const key = format(day, "yyyy-MM-dd");
-      // If we have data for this day, update our "current" known value
-      if (dailyTotals.has(key)) currentNetWorth = dailyTotals.get(key)!;
-      dailySnapshots.push({ date: day, netWorth: currentNetWorth });
+      const dateKey = format(day, "yyyy-MM-dd");
+      const entriesForDay = historyByDate.get(dateKey) || [];
+
+      // Update the "last known" map with any new data found on this specific day
+      for (const entry of entriesForDay) lastKnownValuesBySource.set(getSourceId(entry), getValue(entry));
+
+      // Calculate Total Net Worth for today by summing the last known value of ALL sources
+      let dayTotal = 0;
+      for (const val of lastKnownValuesBySource.values()) dayTotal += val;
+
+      dailySnapshots.push({ date: day, netWorth: dayTotal });
     }
 
-    // FRAME EXTRACTION
+    // Time frame extraction
     const getFrame = (daysBack: number): EntityHistoryDataPoint => {
       const index = dailySnapshots.length - 1 - daysBack;
       const targetSnapshot = dailySnapshots[index < 0 ? 0 : index];
@@ -227,8 +214,7 @@ export class NetWorthService {
         }
         // ALWAYS ensure the very last data point (Today) is included so the chart ends correctly
         const lastOriginal = dailySnapshots[dailySnapshots.length - 1];
-        const lastSampled = sampledData[sampledData.length - 1];
-        if (lastSampled && lastSampled.date.getTime() !== lastOriginal!.date.getTime())
+        if (sampledData[sampledData.length - 1]?.date.getTime() !== lastOriginal!.date.getTime())
           sampledData.push(new HistoricalDataPoint(lastOriginal!.date, lastOriginal!.netWorth));
         return sampledData;
       },

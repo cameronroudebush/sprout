@@ -66,15 +66,16 @@ class FirebaseNotifier extends _$FirebaseNotifier {
   /// Also clears the system tray to prevent stale alerts.
   Future<void> checkLaunchNotification() async {
     if (kIsWeb) return;
-
     final details = await _localNotifications.getNotificationAppLaunchDetails();
+    // Clear all notifications via local notifications
+    await clearNotifications();
+    // Check if we tapped a notification, and if so, wipe it
     if (details != null && details.didNotificationLaunchApp) {
       final response = details.notificationResponse;
       if (response != null) {
         _onNotificationTap(response);
       }
     }
-    await clearNotifications();
   }
 
   /// Requests permissions and registers the background messaging handler.
