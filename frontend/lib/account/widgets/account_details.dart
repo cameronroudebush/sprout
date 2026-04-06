@@ -339,9 +339,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         spacing: 8,
                         children: [
                           if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
-                            SizedBox(
-                              width: 240,
-                              height: 32,
+                            Expanded(
                               child: FilledButton(
                                 onPressed: () async {
                                   final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
@@ -357,9 +355,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                             ),
 
                           // Delete
-                          SizedBox(
-                            width: 240,
-                            height: 32,
+                          Expanded(
                             child: FilledButton(
                               onPressed: () {
                                 // Confirmation dialog
