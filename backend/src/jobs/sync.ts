@@ -82,7 +82,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
     const users = specificUser ? [specificUser] : await User.find({});
     // Handle each user's accounts
     for (const user of users) {
-      if (!provider.isAvailable(user)) {
+      if (!(await provider.isAvailable(user))) {
         this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
         continue;
       }

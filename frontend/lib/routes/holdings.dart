@@ -31,27 +31,25 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
     final theme = Theme.of(context);
     final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
 
+    // Filter to just investment accounts as those contain holdings
+    final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
+
+    // Aggregating all holdings across all investment accounts to check if we have data
+    final allHoldings = investmentAccounts.fold<List<Holding>>([], (previousValue, account) {
+      final holdings = ref.watch(accountHoldingsProvider(account.id)).value ?? [];
+      return [...previousValue, ...holdings];
+    });
+
     // Auto select default holding
-    if (accounts.isNotEmpty) {
-      final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
-
-      if (!_hasInitialSelection && investmentAccounts.isNotEmpty) {
-        final firstAccount = investmentAccounts.first;
-        final holdingsAsync = ref.watch(accountHoldingsProvider(firstAccount.id));
-
-        holdingsAsync.whenData((holdings) {
-          if (holdings.isNotEmpty && _selectedHolding == null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() {
-                  _selectedHolding = holdings.first;
-                  _hasInitialSelection = true;
-                });
-              }
-            });
-          }
-        });
-      }
+    if (!_hasInitialSelection && allHoldings.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedHolding == null) {
+          setState(() {
+            _selectedHolding = allHoldings.first;
+            _hasInitialSelection = true;
+          });
+        }
+      });
     }
 
     return SproutRouteWrapper(
@@ -60,7 +58,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
         // Major indices
         const MajorIndicesBarWidget(),
         // Performance Chart for selected symbol
-        _buildPerformanceChart(theme),
+        if (accounts.isNotEmpty && allHoldings.isNotEmpty) _buildPerformanceChart(theme),
 
         const Divider(),
 
@@ -70,27 +68,25 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
             child: Column(
               spacing: 8,
               children: [
+                // No accounts at all
                 if (accounts.isEmpty)
-                  Center(
-                    child: SizedBox(
-                      height: 164,
-                      child: SproutCard(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            spacing: 12,
-                            children: [
-                              Icon(Icons.show_chart, size: 64, color: theme.colorScheme.primary),
-                              const Text("No accounts found to choose from", style: TextStyle(fontSize: 18)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (accounts.isNotEmpty)
-                  // Account Sections
-                  ...accounts.where((a) => a.type == AccountTypeEnum.investment).map((account) {
+                  _buildWarningCard(
+                    theme,
+                    icon: Icons.account_balance_wallet_outlined,
+                    message: "No accounts found to choose from",
+                  )
+
+                // Accounts exist, but no holdings in any of them
+                else if (allHoldings.isEmpty)
+                  _buildWarningCard(
+                    theme,
+                    icon: Icons.pie_chart_outline,
+                    message: "No holdings found in your investment accounts",
+                  )
+
+                // Render the list
+                else
+                  ...investmentAccounts.map((account) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 4,
@@ -101,7 +97,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                             spacing: 12,
                             children: [
                               AccountLogo(account),
-                              Text(account.name, style: Theme.of(context).textTheme.titleMedium),
+                              Text(account.name, style: theme.textTheme.titleMedium),
                             ],
                           ),
                         ),
@@ -123,6 +119,32 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
         ),
       ],
     ));
+  }
+
+  /// Helper to build the warning UI
+  Widget _buildWarningCard(ThemeData theme, {required IconData icon, required String message}) {
+    return Center(
+      child: SizedBox(
+        height: 180,
+        child: SproutCard(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 12,
+              children: [
+                Icon(icon, size: 48, color: theme.colorScheme.secondary),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Builds the performance chart to display for the current selected symbol
