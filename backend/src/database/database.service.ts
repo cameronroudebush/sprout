@@ -5,18 +5,19 @@ import { DataSource } from "typeorm";
 /** This class contains Sprout's database access via typeorm. */
 @Injectable()
 export class DatabaseService {
-  private readonly logger = new Logger("db");
+  private readonly logger: Logger;
 
   /** The connection data source */
   source: DataSource;
 
   constructor() {
     this.source = new DataSource(Configuration.database.dbConfig);
+    this.logger = new Logger(`db:${Configuration.database.type}`);
   }
 
   /** Initializes the database based on the backend configuration */
   async init() {
-    this.logger.log(`Attempting SQLite connection at: ${this.source.options.database}`);
+    this.logger.log(`Attempting connection at: ${this.source.options.database}`);
     await this.source.initialize();
     this.logger.verbose(`Connection successful`);
     if (!(await this.databaseExists())) {
@@ -37,7 +38,7 @@ export class DatabaseService {
   /** Returns if the current database exists or not in our installed database */
   async databaseExists(databaseName = Configuration.database.dbConfig.database, source = this.source) {
     this.validateSource(source);
-    if (Configuration.database.type === "sqlite") return (await source.query("SELECT name FROM sqlite_master WHERE type='table'")).length >= 1;
+    if (Configuration.database.isSqlite) return (await source.query("SELECT name FROM sqlite_master WHERE type='table'")).length >= 1;
     else return (await source.query("SHOW DATABASES LIKE ?", [databaseName])).length >= 1;
   }
 
@@ -78,7 +79,7 @@ export class DatabaseService {
    * See this info: https://github.com/typeorm/typeorm/issues/2584#issuecomment-408013561
    */
   async setSQLitePRAGMA(enabled: boolean, source = this.source) {
-    if (Configuration.database.type !== "sqlite") return; // Don't do anything if not SQLite
+    if (Configuration.database.isSqlite) return; // Don't do anything if not SQLite
     this.validateSource(source);
     if (enabled) {
       await source.query("PRAGMA foreign_keys=ON;");

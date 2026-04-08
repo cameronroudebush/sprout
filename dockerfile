@@ -10,7 +10,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:25-alpine3.21 AS backend-build
+FROM node:lts-alpine AS backend-build
 # Install git
 RUN apk add git
 WORKDIR /app

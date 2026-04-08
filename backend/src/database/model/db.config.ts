@@ -30,15 +30,21 @@ export class DatabaseConfig {
   @ConfigurationMetadata.assign({ comment: "Configuration for performing database backups automatically" })
   backup = new BackupConfig();
 
-  @ConfigurationMetadata.assign({ comment: "The type of database we want to use", restrictedValues: ["sqlite"] })
-  type: "sqlite" = "sqlite";
+  @ConfigurationMetadata.assign({ comment: "The type of database we want to use", restrictedValues: ["better-sqlite3"] })
+  type: "better-sqlite3" = "better-sqlite3";
 
   @ConfigurationMetadata.assign({ comment: "SQLite specific configuration options" })
   sqlite = new SQLiteConfig();
 
+  /** Returns if this is an sqlite database type */
+  get isSqlite() {
+    return this.type === "better-sqlite3";
+  }
+
   /** Returns the database configuration used to initialize the data source */
   get dbConfig() {
-    const migrationsDirectory = path.resolve(path.join(__dirname, "database", "migration", this.type));
+    const dbType: "sqlite" = this.type === "better-sqlite3" ? "sqlite" : "sqlite";
+    const migrationsDirectory = path.resolve(path.join(__dirname, "database", "migration", dbType));
     const migrationFiles = glob.sync("/**/*.*[!.map]", { root: path.join(migrationsDirectory) });
     return {
       ...this.sqlite,
