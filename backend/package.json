@@ -16,6 +16,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.1",
     "@nestjs/throttler": "^6.4.0",
+    "@scalar/nestjs-api-reference": "^1.1.7",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
@@ -40,7 +41,6 @@
     "rxjs": "^7.8.2",
     "sharp": "^0.34.3",
     "sharp-ico": "^0.1.5",
-    "swagger-themes": "^1.4.3",
     "ts-mixer": "^6.0.4",
     "typeorm": "^0.3.28",
     "yahoo-finance2": "^3.13.0",
@@ -100,7 +100,6 @@
       "node_modules/@img/sharp-win32-x64/**/*",
       "node_modules/@img/sharp-linuxmusl-x64/**/*",
       "node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
-      "node_modules/swagger-themes/**/*",
       "node_modules/ansis/**/*",
       "node_modules/firebase-admin/**/*",
       "node_modules/google-auth-library/**/*"
