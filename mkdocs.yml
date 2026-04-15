@@ -28,7 +28,6 @@ extra:
       link: https://github.com/cameronroudebush/sprout
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/croudebush/sprout
-  generator: false
   analytics:
     provider: custom
     property: foobar
@@ -39,11 +38,6 @@ plugins:
       cards_layout_options:
         background_color: "#1d2127"
         color: "#FFFFFF"
-  - swagger-ui-tag:
-      extra_css: [stylesheets/swagger.css]
-      tryItOutEnabled: false
-      supportedSubmitMethods: []
-      filter: true
 nav:
   - Home: index.md
   - Features:
