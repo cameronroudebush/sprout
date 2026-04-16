@@ -32,7 +32,7 @@ jobs:
       - name: Create GitHub Release
         if: ${{ steps.get_repo_info.outputs.is_tagged_commit == 'true' }}
         id: create_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.get_repo_info.outputs.version_string }}
           name: ${{ steps.get_repo_info.outputs.version_string }}

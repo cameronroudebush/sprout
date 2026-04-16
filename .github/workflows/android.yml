@@ -169,7 +169,7 @@ jobs:
 
       - name: Upload APK to Draft Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: flutter-apk/sprout.apk
           tag_name: ${{ needs.build.outputs.version_string }}
