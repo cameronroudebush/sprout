@@ -49,6 +49,8 @@ To use OIDC with your provider, here's some examples
                 secret: $pbkdf2-da.... #(3)!
                 authorization_policy: two_factor
                 lifespan: extended_lifespan
+                consent_mode: pre-configured
+                pre_configured_consent_duration: "30 days"
                 redirect_uris:
                     - http://sprout.mydomain.com/api/auth/oidc/callback # (Change to your production URL)
                 scopes:

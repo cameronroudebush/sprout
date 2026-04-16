@@ -60,11 +60,6 @@ export async function getBackground(width: number, height: number, layout: "stra
     gradX2 = "50%";
   }
 
-  let gridLines = "";
-  for (let y = 0; y <= height; y += 100) {
-    gridLines += `M0,${y} L${width},${y} `;
-  }
-
   const svgBuffer = Buffer.from(`
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
       <defs>
@@ -88,8 +83,6 @@ export async function getBackground(width: number, height: number, layout: "stra
       <rect width="100%" height="100%" fill="url(#bg-grad)" />
 
       <rect width="100%" height="100%" filter="url(#noise)" pointer-events="none" />
-
-      <path d="${gridLines.trim()}" stroke="url(#grid-grad)" stroke-width="1" fill="none" />
     </svg>
   `);
 
