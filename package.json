@@ -2,8 +2,8 @@
   "private": true,
   "scripts": {
     "install:all": "npm i && npm i --prefix ./backend",
-    "build:docker": "ts-node --project ./backend/tsconfig.build.json ./scripts/build.docker.ts",
-    "screenshot": "ts-node --project ./backend/tsconfig.build.json ./scripts/release.screenshots.ts",
+    "build:docker": "ts-node --project ./scripts/tsconfig.json ./scripts/build.docker.ts",
+    "screenshot": "ts-node --project ./scripts/tsconfig.json ./scripts/release.screenshots.ts",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write",
     "changelog:generate:md": "auto-changelog --template ./docs/changelog-templates/markdown.hbs",
@@ -15,12 +15,13 @@
   },
   "devDependencies": {
     "@types/chrome-remote-interface": "^0.33.0",
+    "@types/node": "^25.6.0",
     "auto-changelog": "^2.5.0",
     "chrome-remote-interface": "^0.34.0",
     "git-describe": "^4.1.1",
     "prettier": "^3.8.1",
-    "ts-node": "^10.9.2",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "typescript": "^6.0.2"
   },
   "auto-changelog": {
     "template": "./docs/changelog-template.hbs",
