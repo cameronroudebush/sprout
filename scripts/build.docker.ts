@@ -23,7 +23,7 @@ export async function spawnProcess(command: string, cwd = path.join(__dirname)) 
 /**
  * This module contains automatic functionality to be able to produce docker contains properly tagged for the sprout ecosystem
  */
-export module DockerBuilder {
+export namespace DockerBuilder {
   function log(...message: any[]) {
     console.log("[Sprout Docker Builder]", ...message);
   }
