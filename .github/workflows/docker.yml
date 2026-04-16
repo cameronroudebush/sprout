@@ -72,7 +72,7 @@ jobs:
           fetch-depth: "0"
 
       - name: Install Dependencies
-        run: npm i --only=dev && npm i --prefix ./backend --only=dev
+        run: npm i && npm i --prefix ./backend
 
       - name: Build Docker Image (Local Only)
         run: npm run build:docker croudebush/sprout:dev
