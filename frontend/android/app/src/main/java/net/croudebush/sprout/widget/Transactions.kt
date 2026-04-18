@@ -26,6 +26,7 @@ class Transactions : AppWidgetProvider() {
         val rootData = WidgetUtils.getWidgetData(context)
         val dataObj = rootData?.optJSONObject("data")
         val themeObj = rootData?.optJSONObject("theme")
+        val failureMessage = rootData?.optString("failureMessage", null)
 
         // Fallback timestamp if data is missing
         val sdf = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
@@ -34,6 +35,11 @@ class Transactions : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.transactions)
             views.setEmptyView(R.id.widget_transactions_list, R.id.widget_empty_view)
+
+            // Failure Message
+            if (failureMessage != null) {
+                views.setTextViewText(R.id.widget_empty_view, failureMessage)
+            }
 
             // Apply Theme
             if (themeObj != null) {

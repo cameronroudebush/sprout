@@ -33,7 +33,7 @@ class Transactions extends _$Transactions {
         // Re-fetch the first page
         fetchFilteredPage(
           startIndex: 0,
-          resetList: true, // We need to clear the list for a force update
+          reset: true, // We need to clear the list for a force update
           // Do not include additional filters so we grab all data
         );
       }
@@ -43,6 +43,8 @@ class Transactions extends _$Transactions {
   }
 
   /// Fetches data matching the given filter with the given index
+  /// [reset] If we should reset the entire list. Warning, this
+  ///   could cause issues where data might disappear more than you expect.
   Future<void> fetchFilteredPage({
     required int startIndex,
     String? accountId,
@@ -50,7 +52,7 @@ class Transactions extends _$Transactions {
     String? search,
     DateTimeRange? dateRange,
     bool? pending,
-    bool resetList = false,
+    bool reset = false,
   }) async {
     final current = state.value;
     if (current == null || current.isLoadingMore) return;
@@ -72,7 +74,7 @@ class Transactions extends _$Transactions {
       );
 
       if (nextItems != null) {
-        final updatedList = resetList
+        final updatedList = reset
             ? nextItems
             : [...current.transactions, ...nextItems.where((t) => !current.transactions.any((e) => e.id == t.id))];
 

@@ -74,7 +74,8 @@ export class AuthController {
     const sameSite = "strict";
     res.cookie("id_token", idToken, { httpOnly: true, secure, sameSite });
     if (accessToken) res.cookie("access_token", accessToken, { httpOnly: true, secure, sameSite });
-    if (refreshToken) res.cookie("refresh_token", refreshToken, { httpOnly: true, secure, path: "/auth/oidc/refresh", sameSite });
+    if (refreshToken)
+      res.cookie("refresh_token", refreshToken, { httpOnly: true, secure, path: `${Configuration.server.basePath}/auth/oidc/refresh`, sameSite });
   }
 
   @Post("oidc/refresh")

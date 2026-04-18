@@ -51,7 +51,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
           );
 
-      _fetchPage(reset: false);
+      _fetchPage();
     });
   }
 
@@ -66,7 +66,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final filters = ref.read(transactionFilterStateProvider);
     await ref.read(transactionsProvider.notifier).fetchFilteredPage(
           startIndex: reset ? 0 : _filteredOffset,
-          resetList: reset,
           accountId: filters.accountId,
           catId: filters.categoryId,
           search: filters.search,
@@ -102,7 +101,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: TransactionFilterBar(
                 accountId: widget.accountId,
-                onFilterChanged: () => _fetchPage(reset: true),
+                onFilterChanged: () => _fetchPage(),
               ),
             ),
           ),
