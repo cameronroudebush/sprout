@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/auth/auth_token_provider.dart';
 import 'package:sprout/auth/oidc_helper/oidc_helper.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
-import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
 part 'auth_provider.g.dart';
@@ -40,103 +41,20 @@ class Auth extends _$Auth {
   /// If we're currently logging out
   bool _isLoggingOut = false;
 
-  /// Used to prevent duplicate OIDC refresh requests
-  Completer<bool>? _refreshCompleter;
-
   // Getters for UI
   bool get isLoggingOut => _isLoggingOut;
 
   @override
   Future<User?> build() async {
     final config = await ref.watch(unsecureConfigProvider.future);
-    final tokens = await ref.read(authTokensProvider.future);
-
     if (config == null || isSetupMode) return null;
 
-    final isOIDC = config.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
-
-    // OIDC
-    if (isOIDC) {
-      try {
-        // Mobile - Restore
-        if (!kIsWeb) {
-          if (tokens.idToken == null || tokens.idToken == "") {
-            final user = await loginOIDC();
-            if (user != null) {
-              // Wait for user config to load before proceeding
-              ref.read(userConfigProvider);
-              return user;
-            } else {
-              return null;
-            }
-          } else {
-            try {
-              final result = await _applyAuth(
-                idToken: tokens.idToken,
-                accessToken: tokens.accessToken,
-                refreshToken: tokens.refreshToken,
-              );
-              if (result != null) {
-                ref.read(userConfigProvider);
-              }
-              return result;
-            } catch (e) {
-              // If applyAuth fails (e.g. 401), try a refresh
-              if (isOIDC) {
-                final success = await silentRefresh();
-                if (success) return await build(); // Retry build after refresh
-              }
-              return null;
-            }
-          }
-        } else {
-          // Web - Restore
-          try {
-            return await _applyAuth();
-          } catch (e) {
-            if (isOIDC && e is ApiException && e.code == 401) {
-              await loginOIDC();
-            } else {
-              rethrow;
-            }
-          }
-        }
-      } catch (e) {
-        if (e is ApiException && e.code == 404) await setup();
-      }
-
-      // Base case. Don't try to auto login to prevent loops from failures
-      return null;
-    }
-
-    // Local Auth Restore (Mobile & Web)
     try {
-      // Try and grab me as a user if we have a token to see if this needs to be a new user setup
-      if ((tokens.idToken == null || tokens.idToken == "") && config.allowUserCreation) {
-        try {
-          final api = await ref.read(userApiProvider.future);
-          await api.userControllerMe();
-          // Wait for user config to load before proceeding
-          ref.read(userConfigProvider);
-        } catch (e) {
-          if (e is ApiException && e.code == 404) await setup();
-        }
-      } else {
-        final api = await ref.read(authApiProvider.future);
-        final loginResponse = await api.authControllerLoginWithJWT(JWTLoginRequest(jwt: tokens.idToken ?? ''));
-        if (loginResponse != null) return await _applyAuth(idToken: loginResponse.jwt, user: loginResponse.user);
-      }
-    } on ApiException catch (e, _) {
-      final isSessionExpiration = e.code == 401;
-      // Reset the JWT as the auto login has expired
-      if (isSessionExpiration) {
-        await ref.read(authTokensProvider.notifier).clear();
-      }
-      // Either no cookie so not logged in, or an invalid JWT
+      final userApi = await ref.read(userApiProvider.future);
+      return await userApi.userControllerMe();
+    } catch (e) {
       return null;
     }
-
-    return null;
   }
 
   /// If called, assumes we need to go to setup for new user creation. Runs some initial checks before trying that.
@@ -159,11 +77,8 @@ class Auth extends _$Auth {
     NavigationProvider.redirect("/");
   }
 
-  /// Private helper to set tokens and update the state
-  Future<User?> _applyAuth({String? idToken, String? accessToken, String? refreshToken, User? user}) async {
-    await ref
-        .read(authTokensProvider.notifier)
-        .updateTokens(idToken: idToken, accessToken: accessToken, refreshToken: refreshToken);
+  /// Private helper to set user info of authenticated user
+  Future<User?> _applyAuth({User? user}) async {
     final userApi = await ref.read(userApiProvider.future);
     final finalUser = user ?? await userApi.userControllerMe();
     state = AsyncData(finalUser);
@@ -178,52 +93,28 @@ class Auth extends _$Auth {
     );
     if (response != null) {
       ref.read(sessionStatusProvider.notifier).markAsManualLogin();
-      return await _applyAuth(idToken: response.jwt, user: response.user);
+      return await _applyAuth(user: response);
     }
     return null;
   }
 
   /// Attempts a login via OIDC using the OIDC helper
   Future<User?> loginOIDC({bool manualLogin = false}) async {
-    final tokens = ref.read(authTokensProvider).value;
-    // Mobile Shortcut: If we have a refresh token, try to use it or refresh it
-    if (!manualLogin && !kIsWeb && tokens?.refreshToken != null && tokens!.refreshToken!.isNotEmpty) {
-      try {
-        return await _applyAuth();
-      } catch (e) {
-        LoggerProvider.debug("Initial OIDC apply failed, attempting silent refresh...");
-        final refreshSuccess = await silentRefresh();
-        if (refreshSuccess) {
-          return await _applyAuth();
-        }
-        // If refresh failed, we fall through to the full OIDC flow below
-        LoggerProvider.debug("Silent refresh failed, proceeding to full OIDC login.");
-      }
-    }
-
-    // Web Shortcut: Try to restore session from cookies
+    // Try to restore session from cookies
     if (kIsWeb) {
       try {
         return await _applyAuth();
       } catch (e) {
-        LoggerProvider.debug("Web cookie restoration failed, proceeding to OIDC redirect.");
+        LoggerProvider.debug("Cookie restoration failed, proceeding to OIDC redirect.");
       }
     }
 
-    // Fallback: Full OIDC Authentication
+    // Full OIDC Authentication
     final basePath = await ref.read(connectionUrlProvider.future);
-    final resultTokens = await _oidcHelper.authenticate(basePath ?? "");
+    await _oidcHelper.authenticate(basePath ?? "", ref);
     ref.read(sessionStatusProvider.notifier).markAsManualLogin();
 
-    // If resultTokens is null, it usually means a web redirect is occurring
-    // or the user cancelled/closed the flow.
-    if (resultTokens == null) return null;
-
-    return await _applyAuth(
-      idToken: resultTokens['id_token'],
-      accessToken: resultTokens['access_token'],
-      refreshToken: resultTokens['refresh_token'],
-    );
+    return await _applyAuth();
   }
 
   /// Initiates a logout
@@ -233,7 +124,6 @@ class Auth extends _$Auth {
     try {
       await api.authControllerLogout();
     } finally {
-      await ref.read(authTokensProvider.notifier).clear();
       // Wipe the state
       state = const AsyncData(null);
       // Invalidate other providers to clear their cache
@@ -241,68 +131,26 @@ class Auth extends _$Auth {
       NavigationProvider.redirect("login");
     }
   }
+}
 
-  /// Adds required tokens via headers for authentication.
-  Future<Map<String, String>> getHeaders() async {
-    // Web uses cookies
-    if (kIsWeb) return {};
-    final tokens = ref.read(authTokensProvider).value;
-    return {"Authorization": 'Bearer ${tokens?.idToken ?? ""}', 'x-access-token': tokens?.accessToken ?? ""};
-  }
+/// Generic cookie jar to persist across app restarts for usage in mobile
+@Riverpod(keepAlive: true)
+Future<CookieJar> cookieJar(Ref ref, bool persist) async {
+  if (kIsWeb || !persist) {
+    return CookieJar();
+  } else {
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final String storagePath = "${appDocDir.path}/.cookies/";
 
-  /// Handles trying to refresh the tokens with the refresh token
-  Future<bool> silentRefresh() async {
-    if (_isLoggingOut) return false;
-    // If a refresh is already in progress, return the existing future
-    if (_refreshCompleter != null) return _refreshCompleter!.future;
-    _refreshCompleter = Completer<bool>();
-
-    try {
-      final config = ref.read(unsecureConfigProvider).value;
-
-      // Strategy Check (OIDC vs Local)
-      // If not OIDC, we can't refresh (Local strategy usually requires a re-login)
-      final isOIDC = config?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
-      if (!isOIDC) {
-        _refreshCompleter!.complete(false);
-        return false;
-      }
-
-      // Token Acquisition
-      final tokens = ref.read(authTokensProvider).value;
-      final refreshToken = kIsWeb ? null : tokens?.refreshToken;
-
-      if (!kIsWeb && (refreshToken == null || refreshToken.isEmpty)) {
-        _refreshCompleter!.complete(false);
-        return false;
-      }
-
-      final authApi = await ref.read(authApiProvider.future);
-      final response = await authApi.authControllerRefresh(RefreshRequestDTO(refreshToken: refreshToken ?? ""));
-
-      if (response != null) {
-        if (!kIsWeb) {
-          // Update storage with the new tokens
-          await _applyAuth(
-              idToken: response.idToken, accessToken: response.accessToken, refreshToken: response.refreshToken);
-        } else {
-          // Web cookies are updated automatically by the browser/server
-          state = AsyncData(state.value); // Refresh state to notify listeners
-        }
-        _refreshCompleter!.complete(true);
-        return true;
-      }
-
-      _refreshCompleter!.complete(false);
-      return false;
-    } catch (e) {
-      LoggerProvider.error("Refresh failed: $e");
-      // If refresh fails, we must log out to clear the "stuck" state
-      await logout();
-      _refreshCompleter!.complete(false);
-      return false;
-    } finally {
-      _refreshCompleter = null;
+    final directory = Directory(storagePath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
     }
+
+    return PersistCookieJar(
+      storage: FileStorage(storagePath),
+      ignoreExpires: false,
+      persistSession: true,
+    );
   }
 }

@@ -1,4 +1,5 @@
 import { AuthController } from "@backend/auth/auth.controller";
+import { OIDCController } from "@backend/auth/auth.oidc.controller";
 import { AuthService } from "@backend/auth/auth.service";
 import { LocalStrategy } from "@backend/auth/strategy/local.strategy";
 import { OIDCStrategy } from "@backend/auth/strategy/oidc.strategy";
@@ -20,7 +21,7 @@ if (Configuration.server.auth.type === "oidc") {
 
 @Module({
   imports: [PassportModule, HttpModule, CacheModule.register(), UserModule],
-  controllers: [AuthController],
+  controllers: [AuthController, OIDCController],
   providers: authProviders,
   exports: [AuthService],
 })

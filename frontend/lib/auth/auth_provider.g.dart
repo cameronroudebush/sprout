@@ -115,7 +115,7 @@ final class AuthProvider extends $AsyncNotifierProvider<Auth, User?> {
   Auth create() => Auth();
 }
 
-String _$authHash() => r'085025593a7df31cb0376f1b2af13903f027b774';
+String _$authHash() => r'fe682cdf2558ae6d751db5516713b7672c994c56';
 
 abstract class _$Auth extends $AsyncNotifier<User?> {
   FutureOr<User?> build();
@@ -130,4 +130,86 @@ abstract class _$Auth extends $AsyncNotifier<User?> {
         Object?>;
     element.handleCreate(ref, build);
   }
+}
+
+/// Generic cookie jar to persist across app restarts for usage in mobile
+
+@ProviderFor(cookieJar)
+final cookieJarProvider = CookieJarFamily._();
+
+/// Generic cookie jar to persist across app restarts for usage in mobile
+
+final class CookieJarProvider extends $FunctionalProvider<AsyncValue<CookieJar>,
+        CookieJar, FutureOr<CookieJar>>
+    with $FutureModifier<CookieJar>, $FutureProvider<CookieJar> {
+  /// Generic cookie jar to persist across app restarts for usage in mobile
+  CookieJarProvider._(
+      {required CookieJarFamily super.from, required bool super.argument})
+      : super(
+          retry: null,
+          name: r'cookieJarProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$cookieJarHash();
+
+  @override
+  String toString() {
+    return r'cookieJarProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<CookieJar> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<CookieJar> create(Ref ref) {
+    final argument = this.argument as bool;
+    return cookieJar(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CookieJarProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$cookieJarHash() => r'5c755cd4ef8139bc80f5a19215bb6594b8723486';
+
+/// Generic cookie jar to persist across app restarts for usage in mobile
+
+final class CookieJarFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<CookieJar>, bool> {
+  CookieJarFamily._()
+      : super(
+          retry: null,
+          name: r'cookieJarProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  /// Generic cookie jar to persist across app restarts for usage in mobile
+
+  CookieJarProvider call(
+    bool persist,
+  ) =>
+      CookieJarProvider._(argument: persist, from: this);
+
+  @override
+  String toString() => r'cookieJarProvider';
 }

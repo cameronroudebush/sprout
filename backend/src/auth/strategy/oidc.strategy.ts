@@ -1,3 +1,4 @@
+import { AuthService } from "@backend/auth/auth.service";
 import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
@@ -19,6 +20,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
 
   constructor(
     private readonly httpService: HttpService,
+    private readonly authService: AuthService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     const config = Configuration.server.auth.oidc;
@@ -36,56 +38,76 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
       passReqToCallback: true,
       issuer: issuer,
       audience,
-      ignoreExpiration: false,
+      ignoreExpiration: true, // Ignores expiration so we can auto refresh
     });
   }
 
-  async validate(req: Request, profileData: { sub: string; preferred_username: string }) {
-    // Sometimes the JWT may be minified which means it excludes all profile info. So go ahead and look that up manually.
-    if (!profileData.preferred_username) {
-      // Need the access token to request data from OIDC provider. Try and find it from either cookies or the header
-      const accessToken = req.cookies["access_token"] || req.headers["x-access-token"];
+  async validate(req: Request, profile: { iss: string; exp: number; sub: string; aud: Array<string> }) {
+    const config = Configuration.server.auth.oidc;
+    const now = Math.floor(Date.now() / 1000);
+    let profileData: { sub: string; preferred_username: string } | undefined;
 
-      if (!accessToken) throw new UnauthorizedException("Token missing profile data and no access token provided.");
+    // Perform some security validation
+    if (profile.iss !== config.issuer) throw new UnauthorizedException("Invalid token issuer.");
+    if (!profile.aud.includes(config.clientId)) throw new UnauthorizedException("Invalid token audience.");
 
-      if (accessToken) {
-        const cacheKey = `oidc_user_${accessToken}`;
-        try {
-          // Check if we have cache data
-          profileData = await this.cacheManager.get<any>(cacheKey);
+    // Grab some tokens from cookies, if available
+    const refreshToken = req.cookies[AuthService.refreshCookie];
+    const accessToken = req.cookies[AuthService.accessTokenCookie];
+    // Check if we need to refresh
+    if (profile.exp && now >= profile.exp) {
+      this.logger.debug(`Token expired for ${profile.sub}, attempting refresh...`);
 
-          // If no cache data, grab it from OIDC
-          if (!profileData) {
-            // Grab the user profile info from the remote OIDC endpoint
-            const userInfoUrl = `${Configuration.server.auth.oidc.issuer}/api/oidc/userinfo`;
-            profileData = (
-              await firstValueFrom(
-                this.httpService.get(userInfoUrl, {
-                  headers: { Authorization: `Bearer ${accessToken}` },
-                }),
-              )
-            ).data;
+      if (!refreshToken) throw new UnauthorizedException("Session expired and no refresh token available.");
 
-            // Cache our data so we don't over-request. Save it for 5 minutes.
-            await this.cacheManager.set(cacheKey, profileData, 5 * 60000);
-          }
-        } catch (e) {
-          this.logger.error(`Failed to fetch UserInfo: ${e}`);
-        }
-      } else this.logger.warn("ID Token missing claims and no x-access-token header provided.");
+      try {
+        const tokens = await this.authService.performOIDCRefresh(refreshToken, req.res);
+
+        // Update profileData with the new token's claims so the current request succeeds
+        profileData = await this.getUserInfo(tokens.accessToken);
+      } catch (e) {
+        this.logger.error(`Refresh failed: ${e}`);
+        throw new UnauthorizedException("Session expired.");
+      }
+    } else {
+      // No refresh? Grab profile data
+      profileData = await this.getUserInfo(accessToken);
     }
 
+    // Make sure we have the user info
     if (!profileData?.preferred_username) throw new UnauthorizedException("Could not determine username from token.");
-
     // Find user based on our profile data/token
     const user = await User.findOne({ where: { username: profileData.preferred_username } });
-
     // Set request context for any data we have for setup of new users
     (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username);
-
     // No user? Probably should fail then
     if (!user) throw new UnauthorizedException(`User ${profileData.preferred_username} not found`);
-
     return user;
+  }
+
+  /**
+   * Retrieves the user info from the OIDC endpoint/cache and returns it
+   */
+  private async getUserInfo(accessToken: string) {
+    const cacheKey = `oidc_user_${accessToken}`;
+    // Check if we have cache data
+    let profileData = await this.cacheManager.get<any>(cacheKey);
+
+    // If no cache data, grab it from OIDC provider
+    if (!profileData) {
+      // Grab the user profile info from the remote OIDC endpoint
+      const userInfoUrl = `${Configuration.server.auth.oidc.issuer}/api/oidc/userinfo`;
+      profileData = (
+        await firstValueFrom(
+          this.httpService.get(userInfoUrl, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }),
+        )
+      ).data;
+
+      // Cache our data so we don't over-request. Save it for 5 minutes.
+      await this.cacheManager.set(cacheKey, profileData, 5 * 60000);
+    }
+    return profileData;
   }
 }

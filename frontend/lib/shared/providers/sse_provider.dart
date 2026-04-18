@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/auth/auth_token_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/models/sse_state.dart';
 
@@ -53,16 +52,11 @@ class Sse extends _$Sse {
     try {
       final client = await ref.read(baseAuthenticatedClientProvider.future);
 
-      // Get current tokens from the provider state
-      var tokens = ref.read(authTokensProvider).value;
-      var idToken = tokens?.idToken;
-
       final url = Uri.parse('${client.basePath}/sse');
       final request = http.Request('GET', url);
       request.headers.addAll({
         'Accept': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        if (idToken != null) 'Authorization': 'Bearer $idToken',
       });
 
       _httpClient = client.client;

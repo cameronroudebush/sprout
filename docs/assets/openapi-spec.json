@@ -763,7 +763,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserLoginResponse"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -797,7 +797,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserLoginResponse"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -810,51 +810,24 @@
         "tags": ["Auth"]
       }
     },
-    "/auth/oidc/refresh": {
+    "/auth/logout": {
       "post": {
-        "description": "Proxies OIDC token refresh to the destination server of the OIDC issuer.  Only available on OIDC strategy auth.",
-        "operationId": "AuthController_refresh",
+        "description": "Clears the session cookies any authentication that has happened.",
+        "operationId": "AuthController_logout",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshRequestDTO"
-              }
-            }
-          }
-        },
         "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefreshResponseDTO"
-                }
-              }
-            }
-          },
           "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefreshResponseDTO"
-                }
-              }
-            }
+            "description": ""
           }
         },
-        "summary": "Proxy OIDC refresh requests.",
+        "summary": "Logout the user",
         "tags": ["Auth"]
       }
     },
     "/auth/oidc/login": {
       "get": {
         "description": "Authenticates to our OIDC server that is configured and handles redirecting the authentication capability back to API to complete the login request.",
-        "operationId": "AuthController_loginOIDC",
+        "operationId": "OIDCController_loginOIDC",
         "parameters": [
           {
             "name": "target_url",
@@ -877,7 +850,7 @@
     "/auth/oidc/callback": {
       "get": {
         "description": "Handles the redirect back from the OIDC server and handles state control to get the authentication response back to the original requester.",
-        "operationId": "AuthController_loginCallbackOIDC",
+        "operationId": "OIDCController_loginCallbackOIDC",
         "parameters": [
           {
             "name": "code",
@@ -905,17 +878,30 @@
         "tags": ["Auth"]
       }
     },
-    "/auth/logout": {
-      "post": {
-        "description": "Clears the session cookies any authentication that has happened.",
-        "operationId": "AuthController_logout",
+    "/auth/oidc/exchange": {
+      "put": {
+        "description": "This seeds the mobile CookieJar or Browser cookies.",
+        "operationId": "OIDCController_exchange",
         "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MobileTokenExchangeDto"
+              }
+            }
           }
         },
-        "summary": "Logout the user",
+        "responses": {
+          "204": {
+            "description": "Cookies set successfully"
+          },
+          "400": {
+            "description": "Invalid token DTO"
+          }
+        },
+        "summary": "Exchange OIDC tokens for HttpOnly cookies",
         "tags": ["Auth"]
       }
     },
@@ -2516,7 +2502,7 @@
             "bearer": []
           }
         ],
-        "summary": "",
+        "summary": "Send Test Notification",
         "tags": ["Notification"]
       }
     }
@@ -2524,13 +2510,13 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.3.0-24-gf9331ed",
+    "version": "v0.3.0-29-g4d4174d",
     "contact": {}
   },
   "tags": [
     {
       "name": "Core",
-      "description": "Provides essential application functionalities, including manual data synchronization and initial setup checks."
+      "description": "Provides essential application functionalities, including some proxying, the Server Sent Events (SSE) endpoints and other utility."
     },
     {
       "name": "Config",
@@ -3073,18 +3059,6 @@
         },
         "required": ["id", "username", "admin", "config"]
       },
-      "UserLoginResponse": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "jwt": {
-            "type": "string"
-          }
-        },
-        "required": ["user"]
-      },
       "JWTLoginRequest": {
         "type": "object",
         "properties": {
@@ -3094,17 +3068,7 @@
           }
         }
       },
-      "RefreshRequestDTO": {
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "type": "string",
-            "description": "The current refresh token"
-          }
-        },
-        "required": ["refreshToken"]
-      },
-      "RefreshResponseDTO": {
+      "MobileTokenExchangeDto": {
         "type": "object",
         "properties": {
           "idToken": {
@@ -3117,7 +3081,7 @@
             "type": "string"
           }
         },
-        "required": ["idToken", "accessToken"]
+        "required": ["idToken", "accessToken", "refreshToken"]
       },
       "UserCreationRequest": {
         "type": "object",
@@ -3691,7 +3655,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-04-15T00:18:20.594Z"
+            "default": "2026-04-18T18:05:19.621Z"
           },
           "isRead": {
             "type": "boolean",

@@ -10,28 +10,22 @@
 
 part of openapi.api;
 
-class RefreshResponseDTO {
-  /// Returns a new [RefreshResponseDTO] instance.
-  RefreshResponseDTO({
+class MobileTokenExchangeDto {
+  /// Returns a new [MobileTokenExchangeDto] instance.
+  MobileTokenExchangeDto({
     required this.idToken,
     required this.accessToken,
-    this.refreshToken,
+    required this.refreshToken,
   });
 
   String idToken;
 
   String accessToken;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? refreshToken;
+  String refreshToken;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RefreshResponseDTO &&
+  bool operator ==(Object other) => identical(this, other) || other is MobileTokenExchangeDto &&
     other.idToken == idToken &&
     other.accessToken == accessToken &&
     other.refreshToken == refreshToken;
@@ -41,27 +35,23 @@ class RefreshResponseDTO {
     // ignore: unnecessary_parenthesis
     (idToken.hashCode) +
     (accessToken.hashCode) +
-    (refreshToken == null ? 0 : refreshToken!.hashCode);
+    (refreshToken.hashCode);
 
   @override
-  String toString() => 'RefreshResponseDTO[idToken=$idToken, accessToken=$accessToken, refreshToken=$refreshToken]';
+  String toString() => 'MobileTokenExchangeDto[idToken=$idToken, accessToken=$accessToken, refreshToken=$refreshToken]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'idToken'] = this.idToken;
       json[r'accessToken'] = this.accessToken;
-    if (this.refreshToken != null) {
       json[r'refreshToken'] = this.refreshToken;
-    } else {
-      json[r'refreshToken'] = null;
-    }
     return json;
   }
 
-  /// Returns a new [RefreshResponseDTO] instance and imports its values from
+  /// Returns a new [MobileTokenExchangeDto] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static RefreshResponseDTO? fromJson(dynamic value) {
+  static MobileTokenExchangeDto? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -69,27 +59,29 @@ class RefreshResponseDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'idToken'), 'Required key "RefreshResponseDTO[idToken]" is missing from JSON.');
-        assert(json[r'idToken'] != null, 'Required key "RefreshResponseDTO[idToken]" has a null value in JSON.');
-        assert(json.containsKey(r'accessToken'), 'Required key "RefreshResponseDTO[accessToken]" is missing from JSON.');
-        assert(json[r'accessToken'] != null, 'Required key "RefreshResponseDTO[accessToken]" has a null value in JSON.');
+        assert(json.containsKey(r'idToken'), 'Required key "MobileTokenExchangeDto[idToken]" is missing from JSON.');
+        assert(json[r'idToken'] != null, 'Required key "MobileTokenExchangeDto[idToken]" has a null value in JSON.');
+        assert(json.containsKey(r'accessToken'), 'Required key "MobileTokenExchangeDto[accessToken]" is missing from JSON.');
+        assert(json[r'accessToken'] != null, 'Required key "MobileTokenExchangeDto[accessToken]" has a null value in JSON.');
+        assert(json.containsKey(r'refreshToken'), 'Required key "MobileTokenExchangeDto[refreshToken]" is missing from JSON.');
+        assert(json[r'refreshToken'] != null, 'Required key "MobileTokenExchangeDto[refreshToken]" has a null value in JSON.');
         return true;
       }());
 
-      return RefreshResponseDTO(
+      return MobileTokenExchangeDto(
         idToken: mapValueOfType<String>(json, r'idToken')!,
         accessToken: mapValueOfType<String>(json, r'accessToken')!,
-        refreshToken: mapValueOfType<String>(json, r'refreshToken'),
+        refreshToken: mapValueOfType<String>(json, r'refreshToken')!,
       );
     }
     return null;
   }
 
-  static List<RefreshResponseDTO> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <RefreshResponseDTO>[];
+  static List<MobileTokenExchangeDto> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <MobileTokenExchangeDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = RefreshResponseDTO.fromJson(row);
+        final value = MobileTokenExchangeDto.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -98,12 +90,12 @@ class RefreshResponseDTO {
     return result.toList(growable: growable);
   }
 
-  static Map<String, RefreshResponseDTO> mapFromJson(dynamic json) {
-    final map = <String, RefreshResponseDTO>{};
+  static Map<String, MobileTokenExchangeDto> mapFromJson(dynamic json) {
+    final map = <String, MobileTokenExchangeDto>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = RefreshResponseDTO.fromJson(entry.value);
+        final value = MobileTokenExchangeDto.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -112,14 +104,14 @@ class RefreshResponseDTO {
     return map;
   }
 
-  // maps a json object with a list of RefreshResponseDTO-objects as value to a dart map
-  static Map<String, List<RefreshResponseDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<RefreshResponseDTO>>{};
+  // maps a json object with a list of MobileTokenExchangeDto-objects as value to a dart map
+  static Map<String, List<MobileTokenExchangeDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<MobileTokenExchangeDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RefreshResponseDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MobileTokenExchangeDto.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -129,6 +121,7 @@ class RefreshResponseDTO {
   static const requiredKeys = <String>{
     'idToken',
     'accessToken',
+    'refreshToken',
   };
 }
 
