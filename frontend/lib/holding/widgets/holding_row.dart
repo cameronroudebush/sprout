@@ -21,10 +21,10 @@ class HoldingRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final config = ref.watch(userConfigProvider).value;
     final isPrivate = config?.privateMode ?? false;
-    final selectedRange = ChartRangeEnum.oneDay;
+    final userChartRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
 
     final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
-    final frame = holdingHistoryAsync.value?.getValueByFrame(selectedRange);
+    final frame = holdingHistoryAsync.value?.getValueByFrame(userChartRange);
     final livePriceAsync = ref.watch(livePriceProvider(holding.symbol));
     final liveData = livePriceAsync.value;
 
@@ -72,21 +72,22 @@ class HoldingRow extends ConsumerWidget {
                   ),
 
                   // Price Type (Live/Prev) & Price Change
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        isLive ? 'Price' : 'Previous Close',
-                        style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      SproutChangeWidget(
-                          totalChange: dayChange,
-                          percentageChange: dayPercent,
-                          fontSize: theme.textTheme.labelMedium!.fontSize!,
-                          useExtendedPeriodString: false,
-                          period: selectedRange),
-                    ],
-                  ),
+                  if (liveData != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isLive ? 'Price' : 'Previous Close',
+                          style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        ),
+                        SproutChangeWidget(
+                            totalChange: dayChange,
+                            percentageChange: dayPercent,
+                            fontSize: theme.textTheme.labelMedium!.fontSize!,
+                            useExtendedPeriodString: false,
+                            period: ChartRangeEnum.oneDay),
+                      ],
+                    ),
 
                   // Provider Source
                   Row(
@@ -117,7 +118,7 @@ class HoldingRow extends ConsumerWidget {
                             percentageChange: frame.percentChange,
                             fontSize: theme.textTheme.labelMedium!.fontSize!,
                             useExtendedPeriodString: false,
-                            period: selectedRange),
+                            period: userChartRange),
                     ],
                   ),
                 ],

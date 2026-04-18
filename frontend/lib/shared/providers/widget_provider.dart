@@ -67,9 +67,6 @@ class WidgetSync extends _$WidgetSync {
   }
 
   /// The primary entry point for updating native widget data.
-  ///
-  /// Checks the user's [allowWidgets] preference before proceeding. If disabled,
-  /// it clears the widget data to ensure privacy.
   Future<void> update() async {
     final data = await _prepareData();
     await _saveToNative(data);
@@ -81,50 +78,61 @@ class WidgetSync extends _$WidgetSync {
     final userConfigAsync = ref.read(userConfigProvider.notifier);
     final theme = userConfigAsync.activeTheme(userConfig);
     Map<String, Object>? data;
+    String? failureMessage;
     num? pastNetWorthChange;
 
     // Safety check: If widgets aren't allowed, clear existing data
     if (userConfig != null && userConfig.allowWidgets) {
-      final netWorth = ref.read(totalNetWorthProvider).value;
-      final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
-      final isPrivate = false; // Set to false so widget info always shows real values
-      if (netWorth == null) {
-        data = null;
-      } else {
-        final monthFrame = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
-        final dayRange = ChartRangeEnum.oneMonth;
-        final pastValueRange = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
-        pastNetWorthChange = pastValueRange.valueChange;
+      try {
+        final netWorth = ref.read(totalNetWorthProvider).value;
+        final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
+        final isPrivate = false; // Set to false so widget info always shows real values
+        if (netWorth == null) {
+          data = null;
+        } else {
+          final monthFrame = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+          final dayRange = ChartRangeEnum.oneMonth;
+          final pastValueRange = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+          pastNetWorthChange = pastValueRange.valueChange;
 
-        // Map the 10 most recent transactions into a widget-friendly format
-        final recent = transactions
-            .take(10)
-            .map(
-              (t) => {
-                "merchant": t.description,
-                "category": t.category?.name ?? "Unknown",
-                "amount": t.amount.toCurrency(isPrivate),
-                "amountNumeric": t.amount,
-                "date": t.timeText,
-                "pending": t.pending,
-              },
-            )
-            .toList();
+          // Map the 10 most recent transactions into a widget-friendly format
+          final recent = transactions
+              .take(10)
+              .map(
+                (t) => {
+                  "merchant": t.description,
+                  "category": t.category?.name ?? "Unknown",
+                  "amount": t.amount.toCurrency(isPrivate),
+                  "amountNumeric": t.amount,
+                  "date": t.timeText,
+                  "pending": t.pending,
+                },
+              )
+              .toList();
 
-        data = {
-          "updateTime": DateTime.now().toShortMonthWithTime,
-          "netWorth": netWorth.value.toCurrency(isPrivate),
-          "changeAmount": monthFrame.valueChange.toCurrency(isPrivate),
-          "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
-          "numericChange": pastNetWorthChange,
-          "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
-          "recentTransactions": recent,
-        };
+          data = {
+            "updateTime": DateTime.now().toShortMonthWithTime,
+            "netWorth": netWorth.value.toCurrency(isPrivate),
+            "changeAmount": monthFrame.valueChange.toCurrency(isPrivate),
+            "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
+            "numericChange": pastNetWorthChange,
+            "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
+            "recentTransactions": recent,
+          };
+        }
+      } catch (e) {
+        // If there is an error, just log it and set a failure message
+        LoggerProvider.error("Failed to update widgets: $e");
+        failureMessage = "Failed to update widgets, check logs";
       }
+    } else if (userConfig == null) {
+      // User must be logged in
+      failureMessage = "Session expired";
     }
 
     return {
       "data": data,
+      "failureMessage": failureMessage,
       "theme": {
         "bgColor": theme.appBarTheme.backgroundColor!.toHex(),
         "cardColor": theme.cardColor.toHex(),

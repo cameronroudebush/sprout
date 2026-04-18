@@ -22,7 +22,7 @@ export function configureApiDocument(app: INestApplication) {
     .setDescription(description)
     .setVersion(version)
     .addBearerAuth({ type: "http", description: "This authentication utilizes the JWT given during user login." })
-    .addTag("Core", `Provides essential application functionalities, including manual data synchronization and initial setup checks.`)
+    .addTag("Core", `Provides essential application functionalities, including some proxying, the Server Sent Events (SSE) endpoints and other utility.`)
     .addTag("Config", `Manages application-wide settings and configurations.`)
     .addTag("Auth", "Manage user authentication.")
     .addTag("User", "Manage user creation, and profile information.")

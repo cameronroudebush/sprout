@@ -9,7 +9,6 @@ import 'package:sprout/routes/util/app_bar.dart';
 import 'package:sprout/routes/util/bottom_nav.dart';
 import 'package:sprout/routes/util/sidenav.dart';
 import 'package:sprout/shared/widgets/layout.dart';
-import 'package:sprout/shared/widgets/lifecycle_observer.dart';
 import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/shared/widgets/lock.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -36,41 +35,39 @@ class SproutShell extends ConsumerWidget {
     final isLoading =
         authState.isLoading || (!userConfigAsync.hasValue && userConfigAsync.isLoading) || !bioState.hasInitialized;
 
-    return SproutLifecycleObserver(
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          systemNavigationBarColor: theme.bottomNavigationBarTheme.backgroundColor,
-          systemNavigationBarIconBrightness:
-              theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white ? Brightness.light : Brightness.dark,
-        ),
-        child: SproutLayoutBuilder((isDesktop, context, constraints) {
-          return Stack(
-            children: [
-              Scaffold(
-                appBar: !isDesktop && !authNotifier.isSetupMode ? const SproutAppBar() : null,
-                body: isDesktop
-                    ? Row(
-                        children: [
-                          if (!authNotifier.isSetupMode) const SproutSideNav(),
-                          Expanded(child: child),
-                        ],
-                      )
-                    : child,
-                bottomNavigationBar:
-                    isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
-              ),
-              if (!authNotifier.isSetupMode && isLoading)
-                const Positioned.fill(
-                  child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),
-                ),
-              if (needsBioCheck && bioState.isLocked)
-                const Positioned.fill(
-                  child: SproutLockWidget(key: ValueKey('sprout_locked_screen')),
-                ),
-            ],
-          );
-        }),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        systemNavigationBarColor: theme.bottomNavigationBarTheme.backgroundColor,
+        systemNavigationBarIconBrightness:
+            theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white ? Brightness.light : Brightness.dark,
       ),
+      child: SproutLayoutBuilder((isDesktop, context, constraints) {
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: !isDesktop && !authNotifier.isSetupMode ? const SproutAppBar() : null,
+              body: isDesktop
+                  ? Row(
+                      children: [
+                        if (!authNotifier.isSetupMode) const SproutSideNav(),
+                        Expanded(child: child),
+                      ],
+                    )
+                  : child,
+              bottomNavigationBar:
+                  isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
+            ),
+            if (!authNotifier.isSetupMode && isLoading)
+              const Positioned.fill(
+                child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),
+              ),
+            if (needsBioCheck && bioState.isLocked)
+              const Positioned.fill(
+                child: SproutLockWidget(key: ValueKey('sprout_locked_screen')),
+              ),
+          ],
+        );
+      }),
     );
   }
 }

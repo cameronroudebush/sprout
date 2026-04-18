@@ -4,6 +4,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/routes/util/router.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
+import 'package:sprout/shared/widgets/lifecycle_observer.dart';
 import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/user/user_config_provider.dart';
@@ -48,12 +49,13 @@ class SproutApp extends ConsumerWidget {
         final theme = userConfigNotifier.activeTheme(userConfig);
         final router = ref.watch(routerProvider);
 
-        return MaterialApp.router(
+        return SproutLifecycleObserver(
+            child: MaterialApp.router(
           routerConfig: router,
           title: "Sprout",
           theme: theme,
           debugShowCheckedModeBanner: false,
-        );
+        ));
       },
     );
   }

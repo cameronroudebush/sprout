@@ -133,7 +133,8 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
       ),
     );
 
-    final resetVisible = filters.dateRange != null || filters.pending != null || filters.search.isNotEmpty;
+    final resetVisible =
+        filters.dateRange != null || filters.categoryId != null || filters.pending != null || filters.search.isNotEmpty;
     final resetButton = IconButton(
         onPressed: () {
           _searchController.clear();

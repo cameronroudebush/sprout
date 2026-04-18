@@ -22,6 +22,7 @@ class Overview : AppWidgetProvider() {
         val rootData = WidgetUtils.getWidgetData(context)
         val dataObj = rootData?.optJSONObject("data")
         val themeObj = rootData?.optJSONObject("theme")
+        val failureMessage = rootData?.optString("failureMessage", null)
 
         val pendingIntent = PendingIntent.getActivity(
             context, 0,
@@ -32,6 +33,11 @@ class Overview : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.overview)
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
+
+            // Failure Message
+            if (failureMessage != null) {
+                views.setTextViewText(R.id.empty_state_container, failureMessage)
+            }
 
             // Apply theme
             if (themeObj != null) {
