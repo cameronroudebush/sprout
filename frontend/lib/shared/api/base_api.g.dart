@@ -8,6 +8,45 @@ part of 'base_api.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Root client to use with every other client
+
+@ProviderFor(rootHttpClient)
+final rootHttpClientProvider = RootHttpClientProvider._();
+
+/// Root client to use with every other client
+
+final class RootHttpClientProvider extends $FunctionalProvider<
+        AsyncValue<http.Client>, http.Client, FutureOr<http.Client>>
+    with $FutureModifier<http.Client>, $FutureProvider<http.Client> {
+  /// Root client to use with every other client
+  RootHttpClientProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'rootHttpClientProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$rootHttpClientHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<http.Client> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<http.Client> create(Ref ref) {
+    return rootHttpClient(ref);
+  }
+}
+
+String _$rootHttpClientHash() => r'cc445fa11f61ed1320626087d2898d7653928f41';
+
 /// Base API client that only adds the connection URL. Everything else is basic and this should be used for public routes
 
 @ProviderFor(baseApiClient)
@@ -44,7 +83,7 @@ final class BaseApiClientProvider extends $FunctionalProvider<
   }
 }
 
-String _$baseApiClientHash() => r'fcaef499b4440258536d440a04856c03fb048cb6';
+String _$baseApiClientHash() => r'c4e7a9f6e880339dfcd0a0e6017bb9371a4b9608';
 
 /// Base API client that implements things auto logout, auth info, and auto retries on top of [baseApiClient]
 
@@ -83,4 +122,4 @@ final class BaseAuthenticatedClientProvider extends $FunctionalProvider<
 }
 
 String _$baseAuthenticatedClientHash() =>
-    r'73e930cbbde316a40a429563e18c1f73f12ad757';
+    r'63cc52b029b6d22ab7946f9e15780bc5ede00dce';

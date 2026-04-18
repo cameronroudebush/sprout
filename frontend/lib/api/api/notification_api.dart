@@ -261,7 +261,7 @@ class NotificationApi {
     }
   }
 
-  /// 
+  /// Send Test Notification
   ///
   /// Notifies all the current users devices with a test notification. Only available in dev mode.
   ///
@@ -291,7 +291,7 @@ class NotificationApi {
     );
   }
 
-  /// 
+  /// Send Test Notification
   ///
   /// Notifies all the current users devices with a test notification. Only available in dev mode.
   Future<void> notificationControllerNotify() async {

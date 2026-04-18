@@ -41,7 +41,7 @@ final class FirebaseNotifierProvider
   }
 }
 
-String _$firebaseNotifierHash() => r'1f4fa3006b2c36862a58c262e62417229ffa4c50';
+String _$firebaseNotifierHash() => r'34db969b26e0a6907731fe83c8c3654295763837';
 
 abstract class _$FirebaseNotifier extends $Notifier<void> {
   void build();

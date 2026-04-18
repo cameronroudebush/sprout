@@ -5,6 +5,7 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/models/notification.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
@@ -30,6 +31,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   void initState() {
     super.initState();
     _errorMessage = "";
+    Future.microtask(() => _autoLogin());
   }
 
   @override
@@ -37,6 +39,21 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  /// This function attempts to automatically login, if we don't have a current user
+  Future<void> _autoLogin() async {
+    final authState = await ref.read(authProvider.future);
+
+    // Check the config to see if we are in OIDC mode
+    final config = ref.read(unsecureConfigProvider).value;
+    final isOIDC = config?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+
+    // If no user was restored and we are OIDC, fire the login flow
+    if (authState == null && isOIDC) {
+      LoggerProvider.debug("No session restored, initiating OIDC auto-login.");
+      await _handleLogin();
+    }
   }
 
   Future<void> _handleLogin() async {

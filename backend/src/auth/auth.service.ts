@@ -1,9 +1,11 @@
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { HttpService } from "@nestjs/axios";
+import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { firstValueFrom } from "rxjs";
 import { UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
-import { UserLoginResponse } from "./model/api/login.response.dto";
 
 /** JWT object content that will be included when we create the JWT's in local authentication mode. */
 export type LocalJWTContent = { username: string };
@@ -11,20 +13,53 @@ export type LocalJWTContent = { username: string };
 /** This service is used to validate login requests */
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger("service:auth");
   // Allowed mobile schemes for redirect of OIDC auth
   static readonly ALLOWED_MOBILE_SCHEME = "net.croudebush.sprout";
+  /** The cookie name we store the id token in. */
+  static readonly idTokenCookie = "id";
+  /** The cookie name we store the access token in. */
+  static readonly accessTokenCookie = "at";
+  /** The cookie name we store the refresh token in. */
+  static readonly refreshCookie = "r";
+
+  constructor(private readonly httpService: HttpService) {}
+
+  /** Returns the cookie value for the given cookie */
+  getCookie(cookie: "id" | "access" | "refresh", request: Request) {
+    if (cookie === "id") return request.cookies[AuthService.idTokenCookie];
+    else if (cookie == "access") return request.cookies[AuthService.accessTokenCookie];
+    else return request.cookies[AuthService.refreshCookie] ?? request.headers["x-refresh-token"];
+  }
+
+  /** Clears all the cookie tokens and resets them to empty */
+  clearAllCookieTokens(res: Response) {
+    res.clearCookie(AuthService.idTokenCookie);
+    res.clearCookie(AuthService.accessTokenCookie);
+    res.clearCookie(AuthService.refreshCookie);
+  }
+
+  /** Sets tokens into the cookies based on what tokens you can provide */
+  setCookieTokens(res: Response, idToken: string, accessToken?: string, refreshToken?: string) {
+    const secure = !Configuration.isDevBuild;
+    const sameSite = "strict";
+    res.cookie(AuthService.idTokenCookie, idToken, { httpOnly: true, secure, sameSite });
+    if (accessToken) res.cookie(AuthService.accessTokenCookie, accessToken, { httpOnly: true, secure, sameSite });
+    if (refreshToken)
+      res.cookie(AuthService.refreshCookie, refreshToken, { httpOnly: true, secure, path: `${Configuration.server.basePath}/auth/oidc/refresh`, sameSite });
+  }
 
   /** Given a login request from an endpoint, requests a login by validating the username and password. */
-  async login(loginRequest: UsernamePasswordLoginRequest): Promise<UserLoginResponse> {
+  async login(loginRequest: UsernamePasswordLoginRequest) {
     const matchingUser = await User.findOne({ where: { username: loginRequest.username } });
     if (matchingUser == null || !matchingUser.password) throw new UnauthorizedException("Login failed");
     const passwordMatches = matchingUser.verifyPassword(loginRequest.password);
     if (!passwordMatches) throw new UnauthorizedException("Login failed");
-    else return UserLoginResponse.fromPlain({ user: matchingUser, jwt: this.generateJWT(matchingUser) });
+    else return { user: matchingUser, jwt: this.generateJWT(matchingUser) };
   }
 
   /** Given a login request from an endpoint, requests a login by validating the JWT. */
-  async loginWithJWT(jwt: string): Promise<UserLoginResponse> {
+  async loginWithJWT(jwt: string) {
     try {
       this.verifyJWT(jwt);
     } catch {
@@ -33,7 +68,7 @@ export class AuthService {
     const usernameToCheck = this.decodeJWT(jwt).username;
     const matchingUser = await User.findOne({ where: { username: usernameToCheck } });
     if (matchingUser == null || matchingUser.password == null) throw new UnauthorizedException("Login failed");
-    else return UserLoginResponse.fromPlain({ user: matchingUser, jwt });
+    else return { user: matchingUser, jwt: this.generateJWT(matchingUser) };
   }
 
   /** Verifies the given JWT. Throws an error if it is not valid */
@@ -76,6 +111,48 @@ export class AuthService {
     } catch (e) {
       // Invalid URL format
       return false;
+    }
+  }
+
+  /** Determines based on the request if it came from the web or a mobile app. We set this platform header ourselves. */
+  getPlatform(request: Request) {
+    return request.headers["x-client-platform"] as "mobile" | "web";
+  }
+
+  /**
+   * This function is used to attempt to refresh our ID token from our OIDC provider
+   *  based on the given refresh token. If it fails to refresh, it will throw an exception.
+   */
+  async performOIDCRefresh(req: Request, res?: Response) {
+    const { issuer, authHeader } = Configuration.server.auth.oidc;
+    const refreshToken = this.getCookie("refresh", req);
+    if (!refreshToken) throw new UnauthorizedException("No refresh token provided");
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(
+          `${issuer}/api/oidc/token`,
+          new URLSearchParams({
+            grant_type: "refresh_token",
+            refresh_token: refreshToken,
+          }).toString(),
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Basic ${authHeader}`,
+            },
+          },
+        ),
+      );
+
+      const { access_token, refresh_token, id_token } = response.data;
+      // Set our cookie content, if response is given
+      if (res) this.setCookieTokens(res, id_token, access_token, refresh_token);
+      return { accessToken: access_token, refreshToken: refresh_token, idToken: id_token };
+    } catch (e: any) {
+      this.logger.error(`Refresh failed: ${e.message}`);
+      // If the OIDC provider returns 401, we propagate it as a session death
+      throw new UnauthorizedException("Session expired and could not be refreshed.");
     }
   }
 }

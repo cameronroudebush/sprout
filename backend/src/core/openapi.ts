@@ -56,12 +56,14 @@ export function setupOpenApiHelp(app: INestApplication) {
     if (req.path === "/" || req.path === "") {
       return apiReference({
         content: document,
-        servers: [
-          {
-            url: "http://localhost:8001",
-            description: "Local Environment",
-          },
-        ],
+        servers: Configuration.isDevBuild
+          ? [
+              {
+                url: "http://localhost:8001",
+                description: "Local Environment",
+              },
+            ]
+          : undefined,
         documentDownloadType: "none",
         hideClientButton: true,
         authentication: {
@@ -78,6 +80,7 @@ export function setupOpenApiHelp(app: INestApplication) {
         mcp: {
           disabled: true,
         },
+        hideTestRequestButton: !Configuration.isDevBuild,
       })(req, res);
     }
     next();

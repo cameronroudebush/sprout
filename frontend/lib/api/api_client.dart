@@ -222,6 +222,8 @@ class ApiClient {
           return JWTLoginRequest.fromJson(value);
         case 'MarketIndexDto':
           return MarketIndexDto.fromJson(value);
+        case 'MobileTokenExchangeDto':
+          return MobileTokenExchangeDto.fromJson(value);
         case 'MonthlyCategoryData':
           return MonthlyCategoryData.fromJson(value);
         case 'MonthlySpendingStats':
@@ -244,10 +246,6 @@ class ApiClient {
           return ProviderConfig.fromJson(value);
         case 'ProviderTypeEnum':
           return ProviderTypeEnumTypeTransformer().decode(value);
-        case 'RefreshRequestDTO':
-          return RefreshRequestDTO.fromJson(value);
-        case 'RefreshResponseDTO':
-          return RefreshResponseDTO.fromJson(value);
         case 'RegisterDeviceDto':
           return RegisterDeviceDto.fromJson(value);
         case 'SSEData':
@@ -278,8 +276,6 @@ class ApiClient {
           return UserCreationRequest.fromJson(value);
         case 'UserCreationResponse':
           return UserCreationResponse.fromJson(value);
-        case 'UserLoginResponse':
-          return UserLoginResponse.fromJson(value);
         case 'UsernamePasswordLoginRequest':
           return UsernamePasswordLoginRequest.fromJson(value);
         case 'ZillowAsset':

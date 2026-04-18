@@ -1,13 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 
 import 'oidc_helper_stub.dart' as stub;
 
 class OIDCHelper implements stub.OIDCHelper {
   @override
-  Future<Map<String, String>?> authenticate(String basePath) async {
+  Future<void> authenticate(String basePath, Ref ref) async {
     try {
       final backendLoginUrl = "$basePath/auth/oidc/login";
       final callbackScheme = 'net.croudebush.sprout';
@@ -29,32 +32,24 @@ class OIDCHelper implements stub.OIDCHelper {
             ],
           ));
       final uri = Uri.parse(result);
-      // Pull out our tokens
-      String fragment = uri.fragment;
-
-      // Handle cases where the fragment might be parsed as query params depending on the deep link structure
-      if (fragment.isEmpty && uri.queryParameters.isNotEmpty) {
-        // Fallback if library returns params in query instead of fragment
-        final params = uri.queryParameters;
-        return _extractTokens(params);
+      final tokens = _extractTokens(uri.queryParameters);
+      // Exchange for some tasty cookies
+      final client = await ref.read(authApiProvider.future);
+      if (tokens != null) {
+        await client.oIDCControllerExchange(tokens);
       }
-
-      final params = Uri.splitQueryString(fragment);
-      return _extractTokens(params);
     } catch (e) {
       LoggerProvider.error('OIDC Auth Error: $e');
     }
-    return null;
   }
 
   /// Extracts the tokens from the return of the OIDC request
-  Map<String, String>? _extractTokens(Map<String, String> params) {
+  MobileTokenExchangeDto? _extractTokens(Map<String, String> params) {
     if (params.containsKey('access_token')) {
-      return {
-        'id_token': params['id_token'] ?? '',
-        'access_token': params['access_token'] ?? '',
-        'refresh_token': params['refresh_token'] ?? '',
-      };
+      return MobileTokenExchangeDto(
+          idToken: params['id_token'] ?? '',
+          accessToken: params['access_token'] ?? '',
+          refreshToken: params['refresh_token'] ?? '');
     }
     return null;
   }

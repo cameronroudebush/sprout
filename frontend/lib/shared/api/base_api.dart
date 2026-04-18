@@ -4,24 +4,43 @@ import 'package:http/retry.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/auth/auth_token_provider.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
-import 'package:sprout/shared/api/auth_interceptor_client.dart';
 import 'package:sprout/shared/api/auto_logout_client.dart';
 import 'package:sprout/shared/api/base_path_client.dart';
 import 'package:sprout/shared/api/browser_client.dart' if (dart.library.html) 'package:http/browser_client.dart';
-import 'package:sprout/shared/api/platform_client.dart';
+import 'package:sprout/shared/api/cookie_client.dart';
+import 'package:sprout/shared/api/header_client.dart';
 import 'package:sprout/shared/api/timeout_client.dart';
 
 part 'base_api.g.dart';
+
+/// Root client to use with every other client
+@Riverpod(keepAlive: true)
+Future<http.Client> rootHttpClient(Ref ref) async {
+  final jar = await ref.watch(cookieJarProvider(true).future);
+
+  http.Client client;
+  if (kIsWeb) {
+    client = BrowserClient()..withCredentials = true;
+  } else {
+    // Mobile uses our custom CookieClient
+    client = CookieClient(innerClient: http.Client(), cookieJar: jar);
+  }
+
+  return RetryClient(
+    client,
+    retries: 2,
+    when: (response) => response.statusCode >= 500 && response.statusCode <= 599,
+  );
+}
 
 /// Base API client that only adds the connection URL. Everything else is basic and this should be used for public routes
 @Riverpod(keepAlive: true)
 Future<ApiClient> baseApiClient(Ref ref) async {
   final basePath = await ref.watch(connectionUrlProvider.future);
-  final rootClient = _createHttpClient();
-  final platformClient = PlatformClient(innerClient: rootClient);
+  final rootClient = await ref.watch(rootHttpClientProvider.future);
+  final platformClient = HeaderClient(innerClient: rootClient);
   final timeoutClient = TimeoutClient(innerClient: platformClient, timeout: 5);
   return BasePathClient(client: timeoutClient, basePath: basePath ?? "");
 }
@@ -30,14 +49,12 @@ Future<ApiClient> baseApiClient(Ref ref) async {
 @Riverpod(keepAlive: true)
 Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
   final basePath = await ref.watch(connectionUrlProvider.future);
-  final tokens = ref.watch(authTokensProvider).value;
-  final rootClient = _createHttpClient();
-  final platformClient = PlatformClient(innerClient: rootClient);
-  final interceptorClient = AuthInterceptorClient(innerClient: platformClient, ref: ref);
+  final rootClient = await ref.watch(rootHttpClientProvider.future);
+  final platformClient = HeaderClient(innerClient: rootClient);
 
   // Create the AutoLogout wrapper
   final autoLogoutClient = AutoLogoutClient(
-    innerClient: interceptorClient,
+    innerClient: platformClient,
     onLogout: () async {
       final auth = ref.read(authProvider.notifier);
       final authState = ref.read(authProvider);
@@ -51,27 +68,5 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
     },
   );
 
-  final auth = HttpBearerAuth();
-  if (tokens?.idToken != null && tokens!.idToken!.isNotEmpty) {
-    auth.accessToken = tokens.idToken!;
-  }
-
-  return BasePathClient(client: autoLogoutClient, basePath: basePath ?? "", authentication: auth);
-}
-
-/// Helper to generate the base http client
-http.Client _createHttpClient() {
-  http.Client inner;
-  if (kIsWeb && kDebugMode) {
-    inner = BrowserClient()..withCredentials = true;
-  } else {
-    inner = http.Client();
-  }
-  return RetryClient(
-    inner,
-    retries: 2,
-    when: (http.BaseResponse response) {
-      return (response.statusCode >= 500 && response.statusCode <= 599);
-    },
-  );
+  return BasePathClient(client: autoLogoutClient, basePath: basePath ?? "");
 }
