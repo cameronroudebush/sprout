@@ -53,6 +53,7 @@ class Auth extends _$Auth {
       final userApi = await ref.read(userApiProvider.future);
       return await userApi.userControllerMe();
     } catch (e) {
+      LoggerProvider.debug("Initial user grab failure: $e");
       return null;
     }
   }
