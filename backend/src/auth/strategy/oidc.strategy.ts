@@ -5,8 +5,9 @@ import { User } from "@backend/user/model/user.model";
 import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { HttpService } from "@nestjs/axios";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
-import { Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { HttpException, Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
+import { isAxiosError } from "axios";
 import { Request } from "express";
 import { passportJwtSecret } from "jwks-rsa";
 import { ExtractJwt, Strategy } from "passport-jwt";
@@ -98,16 +99,21 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     if (!profileData) {
       // Grab the user profile info from the remote OIDC endpoint
       const userInfoUrl = `${Configuration.server.auth.oidc.issuer}/api/oidc/userinfo`;
-      profileData = (
-        await firstValueFrom(
+      try {
+        const response = await firstValueFrom(
           this.httpService.get(userInfoUrl, {
             headers: { Authorization: `Bearer ${accessToken}` },
           }),
-        )
-      ).data;
+        );
 
-      // Cache our data so we don't over-request. Save it for 5 minutes.
-      await this.cacheManager.set(cacheKey, profileData, 5 * 60000);
+        if (response.status !== 200) throw new HttpException(response.statusText, response.status);
+        profileData = response.data;
+
+        // Cache our data so we don't over-request. Save it for 5 minutes.
+        await this.cacheManager.set(cacheKey, profileData, 5 * 60000);
+      } catch (e) {
+        if (isAxiosError(e) && e.status !== 200) throw new HttpException(e.message, e.status!);
+      }
     }
     return profileData;
   }

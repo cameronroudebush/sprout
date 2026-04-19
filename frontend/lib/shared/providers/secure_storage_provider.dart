@@ -5,15 +5,6 @@ class SecureStorageProvider {
   /// Key used to store the connection url in storage so we know where we're connecting.
   static const String connectionUrlKey = 'connection_url';
 
-  /// Key used to store the access token info from OAUTH.
-  static const String accessToken = 'access_token';
-
-  /// Key used to store the JWT that contains the ID for either local or OAUTH strategy.
-  static const String idToken = 'id_token';
-
-  /// Key used to store the refresh token to be able to silently refresh the other tokens.
-  static const String refreshToken = 'refresh_token';
-
   // Secure storage instance for storing the JWT token.
   static final _storage = const FlutterSecureStorage();
 

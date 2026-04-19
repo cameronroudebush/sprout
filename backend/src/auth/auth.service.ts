@@ -3,6 +3,7 @@ import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
 import { HttpException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { isAxiosError } from "axios";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { firstValueFrom } from "rxjs";
@@ -23,6 +24,9 @@ export class AuthService {
   static readonly accessTokenCookie = "at";
   /** The cookie name we store the refresh token in. */
   static readonly refreshCookie = "r";
+
+  /** Promises that control tracking OIDC refresh requests by refresh token */
+  private readonly refreshPromises = new Map<string, Promise<MobileTokenExchangeDto>>();
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -128,34 +132,55 @@ export class AuthService {
     const refreshToken = this.getCookie("refresh", req);
     if (!refreshToken) throw new UnauthorizedException("No refresh token provided");
 
-    try {
-      const response = await firstValueFrom(
-        this.httpService.post(
-          `${issuer}/api/oidc/token`,
-          new URLSearchParams({
-            grant_type: "refresh_token",
-            refresh_token: refreshToken,
-          }).toString(),
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Basic ${authHeader}`,
-            },
-          },
-        ),
-      );
-
-      if (response.status !== 200) throw new HttpException(response.statusText, response.status);
-
-      const { access_token, refresh_token, id_token } = response.data;
-      // Set our cookie content, if response is given
-      if (res) this.setCookieTokens(res, id_token, access_token, refresh_token);
-      return new MobileTokenExchangeDto(id_token, access_token, refresh_token);
-    } catch (e: any) {
-      this.logger.error(`Refresh failed: ${e.message}`);
-      // If the OIDC provider returns 401, we propagate it as a session death
-      throw new UnauthorizedException("Session expired and could not be refreshed.");
+    // Check if there is already an active refresh happening for THIS specific token
+    const existingPromise = this.refreshPromises.get(refreshToken);
+    if (existingPromise) {
+      this.logger.debug(`Joining existing refresh promise for token.`);
+      const tokens = await existingPromise;
+      if (res) this.setCookieTokens(res, tokens.idToken, tokens.accessToken, tokens.refreshToken);
+      return tokens;
     }
+    const refreshPromise = (async () => {
+      try {
+        const response = await firstValueFrom(
+          this.httpService.post(
+            `${issuer}/api/oidc/token`,
+            new URLSearchParams({
+              grant_type: "refresh_token",
+              refresh_token: refreshToken,
+            }).toString(),
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic ${authHeader}`,
+              },
+            },
+          ),
+        );
+
+        if (response.status !== 200) throw new HttpException(response.statusText, response.status);
+
+        const { access_token, refresh_token, id_token } = response.data;
+        // Set our cookie content, if response is given
+        if (res) this.setCookieTokens(res, id_token, access_token, refresh_token);
+        return new MobileTokenExchangeDto(id_token, access_token, refresh_token);
+      } catch (e: any) {
+        let message = e.message;
+        if (isAxiosError(e)) message = e.response?.data.error_description;
+        this.logger.error(`Refresh failed: ${message}`);
+        // If the OIDC provider returns 401, we propagate it as a session death
+        throw new UnauthorizedException("Session expired and could not be refreshed.");
+      } finally {
+        // 10 second grade period before we cleanup the refresh request
+        setTimeout(() => {
+          this.refreshPromises.delete(refreshToken);
+        }, 10000);
+      }
+    })();
+
+    // Store the promise in the map before returning it
+    this.refreshPromises.set(refreshToken, refreshPromise);
+    return refreshPromise;
   }
 
   /**
