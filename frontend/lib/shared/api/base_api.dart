@@ -4,6 +4,7 @@ import 'package:http/retry.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/cookie_provider.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/auto_logout_client.dart';

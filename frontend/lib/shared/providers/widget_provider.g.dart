@@ -40,7 +40,7 @@ final class WidgetSyncProvider extends $NotifierProvider<WidgetSync, void> {
   }
 }
 
-String _$widgetSyncHash() => r'daa811308871b276a40aa7877831fda05c5fba13';
+String _$widgetSyncHash() => r'd11933c79558220ef7ed6c0cff7a916946c38975';
 
 abstract class _$WidgetSync extends $Notifier<void> {
   void build();

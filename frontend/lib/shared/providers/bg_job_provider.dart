@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/auth/cookie_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 
 part 'bg_job_provider.g.dart';

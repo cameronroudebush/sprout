@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/cookie_provider.dart';
 import 'package:sprout/auth/oidc_helper/oidc_helper.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
@@ -139,27 +137,5 @@ class Auth extends _$Auth {
       ref.invalidate(secureConfigProvider);
       NavigationProvider.redirect("login");
     }
-  }
-}
-
-/// Generic cookie jar to persist across app restarts for usage in mobile
-@Riverpod(keepAlive: true)
-Future<CookieJar> cookieJar(Ref ref, bool persist) async {
-  if (kIsWeb || !persist) {
-    return CookieJar();
-  } else {
-    final appDocDir = await getApplicationDocumentsDirectory();
-    final String storagePath = "${appDocDir.path}/.cookies/";
-
-    final directory = Directory(storagePath);
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
-    }
-
-    return PersistCookieJar(
-      storage: FileStorage(storagePath),
-      ignoreExpires: false,
-      persistSession: true,
-    );
   }
 }

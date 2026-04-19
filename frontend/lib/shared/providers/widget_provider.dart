@@ -78,7 +78,7 @@ class WidgetSync extends _$WidgetSync {
     final userConfigAsync = ref.read(userConfigProvider.notifier);
     final theme = userConfigAsync.activeTheme(userConfig);
     Map<String, Object>? data;
-    String? failureMessage;
+    String failureMessage = "No data available. Check settings.";
     num? pastNetWorthChange;
 
     // Safety check: If widgets aren't allowed, clear existing data
