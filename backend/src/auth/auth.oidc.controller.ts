@@ -131,7 +131,23 @@ export class OIDCController {
   })
   @ApiResponse({ status: 204, description: "Cookies set successfully" })
   @ApiResponse({ status: 400, description: "Invalid token DTO" })
-  async exchange(@Body() tokens: MobileTokenExchangeDto, @Res({ passthrough: true }) res: Response) {
+  async exchange(@Body() tokens: MobileTokenExchangeDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const currentAccessToken = this.authService.getCookie("access", req);
+    if (currentAccessToken) {
+      // Ask the OIDC provider about the current cookie and the new token
+      const [currentMeta, newMeta] = await Promise.all([
+        this.authService.introspectToken(currentAccessToken),
+        this.authService.introspectToken(tokens.accessToken),
+      ]);
+
+      // If the cookie token is active and was issued AFTER (or same time as)
+      // the incoming token, ignore the request.
+      if (currentMeta.active && currentMeta.iat && newMeta.iat)
+        if (currentMeta.iat >= newMeta.iat) {
+          this.logger.debug("Exchange ignored: Cookie has a more recent token session.");
+          return;
+        }
+    }
     this.authService.setCookieTokens(res, tokens.idToken, tokens.accessToken, tokens.refreshToken);
   }
 }

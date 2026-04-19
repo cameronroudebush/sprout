@@ -1,12 +1,11 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/auth/auth_bg_trigger.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/notification/models/extensions/firebase_notification_extension.dart';
 import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/shared/providers/bg_job_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,16 +15,11 @@ final FlutterLocalNotificationsPlugin _bgLocalNotifications = FlutterLocalNotifi
 /// Entry point for Firebase messages when the app is in the background or terminated.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Create a container to access Sprout providers in the background
-  final container = ProviderContainer();
+  final (container, user) = await BackgroundJobProvider.entry("Firebase-Handler");
   Notification? notification;
   Importance importance = Importance.defaultImportance;
 
   try {
-    // Pre load authentication if we can.
-    await AuthBackgroundTrigger.ensureAuthenticated(container);
     // Re-configure Firebase for this isolate
     await container.read(firebaseProvider.notifier).configure();
 
