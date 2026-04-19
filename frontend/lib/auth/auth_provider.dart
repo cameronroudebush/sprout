@@ -125,6 +125,14 @@ class Auth extends _$Auth {
     try {
       await api.authControllerLogout();
     } finally {
+      // Wipe the CookieJar
+      try {
+        // We check both persistence flavors just to be safe
+        final jar = await ref.read(cookieJarProvider(true).future);
+        await jar.deleteAll();
+      } catch (e) {
+        LoggerProvider.error("Failed to wipe cookie jar: $e");
+      }
       // Wipe the state
       state = const AsyncData(null);
       // Invalidate other providers to clear their cache

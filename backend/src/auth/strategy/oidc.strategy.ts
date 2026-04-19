@@ -51,17 +51,18 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     if (profile.iss !== config.issuer) throw new UnauthorizedException("Invalid token issuer.");
     if (!profile.aud.includes(config.clientId)) throw new UnauthorizedException("Invalid token audience.");
 
-    // Grab some tokens from cookies, if available
-    const refreshToken = req.cookies[AuthService.refreshCookie];
-    const accessToken = req.cookies[AuthService.accessTokenCookie];
     // Check if we need to refresh
     if (profile.exp && now >= profile.exp) {
       this.logger.debug(`Token expired for ${profile.sub}, attempting refresh...`);
+      const refreshToken = this.authService.getCookie("refresh", req);
 
-      if (!refreshToken) throw new UnauthorizedException("Session expired and no refresh token available.");
+      if (!refreshToken) {
+        this.logger.warn("Failing to refresh token because no refresh token was found in cookies.");
+        throw new UnauthorizedException("Session expired and no refresh token available.");
+      }
 
       try {
-        const tokens = await this.authService.performOIDCRefresh(refreshToken, req.res);
+        const tokens = await this.authService.performOIDCRefresh(req, req.res);
 
         // Update profileData with the new token's claims so the current request succeeds
         profileData = await this.getUserInfo(tokens.accessToken);
@@ -70,7 +71,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
         throw new UnauthorizedException("Session expired.");
       }
     } else {
-      // No refresh? Grab profile data
+      const accessToken = this.authService.getCookie("access", req);
       profileData = await this.getUserInfo(accessToken);
     }
 

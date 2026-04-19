@@ -7,6 +7,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/models/sse_state.dart';
+import 'package:sprout/shared/providers/bg_job_provider.dart';
 
 part 'sse_provider.g.dart';
 
@@ -44,6 +45,8 @@ class Sse extends _$Sse {
 
   /// Starts the SSE connection to the backend
   Future<void> _startSSE() async {
+    // Don't start the connection if this is a background job
+    if (ref.read(isBackgroundJobProvider)) return;
     if (state.isConnecting || state.isConnected) return;
 
     state = state.copyWith(isConnecting: true);

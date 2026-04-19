@@ -1,7 +1,8 @@
+import { MobileTokenExchangeDto } from "@backend/auth/model/api/mobile.token.exchange.dto";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
-import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { HttpException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { firstValueFrom } from "rxjs";
@@ -45,8 +46,7 @@ export class AuthService {
     const sameSite = "strict";
     res.cookie(AuthService.idTokenCookie, idToken, { httpOnly: true, secure, sameSite });
     if (accessToken) res.cookie(AuthService.accessTokenCookie, accessToken, { httpOnly: true, secure, sameSite });
-    if (refreshToken)
-      res.cookie(AuthService.refreshCookie, refreshToken, { httpOnly: true, secure, path: `${Configuration.server.basePath}/auth/oidc/refresh`, sameSite });
+    if (refreshToken) res.cookie(AuthService.refreshCookie, refreshToken, { httpOnly: true, secure, sameSite });
   }
 
   /** Given a login request from an endpoint, requests a login by validating the username and password. */
@@ -145,14 +145,38 @@ export class AuthService {
         ),
       );
 
+      if (response.status !== 200) throw new HttpException(response.statusText, response.status);
+
       const { access_token, refresh_token, id_token } = response.data;
       // Set our cookie content, if response is given
       if (res) this.setCookieTokens(res, id_token, access_token, refresh_token);
-      return { accessToken: access_token, refreshToken: refresh_token, idToken: id_token };
+      return new MobileTokenExchangeDto(id_token, access_token, refresh_token);
     } catch (e: any) {
       this.logger.error(`Refresh failed: ${e.message}`);
       // If the OIDC provider returns 401, we propagate it as a session death
       throw new UnauthorizedException("Session expired and could not be refreshed.");
+    }
+  }
+
+  /**
+   * Given a token, asks the OIDC provider to introspect it to obtain information about our actual token
+   *  including active state, issue time, and expiration time.
+   */
+  async introspectToken(token: string): Promise<{ active: boolean; iat?: number; exp?: number }> {
+    const { issuer, authHeader } = Configuration.server.auth.oidc;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`${issuer}/api/oidc/introspection`, new URLSearchParams({ token }).toString(), {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${authHeader}`,
+          },
+        }),
+      );
+      return response.data;
+    } catch (e) {
+      this.logger.error(`Introspection failed: ${e}`);
+      return { active: false };
     }
   }
 }

@@ -43,6 +43,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   /// This function attempts to automatically login, if we don't have a current user
   Future<void> _autoLogin() async {
+    final auth = ref.read(authProvider.notifier);
     final authState = await ref.read(authProvider.future);
 
     // Check the config to see if we are in OIDC mode
@@ -50,7 +51,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     final isOIDC = config?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
 
     // If no user was restored and we are OIDC, fire the login flow
-    if (authState == null && isOIDC) {
+    if (authState == null && !auth.isLoggingOut && isOIDC) {
       LoggerProvider.debug("No session restored, initiating OIDC auto-login.");
       await _handleLogin();
     }

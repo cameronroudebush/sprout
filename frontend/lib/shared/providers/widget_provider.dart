@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/auth/auth_bg_trigger.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/color_extensions.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
+import 'package:sprout/shared/providers/bg_job_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
@@ -164,14 +164,9 @@ class WidgetSync extends _$WidgetSync {
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    LoggerProvider.debug("Starting background widget update task");
-    WidgetsFlutterBinding.ensureInitialized();
-    // Manually manage a ProviderContainer for the background isolate
-    final container = ProviderContainer();
-
+    final (container, user) = await BackgroundJobProvider.entry("Widget-Provider");
+    if (user == null) return false; // Don't update without a user
     try {
-      final user = await AuthBackgroundTrigger.ensureAuthenticated(container);
-      if (user == null) return false;
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
