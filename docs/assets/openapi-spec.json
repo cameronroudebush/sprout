@@ -836,6 +836,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "app_challenge",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -880,7 +888,7 @@
     },
     "/auth/oidc/exchange": {
       "put": {
-        "description": "This seeds the mobile CookieJar or Browser cookies.",
+        "description": "This seeds the mobile CookieJar and is only intended to be used with mobile apps. We implement our own PKCE implementation to protect against interception attacks.",
         "operationId": "OIDCController_exchange",
         "parameters": [],
         "requestBody": {
@@ -901,7 +909,7 @@
             "description": "Invalid token DTO"
           }
         },
-        "summary": "Exchange OIDC tokens for HttpOnly cookies",
+        "summary": "Exchange session code for cookies",
         "tags": ["Auth"]
       }
     },
@@ -2510,7 +2518,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.",
-    "version": "v0.3.0-29-g4d4174d",
+    "version": "v0.3.0-33-ge565780",
     "contact": {}
   },
   "tags": [
@@ -3071,17 +3079,14 @@
       "MobileTokenExchangeDto": {
         "type": "object",
         "properties": {
-          "idToken": {
+          "code": {
             "type": "string"
           },
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
+          "appVerifier": {
             "type": "string"
           }
         },
-        "required": ["idToken", "accessToken", "refreshToken"]
+        "required": ["code", "appVerifier"]
       },
       "UserCreationRequest": {
         "type": "object",
@@ -3655,7 +3660,7 @@
             "format": "date-time",
             "type": "string",
             "description": "The date that this notification occurs on",
-            "default": "2026-04-18T18:05:19.621Z"
+            "default": "2026-04-21T23:46:18.484Z"
           },
           "isRead": {
             "type": "boolean",

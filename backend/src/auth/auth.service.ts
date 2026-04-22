@@ -1,4 +1,4 @@
-import { MobileTokenExchangeDto } from "@backend/auth/model/api/mobile.token.exchange.dto";
+import { OIDCTokens } from "@backend/auth/model/oidc.tokens";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
@@ -26,7 +26,7 @@ export class AuthService {
   static readonly refreshCookie = "r";
 
   /** Promises that control tracking OIDC refresh requests by refresh token */
-  private readonly refreshPromises = new Map<string, Promise<MobileTokenExchangeDto>>();
+  private readonly refreshPromises = new Map<string, Promise<OIDCTokens>>();
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -163,7 +163,7 @@ export class AuthService {
         const { access_token, refresh_token, id_token } = response.data;
         // Set our cookie content, if response is given
         if (res) this.setCookieTokens(res, id_token, access_token, refresh_token);
-        return new MobileTokenExchangeDto(id_token, access_token, refresh_token);
+        return new OIDCTokens(id_token, access_token, refresh_token);
       } catch (e: any) {
         let message = e.message;
         if (isAxiosError(e)) message = e.response?.data.error_description;

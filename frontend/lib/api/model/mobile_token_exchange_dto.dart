@@ -13,38 +13,32 @@ part of openapi.api;
 class MobileTokenExchangeDto {
   /// Returns a new [MobileTokenExchangeDto] instance.
   MobileTokenExchangeDto({
-    required this.idToken,
-    required this.accessToken,
-    required this.refreshToken,
+    required this.code,
+    required this.appVerifier,
   });
 
-  String idToken;
+  String code;
 
-  String accessToken;
-
-  String refreshToken;
+  String appVerifier;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is MobileTokenExchangeDto &&
-    other.idToken == idToken &&
-    other.accessToken == accessToken &&
-    other.refreshToken == refreshToken;
+    other.code == code &&
+    other.appVerifier == appVerifier;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (idToken.hashCode) +
-    (accessToken.hashCode) +
-    (refreshToken.hashCode);
+    (code.hashCode) +
+    (appVerifier.hashCode);
 
   @override
-  String toString() => 'MobileTokenExchangeDto[idToken=$idToken, accessToken=$accessToken, refreshToken=$refreshToken]';
+  String toString() => 'MobileTokenExchangeDto[code=$code, appVerifier=$appVerifier]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'idToken'] = this.idToken;
-      json[r'accessToken'] = this.accessToken;
-      json[r'refreshToken'] = this.refreshToken;
+      json[r'code'] = this.code;
+      json[r'appVerifier'] = this.appVerifier;
     return json;
   }
 
@@ -59,19 +53,16 @@ class MobileTokenExchangeDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'idToken'), 'Required key "MobileTokenExchangeDto[idToken]" is missing from JSON.');
-        assert(json[r'idToken'] != null, 'Required key "MobileTokenExchangeDto[idToken]" has a null value in JSON.');
-        assert(json.containsKey(r'accessToken'), 'Required key "MobileTokenExchangeDto[accessToken]" is missing from JSON.');
-        assert(json[r'accessToken'] != null, 'Required key "MobileTokenExchangeDto[accessToken]" has a null value in JSON.');
-        assert(json.containsKey(r'refreshToken'), 'Required key "MobileTokenExchangeDto[refreshToken]" is missing from JSON.');
-        assert(json[r'refreshToken'] != null, 'Required key "MobileTokenExchangeDto[refreshToken]" has a null value in JSON.');
+        assert(json.containsKey(r'code'), 'Required key "MobileTokenExchangeDto[code]" is missing from JSON.');
+        assert(json[r'code'] != null, 'Required key "MobileTokenExchangeDto[code]" has a null value in JSON.');
+        assert(json.containsKey(r'appVerifier'), 'Required key "MobileTokenExchangeDto[appVerifier]" is missing from JSON.');
+        assert(json[r'appVerifier'] != null, 'Required key "MobileTokenExchangeDto[appVerifier]" has a null value in JSON.');
         return true;
       }());
 
       return MobileTokenExchangeDto(
-        idToken: mapValueOfType<String>(json, r'idToken')!,
-        accessToken: mapValueOfType<String>(json, r'accessToken')!,
-        refreshToken: mapValueOfType<String>(json, r'refreshToken')!,
+        code: mapValueOfType<String>(json, r'code')!,
+        appVerifier: mapValueOfType<String>(json, r'appVerifier')!,
       );
     }
     return null;
@@ -119,9 +110,8 @@ class MobileTokenExchangeDto {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'idToken',
-    'accessToken',
-    'refreshToken',
+    'code',
+    'appVerifier',
   };
 }
 
