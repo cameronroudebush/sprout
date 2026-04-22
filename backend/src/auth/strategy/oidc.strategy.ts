@@ -5,7 +5,7 @@ import { User } from "@backend/user/model/user.model";
 import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { HttpService } from "@nestjs/axios";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
-import { HttpException, Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, HttpException, Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { isAxiosError } from "axios";
 import { Request } from "express";
@@ -61,6 +61,13 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
         this.logger.warn("Failing to refresh token because no refresh token was found in cookies.");
         throw new UnauthorizedException("Session expired and no refresh token available.");
       }
+
+      const refreshIntro = await this.authService.introspectToken(refreshToken);
+      if (refreshIntro.exp)
+        if (now >= refreshIntro.exp) {
+          this.logger.warn(`Refresh token is expired. Ignoring refresh request.`);
+          throw new BadRequestException(`Token refresh failed. Refresh token is expired.`);
+        } else this.logger.debug(`Refresh token expiration: ${new Date(refreshIntro.exp)}`);
 
       try {
         const tokens = await this.authService.performOIDCRefresh(req, req.res);

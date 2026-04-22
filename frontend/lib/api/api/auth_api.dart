@@ -168,9 +168,9 @@ class AuthApi {
     }
   }
 
-  /// Exchange OIDC tokens for HttpOnly cookies
+  /// Exchange session code for cookies
   ///
-  /// This seeds the mobile CookieJar or Browser cookies.
+  /// This seeds the mobile CookieJar and is only intended to be used with mobile apps. We implement our own PKCE implementation to protect against interception attacks.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -202,9 +202,9 @@ class AuthApi {
     );
   }
 
-  /// Exchange OIDC tokens for HttpOnly cookies
+  /// Exchange session code for cookies
   ///
-  /// This seeds the mobile CookieJar or Browser cookies.
+  /// This seeds the mobile CookieJar and is only intended to be used with mobile apps. We implement our own PKCE implementation to protect against interception attacks.
   ///
   /// Parameters:
   ///
@@ -280,7 +280,9 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [String] targetUrl (required):
-  Future<Response> oIDCControllerLoginOIDCWithHttpInfo(String targetUrl,) async {
+  ///
+  /// * [String] appChallenge (required):
+  Future<Response> oIDCControllerLoginOIDCWithHttpInfo(String targetUrl, String appChallenge,) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/login';
 
@@ -292,6 +294,7 @@ class AuthApi {
     final formParams = <String, String>{};
 
       queryParams.addAll(_queryParams('', 'target_url', targetUrl));
+      queryParams.addAll(_queryParams('', 'app_challenge', appChallenge));
 
     const contentTypes = <String>[];
 
@@ -314,8 +317,10 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [String] targetUrl (required):
-  Future<void> oIDCControllerLoginOIDC(String targetUrl,) async {
-    final response = await oIDCControllerLoginOIDCWithHttpInfo(targetUrl,);
+  ///
+  /// * [String] appChallenge (required):
+  Future<void> oIDCControllerLoginOIDC(String targetUrl, String appChallenge,) async {
+    final response = await oIDCControllerLoginOIDCWithHttpInfo(targetUrl, appChallenge,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
