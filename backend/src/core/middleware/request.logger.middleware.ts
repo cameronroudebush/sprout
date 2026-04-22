@@ -5,10 +5,12 @@ import { NextFunction, Request, Response } from "express";
 @Injectable()
 export class RequestLoggerMiddleware implements NestMiddleware {
   private logger = new Logger("HTTP");
+  private readonly sensitiveParams = ["code", "access_token", "id_token", "state", "refresh_token", "app_challenge"];
 
   use(request: Request, response: Response, next: NextFunction): void {
     const { ip, method, originalUrl } = request;
-    if (originalUrl.startsWith("/api/core/heartbeat") && ip?.endsWith("127.0.0.1")) {
+    const sanitizedUrl = this.maskSensitiveInfo(originalUrl);
+    if (sanitizedUrl.startsWith("/api/core/heartbeat") && ip?.endsWith("127.0.0.1")) {
       // Don't log heartbeat requests if coming from internal. These are normally caused by health checks
     } else {
       const startBytes = request.socket ? request.socket.bytesWritten : 0;
@@ -16,10 +18,29 @@ export class RequestLoggerMiddleware implements NestMiddleware {
         const { statusCode } = response;
         let contentLength = response.get("content-length");
         if (!contentLength && request.socket) contentLength = (request.socket.bytesWritten - startBytes).toString();
-        this.logger.verbose(`${method} ${originalUrl} ${statusCode} ${contentLength ?? 0} - ${ip}`);
+        this.logger.verbose(`${method} ${sanitizedUrl} ${statusCode} ${contentLength ?? 0} - ${ip}`);
       });
     }
 
     next();
+  }
+
+  /** Used to mask potentially sensitive information in the URL's */
+  private maskSensitiveInfo(url: string): string {
+    try {
+      // We use a dummy base URL because originalUrl is usually a relative path
+      const urlObj = new URL(url, "http://localhost");
+      let changed = false;
+
+      this.sensitiveParams.forEach((param) => {
+        if (urlObj.searchParams.has(param)) {
+          urlObj.searchParams.set(param, "*****");
+          changed = true;
+        }
+      });
+      return changed ? `${urlObj.pathname}${urlObj.search}` : url;
+    } catch (e) {
+      return url;
+    }
   }
 }
