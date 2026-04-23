@@ -53,7 +53,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
 
     // Check if we need to refresh
     if (profileIntrospect.isExpired) {
-      this.logger.debug(`Token expired or inactive for request, attempting refresh...`);
+      this.logger.debug(`Token expired or inactive for request, attempting refresh.`);
       try {
         const tokens = await this.authService.performOIDCRefresh(req, req.res);
         // Update profileData with the new token's claims so the current request succeeds
