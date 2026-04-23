@@ -50,6 +50,9 @@ class Auth extends _$Auth {
     try {
       final userApi = await ref.read(userApiProvider.future);
       return await userApi.userControllerMe();
+    } on ApiException catch (e) {
+      if (e.code == 404) await setup();
+      return null;
     } catch (e) {
       LoggerProvider.debug("Initial user grab failure: $e");
       return null;

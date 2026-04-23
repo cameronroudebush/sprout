@@ -64,6 +64,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     });
 
     final authNotifier = ref.read(authProvider.notifier);
+    if (authNotifier.isSetupMode) return; // Ignore login requests if we're moving to setup mode.
     final isOIDC = ref.read(unsecureConfigProvider.notifier).isOIDCAuthMode;
 
     try {

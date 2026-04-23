@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 
 /** This class represents the configuration for OIDC */
 class OIDCConfig {
-  @ConfigurationMetadata.assign({ comment: "The issuer URL for who is issuing the JWT's for this OIDC. Do not include trailing slashes." })
+  @ConfigurationMetadata.assign({ comment: "The issuer URL for who is issuing the tokens for this OIDC. Do not include trailing slashes." })
   issuer = "";
 
   @ConfigurationMetadata.assign({ comment: "The client ID of your OIDC configuration so we can verify the audience." })
