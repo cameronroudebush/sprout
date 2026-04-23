@@ -13,6 +13,7 @@ import 'package:sprout/shared/api/browser_client.dart' if (dart.library.html) 'p
 import 'package:sprout/shared/api/cookie_client.dart';
 import 'package:sprout/shared/api/header_client.dart';
 import 'package:sprout/shared/api/timeout_client.dart';
+import 'package:sprout/shared/providers/bg_job_provider.dart';
 
 part 'base_api.g.dart';
 
@@ -57,6 +58,9 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
   final autoLogoutClient = AutoLogoutClient(
     innerClient: platformClient,
     onLogout: () async {
+      // Don't do anything if we're a background job
+      if (ref.read(isBackgroundJobProvider)) return;
+
       final auth = ref.read(authProvider.notifier);
       final authState = ref.read(authProvider);
 

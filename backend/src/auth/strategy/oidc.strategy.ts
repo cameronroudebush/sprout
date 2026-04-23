@@ -1,11 +1,12 @@
 import { AuthService } from "@backend/auth/auth.service";
+import { OIDCIDTokenIntrospectionResult } from "@backend/auth/model/oidc.introspection";
 import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { HttpService } from "@nestjs/axios";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
-import { BadRequestException, HttpException, Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { HttpException, Inject, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { isAxiosError } from "axios";
 import { Request } from "express";
@@ -43,37 +44,21 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     });
   }
 
-  async validate(req: Request, profile: { iss: string; exp: number; sub: string; aud: Array<string> }) {
-    const config = Configuration.server.auth.oidc;
-    const now = Math.floor(Date.now() / 1000);
+  async validate(req: Request, data: any) {
+    const profileIntrospect = OIDCIDTokenIntrospectionResult.fromPlain(data);
     let profileData: { sub: string; preferred_username: string } | undefined;
 
     // Perform some security validation
-    if (profile.iss !== config.issuer) throw new UnauthorizedException("Invalid token issuer.");
-    if (!profile.aud.includes(config.clientId)) throw new UnauthorizedException("Invalid token audience.");
+    profileIntrospect.checkIssuedState();
 
     // Check if we need to refresh
-    if (profile.exp && now >= profile.exp) {
-      this.logger.debug(`Token expired for ${profile.sub}, attempting refresh...`);
-      const refreshToken = this.authService.getCookie("refresh", req);
-
-      if (!refreshToken) {
-        this.logger.warn("Failing to refresh token because no refresh token was found in cookies.");
-        throw new UnauthorizedException("Session expired and no refresh token available.");
-      }
-
-      const refreshIntro = await this.authService.introspectToken(refreshToken);
-      if (refreshIntro.exp)
-        if (now >= refreshIntro.exp) {
-          this.logger.warn(`Refresh token is expired. Ignoring refresh request.`);
-          throw new BadRequestException(`Token refresh failed. Refresh token is expired.`);
-        } else this.logger.debug(`Refresh token expiration: ${new Date(refreshIntro.exp)}`);
-
+    if (profileIntrospect.isExpired) {
+      this.logger.debug(`Token expired or inactive for request, attempting refresh...`);
       try {
         const tokens = await this.authService.performOIDCRefresh(req, req.res);
-
         // Update profileData with the new token's claims so the current request succeeds
         profileData = await this.getUserInfo(tokens.accessToken);
+        this.logger.debug(`Token refreshed successfully.`);
       } catch (e) {
         this.logger.error(`Refresh failed: ${e}`);
         throw new UnauthorizedException("Session expired.");
@@ -85,8 +70,8 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
 
     // Make sure we have the user info
     if (!profileData?.preferred_username) throw new UnauthorizedException("Could not determine username from token.");
-    // Find user based on our profile data/token
-    const user = await User.findOne({ where: { username: profileData.preferred_username } });
+    // Find user based on our profile data
+    const user = await User.findOne({ where: { id: profileData.sub } });
     // Set request context for any data we have for setup of new users
     (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username);
     // No user? Probably should fail then
@@ -97,7 +82,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
   /**
    * Retrieves the user info from the OIDC endpoint/cache and returns it
    */
-  private async getUserInfo(accessToken: string) {
+  private async getUserInfo(accessToken: string): Promise<{ sub: string; preferred_username: string }> {
     const cacheKey = `oidc_user_${accessToken}`;
     // Check if we have cache data
     let profileData = await this.cacheManager.get<any>(cacheKey);

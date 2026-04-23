@@ -165,7 +165,11 @@ class WidgetSync extends _$WidgetSync {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     final (container, user) = await BackgroundJobProvider.entry("Widget-Provider");
-    if (user == null) return false; // Don't update without a user
+    if (user == null) {
+      // No user? Update anyways. Since auth will be null, we'll just write session expired.
+      await container.read(widgetSyncProvider.notifier).update();
+      return false;
+    }
     try {
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
@@ -174,7 +178,7 @@ void callbackDispatcher() {
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).update();
       LoggerProvider.debug("Background widget update successful");
-      return true; // Task succeeded
+      return true;
     } catch (e) {
       LoggerProvider.error(e);
       return false;

@@ -1,8 +1,9 @@
+import { OIDCIntrospectionResult } from "@backend/auth/model/oidc.introspection";
 import { OIDCTokens } from "@backend/auth/model/oidc.tokens";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
-import { HttpException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, HttpException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { isAxiosError } from "axios";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -125,12 +126,16 @@ export class AuthService {
 
   /**
    * This function is used to attempt to refresh our ID token from our OIDC provider
-   *  based on the given refresh token. If it fails to refresh, it will throw an exception.
+   *  based on the given refresh token. If it fails to refresh, it will throw an exception. If
+   *  it refreshes successfully, we'll add them to the cookies.
    */
   async performOIDCRefresh(req: Request, res?: Response) {
     const { issuer, authHeader } = Configuration.server.auth.oidc;
     const refreshToken = this.getCookie("refresh", req);
-    if (!refreshToken) throw new UnauthorizedException("No refresh token provided");
+    if (!refreshToken) {
+      this.logger.debug("Failing to refresh token because no refresh token was found in cookies.");
+      throw new UnauthorizedException("Session expired and no refresh token available.");
+    }
 
     // Check if there is already an active refresh happening for THIS specific token
     const existingPromise = this.refreshPromises.get(refreshToken);
@@ -142,6 +147,17 @@ export class AuthService {
     }
     const refreshPromise = (async () => {
       try {
+        // Check refresh token status
+        const refreshIntro = await this.introspectToken(refreshToken);
+        refreshIntro.checkIssuedState();
+        if (!refreshIntro.active) {
+          this.logger.debug(`Refresh token as been revoked. Ignoring refresh request.`);
+          throw new UnauthorizedException("Refresh token as been revoked. Ignoring refresh request.");
+        } else if (refreshIntro.isExpired) {
+          this.logger.debug(`Refresh token is expired. Ignoring refresh request.`);
+          throw new BadRequestException(`Token refresh failed. Refresh token is expired.`);
+        }
+
         const response = await firstValueFrom(
           this.httpService.post(
             `${issuer}/api/oidc/token`,
@@ -186,8 +202,10 @@ export class AuthService {
   /**
    * Given a token, asks the OIDC provider to introspect it to obtain information about our actual token
    *  including active state, issue time, and expiration time.
+   *
+   * @returns The token inspection results. Note that times are in seconds from the epoch, according to OIDC spec.
    */
-  async introspectToken(token: string): Promise<{ active: boolean; iat?: number; exp?: number }> {
+  async introspectToken(token: string) {
     const { issuer, authHeader } = Configuration.server.auth.oidc;
     try {
       const response = await firstValueFrom(
@@ -198,10 +216,10 @@ export class AuthService {
           },
         }),
       );
-      return response.data;
+      return OIDCIntrospectionResult.fromPlain(response.data);
     } catch (e) {
       this.logger.error(`Introspection failed: ${e}`);
-      return { active: false };
+      return OIDCIntrospectionResult.fromPlain({ active: false, exp: Date.now() / 1000 });
     }
   }
 }

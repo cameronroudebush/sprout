@@ -31,7 +31,8 @@ class Sse extends _$Sse {
     });
 
     final currentAuth = ref.read(authProvider).value;
-    if (currentAuth != null) {
+    final isBackground = ref.read(isBackgroundJobProvider);
+    if (currentAuth != null && !isBackground) {
       Future.microtask(() => _startSSE());
     }
 

@@ -24,12 +24,12 @@ class WelcomeSetupPage extends StatelessWidget {
           children: <Widget>[
             // Hero Icon or Logo
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(36),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
-              child: SproutIcon(128),
+              child: SproutIcon(108),
             ),
 
             // Main Title

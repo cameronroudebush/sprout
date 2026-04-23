@@ -7,6 +7,7 @@ import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/notification/widgets/notification_item.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/bg_job_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:uuid/uuid.dart';
@@ -30,6 +31,10 @@ class Notifications extends _$Notifications {
 
   @override
   Future<List<Notification>> build() async {
+    final isBackground = ref.watch(isBackgroundJobProvider);
+    // Don't actually do anything if this is a background job.
+    if (isBackground) return [];
+
     final api = await ref.watch(notificationApiProvider.future);
 
     // Setup Firebase (now with Authentication capability)
