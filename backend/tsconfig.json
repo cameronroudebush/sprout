@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig.base.json",
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
   "compilerOptions": {
     "outDir": "./dist",
     "sourceMap": true,
@@ -19,7 +22,8 @@
       "@backend/auth/*": ["./src/auth/*"],
       "@backend/notification/*": ["./src/notification/*"],
       "@backend/chat/*": ["./src/chat/*"],
-      "@backend/net-worth/*": ["./src/net-worth/*"]
+      "@backend/net-worth/*": ["./src/net-worth/*"],
+      "@backend/email/*": ["./src/email/*"]
     }
   },
   "include": ["./src/**/*"]

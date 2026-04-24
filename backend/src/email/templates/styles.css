@@ -1,0 +1,161 @@
+body {
+  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  color: #cfd8dc;
+  text-align: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  background: #1d2127;
+  border-radius: 12px;
+  overflow: hidden;
+  padding-bottom: 1rem;
+  text-align: left;
+}
+
+.header {
+  background: #111418;
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #116383;
+}
+
+.logo {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: #a0cafd;
+  text-transform: uppercase;
+}
+
+.content {
+  text-align: center;
+}
+
+.hero {
+  padding: 1.5rem;
+}
+
+.cards {
+  text-align: center;
+}
+
+.summary-card {
+  background: #111418;
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  border-left: 0.25rem solid transparent;
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
+  margin: 0 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card .label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #8a9297;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.summary-card .value {
+  display: block;
+  font-size: 26px;
+  color: #a0cafd;
+}
+
+.section {
+  padding: 0 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 18px;
+  width: 80%;
+  padding-bottom: 0.25rem;
+  font-weight: bold;
+  border-bottom: 0.15rem solid #116383;
+  margin: 0 auto 1rem auto;
+  color: #8a9297;
+  text-align: center;
+}
+
+.income {
+  color: lightgreen !important;
+}
+
+.expense {
+  color: #ffabaf !important;
+}
+
+.footer {
+  border-top: 0.25rem solid #116383;
+  padding-top: 1rem;
+  text-align: center;
+}
+
+.footer > * {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+.footer p {
+  margin: 0;
+  padding: 0;
+  color: gray;
+}
+
+/* Table styling */
+table {
+  width: 75%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 auto;
+  background-color: #111418;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+thead {
+  background-color: #111418;
+}
+
+th {
+  font-size: 11px;
+  color: #8a9297;
+  padding: 1rem 1.5rem;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #116383;
+}
+
+td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #1d2127;
+  font-size: 14px;
+  color: #cfd8dc;
+  white-space: nowrap;
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

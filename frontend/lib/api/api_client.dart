@@ -204,6 +204,8 @@ class ApiClient {
           return ChatHistory.fromJson(value);
         case 'ChatRequestDTO':
           return ChatRequestDTO.fromJson(value);
+        case 'EmailUpdateFrequencyEnum':
+          return EmailUpdateFrequencyEnumTypeTransformer().decode(value);
         case 'EntityHistory':
           return EntityHistory.fromJson(value);
         case 'EntityHistoryDataPoint':
@@ -268,6 +270,8 @@ class ApiClient {
           return TransactionSubscription.fromJson(value);
         case 'UnsecureAppConfiguration':
           return UnsecureAppConfiguration.fromJson(value);
+        case 'UpdateUserDto':
+          return UpdateUserDto.fromJson(value);
         case 'User':
           return User.fromJson(value);
         case 'UserConfig':
@@ -276,6 +280,8 @@ class ApiClient {
           return UserCreationRequest.fromJson(value);
         case 'UserCreationResponse':
           return UserCreationResponse.fromJson(value);
+        case 'UserGetDTO':
+          return UserGetDTO.fromJson(value);
         case 'UsernamePasswordLoginRequest':
           return UsernamePasswordLoginRequest.fromJson(value);
         case 'ZillowAsset':

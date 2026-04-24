@@ -4,7 +4,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { BadRequestException } from "@nestjs/common";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import bcrypt from "bcrypt";
 import { Exclude } from "class-transformer";
 import { OneToOne } from "typeorm";
@@ -19,6 +19,10 @@ export class User extends DatabaseBase {
 
   @DatabaseDecorators.column()
   username: string;
+
+  @DatabaseDecorators.column({ nullable: true })
+  @ApiProperty({ required: false })
+  email: string;
 
   @DatabaseDecorators.column({ default: false })
   admin: boolean;
@@ -37,9 +41,10 @@ export class User extends DatabaseBase {
     return this.firstName + " " + this.lastName;
   }
 
-  constructor(username: string, firstName: string, lastName: string, admin = false, config: UserConfig) {
+  constructor(username: string, email: string, firstName: string, lastName: string, admin = false, config: UserConfig) {
     super();
     this.username = username;
+    this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;
     this.admin = admin;

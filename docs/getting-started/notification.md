@@ -139,6 +139,8 @@ sprout_server_notification_firebase_clientEmail=firebase-adminsdk-xxxxx@sprout-s
 sprout_server_notification_firebase_privateKey="-----BEGIN PRIVATE KEY-----\nMIIEvQIBA...\n-----END PRIVATE KEY-----\n"
 ```
 
+Fore more configuration information, [see the configuration page](./configuration.md).
+
 ## Troubleshooting
 
 ### Client: 403 Forbidden Error

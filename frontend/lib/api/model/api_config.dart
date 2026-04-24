@@ -14,26 +14,33 @@ class APIConfig {
   /// Returns a new [APIConfig] instance.
   APIConfig({
     required this.chatKeyProvidedInBackend,
+    required this.emailEnabled,
   });
 
   /// Determines if the chat key is already provided and users shouldn't be able to set theirs then.
   bool chatKeyProvidedInBackend;
 
+  /// Tracks if email is enabled and functional
+  bool emailEnabled;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
-    other.chatKeyProvidedInBackend == chatKeyProvidedInBackend;
+    other.chatKeyProvidedInBackend == chatKeyProvidedInBackend &&
+    other.emailEnabled == emailEnabled;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (chatKeyProvidedInBackend.hashCode);
+    (chatKeyProvidedInBackend.hashCode) +
+    (emailEnabled.hashCode);
 
   @override
-  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend]';
+  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend, emailEnabled=$emailEnabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'chatKeyProvidedInBackend'] = this.chatKeyProvidedInBackend;
+      json[r'emailEnabled'] = this.emailEnabled;
     return json;
   }
 
@@ -50,11 +57,14 @@ class APIConfig {
       assert(() {
         assert(json.containsKey(r'chatKeyProvidedInBackend'), 'Required key "APIConfig[chatKeyProvidedInBackend]" is missing from JSON.');
         assert(json[r'chatKeyProvidedInBackend'] != null, 'Required key "APIConfig[chatKeyProvidedInBackend]" has a null value in JSON.');
+        assert(json.containsKey(r'emailEnabled'), 'Required key "APIConfig[emailEnabled]" is missing from JSON.');
+        assert(json[r'emailEnabled'] != null, 'Required key "APIConfig[emailEnabled]" has a null value in JSON.');
         return true;
       }());
 
       return APIConfig(
         chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
+        emailEnabled: mapValueOfType<bool>(json, r'emailEnabled')!,
       );
     }
     return null;
@@ -103,6 +113,7 @@ class APIConfig {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'chatKeyProvidedInBackend',
+    'emailEnabled',
   };
 }
 

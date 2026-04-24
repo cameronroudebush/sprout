@@ -4,12 +4,14 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
 import { RegisterDeviceDto } from "@backend/user/model/api/register.device.dto";
+import { UserGetDTO } from "@backend/user/model/api/user.get.dto";
+import { UpdateUserDto } from "@backend/user/model/api/user.update.dto";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { DevicePlatform } from "@backend/user/model/user.device.type";
 import { User } from "@backend/user/model/user.model";
 import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { UserService } from "@backend/user/user.service";
-import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Post, Req, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Patch, Post, Req, UnauthorizedException } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all User related content */
@@ -49,23 +51,45 @@ export class UserController {
     return await User.findOne({ where: { id: user.id } });
   }
 
+  @Patch("me")
+  @ApiOperation({
+    summary: "Update current user profile.",
+    description: "Allows the authenticated user to update their email and other profile details.",
+  })
+  @ApiOkResponse({ description: "User updated successfully.", type: User })
+  @ApiUnauthorizedResponse({ description: "User is not authenticated." })
+  @AuthGuard.attach()
+  async updateMe(@CurrentUser() user: User, @Body() data: UpdateUserDto) {
+    const updateData: Partial<User> = {};
+
+    if (data.email) {
+      // Ensure email isn't already in use
+      const existing = await User.findOne({ where: { email: data.email } });
+      if (existing && existing.id !== user.id) throw new BadRequestException("Email is already in use.");
+      updateData.email = data.email;
+    }
+
+    Object.assign(user, updateData);
+    return await user.update();
+  }
+
   @Get(":id")
   @ApiOperation({
     summary: "Get user by ID.",
-    description: "Retrieves a user's information by their ID.",
+    description: "Retrieves a user's information by their Id. Only provides relevant information.",
   })
-  @ApiOkResponse({ description: "User found successfully.", type: User })
-  @ApiNotFoundResponse({ description: "User with the specified ID not found." })
+  @ApiOkResponse({ description: "User found successfully.", type: UserGetDTO })
+  @ApiNotFoundResponse({ description: "User with the specified Id not found." })
   @AuthGuard.attach()
   async getById(@Param("id") id: string) {
     const user = await User.findOne({ where: { id: id } });
     if (user == null) throw new NotFoundException();
-    else return user;
+    else return UserGetDTO.fromUser(user);
   }
 
   @Post("create")
   @ApiOperation({
-    summary: "Create a new user..",
+    summary: "Create a new user.",
     description: "Allows for user creation based on either first time setup configuration or OIDC user config.",
   })
   @ApiCreatedResponse({ description: "User created successfully.", type: UserCreationResponse })

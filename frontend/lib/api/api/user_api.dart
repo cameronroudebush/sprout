@@ -16,7 +16,7 @@ class UserApi {
 
   final ApiClient apiClient;
 
-  /// Create a new user..
+  /// Create a new user.
   ///
   /// Allows for user creation based on either first time setup configuration or OIDC user config.
   ///
@@ -50,7 +50,7 @@ class UserApi {
     );
   }
 
-  /// Create a new user..
+  /// Create a new user.
   ///
   /// Allows for user creation based on either first time setup configuration or OIDC user config.
   ///
@@ -74,7 +74,7 @@ class UserApi {
 
   /// Get user by ID.
   ///
-  /// Retrieves a user's information by their ID.
+  /// Retrieves a user's information by their Id. Only provides relevant information.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -109,12 +109,12 @@ class UserApi {
 
   /// Get user by ID.
   ///
-  /// Retrieves a user's information by their ID.
+  /// Retrieves a user's information by their Id. Only provides relevant information.
   ///
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<User?> userControllerGetById(String id,) async {
+  Future<UserGetDTO?> userControllerGetById(String id,) async {
     final response = await userControllerGetByIdWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -123,7 +123,7 @@ class UserApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserGetDTO',) as UserGetDTO;
     
     }
     return null;
@@ -223,5 +223,61 @@ class UserApi {
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+  }
+
+  /// Update current user profile.
+  ///
+  /// Allows the authenticated user to update their email and other profile details.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [UpdateUserDto] updateUserDto (required):
+  Future<Response> userControllerUpdateMeWithHttpInfo(UpdateUserDto updateUserDto,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/user/me';
+
+    // ignore: prefer_final_locals
+    Object? postBody = updateUserDto;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PATCH',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Update current user profile.
+  ///
+  /// Allows the authenticated user to update their email and other profile details.
+  ///
+  /// Parameters:
+  ///
+  /// * [UpdateUserDto] updateUserDto (required):
+  Future<User?> userControllerUpdateMe(UpdateUserDto updateUserDto,) async {
+    final response = await userControllerUpdateMeWithHttpInfo(updateUserDto,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
+    
+    }
+    return null;
   }
 }

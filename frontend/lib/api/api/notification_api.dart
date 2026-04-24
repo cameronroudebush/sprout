@@ -263,7 +263,7 @@ class NotificationApi {
 
   /// Send Test Notification
   ///
-  /// Notifies all the current users devices with a test notification. Only available in dev mode.
+  /// Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> notificationControllerNotifyWithHttpInfo() async {
@@ -293,7 +293,7 @@ class NotificationApi {
 
   /// Send Test Notification
   ///
-  /// Notifies all the current users devices with a test notification. Only available in dev mode.
+  /// Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.
   Future<void> notificationControllerNotify() async {
     final response = await notificationControllerNotifyWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {

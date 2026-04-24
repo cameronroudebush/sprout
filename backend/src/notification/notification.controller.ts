@@ -82,7 +82,7 @@ export class NotificationController {
   @Post("test/notify")
   @ApiOperation({
     summary: "Send Test Notification",
-    description: "Notifies all the current users devices with a test notification. Only available in dev mode.",
+    description: "Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.",
   })
   @UseGuards(DevModeGuard)
   async notify(@CurrentUser() user: User) {

@@ -14,6 +14,7 @@ class User {
   /// Returns a new [User] instance.
   User({
     required this.id,
+    this.email,
     this.firstName,
     this.lastName,
     required this.username,
@@ -22,6 +23,14 @@ class User {
   });
 
   String id;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? email;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -48,6 +57,7 @@ class User {
   @override
   bool operator ==(Object other) => identical(this, other) || other is User &&
     other.id == id &&
+    other.email == email &&
     other.firstName == firstName &&
     other.lastName == lastName &&
     other.username == username &&
@@ -58,6 +68,7 @@ class User {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (email == null ? 0 : email!.hashCode) +
     (firstName == null ? 0 : firstName!.hashCode) +
     (lastName == null ? 0 : lastName!.hashCode) +
     (username.hashCode) +
@@ -65,11 +76,16 @@ class User {
     (config.hashCode);
 
   @override
-  String toString() => 'User[id=$id, firstName=$firstName, lastName=$lastName, username=$username, admin=$admin, config=$config]';
+  String toString() => 'User[id=$id, email=$email, firstName=$firstName, lastName=$lastName, username=$username, admin=$admin, config=$config]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+    if (this.email != null) {
+      json[r'email'] = this.email;
+    } else {
+      json[r'email'] = null;
+    }
     if (this.firstName != null) {
       json[r'firstName'] = this.firstName;
     } else {
@@ -110,6 +126,7 @@ class User {
 
       return User(
         id: mapValueOfType<String>(json, r'id')!,
+        email: mapValueOfType<String>(json, r'email'),
         firstName: mapValueOfType<String>(json, r'firstName'),
         lastName: mapValueOfType<String>(json, r'lastName'),
         username: mapValueOfType<String>(json, r'username')!,

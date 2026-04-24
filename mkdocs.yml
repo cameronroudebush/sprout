@@ -53,6 +53,7 @@ nav:
           - Authentication: getting-started/auth.md
           - Notification: getting-started/notification.md
           - AI Integration: getting-started/llm.md
+          - Email: getting-started/email.md
       - Providers: getting-started/providers.md
       - Accessing Sprout:
           - Overview: getting-started/access.md
