@@ -106,7 +106,8 @@
       "node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
       "node_modules/ansis/**/*",
       "node_modules/firebase-admin/**/*",
-      "node_modules/google-auth-library/**/*"
+      "node_modules/google-auth-library/**/*",
+      "node_modules/@nestjs-modules/mailer/dist/adapters/**/*"
     ]
   }
 }
