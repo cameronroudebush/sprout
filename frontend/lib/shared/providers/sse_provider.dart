@@ -20,6 +20,10 @@ class Sse extends _$Sse {
 
   @override
   SseConnectionState build() {
+    // Ignore requests if this is a background job
+    final isBackground = ref.read(isBackgroundJobProvider);
+    if (isBackground) return SseConnectionState();
+
     ref.listen(authProvider, (previous, next) {
       if (next.value != null && previous?.value == null) {
         // User just logged in
@@ -31,8 +35,7 @@ class Sse extends _$Sse {
     });
 
     final currentAuth = ref.read(authProvider).value;
-    final isBackground = ref.read(isBackgroundJobProvider);
-    if (currentAuth != null && !isBackground) {
+    if (currentAuth != null) {
       Future.microtask(() => _startSSE());
     }
 

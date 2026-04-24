@@ -5,7 +5,7 @@ import { ProviderType } from "@backend/providers/base/provider.type";
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
 import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { User } from "@backend/user/model/user.model";
-import { Injectable, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { Impit } from "impit";
 import { cloneDeep } from "lodash";
 import { ProviderBase } from "../base/core";
@@ -59,6 +59,10 @@ export class ZillowProviderService extends ProviderBase {
     const zestimate = this.cleanNumber(zestMatch?.[1]) ?? 0;
     const rentMatch = content.match(/Rent Zestimate.*?\$([\d,]+)/);
     const rentZestimate = this.cleanNumber(rentMatch?.[1]) ?? 0;
+
+    // Perform validity check
+    if (zpid == null || zpid === "35072756" || zestimate === 50000) throw new BadRequestException("Failed to locate the property on zillow.");
+
     return new ZillowPropertyResultDto(zpid!, zestimate, rentZestimate);
   }
 

@@ -54,8 +54,6 @@ export class ZillowProviderController {
       this.logger.error(error);
       throw new InternalServerErrorException("Failed to fetch property data from Zillow.");
     }
-    // 35072756 Seems to be the default zpid when no property is found
-    if (data == null || data.zpid == null || data.zpid === "35072756") throw new BadRequestException("Failed to locate the property on zillow.");
     return data;
   }
 

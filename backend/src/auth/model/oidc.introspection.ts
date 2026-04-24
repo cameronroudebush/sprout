@@ -1,11 +1,12 @@
 import { Configuration } from "@backend/config/core";
+import { TimeZone } from "@backend/config/model/tz";
 import { Base } from "@backend/core/model/base";
-import { UnauthorizedException } from "@nestjs/common";
+import { Logger, UnauthorizedException } from "@nestjs/common";
 import { Expose } from "class-transformer";
+import { formatDistanceToNow } from "date-fns";
 
 /** Used to store the introspection result from the OIDC providers */
 export class OIDCIntrospectionResult extends Base {
-  active!: boolean;
   @Expose({ name: "client_id" })
   clientId!: string;
   /** Time in seconds since linux epoch that this expires */
@@ -28,6 +29,12 @@ export class OIDCIntrospectionResult extends Base {
   checkIssuedState() {
     const config = Configuration.server.auth.oidc;
     if (this.clientId !== config.clientId) throw new UnauthorizedException("Invalid token client.");
+  }
+
+  /** Logs information regarding when this introspection/token expires */
+  logExpirationDate(tokenName: string, logger: Logger) {
+    const expirationDate = new Date(this.expiresAt * 1000);
+    logger.debug(`${tokenName} token expires at ${TimeZone.formatDate(expirationDate, "PPpp")} (${formatDistanceToNow(expirationDate, { addSuffix: true })})`);
   }
 }
 

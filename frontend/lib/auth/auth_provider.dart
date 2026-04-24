@@ -8,6 +8,7 @@ import 'package:sprout/auth/oidc_helper/oidc_helper.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/bg_job_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/user/user_provider.dart';
 
@@ -121,6 +122,10 @@ class Auth extends _$Auth {
 
   /// Initiates a logout
   Future<void> logout() async {
+    // Ignore requests if this is a background job
+    final isBackground = ref.read(isBackgroundJobProvider);
+    if (isBackground) return;
+
     final api = await ref.read(authApiProvider.future);
     _isLoggingOut = true;
     try {
