@@ -23,10 +23,7 @@ export class EmailController {
     const templatePath = path.join(__dirname, `templates/${template}.ejs`);
 
     try {
-      // Manually render the file to an HTML string
       const html = await ejs.renderFile(templatePath, context);
-
-      // Send the HTML string directly
       res.setHeader("Content-Type", "text/html");
       return res.send(html);
     } catch (error) {
