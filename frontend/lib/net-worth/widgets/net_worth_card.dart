@@ -49,18 +49,21 @@ class NetWorthDisplay extends ConsumerWidget {
       children: [
         _buildHeader(context, isPrivate, selectedRange, currentVal, frame),
         // Net worth chart data
-        timelineData.when(
-          data: (points) => SproutLineChart(
-            data: HistoricalDataPointExtensions.toMap(points ?? []),
-            chartRange: selectedRange,
-            showYAxis: false,
-            height: 100,
-            showXAxis: true,
-            formatValue: (val) => val.toCurrency(isPrivate),
-          ),
-          loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
-          error: (e, _) => const SizedBox(height: 100, child: Center(child: Text("Error loading chart"))),
-        ),
+        Padding(
+            padding: EdgeInsetsGeometry.only(top: 12),
+            child: timelineData.when(
+              data: (points) => SproutLineChart(
+                data: HistoricalDataPointExtensions.toMap(points ?? []),
+                chartRange: selectedRange,
+                showYAxis: true,
+                height: 100,
+                showXAxis: true,
+                formatValue: (val) => val.toCurrency(isPrivate),
+                formatYAxis: (val) => val.toShortCurrency(isPrivate),
+              ),
+              loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+              error: (e, _) => const SizedBox(height: 100, child: Center(child: Text("Error loading chart"))),
+            )),
       ],
     );
   }

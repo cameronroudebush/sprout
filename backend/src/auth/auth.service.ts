@@ -3,7 +3,7 @@ import { OIDCTokens } from "@backend/auth/model/oidc.tokens";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
-import { BadRequestException, HttpException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { HttpException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { isAxiosError } from "axios";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -147,17 +147,6 @@ export class AuthService {
     }
     const refreshPromise = (async () => {
       try {
-        // Check refresh token status
-        const refreshIntro = await this.introspectToken(refreshToken);
-        refreshIntro.checkIssuedState();
-        if (!refreshIntro.active) {
-          this.logger.debug(`Refresh token as been revoked. Ignoring refresh request.`);
-          throw new UnauthorizedException("Refresh token as been revoked. Ignoring refresh request.");
-        } else if (refreshIntro.isExpired) {
-          this.logger.debug(`Refresh token is expired. Ignoring refresh request.`);
-          throw new BadRequestException(`Token refresh failed. Refresh token is expired.`);
-        }
-
         const response = await firstValueFrom(
           this.httpService.post(
             `${issuer}/api/oidc/token`,

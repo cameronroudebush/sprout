@@ -15,11 +15,9 @@ Sprout supports two methods of authentication to ensure your data remains secure
     - **OIDC** requires the user Id to be defined by the OIDC provider, and no password is set. So trying to switch to OIDC from a local account will fail unless you update the userId to be that of your sub. You can do this with a complex query:
             ```sql
                 PRAGMA foreign_keys = OFF;
-
                 UPDATE user SET id = 'myOIDCGUID' WHERE username = 'myUsername';
                 UPDATE account SET userId = 'myOIDCGUID' WHERE userId = 'myOldGUID';
                 -- Repeat for every table that uses a userId...
-
                 PRAGMA foreign_keys = ON;
             ```
 
@@ -55,9 +53,7 @@ To use OIDC with your provider, here's some examples
             lifespans:
                 custom:
                     extended_lifespan: #(1)!
-                        access_token: "1 hour"
-                        refresh_token: "30 days"
-                        id_token: "1 hour"
+                        refresh_token: 30d
             clients:
               - id: sprout
                 description: Sprout
@@ -65,8 +61,6 @@ To use OIDC with your provider, here's some examples
                 secret: $pbkdf2-da.... #(3)!
                 authorization_policy: two_factor
                 lifespan: extended_lifespan
-                consent_mode: pre-configured
-                pre_configured_consent_duration: "30 days"
                 redirect_uris:
                     - http://sprout.mydomain.com/api/auth/oidc/callback # (Change to your production URL)
                 scopes:

@@ -263,7 +263,7 @@ class SproutLineChart extends StatelessWidget {
       yAxisBounds.maxY.abs().toInt().toString().length,
       yAxisBounds.minY.abs().toInt().toString().length,
     );
-    final yReservedSize = yAxisSize ?? 60 + (numDigits - 3).clamp(0, 4) * 10;
+    final yReservedSize = yAxisSize ?? 30 + (numDigits - 3).clamp(0, 4) * 10;
 
     // Calculate the interval that fl_chart will use for the Y-axis labels.
     final yAppliedInterval = LineChartDataProcessor.getChartValueInterval(yAxisBounds.minY, yAxisBounds.maxY);
