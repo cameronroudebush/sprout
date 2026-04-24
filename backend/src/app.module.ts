@@ -11,6 +11,7 @@ import { ImageProxyController } from "@backend/core/image.proxy.controller";
 import { SproutLogger } from "@backend/core/logger";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { DatabaseService } from "@backend/database/database.service";
+import { EmailModule } from "@backend/email/email.module";
 import { HoldingModule } from "@backend/holding/holding.module";
 import { JobsService } from "@backend/jobs/jobs.service";
 import { NetWorthModule } from "@backend/net-worth/net-worth.module";
@@ -37,6 +38,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     NetWorthModule,
     ProviderModule,
     TransactionModule,
+    EmailModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,

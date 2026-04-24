@@ -6,14 +6,16 @@ import { Base } from "@backend/core/model/base";
 export class UserSetupContext extends Base {
   id: string;
   username: string;
+  email: string;
   firstName?: string;
   lastName?: string;
   admin: boolean;
 
-  constructor(id: string, username: string, firstName?: string, lastName?: string, admin: boolean = false) {
+  constructor(id: string, username: string, email: string, firstName?: string, lastName?: string, admin: boolean = false) {
     super();
     this.id = id;
     this.username = username;
+    this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;
     this.admin = admin;

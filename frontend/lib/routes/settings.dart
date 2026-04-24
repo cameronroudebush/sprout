@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/config/widgets/settings_section.dart';
@@ -47,6 +48,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(secureConfigProvider).value;
+    final user = ref.watch(authProvider).value;
     final userConfig = ref.watch(userConfigProvider).value;
     final sseConnected = ref.watch(sseProvider).isConnected;
     final unsecureConfig = ref.watch(unsecureConfigProvider).value;
@@ -120,12 +122,64 @@ class SettingsPage extends ConsumerWidget {
         ),
     ];
 
+    final userHasEmail = user != null && user.email != null && user.email!.isNotEmpty;
+
     return SingleChildScrollView(
       padding: EdgeInsets.only(top: 8),
       child: SproutRouteWrapper(
         child: Column(
           spacing: 16,
           children: [
+            // Profile
+            SettingSection(
+              title: "User Profile",
+              children: [
+                ActionSettingTile(
+                  title: "Username",
+                  subtitle: user?.username ?? "Unknown",
+                  icon: Icons.person_outline,
+                  trailing: SizedBox.shrink(),
+                ),
+                ActionSettingTile(
+                  title: "Email Address",
+                  subtitle: user?.email ?? "No email set",
+                  icon: Icons.email_outlined,
+                  onTap: () => _showEmailDialog(
+                    context: context,
+                    currentEmail: user?.email,
+                    onSave: (newEmail) async {
+                      await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: newEmail));
+                    },
+                  ),
+                ),
+                if (config.emailEnabled)
+                  ActionSettingTile(
+                    title: "Email Frequency",
+                    subtitle: "How often to receive finance updates",
+                    icon: Icons.notifications_active_outlined,
+                    trailing: DropdownButtonHideUnderline(
+                      child: DropdownButton<EmailUpdateFrequencyEnum>(
+                        value: userConfig.emailUpdateFrequency,
+                        alignment: Alignment.centerRight,
+                        onChanged: !userHasEmail
+                            ? null
+                            : (EmailUpdateFrequencyEnum? newValue) {
+                                if (newValue != null) {
+                                  _update(ref, (c) => c.emailUpdateFrequency = newValue);
+                                }
+                              },
+                        items: EmailUpdateFrequencyEnum.values
+                            .map((freq) => DropdownMenuItem(
+                                  value: freq,
+                                  child: Text(freq.value.toTitleCase),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+
             // Appearance (Always shown as it has children)
             SettingSection(title: "Appearance", children: appearanceChildren),
 
@@ -289,6 +343,75 @@ class SettingsPage extends ConsumerWidget {
                         child: const Text(
                           "Save",
                         ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Shows a dialog specifically for updating the email address
+  void _showEmailDialog({
+    required BuildContext context,
+    required String? currentEmail,
+    required Function(String) onSave,
+  }) {
+    final theme = Theme.of(context);
+    final controller = TextEditingController(text: currentEmail);
+    final isChanged = ValueNotifier<bool>(false);
+
+    controller.addListener(() {
+      final text = controller.text.trim();
+      // Basic validation: must be different and contain an @
+      isChanged.value = text != (currentEmail ?? "") && text.contains('@');
+    });
+
+    showSproutPopup(
+      context: context,
+      builder: (context) => SproutBaseDialogWidget(
+        "Update Email",
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 24,
+          children: [
+            Text(
+              "Update your contact email address for notifications and account recovery.",
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: "Email Address",
+                prefixIcon: Icon(Icons.email),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            Row(
+              spacing: 12,
+              children: [
+                Expanded(
+                  child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+                ),
+                Expanded(
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isChanged,
+                    builder: (context, changed, _) {
+                      return FilledButton(
+                        onPressed: changed
+                            ? () {
+                                onSave(controller.text.trim());
+                                Navigator.pop(context);
+                              }
+                            : null,
+                        child: const Text("Update"),
                       );
                     },
                   ),

@@ -3,6 +3,7 @@ const glob = require("glob");
 const webpack = require("webpack");
 const path = require("path");
 const nodeExternals = require("webpack-node-externals");
+const CopyPlugin = require("copy-webpack-plugin");
 
 /** Determines the version of our app via `git-describe` */
 function getVersion() {
@@ -50,6 +51,14 @@ module.exports = function (options, argv) {
     devtool: "inline-source-map",
     plugins: [
       ...options.plugins,
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.resolve("src", "email", "templates"),
+            to: "templates",
+          },
+        ],
+      }),
       // Define relevant variables
       new webpack.DefinePlugin({
         "process.env.APP_VERSION": webpack.DefinePlugin.runtimeValue(() => JSON.stringify(getVersion())),

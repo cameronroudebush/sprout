@@ -146,4 +146,19 @@ class Auth extends _$Auth {
       NavigationProvider.redirect("login");
     }
   }
+
+  /// Updates the current user's profile information (e.g., email)
+  Future<void> updateUser(UpdateUserDto dto) async {
+    final currentUser = state.value;
+    if (currentUser == null) return;
+
+    try {
+      final userApi = await ref.read(userApiProvider.future);
+      final updatedUser = await userApi.userControllerUpdateMe(dto);
+      state = AsyncData(updatedUser);
+    } catch (e) {
+      LoggerProvider.error("Failed to update user profile: $e");
+      rethrow;
+    }
+  }
 }

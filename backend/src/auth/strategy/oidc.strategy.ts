@@ -16,6 +16,8 @@ import { firstValueFrom } from "rxjs";
 
 export const OIDCStrategyName = "oidc";
 
+type ProfileData = { sub: string; preferred_username: string; email: string };
+
 @Injectable()
 export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
   private readonly logger = new Logger("strategy:oidc");
@@ -46,7 +48,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
 
   async validate(req: Request, data: any) {
     const profileIntrospect = OIDCIDTokenIntrospectionResult.fromPlain(data);
-    let profileData: { sub: string; preferred_username: string } | undefined;
+    let profileData: ProfileData | undefined;
 
     // Perform some security validation
     profileIntrospect.checkIssuedState();
@@ -73,7 +75,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     // Find user based on our profile data
     const user = await User.findOne({ where: { id: profileData.sub } });
     // Set request context for any data we have for setup of new users
-    (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username);
+    (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username, profileData.email);
     // No user? Probably should fail then
     if (!user) throw new UnauthorizedException(`User ${profileData.preferred_username} not found`);
     return user;
@@ -82,7 +84,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
   /**
    * Retrieves the user info from the OIDC endpoint/cache and returns it
    */
-  private async getUserInfo(accessToken: string): Promise<{ sub: string; preferred_username: string }> {
+  private async getUserInfo(accessToken: string): Promise<ProfileData> {
     const cacheKey = `oidc_user_${accessToken}`;
     // Check if we have cache data
     let profileData = await this.cacheManager.get<any>(cacheKey);

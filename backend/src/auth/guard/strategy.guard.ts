@@ -1,9 +1,9 @@
 import { LocalStrategyName } from "@backend/auth/strategy/local.strategy";
 import { OIDCStrategyName } from "@backend/auth/strategy/oidc.strategy";
 import { Configuration } from "@backend/config/core";
-import { applyDecorators, CanActivate, ExecutionContext, ForbiddenException, Injectable, SetMetadata, UseGuards } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, SetMetadata, UseGuards } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { ApiExcludeEndpoint } from "@nestjs/swagger";
+import { ApiExcludeController, ApiExcludeEndpoint } from "@nestjs/swagger";
 
 /**
  * This guard allows you to restrict your endpoints to only be available
@@ -15,17 +15,25 @@ export class StrategyGuard implements CanActivate {
 
   /** Dynamically attaches the strategy guard based on the configuration you give. For more info see {@link StrategyGuard} */
   static attach(method: typeof OIDCStrategyName | typeof LocalStrategyName) {
-    return applyDecorators(
-      SetMetadata(StrategyGuard.METADATA_KEY, method),
-      UseGuards(StrategyGuard),
-      Configuration.server.auth.type !== method && Configuration.isRunningScript === false ? ApiExcludeEndpoint() : () => {},
-    );
+    return function (target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor) {
+      SetMetadata(StrategyGuard.METADATA_KEY, method)(target, propertyKey!, descriptor!);
+      UseGuards(StrategyGuard)(target, propertyKey!, descriptor!);
+
+      // Conditionally remove from Swagger if the strategy is disabled
+      if (Configuration.server.auth.type !== method && Configuration.isRunningScript === false) {
+        if (descriptor && propertyKey) {
+          ApiExcludeEndpoint()(target, propertyKey, descriptor);
+        } else {
+          ApiExcludeController()(target as Function);
+        }
+      }
+    };
   }
 
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredMethod = this.reflector.get<string>(StrategyGuard.METADATA_KEY, context.getHandler());
+    const requiredMethod = this.reflector.getAllAndOverride<string>(StrategyGuard.METADATA_KEY, [context.getHandler(), context.getClass()]);
     if (!requiredMethod) return true;
 
     const activeStrategy = Configuration.server.auth.type;

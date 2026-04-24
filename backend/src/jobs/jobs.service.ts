@@ -1,4 +1,6 @@
 import { Configuration } from "@backend/config/core";
+import { EmailService } from "@backend/email/email.service";
+import { StatusEmailJob } from "@backend/jobs/status-email";
 import { ProviderSyncJob } from "@backend/jobs/sync";
 import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationService } from "@backend/notification/notification.service";
@@ -15,11 +17,18 @@ export class JobsService {
   constructor(
     private readonly transactionRuleService: TransactionRuleService,
     private readonly notificationService: NotificationService,
+    private readonly emailService: EmailService,
     @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
   ) {}
 
   /** A dictionary of registered background jobs */
-  jobs: { dbBackup?: DatabaseBackup; pendingTransaction: PendingTransactionJob; userDevice: UserDeviceJob; providerSyncs: ProviderSyncJob[] } = {} as any;
+  jobs: {
+    dbBackup?: DatabaseBackup;
+    pendingTransaction: PendingTransactionJob;
+    userDevice: UserDeviceJob;
+    providerSyncs: ProviderSyncJob[];
+    statusEmailJob: StatusEmailJob;
+  } = {} as any;
 
   /** Starts the background jobs */
   async start() {
@@ -29,5 +38,6 @@ export class JobsService {
     this.jobs.providerSyncs = await Promise.all(
       this.providers.map(async (x) => await new ProviderSyncJob(this.transactionRuleService, this.notificationService, x).start()),
     );
+    this.jobs.statusEmailJob = await new StatusEmailJob(this.emailService).start();
   }
 }

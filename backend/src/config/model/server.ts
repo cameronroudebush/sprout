@@ -2,6 +2,7 @@ import { AuthenticationConfig } from "@backend/auth/model/authentication.config"
 import { ChatConfig } from "@backend/chat/model/chat.config.model";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
+import { EmailConfig } from "@backend/email/model/email.config";
 import { JobsConfig } from "@backend/jobs/model/jobs.config";
 import { NotificationConfig } from "@backend/notification/model/notification.config";
 import { LOG_LEVELS, LogLevel } from "@nestjs/common";
@@ -31,4 +32,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration for LLM prompting." })
   prompt = new ChatConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for email usage." })
+  email = new EmailConfig();
 }

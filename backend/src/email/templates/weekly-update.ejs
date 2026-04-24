@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+      <%- include('styles.css') %>
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent-no-tag.png"
+          alt="Sprout Logo"
+          class="logo"
+        />
+        <h1></h1>
+      </div>
+      <div class="content">
+        <div class="hero" style="padding-bottom: 3rem; font-size: 18px"><%= locals.greeting %>, <%= locals.user %>. Here is your finance update starting on <%= locals.oneWeekAgoDate %>.</div>
+
+        <div class="section">
+          <div class="section-title">Weekly Summary</div>
+
+          <!-- Cards -->
+          <div class="cards">
+            <div class="summary-card">
+              <div class="label">Current Net Worth</div>
+              <div class="value <%= locals.totalNetWorth > 0 ? 'income' : 'expense' %>"><%= locals.totalNetWorthText %></div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label">Total Expenses</div>
+              <div class="value expense"><%= locals.weeklyExpenses %></div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label">Total Income</div>
+              <div class="value <%= locals.weeklyIncome > 0 ? 'income' : '' %>"><%= locals.weeklyIncomeText %></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Transactions</div>
+            <table>
+                <thead>
+                <tr>
+                    <th style="text-align: left;">Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% locals.transactions.forEach(function(tx) { %>
+                <tr>
+                    <td style="text-align: left;"><%= tx.description %></td>
+                    <td><%= tx.category %></td>
+                    <td class="amount <%= tx.amount < 0 ? 'expense' : 'income' %>"><%= tx.amountText %></td>
+                </tr>
+                <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hero" style="font-size: 12px; color: gray;"><%= locals.quote %></div>
+        
+        <div class="section footer">
+            <p style="font-size: small">Generated on <%= locals.today %></p>
+            <p style="font-size: small; padding-top: .25rem;">Emailed, with love, by <a target="_blank" href="https://sprout.croudebush.net">Sprout</a></p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -22,15 +22,10 @@ export class NetWorthController {
   })
   @ApiOkResponse({ description: "Net worth over time successfully.", type: TotalNetWorthDTO })
   async getNetWorthTotal(@CurrentUser() user: User) {
-    // Generate the total net worth using the database to do our math
-    const { total } = await Account.getRepository()
-      .createQueryBuilder("account")
-      .select("SUM(account.balance)", "total")
-      .where("account.userId = :userId", { userId: user.id })
-      .getRawOne();
+    const total = await this.netWorthService.getTotalSummary(user);
     // Generate the content over time
     const calc = await this.netWorthService.getNetWorthSummary(user);
-    return new TotalNetWorthDTO(parseFloat(total ?? "0"), calc.history, calc.timeline());
+    return new TotalNetWorthDTO(total, calc.history, calc.timeline());
   }
 
   @Get("accounts")

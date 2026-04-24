@@ -70,7 +70,7 @@ Sprout uses SQLite by default and includes a built-in backup engine.
 
 | YAML Key                    | Environment Variable               | Default             | Description                                         |
 | --------------------------- | ---------------------------------- | ------------------- | --------------------------------------------------- |
-| `database.type`             | `sprout_database_type`             | `sqlite`            | The database driver to use.                         |
+| `database.type`             | `sprout_database_type`             | `better-sqlite3`    | The database driver to use.                         |
 | **Sqlite**                  |                                    |                     |                                                     |
 | `database.sqlite.database`  | `sprout_database_sqlite_database`  | `sprout.sqlite`     | The filename of the SQLite database.                |
 | **Backups**                 |                                    |                     |                                                     |
@@ -135,6 +135,18 @@ Settings that control how Sprout fetches data from external financial aggregator
 | `server.notification.firebase.projectId`      | `sprout_server_notification_firebase_projectId`      |         | Firebase configuration values (from google-services.json). |
 | `server.notification.firebase.clientEmail`    | `sprout_server_notification_firebase_clientEmail`    |         | Firebase configuration values (from google-services.json). |
 | `server.notification.firebase.privateKey`     | `sprout_server_notification_firebase_privateKey`     |         | The private key string for the service account.            |
+
+## Email
+
+| YAML Key               | Environment Variable          | Default | Description                                                                                                   |
+| ---------------------- | ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `server.email.enabled` | `sprout_server_email_enabled` | `false` | Set to `true` to enable the mailing service.                                                                  |
+| `server.email.from`    | `sprout_server_email_from`    |         | The email address or name that appears in the "From" field. You must verify your SMTP provider supports this. |
+| `server.email.host`    | `sprout_server_email_host`    |         | The SMTP server host (e.g., `smtp.gmail.com`).                                                                |
+| `server.email.port`    | `sprout_server_email_port`    |         | The port as required by your SMTP server host.                                                                |
+| `server.email.secure`  | `sprout_server_email_secure`  |         | If your SMTP host requires TLS.                                                                               |
+| `server.email.user`    | `sprout_server_email_user`    |         | The username for your SMTP server.                                                                            |
+| `server.email.pass`    | `sprout_server_email_pass`    |         | The password or App Password for your SMTP server.                                                            |
 
 ## User
 

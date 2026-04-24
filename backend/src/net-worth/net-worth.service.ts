@@ -14,6 +14,16 @@ type NetWorthSnapshot = { date: Date; netWorth: number };
 export class NetWorthService {
   constructor() {}
 
+  /** Returns the total net worth for a given user using the database to calculate the math */
+  async getTotalSummary(user: User) {
+    const { total } = await Account.getRepository()
+      .createQueryBuilder("account")
+      .select("SUM(account.balance)", "total")
+      .where("account.userId = :userId", { userId: user.id })
+      .getRawOne();
+    return parseFloat(total ?? "0");
+  }
+
   /** Aggregates ALL accounts for a user into a single Net Worth timeline. */
   async getNetWorthSummary(user: User) {
     const history = await this.getAccountHistoryForUser(user);

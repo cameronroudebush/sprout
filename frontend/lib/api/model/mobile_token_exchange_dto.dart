@@ -19,6 +19,7 @@ class MobileTokenExchangeDto {
 
   String code;
 
+  /// Specifies the app verifier that is hashed
   String appVerifier;
 
   @override

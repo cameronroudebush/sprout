@@ -17,6 +17,12 @@ enum Theme {
   COLORED = "colored",
 }
 
+/** How often the user can get email updates */
+export enum EmailUpdateFrequency {
+  NONE = "none",
+  WEEKLY = "weekly",
+}
+
 /**
  * This class defines user configuration options per user
  */
@@ -54,6 +60,12 @@ export class UserConfig extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false, default: false })
   @IsBoolean()
   allowWidgets: boolean;
+
+  /** How often the user should receive email updates. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: false, default: EmailUpdateFrequency.NONE })
+  @ApiProperty({ enum: EmailUpdateFrequency, enumName: "EmailUpdateFrequencyEnum", default: EmailUpdateFrequency.NONE })
+  @IsEnum(EmailUpdateFrequency)
+  emailUpdateFrequency: EmailUpdateFrequency = EmailUpdateFrequency.NONE;
 
   /** The visual theme style selected by the user */
   @DatabaseDecorators.column({
