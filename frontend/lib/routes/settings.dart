@@ -380,7 +380,7 @@ class SettingsPage extends ConsumerWidget {
           spacing: 24,
           children: [
             Text(
-              "Update your contact email address for notifications and account recovery.",
+              "Update your contact email address for additional app features.",
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),

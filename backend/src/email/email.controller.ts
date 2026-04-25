@@ -4,7 +4,7 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { EmailService } from "@backend/email/email.service";
 import { WeeklyEmailContent } from "@backend/email/model/weekly-content";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, Post, Res, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import ejs from "ejs";
 import { Response } from "express";
@@ -14,7 +14,7 @@ import path from "path";
 @Controller("email")
 @ApiTags("Email")
 @AuthGuard.attach()
-@UseGuards(DevModeGuard)
+@DevModeGuard.attach()
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 

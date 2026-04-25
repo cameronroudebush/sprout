@@ -19,7 +19,7 @@ export class StrategyGuard implements CanActivate {
       SetMetadata(StrategyGuard.METADATA_KEY, method)(target, propertyKey!, descriptor!);
       UseGuards(StrategyGuard)(target, propertyKey!, descriptor!);
 
-      // Conditionally remove from Swagger if the strategy is disabled
+      // Conditionally remove from api docs if the strategy is disabled
       if (Configuration.server.auth.type !== method && Configuration.isRunningScript === false) {
         if (descriptor && propertyKey) {
           ApiExcludeEndpoint()(target, propertyKey, descriptor);
