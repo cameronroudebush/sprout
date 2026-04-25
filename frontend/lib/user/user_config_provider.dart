@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
@@ -41,9 +42,9 @@ class UserConfigNotifier extends _$UserConfigNotifier {
       );
     }
 
-    // If the user is null, we return null and don't attempt the API call.
-    final auth = ref.watch(authProvider).value;
-    if (auth == null) return null;
+    // Only watch for user ID changes
+    final userId = ref.watch(authProvider.select((s) => s.value?.id));
+    if (userId == null) return null;
 
     final config = await populateUserConfig();
     // Populate biometrics consideration

@@ -187,7 +187,13 @@ class Notifications extends _$Notifications {
     if (e is ApiException && e.message != null) {
       try {
         final decoded = json.decode(e.message!);
-        return decoded['message'] ?? e.message;
+        final message = decoded['message'];
+        if (message is List && message.isNotEmpty) {
+          return message.first.toString();
+        } else if (message != null) {
+          return message.toString();
+        }
+        return e.message!;
       } catch (_) {
         return e.message!;
       }
