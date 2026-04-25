@@ -10,7 +10,7 @@ import { NotificationService } from "@backend/notification/notification.service"
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Post } from "@nestjs/common";
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all notification related content per user */
@@ -84,7 +84,7 @@ export class NotificationController {
     summary: "Send Test Notification",
     description: "Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.",
   })
-  @UseGuards(DevModeGuard)
+  @DevModeGuard.attach()
   async notify(@CurrentUser() user: User) {
     this.notificationService.notifyUser(user, "This is a test of the notification pipeline", "Test notification", NotificationType.warning);
   }
