@@ -20,7 +20,7 @@
         <h1></h1>
       </div>
       <div class="content">
-        <div class="hero" style="padding-bottom: 3rem; font-size: 18px"><%= locals.greeting %>, <%= locals.user %>. Here is your finance update starting on <%= locals.oneWeekAgoDate %>.</div>
+        <div class="hero" style="padding-bottom: 3rem; font-size: 18px"><%= locals.greeting %>, <%= locals.user %>. Here's your weekly finance update.</div>
 
         <div class="section">
           <div class="section-title">Weekly Summary</div>
@@ -50,16 +50,17 @@
                 <thead>
                 <tr>
                     <th style="text-align: left;">Description</th>
-                    <th>Category</th>
-                    <th>Amount</th>
+                    <th style="text-align: right;">Amount</th>
                 </tr>
                 </thead>
                 <tbody>
                 <% locals.transactions.forEach(function(tx) { %>
                 <tr>
-                    <td style="text-align: left;"><%= tx.description %></td>
-                    <td><%= tx.category %></td>
-                    <td class="amount <%= tx.amount < 0 ? 'expense' : 'income' %>"><%= tx.amountText %></td>
+                    <td class="table-description" style="text-align: left;">
+                      <span><%= tx.description %></span>
+                      <span style="font-size: small; color: gray;"><%= tx.category %></span>
+                    </td>
+                    <td style="text-align: right;" class="amount <%= tx.amount < 0 ? 'expense' : 'income' %>"><%= tx.amountText %></td>
                 </tr>
                 <% }); %>
                 </tbody>
@@ -70,7 +71,8 @@
         
         <div class="section footer">
             <p style="font-size: small">Generated on <%= locals.today %></p>
-            <p style="font-size: small; padding-top: .25rem;">Emailed, with love, by <a target="_blank" href="https://sprout.croudebush.net">Sprout</a></p>
+            <p style="font-size: small">Data start date: <%= locals.oneWeekAgoDate %></p>
+            <p style="font-size: small;">Emailed, with love, by <a target="_blank" href="https://sprout.croudebush.net">Sprout</a></p>
         </div>
       </div>
     </div>

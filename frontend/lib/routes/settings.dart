@@ -148,7 +148,12 @@ class SettingsPage extends ConsumerWidget {
                     context: context,
                     currentEmail: user?.email,
                     onSave: (newEmail) async {
-                      await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: newEmail));
+                      try {
+                        await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: newEmail));
+                      } catch (e) {
+                        ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                        onConfigFailure?.call(e);
+                      }
                     },
                   ),
                 ),

@@ -8,7 +8,6 @@ body {
 
 .container {
   width: 100%;
-  max-width: 1024px;
   margin: 0 auto;
   background: #1d2127;
   border-radius: 12px;
@@ -60,6 +59,7 @@ body {
   text-align: center;
   margin: 0 0.5rem;
   margin-bottom: 1rem;
+  width: 12.5rem;
 }
 
 .summary-card .label {
@@ -122,19 +122,20 @@ a {
 
 .footer p {
   margin: 0;
-  padding: 0;
+  padding: 0.25rem 0;
   color: gray;
 }
 
 /* Table styling */
 table {
-  width: 75%;
+  width: 90%;
   border-collapse: separate;
   border-spacing: 0;
   margin: 0 auto;
   background-color: #111418;
   border-radius: 1rem;
   overflow: hidden;
+  table-layout: fixed;
 }
 
 thead {
@@ -149,13 +150,27 @@ th {
   border-bottom: 2px solid #116383;
 }
 
-td {
+td,
+td span {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #1d2127;
   font-size: 14px;
   color: #cfd8dc;
-  white-space: nowrap;
-  max-width: 10rem;
+  /* white-space: nowrap; */
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+tr:last-of-type td {
+  border-bottom: none;
+}
+
+td span {
+  padding: 0;
+  border-bottom: none;
+}
+
+.table-description span {
+  display: block;
+  width: 100%;
 }

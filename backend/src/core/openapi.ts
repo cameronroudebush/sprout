@@ -15,13 +15,15 @@ const title = `${projName} API`;
  * @param app The reference to the NestJS app to attach our endpoint to
  */
 export function configureApiDocument(app: INestApplication) {
-  const description = `Welcome to the ${projName} API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.`;
+  const description = `
+  Welcome to the ${projName} API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.
+
+  ${Configuration.isDevBuild ? `**Note:** If you wish to test the functionality, you must use a login endpoint to properly attach cookies to your browser.` : ""}`.trim();
   const version = Configuration.version;
   const config = new DocumentBuilder()
     .setTitle(title)
     .setDescription(description)
     .setVersion(version)
-    .addBearerAuth({ type: "http", description: "This authentication utilizes the JWT given during user login." })
     .addTag("Core", `Provides essential application functionalities, including some proxying, the Server Sent Events (SSE) endpoints and other utility.`)
     .addTag("Config", `Manages application-wide settings and configurations.`)
     .addTag("Auth", "Manage user authentication.")
