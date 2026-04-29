@@ -55,7 +55,7 @@ class NetWorthDisplay extends ConsumerWidget {
               data: (points) => SproutLineChart(
                 data: HistoricalDataPointExtensions.toMap(points ?? []),
                 chartRange: selectedRange,
-                showYAxis: true,
+                showYAxis: false,
                 height: 100,
                 showXAxis: true,
                 formatValue: (val) => val.toCurrency(isPrivate),

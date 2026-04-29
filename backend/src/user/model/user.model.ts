@@ -87,7 +87,7 @@ export class User extends DatabaseBase {
       user.password = hashedPassword;
     }
     user.config = await UserConfig.fromPlain({ user: user }).insert();
-    user = await user.insert();
+    user = await user.insert(false);
     await Category.insertMany(Category.getDefaultCategoriesForUser(user));
     return UserCreationResponse.fromPlain({ username: user.username });
   }

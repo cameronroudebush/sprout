@@ -102,7 +102,7 @@ export class UserController {
         const isFirstUser = (await User.count()) === 0;
         let response: UserCreationResponse;
         if (Configuration.server.auth.type === "oidc") {
-          const setup = (req as any).setupUser;
+          const setup = (req as any).setupUser as UserSetupContext;
           response = await User.createUser({ ...setup, admin: isFirstUser });
         } else response = await User.createUser({ username: data.username, password: data.password, admin: isFirstUser });
         this.logger.log(`New user registered: ${response.username}${isFirstUser ? ". This is the first user and will be registered as Admin." : ""}`);
