@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/cookie_provider.dart';
@@ -104,12 +103,10 @@ class Auth extends _$Auth {
   /// Attempts a login via OIDC using the OIDC helper
   Future<User?> loginOIDC({bool manualLogin = false}) async {
     // Try to restore session from cookies
-    if (kIsWeb) {
-      try {
-        return await _applyAuth();
-      } catch (e) {
-        LoggerProvider.debug("Cookie restoration failed, proceeding to OIDC redirect.");
-      }
+    try {
+      return await _applyAuth();
+    } catch (e) {
+      LoggerProvider.debug("Cookie restoration failed, proceeding to OIDC redirect.");
     }
 
     // Full OIDC Authentication
