@@ -17,6 +17,7 @@ class UserConfig {
     required this.netWorthRange,
     this.emailUpdateFrequency = EmailUpdateFrequencyEnum.none,
     required this.themeStyle,
+    this.currency = CurrencyOptionsEnum.USD,
     required this.privateMode,
     this.simpleFinToken,
     this.geminiKey,
@@ -34,6 +35,9 @@ class UserConfig {
 
   /// The visual theme style selected by the user
   ThemeStyleEnum themeStyle;
+
+  /// What currency we should display everything in.
+  CurrencyOptionsEnum currency;
 
   /// If we should hide balances on the users display
   bool privateMode;
@@ -68,6 +72,7 @@ class UserConfig {
     other.netWorthRange == netWorthRange &&
     other.emailUpdateFrequency == emailUpdateFrequency &&
     other.themeStyle == themeStyle &&
+    other.currency == currency &&
     other.privateMode == privateMode &&
     other.simpleFinToken == simpleFinToken &&
     other.geminiKey == geminiKey &&
@@ -81,6 +86,7 @@ class UserConfig {
     (netWorthRange.hashCode) +
     (emailUpdateFrequency.hashCode) +
     (themeStyle.hashCode) +
+    (currency.hashCode) +
     (privateMode.hashCode) +
     (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
     (geminiKey == null ? 0 : geminiKey!.hashCode) +
@@ -88,7 +94,7 @@ class UserConfig {
     (allowWidgets.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode, allowWidgets=$allowWidgets]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode, allowWidgets=$allowWidgets]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -96,6 +102,7 @@ class UserConfig {
       json[r'netWorthRange'] = this.netWorthRange;
       json[r'emailUpdateFrequency'] = this.emailUpdateFrequency;
       json[r'themeStyle'] = this.themeStyle;
+      json[r'currency'] = this.currency;
       json[r'privateMode'] = this.privateMode;
     if (this.simpleFinToken != null) {
       json[r'simpleFinToken'] = this.simpleFinToken;
@@ -131,6 +138,8 @@ class UserConfig {
         assert(json[r'emailUpdateFrequency'] != null, 'Required key "UserConfig[emailUpdateFrequency]" has a null value in JSON.');
         assert(json.containsKey(r'themeStyle'), 'Required key "UserConfig[themeStyle]" is missing from JSON.');
         assert(json[r'themeStyle'] != null, 'Required key "UserConfig[themeStyle]" has a null value in JSON.');
+        assert(json.containsKey(r'currency'), 'Required key "UserConfig[currency]" is missing from JSON.');
+        assert(json[r'currency'] != null, 'Required key "UserConfig[currency]" has a null value in JSON.');
         assert(json.containsKey(r'privateMode'), 'Required key "UserConfig[privateMode]" is missing from JSON.');
         assert(json[r'privateMode'] != null, 'Required key "UserConfig[privateMode]" has a null value in JSON.');
         assert(json.containsKey(r'secureMode'), 'Required key "UserConfig[secureMode]" is missing from JSON.');
@@ -145,6 +154,7 @@ class UserConfig {
         netWorthRange: ChartRangeEnum.fromJson(json[r'netWorthRange'])!,
         emailUpdateFrequency: EmailUpdateFrequencyEnum.fromJson(json[r'emailUpdateFrequency'])!,
         themeStyle: ThemeStyleEnum.fromJson(json[r'themeStyle'])!,
+        currency: CurrencyOptionsEnum.fromJson(json[r'currency'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         geminiKey: mapValueOfType<String>(json, r'geminiKey'),
@@ -201,6 +211,7 @@ class UserConfig {
     'netWorthRange',
     'emailUpdateFrequency',
     'themeStyle',
+    'currency',
     'privateMode',
     'secureMode',
     'allowWidgets',

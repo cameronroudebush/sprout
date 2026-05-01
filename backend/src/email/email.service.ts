@@ -40,10 +40,13 @@ export class EmailService implements OnModuleInit {
     if (!user.email) throw new BadRequestException("This user does not have an email specified");
     // Build the content for this user
     const oneWeekAgo = subDays(new Date(), 7);
-    const transactions = await Transaction.find({
-      where: { account: { user: { id: user.id } }, posted: MoreThanOrEqual(oneWeekAgo) },
-      order: { posted: "DESC" },
-    });
+    const transactions = Transaction.convertListToTargetCurrency(
+      await Transaction.find({
+        where: { account: { user: { id: user.id } }, posted: MoreThanOrEqual(oneWeekAgo) },
+        order: { posted: "DESC" },
+      }),
+      user,
+    );
     const netWorth = await this.netWorthService.getTotalSummary(user);
     const weeklyIncome = transactions.reduce((sum, tx) => (tx.amount > 0 ? sum + tx.amount : sum), 0);
     const weeklyExpense = transactions.reduce((sum, tx) => (tx.amount < 0 ? sum + Math.abs(tx.amount) : sum), 0);

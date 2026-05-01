@@ -1,9 +1,11 @@
 import { Configuration } from "@backend/config/core";
 import { UserDevice } from "@backend/user/model/user.device.model";
+import { Injectable } from "@nestjs/common";
 import { LessThan } from "typeorm";
 import { BackgroundJob } from "./base";
 
 /** This class defines a background job that executes to check user devices and clean them up if we haven't seen them in awhile */
+@Injectable()
 export class UserDeviceJob extends BackgroundJob<any> {
   constructor() {
     super("user:device", Configuration.user.deviceCheckTime);

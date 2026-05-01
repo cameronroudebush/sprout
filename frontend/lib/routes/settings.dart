@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
@@ -78,6 +79,28 @@ class SettingsPage extends ConsumerWidget {
             },
             items: ThemeStyleEnum.values
                 .map((style) => DropdownMenuItem(value: style, child: Text(style.value.toTitleCase)))
+                .toList(),
+          ),
+        ),
+      ),
+      ActionSettingTile(
+        title: "Display Currency",
+        subtitle: "Customize what currency you want to see your finances in",
+        icon: Icons.currency_exchange,
+        trailing: DropdownButtonHideUnderline(
+          child: DropdownButton<CurrencyOptionsEnum>(
+            value: userConfig.currency,
+            alignment: Alignment.centerRight,
+            onChanged: (CurrencyOptionsEnum? newValue) {
+              if (newValue != null) {
+                _update(ref, (c) => c.currency = newValue);
+              }
+            },
+            items: CurrencyOptionsEnum.values
+                .map((style) => DropdownMenuItem(
+                    value: style,
+                    child:
+                        Text("${NumberFormat.simpleCurrency(name: style.toString()).currencySymbol} - ${style.value}")))
                 .toList(),
           ),
         ),
@@ -253,13 +276,13 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   ActionSettingTile(
                     title: "Sprout Documentation",
-                    subtitle: "Need some help? Get it here.",
+                    subtitle: "Need some help? Get it here",
                     icon: Icons.help,
                     onTap: () => launchUrl(Uri.parse("https://sprout.croudebush.net")),
                   ),
                   ActionSettingTile(
                     title: "Connection Url",
-                    subtitle: "The Url of the server we're connected to.",
+                    subtitle: "The Url of the server we're connected to",
                     icon: Icons.http,
                     trailing: Text(backendUrl ?? "", style: Theme.of(context).textTheme.labelMedium),
                   ),

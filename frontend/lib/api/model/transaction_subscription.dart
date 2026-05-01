@@ -15,8 +15,8 @@ class TransactionSubscription {
   TransactionSubscription({
     required this.account,
     required this.transaction,
-    required this.description,
     required this.amount,
+    required this.description,
     required this.count,
     required this.period,
     required this.startDate,
@@ -28,11 +28,11 @@ class TransactionSubscription {
   /// The transaction that matches the first subscription indication
   Transaction transaction;
 
+  /// The numeric value converted to the user's preferred currency format. This overrides the original amount property.
+  num amount;
+
   /// The description of this transaction
   String description;
-
-  /// The amount of this transaction
-  num amount;
 
   /// The number of these transactions we have counted
   num count;
@@ -47,8 +47,8 @@ class TransactionSubscription {
   bool operator ==(Object other) => identical(this, other) || other is TransactionSubscription &&
     other.account == account &&
     other.transaction == transaction &&
-    other.description == description &&
     other.amount == amount &&
+    other.description == description &&
     other.count == count &&
     other.period == period &&
     other.startDate == startDate;
@@ -58,21 +58,21 @@ class TransactionSubscription {
     // ignore: unnecessary_parenthesis
     (account.hashCode) +
     (transaction.hashCode) +
-    (description.hashCode) +
     (amount.hashCode) +
+    (description.hashCode) +
     (count.hashCode) +
     (period.hashCode) +
     (startDate.hashCode);
 
   @override
-  String toString() => 'TransactionSubscription[account=$account, transaction=$transaction, description=$description, amount=$amount, count=$count, period=$period, startDate=$startDate]';
+  String toString() => 'TransactionSubscription[account=$account, transaction=$transaction, amount=$amount, description=$description, count=$count, period=$period, startDate=$startDate]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'account'] = this.account;
       json[r'transaction'] = this.transaction;
-      json[r'description'] = this.description;
       json[r'amount'] = this.amount;
+      json[r'description'] = this.description;
       json[r'count'] = this.count;
       json[r'period'] = this.period;
       json[r'startDate'] = this.startDate.toUtc().toIso8601String();
@@ -94,10 +94,10 @@ class TransactionSubscription {
         assert(json[r'account'] != null, 'Required key "TransactionSubscription[account]" has a null value in JSON.');
         assert(json.containsKey(r'transaction'), 'Required key "TransactionSubscription[transaction]" is missing from JSON.');
         assert(json[r'transaction'] != null, 'Required key "TransactionSubscription[transaction]" has a null value in JSON.');
-        assert(json.containsKey(r'description'), 'Required key "TransactionSubscription[description]" is missing from JSON.');
-        assert(json[r'description'] != null, 'Required key "TransactionSubscription[description]" has a null value in JSON.');
         assert(json.containsKey(r'amount'), 'Required key "TransactionSubscription[amount]" is missing from JSON.');
         assert(json[r'amount'] != null, 'Required key "TransactionSubscription[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'description'), 'Required key "TransactionSubscription[description]" is missing from JSON.');
+        assert(json[r'description'] != null, 'Required key "TransactionSubscription[description]" has a null value in JSON.');
         assert(json.containsKey(r'count'), 'Required key "TransactionSubscription[count]" is missing from JSON.');
         assert(json[r'count'] != null, 'Required key "TransactionSubscription[count]" has a null value in JSON.');
         assert(json.containsKey(r'period'), 'Required key "TransactionSubscription[period]" is missing from JSON.');
@@ -110,8 +110,8 @@ class TransactionSubscription {
       return TransactionSubscription(
         account: Account.fromJson(json[r'account'])!,
         transaction: Transaction.fromJson(json[r'transaction'])!,
-        description: mapValueOfType<String>(json, r'description')!,
         amount: num.parse('${json[r'amount']}'),
+        description: mapValueOfType<String>(json, r'description')!,
         count: num.parse('${json[r'count']}'),
         period: TransactionSubscriptionPeriodEnum.fromJson(json[r'period'])!,
         startDate: mapDateTime(json, r'startDate', r'')!,
@@ -164,8 +164,8 @@ class TransactionSubscription {
   static const requiredKeys = <String>{
     'account',
     'transaction',
-    'description',
     'amount',
+    'description',
     'count',
     'period',
     'startDate',

@@ -1,4 +1,5 @@
 import { TimeZone } from "@backend/config/model/tz";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Utility } from "@backend/core/model/utility/utility";
 import { User } from "@backend/user/model/user.model";
 import { subDays } from "date-fns";
@@ -45,17 +46,17 @@ export class WeeklyEmailContent {
   ) {
     this.user = user.username;
     this.totalNetWorth = totalNetWorth;
-    this.totalNetWorthText = `$${totalNetWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    this.weeklyExpenses = `$${weeklyExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    this.weeklyIncomeText = `$${weeklyIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    this.totalNetWorthText = CurrencyHelper.format(totalNetWorth, user);
+    this.weeklyExpenses = CurrencyHelper.format(weeklyExpenses, user);
+    this.weeklyIncomeText = CurrencyHelper.format(weeklyIncome, user);
     this.weeklyIncome = weeklyIncome;
     this.transactionCount = transactionCount;
-    this.transactions = transactions.map((x) => ({ ...x, amountText: x.amount.toLocaleString(undefined, { minimumFractionDigits: 2 }) }));
+    this.transactions = transactions.map((x) => ({ ...x, amountText: CurrencyHelper.format(x.amount, user) }));
   }
 
   /** Returns an instance of `this` with fake data */
-  static asFake() {
-    return new WeeklyEmailContent({ username: "Demo" } as User, 142550.0, 450.25, 500, 12, [
+  static asFake(user: User) {
+    return new WeeklyEmailContent(user, 142550.0, 450.25, 500, 12, [
       { description: "Grocery Store", category: "shopping", amount: -85.2 },
       { description: "Utility Bill", category: "utilities", amount: -120.0 },
       { description: "Freelance Payout", category: "paycheck", amount: 500.0 },

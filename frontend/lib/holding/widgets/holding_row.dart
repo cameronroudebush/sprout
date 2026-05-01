@@ -4,7 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/holding_logo.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -20,8 +20,8 @@ class HoldingRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final config = ref.watch(userConfigProvider).value;
-    final isPrivate = config?.privateMode ?? false;
     final userChartRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
     final frame = holdingHistoryAsync.value?.getValueByFrame(userChartRange);
@@ -65,7 +65,7 @@ class HoldingRow extends ConsumerWidget {
                         ],
                       ),
                       Text(
-                        liveMarketValue.toCurrency(isPrivate),
+                        formatter.format(liveMarketValue),
                         style: theme.textTheme.titleMedium,
                       ),
                     ],

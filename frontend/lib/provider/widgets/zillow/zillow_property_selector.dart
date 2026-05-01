@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/state_dropdown.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// This widget provides the ability to input a zillow property you want to track
 class ZillowPropertySelector extends ConsumerStatefulWidget {
@@ -144,9 +143,9 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
 
   /// Builds a result card that shows what property details we found from our lookup
   Widget _buildResultCard(ThemeData theme) {
-    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
-    final zestimate = _lookupResult?.zestimate.toCurrency(privateMode) ?? 'Unknown';
-    final rentZestimate = "${_lookupResult?.rentZestimate.toCurrency(privateMode) ?? 'Unknown'}/mo";
+    final formatter = ref.watch(currencyFormatterProvider);
+    final zestimate = formatter.format(_lookupResult?.zestimate);
+    final rentZestimate = "${formatter.format(_lookupResult?.rentZestimate)}/mo";
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(

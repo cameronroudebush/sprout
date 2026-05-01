@@ -65,7 +65,7 @@ class SproutLineChart extends StatelessWidget {
     this.showZeroLine = true,
     this.formatYAxis,
     this.yAxisSize,
-    this.drawVerticalGrid = false,
+    this.drawVerticalGrid = true,
   });
 
   @override

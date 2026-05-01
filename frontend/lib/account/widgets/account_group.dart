@@ -1,15 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/account_error_icon.dart';
 import 'package:sprout/account/widgets/account_item_row.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/shared/widgets/card.dart';
 
 /// Renders a grouping of accounts with the given data and configuration
-class AccountGroupSection extends StatelessWidget {
+class AccountGroupSection extends ConsumerWidget {
   /// The account group name
   final String title;
 
@@ -63,8 +65,9 @@ class AccountGroupSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final formatter = ref.watch(currencyFormatterProvider);
     final total = accounts.fold(0.0, (sum, a) => sum + a.balance);
     final bool groupHasError = accounts.any((a) => a.institution.hasError);
 
@@ -97,7 +100,7 @@ class AccountGroupSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                total.toCurrency(isPrivate),
+                formatter.format(total),
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: total.toBalanceColor(theme),
                 ),

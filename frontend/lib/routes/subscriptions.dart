@@ -4,14 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/calendar.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/extensions/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// This page provides a view for seeing what subscriptions Sprout has identified based on the re-occurring transactions
 class SubscriptionsPage extends ConsumerStatefulWidget {
@@ -28,6 +27,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final subsAsync = ref.watch(transactionSubscriptionsProvider);
+    final formatter = ref.watch(currencyFormatterProvider);
 
     return subsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -44,7 +44,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
                 child: Column(
               spacing: 4,
               children: [
-                _buildTotal(subs, theme),
+                _buildTotal(subs, theme, formatter),
                 _buildCalendarCard(subs),
                 _buildSelectedDayCard(eventsForCurrentDay),
               ],
@@ -56,9 +56,8 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   }
 
   /// Builds the total widget that shows how much our monthly cost of subscriptions are and how many of them we have
-  Widget _buildTotal(List<TransactionSubscription> subs, ThemeData theme) {
+  Widget _buildTotal(List<TransactionSubscription> subs, ThemeData theme, CurrencyFormatter formatter) {
     final total = subs.isEmpty ? 0 : subs.map((e) => e.amount).reduce((a, b) => a + b);
-    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
 
     return SproutCard(
       child: Padding(
@@ -67,7 +66,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildStatColumn("Total Subscriptions", subs.length.toString(), null),
-            _buildStatColumn("Total Monthly Cost", total.toCurrency(privateMode), theme.colorScheme.error),
+            _buildStatColumn("Total Monthly Cost", formatter.format(total), theme.colorScheme.error),
           ],
         ),
       ),

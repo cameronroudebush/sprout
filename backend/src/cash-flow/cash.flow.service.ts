@@ -48,7 +48,7 @@ export class CashFlowService {
       pending: false,
     } as FindOptionsWhere<Transaction>;
 
-    const transactions = await Transaction.find({ where, relations: ["category", "account"] });
+    const transactions = Transaction.convertListToTargetCurrency(await Transaction.find({ where, relations: ["category", "account"] }), user);
 
     const categoryStats = new Map<string, { category: Category; inflow: number; outflow: number }>();
 

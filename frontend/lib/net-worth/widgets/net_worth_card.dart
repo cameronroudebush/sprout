@@ -4,6 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/models/extensions/historical_data_point_extensions.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
@@ -37,8 +38,8 @@ class NetWorthDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(userConfigProvider).value;
-    final isPrivate = config?.privateMode ?? false;
     final selectedRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     final frame = historyData.value?.getValueByFrame(selectedRange);
     final currentVal = currentValue.value ?? 0;
@@ -47,7 +48,7 @@ class NetWorthDisplay extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 12,
       children: [
-        _buildHeader(context, isPrivate, selectedRange, currentVal, frame),
+        _buildHeader(context, formatter, selectedRange, currentVal, frame),
         // Net worth chart data
         Padding(
             padding: EdgeInsetsGeometry.only(top: 12),
@@ -58,8 +59,8 @@ class NetWorthDisplay extends ConsumerWidget {
                 showYAxis: false,
                 height: 100,
                 showXAxis: true,
-                formatValue: (val) => val.toCurrency(isPrivate),
-                formatYAxis: (val) => val.toShortCurrency(isPrivate),
+                formatValue: (val) => formatter.format(val),
+                formatYAxis: (val) => formatter.format(val, compact: true),
               ),
               loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
               error: (e, _) => const SizedBox(height: 100, child: Center(child: Text("Error loading chart"))),
@@ -71,7 +72,7 @@ class NetWorthDisplay extends ConsumerWidget {
   /// Builds the header row that displays net worth information and range selectors
   Widget _buildHeader(
     BuildContext context,
-    bool isPrivate,
+    CurrencyFormatter formatter,
     ChartRangeEnum range,
     num value,
     EntityHistoryDataPoint? frame,
@@ -94,7 +95,7 @@ class NetWorthDisplay extends ConsumerWidget {
                 ),
               ),
             Text(
-              value.toCurrency(isPrivate),
+              formatter.format(value),
               style: theme.textTheme.headlineSmall?.copyWith(color: value.toBalanceColor(theme)),
             ),
             SproutChangeWidget(

@@ -9,9 +9,9 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/color_extensions.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/providers/bg_job_provider.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
@@ -77,6 +77,7 @@ class WidgetSync extends _$WidgetSync {
     final userConfig = ref.read(userConfigProvider).value;
     final userConfigAsync = ref.read(userConfigProvider.notifier);
     final theme = userConfigAsync.activeTheme(userConfig);
+    final formatter = ref.watch(currencyFormatterProvider);
     Map<String, Object>? data;
     String failureMessage = "No data available. Check settings.";
     num? pastNetWorthChange;
@@ -86,7 +87,6 @@ class WidgetSync extends _$WidgetSync {
       try {
         final netWorth = ref.read(totalNetWorthProvider).value;
         final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
-        final isPrivate = false; // Set to false so widget info always shows real values
         if (netWorth == null) {
           data = null;
         } else {
@@ -102,7 +102,7 @@ class WidgetSync extends _$WidgetSync {
                 (t) => {
                   "merchant": t.description,
                   "category": t.category?.name ?? "Unknown",
-                  "amount": t.amount.toCurrency(isPrivate),
+                  "amount": formatter.format(t.amount, handlePrivateMode: false),
                   "amountNumeric": t.amount,
                   "date": t.timeText,
                   "pending": t.pending,
@@ -112,8 +112,8 @@ class WidgetSync extends _$WidgetSync {
 
           data = {
             "updateTime": DateTime.now().toShortMonthWithTime,
-            "netWorth": netWorth.value.toCurrency(isPrivate),
-            "changeAmount": monthFrame.valueChange.toCurrency(isPrivate),
+            "netWorth": formatter.format(netWorth.value, handlePrivateMode: false),
+            "changeAmount": formatter.format(monthFrame.valueChange, handlePrivateMode: false),
             "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
             "numericChange": pastNetWorthChange,
             "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),

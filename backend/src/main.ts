@@ -1,5 +1,6 @@
 import { Configuration } from "@backend/config/core";
 import { startCase } from "lodash";
+import "source-map-support/register";
 import { name } from "../package.json";
 import { ConfigurationService } from "./config/config.service";
 import { SproutLogger } from "./core/logger";
@@ -15,9 +16,9 @@ Configuration.isRunningScript = (Configuration.isDevBuild as any) && process.arg
 import { TimeZone } from "@backend/config/model/tz";
 import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
 import { setupOpenApiHelp } from "@backend/core/openapi";
+import { UserContextSerializerInterceptor } from "@backend/core/serializer/user.context.serializer";
 import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { JobsService } from "@backend/jobs/jobs.service";
 import { ClassSerializerInterceptor, Logger, LogLevel, ValidationPipe } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -65,12 +66,15 @@ async function main() {
       logger: new SproutLogger(projName, { logLevels }),
       cors: !Configuration.isDevBuild,
     });
+    const reflector = app.get(Reflector);
     // All endpoints live under /api
     app.setGlobalPrefix(Configuration.server.basePath);
     // Enable validation
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     // Enable class-transformer for response serialization
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+    app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+    // Enable currency conversion to values we wish to have
+    app.useGlobalInterceptors(new UserContextSerializerInterceptor(reflector));
     // Enable cookie handling
     app.use(cookieParser(Configuration.encryptionKey));
     // Enable compression to help shrink responses
@@ -107,8 +111,6 @@ async function main() {
     const databaseService = app.get(DatabaseService);
     await databaseService.init();
     DatabaseBase.database = databaseService;
-    // Initialize background jobs
-    await app.get(JobsService).start();
     await app.listen(Configuration.server.port);
     logger.log(`Server ready on port ${Configuration.server.port}`);
   } catch (e) {

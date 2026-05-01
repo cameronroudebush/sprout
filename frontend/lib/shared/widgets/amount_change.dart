@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// A generic widget to display financial change (price or percentage) with semantic coloring
 class SproutChangeWidget extends ConsumerWidget {
@@ -34,7 +34,7 @@ class SproutChangeWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isPrivate = ref.watch(userConfigProvider).value?.privateMode ?? false;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     if (totalChange == null && percentageChange == null) return const SizedBox.shrink();
 
@@ -57,7 +57,7 @@ class SproutChangeWidget extends ConsumerWidget {
             children: [
               if (showValue && totalChange != null)
                 Text(
-                  total.toCurrency(isPrivate),
+                  formatter.format(total),
                   style: TextStyle(color: changeColor, fontSize: fontSize),
                 ),
               if (showPercentage && percentageChange != null)

@@ -330,7 +330,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
                       // Static Read-Only Fields
                       _buildStaticRow(theme, Icons.account_balance, "Provider", account.provider.toString()),
-                      _buildStaticRow(theme, Icons.language, "Currency", account.currency),
 
                       const Divider(),
 

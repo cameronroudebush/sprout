@@ -59,6 +59,7 @@ nav:
           - Overview: getting-started/access.md
           - Apps: getting-started/apps.md
       - Backups: getting-started/backups.md
+      - Currency Support: getting-started/currency.md
   - Developer:
       - Overview: developer/index.md
       - Configuration: developer/configuration.md

@@ -4,10 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/sankey/sankey.dart';
 import 'package:sprout/shared/widgets/layout.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders the Sankey diagram with month consideration integrated
 class SankeyByMonth extends ConsumerWidget {
@@ -20,7 +19,7 @@ class SankeyByMonth extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final year = selectedDate.year;
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
-    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     // Watch the specific Sankey data slice for this timeframe
     final sankeyAsync = ref.watch(sankeyDataProvider(year: year, month: month));
@@ -56,7 +55,7 @@ class SankeyByMonth extends ConsumerWidget {
                   child: Center(
                     child: SankeyChart(
                       sankeyData: data,
-                      formatter: (val) => val.toCurrency(privateMode),
+                      formatter: (val) => formatter.format(val),
                       onNodeTap: (node, value) {
                         NavigationProvider.redirectToCatFilter(ref, node);
                       },

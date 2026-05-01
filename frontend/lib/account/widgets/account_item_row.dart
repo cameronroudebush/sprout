@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 
 /// This widget is used to render a singular account item in a row
-class AccountItemRow extends StatelessWidget {
+class AccountItemRow extends ConsumerWidget {
   /// The account to render
   final Account account;
 
@@ -36,8 +37,9 @@ class AccountItemRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final formatter = ref.watch(currencyFormatterProvider);
 
     return InkWell(
       onTap: onAccountClick,
@@ -65,7 +67,7 @@ class AccountItemRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  account.balance.toCurrency(isPrivate),
+                  formatter.format(account.balance),
                   style: theme.textTheme.bodyMedium,
                 ),
                 SproutChangeWidget(

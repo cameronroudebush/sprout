@@ -14,33 +14,31 @@ class Holding {
   /// Returns a new [Holding] instance.
   Holding({
     required this.id,
-    required this.account,
-    required this.currency,
-    required this.costBasis,
-    required this.description,
-    required this.marketValue,
     required this.purchasePrice,
+    required this.costBasis,
+    required this.marketValue,
+    required this.account,
+    required this.description,
     required this.shares,
     required this.symbol,
   });
 
   String id;
 
+  /// The numeric value converted to the user's preferred currency format. This overrides the original purchasePrice property.
+  num purchasePrice;
+
+  /// The numeric value converted to the user's preferred currency format. This overrides the original costBasis property.
+  num costBasis;
+
+  /// The numeric value converted to the user's preferred currency format. This overrides the original marketValue property.
+  num marketValue;
+
   /// The account this holding is associated to
   Account account;
 
-  String currency;
-
-  num costBasis;
-
   /// A description of what this holding is
   String description;
-
-  /// The current market value
-  num marketValue;
-
-  /// The current purchase price
-  num purchasePrice;
 
   /// Total number of shares, including fractional
   num shares;
@@ -51,12 +49,11 @@ class Holding {
   @override
   bool operator ==(Object other) => identical(this, other) || other is Holding &&
     other.id == id &&
-    other.account == account &&
-    other.currency == currency &&
-    other.costBasis == costBasis &&
-    other.description == description &&
-    other.marketValue == marketValue &&
     other.purchasePrice == purchasePrice &&
+    other.costBasis == costBasis &&
+    other.marketValue == marketValue &&
+    other.account == account &&
+    other.description == description &&
     other.shares == shares &&
     other.symbol == symbol;
 
@@ -64,27 +61,25 @@ class Holding {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
-    (account.hashCode) +
-    (currency.hashCode) +
-    (costBasis.hashCode) +
-    (description.hashCode) +
-    (marketValue.hashCode) +
     (purchasePrice.hashCode) +
+    (costBasis.hashCode) +
+    (marketValue.hashCode) +
+    (account.hashCode) +
+    (description.hashCode) +
     (shares.hashCode) +
     (symbol.hashCode);
 
   @override
-  String toString() => 'Holding[id=$id, account=$account, currency=$currency, costBasis=$costBasis, description=$description, marketValue=$marketValue, purchasePrice=$purchasePrice, shares=$shares, symbol=$symbol]';
+  String toString() => 'Holding[id=$id, purchasePrice=$purchasePrice, costBasis=$costBasis, marketValue=$marketValue, account=$account, description=$description, shares=$shares, symbol=$symbol]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
-      json[r'account'] = this.account;
-      json[r'currency'] = this.currency;
-      json[r'costBasis'] = this.costBasis;
-      json[r'description'] = this.description;
-      json[r'marketValue'] = this.marketValue;
       json[r'purchasePrice'] = this.purchasePrice;
+      json[r'costBasis'] = this.costBasis;
+      json[r'marketValue'] = this.marketValue;
+      json[r'account'] = this.account;
+      json[r'description'] = this.description;
       json[r'shares'] = this.shares;
       json[r'symbol'] = this.symbol;
     return json;
@@ -103,18 +98,16 @@ class Holding {
       assert(() {
         assert(json.containsKey(r'id'), 'Required key "Holding[id]" is missing from JSON.');
         assert(json[r'id'] != null, 'Required key "Holding[id]" has a null value in JSON.');
-        assert(json.containsKey(r'account'), 'Required key "Holding[account]" is missing from JSON.');
-        assert(json[r'account'] != null, 'Required key "Holding[account]" has a null value in JSON.');
-        assert(json.containsKey(r'currency'), 'Required key "Holding[currency]" is missing from JSON.');
-        assert(json[r'currency'] != null, 'Required key "Holding[currency]" has a null value in JSON.');
-        assert(json.containsKey(r'costBasis'), 'Required key "Holding[costBasis]" is missing from JSON.');
-        assert(json[r'costBasis'] != null, 'Required key "Holding[costBasis]" has a null value in JSON.');
-        assert(json.containsKey(r'description'), 'Required key "Holding[description]" is missing from JSON.');
-        assert(json[r'description'] != null, 'Required key "Holding[description]" has a null value in JSON.');
-        assert(json.containsKey(r'marketValue'), 'Required key "Holding[marketValue]" is missing from JSON.');
-        assert(json[r'marketValue'] != null, 'Required key "Holding[marketValue]" has a null value in JSON.');
         assert(json.containsKey(r'purchasePrice'), 'Required key "Holding[purchasePrice]" is missing from JSON.');
         assert(json[r'purchasePrice'] != null, 'Required key "Holding[purchasePrice]" has a null value in JSON.');
+        assert(json.containsKey(r'costBasis'), 'Required key "Holding[costBasis]" is missing from JSON.');
+        assert(json[r'costBasis'] != null, 'Required key "Holding[costBasis]" has a null value in JSON.');
+        assert(json.containsKey(r'marketValue'), 'Required key "Holding[marketValue]" is missing from JSON.');
+        assert(json[r'marketValue'] != null, 'Required key "Holding[marketValue]" has a null value in JSON.');
+        assert(json.containsKey(r'account'), 'Required key "Holding[account]" is missing from JSON.');
+        assert(json[r'account'] != null, 'Required key "Holding[account]" has a null value in JSON.');
+        assert(json.containsKey(r'description'), 'Required key "Holding[description]" is missing from JSON.');
+        assert(json[r'description'] != null, 'Required key "Holding[description]" has a null value in JSON.');
         assert(json.containsKey(r'shares'), 'Required key "Holding[shares]" is missing from JSON.');
         assert(json[r'shares'] != null, 'Required key "Holding[shares]" has a null value in JSON.');
         assert(json.containsKey(r'symbol'), 'Required key "Holding[symbol]" is missing from JSON.');
@@ -124,12 +117,11 @@ class Holding {
 
       return Holding(
         id: mapValueOfType<String>(json, r'id')!,
-        account: Account.fromJson(json[r'account'])!,
-        currency: mapValueOfType<String>(json, r'currency')!,
-        costBasis: num.parse('${json[r'costBasis']}'),
-        description: mapValueOfType<String>(json, r'description')!,
-        marketValue: num.parse('${json[r'marketValue']}'),
         purchasePrice: num.parse('${json[r'purchasePrice']}'),
+        costBasis: num.parse('${json[r'costBasis']}'),
+        marketValue: num.parse('${json[r'marketValue']}'),
+        account: Account.fromJson(json[r'account'])!,
+        description: mapValueOfType<String>(json, r'description')!,
         shares: num.parse('${json[r'shares']}'),
         symbol: mapValueOfType<String>(json, r'symbol')!,
       );
@@ -180,12 +172,11 @@ class Holding {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'id',
-    'account',
-    'currency',
-    'costBasis',
-    'description',
-    'marketValue',
     'purchasePrice',
+    'costBasis',
+    'marketValue',
+    'account',
+    'description',
     'shares',
     'symbol',
   };

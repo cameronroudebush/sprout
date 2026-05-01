@@ -5,7 +5,7 @@ import { Body, Controller, Post, Req, Res, UnauthorizedException } from "@nestjs
 import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
-import { JWTLoginRequest, UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
+import { UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
 
 /** This controller provides the endpoints for authentication related capabilities. */
 @Controller("auth")
@@ -32,14 +32,13 @@ export class AuthController {
   @Post("login/jwt")
   @ApiOperation({
     summary: "Login with an existing JWT.",
-    description: "Validates an existing JWT. If valid, it returns the user details and the same JWT. Only available on local strategy auth.",
+    description: "Validates an existing JWT located in cookies. If valid, it returns the user details. Only available on local strategy auth.",
   })
   @ApiCreatedResponse({ description: "User login successful.", type: User })
   @ApiUnauthorizedResponse({ description: "The provided JWT is invalid or has expired." })
-  @ApiBody({ type: JWTLoginRequest })
   @StrategyGuard.attach("local")
-  async loginWithJWT(@Body() body: JWTLoginRequest, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = extractJwtFromHeaderOrCookie(req) || body.jwt;
+  async loginWithJWT(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = extractJwtFromHeaderOrCookie(req);
     if (token == null) throw new UnauthorizedException();
     const { user, jwt } = await this.authService.loginWithJWT(token);
     this.authService.setCookieTokens(res, jwt);

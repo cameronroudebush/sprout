@@ -6,6 +6,7 @@ import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/notification.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_rule_edit.dart';
@@ -33,10 +34,11 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
 
   @override
   void initState() {
+    final formatter = ref.read(currencyFormatterProvider);
     super.initState();
     final transaction = widget.transaction;
     _descriptionController.text = transaction.description;
-    _amountController.text = transaction.amount.toString();
+    _amountController.text = formatter.format(transaction.amount);
     _category = transaction.category;
     _postedDate = transaction.posted;
     _pending = transaction.pending;

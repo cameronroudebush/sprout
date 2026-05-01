@@ -13,24 +13,24 @@ part of openapi.api;
 class MarketIndexDto {
   /// Returns a new [MarketIndexDto] instance.
   MarketIndexDto({
+    required this.price,
     required this.symbol,
     required this.name,
-    required this.price,
     this.previousClose,
     this.dayLow,
     this.dayHigh,
     this.marketState,
-    this.currency,
     required this.change,
     required this.changePercent,
     required this.lastUpdated,
   });
 
+  /// The numeric value converted to the user's preferred currency format. This overrides the original price property.
+  num price;
+
   String symbol;
 
   String name;
-
-  num price;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -58,14 +58,6 @@ class MarketIndexDto {
 
   MarketIndexDtoMarketStateEnum? marketState;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? currency;
-
   num change;
 
   num changePercent;
@@ -74,14 +66,13 @@ class MarketIndexDto {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is MarketIndexDto &&
+    other.price == price &&
     other.symbol == symbol &&
     other.name == name &&
-    other.price == price &&
     other.previousClose == previousClose &&
     other.dayLow == dayLow &&
     other.dayHigh == dayHigh &&
     other.marketState == marketState &&
-    other.currency == currency &&
     other.change == change &&
     other.changePercent == changePercent &&
     other.lastUpdated == lastUpdated;
@@ -89,26 +80,25 @@ class MarketIndexDto {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (price.hashCode) +
     (symbol.hashCode) +
     (name.hashCode) +
-    (price.hashCode) +
     (previousClose == null ? 0 : previousClose!.hashCode) +
     (dayLow == null ? 0 : dayLow!.hashCode) +
     (dayHigh == null ? 0 : dayHigh!.hashCode) +
     (marketState == null ? 0 : marketState!.hashCode) +
-    (currency == null ? 0 : currency!.hashCode) +
     (change.hashCode) +
     (changePercent.hashCode) +
     (lastUpdated.hashCode);
 
   @override
-  String toString() => 'MarketIndexDto[symbol=$symbol, name=$name, price=$price, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, currency=$currency, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
+  String toString() => 'MarketIndexDto[price=$price, symbol=$symbol, name=$name, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'price'] = this.price;
       json[r'symbol'] = this.symbol;
       json[r'name'] = this.name;
-      json[r'price'] = this.price;
     if (this.previousClose != null) {
       json[r'previousClose'] = this.previousClose;
     } else {
@@ -129,11 +119,6 @@ class MarketIndexDto {
     } else {
       json[r'marketState'] = null;
     }
-    if (this.currency != null) {
-      json[r'currency'] = this.currency;
-    } else {
-      json[r'currency'] = null;
-    }
       json[r'change'] = this.change;
       json[r'changePercent'] = this.changePercent;
       json[r'lastUpdated'] = this.lastUpdated;
@@ -151,12 +136,12 @@ class MarketIndexDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
+        assert(json.containsKey(r'price'), 'Required key "MarketIndexDto[price]" is missing from JSON.');
+        assert(json[r'price'] != null, 'Required key "MarketIndexDto[price]" has a null value in JSON.');
         assert(json.containsKey(r'symbol'), 'Required key "MarketIndexDto[symbol]" is missing from JSON.');
         assert(json[r'symbol'] != null, 'Required key "MarketIndexDto[symbol]" has a null value in JSON.');
         assert(json.containsKey(r'name'), 'Required key "MarketIndexDto[name]" is missing from JSON.');
         assert(json[r'name'] != null, 'Required key "MarketIndexDto[name]" has a null value in JSON.');
-        assert(json.containsKey(r'price'), 'Required key "MarketIndexDto[price]" is missing from JSON.');
-        assert(json[r'price'] != null, 'Required key "MarketIndexDto[price]" has a null value in JSON.');
         assert(json.containsKey(r'change'), 'Required key "MarketIndexDto[change]" is missing from JSON.');
         assert(json[r'change'] != null, 'Required key "MarketIndexDto[change]" has a null value in JSON.');
         assert(json.containsKey(r'changePercent'), 'Required key "MarketIndexDto[changePercent]" is missing from JSON.');
@@ -167,14 +152,13 @@ class MarketIndexDto {
       }());
 
       return MarketIndexDto(
+        price: num.parse('${json[r'price']}'),
         symbol: mapValueOfType<String>(json, r'symbol')!,
         name: mapValueOfType<String>(json, r'name')!,
-        price: num.parse('${json[r'price']}'),
         previousClose: num.parse('${json[r'previousClose']}'),
         dayLow: num.parse('${json[r'dayLow']}'),
         dayHigh: num.parse('${json[r'dayHigh']}'),
         marketState: MarketIndexDtoMarketStateEnum.fromJson(json[r'marketState']),
-        currency: mapValueOfType<String>(json, r'currency'),
         change: num.parse('${json[r'change']}'),
         changePercent: num.parse('${json[r'changePercent']}'),
         lastUpdated: mapValueOfType<String>(json, r'lastUpdated')!,
@@ -225,9 +209,9 @@ class MarketIndexDto {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'price',
     'symbol',
     'name',
-    'price',
     'change',
     'changePercent',
     'lastUpdated',

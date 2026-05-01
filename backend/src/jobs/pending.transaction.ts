@@ -1,10 +1,12 @@
 import { Configuration } from "@backend/config/core";
 import { Transaction } from "@backend/transaction/model/transaction.model";
+import { Injectable } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
 import { BackgroundJob } from "./base";
 
 /** This class defines a background job that executes to check things like stuck pending transactions */
+@Injectable()
 export class PendingTransactionJob extends BackgroundJob<any> {
   constructor() {
     super("transaction:pending", Configuration.transaction.stuckTransactionTime);

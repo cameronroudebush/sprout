@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/models/extensions/account_list_extensions.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 
 /// This widget renders the total Assets vs Debts across a progress bar and helps display
 ///   the value of each specific account type.
-class TotalSummary extends StatelessWidget {
+class TotalSummary extends ConsumerWidget {
   /// The accounts to render
   final List<Account> accounts;
 
@@ -17,8 +18,9 @@ class TotalSummary extends StatelessWidget {
   const TotalSummary({super.key, required this.accounts, required this.isPrivate});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final formatter = ref.watch(currencyFormatterProvider);
 
     final totalAssets = accounts.totalAssets;
     final totalDebts = accounts.totalDebts;
@@ -43,7 +45,7 @@ class TotalSummary extends StatelessWidget {
                 ),
               ],
             ),
-            _buildProgressBar(theme, visualTotal),
+            _buildProgressBar(theme, visualTotal, formatter),
           ],
         ),
       ),
@@ -51,7 +53,7 @@ class TotalSummary extends StatelessWidget {
   }
 
   /// Builds the multi-segmented progress bar
-  Widget _buildProgressBar(ThemeData theme, double total) {
+  Widget _buildProgressBar(ThemeData theme, num total, CurrencyFormatter formatter) {
     return Container(
       height: 10,
       clipBehavior: Clip.antiAlias,
@@ -70,7 +72,7 @@ class TotalSummary extends StatelessWidget {
   }
 
   /// Constructs an individual segment with flex proportional to its value
-  Widget _barSegment(double value, double total, Color color) {
+  Widget _barSegment(num value, num total, Color color) {
     if (value <= 0 || total <= 0) return const SizedBox.shrink();
     return Expanded(
       flex: (value / total * 1000).toInt().clamp(1, 1000),
@@ -80,9 +82,9 @@ class TotalSummary extends StatelessWidget {
 }
 
 /// This class is used to provide the overall summary label for above the progress bar
-class _SummaryLabel extends StatelessWidget {
+class _SummaryLabel extends ConsumerWidget {
   final String label;
-  final double amount;
+  final num amount;
   final Color color;
   final bool isEnd;
 
@@ -98,8 +100,9 @@ class _SummaryLabel extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final formatter = ref.watch(currencyFormatterProvider);
     return Column(
       crossAxisAlignment: isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
@@ -109,7 +112,7 @@ class _SummaryLabel extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        Text(amount.toCurrency(isPrivate), style: theme.textTheme.headlineSmall?.copyWith(color: color, fontSize: 18)),
+        Text(formatter.format(amount), style: theme.textTheme.headlineSmall?.copyWith(color: color, fontSize: 18)),
       ],
     );
   }

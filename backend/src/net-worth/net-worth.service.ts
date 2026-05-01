@@ -16,12 +16,8 @@ export class NetWorthService {
 
   /** Returns the total net worth for a given user using the database to calculate the math */
   async getTotalSummary(user: User) {
-    const { total } = await Account.getRepository()
-      .createQueryBuilder("account")
-      .select("SUM(account.balance)", "total")
-      .where("account.userId = :userId", { userId: user.id })
-      .getRawOne();
-    return parseFloat(total ?? "0");
+    const accounts = Account.convertListToTargetCurrency(await Account.find({ where: { user: { id: user.id } } }), user);
+    return accounts.reduce((a, b) => a + b.balance, 0);
   }
 
   /** Aggregates ALL accounts for a user into a single Net Worth timeline. */
@@ -82,8 +78,7 @@ export class NetWorthService {
         }
       }
     }
-
-    return history;
+    return AccountHistory.convertListToTargetCurrency(history, user);
   }
 
   /** Fetches the HoldingHistory from the database utilizing QueryBuilder for efficiency. Sorts by time. */
@@ -109,8 +104,7 @@ export class NetWorthService {
         }
       }
     }
-
-    return history;
+    return HoldingHistory.convertListToTargetCurrency(history, account.user);
   }
 
   /**

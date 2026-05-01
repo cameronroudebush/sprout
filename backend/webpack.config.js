@@ -36,6 +36,7 @@ module.exports = function (options, argv) {
     output: {
       ...options.output,
       filename: "[name].js",
+      devtoolModuleFilenameTemplate: "[absolute-resource-path]",
       library: {
         // Specify the output type so our migrations are usable during dynamic loading
         type: "commonjs2",

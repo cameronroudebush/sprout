@@ -18,6 +18,9 @@ export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "The log levels we want to render content for.", restrictedValues: LOG_LEVELS })
   logLevels: LogLevel[] = ["log", "error", "warn"];
 
+  @ConfigurationMetadata.assign({ comment: "How often we want to check for updated currency exchange rates.", externalControlDisabled: true })
+  exchangeRateTime: string = "0 */6 * * *";
+
   @ConfigurationMetadata.assign({ comment: "Configuration for rate limiting of the endpoints." })
   rateLimit = new RateLimitConfig();
 

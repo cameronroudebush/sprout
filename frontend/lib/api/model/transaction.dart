@@ -26,7 +26,7 @@ class Transaction {
 
   String id;
 
-  /// In the currency of the account
+  /// The numeric value converted to the user's preferred currency format. This overrides the original amount property.
   num amount;
 
   String description;

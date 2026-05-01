@@ -1,16 +1,20 @@
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
+import { Injectable } from "@nestjs/common";
 import fs from "fs";
 import path from "path";
 import { BackgroundJob } from "./base";
 
 /** This class defines a background job to execute routinely for backing up the database. */
-export class DatabaseBackup extends BackgroundJob<any> {
+@Injectable()
+export class DatabaseBackupJob extends BackgroundJob<any> {
   constructor() {
     super("db:backup", Configuration.database.backup.time);
   }
 
   override async start() {
+    // Only run if enabled
+    if (!Configuration.database.backup.enabled) return this;
     // Always perform an initial backup on app start
     return super.start(true);
   }

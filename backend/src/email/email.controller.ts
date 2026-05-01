@@ -45,7 +45,7 @@ export class EmailController {
     summary: "Preview Weekly Update Email",
     description: "Renders the weekly update email with some fake data. Only works in dev mode.",
   })
-  async previewWeeklyUpdate(@Res() res: Response) {
-    await this.renderEjsContent(WeeklyEmailContent.asFake(), "weekly-update", res);
+  async previewWeeklyUpdate(@CurrentUser() user: User, @Res() res: Response) {
+    await this.renderEjsContent(WeeklyEmailContent.asFake(user), "weekly-update", res);
   }
 }
