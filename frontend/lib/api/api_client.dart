@@ -204,6 +204,8 @@ class ApiClient {
           return ChatHistory.fromJson(value);
         case 'ChatRequestDTO':
           return ChatRequestDTO.fromJson(value);
+        case 'CurrencyOptionsEnum':
+          return CurrencyOptionsEnumTypeTransformer().decode(value);
         case 'EmailUpdateFrequencyEnum':
           return EmailUpdateFrequencyEnumTypeTransformer().decode(value);
         case 'EntityHistory':
@@ -220,8 +222,6 @@ class ApiClient {
           return Holding.fromJson(value);
         case 'Institution':
           return Institution.fromJson(value);
-        case 'JWTLoginRequest':
-          return JWTLoginRequest.fromJson(value);
         case 'MarketIndexDto':
           return MarketIndexDto.fromJson(value);
         case 'MobileTokenExchangeDto':

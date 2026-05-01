@@ -2,7 +2,7 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { FirebaseNotificationDTO } from "@backend/notification/model/api/firebase.notification.dto";
 import { User } from "@backend/user/model/user.model";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { IsEnum } from "class-validator";
 import { ManyToOne } from "typeorm";
@@ -26,6 +26,7 @@ export class Notification extends DatabaseBase {
 
   /** The date that this notification occurs on */
   @DatabaseDecorators.column({ nullable: false })
+  @ApiProperty({ default: null })
   createdAt: Date = new Date();
 
   /** Tracks if the user has interacted with this notification yet. */

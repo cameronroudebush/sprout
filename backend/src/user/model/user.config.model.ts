@@ -23,6 +23,17 @@ export enum EmailUpdateFrequency {
   WEEKLY = "weekly",
 }
 
+/** The currency options the user can have for display */
+export enum CurrencyOptions {
+  USD = "USD", // United States Dollar
+  EUR = "EUR", // Euro
+  GBP = "GBP", // British Pound Sterling
+  CAD = "CAD", // Canadian Dollar
+  AUD = "AUD", // Australian Dollar
+  JPY = "JPY", // Japanese Yen
+  CNY = "CNY", // Chinese Yuan
+}
+
 /**
  * This class defines user configuration options per user
  */
@@ -76,6 +87,15 @@ export class UserConfig extends DatabaseBase {
   @ApiProperty({ enum: Theme, enumName: "ThemeStyleEnum" })
   @IsEnum(Theme)
   themeStyle!: Theme;
+
+  @DatabaseDecorators.column({
+    nullable: false,
+    default: CurrencyOptions.USD,
+    type: "varchar",
+  })
+  @ApiProperty({ enum: CurrencyOptions, enumName: "CurrencyOptionsEnum", description: "What currency we should display everything in." })
+  @IsEnum(CurrencyOptions)
+  currency: CurrencyOptions = CurrencyOptions.USD;
 
   @OneToOne(() => User, (user) => user.config, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })

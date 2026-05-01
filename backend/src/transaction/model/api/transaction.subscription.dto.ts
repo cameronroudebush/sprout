@@ -1,5 +1,6 @@
 import { Account } from "@backend/account/model/account.model";
 import { Base } from "@backend/core/model/base";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
@@ -17,6 +18,7 @@ export enum BillingPeriod {
 }
 
 /** This class defines a subscription that has been determined from the transaction history */
+@CurrencyHelper.ExposeCurrencyFields<TransactionSubscription>("amount", "account.currency")
 export class TransactionSubscription extends Base {
   /** The description of this transaction */
   description: string;

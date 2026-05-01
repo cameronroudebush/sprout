@@ -1,17 +1,26 @@
 import { Account } from "@backend/account/model/account.model";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { User } from "@backend/user/model/user.model";
+import { ApiHideProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { ManyToOne, Not } from "typeorm";
 import { HoldingHistory } from "./holding.history.model";
 
 /** This class provides information for a current stock that is associated to an account. */
 @DatabaseDecorators.entity()
+@CurrencyHelper.ExposeCurrencyFields<Holding>("marketValue", "currency")
+@CurrencyHelper.ExposeCurrencyFields<Holding>("costBasis", "currency")
+@CurrencyHelper.ExposeCurrencyFields<Holding>("purchasePrice", "currency")
 export class Holding extends DatabaseBase {
   /** The account this holding is associated to */
   @ManyToOne(() => Account, (i) => i.id, { eager: true, onDelete: "CASCADE" })
   account: Account;
 
   @DatabaseDecorators.column({ nullable: false })
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
   currency: string;
 
   @DatabaseDecorators.numericColumn({ nullable: false })
@@ -73,5 +82,11 @@ export class Holding extends DatabaseBase {
       holding: this,
       time: date,
     });
+  }
+
+  /** Given a list of these holdings, updates them to the target currency of the user config. This will edit in place. */
+  static convertListToTargetCurrency(arr: Array<Holding>, user: User) {
+    CurrencyHelper.convertList(arr, ["costBasis", "marketValue", "purchasePrice"], "currency", user);
+    return arr;
   }
 }

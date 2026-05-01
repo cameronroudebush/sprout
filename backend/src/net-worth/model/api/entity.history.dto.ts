@@ -3,12 +3,12 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsDate } from "class-validator";
 
-/** A class that represents the date/value for a point in time for our total historical data. This data is used to display timelines of change. */
+/** A class that represents the date/value for a point in time for our total historical data. This data is used to display timelines of change, where the value is a finance value. */
 export class HistoricalDataPoint {
   @ApiProperty({ description: "The date of the record" })
   date: Date;
 
-  @ApiProperty({ description: "The numerical value" })
+  @ApiProperty({ description: "The numerical currency value" })
   value: number;
 
   constructor(date: Date, value: number) {

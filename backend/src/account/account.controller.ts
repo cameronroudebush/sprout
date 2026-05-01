@@ -2,8 +2,8 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountEditRequest } from "@backend/account/model/api/edit.request.dto";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { JobsService } from "@backend/jobs/jobs.service";
 import { Sync } from "@backend/jobs/model/sync.model";
+import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { User } from "@backend/user/model/user.model";
 import { Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Patch, Put, Query } from "@nestjs/common";
@@ -21,7 +21,7 @@ import { SSEService } from "../sse/sse.service";
 export class AccountController {
   constructor(
     private readonly sseService: SSEService,
-    private readonly jobService: JobsService,
+    private readonly providerSyncOrchestrator: ProviderSyncOrchestratorJob,
   ) {}
 
   @Get(":id")
@@ -105,7 +105,7 @@ export class AccountController {
     }
 
     // Update all providers for user
-    const syncs = (await Promise.all(this.jobService.jobs.providerSyncs.map(async (x) => await x.updateNow(user)))).filter((x) => x) as Sync[];
+    const syncs = (await Promise.all(this.providerSyncOrchestrator.jobs.map(async (x) => await x.updateNow(user, false)))).filter((x) => x) as Sync[];
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC);
     // Tell to re-request data if we had any success

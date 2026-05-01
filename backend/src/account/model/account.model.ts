@@ -1,6 +1,7 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -12,6 +13,7 @@ import { IsEnum } from "class-validator";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
+@CurrencyHelper.ExposeCurrencyFields<Account>("balance", "currency")
 export class Account extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   name: string;
@@ -28,13 +30,15 @@ export class Account extends DatabaseBase {
   institution: Institution;
 
   /** The user this account belongs to */
-  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (u) => u.id, { eager: true, onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude()
   user: User;
 
   /** The currency this account uses */
   @DatabaseDecorators.column({ nullable: false })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   currency: string;
 
   /** The current balance of the account */
@@ -42,6 +46,8 @@ export class Account extends DatabaseBase {
   balance: number;
   /** The available balance to this account */
   @DatabaseDecorators.numericColumn({ nullable: false })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   availableBalance: number;
 
   /** The type of this account to better separate it from the others. */
@@ -111,5 +117,11 @@ export class Account extends DatabaseBase {
   static validateSubType(subType: string) {
     const allSubTypes = Object.values(AccountSubType);
     if (!allSubTypes.includes(subType as AccountSubType)) throw new Error(`Invalid subType provided: ${subType}`);
+  }
+
+  /** Given a list of these accounts, updates them to the target currency of the user config. This will edit in place. */
+  static convertListToTargetCurrency(arr: Array<Account>, user: User) {
+    CurrencyHelper.convertList(arr, "balance", "currency", user);
+    return arr;
   }
 }

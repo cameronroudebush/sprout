@@ -10,32 +10,51 @@ import { Notification } from "@backend/notification/model/notification.model";
 import { NotificationType } from "@backend/notification/model/notification.type";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
+import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
+import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { subDays, subMinutes } from "date-fns";
 import { merge } from "lodash";
 import { LessThan, MoreThan } from "typeorm";
 import { BackgroundJob } from "./base";
 
-/** This class is used to schedule updates to query for data at routine intervals from the available providers. */
-export class ProviderSyncJob extends BackgroundJob<Sync | null> {
+/** This job is the orchestrator that controls syncing all available providers */
+@Injectable()
+export class ProviderSyncOrchestratorJob implements OnApplicationBootstrap {
+  /** List of jobs for each provider that we have initialized */
+  jobs: Array<ProviderSyncJob> = [];
+
   constructor(
-    private transactionRuleService: TransactionRuleService,
-    private notificationService: NotificationService,
+    private readonly transactionRuleService: TransactionRuleService,
+    private readonly notificationService: NotificationService,
+    @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
+  ) {}
+
+  async onApplicationBootstrap() {
+    this.jobs = await Promise.all(this.providers.map(async (x) => await new ProviderSyncJob(this.transactionRuleService, this.notificationService, x).start()));
+  }
+}
+
+/** The nested job for each specific actual provider */
+class ProviderSyncJob extends BackgroundJob<Sync | null> {
+  constructor(
+    private readonly transactionRuleService: TransactionRuleService,
+    private readonly notificationService: NotificationService,
     private readonly provider: ProviderBase,
   ) {
     super(`provider:sync:${provider.config.dbType}`, provider.getAppConfiguration().syncFrequency);
   }
 
-  public override async updateNow(user?: User) {
-    return await this.update(user);
+  public override async updateNow(user?: User, shouldNotify = true) {
+    return await this.update(user, shouldNotify);
   }
 
-  protected async update(user?: User) {
+  protected async update(user?: User, shouldNotify = true) {
     this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
 
-    const success = await this.updateProvider(this.provider, user);
+    const success = await this.updateProvider(this.provider, user, shouldNotify);
 
     // If a specific user triggered this and it was successful, notify them specifically
     if (success && user) {
@@ -50,8 +69,8 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
       if (!recentNotification) {
         const msg = this.getSuccessMessage();
-        this.logger.log(`Sync successful for user: ${user.username}. Sending notification.`);
-        await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
+        this.logger.log(`Sync successful for user: ${user.username}.${shouldNotify ? " Sending notification." : ""}`);
+        if (shouldNotify) await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
       } else {
         this.logger.log(`Sync successful for ${user.username}, but suppressed notification to avoid spam.`);
       }
@@ -76,7 +95,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
    * @param specificUser If given, will only process this user
    * @returns boolean indicating if the provider sync was successful for all users
    */
-  private async updateProvider(provider: ProviderBase, specificUser?: User): Promise<boolean> {
+  private async updateProvider(provider: ProviderBase, specificUser?: User, shouldNotify = true): Promise<boolean> {
     let allUsersSuccessful = true;
     // Handle each user, or only the given user
     const users = specificUser ? [specificUser] : await User.find({});
@@ -155,7 +174,7 @@ export class ProviderSyncJob extends BackgroundJob<Sync | null> {
           const names = Array.from(institutionErrors);
           sync.status = "failed";
           sync.failureReason = `Connection lost with ${names.join(", ")}`;
-          await this.notificationService.notifyUser(user, sync.failureReason, "Connection Update Required", NotificationType.error);
+          if (shouldNotify) await this.notificationService.notifyUser(user, sync.failureReason, "Connection Update Required", NotificationType.error);
           allUsersSuccessful = false;
         } else if (userHadSuccessfulUpdate) {
           sync.status = "complete";

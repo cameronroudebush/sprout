@@ -18,8 +18,10 @@ class ZillowPropertyResultDto {
     required this.zpid,
   });
 
+  /// The numeric value converted to the user's preferred currency format. This overrides the original zestimate property.
   num zestimate;
 
+  /// The numeric value converted to the user's preferred currency format. This overrides the original rentZestimate property.
   num rentZestimate;
 
   String zpid;

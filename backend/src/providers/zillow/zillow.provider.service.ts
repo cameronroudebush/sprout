@@ -59,11 +59,13 @@ export class ZillowProviderService extends ProviderBase {
     const zestimate = this.cleanNumber(zestMatch?.[1]) ?? 0;
     const rentMatch = content.match(/Rent Zestimate.*?\$([\d,]+)/);
     const rentZestimate = this.cleanNumber(rentMatch?.[1]) ?? 0;
+    const currencyMatch = content.match(/"priceCurrency":"\w*"/gm);
+    const currency = currencyMatch?.[0].replaceAll('"priceCurrency":"', "").replaceAll('"', "");
 
     // Perform validity check
-    if (zpid == null || zpid === "35072756" || zestimate === 50000) throw new BadRequestException("Failed to locate the property on zillow.");
+    if (zpid == null || zpid === "35072756" || zestimate === 50000 || !currency) throw new BadRequestException("Failed to locate the property on zillow.");
 
-    return new ZillowPropertyResultDto(zpid!, zestimate, rentZestimate);
+    return new ZillowPropertyResultDto(zpid!, zestimate, rentZestimate, currency);
   }
 
   /**

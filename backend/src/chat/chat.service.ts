@@ -101,7 +101,8 @@ export class ChatService {
                 - Example Correct: "Analysis for @Account_0"
                 - Example Incorrect: "Analysis for Account_0"
                 - Do not guess names; only use the @ID provided in the mapping.
-              8. Always include: "Consult a financial advisor before making decisions."
+              8. The users chosen currency is: ${user.config.currency}. All values will be in this currency already. Please make sure to use the proper currency symbol leading the numbers.
+              9. Always include: "Consult a financial advisor before making decisions."
               
               CONTEXTUAL DATA:
               ${JSON.stringify(data)}`,
@@ -120,12 +121,15 @@ export class ChatService {
    */
   private async buildUserAccountDetails(user: User, idMap: Map<string, string>) {
     const historicalTimeFrame = subDays(new Date(), 90);
-    const accounts = Utility.shuffleArray(await Account.find({ where: { user: { id: user.id } } }));
-    const transactions = await Transaction.find({
-      where: { account: { user: { id: user.id } }, posted: MoreThan(historicalTimeFrame) },
-      order: { posted: "DESC" },
-      relations: ["category"],
-    });
+    const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: { user: { id: user.id } } })), user);
+    const transactions = Transaction.convertListToTargetCurrency(
+      await Transaction.find({
+        where: { account: { user: { id: user.id } }, posted: MoreThan(historicalTimeFrame) },
+        order: { posted: "DESC" },
+        relations: ["category"],
+      }),
+      user,
+    );
 
     // Process accounts with their holdings and history snapshots
     const accountData = await Promise.all(
@@ -133,12 +137,15 @@ export class ChatService {
         const genericId = `Account_${randomBytes(2).toString("hex")}`;
         idMap.set(acc.id, genericId);
 
-        const holdings = await Holding.find({ where: { account: { id: acc.id } } });
-        const history = await AccountHistory.find({
-          where: { account: { id: acc.id }, time: MoreThan(historicalTimeFrame) },
-          order: { time: "DESC" },
-          take: 10, // Limit snapshots for token efficiency
-        });
+        const holdings = Holding.convertListToTargetCurrency(await Holding.find({ where: { account: { id: acc.id } } }), user);
+        const history = AccountHistory.convertListToTargetCurrency(
+          await AccountHistory.find({
+            where: { account: { id: acc.id }, time: MoreThan(historicalTimeFrame) },
+            order: { time: "DESC" },
+            take: 10, // Limit snapshots for token efficiency
+          }),
+          user,
+        );
 
         return {
           i: genericId,

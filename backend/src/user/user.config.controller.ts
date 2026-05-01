@@ -1,17 +1,24 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { CustomTypes } from "@backend/core/model/utility/custom.types";
+import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { UserService } from "@backend/user/user.service";
 import { Body, Controller, Get, NotFoundException, Patch } from "@nestjs/common";
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { isEqual } from "lodash";
 
 /** This controller provides the endpoint for all User configuration related content */
 @Controller("user-config")
 @ApiTags("User Config")
 @AuthGuard.attach()
 export class UserConfigController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly sseService: SSEService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -41,6 +48,12 @@ export class UserConfigController {
     const userConfig = UserConfig.fromPlain(conf);
     userConfig.id = existingConfig.id;
     await this.userService.syncEncryptedFields(userConfig, existingConfig);
+
+    // Force a re-sync if any of the following properties are not the same
+    const properties: Array<CustomTypes.PropertyNames<UserConfig, any>> = ["currency"];
+    const shouldForceUpdate = properties.find((x) => !isEqual(conf[x], existingConfig[x])) != null;
+    if (shouldForceUpdate) this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+
     return await userConfig.update();
   }
 }

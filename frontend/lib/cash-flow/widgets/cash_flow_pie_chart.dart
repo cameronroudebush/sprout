@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// This renders a pie chart for cash flow on how much money came in versus went out
 class CashFlowPieChart extends ConsumerWidget {
@@ -29,8 +28,8 @@ class CashFlowPieChart extends ConsumerWidget {
     final theme = Theme.of(context);
     final year = selectedDate.year;
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
-    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
     final statsAsync = ref.watch(cashFlowStatsProvider(year: year, month: month));
+    final formatter = ref.watch(currencyFormatterProvider);
 
     return statsAsync.when(
       loading: () => SproutCard(
@@ -58,9 +57,8 @@ class CashFlowPieChart extends ConsumerWidget {
 
         // Create mapping or handle zero state
         final bool hasData = totalIncome != 0 || totalExpense != 0;
-        final Map<String, double>? data = hasData
-            ? {"Income": totalIncome.toDouble(), "Expense": totalExpense.abs().toDouble()}
-            : null;
+        final Map<String, double>? data =
+            hasData ? {"Income": totalIncome.toDouble(), "Expense": totalExpense.abs().toDouble()} : null;
 
         if (data == null) {
           return SproutCard(
@@ -78,7 +76,7 @@ class CashFlowPieChart extends ConsumerWidget {
             subheader: showSubheader ? periodText : null,
             showLegend: showLegend,
             showPieValue: true,
-            formatValue: (value) => value.toCurrency(privateMode),
+            formatValue: (value) => formatter.format(value),
             height: height,
           ),
         );

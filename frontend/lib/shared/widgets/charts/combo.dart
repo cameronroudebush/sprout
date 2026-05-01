@@ -6,8 +6,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
-import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 
 // ignore: must_be_immutable
 class ComboChart extends ConsumerWidget {
@@ -24,7 +23,7 @@ class ComboChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     if (spendingData.data.isEmpty) return const SizedBox();
-    final privateMode = ref.watch(userConfigProvider).value?.privateMode ?? false;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     final maxValue = spendingData.data.map((e) => e.totalSpending).reduce(max);
     double maxY = (maxValue.roundToDouble());
@@ -66,7 +65,7 @@ class ComboChart extends ConsumerWidget {
                           dotData: const FlDotData(show: true),
                         ),
                       ],
-                      titlesData: _getSharedTitlesData(theme, yInterval, privateMode, isVisibleLayer: false),
+                      titlesData: _getSharedTitlesData(theme, yInterval, formatter, isVisibleLayer: false),
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
                     ),
@@ -80,7 +79,7 @@ class ComboChart extends ConsumerWidget {
                     maxY: maxY,
                     minY: 0,
                     barGroups: _getBarGroups(),
-                    titlesData: _getSharedTitlesData(theme, yInterval, privateMode, isVisibleLayer: true),
+                    titlesData: _getSharedTitlesData(theme, yInterval, formatter, isVisibleLayer: true),
                     gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: yInterval),
                     borderData: FlBorderData(show: false),
                     barTouchData: BarTouchData(
@@ -124,13 +123,13 @@ class ComboChart extends ConsumerWidget {
                             theme.textTheme.labelLarge!,
                             children: <TextSpan>[
                               TextSpan(
-                                text: '${barValue.toCurrency(privateMode)}\n',
+                                text: '${formatter.format(barValue)}\n',
                                 style: TextStyle(color: Colors.red[200], fontSize: 12),
                               ),
 
                               // Footer: Show the Total from the line chart
                               TextSpan(
-                                text: 'Total: ${totalValue.toCurrency(privateMode)}',
+                                text: 'Total: ${formatter.format(totalValue)}',
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 10,
@@ -181,7 +180,7 @@ class ComboChart extends ConsumerWidget {
 
   /// Generates titles data.
   /// [isVisibleLayer] determines if we draw visible text or transparent text (spacer).
-  FlTitlesData _getSharedTitlesData(ThemeData theme, double yInterval, bool privateMode,
+  FlTitlesData _getSharedTitlesData(ThemeData theme, double yInterval, CurrencyFormatter formatter,
       {required bool isVisibleLayer}) {
     return FlTitlesData(
       bottomTitles: AxisTitles(
@@ -213,7 +212,7 @@ class ComboChart extends ConsumerWidget {
           interval: yInterval,
           getTitlesWidget: (value, meta) {
             final textColor = isVisibleLayer ? null : Colors.transparent;
-            return Text(value.toCurrency(privateMode), style: TextStyle(fontSize: 10, color: textColor));
+            return Text(formatter.format(value), style: TextStyle(fontSize: 10, color: textColor));
           },
         ),
       ),

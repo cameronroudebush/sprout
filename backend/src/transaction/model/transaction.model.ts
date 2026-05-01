@@ -1,12 +1,15 @@
 import { Account } from "@backend/account/model/account.model";
 import { Category } from "@backend/category/model/category.model";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { User } from "@backend/user/model/user.model";
 import { Optional } from "@nestjs/common";
 import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
+@CurrencyHelper.ExposeCurrencyFields<Transaction>("amount", "account.currency")
 export class Transaction extends DatabaseBase {
   /** In the currency of the account */
   @DatabaseDecorators.numericColumn({ nullable: false })
@@ -50,5 +53,11 @@ export class Transaction extends DatabaseBase {
     this.category = category;
     this.pending = pending;
     this.account = account;
+  }
+
+  /** Given a list of these transactions, updates them to the target currency of the user config. This will edit in place. */
+  static convertListToTargetCurrency(transactions: Array<Transaction>, user: User) {
+    CurrencyHelper.convertList(transactions, "amount", "account.currency", user);
+    return transactions;
   }
 }

@@ -4,8 +4,8 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_edit.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 // Renders a singular transaction with all necessary information in a single row
 class TransactionRow extends ConsumerWidget {
@@ -19,8 +19,7 @@ class TransactionRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final userConfig = ref.watch(userConfigProvider).value;
-    final isPrivate = userConfig?.privateMode ?? false;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     return InkWell(
       onTap:
@@ -63,7 +62,7 @@ class TransactionRow extends ConsumerWidget {
                 spacing: 8,
                 children: [
                   Text(
-                    transaction.amount.toCurrency(isPrivate),
+                    formatter.format(transaction.amount),
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: transaction.amount.toBalanceColor(theme),
                     ),

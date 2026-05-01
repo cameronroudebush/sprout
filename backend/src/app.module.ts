@@ -1,4 +1,4 @@
-import { AccountController } from "@backend/account/account.controller";
+import { AccountModule } from "@backend/account/account.module";
 import { AuthModule } from "@backend/auth/auth.module";
 import { CategoryController } from "@backend/category/category.controller";
 import { CategoryService } from "@backend/category/category.service";
@@ -13,7 +13,7 @@ import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger
 import { DatabaseService } from "@backend/database/database.service";
 import { EmailModule } from "@backend/email/email.module";
 import { HoldingModule } from "@backend/holding/holding.module";
-import { JobsService } from "@backend/jobs/jobs.service";
+import { JobsModule } from "@backend/jobs/jobs.module";
 import { NetWorthModule } from "@backend/net-worth/net-worth.module";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
@@ -39,17 +39,19 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     ProviderModule,
     TransactionModule,
     EmailModule,
+    AccountModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
         limit: Configuration.server.rateLimit.limit,
       },
     ]),
+    // Always initialize jobs last
+    JobsModule,
   ],
-  controllers: [CoreController, AccountController, CategoryController, ConfigController, CashFlowController, ImageProxyController],
+  controllers: [CoreController, CategoryController, ConfigController, CashFlowController, ImageProxyController],
   providers: [
     ConfigurationService,
-    JobsService,
     DatabaseService,
     CategoryService,
     CashFlowService,

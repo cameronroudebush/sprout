@@ -20,7 +20,7 @@ class HistoricalDataPoint {
   /// The date of the record
   DateTime date;
 
-  /// The numerical value
+  /// The numerical currency value
   num value;
 
   @override

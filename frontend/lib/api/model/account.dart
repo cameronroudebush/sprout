@@ -17,11 +17,9 @@ class Account {
     required this.provider,
     this.subType,
     this.interestRate,
+    required this.balance,
     required this.name,
     required this.institution,
-    required this.currency,
-    required this.balance,
-    required this.availableBalance,
     required this.type,
     this.extra,
   });
@@ -42,19 +40,13 @@ class Account {
   /// An interest rate if this is a loan type account.
   num? interestRate;
 
+  /// The numeric value converted to the user's preferred currency format. This overrides the original balance property.
+  num balance;
+
   String name;
 
   /// The institution associated to this account
   Institution institution;
-
-  /// The currency this account uses
-  String currency;
-
-  /// The current balance of the account
-  num balance;
-
-  /// The available balance to this account
-  num availableBalance;
 
   /// The type of this account to better separate it from the others.
   AccountTypeEnum type;
@@ -74,11 +66,9 @@ class Account {
     other.provider == provider &&
     other.subType == subType &&
     other.interestRate == interestRate &&
+    other.balance == balance &&
     other.name == name &&
     other.institution == institution &&
-    other.currency == currency &&
-    other.balance == balance &&
-    other.availableBalance == availableBalance &&
     other.type == type &&
     other.extra == extra;
 
@@ -89,16 +79,14 @@ class Account {
     (provider.hashCode) +
     (subType == null ? 0 : subType!.hashCode) +
     (interestRate == null ? 0 : interestRate!.hashCode) +
+    (balance.hashCode) +
     (name.hashCode) +
     (institution.hashCode) +
-    (currency.hashCode) +
-    (balance.hashCode) +
-    (availableBalance.hashCode) +
     (type.hashCode) +
     (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, provider=$provider, subType=$subType, interestRate=$interestRate, name=$name, institution=$institution, currency=$currency, balance=$balance, availableBalance=$availableBalance, type=$type, extra=$extra]';
+  String toString() => 'Account[id=$id, provider=$provider, subType=$subType, interestRate=$interestRate, balance=$balance, name=$name, institution=$institution, type=$type, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -114,11 +102,9 @@ class Account {
     } else {
       json[r'interestRate'] = null;
     }
+      json[r'balance'] = this.balance;
       json[r'name'] = this.name;
       json[r'institution'] = this.institution;
-      json[r'currency'] = this.currency;
-      json[r'balance'] = this.balance;
-      json[r'availableBalance'] = this.availableBalance;
       json[r'type'] = this.type;
     if (this.extra != null) {
       json[r'extra'] = this.extra;
@@ -143,16 +129,12 @@ class Account {
         assert(json[r'id'] != null, 'Required key "Account[id]" has a null value in JSON.');
         assert(json.containsKey(r'provider'), 'Required key "Account[provider]" is missing from JSON.');
         assert(json[r'provider'] != null, 'Required key "Account[provider]" has a null value in JSON.');
+        assert(json.containsKey(r'balance'), 'Required key "Account[balance]" is missing from JSON.');
+        assert(json[r'balance'] != null, 'Required key "Account[balance]" has a null value in JSON.');
         assert(json.containsKey(r'name'), 'Required key "Account[name]" is missing from JSON.');
         assert(json[r'name'] != null, 'Required key "Account[name]" has a null value in JSON.');
         assert(json.containsKey(r'institution'), 'Required key "Account[institution]" is missing from JSON.');
         assert(json[r'institution'] != null, 'Required key "Account[institution]" has a null value in JSON.');
-        assert(json.containsKey(r'currency'), 'Required key "Account[currency]" is missing from JSON.');
-        assert(json[r'currency'] != null, 'Required key "Account[currency]" has a null value in JSON.');
-        assert(json.containsKey(r'balance'), 'Required key "Account[balance]" is missing from JSON.');
-        assert(json[r'balance'] != null, 'Required key "Account[balance]" has a null value in JSON.');
-        assert(json.containsKey(r'availableBalance'), 'Required key "Account[availableBalance]" is missing from JSON.');
-        assert(json[r'availableBalance'] != null, 'Required key "Account[availableBalance]" has a null value in JSON.');
         assert(json.containsKey(r'type'), 'Required key "Account[type]" is missing from JSON.');
         assert(json[r'type'] != null, 'Required key "Account[type]" has a null value in JSON.');
         return true;
@@ -165,11 +147,9 @@ class Account {
         interestRate: json[r'interestRate'] == null
             ? null
             : num.parse('${json[r'interestRate']}'),
+        balance: num.parse('${json[r'balance']}'),
         name: mapValueOfType<String>(json, r'name')!,
         institution: Institution.fromJson(json[r'institution'])!,
-        currency: mapValueOfType<String>(json, r'currency')!,
-        balance: num.parse('${json[r'balance']}'),
-        availableBalance: num.parse('${json[r'availableBalance']}'),
         type: AccountTypeEnum.fromJson(json[r'type'])!,
         extra: mapValueOfType<Object>(json, r'extra'),
       );
@@ -221,11 +201,9 @@ class Account {
   static const requiredKeys = <String>{
     'id',
     'provider',
+    'balance',
     'name',
     'institution',
-    'currency',
-    'balance',
-    'availableBalance',
     'type',
   };
 }

@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// Displays the major market indexes and their current status
 class MajorIndicesBarWidget extends ConsumerWidget {
@@ -82,7 +81,7 @@ class _IndexTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isPrivate = ref.watch(userConfigProvider).value?.privateMode ?? false;
+    final formatter = ref.watch(currencyFormatterProvider);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -97,7 +96,7 @@ class _IndexTile extends ConsumerWidget {
         ),
         if (showPrice)
           Text(
-            data.price.toCurrency(isPrivate),
+            formatter.format(data.price),
             style: theme.textTheme.labelLarge,
           ),
         SproutChangeWidget(

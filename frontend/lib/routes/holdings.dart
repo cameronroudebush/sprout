@@ -7,7 +7,7 @@ import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account_holding_list.dart';
 import 'package:sprout/holding/widgets/market_indices_bar.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
-import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
@@ -155,9 +155,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
       );
     }
     final timelineAsync = ref.watch(holdingTimelineProvider(_selectedHolding!.id));
-
+    final formatter = ref.watch(currencyFormatterProvider);
     final userConfig = ref.watch(userConfigProvider).value;
-    final privateMode = userConfig?.privateMode ?? false;
 
     return SproutCard(
       child: Container(
@@ -202,7 +201,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                   showYAxis: false,
                   showXAxis: true,
                   applyPosNegColors: true,
-                  formatValue: (val) => val.toCurrency(privateMode),
+                  formatValue: (val) => formatter.format(val),
                 ),
               ],
             );

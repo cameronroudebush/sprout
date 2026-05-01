@@ -1,3 +1,6 @@
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
+import { ApiHideProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from "class-validator";
 
 export enum MarketState {
@@ -9,6 +12,7 @@ export enum MarketState {
   POSTPOST = "POSTPOST", // Occurs late evening
 }
 
+@CurrencyHelper.ExposeCurrencyFields<MarketIndexDto>("price", "currency")
 export class MarketIndexDto {
   @IsString()
   symbol: string;
@@ -37,6 +41,8 @@ export class MarketIndexDto {
 
   @IsString()
   @IsOptional()
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
   currency?: string;
 
   @IsNumber()

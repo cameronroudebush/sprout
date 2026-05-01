@@ -61,6 +61,9 @@ String parameterToString(dynamic value) {
   if (value is ChartRangeEnum) {
     return ChartRangeEnumTypeTransformer().encode(value).toString();
   }
+  if (value is CurrencyOptionsEnum) {
+    return CurrencyOptionsEnumTypeTransformer().encode(value).toString();
+  }
   if (value is EmailUpdateFrequencyEnum) {
     return EmailUpdateFrequencyEnumTypeTransformer().encode(value).toString();
   }
