@@ -2,6 +2,7 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
@@ -40,10 +41,13 @@ export class Category extends DatabaseBase {
   @JoinColumn({ name: "parentCategoryId" })
   @IsOptional()
   @IsObject()
-  @ApiProperty({ type: Category })
-  parentCategory?: Category;
-  @DatabaseDecorators.column({ nullable: true })
   @ApiHideProperty()
+  @Exclude()
+  parentCategory?: Category;
+
+  @DatabaseDecorators.column({ nullable: true })
+  @IsOptional()
+  @ApiProperty({ required: false })
   parentCategoryId!: string;
 
   constructor(user: User, name: string, parentCategory?: Category, icon?: string) {

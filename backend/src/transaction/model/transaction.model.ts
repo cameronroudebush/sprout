@@ -5,8 +5,10 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { Optional } from "@nestjs/common";
-import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
-import { ManyToOne } from "typeorm";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { JoinColumn, ManyToOne } from "typeorm";
 
 @DatabaseDecorators.entity()
 @CurrencyHelper.ExposeCurrencyFields<Transaction>("amount", "account.currency")
@@ -24,9 +26,16 @@ export class Transaction extends DatabaseBase {
 
   /** The category this transaction belongs to. A null category signifies an unknown category. */
   @ManyToOne(() => Category, (a) => a.id, { nullable: true, eager: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "categoryId" })
   @IsOptional()
-  @IsObject()
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   category?: Category;
+
+  @DatabaseDecorators.column({ nullable: true })
+  @ApiProperty({ description: "The Id of the category related to this transaction, if set.", required: false })
+  @IsOptional()
+  categoryId!: string;
 
   /** The date this transaction posted */
   @DatabaseDecorators.column({ nullable: false })
@@ -34,7 +43,14 @@ export class Transaction extends DatabaseBase {
 
   /** The account this transaction belongs to */
   @ManyToOne(() => Account, (a) => a.id, { eager: true, onDelete: "CASCADE" })
+  @JoinColumn({ name: "accountId" })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   account: Account;
+
+  @DatabaseDecorators.column({ nullable: false })
+  @ApiProperty({ description: "The Id of the account related to this transaction." })
+  accountId!: string;
 
   /** Any extra data that we want to store as JSON */
   @DatabaseDecorators.jsonColumn({ nullable: true })

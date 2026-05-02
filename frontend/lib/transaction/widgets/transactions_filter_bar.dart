@@ -146,7 +146,7 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       final categoryDropdown = CategoryDropdown(
-          initialCategory, (cat) => _updateFilter(filters.copyWith(categoryId: cat?.id)),
+          initialCategory.id, (cat) => _updateFilter(filters.copyWith(categoryId: cat?.id)),
           displayAllCategoryButton: true);
 
       final isFiltered = filters.pending == true;

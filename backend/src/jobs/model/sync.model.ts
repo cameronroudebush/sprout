@@ -2,7 +2,7 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { ProviderType } from "@backend/providers/base/provider.type";
 import { User } from "@backend/user/model/user.model";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { ManyToOne } from "typeorm";
 
@@ -28,6 +28,7 @@ export class Sync extends DatabaseBase {
 
   /** This user properly allows us to track if this sync was for a specific user */
   @ManyToOne(() => User, { nullable: true, onDelete: "CASCADE", eager: false })
-  @Exclude()
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   declare user?: User;
 }

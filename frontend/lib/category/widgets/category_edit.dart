@@ -24,14 +24,14 @@ class CategoryEdit extends ConsumerStatefulWidget {
 class _CategoryEditState extends ConsumerState<CategoryEdit> {
   late TextEditingController _nameController;
   String? _selectedIcon;
-  Category? _selectedParent;
+  String? _selectedParentId;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name);
     _selectedIcon = widget.category?.icon ?? "payment";
-    _selectedParent = widget.category?.parentCategory;
+    _selectedParentId = widget.category?.parentCategoryId;
   }
 
   @override
@@ -70,7 +70,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
       id: widget.category?.id ?? '',
       name: name,
       icon: _selectedIcon,
-      parentCategory: _selectedParent,
+      parentCategoryId: _selectedParentId,
     );
 
     if (widget.category == null) {
@@ -122,9 +122,10 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                 setState(() => _selectedIcon = newValue);
               }),
               CategoryDropdown(
-                _selectedParent,
-                (newValue) => setState(() => _selectedParent = newValue),
+                _selectedParentId,
+                (newValue) => setState(() => _selectedParentId = newValue?.id),
                 editingCategoryId: widget.category?.id,
+                label: "Parent Category",
               ),
             ],
           ),

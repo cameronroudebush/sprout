@@ -15,7 +15,7 @@ class Category {
   Category({
     required this.id,
     required this.name,
-    this.parentCategory,
+    this.parentCategoryId,
     this.icon,
   });
 
@@ -24,14 +24,13 @@ class Category {
   /// The name of the category
   String name;
 
-  /// The parent category this category belongs to
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Category? parentCategory;
+  String? parentCategoryId;
 
   /// The icon to use for this category. If one is not given, we'll use the default.
   ///
@@ -46,7 +45,7 @@ class Category {
   bool operator ==(Object other) => identical(this, other) || other is Category &&
     other.id == id &&
     other.name == name &&
-    other.parentCategory == parentCategory &&
+    other.parentCategoryId == parentCategoryId &&
     other.icon == icon;
 
   @override
@@ -54,20 +53,20 @@ class Category {
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (name.hashCode) +
-    (parentCategory == null ? 0 : parentCategory!.hashCode) +
+    (parentCategoryId == null ? 0 : parentCategoryId!.hashCode) +
     (icon == null ? 0 : icon!.hashCode);
 
   @override
-  String toString() => 'Category[id=$id, name=$name, parentCategory=$parentCategory, icon=$icon]';
+  String toString() => 'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
       json[r'name'] = this.name;
-    if (this.parentCategory != null) {
-      json[r'parentCategory'] = this.parentCategory;
+    if (this.parentCategoryId != null) {
+      json[r'parentCategoryId'] = this.parentCategoryId;
     } else {
-      json[r'parentCategory'] = null;
+      json[r'parentCategoryId'] = null;
     }
     if (this.icon != null) {
       json[r'icon'] = this.icon;
@@ -98,7 +97,7 @@ class Category {
       return Category(
         id: mapValueOfType<String>(json, r'id')!,
         name: mapValueOfType<String>(json, r'name')!,
-        parentCategory: Category.fromJson(json[r'parentCategory']),
+        parentCategoryId: mapValueOfType<String>(json, r'parentCategoryId'),
         icon: mapValueOfType<String>(json, r'icon'),
       );
     }

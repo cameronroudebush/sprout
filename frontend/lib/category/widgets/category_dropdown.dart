@@ -10,20 +10,19 @@ class CategoryDropdown extends ConsumerWidget {
   static final fakeAllCategory = Category(id: "all", name: "All Categories", icon: "category");
   static final unknownCategory = Category(id: "unknown" as dynamic, name: "Unknown", icon: "unknown");
 
-  final Category? selectedParent;
+  final String? selectedParentId;
   final String? editingCategoryId;
   final Function(Category? newValue) onChanged;
   final bool displayAllCategoryButton;
   final bool enabled;
+  final String label;
 
-  const CategoryDropdown(
-    this.selectedParent,
-    this.onChanged, {
-    super.key,
-    this.editingCategoryId,
-    this.displayAllCategoryButton = false,
-    this.enabled = true,
-  });
+  const CategoryDropdown(this.selectedParentId, this.onChanged,
+      {super.key,
+      this.editingCategoryId,
+      this.displayAllCategoryButton = false,
+      this.enabled = true,
+      this.label = "Category"});
 
   /// Helper to render the item content (Icon + Name)
   Widget _getDisplay(Category category) {
@@ -68,7 +67,7 @@ class CategoryDropdown extends ConsumerWidget {
       ),
     );
 
-    final children = allCategories.where((c) => c.parentCategory?.id == currentItem.id).toList();
+    final children = allCategories.where((c) => c.parentCategoryId == currentItem.id).toList();
     children.sort((a, b) => a.name.compareTo(b.name));
 
     for (final child in children) {
@@ -91,7 +90,7 @@ class CategoryDropdown extends ConsumerWidget {
         final categories = [...cats];
         categories.insert(0, unknownCategory);
         if (displayAllCategoryButton) categories.insert(0, fakeAllCategory);
-        var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParent?.id);
+        var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParentId);
         if (displayAllCategoryButton && selectedValue == null) selectedValue = CategoryDropdown.fakeAllCategory;
 
         // Build the display list
@@ -99,7 +98,7 @@ class CategoryDropdown extends ConsumerWidget {
         final topLevel = cats
             .where(
               (c) =>
-                  c.parentCategory == null &&
+                  c.parentCategoryId == null &&
                   c.id != editingCategoryId &&
                   c.id != fakeAllCategory.id &&
                   c.id != unknownCategory.id,
@@ -116,7 +115,8 @@ class CategoryDropdown extends ConsumerWidget {
           menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
           dropdownColor: theme.colorScheme.surfaceContainerHighest,
           value: selectedValue,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
+            label: Text(label),
             isDense: true,
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),

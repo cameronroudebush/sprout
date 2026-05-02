@@ -27,8 +27,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
   final _valueController = TextEditingController();
   final _priorityController = TextEditingController();
   TransactionRuleTypeEnum _type = TransactionRuleTypeEnum.description;
-  Category? _category;
-  Account? _account;
+  String? _categoryId;
+  String? _accountId;
   bool _strict = false;
   bool _enabled = true;
 
@@ -47,8 +47,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
       _valueController.text = rule.value;
       _priorityController.text = rule.order.toString();
       _type = rule.type;
-      _category = rule.category;
-      _account = rule.account;
+      _categoryId = rule.categoryId;
+      _accountId = rule.accountId;
       _strict = rule.strict;
       _enabled = rule.enabled;
     } else {
@@ -56,8 +56,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
       _valueController.text = widget.initialValue == null ? "" : widget.initialValue.toString();
       _priorityController.text = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
       _type = TransactionRuleTypeEnum.description;
-      _category = null;
-      _account = null;
+      _categoryId = null;
+      _accountId = null;
       _enabled = true;
       _strict = false;
     }
@@ -82,8 +82,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
       id: widget.rule?.id ?? "",
       type: _type,
       value: _valueController.text,
-      category: _category,
-      account: _account,
+      categoryId: _categoryId,
+      accountId: _accountId,
       strict: _strict,
       order: int.tryParse(_priorityController.text) ?? 1,
       enabled: _enabled,
@@ -298,7 +298,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                               builder: (_) => CategoryEdit(
                                 null,
                                 onAdd: (category) {
-                                  setState(() => _category = category);
+                                  setState(() => _categoryId = category.id);
                                 },
                               ),
                             );
@@ -307,8 +307,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                       ),
                     ],
                   ),
-                  CategoryDropdown(_category, (cat) {
-                    setState(() => _category = cat);
+                  CategoryDropdown(_categoryId, (cat) {
+                    setState(() => _categoryId = cat?.id);
                   }),
                   Text("The category applied when the rule is met.", style: helpStyle),
                 ],
@@ -319,8 +319,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                 spacing: 8,
                 children: [
                   Text("Account", style: theme.textTheme.titleMedium),
-                  AccountDropdown(_account, (acc) {
-                    setState(() => _account = acc);
+                  AccountDropdown(_accountId, (acc) {
+                    setState(() => _accountId = acc?.id);
                   }),
                   Text("The account affected by this rule if selected.", style: helpStyle),
                 ],

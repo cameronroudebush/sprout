@@ -1,7 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -37,10 +40,10 @@ class TransactionRuleRow extends ConsumerWidget {
           ),
         ),
       ),
-      title: _buildMatchText(effectiveStyle, theme),
+      title: _buildMatchText(ref, effectiveStyle, theme),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 4.0),
-        child: _buildCatRow(disabledStyle, effectiveStyle, textTheme, disabledColor),
+        child: _buildCatRow(ref, disabledStyle, effectiveStyle, textTheme, disabledColor),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -54,16 +57,23 @@ class TransactionRuleRow extends ConsumerWidget {
   }
 
   /// Builds the category row to display who we're matching to
-  Widget _buildCatRow(TextStyle? disabledStyle, TextStyle? effectiveStyle, TextTheme textTheme, Color disabledColor) {
+  Widget _buildCatRow(
+      WidgetRef ref, TextStyle? disabledStyle, TextStyle? effectiveStyle, TextTheme textTheme, Color disabledColor) {
+    final cat = ref.watch(
+      categoriesProvider.select((state) => state.value?.firstWhereOrNull(
+            (a) => a.id == rule.categoryId,
+          )),
+    );
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: 4,
       children: [
         const Icon(Icons.arrow_right_alt, size: 16),
-        if (rule.category != null) ...[
-          CategoryIcon(rule.category!, avatarSize: 16),
+        if (rule.categoryId != null) ...[
+          CategoryIcon(cat!, avatarSize: 16),
           Flexible(
-            child: Text(rule.category!.name, style: effectiveStyle, overflow: TextOverflow.ellipsis),
+            child: Text(cat.name, style: effectiveStyle, overflow: TextOverflow.ellipsis),
           ),
         ] else
           Text('Uncategorized', style: disabledStyle),
@@ -72,10 +82,16 @@ class TransactionRuleRow extends ConsumerWidget {
   }
 
   /// Builds the text to display how we're matching our content
-  Widget _buildMatchText(TextStyle? effectiveStyle, ThemeData theme) {
+  Widget _buildMatchText(WidgetRef ref, TextStyle? effectiveStyle, ThemeData theme) {
     final value = rule.value.replaceAll('|', ' OR ');
     final String condition = rule.strict ? 'is' : 'contains';
     final String type = rule.type.value;
+
+    final account = ref.watch(
+      accountsProvider.select((state) => state.value?.accounts.firstWhereOrNull(
+            (a) => a.id == rule.accountId,
+          )),
+    );
 
     return Text.rich(
       TextSpan(
@@ -85,14 +101,14 @@ class TransactionRuleRow extends ConsumerWidget {
             text: 'IF ',
             style: theme.textTheme.labelMedium,
           ),
-          if (rule.account != null) ...[
+          if (account != null) ...[
             const TextSpan(text: 'account is '),
             TextSpan(
-              text: rule.account!.name,
+              text: account.name,
               style: theme.textTheme.labelMedium?.copyWith(decoration: TextDecoration.underline),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-                  NavigationProvider.redirectToAccount(rule.account!);
+                  NavigationProvider.redirectToAccount(account);
                 },
             ),
             const TextSpan(text: ' and '),

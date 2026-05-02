@@ -2591,7 +2591,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.\n\n  **Note:** If you wish to test the functionality, you must use a login endpoint to properly attach cookies to your browser.",
-    "version": "v0.3.1",
+    "version": "v0.3.1-2-g053e172",
     "contact": {}
   },
   "tags": [
@@ -2670,13 +2670,8 @@
             "description": "The name of the category",
             "example": "Groceries"
           },
-          "parentCategory": {
-            "description": "The parent category this category belongs to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Category"
-              }
-            ]
+          "parentCategoryId": {
+            "type": "string"
           },
           "icon": {
             "type": "string",
@@ -2779,112 +2774,19 @@
         },
         "required": ["colors", "nodes", "links"]
       },
-      "ProviderTypeEnum": {
-        "type": "string",
-        "enum": ["simple-fin", "zillow", "plaid"]
-      },
-      "AccountSubTypeEnum": {
-        "type": "string",
-        "enum": [
-          "other",
-          "Savings",
-          "Checking",
-          "HYSA",
-          "401K",
-          "Brokerage",
-          "IRA",
-          "HSA",
-          "Student",
-          "Mortgage",
-          "Personal",
-          "Auto",
-          "Travel",
-          "Cash Back",
-          "Wallet",
-          "Staking",
-          "House"
-        ],
-        "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
-      },
-      "Institution": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL for where this institution is"
-          },
-          "name": {
-            "type": "string"
-          },
-          "hasError": {
-            "type": "boolean",
-            "description": "If this institution has connection errors and needs fixed"
-          }
-        },
-        "required": ["id", "url", "name", "hasError"]
-      },
-      "Account": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "provider": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProviderTypeEnum"
-              }
-            ]
-          },
-          "subType": {
-            "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountSubTypeEnum"
-              }
-            ]
-          },
-          "interestRate": {
-            "type": "number",
-            "description": "An interest rate if this is a loan type account.",
-            "nullable": true
-          },
-          "balance": {
-            "type": "number",
-            "description": "The numeric value converted to the user's preferred currency format. This overrides the original balance property.",
-            "nullable": false
-          },
-          "name": {
-            "type": "string"
-          },
-          "institution": {
-            "description": "The institution associated to this account",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Institution"
-              }
-            ]
-          },
-          "type": {
-            "description": "The type of this account to better separate it from the others.",
-            "enum": ["other", "depository", "credit", "asset", "loan", "investment", "crypto"],
-            "type": "string"
-          },
-          "extra": {
-            "type": "object",
-            "description": "Any extra data that we want to store as JSON"
-          }
-        },
-        "required": ["id", "provider", "balance", "name", "institution", "type"]
-      },
       "Transaction": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "The Id of the category related to this transaction, if set."
+          },
+          "accountId": {
+            "type": "string",
+            "description": "The Id of the account related to this transaction."
           },
           "amount": {
             "type": "number",
@@ -2897,26 +2799,10 @@
           "pending": {
             "type": "boolean"
           },
-          "category": {
-            "description": "The category this transaction belongs to. A null category signifies an unknown category.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Category"
-              }
-            ]
-          },
           "posted": {
             "format": "date-time",
             "type": "string",
             "description": "The date this transaction posted"
-          },
-          "account": {
-            "description": "The account this transaction belongs to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Account"
-              }
-            ]
           },
           "extra": {
             "type": "object",
@@ -2928,7 +2814,7 @@
             "default": false
           }
         },
-        "required": ["id", "amount", "description", "pending", "posted", "account"]
+        "required": ["id", "accountId", "amount", "description", "pending", "posted"]
       },
       "CashFlowStats": {
         "type": "object",
@@ -3213,6 +3099,10 @@
         },
         "required": ["token"]
       },
+      "ProviderTypeEnum": {
+        "type": "string",
+        "enum": ["simple-fin", "zillow", "plaid"]
+      },
       "ProviderConfig": {
         "type": "object",
         "properties": {
@@ -3246,6 +3136,103 @@
           }
         },
         "required": ["dbType", "name", "url", "logoUrl", "enabled"]
+      },
+      "AccountSubTypeEnum": {
+        "type": "string",
+        "enum": [
+          "other",
+          "Savings",
+          "Checking",
+          "HYSA",
+          "401K",
+          "Brokerage",
+          "IRA",
+          "HSA",
+          "Student",
+          "Mortgage",
+          "Personal",
+          "Auto",
+          "Travel",
+          "Cash Back",
+          "Wallet",
+          "Staking",
+          "House"
+        ],
+        "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
+      },
+      "Institution": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL for where this institution is"
+          },
+          "name": {
+            "type": "string"
+          },
+          "hasError": {
+            "type": "boolean",
+            "description": "If this institution has connection errors and needs fixed"
+          }
+        },
+        "required": ["id", "url", "name", "hasError"]
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "provider": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProviderTypeEnum"
+              }
+            ]
+          },
+          "subType": {
+            "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountSubTypeEnum"
+              }
+            ]
+          },
+          "interestRate": {
+            "type": "number",
+            "description": "An interest rate if this is a loan type account.",
+            "nullable": true
+          },
+          "balance": {
+            "type": "number",
+            "description": "The numeric value converted to the user's preferred currency format. This overrides the original balance property.",
+            "nullable": false
+          },
+          "name": {
+            "type": "string"
+          },
+          "institution": {
+            "description": "The institution associated to this account",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Institution"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of this account to better separate it from the others.",
+            "enum": ["other", "depository", "credit", "asset", "loan", "investment", "crypto"],
+            "type": "string"
+          },
+          "extra": {
+            "type": "object",
+            "description": "Any extra data that we want to store as JSON"
+          }
+        },
+        "required": ["id", "provider", "balance", "name", "institution", "type"]
       },
       "ZillowAsset": {
         "type": "object",
@@ -3452,13 +3439,13 @@
           "id": {
             "type": "string"
           },
-          "account": {
-            "description": "An account that this rule should ony apply to.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Account"
-              }
-            ]
+          "categoryId": {
+            "type": "string",
+            "description": "The Id of the category related to this transaction rule, if set."
+          },
+          "accountId": {
+            "type": "string",
+            "description": "The Id of the account related to this transaction rule for specific filtering."
           },
           "type": {
             "enum": ["description", "amount"],
@@ -3467,14 +3454,6 @@
           "value": {
             "type": "string",
             "description": "This defines the value of the rule. Strings support | to split content"
-          },
-          "category": {
-            "description": "This defines the category to set the transaction to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Category"
-              }
-            ]
           },
           "strict": {
             "type": "boolean",
@@ -3542,6 +3521,10 @@
           "id": {
             "type": "string"
           },
+          "accountId": {
+            "type": "string",
+            "description": "The Id of the account related to this holding."
+          },
           "purchasePrice": {
             "type": "number",
             "description": "The numeric value converted to the user's preferred currency format. This overrides the original purchasePrice property.",
@@ -3557,14 +3540,6 @@
             "description": "The numeric value converted to the user's preferred currency format. This overrides the original marketValue property.",
             "nullable": false
           },
-          "account": {
-            "description": "The account this holding is associated to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Account"
-              }
-            ]
-          },
           "description": {
             "type": "string",
             "description": "A description of what this holding is"
@@ -3578,7 +3553,7 @@
             "description": "The symbol for this holding"
           }
         },
-        "required": ["id", "purchasePrice", "costBasis", "marketValue", "account", "description", "shares", "symbol"]
+        "required": ["id", "accountId", "purchasePrice", "costBasis", "marketValue", "description", "shares", "symbol"]
       },
       "EntityHistoryDataPoint": {
         "type": "object",

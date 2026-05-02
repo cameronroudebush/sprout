@@ -14,17 +14,29 @@ class Transaction {
   /// Returns a new [Transaction] instance.
   Transaction({
     required this.id,
+    this.categoryId,
+    required this.accountId,
     required this.amount,
     required this.description,
     required this.pending,
-    this.category,
     required this.posted,
-    required this.account,
     this.extra,
     this.manuallyEdited = false,
   });
 
   String id;
+
+  /// The Id of the category related to this transaction, if set.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? categoryId;
+
+  /// The Id of the account related to this transaction.
+  String accountId;
 
   /// The numeric value converted to the user's preferred currency format. This overrides the original amount property.
   num amount;
@@ -33,20 +45,8 @@ class Transaction {
 
   bool pending;
 
-  /// The category this transaction belongs to. A null category signifies an unknown category.
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  Category? category;
-
   /// The date this transaction posted
   DateTime posted;
-
-  /// The account this transaction belongs to
-  Account account;
 
   /// Any extra data that we want to store as JSON
   ///
@@ -63,12 +63,12 @@ class Transaction {
   @override
   bool operator ==(Object other) => identical(this, other) || other is Transaction &&
     other.id == id &&
+    other.categoryId == categoryId &&
+    other.accountId == accountId &&
     other.amount == amount &&
     other.description == description &&
     other.pending == pending &&
-    other.category == category &&
     other.posted == posted &&
-    other.account == account &&
     other.extra == extra &&
     other.manuallyEdited == manuallyEdited;
 
@@ -76,31 +76,31 @@ class Transaction {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (categoryId == null ? 0 : categoryId!.hashCode) +
+    (accountId.hashCode) +
     (amount.hashCode) +
     (description.hashCode) +
     (pending.hashCode) +
-    (category == null ? 0 : category!.hashCode) +
     (posted.hashCode) +
-    (account.hashCode) +
     (extra == null ? 0 : extra!.hashCode) +
     (manuallyEdited.hashCode);
 
   @override
-  String toString() => 'Transaction[id=$id, amount=$amount, description=$description, pending=$pending, category=$category, posted=$posted, account=$account, extra=$extra, manuallyEdited=$manuallyEdited]';
+  String toString() => 'Transaction[id=$id, categoryId=$categoryId, accountId=$accountId, amount=$amount, description=$description, pending=$pending, posted=$posted, extra=$extra, manuallyEdited=$manuallyEdited]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+    if (this.categoryId != null) {
+      json[r'categoryId'] = this.categoryId;
+    } else {
+      json[r'categoryId'] = null;
+    }
+      json[r'accountId'] = this.accountId;
       json[r'amount'] = this.amount;
       json[r'description'] = this.description;
       json[r'pending'] = this.pending;
-    if (this.category != null) {
-      json[r'category'] = this.category;
-    } else {
-      json[r'category'] = null;
-    }
       json[r'posted'] = this.posted.toUtc().toIso8601String();
-      json[r'account'] = this.account;
     if (this.extra != null) {
       json[r'extra'] = this.extra;
     } else {
@@ -123,6 +123,8 @@ class Transaction {
       assert(() {
         assert(json.containsKey(r'id'), 'Required key "Transaction[id]" is missing from JSON.');
         assert(json[r'id'] != null, 'Required key "Transaction[id]" has a null value in JSON.');
+        assert(json.containsKey(r'accountId'), 'Required key "Transaction[accountId]" is missing from JSON.');
+        assert(json[r'accountId'] != null, 'Required key "Transaction[accountId]" has a null value in JSON.');
         assert(json.containsKey(r'amount'), 'Required key "Transaction[amount]" is missing from JSON.');
         assert(json[r'amount'] != null, 'Required key "Transaction[amount]" has a null value in JSON.');
         assert(json.containsKey(r'description'), 'Required key "Transaction[description]" is missing from JSON.');
@@ -131,19 +133,17 @@ class Transaction {
         assert(json[r'pending'] != null, 'Required key "Transaction[pending]" has a null value in JSON.');
         assert(json.containsKey(r'posted'), 'Required key "Transaction[posted]" is missing from JSON.');
         assert(json[r'posted'] != null, 'Required key "Transaction[posted]" has a null value in JSON.');
-        assert(json.containsKey(r'account'), 'Required key "Transaction[account]" is missing from JSON.');
-        assert(json[r'account'] != null, 'Required key "Transaction[account]" has a null value in JSON.');
         return true;
       }());
 
       return Transaction(
         id: mapValueOfType<String>(json, r'id')!,
+        categoryId: mapValueOfType<String>(json, r'categoryId'),
+        accountId: mapValueOfType<String>(json, r'accountId')!,
         amount: num.parse('${json[r'amount']}'),
         description: mapValueOfType<String>(json, r'description')!,
         pending: mapValueOfType<bool>(json, r'pending')!,
-        category: Category.fromJson(json[r'category']),
         posted: mapDateTime(json, r'posted', r'')!,
-        account: Account.fromJson(json[r'account'])!,
         extra: mapValueOfType<Object>(json, r'extra'),
         manuallyEdited: mapValueOfType<bool>(json, r'manuallyEdited') ?? false,
       );
@@ -194,11 +194,11 @@ class Transaction {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'id',
+    'accountId',
     'amount',
     'description',
     'pending',
     'posted',
-    'account',
   };
 }
 
