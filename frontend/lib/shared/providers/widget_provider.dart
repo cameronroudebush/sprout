@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/color_extensions.dart';
@@ -78,6 +80,7 @@ class WidgetSync extends _$WidgetSync {
     final userConfigAsync = ref.read(userConfigProvider.notifier);
     final theme = userConfigAsync.activeTheme(userConfig);
     final formatter = ref.watch(currencyFormatterProvider);
+    final categories = ref.read(categoriesProvider).value ?? [];
     Map<String, Object>? data;
     String failureMessage = "No data available. Check settings.";
     num? pastNetWorthChange;
@@ -96,19 +99,20 @@ class WidgetSync extends _$WidgetSync {
           pastNetWorthChange = pastValueRange.valueChange;
 
           // Map the 10 most recent transactions into a widget-friendly format
-          final recent = transactions
-              .take(10)
-              .map(
-                (t) => {
-                  "merchant": t.description,
-                  "category": t.category?.name ?? "Unknown",
-                  "amount": formatter.format(t.amount, handlePrivateMode: false),
-                  "amountNumeric": t.amount,
-                  "date": t.timeText,
-                  "pending": t.pending,
-                },
-              )
-              .toList();
+          final recent = transactions.take(10).map(
+            (t) {
+              final categoryName = categories.firstWhereOrNull((c) => c.id == t.categoryId)?.name ?? "Unknown";
+
+              return {
+                "merchant": t.description,
+                "category": categoryName,
+                "amount": formatter.format(t.amount, handlePrivateMode: false),
+                "amountNumeric": t.amount,
+                "date": t.timeText,
+                "pending": t.pending,
+              };
+            },
+          ).toList();
 
           data = {
             "updateTime": DateTime.now().toShortMonthWithTime,
@@ -175,6 +179,7 @@ void callbackDispatcher() {
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
       await container.read(transactionsProvider.future);
+      await container.read(categoriesProvider.future);
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).update();
       LoggerProvider.debug("Background widget update successful");

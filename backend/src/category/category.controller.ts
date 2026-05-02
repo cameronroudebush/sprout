@@ -79,7 +79,7 @@ export class CategoryController {
     const category = Category.fromPlain(data);
     category.user = user;
 
-    const parentId = category.parentCategory?.id;
+    const parentId = category.parentCategoryId;
 
     // Make sure we don't have any overlaps for user, name, and parentCategoryId
     const similarCategories = await Category.find({
@@ -126,7 +126,13 @@ export class CategoryController {
     const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to edit.");
     // Update the category object
-    const updatedCategory = Category.fromPlain({ ...update, name: (update.name ?? matchingCategory.name).trim(), user: user, id: matchingCategory.id });
+    const updatedCategory = Category.fromPlain({
+      ...update,
+      name: (update.name ?? matchingCategory.name).trim(),
+      user: user,
+      id: matchingCategory.id,
+      parentCategoryId: update.parentCategoryId === "unknown" ? null : update.parentCategoryId,
+    });
     await updatedCategory.update();
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE); // Tell clients of this user to update so that transactional data is refreshed
     return updatedCategory;

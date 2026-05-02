@@ -14,10 +14,10 @@ class TransactionRule {
   /// Returns a new [TransactionRule] instance.
   TransactionRule({
     required this.id,
-    this.account,
+    this.categoryId,
+    this.accountId,
     required this.type,
     required this.value,
-    this.category,
     required this.strict,
     this.matches = 0,
     this.order = 0,
@@ -26,28 +26,28 @@ class TransactionRule {
 
   String id;
 
-  /// An account that this rule should ony apply to.
+  /// The Id of the category related to this transaction rule, if set.
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Account? account;
+  String? categoryId;
+
+  /// The Id of the account related to this transaction rule for specific filtering.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? accountId;
 
   TransactionRuleTypeEnum type;
 
   /// This defines the value of the rule. Strings support | to split content
   String value;
-
-  /// This defines the category to set the transaction to
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  Category? category;
 
   /// If this match should be strict. So if it should be the exact string or the exact number.
   bool strict;
@@ -64,10 +64,10 @@ class TransactionRule {
   @override
   bool operator ==(Object other) => identical(this, other) || other is TransactionRule &&
     other.id == id &&
-    other.account == account &&
+    other.categoryId == categoryId &&
+    other.accountId == accountId &&
     other.type == type &&
     other.value == value &&
-    other.category == category &&
     other.strict == strict &&
     other.matches == matches &&
     other.order == order &&
@@ -77,33 +77,33 @@ class TransactionRule {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
-    (account == null ? 0 : account!.hashCode) +
+    (categoryId == null ? 0 : categoryId!.hashCode) +
+    (accountId == null ? 0 : accountId!.hashCode) +
     (type.hashCode) +
     (value.hashCode) +
-    (category == null ? 0 : category!.hashCode) +
     (strict.hashCode) +
     (matches.hashCode) +
     (order.hashCode) +
     (enabled.hashCode);
 
   @override
-  String toString() => 'TransactionRule[id=$id, account=$account, type=$type, value=$value, category=$category, strict=$strict, matches=$matches, order=$order, enabled=$enabled]';
+  String toString() => 'TransactionRule[id=$id, categoryId=$categoryId, accountId=$accountId, type=$type, value=$value, strict=$strict, matches=$matches, order=$order, enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
-    if (this.account != null) {
-      json[r'account'] = this.account;
+    if (this.categoryId != null) {
+      json[r'categoryId'] = this.categoryId;
     } else {
-      json[r'account'] = null;
+      json[r'categoryId'] = null;
+    }
+    if (this.accountId != null) {
+      json[r'accountId'] = this.accountId;
+    } else {
+      json[r'accountId'] = null;
     }
       json[r'type'] = this.type;
       json[r'value'] = this.value;
-    if (this.category != null) {
-      json[r'category'] = this.category;
-    } else {
-      json[r'category'] = null;
-    }
       json[r'strict'] = this.strict;
       json[r'matches'] = this.matches;
       json[r'order'] = this.order;
@@ -141,10 +141,10 @@ class TransactionRule {
 
       return TransactionRule(
         id: mapValueOfType<String>(json, r'id')!,
-        account: Account.fromJson(json[r'account']),
+        categoryId: mapValueOfType<String>(json, r'categoryId'),
+        accountId: mapValueOfType<String>(json, r'accountId'),
         type: TransactionRuleTypeEnum.fromJson(json[r'type'])!,
         value: mapValueOfType<String>(json, r'value')!,
-        category: Category.fromJson(json[r'category']),
         strict: mapValueOfType<bool>(json, r'strict')!,
         matches: num.parse('${json[r'matches']}'),
         order: num.parse('${json[r'order']}'),

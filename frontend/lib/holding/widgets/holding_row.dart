@@ -1,5 +1,7 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/holding_logo.dart';
@@ -34,6 +36,14 @@ class HoldingRow extends ConsumerWidget {
     final dayChange = liveMarketValue - holding.marketValue;
     final dayPercent = holding.marketValue != 0 ? (dayChange / holding.marketValue) * 100 : 0.0;
     final isLive = liveData?.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
+
+    final account = ref.watch(
+      accountsProvider.select((asyncState) {
+        return asyncState.value?.accounts.firstWhereOrNull(
+          (a) => a.id == holding.accountId,
+        );
+      }),
+    );
 
     return InkWell(
       onTap: onSelect,
@@ -97,7 +107,7 @@ class HoldingRow extends ConsumerWidget {
                         spacing: 4,
                         children: [
                           Text(
-                            "Source: ${holding.account.provider}",
+                            "Source: ${account?.provider ?? "Unknown"}",
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                             ),

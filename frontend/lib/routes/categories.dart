@@ -38,7 +38,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
   /// Builds the overall category tree utilizing nesting capabilities
   List<Widget> _buildCategoryTree(Category category, List<Category> all, int depth) {
     final List<Widget> widgets = [_buildCategoryTile(category, depth)];
-    final children = all.where((c) => c.parentCategory?.id == category.id).toList()
+    final children = all.where((c) => c.parentCategoryId == category.id).toList()
       ..sort((a, b) => a.name.compareTo(b.name));
 
     for (final child in children) {
@@ -58,7 +58,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text("Error: $err")),
         data: (categories) {
-          final topLevel = categories.where((c) => c.parentCategory == null).toList()
+          final topLevel = categories.where((c) => c.parentCategoryId == null).toList()
             ..sort((a, b) => a.name.compareTo(b.name));
 
           return SingleChildScrollView(

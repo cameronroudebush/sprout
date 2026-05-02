@@ -17,6 +17,7 @@ class CategoryIconDropdown extends StatelessWidget {
       ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
 
     return DropdownMenu<String>(
+      label: Text("Icon"),
       initialSelection: icon,
       menuHeight: media.height * .4,
       expandedInsets: EdgeInsets.zero,

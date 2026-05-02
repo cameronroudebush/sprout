@@ -29,7 +29,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
-  Category? _category;
+  String? _categoryId;
   late DateTime _postedDate;
   late bool _pending;
 
@@ -40,7 +40,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
     final transaction = widget.transaction;
     _descriptionController.text = transaction.description;
     _amountController.text = formatter.format(transaction.amount);
-    _category = transaction.category;
+    _categoryId = transaction.categoryId;
     _postedDate = transaction.posted;
     _pending = transaction.pending;
   }
@@ -56,10 +56,10 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
   Transaction _getNewTransaction() {
     return Transaction(
       id: widget.transaction.id,
-      account: widget.transaction.account,
+      accountId: widget.transaction.accountId,
       description: _descriptionController.text,
       amount: double.tryParse(_amountController.text) ?? widget.transaction.amount,
-      category: _category,
+      categoryId: _categoryId,
       posted: _postedDate,
       pending: _pending,
     );
@@ -72,7 +72,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
 
     return original.description != current.description ||
         original.amount != current.amount ||
-        original.category?.id != current.category?.id ||
+        original.categoryId != current.categoryId ||
         original.posted != current.posted ||
         original.pending != current.pending;
   }
@@ -225,7 +225,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                               builder: (_) => CategoryEdit(
                                 null,
                                 onAdd: (category) {
-                                  setState(() => _category = category);
+                                  setState(() => _categoryId = category.id);
                                 },
                               ),
                             );
@@ -235,8 +235,8 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                     ],
                   ),
                   CategoryDropdown(
-                    _category,
-                    (cat) => setState(() => _category = cat),
+                    _categoryId,
+                    (cat) => setState(() => _categoryId = cat?.id),
                     enabled: !widget.transaction.pending,
                   ),
                   Text("The category this transaction belongs to.", style: helpStyle),

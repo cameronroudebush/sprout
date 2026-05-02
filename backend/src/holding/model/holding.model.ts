@@ -3,9 +3,9 @@ import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
-import { ManyToOne, Not } from "typeorm";
+import { JoinColumn, ManyToOne, Not } from "typeorm";
 import { HoldingHistory } from "./holding.history.model";
 
 /** This class provides information for a current stock that is associated to an account. */
@@ -16,7 +16,13 @@ import { HoldingHistory } from "./holding.history.model";
 export class Holding extends DatabaseBase {
   /** The account this holding is associated to */
   @ManyToOne(() => Account, (i) => i.id, { eager: true, onDelete: "CASCADE" })
+  @JoinColumn({ name: "accountId" })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   account: Account;
+  @DatabaseDecorators.column({ nullable: false })
+  @ApiProperty({ description: "The Id of the account related to this holding." })
+  accountId!: string;
 
   @DatabaseDecorators.column({ nullable: false })
   @Exclude({ toPlainOnly: true })

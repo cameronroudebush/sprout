@@ -74,8 +74,8 @@ export class TransactionRuleController {
     const newRule = TransactionRule.fromPlain({ ...rule, id: matchingRule.id });
     newRule.user = user;
     // Validate category
-    if (newRule.category != null) {
-      const matchingCat = await Category.findOne({ where: { id: newRule.category?.id, user: { id: user.id } } });
+    if (newRule.categoryId != null) {
+      const matchingCat = await Category.findOne({ where: { id: newRule.categoryId, user: { id: user.id } } });
       if (matchingCat == null) throw new NotFoundException("Failed to locate matching category for transactional rule.");
       else newRule.category = matchingCat;
     }
@@ -107,8 +107,8 @@ export class TransactionRuleController {
     rule.value = rule.value.trim();
     rule.user = user;
 
-    if (rule.category) {
-      const category = await Category.findOne({ where: { id: rule.category.id, user: { id: user.id } } });
+    if (rule.categoryId) {
+      const category = await Category.findOne({ where: { id: rule.categoryId, user: { id: user.id } } });
       if (category == null) throw new NotFoundException("Failed to locate a matching category for this rule");
     }
 

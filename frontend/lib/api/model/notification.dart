@@ -14,15 +14,18 @@ class Notification {
   /// Returns a new [Notification] instance.
   Notification({
     required this.id,
+    required this.createdAt,
     required this.title,
     required this.message,
     required this.type,
-    required this.createdAt,
     this.isRead = false,
     this.readAt,
   });
 
   String id;
+
+  /// The date that this notification occurs on
+  DateTime createdAt;
 
   /// The title for our notification
   String title;
@@ -32,9 +35,6 @@ class Notification {
 
   /// The type of notification this is
   NotificationTypeEnum type;
-
-  /// The date that this notification occurs on
-  DateTime createdAt;
 
   /// Tracks if the user has interacted with this notification yet.
   bool isRead;
@@ -50,10 +50,10 @@ class Notification {
   @override
   bool operator ==(Object other) => identical(this, other) || other is Notification &&
     other.id == id &&
+    other.createdAt == createdAt &&
     other.title == title &&
     other.message == message &&
     other.type == type &&
-    other.createdAt == createdAt &&
     other.isRead == isRead &&
     other.readAt == readAt;
 
@@ -61,23 +61,23 @@ class Notification {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (createdAt.hashCode) +
     (title.hashCode) +
     (message.hashCode) +
     (type.hashCode) +
-    (createdAt.hashCode) +
     (isRead.hashCode) +
     (readAt == null ? 0 : readAt!.hashCode);
 
   @override
-  String toString() => 'Notification[id=$id, title=$title, message=$message, type=$type, createdAt=$createdAt, isRead=$isRead, readAt=$readAt]';
+  String toString() => 'Notification[id=$id, createdAt=$createdAt, title=$title, message=$message, type=$type, isRead=$isRead, readAt=$readAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+      json[r'createdAt'] = this.createdAt.toUtc().toIso8601String();
       json[r'title'] = this.title;
       json[r'message'] = this.message;
       json[r'type'] = this.type;
-      json[r'createdAt'] = this.createdAt.toUtc().toIso8601String();
       json[r'isRead'] = this.isRead;
     if (this.readAt != null) {
       json[r'readAt'] = this.readAt!.toUtc().toIso8601String();
@@ -100,14 +100,14 @@ class Notification {
       assert(() {
         assert(json.containsKey(r'id'), 'Required key "Notification[id]" is missing from JSON.');
         assert(json[r'id'] != null, 'Required key "Notification[id]" has a null value in JSON.');
+        assert(json.containsKey(r'createdAt'), 'Required key "Notification[createdAt]" is missing from JSON.');
+        assert(json[r'createdAt'] != null, 'Required key "Notification[createdAt]" has a null value in JSON.');
         assert(json.containsKey(r'title'), 'Required key "Notification[title]" is missing from JSON.');
         assert(json[r'title'] != null, 'Required key "Notification[title]" has a null value in JSON.');
         assert(json.containsKey(r'message'), 'Required key "Notification[message]" is missing from JSON.');
         assert(json[r'message'] != null, 'Required key "Notification[message]" has a null value in JSON.');
         assert(json.containsKey(r'type'), 'Required key "Notification[type]" is missing from JSON.');
         assert(json[r'type'] != null, 'Required key "Notification[type]" has a null value in JSON.');
-        assert(json.containsKey(r'createdAt'), 'Required key "Notification[createdAt]" is missing from JSON.');
-        assert(json[r'createdAt'] != null, 'Required key "Notification[createdAt]" has a null value in JSON.');
         assert(json.containsKey(r'isRead'), 'Required key "Notification[isRead]" is missing from JSON.');
         assert(json[r'isRead'] != null, 'Required key "Notification[isRead]" has a null value in JSON.');
         return true;
@@ -115,10 +115,10 @@ class Notification {
 
       return Notification(
         id: mapValueOfType<String>(json, r'id')!,
+        createdAt: mapDateTime(json, r'createdAt', r'')!,
         title: mapValueOfType<String>(json, r'title')!,
         message: mapValueOfType<String>(json, r'message')!,
         type: NotificationTypeEnum.fromJson(json[r'type'])!,
-        createdAt: mapDateTime(json, r'createdAt', r'')!,
         isRead: mapValueOfType<bool>(json, r'isRead')!,
         readAt: mapDateTime(json, r'readAt', r''),
       );
@@ -169,10 +169,10 @@ class Notification {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'id',
+    'createdAt',
     'title',
     'message',
     'type',
-    'createdAt',
     'isRead',
   };
 }

@@ -77,9 +77,9 @@ extension TransactionSubscriptionExtensions on TransactionSubscription {
       amount: amount,
       posted: DateTime.now(),
       description: description,
-      category: transaction.category,
+      categoryId: transaction.categoryId,
       pending: false,
-      account: account,
+      accountId: transaction.accountId,
     );
   }
 }

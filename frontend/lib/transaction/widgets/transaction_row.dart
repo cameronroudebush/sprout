@@ -1,6 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
@@ -21,6 +24,22 @@ class TransactionRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
 
+    final cat = ref.watch(
+      categoriesProvider.select((asyncState) {
+        return asyncState.value?.firstWhereOrNull(
+          (a) => a.id == transaction.categoryId,
+        );
+      }),
+    );
+
+    final account = ref.watch(
+      accountsProvider.select((asyncState) {
+        return asyncState.value?.accounts.firstWhereOrNull(
+          (a) => a.id == transaction.accountId,
+        );
+      }),
+    );
+
     return InkWell(
       onTap:
           !allowDialog ? null : () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
@@ -34,7 +53,7 @@ class TransactionRow extends ConsumerWidget {
             spacing: 16,
             children: [
               // Category
-              CategoryIcon(transaction.category, avatarSize: 16),
+              CategoryIcon(cat, avatarSize: 16),
               // Description
               Expanded(
                 child: Column(
@@ -47,7 +66,7 @@ class TransactionRow extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      transaction.account.name,
+                      account?.name ?? "Unknown",
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

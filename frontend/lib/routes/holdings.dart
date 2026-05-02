@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
@@ -155,6 +156,13 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
       );
     }
     final timelineAsync = ref.watch(holdingTimelineProvider(_selectedHolding!.id));
+    final selectedHoldingAccount = ref.watch(
+      accountsProvider.select<Account?>((asyncState) {
+        return asyncState.value?.accounts.firstWhereOrNull(
+          (a) => a.id == _selectedHolding?.accountId,
+        );
+      }),
+    );
     final formatter = ref.watch(currencyFormatterProvider);
     final userConfig = ref.watch(userConfigProvider).value;
 
@@ -176,7 +184,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                     Column(
                       children: [
                         Text(
-                          _selectedHolding!.account.name,
+                          selectedHoldingAccount?.name ?? "Unknown account",
                           style: theme.textTheme.labelMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

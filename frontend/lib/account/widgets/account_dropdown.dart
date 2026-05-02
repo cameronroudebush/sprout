@@ -7,11 +7,11 @@ import 'package:sprout/shared/providers/currency_provider.dart';
 
 /// A dropdown that allows account selection using Riverpod for state management.
 class AccountDropdown extends ConsumerWidget {
-  final Account? account;
+  final String? accountId;
   final Function(Account? newValue) onChanged;
   final bool enabled;
 
-  const AccountDropdown(this.account, this.onChanged, {super.key, this.enabled = true});
+  const AccountDropdown(this.accountId, this.onChanged, {super.key, this.enabled = true});
 
   /// Returns the display for the given account (Name + Formatted Balance)
   Widget _getAccountDisplay(WidgetRef ref, ThemeData theme, Account account, CurrencyFormatter formatter) {
@@ -47,7 +47,7 @@ class AccountDropdown extends ConsumerWidget {
         final accounts = accountState.accounts;
 
         // Ensure we match the instance from the list to avoid Flutter's Dropdown equality errors
-        final selectedValue = accounts.firstWhereOrNull((a) => a.id == account?.id);
+        final selectedValue = accounts.firstWhereOrNull((a) => a.id == accountId);
 
         return DropdownButtonFormField<Account>(
           isExpanded: true,

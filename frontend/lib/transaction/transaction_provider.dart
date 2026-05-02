@@ -126,7 +126,7 @@ List<Transaction> filteredTransactions(Ref ref) {
 
   return masterState.transactions.where((t) {
     // Filter by Account
-    if (filter.accountId != null && t.account.id != filter.accountId) return false;
+    if (filter.accountId != null && t.accountId != filter.accountId) return false;
 
     // Filter by Search String
     if (filter.search.isNotEmpty) {
@@ -136,8 +136,8 @@ List<Transaction> filteredTransactions(Ref ref) {
     // Filter by Category
     if (filter.categoryId != null && filter.categoryId != CategoryDropdown.fakeAllCategory.id) {
       if (filter.categoryId == "unknown") {
-        if (t.category != null) return false;
-      } else if (t.category?.id != filter.categoryId) {
+        if (t.categoryId != null) return false;
+      } else if (t.categoryId != filter.categoryId) {
         return false;
       }
     }
