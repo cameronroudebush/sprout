@@ -8,7 +8,7 @@ import { addMinutes } from "date-fns";
 export abstract class BackgroundJob<T extends any> {
   protected readonly logger: Logger;
 
-  private interval: CronExpression;
+  private interval!: CronExpression;
 
   /**
    * Creates an instance of a background job
@@ -19,8 +19,10 @@ export abstract class BackgroundJob<T extends any> {
     private cronTime: string,
   ) {
     this.logger = new Logger(`job:${jobName}`);
-    this.logger.log(`Initializing background job of: ${this.cronTime}`);
-    this.interval = CronExpressionParser.parse(this.cronTime, { tz: TimeZone.timeZone });
+    if (!Configuration.isRunningScript) {
+      this.logger.log(`Initializing background job of: ${this.cronTime}`);
+      this.interval = CronExpressionParser.parse(this.cronTime, { tz: TimeZone.timeZone });
+    }
   }
 
   /**

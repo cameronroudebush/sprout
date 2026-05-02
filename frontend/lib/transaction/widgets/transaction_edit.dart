@@ -10,6 +10,7 @@ import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_rule_edit.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// A widget that displays the editing capabilities of a [Transaction]
 class TransactionEdit extends ConsumerStatefulWidget {
@@ -124,6 +125,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
   Widget _getForm(BuildContext context, ThemeData theme) {
     final helpStyle = const TextStyle(fontSize: 12, color: Colors.grey);
     final theme = Theme.of(context);
+    final userConfig = ref.watch(userConfigProvider).value;
 
     return Form(
       key: _formKey,
@@ -193,7 +195,11 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                     onChanged: (value) => setState(() {}),
                     validator: (value) {
                       if (value == null || value.isEmpty) return "Required";
-                      if (double.tryParse(value) == null) return "Must be numerical";
+                      final currency = userConfig?.currency != null
+                          ? NumberFormat.simpleCurrency(name: userConfig!.currency.toString()).currencySymbol
+                          : "";
+                      final result = double.tryParse(value.replaceAll(currency, ""));
+                      if (result == null) return "Must be numerical";
                       return null;
                     },
                   ),

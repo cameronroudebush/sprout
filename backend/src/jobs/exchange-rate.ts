@@ -48,7 +48,7 @@ export class ExchangeRateJob extends BackgroundJob<any> {
     if (symbols.length === 0) return;
 
     try {
-      const results = await Promise.all(symbols.map((x) => yf.quoteCombine(x)));
+      const results = await Promise.all(symbols.map((x) => yf.quote(x)));
       const newMap = new Map<string, Map<string, number>>();
 
       results.forEach((quote) => {

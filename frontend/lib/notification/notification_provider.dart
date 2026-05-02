@@ -87,22 +87,22 @@ class Notifications extends _$Notifications {
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Material(
-                  type: MaterialType.card,
-                  elevation: 8,
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Dismissible(
-                    key: Key('overlay_${notification.id}'),
-                    direction: DismissDirection.horizontal,
-                    onDismissed: (_) async {
-                      if (!frontendOnly) {
-                        final api = await ref.read(notificationApiProvider.future);
-                        await api.notificationControllerMarkRead(notification.id);
-                      }
-                      entry.remove();
-                      _displayedNotifications.remove(notification.id);
-                    },
+                child: Dismissible(
+                  key: Key('overlay_${notification.id}'),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (_) async {
+                    if (!frontendOnly) {
+                      final api = await ref.read(notificationApiProvider.future);
+                      await api.notificationControllerMarkRead(notification.id);
+                    }
+                    entry.remove();
+                    _displayedNotifications.remove(notification.id);
+                  },
+                  child: Material(
+                    type: MaterialType.card,
+                    elevation: 8,
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxHeight: 120, maxWidth: isDesktop ? 520 : 340),
                       child: NotificationItem(
