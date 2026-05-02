@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/shared/providers/widget_provider.dart';
 
 /// An observer mechanism that handles firing functionality as the app goes to the background or comes back to foreground
 class SproutLifecycleObserver extends ConsumerStatefulWidget {
@@ -32,6 +33,8 @@ class _SproutLifecycleObserverState extends ConsumerState<SproutLifecycleObserve
 
     switch (state) {
       case AppLifecycleState.resumed:
+        // Update widgets on app resume
+        ref.read(widgetSyncProvider.notifier).update();
         // Check launch notifications and clear them as needed
         ref.read(firebaseProvider.notifier).checkLaunchNotification();
         await bio.unlockResume(

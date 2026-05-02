@@ -1,3 +1,4 @@
+import { Configuration } from "@backend/config/core";
 import { EmailModule } from "@backend/email/email.module";
 import { DatabaseBackupJob } from "@backend/jobs/backup";
 import { BackgroundJob } from "@backend/jobs/base";
@@ -23,13 +24,14 @@ export class JobsModule implements OnModuleInit {
 
   async onModuleInit() {
     const providers = Reflect.getMetadata("providers", JobsModule) || [];
-    await Promise.all(
-      providers.map(async (provider: any) => {
-        const token = provider.provide || provider;
-        const job = this.moduleRef.get<BackgroundJob<any>>(token, { strict: true });
-        if (job.start) return await job.start();
-        else return Promise.resolve();
-      }),
-    );
+    if (!Configuration.isRunningScript)
+      await Promise.all(
+        providers.map(async (provider: any) => {
+          const token = provider.provide || provider;
+          const job = this.moduleRef.get<BackgroundJob<any>>(token, { strict: true });
+          if (job.start) return await job.start();
+          else return Promise.resolve();
+        }),
+      );
   }
 }
