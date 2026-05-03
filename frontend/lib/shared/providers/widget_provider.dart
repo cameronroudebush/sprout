@@ -154,6 +154,7 @@ class WidgetSync extends _$WidgetSync {
 
   /// Serializes the data and sends it to the native platform via [HomeWidget].
   Future<void> _saveToNative(Map<String, dynamic>? data) async {
+    if (kIsWeb) return; // Widgets are not available on web
     final String jsonString = jsonEncode(data ?? {});
     await HomeWidget.saveWidgetData('widget_data', jsonString);
     await HomeWidget.updateWidget(androidName: 'widget.Overview');
