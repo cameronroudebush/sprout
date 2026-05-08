@@ -4,11 +4,11 @@ import { Reflector } from "@nestjs/core";
 import { ClassTransformOptions } from "class-transformer";
 
 /** Class transformer user context */
-export type ClassTransformerUserContext = ClassSerializerContextOptions & { context: ({ user: User | undefined } & { [key: string]: any }) | undefined };
+export type ClassTransformerContext = ClassSerializerContextOptions & { context: ({ user: User | undefined } & { [key: string]: any }) | undefined };
 
-/** This transformer allows us to inject the {@link User} model into the transform of our class-transformer decorators. */
+/** This serializer extends the base {@link ClassSerializerInterceptor} to auto convert to JSON as necessary for our messages + add the ability for the user to be seen from the context.*/
 @Injectable()
-export class UserContextSerializerInterceptor extends ClassSerializerInterceptor {
+export class ContextSerializerInterceptor extends ClassSerializerInterceptor {
   constructor(reflector: Reflector) {
     super(reflector);
   }

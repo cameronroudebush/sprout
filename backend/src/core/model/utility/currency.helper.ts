@@ -1,5 +1,5 @@
+import { ClassTransformerContext } from "@backend/core/context.serializer";
 import { CustomTypes } from "@backend/core/model/utility/custom.types";
-import { ClassTransformerUserContext } from "@backend/core/serializer/user.context.serializer";
 import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Logger } from "@nestjs/common";
@@ -41,7 +41,7 @@ export class CurrencyHelper {
         ({ obj, options }) => {
           const originalAmount = obj[targetKey];
           if (originalAmount === undefined || originalAmount === null) return null;
-          const user = (options as ClassTransformerUserContext)?.context?.user;
+          const user = (options as ClassTransformerContext)?.context?.user;
           const sourceCurrency = get(obj, currencyProperty) ?? CurrencyHelper.FallbackCurrency;
           const targetCurrency = user?.config.currency ?? CurrencyHelper.FallbackCurrency;
           return CurrencyHelper.convert(originalAmount, sourceCurrency, targetCurrency);

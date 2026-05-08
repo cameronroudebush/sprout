@@ -16,11 +16,10 @@ Configuration.isRunningScript = (Configuration.isDevBuild as any) && process.arg
 import { TimeZone } from "@backend/config/model/tz";
 import { EncryptionTransformer } from "@backend/core/decorator/encryption.decorator";
 import { setupOpenApiHelp } from "@backend/core/openapi";
-import { UserContextSerializerInterceptor } from "@backend/core/serializer/user.context.serializer";
 import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { ClassSerializerInterceptor, Logger, LogLevel, ValidationPipe } from "@nestjs/common";
-import { NestFactory, Reflector } from "@nestjs/core";
+import { Logger, LogLevel, ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import compression from "compression";
 import cookieParser from "cookie-parser";
@@ -66,15 +65,10 @@ async function main() {
       logger: new SproutLogger(projName, { logLevels }),
       cors: !Configuration.isDevBuild,
     });
-    const reflector = app.get(Reflector);
     // All endpoints live under /api
     app.setGlobalPrefix(Configuration.server.basePath);
     // Enable validation
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-    // Enable class-transformer for response serialization
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
-    // Enable currency conversion to values we wish to have
-    app.useGlobalInterceptors(new UserContextSerializerInterceptor(reflector));
     // Enable cookie handling
     app.use(cookieParser(Configuration.encryptionKey));
     // Enable compression to help shrink responses

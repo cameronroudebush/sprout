@@ -6,7 +6,6 @@ import { OIDCStrategy } from "@backend/auth/strategy/oidc.strategy";
 import { Configuration } from "@backend/config/core";
 import { UserModule } from "@backend/user/user.module";
 import { HttpModule } from "@nestjs/axios";
-import { CacheModule } from "@nestjs/cache-manager";
 import { Module, Provider } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 
@@ -20,7 +19,7 @@ if (Configuration.server.auth.type === "oidc") {
 }
 
 @Module({
-  imports: [PassportModule, HttpModule, CacheModule.register(), UserModule],
+  imports: [PassportModule, HttpModule, UserModule],
   controllers: [AuthController, OIDCController],
   providers: authProviders,
   exports: [AuthService],
