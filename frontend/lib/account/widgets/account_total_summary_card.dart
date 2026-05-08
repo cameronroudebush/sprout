@@ -12,10 +12,7 @@ class TotalSummary extends ConsumerWidget {
   /// The accounts to render
   final List<Account> accounts;
 
-  /// If the user is in private mode
-  final bool isPrivate;
-
-  const TotalSummary({super.key, required this.accounts, required this.isPrivate});
+  const TotalSummary({super.key, required this.accounts});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,12 +32,11 @@ class TotalSummary extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _SummaryLabel(label: "Assets", amount: totalAssets, color: Colors.teal, isPrivate: isPrivate),
+                _SummaryLabel(label: "Assets", amount: totalAssets, color: Colors.teal),
                 _SummaryLabel(
                   label: "Debts",
                   amount: totalDebts,
                   color: Colors.redAccent,
-                  isPrivate: isPrivate,
                   isEnd: true,
                 ),
               ],
@@ -88,14 +84,10 @@ class _SummaryLabel extends ConsumerWidget {
   final Color color;
   final bool isEnd;
 
-  /// If the user is in private mode
-  final bool isPrivate;
-
   const _SummaryLabel({
     required this.label,
     required this.amount,
     required this.color,
-    required this.isPrivate,
     this.isEnd = false,
   });
 

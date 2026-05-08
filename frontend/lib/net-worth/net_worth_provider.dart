@@ -49,6 +49,15 @@ class AccountTimeline extends _$AccountTimeline {
   @override
   Future<List<HistoricalDataPoint>?> build(String accountId) async {
     final api = await ref.watch(netWorthApiProvider.future);
+
+    // Automatically refresh on SSE events
+    ref.listen(sseProvider, (prev, next) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
     return await api.netWorthControllerGetNetWorthTimelineAccount(accountId);
   }
 }

@@ -11,9 +11,6 @@ class AccountItemRow extends ConsumerWidget {
   /// The account to render
   final Account account;
 
-  /// If the user is in private mode
-  final bool isPrivate;
-
   /// The percentage change for the selected period
   final double? percentChange;
 
@@ -27,8 +24,7 @@ class AccountItemRow extends ConsumerWidget {
   final void Function()? onAccountClick;
 
   const AccountItemRow(
-    this.account,
-    this.isPrivate, {
+    this.account, {
     super.key,
     this.percentChange,
     this.valueChange,

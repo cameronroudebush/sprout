@@ -1,7 +1,6 @@
 import { StrategyGuard } from "@backend/auth/guard/strategy.guard";
-import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
 import { User } from "@backend/user/model/user.model";
-import { Body, Controller, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
+import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
@@ -16,8 +15,7 @@ export class AuthController {
   @Post("login")
   @ApiOperation({
     summary: "Login with username and password.",
-    description:
-      "Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.",
+    description: "Authenticates a user with their username and password, returning user details. Only available on local strategy auth.",
   })
   @ApiCreatedResponse({ description: "User login successful.", type: User })
   @ApiUnauthorizedResponse({ description: "Invalid credentials provided." })
@@ -25,22 +23,6 @@ export class AuthController {
   @StrategyGuard.attach("local")
   async login(@Body() body: UsernamePasswordLoginRequest, @Res({ passthrough: true }) res: Response, @Req() _req: Request) {
     const { user, jwt } = await this.authService.login(body);
-    this.authService.setCookieTokens(res, jwt);
-    return user;
-  }
-
-  @Post("login/jwt")
-  @ApiOperation({
-    summary: "Login with an existing JWT.",
-    description: "Validates an existing JWT located in cookies. If valid, it returns the user details. Only available on local strategy auth.",
-  })
-  @ApiCreatedResponse({ description: "User login successful.", type: User })
-  @ApiUnauthorizedResponse({ description: "The provided JWT is invalid or has expired." })
-  @StrategyGuard.attach("local")
-  async loginWithJWT(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = extractJwtFromHeaderOrCookie(req);
-    if (token == null) throw new UnauthorizedException();
-    const { user, jwt } = await this.authService.loginWithJWT(token);
     this.authService.setCookieTokens(res, jwt);
     return user;
   }

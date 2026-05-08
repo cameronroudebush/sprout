@@ -86,6 +86,7 @@ class SimpleFinAccountSelector extends ConsumerWidget {
           child: SelectableAccountsWidget(
             accounts: accounts,
             displaySubTypes: true,
+            showErrors: false,
             onSelectionChanged: onSelectionChanged,
           ),
         ),

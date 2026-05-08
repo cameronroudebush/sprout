@@ -18,9 +18,6 @@ class AccountGroupSection extends ConsumerWidget {
   /// The list of accounts in this group
   final List<Account> accounts;
 
-  /// If the user is in private mode
-  final bool isPrivate;
-
   /// The color of this grouping
   final Color accentColor;
 
@@ -46,23 +43,25 @@ class AccountGroupSection extends ConsumerWidget {
   final Set<Account>? selectedAccounts;
   final void Function(Account)? onAccountClick;
 
-  const AccountGroupSection({
-    super.key,
-    required this.title,
-    required this.accounts,
-    required this.isPrivate,
-    required this.accentColor,
-    required this.selectedRange,
-    this.isNegative = false,
-    this.renderAsCard = false,
-    this.initiallyExpanded = true,
-    this.percentChange,
-    this.totalChange,
-    this.historyList,
-    this.selectedAccounts,
-    this.onAccountClick,
-    this.allowExpansion = true,
-  });
+  /// Show the error icon if any accounts have errors
+  final bool showErrors;
+
+  const AccountGroupSection(
+      {super.key,
+      required this.title,
+      required this.accounts,
+      required this.accentColor,
+      required this.selectedRange,
+      this.isNegative = false,
+      this.renderAsCard = false,
+      this.initiallyExpanded = true,
+      this.percentChange,
+      this.totalChange,
+      this.historyList,
+      this.selectedAccounts,
+      this.onAccountClick,
+      this.allowExpansion = true,
+      this.showErrors = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,7 +91,7 @@ class AccountGroupSection extends ConsumerWidget {
                 ),
               ),
               // Error indicator for the group
-              SproutErrorIcon(hasError: groupHasError, size: 14),
+              if (showErrors) SproutErrorIcon(hasError: groupHasError, size: 14),
             ],
           ),
           trailing: Column(
@@ -132,14 +131,14 @@ class AccountGroupSection extends ConsumerWidget {
                   children: [
                     AccountItemRow(
                       acc,
-                      isPrivate,
                       percentChange: dataPoint?.percentChange?.toDouble(),
                       valueChange: dataPoint?.valueChange.toDouble(),
                       period: selectedRange,
                       onAccountClick: onAccountClick != null ? () => onAccountClick!(acc) : null,
                     ),
-                    // Display the error badge if the institution has an error
-                    Positioned(left: -10, top: 2, child: SproutErrorIcon(hasError: hasError, size: 12)),
+                    if (showErrors)
+                      // Display the error badge if the institution has an error
+                      Positioned(left: -10, top: 2, child: SproutErrorIcon(hasError: hasError, size: 12)),
                   ],
                 ),
               );

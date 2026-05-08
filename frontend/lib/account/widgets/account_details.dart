@@ -5,6 +5,7 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/account_tab_item.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_merge_dialog.dart';
 import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
@@ -22,13 +23,11 @@ import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// A responsive view for account details that adapts its navigation
-/// based on the user's screen size for better ergonomics.
+/// This page provides the overall account details view
 class AccountDetailsView extends ConsumerStatefulWidget {
   final Account account;
-  final bool isPrivate;
 
-  const AccountDetailsView({super.key, required this.account, required this.isPrivate});
+  const AccountDetailsView({super.key, required this.account});
 
   @override
   ConsumerState<AccountDetailsView> createState() => _AccountDetailsViewState();
@@ -337,6 +336,23 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 8,
                         children: [
+                          // Merge
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () async {
+                                showSproutPopup(
+                                  context: context,
+                                  builder: (ctx) => AccountMergeDialog(account),
+                                );
+                              },
+                              style: ThemeHelpers.secondaryButton,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 8,
+                                children: [Icon(Icons.merge), Text("Merge Accounts")],
+                              ),
+                            ),
+                          ),
                           if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
                             Expanded(
                               child: FilledButton(

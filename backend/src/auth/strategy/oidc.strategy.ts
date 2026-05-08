@@ -1,6 +1,6 @@
 import { AuthService } from "@backend/auth/auth.service";
 import { OIDCIDTokenIntrospectionResult } from "@backend/auth/model/oidc.introspection";
-import { extractJwtFromHeaderOrCookie } from "@backend/auth/strategy/auth.extractor";
+import { extractIdToken } from "@backend/auth/strategy/auth.extractor";
 import { Configuration } from "@backend/config/core";
 import { User } from "@backend/user/model/user.model";
 import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
@@ -32,7 +32,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     const issuer = config.issuer || "temp";
     const audience = config.clientId || "temp";
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromHeaderOrCookie]),
+      jwtFromRequest: ExtractJwt.fromExtractors([extractIdToken]),
       secretOrKeyProvider: passportJwtSecret({
         cache: true,
         rateLimit: true,
