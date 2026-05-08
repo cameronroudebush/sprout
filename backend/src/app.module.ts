@@ -10,7 +10,7 @@ import { CoreController } from "@backend/core/core.controller";
 import { ImageProxyController } from "@backend/core/image.proxy.controller";
 import { SproutLogger } from "@backend/core/logger";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
-import { DatabaseService } from "@backend/database/database.service";
+import { DatabaseModule } from "@backend/database/database.module";
 import { EmailModule } from "@backend/email/email.module";
 import { HoldingModule } from "@backend/holding/holding.module";
 import { JobsModule } from "@backend/jobs/jobs.module";
@@ -28,6 +28,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
 
 @Module({
   imports: [
+    DatabaseModule,
     AuthModule,
     UserModule,
     ProviderModule,
@@ -52,7 +53,6 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
   controllers: [CoreController, CategoryController, ConfigController, CashFlowController, ImageProxyController],
   providers: [
     ConfigurationService,
-    DatabaseService,
     CategoryService,
     CashFlowService,
     SproutLogger,

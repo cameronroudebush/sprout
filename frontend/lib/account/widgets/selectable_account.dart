@@ -10,14 +10,18 @@ import 'package:sprout/user/user_config_provider.dart';
 class SelectableAccountsWidget extends ConsumerStatefulWidget {
   final List<Account> accounts;
   final ValueChanged<List<Account>>? onSelectionChanged;
+  // TODO: Sub type selection
   final bool displaySubTypes;
 
-  const SelectableAccountsWidget({
-    super.key,
-    required this.accounts,
-    this.onSelectionChanged,
-    this.displaySubTypes = false,
-  });
+  /// Show the error icon if any accounts have errors
+  final bool showErrors;
+
+  const SelectableAccountsWidget(
+      {super.key,
+      required this.accounts,
+      this.onSelectionChanged,
+      this.displaySubTypes = false,
+      this.showErrors = true});
 
   @override
   ConsumerState<SelectableAccountsWidget> createState() => _SelectableAccountsWidgetState();
@@ -42,7 +46,6 @@ class _SelectableAccountsWidgetState extends ConsumerState<SelectableAccountsWid
     final config = AccountExtensions.groupConfig;
     final historyAsync = ref.watch(historicalAccountDataProvider);
     final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ?? ChartRangeEnum.oneDay;
-    final isPrivate = ref.watch(userConfigProvider).value?.privateMode ?? false;
 
     final groupedAccounts = config.keys.map((type) {
       final groupAccounts = widget.accounts.where((a) => a.type == type).toList();
@@ -53,7 +56,6 @@ class _SelectableAccountsWidgetState extends ConsumerState<SelectableAccountsWid
       return AccountGroupSection(
         title: ui.title,
         accounts: groupAccounts,
-        isPrivate: isPrivate,
         accentColor: ui.color,
         isNegative: ui.isNegative,
         initiallyExpanded: true,
@@ -63,6 +65,7 @@ class _SelectableAccountsWidgetState extends ConsumerState<SelectableAccountsWid
         renderAsCard: false, // Keeping it tight for the selection dialog
         onAccountClick: _toggleSelection,
         selectedAccounts: _selectedAccounts,
+        showErrors: widget.showErrors,
       );
     }).toList();
 

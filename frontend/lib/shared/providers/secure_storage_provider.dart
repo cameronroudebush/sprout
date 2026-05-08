@@ -5,7 +5,7 @@ class SecureStorageProvider {
   /// Key used to store the connection url in storage so we know where we're connecting.
   static const String connectionUrlKey = 'connection_url';
 
-  // Secure storage instance for storing the JWT token.
+  /// The storage where we actually store our content
   static final _storage = const FlutterSecureStorage();
 
   /// Saves the given value to the given key

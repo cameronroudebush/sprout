@@ -18,7 +18,7 @@ class AuthApi {
 
   /// Login with username and password.
   ///
-  /// Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.
+  /// Authenticates a user with their username and password, returning user details. Only available on local strategy auth.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -52,61 +52,13 @@ class AuthApi {
 
   /// Login with username and password.
   ///
-  /// Authenticates a user with their username and password, returning user details and a new JWT for requests. Only available on local strategy auth.
+  /// Authenticates a user with their username and password, returning user details. Only available on local strategy auth.
   ///
   /// Parameters:
   ///
   /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
   Future<User?> authControllerLogin(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
     final response = await authControllerLoginWithHttpInfo(usernamePasswordLoginRequest,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
-    
-    }
-    return null;
-  }
-
-  /// Login with an existing JWT.
-  ///
-  /// Validates an existing JWT located in cookies. If valid, it returns the user details. Only available on local strategy auth.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  Future<Response> authControllerLoginWithJWTWithHttpInfo() async {
-    // ignore: prefer_const_declarations
-    final path = r'/auth/login/jwt';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Login with an existing JWT.
-  ///
-  /// Validates an existing JWT located in cookies. If valid, it returns the user details. Only available on local strategy auth.
-  Future<User?> authControllerLoginWithJWT() async {
-    final response = await authControllerLoginWithJWTWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

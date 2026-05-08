@@ -283,4 +283,65 @@ class AccountApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
+
+  /// Merge two accounts.
+  ///
+  /// Merges a source account into the target account by Id, updating all related historical data and deleting the source. Intended purely to migrate from one account as your base to another, in the event the provider changes the structure. You should consider the Target Id (in the query) will be the remaining account. The source account will be provided by the body.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [AccountMergeDTO] accountMergeDTO (required):
+  Future<Response> accountControllerMergeAccountsWithHttpInfo(String id, AccountMergeDTO accountMergeDTO,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/account/{id}/migrat'
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = accountMergeDTO;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Merge two accounts.
+  ///
+  /// Merges a source account into the target account by Id, updating all related historical data and deleting the source. Intended purely to migrate from one account as your base to another, in the event the provider changes the structure. You should consider the Target Id (in the query) will be the remaining account. The source account will be provided by the body.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [AccountMergeDTO] accountMergeDTO (required):
+  Future<Account?> accountControllerMergeAccounts(String id, AccountMergeDTO accountMergeDTO,) async {
+    final response = await accountControllerMergeAccountsWithHttpInfo(id, accountMergeDTO,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
+    
+    }
+    return null;
+  }
 }

@@ -188,6 +188,8 @@ class ApiClient {
           return Account.fromJson(value);
         case 'AccountEditRequest':
           return AccountEditRequest.fromJson(value);
+        case 'AccountMergeDTO':
+          return AccountMergeDTO.fromJson(value);
         case 'AccountSubTypeEnum':
           return AccountSubTypeEnumTypeTransformer().decode(value);
         case 'CashFlowSpending':

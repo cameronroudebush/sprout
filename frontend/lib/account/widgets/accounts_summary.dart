@@ -21,16 +21,12 @@ class AccountSummaryView extends ConsumerWidget {
   /// The accounts to render
   final List<Account> accounts;
 
-  /// If the user is configured to private mode
-  final bool isPrivate;
-
   /// If each grouping should be rendered as it's own card. We use this heavily to determine if this is displayed on the dashboard vs it's own page
   final bool individualCards;
 
   const AccountSummaryView({
     super.key,
     required this.accounts,
-    required this.isPrivate,
     this.individualCards = true,
   });
 
@@ -111,7 +107,6 @@ class AccountSummaryView extends ConsumerWidget {
       return AccountGroupSection(
         title: ui.title,
         accounts: groupAccounts,
-        isPrivate: isPrivate,
         accentColor: ui.color,
         isNegative: ui.isNegative,
         initiallyExpanded: individualCards,
@@ -128,7 +123,7 @@ class AccountSummaryView extends ConsumerWidget {
       (isDesktop, context, constraints) {
         return Column(
           children: [
-            TotalSummary(accounts: accounts, isPrivate: isPrivate),
+            TotalSummary(accounts: accounts),
             if (individualCards)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),

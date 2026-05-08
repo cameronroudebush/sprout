@@ -18,7 +18,7 @@ function getAuthStrategies(): string[] {
   else return [LocalStrategyName];
 }
 
-/** A guard that automatically handles trying to authenticate our local JWT and falls back to OIDC if available. */
+/** A guard that automatically handles trying to authentication. If a user can't be determined, the endpoint won't be able to be accessed. */
 @Injectable()
 export class AuthGuard extends PassportAuthGuard(getAuthStrategies()) {
   constructor(private reflector: Reflector) {

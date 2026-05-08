@@ -68,6 +68,18 @@ export class ZillowProviderService extends ProviderBase {
     return new ZillowPropertyResultDto(zpid!, zestimate, rentZestimate, currency);
   }
 
+  /** Given a search URL, returns the content from the page */
+  private async getByUrl(searchUrl: string) {
+    const response = await this.impit.fetch(searchUrl);
+    const content = await response.text();
+
+    // Validation checks
+    if (content.includes("px-captcha") || content.includes("Access to this page has been denied"))
+      throw new Error("Provider temporarily unavailable due to rate limits.");
+
+    return content;
+  }
+
   /**
    * Gets property info for the given address information. This includes the zestimates and the zid. This is accomplished using
    *  web scraping.
@@ -81,8 +93,7 @@ export class ZillowProviderService extends ProviderBase {
     await this.rateLimit(user).incrementOrError();
     const completeAddress = `${address} ${city}, ${state} ${zip}`.replace(/\s+/g, "-");
     const searchUrl = `https://www.zillow.com/homes/${completeAddress}_rb/`;
-    const response = await this.impit.fetch(searchUrl);
-    const content = await response.text();
+    const content = await this.getByUrl(searchUrl);
     return this.resultFromContent(content);
   }
 
@@ -93,8 +104,7 @@ export class ZillowProviderService extends ProviderBase {
   async getInfoByZpid(user: User, zpid: string) {
     await this.rateLimit(user).incrementOrError();
     const searchUrl = `https://www.zillow.com/homes/${zpid}_zpid/`;
-    const response = await this.impit.fetch(searchUrl);
-    const content = await response.text();
+    const content = await this.getByUrl(searchUrl);
     return this.resultFromContent(content);
   }
 }

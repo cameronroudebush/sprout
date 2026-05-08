@@ -19,6 +19,13 @@ import { ProviderRateLimit } from "../base/rate-limit";
  */
 @Injectable()
 export class SimpleFINProviderService extends ProviderBase {
+  /** If an account contains this text, it will be considered {@link AccountType.credit}  */
+  private static readonly CREDIT_ACCOUNT_INCLUDES = ["card", "credit"];
+  /** If an account contains this text, it will be considered {@link AccountType.crypto}  */
+  private static readonly CRYPTO_ACCOUNT_INCLUDES = ["wallet", "staked"];
+  /** If an account contains this text, it will be considered {@link AccountType.investment}  */
+  private static readonly INVESTMENT_ACCOUNT_INCLUDES = ["401", "health savings", "ira", "individual"];
+
   override getAppConfiguration = () => Configuration.providers.simpleFIN;
   config = new ProviderConfig(
     "SimpleFIN",
@@ -34,6 +41,26 @@ export class SimpleFINProviderService extends ProviderBase {
     return this.convertData(await this.fetchData(undefined, undefined, accountsOnly, user), user);
   }
 
+  /** SimpleFin doesn't provide account type metadata, so try and guess here. */
+  private determineAccountType(name: string, balance: number, holdings: Array<any>): AccountType {
+    const nameLower = name.toLowerCase();
+    const isCredit = SimpleFINProviderService.CREDIT_ACCOUNT_INCLUDES.some((keyword) => nameLower.includes(keyword));
+    const isCrypto = SimpleFINProviderService.CRYPTO_ACCOUNT_INCLUDES.some((keyword) => nameLower.includes(keyword));
+    const isInvestment = SimpleFINProviderService.INVESTMENT_ACCOUNT_INCLUDES.some((keyword) => nameLower.includes(keyword));
+
+    if (balance <= 0 && isCredit) {
+      return AccountType.credit;
+    } else if (isCrypto) {
+      return AccountType.crypto;
+    } else if (holdings.length !== 0 || isInvestment) {
+      return AccountType.investment;
+    } else if (balance > 0) {
+      return AccountType.depository;
+    } else {
+      return AccountType.loan;
+    }
+  }
+
   /** Converts the given SimpleFIN typed data to our own local models */
   private async convertData(data: SimpleFINReturn.FinancialData, user: User) {
     return await Promise.all(
@@ -44,13 +71,7 @@ export class SimpleFINProviderService extends ProviderBase {
         const balance = parseFloat(x.balance);
         const availableBalance = parseFloat(x["available-balance"]);
         // Try to determine our account type
-        let type: Account["type"];
-        if (balance <= 0 && (name.toLowerCase().includes("credit") || name.toLowerCase().includes("card"))) type = AccountType.credit;
-        else if (name.toLowerCase().includes("wallet") || name.toLowerCase().includes("staked"))
-          type = AccountType.crypto; // Crypto is considered if it contains "wallet" or "staked"
-        else if (x.holdings.length !== 0) type = AccountType.investment;
-        else if (availableBalance !== 0) type = AccountType.depository;
-        else type = AccountType.loan;
+        const type = this.determineAccountType(name, balance, x.holdings);
         const account = Account.fromPlain({
           name,
           id: x.id,

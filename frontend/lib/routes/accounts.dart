@@ -8,7 +8,6 @@ import 'package:sprout/provider/widgets/dialog/provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// The primary entry point for the Accounts section of Sprout.
 ///
@@ -24,7 +23,6 @@ class AccountsPage extends ConsumerWidget {
     final String? accountId = GoRouterState.of(context).uri.queryParameters['id'];
 
     final accountsAsync = ref.watch(accountsProvider);
-    final isPrivate = ref.watch(userConfigProvider).value?.privateMode ?? false;
 
     return accountsAsync.when(
       data: (state) {
@@ -32,9 +30,9 @@ class AccountsPage extends ConsumerWidget {
         // Determine the body content based on URL parameters
         if (accountId != null) {
           final account = state.accounts.firstWhere((a) => a.id == accountId, orElse: () => state.accounts.first);
-          body = AccountDetailsView(account: account, isPrivate: isPrivate);
+          body = AccountDetailsView(account: account);
         } else {
-          body = AccountSummaryView(accounts: state.accounts, isPrivate: isPrivate);
+          body = AccountSummaryView(accounts: state.accounts);
         }
 
         return Scaffold(

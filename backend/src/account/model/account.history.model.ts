@@ -35,10 +35,11 @@ export class AccountHistory extends DatabaseBase {
   /**
    * Given an account, inserts a one day old account history intended to be used with new accounts. This will help
    *    make sure we can properly calculate when the account was added
+   * @param includeBalances If we should include balances of the given account. False means we set them to 0.
    */
-  static async insertForNewAccount(account: Account) {
+  static async insertForNewAccount(account: Account, includeBalances = false) {
     const time = subDays(new Date(), 1);
-    return await new AccountHistory(account, time, 0, 0).insert();
+    return await new AccountHistory(account, time, includeBalances ? account.balance : 0, includeBalances ? account.availableBalance : 0).insert();
   }
 
   /** Given a list of these account histories, updates them to the target currency of the user config. This will edit in place. */
