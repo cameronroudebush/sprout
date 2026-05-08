@@ -1,14 +1,17 @@
 import { Configuration } from "@backend/config/core";
-import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { CurrencyOptions } from "@backend/user/model/user.config.model";
-import { Injectable } from "@nestjs/common";
+import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
+import { Inject, Injectable } from "@nestjs/common";
 import YahooFinance from "yahoo-finance2";
 import { BackgroundJob } from "./base";
 
 /** This class defines a background job that runs in the background to automatically update exchange rates */
 @Injectable()
 export class ExchangeRateJob extends BackgroundJob<any> {
-  constructor() {
+  /** The key we store content under in the cache manager */
+  static readonly CACHE_KEY = "exchange-rates";
+
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
     super("exchange-rate", Configuration.server.exchangeRateTime);
   }
 
@@ -18,6 +21,11 @@ export class ExchangeRateJob extends BackgroundJob<any> {
 
   protected async update() {
     await this.refreshExchangeRates();
+  }
+
+  /** Hydrates {@link CurrencyHelper.exchangeRates} based on the redis content, if enabled */
+  private async updateFromRedis() {
+    // TODO?
   }
 
   /**
@@ -67,7 +75,7 @@ export class ExchangeRateJob extends BackgroundJob<any> {
         newMap.get(to)!.set(from, 1 / rate);
       });
 
-      CurrencyHelper.exchangeRates = newMap;
+      this.cacheManager.set(ExchangeRateJob.CACHE_KEY, newMap);
       this.logger.log(`Refresh complete.`);
     } catch (error) {
       this.logger.error("Failed to fetch batched exchange rates", error);

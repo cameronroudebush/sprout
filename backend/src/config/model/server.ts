@@ -1,5 +1,6 @@
 import { AuthenticationConfig } from "@backend/auth/model/authentication.config";
 import { ChatConfig } from "@backend/chat/model/chat.config.model";
+import { CacheConfig } from "@backend/config/model/cache.config";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
 import { EmailConfig } from "@backend/email/model/email.config";
@@ -38,4 +39,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration for email usage." })
   email = new EmailConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for caching." })
+  cache = new CacheConfig();
 }
