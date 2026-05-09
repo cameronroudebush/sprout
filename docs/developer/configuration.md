@@ -64,6 +64,17 @@ Sprout supports two authentication modes. You must choose one via `server.auth.t
 | `server.auth.oidc.secret`        | `sprout_server_auth_oidc_secret`        |         | The Client Secret from your provider.                                               |
 | `server.auth.oidc.allowNewUsers` | `sprout_server_auth_oidc_allowNewUsers` | `true`  | If `true`, anyone who logs in via OIDC gets a Sprout account created automatically. |
 
+## L2 Cache (Redis)
+
+Adds support to share cached info (holdings, auth lookup, etc.) across Sprout instances using Redis.
+
+| YAML Key                      | Environment Variable                 | Default | Description                                                  |
+| ----------------------------- | ------------------------------------ | ------- | ------------------------------------------------------------ |
+| `server.cache.type`           | `sprout_server_cache_type`           | `local` | The type of cache to use. [`local`, `redis`]                 |
+| `server.cache.redis.host`     | `sprout_server_cache_redis_host`     |         | The host url to connect to redis on.                         |
+| `server.cache.redis.port`     | `sprout_server_cache_redis_port`     |         | The port to connect to redis on.                             |
+| `server.cache.redis.password` | `sprout_server_cache_redis_password` |         | The password to use for redis, if authentication is enabled. |
+
 ## Database & Backups
 
 Sprout uses SQLite by default and includes a built-in backup engine.

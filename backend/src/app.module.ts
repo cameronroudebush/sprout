@@ -3,8 +3,7 @@ import { AuthModule } from "@backend/auth/auth.module";
 import { CategoryController } from "@backend/category/category.controller";
 import { CategoryService } from "@backend/category/category.service";
 import { ChatModule } from "@backend/chat/chat.module";
-import { ConfigController } from "@backend/config/config.controller";
-import { ConfigurationService } from "@backend/config/config.service";
+import { ConfigurationModule } from "@backend/config/config.module";
 import { Configuration } from "@backend/config/core";
 import { ContextSerializerInterceptor } from "@backend/core/context.serializer";
 import { CoreController } from "@backend/core/core.controller";
@@ -32,6 +31,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
 
 @Module({
   imports: [
+    ConfigurationModule,
     DatabaseModule,
     AuthModule,
     UserModule,
@@ -54,23 +54,26 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => {
-        // 1. Always initialize the local memory store (L1 Cache)
+        const logger = new SproutLogger("cache", { logLevels: ["verbose"] });
+        // Always initialize the local memory store (L1 Cache)
         const memoryStore = new Keyv({
-          store: new KeyvCacheableMemory({ ttl: 60000, lruSize: 5000 }),
+          store: new KeyvCacheableMemory({}),
         });
 
         // Start with only the memory store in our hierarchy
         const stores: any[] = [memoryStore];
 
-        // 2. Conditionally add the Redis store (L2 Cache)
+        // Conditionally add the L2 cache
         if (Configuration.server.cache.type === "redis") {
-          // Construct the connection string
-          const auth = Configuration.cache.password ? `:${Configuration.cache.password}@` : "";
-          const redisUrl = `redis://${auth}${Configuration.cache.host}:${Configuration.cache.port}`;
-
+          logger.log(`L2 cache is enabled. Connecting...`);
+          Configuration.server.cache.redis.validate();
+          const auth = Configuration.server.cache.redis.password ? `:${Configuration.server.cache.redis.password}@` : "";
+          const redisUrl = `redis://${auth}${Configuration.server.cache.redis.host}:${Configuration.server.cache.redis.port}`;
           const redisStore = new KeyvRedis(redisUrl);
-
-          // Push Redis into the array. Keyv reads the array in order.
+          // Check if we can connect
+          if (!redisStore.client.isOpen) await redisStore.client.connect();
+          await redisStore.client.ping();
+          logger.log(`L2 cache connected successfully!`);
           stores.push(redisStore);
         }
 
@@ -82,9 +85,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     // Always initialize jobs last
     JobsModule,
   ],
-  controllers: [CoreController, CategoryController, ConfigController, CashFlowController, ImageProxyController],
+  controllers: [CoreController, CategoryController, CashFlowController, ImageProxyController],
   providers: [
-    ConfigurationService,
     CategoryService,
     CashFlowService,
     SproutLogger,

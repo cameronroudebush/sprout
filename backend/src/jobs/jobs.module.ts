@@ -1,3 +1,4 @@
+import { ConfigurationModule } from "@backend/config/config.module";
 import { Configuration } from "@backend/config/core";
 import { EmailModule } from "@backend/email/email.module";
 import { DatabaseBackupJob } from "@backend/jobs/backup";
@@ -14,7 +15,7 @@ import { Module, OnModuleInit } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 
 @Module({
-  imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule],
+  imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule, ConfigurationModule],
   controllers: [],
   providers: [ExchangeRateJob, DatabaseBackupJob, PendingTransactionJob, UserDeviceJob, StatusEmailJob, ProviderSyncOrchestratorJob],
   exports: [ProviderSyncOrchestratorJob],

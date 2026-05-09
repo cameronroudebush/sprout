@@ -1,4 +1,6 @@
+import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { Inject, Injectable } from "@nestjs/common";
@@ -11,7 +13,13 @@ export class ExchangeRateJob extends BackgroundJob<any> {
   /** The key we store content under in the cache manager */
   static readonly CACHE_KEY = "exchange-rates";
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+  /** Locally kept cache to be easily access by {@link CurrencyHelper} */
+  static exchangeRates: Record<string, Record<string, number>> = {};
+
+  constructor(
+    private readonly configService: ConfigurationService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {
     super("exchange-rate", Configuration.server.exchangeRateTime);
   }
 
@@ -20,12 +28,27 @@ export class ExchangeRateJob extends BackgroundJob<any> {
   }
 
   protected async update() {
-    await this.refreshExchangeRates();
+    const hydrated = await this.updateFromL2();
+
+    // If L2 didn't have it (or it expired), fetch from Yahoo
+    if (!hydrated) await this.refreshExchangeRates();
   }
 
-  /** Hydrates {@link CurrencyHelper.exchangeRates} based on the redis content, if enabled */
-  private async updateFromRedis() {
-    // TODO?
+  /** Hydrates {@link CurrencyHelper.exchangeRates} based on the L2 cache content. Returns true if successful. */
+  private async updateFromL2(): Promise<boolean> {
+    try {
+      const cachedRates = await this.cacheManager.get<Record<string, Record<string, number>>>(ExchangeRateJob.CACHE_KEY);
+
+      if (cachedRates && Object.keys(cachedRates).length > 0) {
+        ExchangeRateJob.exchangeRates = cachedRates;
+        this.logger.log("Successfully synchronized local exchange rates from L2 cache.");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      this.logger.error("Failed to read exchange rates from L2 cache", error);
+      return false;
+    }
   }
 
   /**
@@ -57,7 +80,7 @@ export class ExchangeRateJob extends BackgroundJob<any> {
 
     try {
       const results = await Promise.all(symbols.map((x) => yf.quote(x)));
-      const newMap = new Map<string, Map<string, number>>();
+      const newRates: Record<string, Record<string, number>> = {};
 
       results.forEach((quote) => {
         const pair = symbolToPairMap.get(quote.symbol);
@@ -66,16 +89,19 @@ export class ExchangeRateJob extends BackgroundJob<any> {
         const { from, to } = pair;
         const rate = quote.regularMarketPrice;
 
-        // Ensure sub-maps exist
-        if (!newMap.has(from)) newMap.set(from, new Map());
-        if (!newMap.has(to)) newMap.set(to, new Map());
+        // Ensure sub-objects exist
+        if (!newRates[from]) newRates[from] = {};
+        if (!newRates[to]) newRates[to] = {};
 
         // Set direct and inverted rates
-        newMap.get(from)!.set(to, rate);
-        newMap.get(to)!.set(from, 1 / rate);
+        newRates[from][to] = rate;
+        newRates[to][from] = 1 / rate;
       });
 
-      this.cacheManager.set(ExchangeRateJob.CACHE_KEY, newMap);
+      // Update our cache
+      ExchangeRateJob.exchangeRates = newRates;
+      const ttl = await this.configService.convertCronToMilliseconds(Configuration.server.exchangeRateTime, 300000);
+      await this.cacheManager.set(ExchangeRateJob.CACHE_KEY, newRates, ttl);
       this.logger.log(`Refresh complete.`);
     } catch (error) {
       this.logger.error("Failed to fetch batched exchange rates", error);

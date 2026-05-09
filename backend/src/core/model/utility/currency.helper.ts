@@ -1,5 +1,6 @@
 import { ClassTransformerContext } from "@backend/core/context.serializer";
 import { CustomTypes } from "@backend/core/model/utility/custom.types";
+import { ExchangeRateJob } from "@backend/jobs/exchange-rate";
 import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Logger } from "@nestjs/common";
@@ -12,8 +13,6 @@ export class CurrencyHelper {
   private static readonly logger = new Logger("currency-helper");
   /** What currency option we should fallback to if we can't determine one from the source */
   protected static readonly FallbackCurrency = CurrencyOptions.USD;
-  /** Exchange rates populated by a background job */
-  static exchangeRates = new Map<string, Map<string, number>>();
 
   /**
    * This decorator is used to override the source property (the finance amount, like an account balance) to set it to a specific
@@ -55,7 +54,7 @@ export class CurrencyHelper {
   static convert(amount: number, from: string, to: string): number {
     if (from === to) return amount;
     if (amount == null || amount === 0) return 0;
-    const rate = CurrencyHelper.exchangeRates.get(from)?.get(to);
+    const rate = ExchangeRateJob.exchangeRates[from]?.[to];
     if (rate === undefined) {
       this.logger.warn(`Failed to locate a matching currency map from ${from} to ${to}. You should report this to the developer.`);
       return 0;
