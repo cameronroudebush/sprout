@@ -1,5 +1,6 @@
 import { SproutLogger } from "@backend/core/logger";
 import { Injectable } from "@nestjs/common";
+import cronParser from "cron-parser";
 import fs from "fs";
 import { set } from "lodash";
 import path from "path";
@@ -163,5 +164,14 @@ export class ConfigurationService {
     }
 
     return value;
+  }
+
+  /** Given a cron time, determines how many milliseconds it is until the next run. */
+  async convertCronToMilliseconds(cron: string, buffer = 0) {
+    const interval = cronParser.parse(cron);
+    const nextRun = interval.next().toDate();
+    const now = new Date();
+    // Milliseconds until the next cron job fires
+    return nextRun.getTime() - now.getTime() + buffer;
   }
 }

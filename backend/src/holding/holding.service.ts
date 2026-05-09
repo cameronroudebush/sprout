@@ -37,33 +37,43 @@ export class HoldingService {
    */
   async getLiveHoldingPrices(symbols: string[], ttlMs: number = 5 * 60 * 1000): Promise<MarketIndexDto[]> {
     try {
+      const uniqueSymbols = [...new Set(symbols)];
+
+      // Concurrent Cache Lookup
+      const cacheLookups = await Promise.all(uniqueSymbols.map((s) => this.cacheManager.get<MarketIndexDto>(`quote:${s}`)));
+
       const finalResults: MarketIndexDto[] = [];
       const missingSymbols: string[] = [];
 
-      // Check the cache for each symbol to avoid unnecessary batch queries
-      for (const symbol of symbols) {
-        const cacheKey = `quote:${symbol}`;
-        const cachedQuote = await this.cacheManager.get<MarketIndexDto>(cacheKey);
-        if (cachedQuote) finalResults.push(cachedQuote);
+      // Sort results into "Found" and "Missing"
+      uniqueSymbols.forEach((symbol, index) => {
+        const cached = cacheLookups[index];
+        if (cached) finalResults.push(cached);
         else missingSymbols.push(symbol);
-      }
+      });
 
-      // Query Yahoo Finance only for the symbols that weren't cached
+      // Batch Request for Missing Symbols
       if (missingSymbols.length > 0) {
         const rawQuotes = await this.yf.quote(missingSymbols);
+        const quotesArray = Array.isArray(rawQuotes) ? rawQuotes : [rawQuotes];
 
-        for (const quote of rawQuotes) {
-          const dto = new MarketIndexDto(quote);
-          finalResults.push(dto);
-          // Cache new data
-          const cacheKey = `quote:${quote.symbol}`;
-          await this.cacheManager.set(cacheKey, dto, ttlMs);
-        }
+        // Concurrent Cache Update
+        await Promise.all(
+          quotesArray.map(async (quote) => {
+            if (!quote || !quote.symbol) return;
+
+            const dto = new MarketIndexDto(quote);
+            finalResults.push(dto);
+
+            // Cache the result
+            await this.cacheManager.set(`quote:${quote.symbol}`, dto, ttlMs);
+          }),
+        );
       }
 
       return finalResults;
     } catch (error) {
-      throw new HttpException("Failed to fetch holding prices", HttpStatus.SERVICE_UNAVAILABLE);
+      throw new HttpException("Service Unavailable", HttpStatus.SERVICE_UNAVAILABLE);
     }
   }
 
