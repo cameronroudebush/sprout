@@ -14,6 +14,7 @@ class AccountEditRequest {
   /// Returns a new [AccountEditRequest] instance.
   AccountEditRequest({
     this.subType,
+    this.type,
     this.name,
     this.interestRate,
   });
@@ -25,6 +26,14 @@ class AccountEditRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   AccountSubTypeEnum? subType;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  AccountTypeEnum? type;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -45,6 +54,7 @@ class AccountEditRequest {
   @override
   bool operator ==(Object other) => identical(this, other) || other is AccountEditRequest &&
     other.subType == subType &&
+    other.type == type &&
     other.name == name &&
     other.interestRate == interestRate;
 
@@ -52,11 +62,12 @@ class AccountEditRequest {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (subType == null ? 0 : subType!.hashCode) +
+    (type == null ? 0 : type!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
     (interestRate == null ? 0 : interestRate!.hashCode);
 
   @override
-  String toString() => 'AccountEditRequest[subType=$subType, name=$name, interestRate=$interestRate]';
+  String toString() => 'AccountEditRequest[subType=$subType, type=$type, name=$name, interestRate=$interestRate]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -64,6 +75,11 @@ class AccountEditRequest {
       json[r'subType'] = this.subType;
     } else {
       json[r'subType'] = null;
+    }
+    if (this.type != null) {
+      json[r'type'] = this.type;
+    } else {
+      json[r'type'] = null;
     }
     if (this.name != null) {
       json[r'name'] = this.name;
@@ -94,6 +110,7 @@ class AccountEditRequest {
 
       return AccountEditRequest(
         subType: AccountSubTypeEnum.fromJson(json[r'subType']),
+        type: AccountTypeEnum.fromJson(json[r'type']),
         name: mapValueOfType<String>(json, r'name'),
         interestRate: num.parse('${json[r'interestRate']}'),
       );

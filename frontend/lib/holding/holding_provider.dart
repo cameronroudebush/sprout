@@ -69,19 +69,75 @@ class MajorIndices extends _$MajorIndices {
   }
 }
 
-/// Riverpod that provides live price of a stock utilizing the backend API
+/// A DataLoader style provider that batches requests from the UI
 @Riverpod(keepAlive: true)
-class LivePrice extends _$LivePrice {
-  Timer? _timer;
+class BatchedLivePrices extends _$BatchedLivePrices {
+  Timer? _refreshTimer;
+  final Set<String> _pendingSymbols = {};
+  bool _isFetching = false;
 
   @override
-  Future<MarketIndexDto?> build(String symbol) async {
-    // Refresh cycle to match backend cache
-    _timer = Timer.periodic(const Duration(minutes: 5), (_) => ref.invalidateSelf());
-    ref.onDispose(() => _timer?.cancel());
-    final api = await ref.watch(holdingApiProvider.future);
-    final results = await api.holdingControllerGetLivePrices([symbol]);
+  Map<String, MarketIndexDto> build() {
+    // Refresh all currently known symbols every 5 minutes
+    _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) => _refreshAll());
+    ref.onDispose(() => _refreshTimer?.cancel());
+    return {};
+  }
 
-    return results?.firstOrNull;
+  /// Called by the UI to register a symbol it needs
+  void requestSymbol(String symbol) {
+    if (state.containsKey(symbol) || _pendingSymbols.contains(symbol)) return;
+
+    _pendingSymbols.add(symbol);
+    _scheduleFetch();
+  }
+
+  void _scheduleFetch() {
+    if (_isFetching) return;
+    _isFetching = true;
+
+    // Wait 50ms for the Flutter frame to finish mounting all HoldingRows
+    Future.delayed(const Duration(milliseconds: 50), () async {
+      if (_pendingSymbols.isEmpty) {
+        _isFetching = false;
+        return;
+      }
+
+      final symbolsToFetch = _pendingSymbols.toList();
+      _pendingSymbols.clear();
+
+      try {
+        // Use ref.read to prevent reactive rebuilds!
+        final api = await ref.read(holdingApiProvider.future);
+        final results = await api.holdingControllerGetLivePrices(symbolsToFetch);
+
+        if (results != null) {
+          final newState = Map<String, MarketIndexDto>.from(state);
+          for (final data in results) {
+            newState[data.symbol] = data;
+          }
+          state = newState;
+        }
+      } finally {
+        _isFetching = false;
+        // If more widgets asked for symbols while we were fetching, go again
+        if (_pendingSymbols.isNotEmpty) _scheduleFetch();
+      }
+    });
+  }
+
+  Future<void> _refreshAll() async {
+    if (state.isEmpty) return;
+    try {
+      final api = await ref.read(holdingApiProvider.future);
+      final results = await api.holdingControllerGetLivePrices(state.keys.toList());
+      if (results != null) {
+        final newState = Map<String, MarketIndexDto>.from(state);
+        for (final data in results) {
+          newState[data.symbol] = data;
+        }
+        state = newState;
+      }
+    } catch (_) {}
   }
 }

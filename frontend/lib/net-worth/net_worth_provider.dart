@@ -36,6 +36,15 @@ class HistoricalAccountData extends _$HistoricalAccountData {
   @override
   Future<List<EntityHistory>?> build() async {
     final api = await ref.watch(netWorthApiProvider.future);
+
+    // Automatically refresh on SSE events
+    ref.listen(sseProvider, (prev, next) {
+      final event = next.latestData?.event;
+      if (event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
     return await api.netWorthControllerGetNetWorthByAccounts();
   }
 

@@ -399,100 +399,59 @@ abstract class _$MajorIndices extends $AsyncNotifier<List<MarketIndexDto>> {
   }
 }
 
-/// Riverpod that provides live price of a stock utilizing the backend API
+/// A DataLoader style provider that batches requests from the UI
 
-@ProviderFor(LivePrice)
-final livePriceProvider = LivePriceFamily._();
+@ProviderFor(BatchedLivePrices)
+final batchedLivePricesProvider = BatchedLivePricesProvider._();
 
-/// Riverpod that provides live price of a stock utilizing the backend API
-final class LivePriceProvider
-    extends $AsyncNotifierProvider<LivePrice, MarketIndexDto?> {
-  /// Riverpod that provides live price of a stock utilizing the backend API
-  LivePriceProvider._(
-      {required LivePriceFamily super.from, required String super.argument})
+/// A DataLoader style provider that batches requests from the UI
+final class BatchedLivePricesProvider
+    extends $NotifierProvider<BatchedLivePrices, Map<String, MarketIndexDto>> {
+  /// A DataLoader style provider that batches requests from the UI
+  BatchedLivePricesProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
-          name: r'livePriceProvider',
+          name: r'batchedLivePricesProvider',
           isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$livePriceHash();
-
-  @override
-  String toString() {
-    return r'livePriceProvider'
-        ''
-        '($argument)';
-  }
+  String debugGetCreateSourceHash() => _$batchedLivePricesHash();
 
   @$internal
   @override
-  LivePrice create() => LivePrice();
+  BatchedLivePrices create() => BatchedLivePrices();
 
-  @override
-  bool operator ==(Object other) {
-    return other is LivePriceProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, MarketIndexDto> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, MarketIndexDto>>(value),
+    );
   }
 }
 
-String _$livePriceHash() => r'96715e8ffc836594a4ac53c12671b1f1aa4d079c';
+String _$batchedLivePricesHash() => r'cfb474137afc897d4301374b89b3c61392549b1d';
 
-/// Riverpod that provides live price of a stock utilizing the backend API
+/// A DataLoader style provider that batches requests from the UI
 
-final class LivePriceFamily extends $Family
-    with
-        $ClassFamilyOverride<LivePrice, AsyncValue<MarketIndexDto?>,
-            MarketIndexDto?, FutureOr<MarketIndexDto?>, String> {
-  LivePriceFamily._()
-      : super(
-          retry: null,
-          name: r'livePriceProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: false,
-        );
-
-  /// Riverpod that provides live price of a stock utilizing the backend API
-
-  LivePriceProvider call(
-    String symbol,
-  ) =>
-      LivePriceProvider._(argument: symbol, from: this);
-
-  @override
-  String toString() => r'livePriceProvider';
-}
-
-/// Riverpod that provides live price of a stock utilizing the backend API
-
-abstract class _$LivePrice extends $AsyncNotifier<MarketIndexDto?> {
-  late final _$args = ref.$arg as String;
-  String get symbol => _$args;
-
-  FutureOr<MarketIndexDto?> build(
-    String symbol,
-  );
+abstract class _$BatchedLivePrices
+    extends $Notifier<Map<String, MarketIndexDto>> {
+  Map<String, MarketIndexDto> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<MarketIndexDto?>, MarketIndexDto?>;
+    final ref = this.ref
+        as $Ref<Map<String, MarketIndexDto>, Map<String, MarketIndexDto>>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<MarketIndexDto?>, MarketIndexDto?>,
-        AsyncValue<MarketIndexDto?>,
+        AnyNotifier<Map<String, MarketIndexDto>, Map<String, MarketIndexDto>>,
+        Map<String, MarketIndexDto>,
         Object?,
         Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    element.handleCreate(ref, build);
   }
 }

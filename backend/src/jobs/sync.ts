@@ -2,6 +2,7 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
+import { CustomTypes } from "@backend/core/model/utility/custom.types";
 import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -53,40 +54,37 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
   protected async update(user?: User, shouldNotify = true) {
     this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
-
-    const success = await this.updateProvider(this.provider, user, shouldNotify);
-
-    // If a specific user triggered this and it was successful, notify them specifically
-    if (success && user) {
-      const recentNotification = await Notification.findOne({
-        where: {
-          user: { id: user.id },
-          type: NotificationType.success,
-          // Check if a success notification was sent in the last 5 minutes
-          createdAt: MoreThan(subMinutes(new Date(), 5)),
-        },
-      });
-
-      if (!recentNotification) {
-        const msg = this.getSuccessMessage();
-        this.logger.log(`Sync successful for user: ${user.username}.${shouldNotify ? " Sending notification." : ""}`);
-        if (shouldNotify) await this.notificationService.notifyUser(user, msg.body, msg.title, NotificationType.success);
-      } else {
-        this.logger.log(`Sync successful for ${user.username}, but suppressed notification to avoid spam.`);
-      }
-    }
-
-    // Cleanup
+    const results = await this.updateProvider(this.provider, user);
+    // Handle notifications separately based on results
+    if (shouldNotify)
+      for (const result of results)
+        await this.notify(result.user, result.msg, result.success ? NotificationType.success : NotificationType.error, result.success);
     await this.cleanupOldSyncs();
-
     // If we we're given a single user, find their most recent sync status
-    if (user) {
+    if (user)
       return await Sync.findOne({
         where: { user: { id: user.id } },
         order: { time: "DESC" },
       });
-    }
     return null;
+  }
+
+  /**
+   * Sends notifications on successes, handles not spamming the user if another one was sent within 5 minutes.
+   * @param spamCheck If we should check if a recent notification was already sent. If this is true, and a recent
+   *  one was sent, we don't send another.
+   */
+  private async notify(user: User, msg: { title: string; body: string }, type: NotificationType, spamCheck: boolean) {
+    let recentNotification: CustomTypes.Nullable<Notification> = undefined;
+    if (spamCheck)
+      recentNotification = await Notification.findOne({
+        where: {
+          user: { id: user.id },
+          type: NotificationType.success,
+          createdAt: MoreThan(subMinutes(new Date(), 5)),
+        },
+      });
+    if (recentNotification == null) await this.notificationService.notifyUser(user, msg.body, msg.title, type);
   }
 
   /**
@@ -95,8 +93,8 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
    * @param specificUser If given, will only process this user
    * @returns boolean indicating if the provider sync was successful for all users
    */
-  private async updateProvider(provider: ProviderBase, specificUser?: User, shouldNotify = true): Promise<boolean> {
-    let allUsersSuccessful = true;
+  private async updateProvider(provider: ProviderBase, specificUser?: User) {
+    const results: Array<{ user: User; success: boolean; msg: { title: string; body: string } }> = [];
     // Handle each user, or only the given user
     const users = specificUser ? [specificUser] : await User.find({});
     // Handle each user's accounts
@@ -124,7 +122,6 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
         const accounts = await provider.get(user, false);
         let userHadSuccessfulUpdate = false;
-        let hasAccountErrors = false;
         const institutionErrors = new Set<string>();
 
         for (const data of accounts) {
@@ -161,7 +158,6 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
             // If we reached this point, this specific account sync was valid
             userHadSuccessfulUpdate = true;
           } catch (e) {
-            hasAccountErrors = true;
             this.logger.error(`Account error: ${(e as Error).message}`);
           }
         }
@@ -174,14 +170,10 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
           const names = Array.from(institutionErrors);
           sync.status = "failed";
           sync.failureReason = `Connection lost with ${names.join(", ")}`;
-          if (shouldNotify) await this.notificationService.notifyUser(user, sync.failureReason, "Connection Update Required", NotificationType.error);
-          allUsersSuccessful = false;
-        } else if (userHadSuccessfulUpdate) {
-          sync.status = "complete";
-          if (hasAccountErrors) allUsersSuccessful = false;
+          results.push({ user, success: false, msg: { title: "Connection Update Required", body: sync.failureReason } });
         } else {
-          // Ignore if we had no accounts, because there was nothing to update!
           sync.status = "complete";
+          results.push({ user, success: true, msg: this.getSuccessMessage() });
         }
         // Finalize by updating the sync
         await sync.update();
@@ -190,11 +182,10 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
         sync.status = "failed";
         sync.failureReason = (e as Error).message;
         await sync.update();
-        this.logger.error(`Sync failed for ${user.username}: ${sync.failureReason}`);
-        allUsersSuccessful = false;
+        results.push({ user, success: false, msg: { title: "Unknown Sync Error", body: sync.failureReason } });
       }
     }
-    return allUsersSuccessful;
+    return results;
   }
 
   /** Updates all transaction data for the given account that matches the given transaction */

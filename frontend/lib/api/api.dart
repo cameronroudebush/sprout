@@ -50,6 +50,7 @@ part 'model/account.dart';
 part 'model/account_edit_request.dart';
 part 'model/account_merge_dto.dart';
 part 'model/account_sub_type_enum.dart';
+part 'model/account_type_enum.dart';
 part 'model/cash_flow_spending.dart';
 part 'model/cash_flow_stats.dart';
 part 'model/category.dart';

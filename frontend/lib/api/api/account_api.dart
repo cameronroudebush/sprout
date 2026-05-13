@@ -297,7 +297,7 @@ class AccountApi {
   /// * [AccountMergeDTO] accountMergeDTO (required):
   Future<Response> accountControllerMergeAccountsWithHttpInfo(String id, AccountMergeDTO accountMergeDTO,) async {
     // ignore: prefer_const_declarations
-    final path = r'/account/{id}/migrat'
+    final path = r'/account/{id}/merge'
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals

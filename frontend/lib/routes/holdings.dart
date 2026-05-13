@@ -36,19 +36,24 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
     final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
 
     // Aggregating all holdings across all investment accounts to check if we have data
-    final allHoldings = investmentAccounts.fold<List<Holding>>([], (previousValue, account) {
-      final holdings = ref.watch(accountHoldingsProvider(account.id)).value ?? [];
-      return [...previousValue, ...holdings];
+    final hasHoldings = investmentAccounts.any((account) {
+      return ref.watch(accountHoldingsProvider(account.id).select((state) => state.value?.isNotEmpty == true));
     });
 
     // Auto select default holding
-    if (!_hasInitialSelection && allHoldings.isNotEmpty) {
+    if (!_hasInitialSelection && hasHoldings) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _selectedHolding == null) {
-          setState(() {
-            _selectedHolding = allHoldings.first;
-            _hasInitialSelection = true;
-          });
+          for (final account in investmentAccounts) {
+            final holdings = ref.read(accountHoldingsProvider(account.id)).value ?? [];
+            if (holdings.isNotEmpty) {
+              setState(() {
+                _selectedHolding = holdings.first;
+                _hasInitialSelection = true;
+              });
+              break; // Stop after finding the first one
+            }
+          }
         }
       });
     }
@@ -59,7 +64,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
         // Major indices
         const MajorIndicesBarWidget(),
         // Performance Chart for selected symbol
-        if (accounts.isNotEmpty && allHoldings.isNotEmpty) _buildPerformanceChart(theme),
+        if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme),
 
         const Divider(),
 
@@ -76,9 +81,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                     icon: Icons.account_balance_wallet_outlined,
                     message: "No accounts found to choose from",
                   )
-
                 // Accounts exist, but no holdings in any of them
-                else if (allHoldings.isEmpty)
+                else if (!hasHoldings)
                   _buildWarningCard(
                     theme,
                     icon: Icons.pie_chart_outline,
@@ -98,7 +102,14 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                             spacing: 12,
                             children: [
                               AccountLogo(account),
-                              Text(account.name, style: theme.textTheme.titleMedium),
+                              Expanded(
+                                child: Text(
+                                  account.name,
+                                  style: theme.textTheme.titleMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -180,25 +191,34 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                   spacing: 4,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: const SizedBox.shrink()),
-                    Column(
-                      children: [
-                        Text(
-                          selectedHoldingAccount?.name ?? "Unknown account",
-                          style: theme.textTheme.labelMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          _selectedHolding!.symbol,
-                          style: theme.textTheme.labelMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    const Expanded(child: SizedBox.shrink()),
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            selectedHoldingAccount?.name ?? "Unknown account",
+                            style: theme.textTheme.labelMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            _selectedHolding!.symbol,
+                            style: theme.textTheme.labelMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
                     Expanded(
-                      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [ChartRangeSelector()]),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [ChartRangeSelector()],
+                      ),
                     ),
                   ],
                 ),

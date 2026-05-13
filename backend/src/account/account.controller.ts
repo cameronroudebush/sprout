@@ -84,11 +84,13 @@ export class AccountController {
   async edit(@Param("id") id: string, @CurrentUser() user: User, @Body() updatedAccount: AccountEditRequest) {
     const matchingAccount = await Account.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingAccount == null) throw new NotFoundException(`Account with ID ${id} not found or does not belong to the user.`);
+    if (updatedAccount.name != null && updatedAccount.name.length < 5) throw new BadRequestException("Account names must be at least 5 characters.");
 
     // Update only the allowed fields
-    matchingAccount.name = updatedAccount.name ?? matchingAccount.name;
-    matchingAccount.subType = updatedAccount.subType ?? (matchingAccount.subType as any);
-    matchingAccount.interestRate = updatedAccount.interestRate ?? (matchingAccount.interestRate as any);
+    matchingAccount.name = updatedAccount.name?.trim() ?? matchingAccount.name;
+    matchingAccount.type = updatedAccount.type ?? matchingAccount.type;
+    matchingAccount.subType = updatedAccount.subType ?? matchingAccount.subType;
+    matchingAccount.interestRate = updatedAccount.interestRate ?? matchingAccount.interestRate;
     // Perform the update, return the result.
     const result = await matchingAccount.update();
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
@@ -133,7 +135,7 @@ export class AccountController {
     if (hasSuccess) this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
   }
 
-  @Post(":id/migrat")
+  @Post(":id/merge")
   @ApiOperation({
     summary: "Merge two accounts.",
     description:

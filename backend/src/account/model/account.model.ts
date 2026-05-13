@@ -53,6 +53,7 @@ export class Account extends DatabaseBase {
   /** The type of this account to better separate it from the others. */
   @DatabaseDecorators.column({ nullable: false, type: "varchar" })
   @IsEnum(AccountType)
+  @ApiProperty({ enum: AccountType, enumName: "AccountTypeEnum", required: true })
   type: AccountType;
 
   /** The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA. */
