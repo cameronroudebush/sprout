@@ -15,9 +15,6 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
     steps:
       - uses: actions/checkout@v6
 
@@ -28,6 +25,7 @@ jobs:
           cache: "npm"
 
       - name: Install Dependencies
+        working-directory: ./backend
         run: npm i
 
       - name: Monitor Coverage
