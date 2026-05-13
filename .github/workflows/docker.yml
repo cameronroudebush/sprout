@@ -38,6 +38,8 @@ jobs:
             backend/**
             dockerfile
             .dockerignore
+          files_ignore: |
+            **/*.spec.ts
 
       - name: Decide whether to proceed
         id: decision
