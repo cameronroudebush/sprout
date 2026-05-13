@@ -71,10 +71,20 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
           const redisUrl = `redis://${auth}${Configuration.server.cache.redis.host}:${Configuration.server.cache.redis.port}`;
           const redisStore = new KeyvRedis(redisUrl);
           // Check if we can connect
-          if (!redisStore.client.isOpen) await redisStore.client.connect();
-          await redisStore.client.ping();
-          logger.log(`L2 cache connected successfully!`);
-          stores.push(redisStore);
+          const timeout = 5000; // 5 seconds
+          const connectionTask = async () => {
+            if (!redisStore.client.isOpen) await redisStore.client.connect();
+            await redisStore.client.ping();
+          };
+          const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error("Redis connection timed out")), timeout));
+          try {
+            // Race the connection against the timer
+            await Promise.race([connectionTask(), timeoutTask]);
+            logger.log(`L2 cache connected successfully!`);
+            stores.push(redisStore);
+          } catch (error) {
+            logger.error(`L2 cache failed to connect: ${error}. Falling back to L1 only.`);
+          }
         }
 
         return {

@@ -192,6 +192,8 @@ class ApiClient {
           return AccountMergeDTO.fromJson(value);
         case 'AccountSubTypeEnum':
           return AccountSubTypeEnumTypeTransformer().decode(value);
+        case 'AccountTypeEnum':
+          return AccountTypeEnumTypeTransformer().decode(value);
         case 'CashFlowSpending':
           return CashFlowSpending.fromJson(value);
         case 'CashFlowStats':

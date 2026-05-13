@@ -15,6 +15,7 @@ import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -196,25 +197,51 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                     children: [
                       AccountLogo(widget.account, height: 36, width: 36),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
                             Text(
                               widget.account.institution.name,
                               style: theme.textTheme.labelMedium,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            Text(
-                              widget.account.name,
-                              style: theme.textTheme.labelLarge,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    widget.account.name,
+                                    style: theme.textTheme.labelLarge,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  icon: const Icon(Icons.edit, size: 14),
+                                  onPressed: () => showSproutEditDialog(
+                                    context: context,
+                                    title: "Edit Account Name",
+                                    label: "Account Name",
+                                    currentValue: widget.account.name,
+                                    icon: Icons.account_balance_wallet,
+                                    onSave: (newName) async {
+                                      final oldName = widget.account.name;
+                                      try {
+                                        setState(() => widget.account.name = newName);
+                                        await ref.read(accountsProvider.notifier).edit(widget.account);
+                                      } catch (e) {
+                                        setState(() => widget.account.name = oldName);
+                                        ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
+                          ])),
                     ],
                   ),
                 ),
@@ -266,6 +293,39 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                   child: Column(
                     spacing: 8,
                     children: [
+                      // Account type
+                      Row(
+                        spacing: 8,
+                        children: [
+                          Expanded(
+                            child: Text("Account Type", style: theme.textTheme.titleSmall),
+                          ),
+                          SizedBox(
+                            width: 240,
+                            child: DropdownButtonFormField<AccountTypeEnum>(
+                              value: account.type,
+                              isDense: true,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              ),
+                              items: AccountTypeEnum.values.map((type) {
+                                return DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type.value.toTitleCase, style: theme.textTheme.bodyMedium),
+                                );
+                              }).toList(),
+                              onChanged: (newType) {
+                                if (newType != null && newType != account.type) {
+                                  setState(() => account.type = newType);
+                                  accountProvider.edit(account);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                       // Account sub type selector
                       Row(
                         spacing: 4,

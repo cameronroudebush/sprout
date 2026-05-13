@@ -12,7 +12,7 @@ import 'package:sprout/config/widgets/tiles/action_tile.dart';
 import 'package:sprout/config/widgets/tiles/switch_tile.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
-import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
@@ -167,9 +167,12 @@ class SettingsPage extends ConsumerWidget {
                   title: "Email Address",
                   subtitle: user?.email ?? "No email set",
                   icon: Icons.email_outlined,
-                  onTap: () => _showEmailDialog(
+                  onTap: () => showSproutEditDialog(
                     context: context,
-                    currentEmail: user?.email,
+                    title: "Update Email",
+                    label: "Email Address",
+                    currentValue: user?.email,
+                    icon: Icons.email,
                     onSave: (newEmail) async {
                       try {
                         await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: newEmail));
@@ -224,10 +227,14 @@ class SettingsPage extends ConsumerWidget {
                   title: "SimpleFIN Token",
                   subtitle: userConfig.simpleFinToken?.isNotEmpty == true ? "Token Set" : "Configure Token",
                   icon: Icons.api,
-                  onTap: () => _showTokenDialog(
+                  onTap: () => showSproutEditDialog(
                     context: context,
-                    provider: "SimpleFIN",
+                    title: "Update SimpleFIN Token",
+                    label: "SimpleFIN API Token",
                     currentValue: userConfig.simpleFinToken,
+                    icon: Icons.key,
+                    obscureText: true,
+                    description: "Enter your new token below. This will be encrypted and stored securely.",
                     onSave: (val) => _update(ref, (c) => c.simpleFinToken = val),
                   ),
                 ),
@@ -236,10 +243,14 @@ class SettingsPage extends ConsumerWidget {
                     title: "Gemini AI Key",
                     subtitle: userConfig.geminiKey?.isNotEmpty == true ? "Token Set" : "Configure Token",
                     icon: Icons.auto_awesome,
-                    onTap: () => _showTokenDialog(
+                    onTap: () => showSproutEditDialog(
                       context: context,
-                      provider: "Gemini",
+                      title: "Update Gemini Token",
+                      label: "Gemini API Token",
                       currentValue: userConfig.geminiKey,
+                      icon: Icons.key,
+                      obscureText: true,
+                      description: "Enter your new token below. This will be encrypted and stored securely.",
                       onSave: (val) => _update(ref, (c) => c.geminiKey = val),
                     ),
                   ),
@@ -303,151 +314,6 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ],
               ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Shows a branded bottom sheet to update a specific config field.
-  /// The [onSave] callback handles the dynamic update logic.
-  void _showTokenDialog({
-    required BuildContext context,
-    required String provider,
-    required String? currentValue,
-    required Function(String) onSave,
-  }) {
-    final theme = Theme.of(context);
-    final controller = TextEditingController(text: currentValue);
-
-    final isChanged = ValueNotifier<bool>(false);
-    controller.addListener(() {
-      isChanged.value = controller.text.trim() != (currentValue ?? "");
-    });
-
-    showSproutPopup(
-      context: context,
-      builder: (context) => SproutBaseDialogWidget(
-        "Update $provider Token",
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 24,
-          children: [
-            Text(
-              "Enter your new token below. This will be encrypted and stored securely.",
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            // Input for the API token
-            TextField(
-              controller: controller,
-              autofocus: true,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "$provider API Token",
-                prefixIcon: const Icon(Icons.key),
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(icon: const Icon(Icons.clear), onPressed: () => controller.clear()),
-              ),
-            ),
-            // Bottom row of buttons
-            Row(
-              spacing: 12,
-              children: [
-                Expanded(
-                  child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-                ),
-                Expanded(
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: isChanged,
-                    builder: (context, changed, child) {
-                      return FilledButton(
-                        onPressed: (changed && controller.text.trim().isNotEmpty)
-                            ? () {
-                                onSave(controller.text.trim());
-                                Navigator.pop(context);
-                              }
-                            : null,
-                        style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.primary),
-                        child: const Text(
-                          "Save",
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Shows a dialog specifically for updating the email address
-  void _showEmailDialog({
-    required BuildContext context,
-    required String? currentEmail,
-    required Function(String) onSave,
-  }) {
-    final theme = Theme.of(context);
-    final controller = TextEditingController(text: currentEmail);
-    final isChanged = ValueNotifier<bool>(false);
-
-    controller.addListener(() {
-      final text = controller.text.trim();
-      // Basic validation: must be different and contain an @
-      isChanged.value = text != (currentEmail ?? "") && text.contains('@');
-    });
-
-    showSproutPopup(
-      context: context,
-      builder: (context) => SproutBaseDialogWidget(
-        "Update Email",
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 24,
-          children: [
-            Text(
-              "Update your contact email address for additional app features.",
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: "Email Address",
-                prefixIcon: Icon(Icons.email),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            Row(
-              spacing: 12,
-              children: [
-                Expanded(
-                  child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-                ),
-                Expanded(
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: isChanged,
-                    builder: (context, changed, _) {
-                      return FilledButton(
-                        onPressed: changed
-                            ? () {
-                                onSave(controller.text.trim());
-                                Navigator.pop(context);
-                              }
-                            : null,
-                        child: const Text("Update"),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

@@ -13,17 +13,25 @@ part of openapi.api;
 class MarketIndexDto {
   /// Returns a new [MarketIndexDto] instance.
   MarketIndexDto({
-    required this.price,
-    required this.symbol,
-    required this.name,
     this.previousClose,
     this.dayLow,
     this.dayHigh,
     this.marketState,
+    required this.price,
+    required this.symbol,
+    required this.name,
     required this.change,
     required this.changePercent,
     required this.lastUpdated,
   });
+
+  num? previousClose;
+
+  num? dayLow;
+
+  num? dayHigh;
+
+  MarketIndexDtoMarketStateEnum? marketState;
 
   /// The numeric value converted to the user's preferred currency format. This overrides the original price property.
   num price;
@@ -31,32 +39,6 @@ class MarketIndexDto {
   String symbol;
 
   String name;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  num? previousClose;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  num? dayLow;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  num? dayHigh;
-
-  MarketIndexDtoMarketStateEnum? marketState;
 
   num change;
 
@@ -66,13 +48,13 @@ class MarketIndexDto {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is MarketIndexDto &&
-    other.price == price &&
-    other.symbol == symbol &&
-    other.name == name &&
     other.previousClose == previousClose &&
     other.dayLow == dayLow &&
     other.dayHigh == dayHigh &&
     other.marketState == marketState &&
+    other.price == price &&
+    other.symbol == symbol &&
+    other.name == name &&
     other.change == change &&
     other.changePercent == changePercent &&
     other.lastUpdated == lastUpdated;
@@ -80,25 +62,22 @@ class MarketIndexDto {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (price.hashCode) +
-    (symbol.hashCode) +
-    (name.hashCode) +
     (previousClose == null ? 0 : previousClose!.hashCode) +
     (dayLow == null ? 0 : dayLow!.hashCode) +
     (dayHigh == null ? 0 : dayHigh!.hashCode) +
     (marketState == null ? 0 : marketState!.hashCode) +
+    (price.hashCode) +
+    (symbol.hashCode) +
+    (name.hashCode) +
     (change.hashCode) +
     (changePercent.hashCode) +
     (lastUpdated.hashCode);
 
   @override
-  String toString() => 'MarketIndexDto[price=$price, symbol=$symbol, name=$name, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
+  String toString() => 'MarketIndexDto[previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'price'] = this.price;
-      json[r'symbol'] = this.symbol;
-      json[r'name'] = this.name;
     if (this.previousClose != null) {
       json[r'previousClose'] = this.previousClose;
     } else {
@@ -119,6 +98,9 @@ class MarketIndexDto {
     } else {
       json[r'marketState'] = null;
     }
+      json[r'price'] = this.price;
+      json[r'symbol'] = this.symbol;
+      json[r'name'] = this.name;
       json[r'change'] = this.change;
       json[r'changePercent'] = this.changePercent;
       json[r'lastUpdated'] = this.lastUpdated;
@@ -152,13 +134,19 @@ class MarketIndexDto {
       }());
 
       return MarketIndexDto(
+        previousClose: json[r'previousClose'] == null
+            ? null
+            : num.parse('${json[r'previousClose']}'),
+        dayLow: json[r'dayLow'] == null
+            ? null
+            : num.parse('${json[r'dayLow']}'),
+        dayHigh: json[r'dayHigh'] == null
+            ? null
+            : num.parse('${json[r'dayHigh']}'),
+        marketState: MarketIndexDtoMarketStateEnum.fromJson(json[r'marketState']),
         price: num.parse('${json[r'price']}'),
         symbol: mapValueOfType<String>(json, r'symbol')!,
         name: mapValueOfType<String>(json, r'name')!,
-        previousClose: num.parse('${json[r'previousClose']}'),
-        dayLow: num.parse('${json[r'dayLow']}'),
-        dayHigh: num.parse('${json[r'dayHigh']}'),
-        marketState: MarketIndexDtoMarketStateEnum.fromJson(json[r'marketState']),
         change: num.parse('${json[r'change']}'),
         changePercent: num.parse('${json[r'changePercent']}'),
         lastUpdated: mapValueOfType<String>(json, r'lastUpdated')!,

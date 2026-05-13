@@ -186,7 +186,7 @@ final class FilteredTransactionsProvider extends $FunctionalProvider<
 }
 
 String _$filteredTransactionsHash() =>
-    r'1b389fa7e921f449c5484b1d952850a3301315f5';
+    r'e2469d7faa4451667db1ffea70641526aabaf42d';
 
 /// Provider to track transaction subscriptions
 

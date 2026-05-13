@@ -124,7 +124,7 @@ final class HistoricalAccountDataProvider extends $AsyncNotifierProvider<
 }
 
 String _$historicalAccountDataHash() =>
-    r'2719f7fffdfe8d1f84b0fd86cade8af4b36c4c2a';
+    r'608305698bd1c6901097aeecec2ebe13b0cc4dec';
 
 /// Defines the historical account data
 
@@ -190,7 +190,7 @@ final class AccountTimelineProvider extends $AsyncNotifierProvider<
   }
 }
 
-String _$accountTimelineHash() => r'23ecb35de97cb151f2f8f85c1f73a9226b27b141';
+String _$accountTimelineHash() => r'26713c089facecf1c2789c21b45c04b87200ceb9';
 
 /// Defines the overall account timeline
 

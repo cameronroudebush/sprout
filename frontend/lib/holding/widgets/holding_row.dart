@@ -27,8 +27,9 @@ class HoldingRow extends ConsumerWidget {
 
     final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
     final frame = holdingHistoryAsync.value?.getValueByFrame(userChartRange);
-    final livePriceAsync = ref.watch(livePriceProvider(holding.symbol));
-    final liveData = livePriceAsync.value;
+    ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
+    final livePrices = ref.watch(batchedLivePricesProvider);
+    final liveData = livePrices[holding.symbol];
 
     final livePrice = liveData?.price ?? (holding.marketValue / holding.shares);
     final liveMarketValue = livePrice * holding.shares;

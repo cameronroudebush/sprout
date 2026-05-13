@@ -1,5 +1,5 @@
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
-import { ApiHideProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from "class-validator";
 
@@ -25,18 +25,22 @@ export class MarketIndexDto {
 
   @IsNumber()
   @IsOptional()
+  @ApiProperty({ required: false, nullable: true })
   previousClose?: number;
 
   @IsNumber()
   @IsOptional()
+  @ApiProperty({ required: false, nullable: true })
   dayLow?: number;
 
   @IsNumber()
   @IsOptional()
+  @ApiProperty({ required: false, nullable: true })
   dayHigh?: number;
 
   @IsEnum(MarketState)
   @IsOptional()
+  @ApiProperty({ required: false, nullable: true })
   marketState?: MarketState;
 
   @IsString()

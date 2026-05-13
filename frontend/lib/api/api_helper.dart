@@ -58,6 +58,9 @@ String parameterToString(dynamic value) {
   if (value is AccountSubTypeEnum) {
     return AccountSubTypeEnumTypeTransformer().encode(value).toString();
   }
+  if (value is AccountTypeEnum) {
+    return AccountTypeEnumTypeTransformer().encode(value).toString();
+  }
   if (value is ChartRangeEnum) {
     return ChartRangeEnumTypeTransformer().encode(value).toString();
   }

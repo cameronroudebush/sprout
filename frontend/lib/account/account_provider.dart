@@ -72,7 +72,7 @@ class Accounts extends _$Accounts {
     final api = await ref.read(accountApiProvider.future);
     final updated = await api.accountControllerEdit(
       a.id,
-      AccountEditRequest(name: a.name, subType: a.subType, interestRate: a.interestRate),
+      AccountEditRequest(name: a.name, type: a.type, subType: a.subType, interestRate: a.interestRate),
     );
 
     if (updated != null && state.value != null) {

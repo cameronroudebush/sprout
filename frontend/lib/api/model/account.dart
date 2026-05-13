@@ -15,18 +15,21 @@ class Account {
   Account({
     required this.id,
     required this.provider,
+    required this.type,
     this.subType,
     this.interestRate,
     required this.balance,
     required this.name,
     required this.institution,
-    required this.type,
     this.extra,
   });
 
   String id;
 
   ProviderTypeEnum provider;
+
+  /// The type of this account to better separate it from the others.
+  AccountTypeEnum type;
 
   /// The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.
   ///
@@ -48,9 +51,6 @@ class Account {
   /// The institution associated to this account
   Institution institution;
 
-  /// The type of this account to better separate it from the others.
-  AccountTypeEnum type;
-
   /// Any extra data that we want to store as JSON
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -64,12 +64,12 @@ class Account {
   bool operator ==(Object other) => identical(this, other) || other is Account &&
     other.id == id &&
     other.provider == provider &&
+    other.type == type &&
     other.subType == subType &&
     other.interestRate == interestRate &&
     other.balance == balance &&
     other.name == name &&
     other.institution == institution &&
-    other.type == type &&
     other.extra == extra;
 
   @override
@@ -77,21 +77,22 @@ class Account {
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (provider.hashCode) +
+    (type.hashCode) +
     (subType == null ? 0 : subType!.hashCode) +
     (interestRate == null ? 0 : interestRate!.hashCode) +
     (balance.hashCode) +
     (name.hashCode) +
     (institution.hashCode) +
-    (type.hashCode) +
     (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, provider=$provider, subType=$subType, interestRate=$interestRate, balance=$balance, name=$name, institution=$institution, type=$type, extra=$extra]';
+  String toString() => 'Account[id=$id, provider=$provider, type=$type, subType=$subType, interestRate=$interestRate, balance=$balance, name=$name, institution=$institution, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
       json[r'provider'] = this.provider;
+      json[r'type'] = this.type;
     if (this.subType != null) {
       json[r'subType'] = this.subType;
     } else {
@@ -105,7 +106,6 @@ class Account {
       json[r'balance'] = this.balance;
       json[r'name'] = this.name;
       json[r'institution'] = this.institution;
-      json[r'type'] = this.type;
     if (this.extra != null) {
       json[r'extra'] = this.extra;
     } else {
@@ -129,20 +129,21 @@ class Account {
         assert(json[r'id'] != null, 'Required key "Account[id]" has a null value in JSON.');
         assert(json.containsKey(r'provider'), 'Required key "Account[provider]" is missing from JSON.');
         assert(json[r'provider'] != null, 'Required key "Account[provider]" has a null value in JSON.');
+        assert(json.containsKey(r'type'), 'Required key "Account[type]" is missing from JSON.');
+        assert(json[r'type'] != null, 'Required key "Account[type]" has a null value in JSON.');
         assert(json.containsKey(r'balance'), 'Required key "Account[balance]" is missing from JSON.');
         assert(json[r'balance'] != null, 'Required key "Account[balance]" has a null value in JSON.');
         assert(json.containsKey(r'name'), 'Required key "Account[name]" is missing from JSON.');
         assert(json[r'name'] != null, 'Required key "Account[name]" has a null value in JSON.');
         assert(json.containsKey(r'institution'), 'Required key "Account[institution]" is missing from JSON.');
         assert(json[r'institution'] != null, 'Required key "Account[institution]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "Account[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "Account[type]" has a null value in JSON.');
         return true;
       }());
 
       return Account(
         id: mapValueOfType<String>(json, r'id')!,
         provider: ProviderTypeEnum.fromJson(json[r'provider'])!,
+        type: AccountTypeEnum.fromJson(json[r'type'])!,
         subType: AccountSubTypeEnum.fromJson(json[r'subType']),
         interestRate: json[r'interestRate'] == null
             ? null
@@ -150,7 +151,6 @@ class Account {
         balance: num.parse('${json[r'balance']}'),
         name: mapValueOfType<String>(json, r'name')!,
         institution: Institution.fromJson(json[r'institution'])!,
-        type: AccountTypeEnum.fromJson(json[r'type'])!,
         extra: mapValueOfType<Object>(json, r'extra'),
       );
     }
@@ -201,99 +201,10 @@ class Account {
   static const requiredKeys = <String>{
     'id',
     'provider',
+    'type',
     'balance',
     'name',
     'institution',
-    'type',
   };
 }
-
-/// The type of this account to better separate it from the others.
-class AccountTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const AccountTypeEnum._(this.value);
-
-  /// The underlying value of this enum member.
-  final String value;
-
-  @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static const other = AccountTypeEnum._(r'other');
-  static const depository = AccountTypeEnum._(r'depository');
-  static const credit = AccountTypeEnum._(r'credit');
-  static const asset = AccountTypeEnum._(r'asset');
-  static const loan = AccountTypeEnum._(r'loan');
-  static const investment = AccountTypeEnum._(r'investment');
-  static const crypto = AccountTypeEnum._(r'crypto');
-
-  /// List of all possible values in this [enum][AccountTypeEnum].
-  static const values = <AccountTypeEnum>[
-    other,
-    depository,
-    credit,
-    asset,
-    loan,
-    investment,
-    crypto,
-  ];
-
-  static AccountTypeEnum? fromJson(dynamic value) => AccountTypeEnumTypeTransformer().decode(value);
-
-  static List<AccountTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <AccountTypeEnum>[];
-    if (json is List && json.isNotEmpty) {
-      for (final row in json) {
-        final value = AccountTypeEnum.fromJson(row);
-        if (value != null) {
-          result.add(value);
-        }
-      }
-    }
-    return result.toList(growable: growable);
-  }
-}
-
-/// Transformation class that can [encode] an instance of [AccountTypeEnum] to String,
-/// and [decode] dynamic data back to [AccountTypeEnum].
-class AccountTypeEnumTypeTransformer {
-  factory AccountTypeEnumTypeTransformer() => _instance ??= const AccountTypeEnumTypeTransformer._();
-
-  const AccountTypeEnumTypeTransformer._();
-
-  String encode(AccountTypeEnum data) => data.value;
-
-  /// Decodes a [dynamic value][data] to a AccountTypeEnum.
-  ///
-  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
-  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
-  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
-  ///
-  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
-  /// and users are still using an old app with the old code.
-  AccountTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data != null) {
-      switch (data) {
-        case r'other': return AccountTypeEnum.other;
-        case r'depository': return AccountTypeEnum.depository;
-        case r'credit': return AccountTypeEnum.credit;
-        case r'asset': return AccountTypeEnum.asset;
-        case r'loan': return AccountTypeEnum.loan;
-        case r'investment': return AccountTypeEnum.investment;
-        case r'crypto': return AccountTypeEnum.crypto;
-        default:
-          if (!allowNull) {
-            throw ArgumentError('Unknown enum value to decode: $data');
-          }
-      }
-    }
-    return null;
-  }
-
-  /// Singleton [AccountTypeEnumTypeTransformer] instance.
-  static AccountTypeEnumTypeTransformer? _instance;
-}
-
 

@@ -54,4 +54,4 @@ final class CurrencyFormatterProvider extends $FunctionalProvider<
   }
 }
 
-String _$currencyFormatterHash() => r'9dfb2cb4639eb62ede756310be7f9f92a98155e1';
+String _$currencyFormatterHash() => r'450a0374e5ab356cc5d0d79548277cb204fd80c6';

@@ -1,5 +1,8 @@
 /** Custom types to help better improve developer type implementations */
 export namespace CustomTypes {
+  /*** Applies null and undefined to the given type */
+  export type Nullable<T> = T | null | undefined;
+
   /**
    * This custom type allows you to get properties of an object of a certain type as strings so you can use them
    *  as parameters for various things like functions or even props of other components.
