@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Monitor Coverage
-        uses: shogun70/jest-coverage-report-action@v2.3.1
+        uses: ArtiomTr/jest-coverage-report-action@v2.3.1
         with:
           test-script: npm test -- --coverage
           annotations: failed-tests
