@@ -8,16 +8,11 @@ on:
     branches:
       - master
 
-permissions:
-  contents: write
-  pull-requests: write
-  checks: write
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,8 +21,18 @@ jobs:
           cache: "npm"
           cache-dependency-path: ./backend/package.json
 
-      - name: Monitor Coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2.3.1
+      - name: Install dependencies
+        working-directory: backend
+        run: npm i
+
+      - name: Run Tests & Generate Coverage
+        working-directory: backend
+        run: npm test -- --coverage
+
+      # Upload the generated report directly to Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          working-directory: backend
-          test-script: npm test -- --coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./backend/coverage/
+          fail_ci_if_error: true
