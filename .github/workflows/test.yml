@@ -1,0 +1,42 @@
+name: CI - Tests and Coverage
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "backend/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "backend/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: ./backend/package.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm i
+
+      - name: Run Tests & Generate Coverage
+        working-directory: backend
+        run: npm test -- --coverage
+
+      # Upload the generated report directly to Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./backend/coverage/
+          fail_ci_if_error: true

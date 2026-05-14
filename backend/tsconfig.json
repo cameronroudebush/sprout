@@ -6,6 +6,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "sourceMap": true,
+    "types": ["node", "jest"],
     "paths": {
       "@backend/providers/*": ["./src/providers/*"],
       "@backend/config/*": ["./src/config/*"],
