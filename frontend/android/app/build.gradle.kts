@@ -40,17 +40,23 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = System.getenv("ANDROID_SIGNING_KEY_ALIAS") ?: keystoreProperties.getProperty("keyAlias")
-            keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: keystoreProperties.getProperty("keyPassword")
-            storeFile = file(System.getenv("ANDROID_SIGNING_KEYSTORE_PATH") ?: keystoreProperties.getProperty("storeFile"))
-            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: keystoreProperties.getProperty("storePassword")
+        val keystorePath = System.getenv("ANDROID_SIGNING_KEYSTORE_PATH") 
+            ?: keystoreProperties.getProperty("storeFile")
+        
+        // Check if the file path is provided AND the file actually exists
+        if (keystorePath != null && file(keystorePath).exists()) {
+            create("release") {
+                keyAlias = System.getenv("ANDROID_SIGNING_KEY_ALIAS") ?: keystoreProperties.getProperty("keyAlias")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: keystoreProperties.getProperty("storePassword")
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
     buildFeatures {

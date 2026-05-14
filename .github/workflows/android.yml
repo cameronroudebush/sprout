@@ -95,20 +95,22 @@ jobs:
 
       - name: Build App Bundle (AAB)
         working-directory: ./frontend
+        env:
+          SIGNING_SECRET: ${{ secrets.ANDROID_SIGNING_KEY }}
         run: |
           flutter pub get
-
-          # Decode Keystore
-          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 --decode > android/app/upload-keystore.jks
-
-          # Update so current shell sees the path
-          export ANDROID_SIGNING_KEYSTORE_PATH="$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks"
-
-          # Also write to GITHUB_ENV for any future steps if needed
-          echo "ANDROID_SIGNING_KEYSTORE_PATH=$ANDROID_SIGNING_KEYSTORE_PATH" >> $GITHUB_ENV
-
           chmod +x ../scripts/build_app.sh
-          ../scripts/build_app.sh appbundle
+
+          if [ -n "$SIGNING_SECRET" ]; then
+            echo "Secret found. Decoding keystore..."
+            echo "$SIGNING_SECRET" | base64 --decode > android/app/upload-keystore.jks
+            export ANDROID_SIGNING_KEYSTORE_PATH="$GITHUB_WORKSPACE/frontend/android/app/upload-keystore.jks"
+            echo "ANDROID_SIGNING_KEYSTORE_PATH=$ANDROID_SIGNING_KEYSTORE_PATH" >> $GITHUB_ENV
+            ../scripts/build_app.sh appbundle
+          else
+            echo "Secret NOT found. Building unsigned/debug bundle..."
+            ../scripts/build_app.sh appbundle
+          fi
 
       - name: Build and Rename APK (Tags Only)
         if: startsWith(github.ref, 'refs/tags/')
