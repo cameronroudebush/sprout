@@ -3,6 +3,7 @@
   <br>
   <img href="https://hub.docker.com/r/croudebush/sprout" src="https://img.shields.io/docker/pulls/croudebush/sprout?style=for-the-badge&logo=docker" alt="Docker Pulls">
   <img href="https://github.com/cameronroudebush/sprout/releases/latest" src="https://img.shields.io/github/v/tag/cameronroudebush/sprout?label=latest%20release&style=for-the-badge&logo=github" alt="GitHub Tag">
+  <img href="https://codecov.io/gh/cameronroudebush/sprout" src="https://img.shields.io/codecov/c/github/cameronroudebush/sprout?label=Coverage&style=for-the-badge&logo=codecov" alt="Code Coverage">
 </p>
 
 # What is Sprout?
