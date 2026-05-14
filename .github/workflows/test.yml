@@ -9,7 +9,7 @@ on:
       - master
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   checks: write
 
@@ -29,6 +29,5 @@ jobs:
       - name: Monitor Coverage
         uses: ArtiomTr/jest-coverage-report-action@v2.3.1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: backend
           test-script: npm test -- --coverage
