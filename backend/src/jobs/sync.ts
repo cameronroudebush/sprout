@@ -52,7 +52,7 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
     return await this.update(user, shouldNotify);
   }
 
-  protected async update(user?: User, shouldNotify = true) {
+  protected async update(user?: User, shouldNotify?: boolean) {
     this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
     const results = await this.updateProvider(this.provider, user);
     // Handle notifications separately based on results

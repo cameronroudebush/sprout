@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
@@ -92,20 +93,25 @@ class UserConfigNotifier extends _$UserConfigNotifier {
   Future<void> updateConfig(void Function(UserConfig) callback) async {
     final current = state.value;
     if (current == null) return;
-    callback(current);
-    await _sendUpdate(current);
+    final success = await _sendUpdate(current);
+    if (success) callback(current);
   }
 
   /// Internal helper to push to API and update local state
-  Future<void> _sendUpdate(UserConfig updatedConfig) async {
+  /// Returns true for success
+  Future<bool> _sendUpdate(UserConfig updatedConfig) async {
+    final previousState = state;
     state = const AsyncLoading();
     try {
       final api = await ref.read(userConfigApiProvider.future);
       final result = await api.userConfigControllerEdit(updatedConfig);
       if (result != null) await _updateThemeCache(result.themeStyle);
       state = AsyncData(result);
-    } catch (e, st) {
-      state = AsyncError(e, st);
+      return true;
+    } catch (e) {
+      ref.read(notificationsProvider.notifier).openWithAPIException(e);
+      state = previousState;
+      return false;
     }
   }
 
