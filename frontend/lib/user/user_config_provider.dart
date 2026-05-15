@@ -11,6 +11,7 @@ import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/theme/bliss_light.dart';
 import 'package:sprout/theme/colored_dark.dart';
+import 'package:sprout/user/models/extensions/use_config_extensions.dart';
 
 part 'user_config_provider.g.dart';
 
@@ -89,12 +90,15 @@ class UserConfigNotifier extends _$UserConfigNotifier {
   }
 
   /// Safely update the config using a callback for full type-safety.
-  /// Usage: ref.read(userConfigProvider.notifier).update((c) => c.privateMode = true);
-  Future<void> updateConfig(void Function(UserConfig) callback) async {
+  /// Usage: ref.read(userConfigProvider.notifier).update((c) => c.copyWith(privateMode: true));
+  Future<void> updateConfig(UserConfig Function(UserConfig) callback) async {
     final current = state.value;
     if (current == null) return;
-    final success = await _sendUpdate(current);
-    if (success) callback(current);
+    final updatedClone = callback(current);
+    final success = await _sendUpdate(updatedClone);
+    if (success) {
+      state = AsyncValue.data(updatedClone);
+    }
   }
 
   /// Internal helper to push to API and update local state
@@ -117,6 +121,6 @@ class UserConfigNotifier extends _$UserConfigNotifier {
 
   /// Updates the apps overall chart range to the given value
   Future<void> updateChartRange(ChartRangeEnum range) async {
-    await updateConfig((c) => c.netWorthRange = range);
+    await updateConfig((c) => c.copyWith(netWorthRange: range));
   }
 }
