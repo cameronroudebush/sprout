@@ -16,6 +16,7 @@ import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
+import 'package:sprout/user/models/extensions/use_config_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,7 +34,7 @@ class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key, this.onlyShowSetup = false, this.onConfigChanged, this.onConfigFailure});
 
   /// Central function to handle config updates
-  Future<void> _update(WidgetRef ref, void Function(UserConfig) callback) async {
+  Future<void> _update(WidgetRef ref, UserConfig Function(UserConfig) callback) async {
     try {
       await ref.read(userConfigProvider.notifier).updateConfig(callback);
       onConfigChanged?.call();
@@ -74,7 +75,7 @@ class SettingsPage extends ConsumerWidget {
             alignment: Alignment.centerRight,
             onChanged: (ThemeStyleEnum? newValue) {
               if (newValue != null) {
-                _update(ref, (c) => c.themeStyle = newValue);
+                _update(ref, (c) => c.copyWith(themeStyle: newValue));
               }
             },
             items: ThemeStyleEnum.values
@@ -93,7 +94,7 @@ class SettingsPage extends ConsumerWidget {
             alignment: Alignment.centerRight,
             onChanged: (CurrencyOptionsEnum? newValue) {
               if (newValue != null) {
-                _update(ref, (c) => c.currency = newValue);
+                _update(ref, (c) => c.copyWith(currency: newValue));
               }
             },
             items: CurrencyOptionsEnum.values
@@ -114,7 +115,7 @@ class SettingsPage extends ConsumerWidget {
           subtitle: "Hide balances across the app",
           icon: Icons.visibility_off_outlined,
           value: userConfig.privateMode,
-          onChanged: (val) => _update(ref, (c) => c.privateMode = val),
+          onChanged: (val) => _update(ref, (c) => c.copyWith(privateMode: val)),
         ),
       if (!kIsWeb)
         SwitchSettingTile(
@@ -123,7 +124,7 @@ class SettingsPage extends ConsumerWidget {
           icon: Icons.widgets_outlined,
           value: userConfig.allowWidgets,
           onChanged: (val) async {
-            await _update(ref, (c) => c.allowWidgets = val);
+            await _update(ref, (c) => c.copyWith(allowWidgets: val));
             await ref.read(widgetSyncProvider.notifier).update();
           },
         ),
@@ -198,7 +199,7 @@ class SettingsPage extends ConsumerWidget {
                             ? null
                             : (EmailUpdateFrequencyEnum? newValue) {
                                 if (newValue != null) {
-                                  _update(ref, (c) => c.emailUpdateFrequency = newValue);
+                                  _update(ref, (c) => c.copyWith(emailUpdateFrequency: newValue));
                                 }
                               },
                         items: EmailUpdateFrequencyEnum.values
@@ -235,7 +236,7 @@ class SettingsPage extends ConsumerWidget {
                     icon: Icons.key,
                     obscureText: true,
                     description: "Enter your new token below. This will be encrypted and stored securely.",
-                    onSave: (val) => _update(ref, (c) => c.simpleFinToken = val),
+                    onSave: (val) => _update(ref, (c) => c.copyWith(simpleFinToken: val)),
                   ),
                 ),
                 if (!config.chatKeyProvidedInBackend)
@@ -251,7 +252,7 @@ class SettingsPage extends ConsumerWidget {
                       icon: Icons.key,
                       obscureText: true,
                       description: "Enter your new token below. This will be encrypted and stored securely.",
-                      onSave: (val) => _update(ref, (c) => c.geminiKey = val),
+                      onSave: (val) => _update(ref, (c) => c.copyWith(geminiKey: val)),
                     ),
                   ),
               ],
