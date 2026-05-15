@@ -27,27 +27,29 @@ part 'widget_provider.g.dart';
 @Riverpod(keepAlive: true)
 class WidgetSync extends _$WidgetSync {
   @override
-  void build() {
+  Future<void> build() async {
     if (kIsWeb) return;
 
-    // Listen for when user is authenticated
-    ref.listen(authProvider, (prev, next) {
-      if (next.value == null && prev?.value != null) {
-        _saveToNative(null); // On logout, wipe data
-      } else if (next.value != null) {
-        update();
-      }
-    });
+    final auth = ref.watch(authProvider).value;
 
+    if (auth == null) {
+      await _saveToNative(null);
+      return;
+    }
+
+    _setupListeners();
+    await update();
+  }
+
+  void _setupListeners() {
+    // Listen to data providers and trigger sync
     ref.listen(transactionsProvider, (_, __) => update());
     ref.listen(totalNetWorthProvider, (_, __) => update());
     ref.listen(userConfigProvider, (_, __) => update());
 
-    /// Listen for SSE events to trigger immediate widget updates.
-    ref.listen(sseProvider, (prev, next) async {
-      final data = next.latestData;
-      if (data?.event == SSEDataEventEnum.forceUpdate) {
-        await update();
+    ref.listen(sseProvider, (prev, next) {
+      if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
+        update();
       }
     });
   }
