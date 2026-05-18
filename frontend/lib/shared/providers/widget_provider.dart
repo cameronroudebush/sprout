@@ -38,18 +38,18 @@ class WidgetSync extends _$WidgetSync {
     }
 
     _setupListeners();
-    await update();
+    await updateData();
   }
 
   void _setupListeners() {
     // Listen to data providers and trigger sync
-    ref.listen(transactionsProvider, (_, __) => update());
-    ref.listen(totalNetWorthProvider, (_, __) => update());
-    ref.listen(userConfigProvider, (_, __) => update());
+    ref.listen(transactionsProvider, (_, __) => updateData());
+    ref.listen(totalNetWorthProvider, (_, __) => updateData());
+    ref.listen(userConfigProvider, (_, __) => updateData());
 
     ref.listen(sseProvider, (prev, next) {
       if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
-        update();
+        updateData();
       }
     });
   }
@@ -71,7 +71,7 @@ class WidgetSync extends _$WidgetSync {
   }
 
   /// The primary entry point for updating native widget data.
-  Future<void> update() async {
+  Future<void> updateData() async {
     final data = await _prepareData();
     await _saveToNative(data);
   }
@@ -174,7 +174,7 @@ void callbackDispatcher() {
     final (container, user) = await BackgroundJobProvider.entry("Widget-Provider");
     if (user == null) {
       // No user? Update anyways. Since auth will be null, we'll just write session expired.
-      await container.read(widgetSyncProvider.notifier).update();
+      await container.read(widgetSyncProvider.notifier).updateData();
       return false;
     }
     try {
@@ -184,7 +184,7 @@ void callbackDispatcher() {
       await container.read(transactionsProvider.future);
       await container.read(categoriesProvider.future);
       // Perform the native widget update
-      await container.read(widgetSyncProvider.notifier).update();
+      await container.read(widgetSyncProvider.notifier).updateData();
       LoggerProvider.debug("Background widget update successful");
       return true;
     } catch (e) {

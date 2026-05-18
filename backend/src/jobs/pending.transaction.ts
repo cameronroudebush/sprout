@@ -9,17 +9,12 @@ import { BackgroundJob } from "./base";
 @Injectable()
 export class PendingTransactionJob extends BackgroundJob<any> {
   constructor() {
-    super("transaction:pending", Configuration.transaction.stuckTransactionTime);
-  }
-
-  override async start() {
-    // Always perform an initial pending check on startup
-    return super.start(true);
+    super("transaction:pending", Configuration.transaction.struckTransactions.time, Configuration.transaction.struckTransactions.enabled, true);
   }
 
   protected async update() {
     this.logger.log("Checking for stuck pending transactions...");
-    const oneWeekAgo = subDays(new Date(), Configuration.transaction.stuckTransactionDays);
+    const oneWeekAgo = subDays(new Date(), Configuration.transaction.struckTransactions.days);
     const stuckTransactions = await Transaction.find({
       where: {
         pending: true,

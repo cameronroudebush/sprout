@@ -7,7 +7,7 @@ import { BackgroundJob } from "./base";
 @Injectable()
 export class StatusEmailJob extends BackgroundJob<any> {
   constructor(private readonly emailService: EmailService) {
-    super("email:status", Configuration.server.email.sendTime);
+    super("email:status", Configuration.server.email.sendTime, Configuration.server.email.enabled);
   }
 
   protected async update() {

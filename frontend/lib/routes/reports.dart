@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_sankey.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
-import 'package:sprout/cash-flow/widgets/sankey_by_month.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_trend.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
-import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/charts/combo.dart';
 import 'package:sprout/shared/widgets/layout.dart';
+
+enum DetailChartType { pie, sankey }
 
 /// This page gives the user the ability to track habits over time and generate more useful data reports based on them
 class ReportsPage extends ConsumerStatefulWidget {
@@ -23,6 +23,7 @@ class ReportsPage extends ConsumerStatefulWidget {
 class _ReportsPageState extends ConsumerState<ReportsPage> {
   late DateTime _selectedDate;
   CashFlowView _currentView = CashFlowView.monthly;
+  DetailChartType _currentDetailChart = DetailChartType.sankey;
 
   @override
   void initState() {
@@ -51,120 +52,98 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
     return SingleChildScrollView(
       child: SproutRouteWrapper(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 8,
-        children: [
-          _buildSpendingTrend(),
-          const Divider(indent: 16, endIndent: 16),
-          _buildTimeFrameSection(),
-          _buildDetailedAnalysis(theme),
-        ],
-      )),
-    );
-  }
-
-  /// Shows the last spending trend
-  Widget _buildSpendingTrend() {
-    final spendingAsync = ref.watch(monthlySpendingProvider());
-
-    return spendingAsync.when(
-      loading: () => const SizedBox(height: 300, child: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Center(child: Text("Error loading trend: $err")),
-      data: (spending) {
-        if (spending == null) return const SizedBox.shrink();
-        return SizedBox(
-          height: 250,
-          child: SproutCard(
-            child: ComboChart(
-              spending,
-              title: "Spending Trend",
-              onNodeTap: (node) => NavigationProvider.redirectToCatFilter(ref, node, navigateOnUnknown: true),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// The selector for the detailed reports below
-  Widget _buildTimeFrameSection() {
-    return SproutCard(
-      child: CashFlowSelector(
-        currentView: _currentView,
-        selectedDate: _selectedDate,
-        onViewChanged: (view) {
-          setState(() {
-            _currentView = view;
-            if (view == CashFlowView.monthly) {
-              final now = DateTime.now();
-              _selectedDate = DateTime(now.year, now.month + 1, 0);
-            }
-          });
-        },
-        onMonthIncrementChanged: _changeMonth,
-        onYearChanged: _changeYear,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const CashFlowTrendChart(height: 200),
+            _buildMicroDetailSection(theme),
+          ],
+        ),
       ),
     );
   }
 
-  /// Detailed break-down (Pie Charts and Sankey)
-  Widget _buildDetailedAnalysis(ThemeData theme) {
+  /// Monthly Workspace with Switcher
+  Widget _buildMicroDetailSection(ThemeData theme) {
+    return SproutCard(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CashFlowSelector(
+              currentView: _currentView,
+              selectedDate: _selectedDate,
+              onViewChanged: (view) {
+                setState(() {
+                  _currentView = view;
+                  if (view == CashFlowView.monthly) {
+                    final now = DateTime.now();
+                    _selectedDate = DateTime(now.year, now.month + 1, 0);
+                  }
+                });
+              },
+              onMonthIncrementChanged: _changeMonth,
+              onYearChanged: _changeYear,
+            ),
+
+            const Divider(),
+
+            // The View Switcher
+            SegmentedButton<DetailChartType>(
+              segments: const [
+                ButtonSegment(
+                  value: DetailChartType.sankey,
+                  label: Text('Sankey'),
+                  icon: Icon(Icons.account_tree_outlined),
+                ),
+                ButtonSegment(
+                  value: DetailChartType.pie,
+                  label: Text('Pie'),
+                  icon: Icon(Icons.pie_chart_outline),
+                ),
+              ],
+              selected: {_currentDetailChart},
+              onSelectionChanged: (Set<DetailChartType> newSelection) {
+                setState(() {
+                  _currentDetailChart = newSelection.first;
+                });
+              },
+            ),
+
+            // Render the selected chart type
+            _buildActiveDetailChart(theme),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Renders only the chart the user has selected
+  Widget _buildActiveDetailChart(ThemeData theme) {
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
     final year = _selectedDate.year;
     final dateForCharts = DateTime(year, month ?? 1);
 
-    return Column(
-      spacing: 4,
-      children: [
-        // Pie Charts Row/Column
-        SproutLayoutBuilder((isDesktop, context, constraints) {
-          final charts = [
-            Expanded(
-              flex: isDesktop ? 1 : 0,
-              child: CashFlowPieChart(dateForCharts, view: _currentView, height: 200, showSubheader: true),
-            ),
-            Expanded(
-              flex: isDesktop ? 1 : 0,
-              child: CategoryPieChart(dateForCharts, view: _currentView, height: 200, showSubheader: true),
-            ),
-          ];
-
-          return isDesktop
-              ? Row(crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: charts)
-              : Column(spacing: 4, children: charts.map((e) => e.child).toList());
-        }),
-
-        // Sankey Flow
-        _buildSankeySection(theme, year, month),
-      ],
-    );
-  }
-
-  /// Builds the sankey data for rendering
-  Widget _buildSankeySection(ThemeData theme, int year, int? month) {
-    final sankeyAsync = ref.watch(sankeyDataProvider(year: year, month: month));
-
-    return sankeyAsync.when(
-      loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Center(child: Text("Error: $err")),
-      data: (data) => SproutCard(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 4,
-            children: [
-              Text(
-                "Cash Flow Distribution",
-                style: theme.textTheme.labelLarge?.copyWith(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 600, child: SankeyByMonth(DateTime(year, month ?? 1), view: _currentView)),
-            ],
-          ),
-        ),
-      ),
+    return SproutLayoutBuilder(
+      (isDesktop, context, constraints) {
+        switch (_currentDetailChart) {
+          case DetailChartType.sankey:
+            return CashFlowSankeyChart(
+              height: isDesktop ? 800 : 600,
+              selectedDate: _selectedDate,
+              view: _currentView,
+            );
+          case DetailChartType.pie:
+            return Column(
+              spacing: 0,
+              children: [
+                CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 600 : 300, showSubheader: true),
+                CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 600 : 300, showSubheader: true),
+              ],
+            );
+        }
+      },
     );
   }
 }

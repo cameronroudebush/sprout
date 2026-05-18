@@ -102,6 +102,12 @@ describe("ProviderSync", () => {
         job.updateProvider = jest.fn().mockResolvedValue([{ user, success: true, msg: { title: "Success", body: "Sync complete" } }]);
       });
 
+      it("should fire notification when shouldNotify is set to default", async () => {
+        jest.spyOn(Notification, "findOne").mockResolvedValue(null);
+        await job.updateNow(user);
+        expect(notificationService.notifyUser).toHaveBeenCalledWith(user, "Sync complete", "Success", NotificationType.success);
+      });
+
       it("should fire notification when shouldNotify is true and no recent notification exists", async () => {
         jest.spyOn(Notification, "findOne").mockResolvedValue(null);
         await job.updateNow(user, true);

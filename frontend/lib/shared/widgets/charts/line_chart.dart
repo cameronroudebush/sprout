@@ -78,7 +78,9 @@ class SproutLineChart extends StatelessWidget {
       final preparedData = LineChartDataProcessor.prepareChartData(filteredHistoricalData);
       return SizedBox(
         height: height,
-        child: LineChart(_buildLineChartData(preparedData, chartRange, theme), duration: Duration.zero),
+        child: Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
+            child: LineChart(_buildLineChartData(preparedData, chartRange, theme), duration: Duration.zero)),
       );
     }
   }
@@ -104,38 +106,46 @@ class SproutLineChart extends StatelessWidget {
       gridData: FlGridData(
         show: showGrid,
         drawVerticalLine: drawVerticalGrid,
-        getDrawingHorizontalLine: (_) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
-        getDrawingVerticalLine: (_) => FlLine(color: colorScheme.outline.withAlpha(50), strokeWidth: 0.5),
+        drawHorizontalLine: true,
+        getDrawingHorizontalLine: (_) => FlLine(
+          color: colorScheme.outline.withOpacity(0.15),
+          strokeWidth: 1,
+          dashArray: [4, 4],
+        ),
+        getDrawingVerticalLine: (_) => FlLine(
+          color: colorScheme.outline.withOpacity(0.15),
+          strokeWidth: 1,
+        ),
       ),
       borderData: FlBorderData(
         show: showBorder,
-        border: Border.all(color: colorScheme.outline, width: 1),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.3), width: 1),
       ),
       lineBarsData: [
         // GREEN LINE (Positive)
         LineChartBarData(
           spots: segments.green,
-          color: positiveColor, // Solid Green
+          color: positiveColor,
           barWidth: 3,
           isStrokeCapRound: true,
           dotData: const FlDotData(show: false),
           belowBarData: BarAreaData(
             show: true,
-            color: positiveColor.withValues(alpha: .3),
-            cutOffY: 0, // Stop filling at Y=0
+            color: positiveColor.withOpacity(0.2),
+            cutOffY: 0,
             applyCutOffY: true,
           ),
         ),
         // RED LINE (Negative)
         LineChartBarData(
           spots: segments.red,
-          color: negativeColor, // Solid Red
+          color: negativeColor,
           barWidth: 3,
           isStrokeCapRound: true,
           dotData: const FlDotData(show: false),
           aboveBarData: BarAreaData(
             show: true,
-            color: negativeColor.withValues(alpha: .3),
+            color: negativeColor.withOpacity(0.2),
             cutOffY: 0,
             applyCutOffY: true,
           ),
@@ -147,8 +157,8 @@ class SproutLineChart extends StatelessWidget {
               horizontalLines: [
                 HorizontalLine(
                   y: 0,
-                  color: colorScheme.outline.withValues(alpha: .5),
-                  strokeWidth: 1,
+                  color: colorScheme.outline.withOpacity(0.6),
+                  strokeWidth: 1.5,
                   dashArray: [5, 5],
                 ),
               ],
@@ -259,18 +269,10 @@ class SproutLineChart extends StatelessWidget {
   ) {
     final spots = chartData.spots;
 
-    int numDigits = max(
-      yAxisBounds.maxY.abs().toInt().toString().length,
-      yAxisBounds.minY.abs().toInt().toString().length,
-    );
-    final yReservedSize = yAxisSize ?? 30 + (numDigits - 3).clamp(0, 4) * 10;
+    final double yRange = yAxisBounds.maxY - yAxisBounds.minY;
+    final double yInterval = yRange > 0 ? yRange / 4 : 1.0;
 
-    // Calculate the interval that fl_chart will use for the Y-axis labels.
-    final yAppliedInterval = LineChartDataProcessor.getChartValueInterval(yAxisBounds.minY, yAxisBounds.maxY);
-    // Define a "collision zone" for Y-axis. Any label within 40% of the interval from the min/max will be hidden.
-    final yCollisionThreshold = yAppliedInterval * 0.4;
-    // Calculate the interval for the X-axis labels.
-    final xAppliedInterval = ChartRangeUtility.getChartInterval(selectedChartRange, spots.length);
+    final double xInterval = max(1.0, (spots.length / 5).floorToDouble());
 
     return FlTitlesData(
       show: true,
@@ -278,67 +280,52 @@ class SproutLineChart extends StatelessWidget {
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
-          minIncluded: showMinMax,
-          maxIncluded: showMinMax,
           showTitles: showXAxis,
-          reservedSize: 30,
-          interval: xAppliedInterval,
+          reservedSize: 32,
+          interval: xInterval,
           getTitlesWidget: (value, meta) {
             final int index = value.toInt();
-            final int totalEntries = chartData.sortedEntries.length;
-            final int showEveryNth = (totalEntries / 4).ceil();
-            bool isStart = index == 0;
-            bool isEnd = index == totalEntries - 1;
-            bool isIntermediate = index % showEveryNth == 0;
-            bool isTooCloseToEdge = index < (totalEntries * 0.15) || index > (totalEntries * 0.85);
-
-            if (isStart || isEnd || (isIntermediate && !isTooCloseToEdge)) {
-              final date = chartData.sortedEntries[index].key;
-              String format = ChartRangeUtility.getDateFormat(selectedChartRange);
-
-              return SideTitleWidget(
-                meta: meta,
-                space: 8,
-                fitInside: SideTitleFitInsideData.fromTitleMeta(meta, enabled: true, distanceFromEdge: 0),
-                child: Text(DateFormat(format).format(date), style: theme.textTheme.bodySmall),
-              );
+            if (index < 0 || index >= chartData.sortedEntries.length) {
+              return const SizedBox.shrink();
             }
 
-            // Return an empty box for everything else
-            return const SizedBox.shrink();
+            final date = chartData.sortedEntries[index].key;
+            String format = ChartRangeUtility.getDateFormat(selectedChartRange);
+
+            return SideTitleWidget(
+              meta: meta,
+              space: 8,
+              child: Text(
+                DateFormat(format).format(date),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 10),
+              ),
+            );
           },
         ),
       ),
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
-          minIncluded: showMinMax,
-          maxIncluded: showMinMax,
           showTitles: showYAxis,
-          reservedSize: yReservedSize.toDouble(),
-          interval: yAppliedInterval,
+          reservedSize: 40,
+          interval: yInterval,
           getTitlesWidget: (value, meta) {
-            // If we're not showing min/max, no collision is possible.
-            if (showMinMax) {
-              // If the current label is the min or max, always show it.
-              if (value != meta.min && value != meta.max) {
-                // If it's a regular interval label, check if it's too close to the edges.
-                if ((value - meta.min).abs() < yCollisionThreshold || (meta.max - value).abs() < yCollisionThreshold) {
-                  // If it's in the "collision zone", draw nothing to prevent overlap.
-                  return const Text('');
-                }
-              }
+            if (value == meta.max || value == meta.min) {
+              return const SizedBox.shrink();
             }
 
-            // If we've gotten this far, it's safe to draw the label.
             return SideTitleWidget(
               meta: meta,
+              space: 8,
               child: Text(
                 formatYAxis != null
                     ? formatYAxis!(value)
                     : formatValue != null
                         ? formatValue!(value)
-                        : value.toStringAsFixed(2),
-                style: theme.textTheme.bodySmall,
+                        : value.toStringAsFixed(0),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 10),
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.visible,
               ),
             );
           },
