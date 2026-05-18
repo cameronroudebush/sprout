@@ -74,7 +74,7 @@ describe("DatabaseBackupJob", () => {
         "sprout_backup_3.sqlite",
         "sprout_backup_2.sqlite",
         "sprout_backup_1.sqlite",
-        "not_a_backup.txt" // Should be ignored
+        "not_a_backup.txt", // Should be ignored
       ]);
 
       await (job as any).update();
@@ -99,9 +99,7 @@ describe("DatabaseBackupJob", () => {
 
     it("should not create directory if it already exists and not delete if under count", async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdirSync as jest.Mock).mockReturnValue([
-        "sprout_backup_1.sqlite",
-      ]);
+      (fs.readdirSync as jest.Mock).mockReturnValue(["sprout_backup_1.sqlite"]);
 
       await (job as any).update();
 

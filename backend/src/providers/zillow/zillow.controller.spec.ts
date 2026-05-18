@@ -43,9 +43,13 @@ describe("ZillowProviderController", () => {
 
     // Mocks for DB entities
     ZillowAsset.findOne = jest.fn();
-    ZillowAsset.prototype.insert = jest.fn().mockImplementation(function (this: ZillowAsset) { return Promise.resolve(this); });
+    ZillowAsset.prototype.insert = jest.fn().mockImplementation(function (this: ZillowAsset) {
+      return Promise.resolve(this);
+    });
     Institution.findOne = jest.fn();
-    Account.prototype.insert = jest.fn().mockImplementation(function (this: Account) { return Promise.resolve(this); });
+    Account.prototype.insert = jest.fn().mockImplementation(function (this: Account) {
+      return Promise.resolve(this);
+    });
     AccountHistory.insertForNewAccount = jest.fn();
   });
 

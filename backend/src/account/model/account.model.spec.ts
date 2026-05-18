@@ -29,17 +29,7 @@ describe("Account Model", () => {
 
   describe("Constructor", () => {
     it("should instantiate an Account object correctly", () => {
-      const account = new Account(
-        "Checking",
-        ProviderType.plaid,
-        mockUser,
-        mockInstitution,
-        1000,
-        900,
-        AccountType.depository,
-        "USD",
-        AccountSubType.checking
-      );
+      const account = new Account("Checking", ProviderType.plaid, mockUser, mockInstitution, 1000, 900, AccountType.depository, "USD", AccountSubType.checking);
 
       expect(account.name).toBe("Checking");
       expect(account.provider).toBe(ProviderType.plaid);
@@ -131,9 +121,7 @@ describe("Account Model", () => {
 
   describe("convertListToTargetCurrency", () => {
     it("should call CurrencyHelper.convertList with correct parameters", () => {
-      const accounts = [
-        new Account("Checking", ProviderType.plaid, mockUser, mockInstitution, 1000, 900, AccountType.depository, "USD"),
-      ];
+      const accounts = [new Account("Checking", ProviderType.plaid, mockUser, mockInstitution, 1000, 900, AccountType.depository, "USD")];
 
       const result = Account.convertListToTargetCurrency(accounts, mockUser);
 

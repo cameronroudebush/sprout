@@ -84,9 +84,7 @@ describe("SimpleFinProviderController", () => {
       const existingAccounts: Account[] = [];
       (Account.find as jest.Mock).mockResolvedValue(existingAccounts);
 
-      const mockProviderAccounts = [
-        { account: { id: "acc-2", institution: { name: "Bank B", id: "old-uuid" } } },
-      ];
+      const mockProviderAccounts = [{ account: { id: "acc-2", institution: { name: "Bank B", id: "old-uuid" } } }];
       (simpleFinProviderService.get as jest.Mock).mockResolvedValue(mockProviderAccounts);
 
       (Institution.findOne as jest.Mock).mockResolvedValue(null);
@@ -109,8 +107,8 @@ describe("SimpleFinProviderController", () => {
         {
           account: { id: "acc-1", name: "Checking", institution: { name: "Bank A" }, insert: insertMock },
           transactions: [{ id: "t1" }],
-          holdings: [{ id: "h1" }]
-        }
+          holdings: [{ id: "h1" }],
+        },
       ];
 
       (simpleFinProviderService.get as jest.Mock).mockResolvedValue(mockProviderAccounts);
@@ -139,8 +137,8 @@ describe("SimpleFinProviderController", () => {
         {
           account: { name: "Checking", institution: { name: "Bank A" }, insert: insertMock },
           transactions: [],
-          holdings: []
-        }
+          holdings: [],
+        },
       ];
 
       (simpleFinProviderService.get as jest.Mock).mockResolvedValue(mockProviderAccounts);
@@ -154,9 +152,7 @@ describe("SimpleFinProviderController", () => {
 
     it("should skip accounts that don't match provider data", async () => {
       const accountsToLink = [{ name: "Unknown" }] as unknown as Account[];
-      const mockProviderAccounts = [
-        { account: { name: "Checking" }, transactions: [], holdings: [] }
-      ];
+      const mockProviderAccounts = [{ account: { name: "Checking" }, transactions: [], holdings: [] }];
 
       (simpleFinProviderService.get as jest.Mock).mockResolvedValue(mockProviderAccounts);
 

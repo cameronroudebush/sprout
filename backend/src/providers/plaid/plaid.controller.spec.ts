@@ -70,7 +70,10 @@ describe("PlaidProviderController", () => {
   describe("exchangeAndLink", () => {
     it("should exchange token, create accounts, and trigger SSE", async () => {
       const mockAccounts = [{ id: "acc-1" }];
-      const mockDto = { metadata: { institution: null as any, accounts: [], link_session_id: "", status: null as any }, public_token: "pub_tok" } as unknown as PlaidLinkDTO;
+      const mockDto = {
+        metadata: { institution: null as any, accounts: [], link_session_id: "", status: null as any },
+        public_token: "pub_tok",
+      } as unknown as PlaidLinkDTO;
 
       (plaidProviderService.exchangeAndCreateAccounts as jest.Mock).mockResolvedValue(mockAccounts);
 
@@ -82,7 +85,10 @@ describe("PlaidProviderController", () => {
     });
 
     it("should throw InternalServerErrorException on error", async () => {
-      const mockDto = { metadata: { institution: null as any, accounts: [], link_session_id: "", status: null as any }, public_token: "pub_tok" } as unknown as PlaidLinkDTO;
+      const mockDto = {
+        metadata: { institution: null as any, accounts: [], link_session_id: "", status: null as any },
+        public_token: "pub_tok",
+      } as unknown as PlaidLinkDTO;
       (plaidProviderService.exchangeAndCreateAccounts as jest.Mock).mockRejectedValue(new Error("Provider Error"));
 
       await expect(controller.exchangeAndLink(mockUser, mockDto)).rejects.toThrow(InternalServerErrorException);

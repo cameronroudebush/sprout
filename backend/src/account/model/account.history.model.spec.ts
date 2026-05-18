@@ -20,7 +20,7 @@ describe("AccountHistory Model", () => {
     } as unknown as User;
 
     // Spy on DatabaseBase insert to mock it properly
-    jest.spyOn(AccountHistory.prototype, "insert").mockImplementation(async function(this: AccountHistory) {
+    jest.spyOn(AccountHistory.prototype, "insert").mockImplementation(async function (this: AccountHistory) {
       return this;
     });
 
@@ -75,9 +75,7 @@ describe("AccountHistory Model", () => {
 
   describe("convertListToTargetCurrency", () => {
     it("should call CurrencyHelper.convertList with correct parameters", () => {
-      const histories = [
-        new AccountHistory(mockAccount, new Date(), 500, 450),
-      ];
+      const histories = [new AccountHistory(mockAccount, new Date(), 500, 450)];
 
       const result = AccountHistory.convertListToTargetCurrency(histories, mockUser);
 

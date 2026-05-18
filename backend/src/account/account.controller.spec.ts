@@ -63,8 +63,8 @@ describe("AccountController", () => {
           provide: DatabaseService,
           useValue: {
             source: {
-              transaction: jest.fn(async (cb) => cb(mockTransactionManager))
-            }
+              transaction: jest.fn(async (cb) => cb(mockTransactionManager)),
+            },
           },
         },
         {
@@ -148,7 +148,7 @@ describe("AccountController", () => {
         name: "New Valid Name",
         type: AccountType.credit,
         subType: AccountSubType.travel,
-        interestRate: 15.5
+        interestRate: 15.5,
       } as any;
 
       await controller.edit("acc-1", mockUser, updateDto);
@@ -262,9 +262,7 @@ describe("AccountController", () => {
   describe("mergeAccounts", () => {
     it("should successfully merge two accounts and trigger SSE", async () => {
       // Mock finding both accounts
-      (Account.findOne as jest.Mock)
-        .mockResolvedValueOnce(mockAccount)
-        .mockResolvedValueOnce(mockSourceAccount);
+      (Account.findOne as jest.Mock).mockResolvedValueOnce(mockAccount).mockResolvedValueOnce(mockSourceAccount);
 
       const request = { sourceId: "acc-2" } as any;
 
@@ -279,9 +277,7 @@ describe("AccountController", () => {
 
     it("should update target subType if null and source has one", async () => {
       const targetWithoutSubType = { ...mockAccount, subType: null } as unknown as Account;
-      (Account.findOne as jest.Mock)
-        .mockResolvedValueOnce(targetWithoutSubType)
-        .mockResolvedValueOnce(mockSourceAccount);
+      (Account.findOne as jest.Mock).mockResolvedValueOnce(targetWithoutSubType).mockResolvedValueOnce(mockSourceAccount);
 
       const request = { sourceId: "acc-2" } as any;
 
@@ -300,9 +296,7 @@ describe("AccountController", () => {
 
     it("should throw NotFoundException if one or both accounts do not exist", async () => {
       // Target exists, source does not
-      (Account.findOne as jest.Mock)
-        .mockResolvedValueOnce(mockAccount)
-        .mockResolvedValueOnce(null);
+      (Account.findOne as jest.Mock).mockResolvedValueOnce(mockAccount).mockResolvedValueOnce(null);
 
       const request = { sourceId: "acc-2" } as any;
 
