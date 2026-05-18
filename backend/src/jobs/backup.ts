@@ -9,14 +9,7 @@ import { BackgroundJob } from "./base";
 @Injectable()
 export class DatabaseBackupJob extends BackgroundJob<any> {
   constructor() {
-    super("db:backup", Configuration.database.backup.time);
-  }
-
-  override async start() {
-    // Only run if enabled
-    if (!Configuration.database.backup.enabled) return this;
-    // Always perform an initial backup on app start
-    return super.start(true);
+    super("db:backup", Configuration.database.backup.time, Configuration.database.backup.enabled, true);
   }
 
   protected async update() {

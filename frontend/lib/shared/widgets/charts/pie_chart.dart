@@ -170,7 +170,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
             : entry.key,
 
         radius: radius,
-        titleStyle: TextStyle(fontSize: titleFontSize, color: Colors.white),
+        titleStyle: TextStyle(fontSize: titleFontSize, color: Colors.white, fontWeight: FontWeight.bold),
       );
     }).toList();
   }

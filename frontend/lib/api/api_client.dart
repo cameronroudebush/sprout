@@ -198,6 +198,8 @@ class ApiClient {
           return CashFlowSpending.fromJson(value);
         case 'CashFlowStats':
           return CashFlowStats.fromJson(value);
+        case 'CashFlowTrendStats':
+          return CashFlowTrendStats.fromJson(value);
         case 'Category':
           return Category.fromJson(value);
         case 'CategoryStats':

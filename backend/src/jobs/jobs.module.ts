@@ -11,7 +11,7 @@ import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
 import { TransactionModule } from "@backend/transaction/transaction.module";
-import { Module, OnModuleInit } from "@nestjs/common";
+import { Module, OnApplicationBootstrap } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 
 @Module({
@@ -20,10 +20,11 @@ import { ModuleRef } from "@nestjs/core";
   providers: [ExchangeRateJob, DatabaseBackupJob, PendingTransactionJob, UserDeviceJob, StatusEmailJob, ProviderSyncOrchestratorJob],
   exports: [ProviderSyncOrchestratorJob],
 })
-export class JobsModule implements OnModuleInit {
+export class JobsModule implements OnApplicationBootstrap {
   constructor(private readonly moduleRef: ModuleRef) {}
 
-  async onModuleInit() {
+  /** Starts the background jobs for all providers of the {@link JobsModule} */
+  async onApplicationBootstrap() {
     const providers = Reflect.getMetadata("providers", JobsModule) || [];
     if (!Configuration.isRunningScript)
       await Promise.all(

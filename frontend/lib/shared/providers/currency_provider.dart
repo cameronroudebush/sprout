@@ -33,7 +33,7 @@ class CurrencyFormatter {
     if (compact) {
       return NumberFormat.compactCurrency(
         symbol: NumberFormat.simpleCurrency(name: currencyCode).currencySymbol,
-        decimalDigits: 1,
+        decimalDigits: 2,
       ).format(value);
     }
     final formatter = NumberFormat.simpleCurrency(

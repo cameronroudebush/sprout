@@ -8,16 +8,12 @@ import { BackgroundJob } from "./base";
 @Injectable()
 export class UserDeviceJob extends BackgroundJob<any> {
   constructor() {
-    super("user:device", Configuration.user.deviceCheckTime);
-  }
-
-  override async start() {
-    return super.start(true); // Always check immediately on startup
+    super("user:device", Configuration.user.deviceCheck.time, Configuration.user.deviceCheck.enabled, true);
   }
 
   protected async update() {
     this.logger.log("Checking for outdated user devices...");
-    const days = Configuration.user.days;
+    const days = Configuration.user.deviceCheck.days;
     // Calculate the cutoff date
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);

@@ -3,9 +3,11 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { format } from "date-fns";
 import { CashFlowService } from "./cash.flow.service";
 import { CashFlowSpending } from "./model/api/cash.flow.spending.dto";
 import { CashFlowStats } from "./model/api/cash.flow.stats.dto";
+import { CashFlowTrendStats } from "./model/api/cash.flow.trend.dto";
 import { SankeyData } from "./model/api/sankey.dto";
 
 /** Dynamically attaches the expected query information for re-use in cash flow endpoints that allows us to better specify what cash flow data we want. */
@@ -73,6 +75,30 @@ export class CashFlowController {
   ) {
     const { totalIncome, totalExpense, transactionCount, largestExpense } = await this.cashFlowService.calculateFlows(user, year, month, day, accountId);
     return new CashFlowStats(totalExpense, totalIncome, transactionCount, largestExpense ?? undefined);
+  }
+
+  @Get("trend")
+  @ApiOperation({
+    summary: "Get cash flow trend by month.",
+    description: "Returns monthly trend breakdown for the requested look-back period.",
+  })
+  @ApiOkResponse({ type: CashFlowTrendStats, isArray: true })
+  async getTrend(@CurrentUser() user: User, @Query("months") monthsQuery?: number) {
+    const monthsToTrace = monthsQuery || 6; // Default to 6 months
+    const trendStats: CashFlowTrendStats[] = [];
+    const currentDate = new Date();
+    for (let i = 0; i < monthsToTrace; i++) {
+      const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const year = targetDate.getFullYear();
+      const month = targetDate.getMonth() + 1;
+      const label = format(targetDate, "MMM ''yy");
+      const { totalIncome, totalExpense } = await this.cashFlowService.calculateFlows(user, year, month);
+      const topValue = totalIncome;
+      const bottomValue = Math.abs(totalExpense);
+      const trendValue = topValue - bottomValue;
+      trendStats.push(new CashFlowTrendStats(label, topValue, bottomValue, trendValue));
+    }
+    return trendStats.reverse();
   }
 
   @Get("spending")

@@ -56,9 +56,10 @@ class NetWorthDisplay extends ConsumerWidget {
               data: (points) => SproutLineChart(
                 data: HistoricalDataPointExtensions.toMap(points ?? []),
                 chartRange: selectedRange,
-                showYAxis: false,
+                showYAxis: true,
                 height: 100,
                 showXAxis: true,
+                showGrid: true,
                 formatValue: (val) => formatter.format(val),
                 formatYAxis: (val) => formatter.format(val, compact: true),
               ),

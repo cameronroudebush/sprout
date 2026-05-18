@@ -81,6 +81,7 @@ class SproutChangeWidget extends ConsumerWidget {
   String _formatPercent(num val, bool showParentheses) {
     if (val == double.infinity) return "(∞%)";
     if (val.isNaN) return "";
+    if (val == -0.0) val = 0;
     final sign = val > 0 ? "+" : "";
     final returnVal = "$sign${val.toStringAsFixed(2)}%";
     if (showParentheses) {

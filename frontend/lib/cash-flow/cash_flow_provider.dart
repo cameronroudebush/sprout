@@ -45,6 +45,13 @@ Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, in
   return await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: accountId);
 }
 
+/// State for cash flow trends
+@Riverpod(keepAlive: true)
+Future<List<CashFlowTrendStats>?> cashFlowTrend(Ref ref, int months) async {
+  final api = await ref.watch(cashFlowApiProvider.future);
+  return await api.cashFlowControllerGetTrend(months);
+}
+
 /// Monthly spending state
 @Riverpod(keepAlive: true)
 class MonthlySpending extends _$MonthlySpending {

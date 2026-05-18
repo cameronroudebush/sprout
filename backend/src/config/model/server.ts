@@ -8,6 +8,18 @@ import { JobsConfig } from "@backend/jobs/model/jobs.config";
 import { NotificationConfig } from "@backend/notification/model/notification.config";
 import { LOG_LEVELS, LogLevel } from "@nestjs/common";
 
+class ExchangeRateConfig {
+  @ConfigurationMetadata.assign({
+    comment: "If we should automatically check for updated exchange rate in the background",
+    restrictedValues: [true, false],
+    externalControlDisabled: true,
+  })
+  enabled = true;
+
+  @ConfigurationMetadata.assign({ comment: "How often we want to check for updated currency exchange rates.", externalControlDisabled: true })
+  time: string = "0 */6 * * *";
+}
+
 /** Options that should be provided to the core of the web server */
 export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "The port to accept backend requests on." })
@@ -19,8 +31,8 @@ export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "The log levels we want to render content for.", restrictedValues: LOG_LEVELS })
   logLevels: LogLevel[] = ["log", "error", "warn"];
 
-  @ConfigurationMetadata.assign({ comment: "How often we want to check for updated currency exchange rates.", externalControlDisabled: true })
-  exchangeRateTime: string = "0 */6 * * *";
+  @ConfigurationMetadata.assign({ comment: "Configuration related to the exchange rates located in Sprout." })
+  exchangeRate = new ExchangeRateConfig();
 
   @ConfigurationMetadata.assign({ comment: "Configuration for rate limiting of the endpoints." })
   rateLimit = new RateLimitConfig();

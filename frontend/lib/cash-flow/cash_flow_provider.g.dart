@@ -274,6 +274,93 @@ final class CashFlowStatsFamily extends $Family
   String toString() => r'cashFlowStatsProvider';
 }
 
+/// State for cash flow trends
+
+@ProviderFor(cashFlowTrend)
+final cashFlowTrendProvider = CashFlowTrendFamily._();
+
+/// State for cash flow trends
+
+final class CashFlowTrendProvider extends $FunctionalProvider<
+        AsyncValue<List<CashFlowTrendStats>?>,
+        List<CashFlowTrendStats>?,
+        FutureOr<List<CashFlowTrendStats>?>>
+    with
+        $FutureModifier<List<CashFlowTrendStats>?>,
+        $FutureProvider<List<CashFlowTrendStats>?> {
+  /// State for cash flow trends
+  CashFlowTrendProvider._(
+      {required CashFlowTrendFamily super.from, required int super.argument})
+      : super(
+          retry: null,
+          name: r'cashFlowTrendProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$cashFlowTrendHash();
+
+  @override
+  String toString() {
+    return r'cashFlowTrendProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<CashFlowTrendStats>?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<CashFlowTrendStats>?> create(Ref ref) {
+    final argument = this.argument as int;
+    return cashFlowTrend(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CashFlowTrendProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$cashFlowTrendHash() => r'f3864bd8a015c9f0fb64386cdaec321fe528a539';
+
+/// State for cash flow trends
+
+final class CashFlowTrendFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<CashFlowTrendStats>?>, int> {
+  CashFlowTrendFamily._()
+      : super(
+          retry: null,
+          name: r'cashFlowTrendProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  /// State for cash flow trends
+
+  CashFlowTrendProvider call(
+    int months,
+  ) =>
+      CashFlowTrendProvider._(argument: months, from: this);
+
+  @override
+  String toString() => r'cashFlowTrendProvider';
+}
+
 /// Monthly spending state
 
 @ProviderFor(MonthlySpending)

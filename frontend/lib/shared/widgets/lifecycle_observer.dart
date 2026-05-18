@@ -34,7 +34,7 @@ class _SproutLifecycleObserverState extends ConsumerState<SproutLifecycleObserve
     switch (state) {
       case AppLifecycleState.resumed:
         // Update widgets on app resume
-        ref.read(widgetSyncProvider.notifier).update();
+        ref.read(widgetSyncProvider.notifier).updateData();
         // Check launch notifications and clear them as needed
         ref.read(firebaseProvider.notifier).checkLaunchNotification();
         await bio.unlockResume(

@@ -125,7 +125,7 @@ class SettingsPage extends ConsumerWidget {
           value: userConfig.allowWidgets,
           onChanged: (val) async {
             await _update(ref, (c) => c.copyWith(allowWidgets: val));
-            await ref.read(widgetSyncProvider.notifier).update();
+            await ref.read(widgetSyncProvider.notifier).updateData();
           },
         ),
       if (!kIsWeb && !onlyShowSetup)

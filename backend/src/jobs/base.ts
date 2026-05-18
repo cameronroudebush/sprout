@@ -13,26 +13,35 @@ export abstract class BackgroundJob<T extends any> {
   /**
    * Creates an instance of a background job
    * @param cronTime The cronjob formatted time of when to run this job
+   * @param enabled Normally controlled by a configuration property, tracks if this job should execute in the background or any other functionality.
+   * @param shouldExecuteImmediately If we should immediately fire the task, else waits for the next cron interval. Only fires if this job is enabled.
    */
   constructor(
     public jobName: string,
     private cronTime: string,
+    private enabled: boolean,
+    private shouldExecuteImmediately = false,
   ) {
     this.logger = new Logger(`job:${jobName}`);
-    if (!Configuration.isRunningScript) {
-      this.logger.log(`Initializing background job of: ${this.cronTime}`);
-      this.interval = CronExpressionParser.parse(this.cronTime, { tz: TimeZone.timeZone });
-    }
+    this.interval = CronExpressionParser.parse(this.cronTime, { tz: TimeZone.timeZone });
   }
 
   /**
    * Starts the background job listeners
-   * @param shouldExecuteImmediately If we should immediately fire the task, else waits for the next cron interval
    */
-  public async start(shouldExecuteImmediately = false) {
-    // Perform update if requested, else schedule the next update
-    if (shouldExecuteImmediately) await this.update();
-    this.scheduleNextUpdate();
+  public async start() {
+    if (Configuration.isRunningScript) return this; // Don't do anything on script runs
+    // If this job is not enabled, don't use it.
+    if (!this.enabled) {
+      this.logger.warn(`Job is disabled. This job will only run as manually requested.`);
+    } else {
+      if (this.shouldExecuteImmediately) {
+        this.logger.log(`Job is requesting to run immediately. Executing...`);
+        await this.update();
+      }
+      this.logger.log(`Initializing background job of: ${this.cronTime}`);
+      this.scheduleNextUpdate();
+    }
     return this;
   }
 

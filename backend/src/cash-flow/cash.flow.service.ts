@@ -178,11 +178,11 @@ export class CashFlowService {
     // Handle Surplus / Deficit Nodes
     if (netSavings > 0.01) {
       const target = "Savings / Unallocated";
-      addOrUpdateLink(incomeHubName, target, netSavings, "You earned more than you spent this month! Good Job!");
+      addOrUpdateLink(incomeHubName, target, netSavings, "You earned more than you spent! Good Job!");
       colors[target] = "#48BB78";
     } else if (netSavings < -0.01) {
       const source = "Deficit";
-      addOrUpdateLink(source, incomeHubName, Math.abs(netSavings), "You spent more than you earned this month!");
+      addOrUpdateLink(source, incomeHubName, Math.abs(netSavings), "You spent more than you earned!");
       colors[source] = "#F56565";
     }
 

@@ -98,12 +98,15 @@ Settings that control how Sprout fetches data from external financial aggregator
 | ----------------------------------- | ------------------------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `providers.lookBackDays`            | `sprout_providers_lookBackDays`            | `14`                           | How many days to look back for transactional data across all providers.                                                                       |
 | **SimpleFIN**                       |                                            |                                |                                                                                                                                               |
+| `providers.simpleFIN.bgSyncEnabled` | `sprout_providers_simpleFIN_bgSyncEnabled` | `true`                         | If this provider is enabled to execute syncs in the background.                                                                               |
 | `providers.simpleFIN.syncFrequency` | `sprout_providers_simpleFIN_syncFrequency` | `0 6 * * 0`                    | How often to update this provider. Default is daily at 6am.                                                                                   |
 | `providers.simpleFIN.rateLimit`     | `sprout_providers_simpleFIN_rateLimit`     | `24`                           | How many API calls we allow per day, per user, for this provider.                                                                             |
 | **Zillow**                          |                                            |                                |                                                                                                                                               |
+| `providers.zillow.bgSyncEnabled`    | `sprout_providers_zillow_bgSyncEnabled`    | `true`                         | If this provider is enabled to execute syncs in the background.                                                                               |
 | `providers.zillow.syncFrequency`    | `sprout_providers_zillow_syncFrequency`    | `0 6 * * 0`                    | How often to update this provider. Default is daily at 6am.                                                                                   |
 | `providers.zillow.rateLimit`        | `sprout_providers_zillow_rateLimit`        | `10`                           | How many API calls we allow per day, per user, for this provider.                                                                             |
 | **Plaid**                           |                                            |                                |                                                                                                                                               |
+| `providers.plaid.bgSyncEnabled`     | `sprout_providers_plaid_bgSyncEnabled`     | `true`                         | If this provider is enabled to execute syncs in the background.                                                                               |
 | `providers.plaid.syncFrequency`     | `sprout_providers_plaid_syncFrequency`     | `0 */6 * * *`                  | How often to update this provider. Default is to run every 6 hours, starting at 6am.                                                          |
 | `providers.plaid.rateLimit`         | `sprout_providers_plaid_rateLimit`         | `100`                          | How many API calls we allow per day, per user, for this provider.                                                                             |
 | `providers.plaid.environment`       | `sprout_providers_plaid_environment`       | `https://production.plaid.com` | The mode that we are searching for data on for our clientId and secret. One of: [`https://sandbox.plaid.com`, `https://production.plaid.com`] |
@@ -112,11 +115,12 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## Transactions
 
-| YAML Key                           | Environment Variable                      | Default       | Description                                                              |
-| ---------------------------------- | ----------------------------------------- | ------------- | ------------------------------------------------------------------------ |
-| `transaction.stuckTransactionTime` | `sprout_transaction_stuckTransactionTime` | `0 */6 * * *` | Cron schedule to check for "stuck" pending transactions.                 |
-| `transaction.stuckTransactionDays` | `sprout_transaction_stuckTransactionDays` | `7`           | Days before a pending transaction is considered "stuck" and removed.     |
-| `transaction.subscriptionCount`    | `sprout_transaction_subscriptionCount`    | `3`           | Number of similar recurring charges required to identify a Subscription. |
+| YAML Key                                 | Environment Variable                            | Default       | Description                                                              |
+| ---------------------------------------- | ----------------------------------------------- | ------------- | ------------------------------------------------------------------------ |
+| `transaction.struckTransactions.enabled` | `sprout_transaction_struckTransactions_enabled` | `true`        | If we should check for stuck transactions.                               |
+| `transaction.struckTransactions.time`    | `sprout_transaction_struckTransactions_time`    | `0 */6 * * *` | Cron schedule to check for "stuck" pending transactions.                 |
+| `transaction.struckTransactions.days`    | `sprout_transaction_stuckTransactions_days`     | `7`           | Days before a pending transaction is considered "stuck" and removed.     |
+| `transaction.subscriptionCount`          | `sprout_transaction_subscriptionCount`          | `3`           | Number of similar recurring charges required to identify a Subscription. |
 
 ## Holdings
 
@@ -149,19 +153,22 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## Email
 
-| YAML Key               | Environment Variable          | Default | Description                                                                                                   |
-| ---------------------- | ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
-| `server.email.enabled` | `sprout_server_email_enabled` | `false` | Set to `true` to enable the mailing service.                                                                  |
-| `server.email.from`    | `sprout_server_email_from`    |         | The email address or name that appears in the "From" field. You must verify your SMTP provider supports this. |
-| `server.email.host`    | `sprout_server_email_host`    |         | The SMTP server host (e.g., `smtp.gmail.com`).                                                                |
-| `server.email.port`    | `sprout_server_email_port`    |         | The port as required by your SMTP server host.                                                                |
-| `server.email.secure`  | `sprout_server_email_secure`  |         | If your SMTP host requires TLS.                                                                               |
-| `server.email.user`    | `sprout_server_email_user`    |         | The username for your SMTP server.                                                                            |
-| `server.email.pass`    | `sprout_server_email_pass`    |         | The password or App Password for your SMTP server.                                                            |
+| YAML Key                | Environment Variable           | Default      | Description                                                                                                   |
+| ----------------------- | ------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `server.email.enabled`  | `sprout_server_email_enabled`  | `false`      | Set to `true` to enable the mailing service.                                                                  |
+| `server.email.sendTime` | `sprout_server_email_sendTime` | `0 12 * * 0` | When to send weekly status updates. Default is 12pm, every sunday.                                            |
+| `server.email.from`     | `sprout_server_email_from`     |              | The email address or name that appears in the "From" field. You must verify your SMTP provider supports this. |
+| `server.email.host`     | `sprout_server_email_host`     |              | The SMTP server host (e.g., `smtp.gmail.com`).                                                                |
+| `server.email.port`     | `sprout_server_email_port`     |              | The port as required by your SMTP server host.                                                                |
+| `server.email.secure`   | `sprout_server_email_secure`   |              | If your SMTP host requires TLS.                                                                               |
+| `server.email.user`     | `sprout_server_email_user`     |              | The username for your SMTP server.                                                                            |
+| `server.email.pass`     | `sprout_server_email_pass`     |              | The password or App Password for your SMTP server.                                                            |
 
 ## User
 
-| YAML Key                      | Environment Variable                 | Default       | Description                                                    |
-| ----------------------------- | ------------------------------------ | ------------- | -------------------------------------------------------------- |
-| `server.user.deviceCheckTime` | `sprout_server_user_deviceCheckTime` | `0 */6 * * *` | When to check for user devices that we haven't seen in awhile. |
-| `server.user.days`            | `sprout_server_user_days`            | `7`           | How many days it takes for a device to be considered stuck.    |
+| YAML Key                          | Environment Variable                     | Default       | Description                                                                        |
+| --------------------------------- | ---------------------------------------- | ------------- | ---------------------------------------------------------------------------------- |
+| **Device Check**                  |                                          |               |                                                                                    |
+| `server.user.deviceCheck.enabled` | `sprout_server_user_deviceCheck_enabled` | `true`        | If we should check for devices that haven't been seen in awhile and clean them up. |
+| `server.user.deviceCheck.time`    | `sprout_server_user_deviceCheck_time`    | `0 */6 * * *` | When to check for user devices that we haven't seen in awhile.                     |
+| `server.user.deviceCheck.days`    | `sprout_server_user_deviceCheck_days`    | `7`           | How many days it takes for a device to be considered stuck.                        |
