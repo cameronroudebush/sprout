@@ -22,16 +22,17 @@ class AccountHoldingsList extends ConsumerWidget {
       ),
       error: (err, _) => Center(child: Text("Error loading holdings: $err")),
       data: (holdings) {
+        final sortedHoldings = holdings..sort((a, b) => b.marketValue.compareTo(a.marketValue));
         if (holdings.isEmpty) return const SizedBox.shrink();
 
         return SproutCard(
           child: ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: holdings.length,
+            itemCount: sortedHoldings.length,
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
-              final holding = holdings[index];
+              final holding = sortedHoldings[index];
               final isSelected = selectedId == holding.id;
 
               return HoldingRow(holding: holding, isSelected: isSelected, onSelect: () => onSelect(holding));

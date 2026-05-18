@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
-import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 
@@ -64,7 +63,7 @@ class CategoryPieChart extends ConsumerWidget {
             showPieTitle: false,
             height: height,
             onSliceTap: (slice, val) {
-              NavigationProvider.redirectToCatFilter(ref, slice);
+              // NavigationProvider.redirectToCatFilter(ref, slice);
             },
           ),
         );

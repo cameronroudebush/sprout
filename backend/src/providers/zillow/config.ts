@@ -3,6 +3,9 @@ import { BaseProviderConfig } from "@backend/providers/base/config";
 
 /** The configuration for the Zillow provider */
 export class ZillowConfig extends BaseProviderConfig {
+  @ConfigurationMetadata.assign({ comment: "If this provider is enabled to execute syncs in the background", restrictedValues: [true, false] })
+  override bgSyncEnabled = true;
+
   @ConfigurationMetadata.assign({ comment: "How often to update this provider. Default is every Sunday at 6am" })
   override syncFrequency: string = "0 6 * * 0";
 

@@ -4,6 +4,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/routes/util/router.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
+import 'package:sprout/shared/widgets/error.dart';
 import 'package:sprout/shared/widgets/lifecycle_observer.dart';
 import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/theme/absolute_dark.dart';
@@ -40,8 +41,14 @@ class SproutApp extends ConsumerWidget {
           data: absoluteDarkTheme,
           child: Directionality(textDirection: TextDirection.ltr, child: SproutLoadingIndicator())),
       error: (error, stackTrace) => MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: absoluteDarkTheme,
-        home: Scaffold(body: Center(child: Text('Failed to initialize: $error'))),
+        home: SproutErrorPage(
+          error: error,
+          onRetry: () {
+            ref.invalidate(userConfigProvider);
+          },
+        ),
       ),
       data: (_) {
         final userConfig = ref.watch(userConfigProvider).value;

@@ -8,7 +8,6 @@ import 'package:sprout/holding/widgets/holding_logo.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// This widget shows a specific holding row from an account
 class HoldingRow extends ConsumerWidget {
@@ -21,12 +20,10 @@ class HoldingRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final config = ref.watch(userConfigProvider).value;
-    final userChartRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
     final formatter = ref.watch(currencyFormatterProvider);
 
     final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
-    final frame = holdingHistoryAsync.value?.getValueByFrame(userChartRange);
+    final frame = holdingHistoryAsync.value?.getValueByFrame(ChartRangeEnum.oneDay);
     ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
     final livePrices = ref.watch(batchedLivePricesProvider);
     final liveData = livePrices[holding.symbol];
@@ -36,7 +33,6 @@ class HoldingRow extends ConsumerWidget {
 
     final dayChange = liveMarketValue - holding.marketValue;
     final dayPercent = holding.marketValue != 0 ? (dayChange / holding.marketValue) * 100 : 0.0;
-    final isLive = liveData?.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
 
     final account = ref.watch(
       accountsProvider.select((asyncState) {
@@ -87,16 +83,29 @@ class HoldingRow extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          isLive ? 'Price' : 'Previous Close',
-                          style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        Row(
+                          spacing: 4,
+                          children: [
+                            Text(
+                              "Intraday Change",
+                              style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                            ),
+                            Tooltip(
+                              message:
+                                  "Calculated using real-time market prices. This reflects the estimated change in your holding's value since the last market value.",
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 14,
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ],
                         ),
                         SproutChangeWidget(
-                            totalChange: dayChange,
-                            percentageChange: dayPercent,
-                            fontSize: theme.textTheme.labelMedium!.fontSize!,
-                            useExtendedPeriodString: false,
-                            period: ChartRangeEnum.oneDay),
+                          totalChange: dayChange,
+                          percentageChange: dayPercent,
+                          fontSize: theme.textTheme.labelMedium!.fontSize!,
+                        ),
                       ],
                     ),
 
@@ -108,13 +117,14 @@ class HoldingRow extends ConsumerWidget {
                         spacing: 4,
                         children: [
                           Text(
-                            "Source: ${account?.provider ?? "Unknown"}",
+                            "Settled Value Change",
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                             ),
                           ),
                           Tooltip(
-                            message: "This data may be out of date",
+                            message:
+                                "This is the most recent change reported by ${account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
                             child: Icon(
                               Icons.info_outline,
                               size: 12,
@@ -125,11 +135,11 @@ class HoldingRow extends ConsumerWidget {
                       ),
                       if (frame != null)
                         SproutChangeWidget(
-                            totalChange: frame.valueChange,
-                            percentageChange: frame.percentChange,
-                            fontSize: theme.textTheme.labelMedium!.fontSize!,
-                            useExtendedPeriodString: false,
-                            period: userChartRange),
+                          totalChange: frame.valueChange,
+                          percentageChange: frame.percentChange,
+                          fontSize: theme.textTheme.labelMedium!.fontSize!,
+                          useExtendedPeriodString: false,
+                        ),
                     ],
                   ),
                 ],

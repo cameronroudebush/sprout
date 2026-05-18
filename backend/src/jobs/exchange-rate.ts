@@ -20,11 +20,7 @@ export class ExchangeRateJob extends BackgroundJob<any> {
     private readonly configService: ConfigurationService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
-    super("exchange-rate", Configuration.server.exchangeRateTime);
-  }
-
-  override async start() {
-    return super.start(true); // Always check immediately on startup
+    super("exchange-rate", Configuration.server.exchangeRate.time, Configuration.server.exchangeRate.enabled, true);
   }
 
   protected async update() {
@@ -100,7 +96,7 @@ export class ExchangeRateJob extends BackgroundJob<any> {
 
       // Update our cache
       ExchangeRateJob.exchangeRates = newRates;
-      const ttl = await this.configService.convertCronToMilliseconds(Configuration.server.exchangeRateTime, 300000);
+      const ttl = await this.configService.convertCronToMilliseconds(Configuration.server.exchangeRate.time, 300000);
       await this.cacheManager.set(ExchangeRateJob.CACHE_KEY, newRates, ttl);
       this.logger.log(`Refresh complete.`);
     } catch (error) {

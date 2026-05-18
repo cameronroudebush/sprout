@@ -5,8 +5,8 @@ export class EmailConfig {
   @ConfigurationMetadata.assign({ comment: "If emails should be supported.", restrictedValues: [true, false] })
   enabled: boolean = false;
 
-  @ConfigurationMetadata.assign({ comment: "When to send weekly status updates. Default is 7am, every sunday." })
-  sendTime: string = "0 7 * * 0";
+  @ConfigurationMetadata.assign({ comment: "When to send weekly status updates. Default is 12pm, every sunday." })
+  sendTime: string = "0 12 * * 0";
 
   @ConfigurationMetadata.assign({ comment: "The email that we will send as." })
   from: string = "noreply@sprout.app.io";

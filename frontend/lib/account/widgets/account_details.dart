@@ -392,75 +392,70 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
                       const Divider(),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        runSpacing: 8,
                         spacing: 8,
                         children: [
                           // Merge
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () async {
-                                showSproutPopup(
-                                  context: context,
-                                  builder: (ctx) => AccountMergeDialog(account),
-                                );
-                              },
-                              style: ThemeHelpers.secondaryButton,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 8,
-                                children: [Icon(Icons.merge), Text("Merge Accounts")],
-                              ),
+                          FilledButton(
+                            onPressed: () async {
+                              showSproutPopup(
+                                context: context,
+                                builder: (ctx) => AccountMergeDialog(account),
+                              );
+                            },
+                            style: ThemeHelpers.secondaryButton,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 8,
+                              children: [Icon(Icons.merge), Text("Merge Accounts")],
                             ),
                           ),
                           if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
-                            Expanded(
-                              child: FilledButton(
-                                onPressed: () async {
-                                  final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
-                                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                                },
-                                style: ThemeHelpers.primaryButton,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  spacing: 8,
-                                  children: [Icon(Icons.house), Text("View on Zillow")],
-                                ),
+                            FilledButton(
+                              onPressed: () async {
+                                final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
+                                await launchUrl(url, mode: LaunchMode.externalApplication);
+                              },
+                              style: ThemeHelpers.primaryButton,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 8,
+                                children: [Icon(Icons.house), Text("View on Zillow")],
                               ),
                             ),
 
                           // Delete
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () {
-                                // Confirmation dialog
-                                showSproutPopup(
-                                  context: context,
-                                  builder: (ctx) => SproutBaseDialogWidget(
-                                    'Delete Account',
-                                    showCloseDialogButton: true,
-                                    closeButtonStyle: ThemeHelpers.primaryButton,
-                                    showSubmitButton: true,
-                                    submitButtonText: "Delete",
-                                    submitButtonStyle: ThemeHelpers.errorButton,
-                                    onSubmitClick: () async {
-                                      Navigator.of(context).pop();
-                                      await accountProvider.delete(account.id);
-                                      await NavigationProvider.redirect("/accounts");
-                                    },
-                                    child: Text(
-                                      "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
-                                      textAlign: TextAlign.center,
-                                    ),
+                          FilledButton(
+                            onPressed: () {
+                              // Confirmation dialog
+                              showSproutPopup(
+                                context: context,
+                                builder: (ctx) => SproutBaseDialogWidget(
+                                  'Delete Account',
+                                  showCloseDialogButton: true,
+                                  closeButtonStyle: ThemeHelpers.primaryButton,
+                                  showSubmitButton: true,
+                                  submitButtonText: "Delete",
+                                  submitButtonStyle: ThemeHelpers.errorButton,
+                                  onSubmitClick: () async {
+                                    Navigator.of(context).pop();
+                                    await accountProvider.delete(account.id);
+                                    await NavigationProvider.redirect("/accounts");
+                                  },
+                                  child: Text(
+                                    "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
+                                    textAlign: TextAlign.center,
                                   ),
-                                );
-                              },
-                              style: ThemeHelpers.errorButton,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 8,
-                                children: [Icon(Icons.delete), Text("Delete")],
-                              ),
+                                ),
+                              );
+                            },
+                            style: ThemeHelpers.errorButton,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 8,
+                              children: [Icon(Icons.delete), Text("Delete")],
                             ),
                           ),
                         ],

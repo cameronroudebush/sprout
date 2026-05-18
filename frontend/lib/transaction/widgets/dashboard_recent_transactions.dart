@@ -66,7 +66,9 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => Padding(
+                padding: EdgeInsetsGeometry.only(top: 12, bottom: 24),
+                child: const Center(child: CircularProgressIndicator())),
             error: (e, _) => const Padding(
                 padding: EdgeInsetsGeometry.only(bottom: 12),
                 child: Center(child: Text("Failed to load transactions"))),

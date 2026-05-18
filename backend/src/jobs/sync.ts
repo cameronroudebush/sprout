@@ -45,13 +45,17 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
     private readonly notificationService: NotificationService,
     private readonly provider: ProviderBase,
   ) {
-    super(`provider:sync:${provider.config.dbType}`, provider.getAppConfiguration().syncFrequency);
+    const config = provider.getAppConfiguration();
+    super(`provider:sync:${provider.config.dbType}`, config.syncFrequency, config.bgSyncEnabled);
   }
 
-  public override async updateNow(user?: User, shouldNotify = true) {
+  public override async updateNow(user?: User, shouldNotify?: boolean) {
     return await this.update(user, shouldNotify);
   }
 
+  /**
+   * @param shouldNotify If we should notify users of their results. Enabled by default.
+   */
   protected async update(user?: User, shouldNotify = true) {
     this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
     const results = await this.updateProvider(this.provider, user);

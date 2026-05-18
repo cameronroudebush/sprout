@@ -226,10 +226,10 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                   height: 125,
                   data: chartData,
                   chartRange: userConfig?.netWorthRange ?? ChartRangeEnum.oneMonth,
-                  showYAxis: false,
+                  showYAxis: true,
                   showXAxis: true,
                   applyPosNegColors: true,
-                  formatValue: (val) => formatter.format(val),
+                  formatValue: (val) => formatter.format(val, compact: true),
                 ),
               ],
             );

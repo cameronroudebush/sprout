@@ -12,7 +12,8 @@ part of 'widget_provider.dart';
 @ProviderFor(WidgetSync)
 final widgetSyncProvider = WidgetSyncProvider._();
 
-final class WidgetSyncProvider extends $NotifierProvider<WidgetSync, void> {
+final class WidgetSyncProvider
+    extends $AsyncNotifierProvider<WidgetSync, void> {
   WidgetSyncProvider._()
       : super(
           from: null,
@@ -30,26 +31,21 @@ final class WidgetSyncProvider extends $NotifierProvider<WidgetSync, void> {
   @$internal
   @override
   WidgetSync create() => WidgetSync();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
 }
 
-String _$widgetSyncHash() => r'b36cd7564c5df34f443dd52834cd7ab31b7d4ff6';
+String _$widgetSyncHash() => r'520731e04402bb7aa02a623e2aaae6908e879ca8';
 
-abstract class _$WidgetSync extends $Notifier<void> {
-  void build();
+abstract class _$WidgetSync extends $AsyncNotifier<void> {
+  FutureOr<void> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<void, void>, void, Object?, Object?>;
+        AnyNotifier<AsyncValue<void>, void>,
+        AsyncValue<void>,
+        Object?,
+        Object?>;
     element.handleCreate(ref, build);
   }
 }
