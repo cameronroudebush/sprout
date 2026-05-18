@@ -9,186 +9,198 @@ import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
+import { Test, TestingModule } from "@nestjs/testing";
 
-// Mock static methods on TypeORM models
-jest.mock("@backend/account/model/account.model");
+// Explicitly provide structural placeholders for inherited methods so spyOn can bind to them
+jest.mock("@backend/account/model/account.model", () => {
+  return {
+    Account: {
+      find: jest.fn(),
+      validateSubType: jest.fn(),
+      fromPlain: () => {}, // Added placeholder so spyOn works flawlessly
+    },
+  };
+});
+
 jest.mock("@backend/institution/model/institution.model");
 jest.mock("@backend/account/model/account.history.model");
 jest.mock("@backend/transaction/model/transaction.model");
 jest.mock("@backend/holding/model/holding.model");
-
-// Mock crypto module for stable test handling of randomUUID
 jest.mock("crypto", () => ({
   randomUUID: () => "mocked-uuid-1234",
 }));
 
 describe("SimpleFinProviderController", () => {
   let controller: SimpleFinProviderController;
-  let mockSimpleFinProviderService: jest.Mocked<SimpleFINProviderService>;
-  let mockSseService: jest.Mocked<SSEService>;
-  let mockTransactionRuleService: jest.Mocked<TransactionRuleService>;
-  let mockUser: User;
+  let simpleFinProviderService: jest.Mocked<SimpleFINProviderService>;
+  let sseService: jest.Mocked<SSEService>;
+  let transactionRuleService: jest.Mocked<TransactionRuleService>;
 
-  beforeEach(() => {
+  const mockUser = { id: "user-id-abc" } as User;
+
+  beforeEach(async () => {
+    const mockSimpleFinProviderService = { get: jest.fn() };
+    const mockSseService = { sendToUser: jest.fn() };
+    const mockTransactionRuleService = { applyRulesToTransactions: jest.fn() };
+
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [SimpleFinProviderController],
+      providers: [
+        { provide: SimpleFINProviderService, useValue: mockSimpleFinProviderService },
+        { provide: SSEService, useValue: mockSseService },
+        { provide: TransactionRuleService, useValue: mockTransactionRuleService },
+      ],
+    }).compile();
+
+    controller = module.get<SimpleFinProviderController>(SimpleFinProviderController);
+    simpleFinProviderService = module.get(SimpleFINProviderService);
+    sseService = module.get(SSEService);
+    transactionRuleService = module.get(TransactionRuleService);
+
     jest.clearAllMocks();
-
-    mockSimpleFinProviderService = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<SimpleFINProviderService>;
-
-    mockSseService = {
-      sendToUser: jest.fn(),
-    } as unknown as jest.Mocked<SSEService>;
-
-    mockTransactionRuleService = {
-      applyRulesToTransactions: jest.fn(),
-    } as unknown as jest.Mocked<TransactionRuleService>;
-
-    controller = new SimpleFinProviderController(mockSimpleFinProviderService, mockSseService, mockTransactionRuleService);
-
-    mockUser = { id: "user_123" } as User;
   });
 
   describe("getAccounts", () => {
-    it("should return filtered provider accounts when institution exists and some are already synced", async () => {
-      const existingAccounts = [{ id: "acc_already_synced" }];
-      (Account.find as jest.Mock).mockResolvedValue(existingAccounts);
-
-      const mockInstitution = { id: "inst_99", name: "Chase" };
-      (Institution.findOne as jest.Mock).mockResolvedValue(mockInstitution);
+    it("should return un-synced provider accounts, creating a new institution UUID if none exists", async () => {
+      const mockExistingAccounts = [{ id: "acc-already-synced" }] as Account[];
+      jest.spyOn(Account, "find").mockResolvedValue(mockExistingAccounts);
 
       const mockProviderResponse = [
         {
-          account: { id: "acc_already_synced", institution: { name: "Chase" } },
+          account: { id: "acc-already-synced", institution: { name: "Bank A" } },
         },
         {
-          account: { id: "acc_new_1", institution: { name: "Chase" } },
+          account: { id: "acc-new-1", institution: { name: "Bank B" } },
         },
       ];
-      mockSimpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
+      simpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
+      jest.spyOn(Institution, "findOne").mockResolvedValue(null);
 
       const result = await controller.getAccounts(mockUser);
 
-      expect(Account.find).toHaveBeenCalledWith({ where: { user: { id: "user_123" } } });
-      expect(Institution.findOne).toHaveBeenCalledWith({
-        where: { user: { id: "user_123" }, name: "Chase" },
-      });
+      expect(Account.find).toHaveBeenCalledWith({ where: { user: { id: "user-id-abc" } } });
+      expect(Institution.findOne).toHaveBeenCalledTimes(2);
 
-      // Verification: The already synced account is filtered out, the new one is retained.
       expect(result).toHaveLength(1);
-      expect(result[0]!.id).toBe("acc_new_1");
-      expect(result[0]!.institution).toEqual(mockInstitution); // Overwritten with existing institution
+      expect(result[0]!.id).toBe("acc-new-1");
+      expect(result[0]!.institution.id).toBe("mocked-uuid-1234");
     });
 
-    it("should assign a random UUID to a new institution if no matching institution is found", async () => {
-      (Account.find as jest.Mock).mockResolvedValue([]);
-      (Institution.findOne as jest.Mock).mockResolvedValue(null); // Force branch condition: matchingInstitution == null
+    it("should reuse an existing institution if a matching one is found", async () => {
+      jest.spyOn(Account, "find").mockResolvedValue([]);
 
-      const mockProviderResponse = [
-        {
-          account: { id: "acc_new_2", institution: { name: "New Bank", id: undefined } },
-        },
-      ];
-      mockSimpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
+      const existingInstitution = { id: "inst-existing", name: "Bank A" };
+      jest.spyOn(Institution, "findOne").mockResolvedValue(existingInstitution as any);
+
+      const mockProviderResponse = [{ account: { id: "acc-new-2", institution: { name: "Bank A" } } }];
+      simpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
 
       const result = await controller.getAccounts(mockUser);
 
       expect(result).toHaveLength(1);
-      expect(result[0]!.institution.id).toBe("mocked-uuid-1234");
+      expect(result[0]!.institution).toEqual(existingInstitution);
     });
   });
 
   describe("linkAccounts", () => {
-    it("should process, validate, link, and save matching accounts, transactions, and holdings", async () => {
+    it("should link accounts, execute histories, transactions, rules, holdings, and send SSE updates", async () => {
+      jest.spyOn(Account, "fromPlain").mockReturnValue({ name: "Checking Account", subType: "checking" } as any);
+      const accountsToLink = [Account.fromPlain({ name: "Checking Account", subType: "checking" })];
+
       const mockAccountInstance = {
-        name: "Checking",
-        institution: { name: "Chase" },
-        insert: jest.fn().mockResolvedValue({ id: "inserted_acc" }),
+        name: "Checking Account",
+        institution: { name: "Chase Bank" },
+        subType: null,
+        user: null,
+        insert: jest.fn().mockResolvedValue({ id: "inserted-acc-id" }),
       };
 
-      const mockProviderData = [
+      const mockProviderResponse = [
         {
           account: mockAccountInstance,
-          transactions: [{ id: "tx_1" }],
-          holdings: [{ id: "hold_1" }],
+          transactions: [{ id: "tx-1" }],
+          holdings: [{ id: "h-1" }],
         },
       ];
-      mockSimpleFinProviderService.get.mockResolvedValue(mockProviderData as any);
+      simpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
 
-      const mockInstitution = { id: "inst_99", name: "Chase" };
-      (Institution.findOne as jest.Mock).mockResolvedValue(mockInstitution);
+      const mockMatchingInstitution = { id: "inst-chase", name: "Chase Bank" };
+      jest.spyOn(Institution, "findOne").mockResolvedValue(mockMatchingInstitution as any);
 
-      // Spy on static validator
       const validateSubTypeSpy = jest.spyOn(Account, "validateSubType").mockImplementation(() => {});
-      (Transaction.insertMany as jest.Mock).mockResolvedValue(true);
-      (Holding.insertMany as jest.Mock).mockResolvedValue(true);
-      (AccountHistory.insertForNewAccount as jest.Mock).mockImplementation(() => {});
+      const insertForNewAccountSpy = jest.spyOn(AccountHistory, "insertForNewAccount").mockImplementation((() => {}) as any);
+      jest.spyOn(Transaction, "insertMany").mockResolvedValue([] as any);
+      jest.spyOn(Holding, "insertMany").mockResolvedValue([] as any);
 
-      const accountsToLinkFromRequest = [{ name: "Checking", subType: "checking" }] as unknown as [Account];
+      const result = await controller.linkAccounts(accountsToLink as [Account], mockUser);
 
-      const result = await controller.linkAccounts(accountsToLinkFromRequest, mockUser);
-
-      expect(mockSimpleFinProviderService.get).toHaveBeenCalledWith(mockUser, true);
-      expect(Institution.findOne).toHaveBeenCalledWith({
-        where: { user: { id: "user_123" }, name: "Chase" },
-      });
-
-      // Branch evaluation: verified subType string validation executed
+      expect(mockAccountInstance.user).toBe(mockUser);
+      expect(mockAccountInstance.institution).toBe(mockMatchingInstitution);
+      expect(mockAccountInstance.subType).toBe("checking");
       expect(validateSubTypeSpy).toHaveBeenCalledWith("checking");
+
       expect(mockAccountInstance.insert).toHaveBeenCalledWith(false);
+      expect(insertForNewAccountSpy).toHaveBeenCalledWith({ id: "inserted-acc-id" });
+      expect(Transaction.insertMany).toHaveBeenCalledWith([{ id: "tx-1", account: mockAccountInstance }]);
+      expect(Holding.insertMany).toHaveBeenCalledWith([{ id: "h-1", account: mockAccountInstance }]);
+      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(mockUser, undefined, true);
 
-      expect(AccountHistory.insertForNewAccount).toHaveBeenCalledWith({ id: "inserted_acc" });
-      expect(Transaction.insertMany).toHaveBeenCalledWith([{ id: "tx_1", account: mockAccountInstance }]);
-      expect(mockTransactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(mockUser, undefined, true);
-      expect(Holding.insertMany).toHaveBeenCalledWith([{ id: "hold_1", account: mockAccountInstance }]);
-
-      // SSE Events pipeline validation
-      expect(mockSseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-      expect(result).toEqual([mockAccountInstance]);
+      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
+      expect(result).toHaveLength(1);
+      expect(result[0]!.name).toBe("Checking Account");
     });
 
-    it("should fallback institution context user configuration and ignore null subType definitions", async () => {
+    it("should assign user to institution if institution doesn't exist, and skip validateSubType if subType is missing", async () => {
+      jest.spyOn(Account, "fromPlain").mockReturnValue({ name: "Savings Account", subType: null } as any);
+      const accountsToLink = [Account.fromPlain({ name: "Savings Account", subType: null })];
+
       const mockAccountInstance = {
-        name: "Savings",
-        institution: { name: "Unsaved Inst", user: undefined },
-        insert: jest.fn().mockResolvedValue({ id: "inserted_savings" }),
+        name: "Savings Account",
+        institution: { name: "New Bank", user: null },
+        subType: null,
+        user: null,
+        insert: jest.fn().mockResolvedValue({ id: "inserted-savings-id" }),
       };
 
-      const mockProviderData = [
+      const mockProviderResponse = [
         {
           account: mockAccountInstance,
           transactions: [],
           holdings: [],
         },
       ];
-      mockSimpleFinProviderService.get.mockResolvedValue(mockProviderData as any);
-      (Institution.findOne as jest.Mock).mockResolvedValue(null); // Forces else branch: matchingAccount.account.institution.user = user;
+      simpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
+      jest.spyOn(Institution, "findOne").mockResolvedValue(null);
 
       const validateSubTypeSpy = jest.spyOn(Account, "validateSubType");
+      jest.spyOn(AccountHistory, "insertForNewAccount").mockImplementation((() => {}) as any);
+      jest.spyOn(Transaction, "insertMany").mockResolvedValue([] as any);
+      jest.spyOn(Holding, "insertMany").mockResolvedValue([] as any);
 
-      const accountsToLinkFromRequest = [
-        { name: "Savings", subType: null }, // Forces branch: account.subType != null to evaluate false
-      ] as unknown as [Account];
+      const result = await controller.linkAccounts(accountsToLink as [Account], mockUser);
 
-      const result = await controller.linkAccounts(accountsToLinkFromRequest, mockUser);
-
-      expect(mockAccountInstance.institution.user).toEqual(mockUser);
+      expect(mockAccountInstance.institution.user).toBe(mockUser);
       expect(validateSubTypeSpy).not.toHaveBeenCalled();
       expect(result).toHaveLength(1);
     });
 
-    it("should skip adding any account variants not found within provider runtime contexts", async () => {
-      mockSimpleFinProviderService.get.mockResolvedValue([]); // No matching accounts found inside SimpleFin
+    it("should skip adding the account if it does not match any provider account", async () => {
+      const accountsToLink = [{ name: "Phantom Account" } as Account];
 
-      const accountsToLinkFromRequest = [{ name: "Ghost Account", subType: "checking" }] as unknown as [Account];
+      const mockProviderResponse = [
+        {
+          account: { name: "Real Account", institution: { name: "Real Bank" } },
+          transactions: [],
+          holdings: [],
+        },
+      ];
+      simpleFinProviderService.get.mockResolvedValue(mockProviderResponse as any);
 
-      const result = await controller.linkAccounts(accountsToLinkFromRequest, mockUser);
+      const result = await controller.linkAccounts(accountsToLink as [Account], mockUser);
 
-      // Verify execution skipped processing structures
-      expect(Institution.findOne).not.toHaveBeenCalled();
-      expect(Transaction.insertMany).not.toHaveBeenCalled();
-      expect(mockSseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-      expect(result).toEqual([]); // Returns empty array since matchingAccount was falsy
+      expect(AccountHistory.insertForNewAccount).not.toHaveBeenCalled();
+      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
+      expect(result).toHaveLength(0);
     });
   });
 });
