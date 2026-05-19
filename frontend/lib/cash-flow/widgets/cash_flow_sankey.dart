@@ -8,7 +8,6 @@ import 'package:sprout/shared/widgets/charts/sankey.dart';
 
 /// This renders an interactive Sankey diagram showing cash flow distributions.
 class CashFlowSankeyChart extends ConsumerWidget {
-  final double height;
   final String title;
   final String? subheader;
   final DateTime selectedDate;
@@ -16,7 +15,6 @@ class CashFlowSankeyChart extends ConsumerWidget {
 
   const CashFlowSankeyChart({
     super.key,
-    required this.height,
     required this.selectedDate,
     required this.view,
     this.title = "Cash Flow Distribution",
@@ -29,6 +27,7 @@ class CashFlowSankeyChart extends ConsumerWidget {
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
     final sankeyAsync = ref.watch(sankeyDataProvider(year: year, month: month));
     final formatter = ref.watch(currencyFormatterProvider);
+    final height = 500;
 
     return sankeyAsync.when(
       loading: () => SproutCard(
@@ -59,7 +58,6 @@ class CashFlowSankeyChart extends ConsumerWidget {
               padding: EdgeInsetsGeometry.all(12),
               child: SproutSankeyChart(
                 data: sankeyData,
-                height: height,
                 formatter: formatter.format,
               )),
         );

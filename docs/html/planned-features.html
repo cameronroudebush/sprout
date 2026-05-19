@@ -1,5 +1,4 @@
 <style>
-  /* Base Roadmap Container (respects page width) */
   .sprout-roadmap {
     --priority-high: #ef5350;
     --priority-med: #ffa726;
@@ -9,27 +8,158 @@
     font-family: "Inter", sans-serif;
     margin: 0 auto;
     max-width: 1000px;
-    padding: 2rem 0;
-  }
-
-  /* Intro Section */
-  .intro {
-    text-align: center;
-    margin-bottom: 2rem;
+    padding: 1rem 0;
   }
 
   .intro h2 {
-    color: var(--light-color);
-    font-size: 1.6rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem 0;
+    margin-top: 0;
+    font-size: 1.5rem;
   }
 
-  .intro .intro-text {
+  .sprout-roadmap h2 {
+    color: var(--light-color);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .sprout-roadmap .intro-text {
+    text-align: center;
     color: var(--md-default-fg-color--light);
+    margin-bottom: 2.5rem;
     font-size: 0.95rem;
-    line-height: 1.6;
+  }
+
+  /* List Container */
+  .sprout-roadmap .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* The Row Card */
+  .sprout-roadmap .feature-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    background-color: var(--md-primary-fg-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .sprout-roadmap .feature-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Left Column: Meta (Title & Badge) */
+  .sprout-roadmap .feature-meta {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sprout-roadmap .feature-meta h3 {
     margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--light-color);
+  }
+
+  /* Right Column: Content */
+  .sprout-roadmap .feature-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .sprout-roadmap .feature-content p {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--md-typeset-color);
+  }
+
+  .sprout-roadmap .feature-content ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--md-default-fg-color--light);
+    font-size: 0.9rem;
+  }
+
+  .sprout-roadmap .feature-content li {
+    margin-bottom: 0.4rem;
+  }
+
+  .sprout-roadmap .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    font-weight: 800;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    width: fit-content;
+  }
+
+  /* High Priority Styling */
+  .sprout-roadmap .p-high {
+    border-left: 4px solid var(--priority-high);
+  }
+  .sprout-roadmap .p-high .priority-badge {
+    color: var(--priority-high);
+    background: rgba(239, 83, 80, 0.15);
+  }
+
+  /* Medium Priority Styling */
+  .sprout-roadmap .p-med {
+    border-left: 4px solid var(--priority-med);
+  }
+  .sprout-roadmap .p-med .priority-badge {
+    color: var(--priority-med);
+    background: rgba(255, 167, 38, 0.15);
+  }
+
+  /* Low Priority Styling */
+  .sprout-roadmap .p-low {
+    border-left: 4px solid var(--priority-low);
+  }
+  .sprout-roadmap .p-low .priority-badge {
+    color: var(--light-color);
+    background: rgba(160, 202, 253, 0.1);
+  }
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 768px) {
+    .sprout-roadmap .feature-row {
+      grid-template-columns: 1fr;
+    }
+
+    .sprout-roadmap .feature-meta {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      border-right: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+    }
+
+    .sprout-roadmap .feature-content {
+      padding: 1rem;
+    }
   }
 
   /* --- Start Integrated Pondering Section --- */
@@ -47,7 +177,6 @@
     margin-right: auto;
   }
 
-  /* Normal Text Label */
   .pondering-container .ponder-label-text {
     font-size: 0.95rem;
     line-height: 1.6;
@@ -55,7 +184,6 @@
     margin: 0 0 1rem 0;
   }
 
-  /* The container for the animated visual */
   .pondering-visual {
     width: 200px; /* More compact */
     height: 140px;
@@ -64,7 +192,6 @@
     overflow: visible;
   }
 
-  /* Swirling Idea Particles (Updated: cleaner dots) */
   .idea-dot {
     position: absolute;
     bottom: 10px;
@@ -74,7 +201,6 @@
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
   }
 
-  /* Dot sizes and colors */
   .idea-dot.p-high {
     width: 7px;
     height: 7px;
@@ -91,7 +217,6 @@
     background: var(--priority-low);
   }
 
-  /* Staggered swirling animations */
   .idea-dot.d-1 {
     animation: swirl-main 4s infinite 0s ease-in-out;
   }
@@ -105,13 +230,12 @@
     animation: swirl-alt 4s infinite 3s ease-in-out;
   }
 
-  /* SVG Synapse Paths */
   .synapse {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 90px; /* Compact */
+    height: 90px;
   }
 
   .synapse-path {
@@ -124,7 +248,6 @@
     transition: opacity 0.5s ease;
   }
 
-  /* Tracing animations (continuous) */
   .synapse-1 {
     animation: trace-synapse-long 12s infinite 0s;
   }
@@ -137,12 +260,6 @@
   .synapse-4 {
     animation: trace-synapse-long 18s infinite 6s;
   }
-
-  /* --- RANDOMIZED GLOWING PATH LOGIC --- */
-  /* This works by having one "candidate" glow cycle that staggers 
-     which path it activates on, based on different keyframe tracks. */
-
-  /* Candidate Icon (Star) - Shown at end of glowing path */
   .candidate-star {
     fill: var(--light-color);
     opacity: 0;
@@ -152,7 +269,6 @@
       transform 0.4s ease;
   }
 
-  /* --- Candidate 1 Cycle (Path 1) --- */
   @keyframes candidate-cycle-1 {
     0%,
     20%,
@@ -192,7 +308,6 @@
     animation: icon-reveal-1 20s infinite 0s;
   }
 
-  /* --- Candidate 2 Cycle (Path 2) --- */
   @keyframes candidate-cycle-2 {
     0%,
     20%,
@@ -232,7 +347,6 @@
     animation: icon-reveal-2 20s infinite 5s;
   }
 
-  /* --- Candidate 3 Cycle (Path 3) --- */
   @keyframes candidate-cycle-3 {
     0%,
     20%,
@@ -272,7 +386,6 @@
     animation: icon-reveal-3 20s infinite 10s;
   }
 
-  /* --- Candidate 4 Cycle (Path 4) --- */
   @keyframes candidate-cycle-4 {
     0%,
     20%,
@@ -312,7 +425,6 @@
     animation: icon-reveal-4 20s infinite 15s;
   }
 
-  /* KEYFRAMES: Swirling Dots */
   @keyframes swirl-main {
     0% {
       transform: translate(-50%, 0) scale(1);
@@ -348,7 +460,6 @@
     }
   }
 
-  /* KEYFRAMES: Trace Synapse (continuous) */
   @keyframes trace-synapse-long {
     0% {
       stroke-dashoffset: 200;
@@ -370,149 +481,15 @@
   }
 
   /* --- End Pondering Animation Section --- */
-
-  /* --- List Container (Integrated Backdrop) --- */
-  .roadmap-wrapper {
-    background-color: var(--md-primary-fg-color);
-    padding: 2.5rem;
-    border-radius: 0.8rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .feature-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  /* The Row Card */
-  .feature-row {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    background-color: rgba(255, 255, 255, 0.02);
-    border-radius: 0.6rem;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease,
-      border-color 0.2s ease;
-  }
-
-  .feature-row:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.15);
-  }
-
-  /* Left Column: Meta (Title & Badge) */
-  .feature-meta {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 0.8rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .feature-meta h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--light-color);
-  }
-
-  /* Right Column: Content */
-  .feature-content {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .feature-content p {
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--md-typeset-color);
-  }
-
-  .feature-content ul {
-    margin: 0;
-    padding-left: 1.2rem;
-    color: var(--md-default-fg-color--light);
-    font-size: 0.9rem;
-  }
-
-  .feature-content li {
-    margin-bottom: 0.4rem;
-  }
-
-  .priority-badge {
-    display: inline-flex;
-    align-items: center;
-    text-align: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    white-space: nowrap;
-    letter-spacing: 0.05em;
-    font-weight: 800;
-    padding: 0.25rem 0.75rem;
-    border-radius: 50px;
-    width: fit-content;
-  }
-
-  /* Priority Coloring (Left Border) */
-  .p-high {
-    border-left: 4px solid var(--priority-high);
-  }
-  .p-med {
-    border-left: 4px solid var(--priority-med);
-  }
-  .p-low {
-    border-left: 4px solid var(--priority-low);
-  }
-
-  /* Priority Badge Backgrounds */
-  .p-high .priority-badge {
-    color: var(--priority-high);
-    background: rgba(239, 83, 80, 0.15);
-  }
-  .p-med .priority-badge {
-    color: var(--priority-med);
-    background: rgba(255, 167, 38, 0.15);
-  }
-  .p-low .priority-badge {
-    color: var(--light-color);
-    background: rgba(160, 202, 253, 0.1);
-  }
-
-  /* Mobile Responsive */
-  @media screen and (max-width: 768px) {
-    .feature-row {
-      grid-template-columns: 1fr;
-    }
-    .feature-meta {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      border-right: none;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 1rem;
-    }
-    .feature-content {
-      padding: 1rem;
-    }
-  }
 </style>
 
 <div class="sprout-roadmap">
-  <div class="intro">
+  <div class="intro center">
     <h2>What's Next for Sprout?</h2>
-    <p class="intro-text">I'm a busy guy but I try my best to get new features built in my free time.</p>
+    <p class="intro-text">
+      I'm a busy guy but I try my best to get new features built in my free time.<br />
+      Here is the roadmap sorted by priority.
+    </p>
   </div>
 
   <div class="pondering-container">
