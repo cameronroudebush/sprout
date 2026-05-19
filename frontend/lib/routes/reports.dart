@@ -130,7 +130,6 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
         switch (_currentDetailChart) {
           case DetailChartType.sankey:
             return CashFlowSankeyChart(
-              height: isDesktop ? 800 : 600,
               selectedDate: _selectedDate,
               view: _currentView,
             );

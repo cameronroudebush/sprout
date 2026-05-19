@@ -116,7 +116,11 @@ class AccountGroupSection extends ConsumerWidget {
           ),
           children: [
             const Divider(height: 1, indent: 16, endIndent: 16),
-            ...accounts.map((acc) {
+            ...(accounts
+                  ..sort((a, b) {
+                    return isNegative ? a.balance.compareTo(b.balance) : b.balance.compareTo(a.balance);
+                  }))
+                .map((acc) {
               // Find history for this specific account
               final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
               final dataPoint = history?.getValueByFrame(selectedRange);

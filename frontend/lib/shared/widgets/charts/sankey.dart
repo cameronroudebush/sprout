@@ -21,7 +21,6 @@ class _SankeyLayoutData {
 /// A mobile-friendly, highly performant Sankey chart.
 class SproutSankeyChart extends StatefulWidget {
   final SankeyData data;
-  final double height;
   final String Function(num val)? formatter;
   final void Function(String node, double value)? onNodeTap;
   final void Function(SankeyLink link)? onLinkTap;
@@ -32,7 +31,6 @@ class SproutSankeyChart extends StatefulWidget {
   const SproutSankeyChart({
     super.key,
     required this.data,
-    required this.height,
     this.formatter,
     this.onNodeTap,
     this.onLinkTap,
@@ -108,61 +106,108 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
     }
   }
 
+  /// Calculates the required height based on the total number of nodes
+  double _calculateRequiredHeight(SankeyData data) {
+    final Set<String> nodeNames = {};
+    final Map<String, List<String>> nodeParents = {};
+    final Map<String, List<String>> nodeChildren = {};
+    for (var link in data.links) {
+      nodeNames.add(link.source_);
+      nodeNames.add(link.target);
+      nodeChildren.putIfAbsent(link.source_, () => []).add(link.target);
+      nodeParents.putIfAbsent(link.target, () => []).add(link.source_);
+    }
+    final Map<String, int> nodeColumns = {};
+    List<String> currentColumnNodes =
+        nodeNames.where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty).toList();
+    int column = 0;
+    while (currentColumnNodes.isNotEmpty) {
+      for (var node in currentColumnNodes) {
+        nodeColumns[node] = column;
+      }
+      final nextColumnNodes = <String>{};
+      for (var node in currentColumnNodes) {
+        if (nodeChildren[node] != null) nextColumnNodes.addAll(nodeChildren[node]!);
+      }
+      currentColumnNodes = nextColumnNodes.where((n) {
+        if (nodeColumns.containsKey(n)) return false;
+        final parents = nodeParents[n];
+        return parents == null || parents.isEmpty || parents.every((p) => nodeColumns.containsKey(p));
+      }).toList();
+      column++;
+    }
+    for (var node in nodeNames.where((n) => !nodeColumns.containsKey(n))) {
+      nodeColumns[node] = column > 0 ? column - 1 : 0;
+    }
+    final int numColumns = nodeColumns.isEmpty ? 0 : nodeColumns.values.reduce(max) + 1;
+    final List<int> columnCounts = List.generate(numColumns, (_) => 0);
+    nodeColumns.forEach((node, col) => columnCounts[col]++);
+    final int maxNodesInAnyColumn = columnCounts.isEmpty ? 0 : columnCounts.reduce(max);
+    const double minNodeHeight = 40.0;
+    const double nodePadding = 16.0;
+    return (maxNodesInAnyColumn * minNodeHeight) + ((maxNodesInAnyColumn - 1) * nodePadding);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SizedBox(
-        height: widget.height,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Enforce a minimum width to prevent unreadable squishing on mobile
-            final isScrollable = constraints.maxWidth < widget.minWidth;
-            final chartWidth = isScrollable ? widget.minWidth : constraints.maxWidth;
-            final chartSize = Size(chartWidth, widget.height);
+    final double dynamicHeight = _calculateRequiredHeight(widget.data);
 
-            // Memoize the heavy layout computation
-            if (_layoutData == null || _lastComputedSize != chartSize) {
-              _layoutData = _computeLayout(chartSize);
-              _lastComputedSize = chartSize;
-            }
+    Widget chartContent = SizedBox(
+      height: dynamicHeight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Enforce a minimum width to prevent unreadable squishing on mobile
+          final isScrollableX = constraints.maxWidth < widget.minWidth;
+          final chartWidth = isScrollableX ? widget.minWidth : constraints.maxWidth;
+          final chartSize = Size(chartWidth, dynamicHeight);
 
-            Widget chartArea = MouseRegion(
-              onHover: (e) => _handleInteraction(e.localPosition),
-              onExit: (_) => _clearInteraction(),
-              child: GestureDetector(
-                onTapDown: (details) => _handleInteraction(details.localPosition),
-                onTapUp: (_) => _handleTap(),
-                onPanUpdate: (details) => _handleInteraction(details.localPosition),
-                onPanEnd: (_) => _clearInteraction(),
-                onLongPressStart: (details) => _handleInteraction(details.localPosition),
-                onLongPressMoveUpdate: (details) => _handleInteraction(details.localPosition),
-                onLongPressEnd: (_) => _clearInteraction(),
-                child: CustomPaint(
-                  size: chartSize,
-                  painter: _SankeyPainter(
-                    layoutData: _layoutData!,
-                    sankeyData: widget.data,
-                    theme: theme,
-                    hoveredNode: _hoveredNode,
-                    hoveredLink: _hoveredLink,
-                    hoverPosition: _hoverPosition,
-                    formatter: widget.formatter,
-                  ),
+          // Memoize the heavy layout computation
+          if (_layoutData == null || _lastComputedSize != chartSize) {
+            _layoutData = _computeLayout(chartSize);
+            _lastComputedSize = chartSize;
+          }
+
+          Widget chartArea = MouseRegion(
+            onHover: (e) => _handleInteraction(e.localPosition),
+            onExit: (_) => _clearInteraction(),
+            child: GestureDetector(
+              onTapDown: (details) => _handleInteraction(details.localPosition),
+              onTapUp: (_) => _handleTap(),
+              onPanUpdate: (details) => _handleInteraction(details.localPosition),
+              onPanEnd: (_) => _clearInteraction(),
+              onLongPressStart: (details) => _handleInteraction(details.localPosition),
+              onLongPressMoveUpdate: (details) => _handleInteraction(details.localPosition),
+              onLongPressEnd: (_) => _clearInteraction(),
+              child: CustomPaint(
+                size: chartSize,
+                painter: _SankeyPainter(
+                  layoutData: _layoutData!,
+                  sankeyData: widget.data,
+                  theme: theme,
+                  hoveredNode: _hoveredNode,
+                  hoveredLink: _hoveredLink,
+                  hoverPosition: _hoverPosition,
+                  formatter: widget.formatter,
                 ),
               ),
+            ),
+          );
+
+          if (isScrollableX) {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: chartArea,
             );
+          }
 
-            if (isScrollable) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: chartArea,
-              );
-            }
+          return chartArea;
+        },
+      ),
+    );
 
-            return chartArea;
-          },
-        ));
+    return chartContent;
   }
 
   /// The heavy math engine. Extracted here so it only runs when size or data changes.
