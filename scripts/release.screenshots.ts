@@ -230,7 +230,7 @@ async function createMainOverview(c = { width: 1200, height: 1900, corner: 20 })
     .composite([
       { input: logoBuffer, top: 50, left: (c.width - logoWidth) / 2 },
       { input: textOverlay, top: 500, left: 0 },
-      { input: overview, top: 1000, left: (c.width - overviewWidth) / 2 },
+      { input: overview, top: 925, left: (c.width - overviewWidth) / 2 },
     ])
     .toBuffer();
 }
@@ -303,15 +303,15 @@ async function createHorizontalBanner(
       { input: brandingOverlay, top: 0, left: 0 },
       { input: logoBuffer, top: 140, left: 60 },
       { input: badgeBuffer, top: 680, left: 130 },
-      { input: card1Rotated, top: yPos, left: xPos - 300 },
-      { input: card2Rotated, top: yPos, left: xPos + 40 },
-      { input: mainCard, top: yPos + 20, left: xPos - 60 },
+      { input: card1Rotated, top: yPos - 60, left: xPos - 320 },
+      { input: card2Rotated, top: yPos - 60, left: xPos + 20 },
+      { input: mainCard, top: yPos - 40, left: xPos - 80 },
     ])
     .toBuffer();
 }
 
 /** Iterates through each route and viewport and captures screenshots */
-async function captureScreenshots() {
+export async function captureScreenshots() {
   console.log(`--- Capturing Basic Screenshots ---`);
   let client;
   try {
