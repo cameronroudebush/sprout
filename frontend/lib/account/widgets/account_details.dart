@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
@@ -9,7 +10,7 @@ import 'package:sprout/account/widgets/account_merge_dialog.dart';
 import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
-import 'package:sprout/net-worth/widgets/net_worth_card.dart';
+import 'package:sprout/net-worth/widgets/generic_net_worth.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/routes/transactions.dart';
@@ -23,6 +24,9 @@ import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+/// A simple record type to hold the combined data for our generic widget
+typedef AccountChartData = ({EntityHistory? history, List<HistoricalDataPoint>? timeline});
 
 /// This page provides the overall account details view
 class AccountDetailsView extends ConsumerStatefulWidget {
@@ -75,7 +79,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
           Navigator.of(context).pop();
           await ref.read(accountsProvider.notifier).manualSync();
         },
-        child: Text(
+        child: const Text(
           'Welcome back! Would you like to re-sync your accounts to get updated data from fixed accounts?',
           textAlign: TextAlign.center,
         ),
@@ -135,7 +139,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
       return Scaffold(
         body: Padding(
-          padding: EdgeInsetsGeometry.only(top: 4),
+          padding: const EdgeInsets.only(top: 4),
           child: Column(
             children: [
               if (isDesktop) navWidget,
@@ -179,8 +183,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   /// Builds the top hero card featuring account identification and the NetWorthCard
   Widget _buildBalanceHeroCard(
     ThemeData theme,
-    AsyncValue<EntityHistory?> historyData,
-    AsyncValue<List<HistoricalDataPoint>?> timelineData,
+    AsyncValue<AccountChartData> combinedData,
   ) {
     return SproutCard(
       child: Column(
@@ -197,10 +200,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                     children: [
                       AccountLogo(widget.account, height: 36, width: 36),
                       Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                             Text(
                               widget.account.institution.name,
                               style: theme.textTheme.labelMedium,
@@ -241,7 +244,9 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                                 ),
                               ],
                             ),
-                          ])),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -250,15 +255,15 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
               ],
             ),
           ),
-
-          // Renders the net worth card
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-            child: NetWorthDisplay(
-                historyData: historyData,
-                timelineData: timelineData,
-                currentValue: AsyncValue.data(widget.account.balance),
-                invert: widget.account.isDebt),
+            child: GenericNetWorthWidget<AccountChartData>(
+              data: combinedData,
+              getValue: (_) => widget.account.balance,
+              getHistory: (data) => data.history,
+              getTimeline: (data) => data.timeline,
+              invert: widget.account.isDebt,
+            ),
           ),
         ],
       ),
@@ -272,16 +277,30 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
     final zillowAsset =
         account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
 
-    final allHistory = ref.watch(historicalAccountDataProvider);
-    final timeline = ref.watch(accountTimelineProvider(widget.account.id));
-    final accountHistory = allHistory.whenData((list) => list?.firstWhere((h) => h.connectedId == widget.account.id));
+    final allHistoryAsync = ref.watch(historicalAccountDataProvider);
+    final timelineAsync = ref.watch(accountTimelineProvider(widget.account.id));
+
+    final AsyncValue<AccountChartData> combinedChartData = allHistoryAsync.when(
+      data: (historyList) {
+        return timelineAsync.when(
+          data: (timelineList) {
+            final accountHistory = historyList?.firstWhereOrNull((h) => h.connectedId == widget.account.id);
+            return AsyncValue.data((history: accountHistory, timeline: timelineList));
+          },
+          error: (err, stack) => AsyncValue.error(err, stack),
+          loading: () => const AsyncValue.loading(),
+        );
+      },
+      error: (err, stack) => AsyncValue.error(err, stack),
+      loading: () => const AsyncValue.loading(),
+    );
+
     return Column(
       children: [
         // Notifications
         _buildNotifications(theme),
         // Top card
-        _buildBalanceHeroCard(theme, accountHistory, timeline),
-
+        _buildBalanceHeroCard(theme, combinedChartData),
         // Configuration
         Expanded(
           child: ListView(
@@ -366,7 +385,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                                 key: Key("${account.id}_rate_${account.interestRate}"),
                                 initialValue: account.interestRate?.toString(),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                textAlign: TextAlign.end, // Aligns value with dropdown text
+                                textAlign: TextAlign.end,
                                 decoration: InputDecoration(
                                   prefixIcon: const Icon(Icons.percent, size: 18),
                                   isDense: true,

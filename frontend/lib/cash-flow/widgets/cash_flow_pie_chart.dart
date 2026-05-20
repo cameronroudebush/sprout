@@ -8,7 +8,7 @@ import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 
 /// This renders a pie chart for cash flow on how much money came in versus went out
 class CashFlowPieChart extends ConsumerWidget {
-  final bool showLegend;
+  final PieLegendPosition legendPosition;
   final DateTime selectedDate;
   final double height;
   final CashFlowView view;
@@ -17,7 +17,7 @@ class CashFlowPieChart extends ConsumerWidget {
   const CashFlowPieChart(
     this.selectedDate, {
     super.key,
-    this.showLegend = false,
+    required this.legendPosition,
     required this.height,
     this.view = CashFlowView.monthly,
     this.showSubheader = true,
@@ -74,7 +74,7 @@ class CashFlowPieChart extends ConsumerWidget {
             colorMapping: {"Income": Colors.green, "Expense": theme.colorScheme.error},
             header: "Cash Flow",
             subheader: showSubheader ? periodText : null,
-            showLegend: showLegend,
+            legendPosition: legendPosition,
             showPieValue: true,
             formatValue: (value) => formatter.format(value),
             height: height,

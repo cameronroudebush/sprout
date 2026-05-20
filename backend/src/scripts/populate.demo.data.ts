@@ -79,7 +79,7 @@ export const DEMO_CATEGORIES = {
 };
 
 /** This function/script is used to populate consistent demo data. */
-export async function populateDemoData(daysToGenerate: number = 90) {
+export async function populateDemoData(daysToGenerate: number = 150) {
   // Check the numbers of days to generate
   if (isNaN(daysToGenerate) || daysToGenerate <= 0) throw new Error("Invalid number of days specified. Please provide a positive number.");
   // Create a "silent" app instance
@@ -162,6 +162,8 @@ async function createAccounts(demoUser: User) {
     new Account("Brokerage", ProviderType.simpleFin, demoUser, institutions[1]!, 12000, 12000, AccountType.investment, "USD", AccountSubType.brokerage),
     new Account("401(k)", ProviderType.simpleFin, demoUser, institutions[2]!, 275000, 75000, AccountType.investment, "USD", AccountSubType["401k"]),
     new Account("Roth IRA", ProviderType.simpleFin, demoUser, institutions[2]!, 30000, 30000, AccountType.investment, "USD", AccountSubType.ira),
+    // Crypto
+    new Account("Bitcoin", ProviderType.simpleFin, demoUser, institutions[2]!, 1534, 1534, AccountType.crypto, "USD", AccountSubType.wallet),
   ];
   logger.log(`Creating ${accounts.length} accounts.`);
 
@@ -471,13 +473,16 @@ async function populateTransactionRules(user: User) {
   const logger = new Logger("demo:transaction:rules");
   logger.log(`Inserting sample transaction rules.`);
   const categories = await Category.find({ where: { user: { id: user.id } } });
+  const findCat = (name: string) => categories.find((x) => x.name === name);
   await TransactionRule.insertMany([
-    new TransactionRule(
-      user,
-      TransactionRuleType.description,
-      "mcdonalds",
-      categories.find((x) => x.name === "Food"),
-    ),
+    new TransactionRule(user, TransactionRuleType.description, "mcdonalds", findCat("Restaurants")),
+    new TransactionRule(user, TransactionRuleType.description, "shell", findCat("Gas")),
+    new TransactionRule(user, TransactionRuleType.description, "chevron", findCat("Gas")),
+    new TransactionRule(user, TransactionRuleType.description, "netflix", findCat("Subscriptions")),
+    new TransactionRule(user, TransactionRuleType.description, "spotify", findCat("Subscriptions")),
+    new TransactionRule(user, TransactionRuleType.description, "amazon", findCat("Shopping")),
+    new TransactionRule(user, TransactionRuleType.description, "whole foods", findCat("Groceries")),
+    new TransactionRule(user, TransactionRuleType.description, "uber", findCat("Public Transit")),
   ]);
 }
 
@@ -485,18 +490,33 @@ async function populateTransactionRules(user: User) {
 async function populateChat(user: User) {
   const logger = new Logger("demo:chat");
   logger.log(`Inserting sample AI chat messages.`);
-  const firstMessageDate = new Date(new Date().getTime() - 10000);
+  const now = new Date().getTime();
   await ChatHistory.insertMany([
-    new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth", "user", firstMessageDate, false),
+    // Interaction 1
+    new ChatHistory(user, "How much did I spend on food last month?", "user", new Date(now - 60000), false),
+    new ChatHistory(
+      user,
+      "Based on your transaction history, you spent a total of $642.50 on food last month, which is about 12% of your total expenses.",
+      "model",
+      new Date(now - 55000),
+      false,
+    ),
+
+    // Interaction 2
+    new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth.", "user", new Date(now - 30000), false),
     new ChatHistory(
       user,
       `1. Use $20,000 from High-Yield Savings to pay off the personal loan (Car Loan) to eliminate interest expenses and reduce total liabilities.
-       2. Reduce discretionary spending in the "Shopping" and "Entertainment" categories across Visa Credit Card and Checking, redirecting those funds into investment Brokerage to maximize compound growth.
+       2. Reduce discretionary spending in "Shopping" and "Entertainment" by $200/month, redirecting those funds into your Brokerage account to maximize compound growth.
        Consult a financial advisor before making decisions.`,
       "model",
-      new Date(firstMessageDate.getTime() + 1000),
+      new Date(now - 25000),
       false,
     ),
+
+    // Interaction 3
+    new ChatHistory(user, "What is my largest recurring monthly expense?", "user", new Date(now - 10000), false),
+    new ChatHistory(user, "Your largest recurring expense is your Mortgage payment at $1,800 per month.", "model", new Date(now - 5000), false),
   ]);
 }
 
