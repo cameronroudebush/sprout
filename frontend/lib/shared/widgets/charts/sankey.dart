@@ -175,8 +175,7 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
             child: GestureDetector(
               onTapDown: (details) => _handleInteraction(details.localPosition),
               onTapUp: (_) => _handleTap(),
-              onPanUpdate: (details) => _handleInteraction(details.localPosition),
-              onPanEnd: (_) => _clearInteraction(),
+              onTapCancel: _clearInteraction,
               onLongPressStart: (details) => _handleInteraction(details.localPosition),
               onLongPressMoveUpdate: (details) => _handleInteraction(details.localPosition),
               onLongPressEnd: (_) => _clearInteraction(),
@@ -362,8 +361,8 @@ class _SankeyPainter extends CustomPainter {
   final Offset? hoverPosition;
   final String Function(num val)? formatter;
 
-  final Color _tooltipBgColor = Color(0xFF4A5568);
-  final Color _defaultNodeColor = Color(0xFF38A169);
+  final Color _tooltipBgColor = const Color(0xFF4A5568);
+  final Color _defaultNodeColor = const Color(0xFF38A169);
 
   _SankeyPainter({
     required this.layoutData,
@@ -490,10 +489,9 @@ class _SankeyPainter extends CustomPainter {
     }
 
     final totalSpacing = (painters.length - 1) * spacing;
-    final tooltipWidth = maxContentWidth + 24.0; // 12px padding each side
-    final tooltipHeight = totalContentHeight + totalSpacing + 16.0; // 8px padding top/bottom
+    final tooltipWidth = maxContentWidth + 24.0;
+    final tooltipHeight = totalContentHeight + totalSpacing + 16.0;
 
-    // Boundary checks
     double dx = hoverPosition!.dx + 15;
     double dy = hoverPosition!.dy + 15;
     if (dx + tooltipWidth > size.width) dx = hoverPosition!.dx - tooltipWidth - 15;

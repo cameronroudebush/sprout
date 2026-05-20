@@ -39,7 +39,7 @@ export async function checkScript() {
         await generateOpenApiSpec(process.argv[3]);
         process.exit(0);
       case "populate.demo.data":
-        await populateDemoData(parseInt(process.argv[3] ?? "90"));
+        await populateDemoData(parseInt(process.argv[3] ?? "150"));
         process.exit(0);
       default:
         throw new Error("Failed to locate matching script to execute");

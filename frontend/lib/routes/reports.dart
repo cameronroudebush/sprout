@@ -8,6 +8,7 @@ import 'package:sprout/cash-flow/widgets/cash_flow_trend.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
 enum DetailChartType { pie, sankey }
@@ -137,8 +138,20 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             return Column(
               spacing: 0,
               children: [
-                CategoryPieChart(dateForCharts, view: _currentView, height: isDesktop ? 600 : 300, showSubheader: true),
-                CashFlowPieChart(dateForCharts, view: _currentView, height: isDesktop ? 600 : 300, showSubheader: true),
+                CategoryPieChart(
+                  dateForCharts,
+                  view: _currentView,
+                  height: isDesktop ? 600 : 300,
+                  showSubheader: true,
+                  legendPosition: PieLegendPosition.left,
+                ),
+                CashFlowPieChart(
+                  dateForCharts,
+                  view: _currentView,
+                  height: isDesktop ? 600 : 300,
+                  showSubheader: true,
+                  legendPosition: PieLegendPosition.none,
+                ),
               ],
             );
         }

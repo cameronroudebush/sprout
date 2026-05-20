@@ -166,33 +166,35 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
           ),
 
           // Calendar Grid
-          GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              childAspectRatio: isDesktop ? 1.75 : 1,
-            ),
-            itemCount: days.length,
-            itemBuilder: (context, index) {
-              final date = days[index];
-              // Find events for the specific day from our grouped map.
-              final eventsForDay = widget.events.where((e) {
-                return widget.isOnDay(date, e);
-              }).toList();
+          Padding(
+              padding: EdgeInsetsGeometry.symmetric(horizontal: 6, vertical: 2),
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  childAspectRatio: isDesktop ? 1.75 : 1,
+                ),
+                itemCount: days.length,
+                itemBuilder: (context, index) {
+                  final date = days[index];
+                  // Find events for the specific day from our grouped map.
+                  final eventsForDay = widget.events.where((e) {
+                    return widget.isOnDay(date, e);
+                  }).toList();
 
-              return _CalendarCell(
-                date: date,
-                focusedDate: _focusedDate,
-                events: eventsForDay,
-                displayOutsideDays: widget.displayOutsideDays,
-                eventMarkerBuilder: widget.dayDisplay,
-                onDaySelected: (day, List<T> events) {
-                  _focusDay(day);
+                  return _CalendarCell(
+                    date: date,
+                    focusedDate: _focusedDate,
+                    events: eventsForDay,
+                    displayOutsideDays: widget.displayOutsideDays,
+                    eventMarkerBuilder: widget.dayDisplay,
+                    onDaySelected: (day, List<T> events) {
+                      _focusDay(day);
+                    },
+                  );
                 },
-              );
-            },
-          ),
+              )),
         ],
       );
     });
@@ -246,7 +248,9 @@ class _CalendarCell<T> extends StatelessWidget {
         decoration: BoxDecoration(
           color: isFocused ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: isToday ? BoxBorder.all(color: theme.colorScheme.secondary) : null,
+          border: isToday
+              ? BoxBorder.all(color: theme.colorScheme.secondary)
+              : BoxBorder.all(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
