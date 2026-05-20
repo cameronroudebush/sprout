@@ -19,6 +19,22 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                // 'this' is implicitly the DependencyResolveDetails
+                if (requested.group == "androidx.glance" && requested.name == "glance-appwidget") {
+                    useVersion("1.1.1")
+                }
+                if (requested.group == "androidx.compose.remote" && requested.name == "remote-creation-android") {
+                    useVersion("1.0.0-alpha09")
+                }
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
