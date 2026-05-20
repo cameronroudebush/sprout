@@ -36,7 +36,7 @@ const routes = [
 
 /** The display sizes we want to take pictures of */
 const viewports = [
-  { name: "mobile", width: 375, height: 812, mobile: true },
+  { name: "mobile", width: 412, height: 915, mobile: true },
   { name: "desktop", width: 1920, height: 1080, mobile: false },
 ];
 

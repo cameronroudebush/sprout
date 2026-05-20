@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
 import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
@@ -13,6 +14,15 @@ typedef _YAxisBounds = ({double minY, double maxY});
 
 /// A line chart that displays the given data in a line chart format
 class SproutLineChart extends StatelessWidget {
+  /// The main title of the chart
+  final String? header;
+
+  /// Optional text displayed below the title
+  final String? subheader;
+
+  /// If we should wrap the chart and titles in a SproutCard
+  final bool showCard;
+
   /// If the y axis number should be shown
   final bool showYAxis;
 
@@ -54,6 +64,9 @@ class SproutLineChart extends StatelessWidget {
     super.key,
     required this.data,
     required this.chartRange,
+    this.header,
+    this.subheader,
+    this.showCard = false,
     this.formatValue,
     this.showYAxis = false,
     this.showXAxis = false,
@@ -71,18 +84,60 @@ class SproutLineChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     if (data == null || data!.isEmpty) {
       return const SizedBox.shrink();
-    } else {
-      final filteredHistoricalData = LineChartDataProcessor.filterHistoricalData(data, chartRange);
-      final preparedData = LineChartDataProcessor.prepareChartData(filteredHistoricalData);
-      return SizedBox(
-        height: height,
+    }
+
+    final filteredHistoricalData = LineChartDataProcessor.filterHistoricalData(data, chartRange);
+    final preparedData = LineChartDataProcessor.prepareChartData(filteredHistoricalData);
+
+    Widget chartContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (header != null || subheader != null) _buildHeader(theme),
+        if (header != null || subheader != null) const SizedBox(height: 24),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: LineChart(_buildLineChartData(preparedData, chartRange, theme), duration: Duration.zero),
+          ),
+        ),
+      ],
+    );
+
+    if (showCard) {
+      return SproutCard(
+        applySizedBox: false,
         child: Padding(
-            padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
-            child: LineChart(_buildLineChartData(preparedData, chartRange, theme), duration: Duration.zero)),
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(height: height, child: chartContent),
+        ),
       );
     }
+
+    return SizedBox(height: height, child: chartContent);
+  }
+
+  /// Builds the header with Title and Subheader matching the other visual components
+  Widget _buildHeader(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (header != null)
+          Text(
+            header!,
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        if (subheader != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            subheader!,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+          ),
+        ],
+      ],
+    );
   }
 
   /// Builds the widget for our necessary line chart by coordinating helper functions.
