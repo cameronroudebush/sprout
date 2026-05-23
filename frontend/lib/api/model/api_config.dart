@@ -15,6 +15,7 @@ class APIConfig {
   APIConfig({
     required this.chatKeyProvidedInBackend,
     required this.emailEnabled,
+    this.brandFetchClientId,
   });
 
   /// Determines if the chat key is already provided and users shouldn't be able to set theirs then.
@@ -23,24 +24,40 @@ class APIConfig {
   /// Tracks if email is enabled and functional
   bool emailEnabled;
 
+  /// The brand fetch client ID used for displaying logos.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? brandFetchClientId;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
     other.chatKeyProvidedInBackend == chatKeyProvidedInBackend &&
-    other.emailEnabled == emailEnabled;
+    other.emailEnabled == emailEnabled &&
+    other.brandFetchClientId == brandFetchClientId;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (chatKeyProvidedInBackend.hashCode) +
-    (emailEnabled.hashCode);
+    (emailEnabled.hashCode) +
+    (brandFetchClientId == null ? 0 : brandFetchClientId!.hashCode);
 
   @override
-  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend, emailEnabled=$emailEnabled]';
+  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'chatKeyProvidedInBackend'] = this.chatKeyProvidedInBackend;
       json[r'emailEnabled'] = this.emailEnabled;
+    if (this.brandFetchClientId != null) {
+      json[r'brandFetchClientId'] = this.brandFetchClientId;
+    } else {
+      json[r'brandFetchClientId'] = null;
+    }
     return json;
   }
 
@@ -65,6 +82,7 @@ class APIConfig {
       return APIConfig(
         chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
         emailEnabled: mapValueOfType<bool>(json, r'emailEnabled')!,
+        brandFetchClientId: mapValueOfType<String>(json, r'brandFetchClientId'),
       );
     }
     return null;

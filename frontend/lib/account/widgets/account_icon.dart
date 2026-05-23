@@ -4,10 +4,10 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/providers/logo_provider.dart';
 import 'package:sprout/shared/widgets/logo_base.dart';
 
-/// A widget used to display a full institution logo
-class AccountLogo extends LogoBaseWidget<Account> {
-  /// Creates an [AccountLogo] instance.
-  const AccountLogo(
+/// A widget used to display an account icon based on the institution
+class AccountIcon extends LogoBaseWidget<Account> {
+  /// Creates an [AccountIcon] instance.
+  const AccountIcon(
     super.logoClass, {
     super.key,
     super.size,
@@ -15,6 +15,6 @@ class AccountLogo extends LogoBaseWidget<Account> {
 
   @override
   ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, Account data, double size) {
-    return institutionLogoProvider(data.institution, size);
+    return institutionIconProvider(data.institution, size);
   }
 }

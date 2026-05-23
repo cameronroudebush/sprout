@@ -1,5 +1,6 @@
 import { AuthenticationConfig } from "@backend/auth/model/authentication.config";
 import { ChatConfig } from "@backend/chat/model/chat.config.model";
+import { BrandFetchConfig } from "@backend/config/model/brand.fetch.config";
 import { CacheConfig } from "@backend/config/model/cache.config";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
@@ -54,4 +55,7 @@ export class ServerConfig {
 
   @ConfigurationMetadata.assign({ comment: "Configuration for caching." })
   cache = new CacheConfig();
+
+  @ConfigurationMetadata.assign({ comment: "Configuration for brand fetch." })
+  brandFetch = new BrandFetchConfig();
 }

@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account_holding_list.dart';
@@ -101,7 +101,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                           child: Row(
                             spacing: 12,
                             children: [
-                              AccountLogo(account),
+                              AccountIcon(account),
                               Expanded(
                                 child: Text(
                                   account.name,

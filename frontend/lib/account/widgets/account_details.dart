@@ -5,7 +5,7 @@ import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/account_tab_item.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
-import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/account/widgets/account_merge_dialog.dart';
 import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
@@ -198,7 +198,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                   child: Row(
                     spacing: 8,
                     children: [
-                      AccountLogo(widget.account, height: 36, width: 36),
+                      AccountIcon(widget.account, size: 36),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

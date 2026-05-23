@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/widgets/calendar.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -79,7 +79,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
               },
               dayDisplay: (context, events) {
                 return SproutLayoutBuilder((isDesktop, context, constraints) {
-                  final double effectiveIconSize = isDesktop ? 18.0 : 14.0;
+                  final double effectiveIconSize = 24;
                   if (events.isEmpty) return const SizedBox.shrink();
 
                   final maxLogos = (constraints.maxWidth / (effectiveIconSize + 4)).floor().clamp(0, events.length);
@@ -91,7 +91,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                     spacing: 4,
                     children: [
                       ...displayedEvents.map(
-                        (e) => AccountLogo(e.account, height: effectiveIconSize, width: effectiveIconSize),
+                        (e) => AccountIcon(e.account, size: effectiveIconSize),
                       ),
                       if (remainingCount > 0)
                         Text("+$remainingCount", style: TextStyle(fontSize: effectiveIconSize * 0.8)),
