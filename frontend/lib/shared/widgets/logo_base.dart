@@ -1,39 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sprout/shared/providers/logo_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-/// A base class that is used to render a logo based on the given class data
+/// A base class that is used to render a logo based on the given class data.
 abstract class LogoBaseWidget<T> extends ConsumerWidget {
   final T logoClass;
-  final double height;
-  final double width;
+  final double size;
 
-  const LogoBaseWidget(this.logoClass, {super.key, this.height = 24, this.width = 24});
+  /// Creates a [LogoBaseWidget] instance.
+  const LogoBaseWidget(
+    this.logoClass, {
+    super.key,
+    this.size = 24,
+  });
 
-  ({String? faviconImageUrl, String? fullImageUrl}) getLogoUrl(BuildContext context);
-  IconData getFallbackIcon(BuildContext context);
+  /// Returns the watchable provider instance for the specific model type.
+  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, T data, double size);
+
+  /// Returns the icon to display if the image fails to load.
+  Icon getFallbackIcon(BuildContext context) {
+    return Icon(Icons.account_balance, size: size);
+  }
+
+  Widget _buildImage(BuildContext context, List<String> urls, int index) {
+    // Fallback to Sprout logo
+    if (index >= urls.length) return getFallbackIcon(context);
+
+    return Image.network(
+      urls[index],
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (context, error, stackTrace) => _buildImage(context, urls, index + 1),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final urls = getLogoUrl(context);
-    final imageAsync = ref.watch(logoImageProvider(faviconUrl: urls.faviconImageUrl, fullUrl: urls.fullImageUrl));
+    final imageAsync = ref.watch(getProvider(context, logoClass, size));
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(height),
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: imageAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2.0)),
-          error: (_, __) => Icon(getFallbackIcon(context), size: height * 0.75),
-          data: (bytes) => Image.memory(
-            bytes,
-            fit: BoxFit.cover,
-            cacheWidth: (width * MediaQuery.devicePixelRatioOf(context)).round(),
-            errorBuilder: (context, _, __) => Icon(getFallbackIcon(context), size: height * 0.75),
-          ),
+    return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
-    );
+        child: ClipRRect(
+            // ClipRRect is often sharper than ClipPath for simple rounded rects
+            borderRadius: BorderRadius.circular(8),
+            child: imageAsync.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(strokeWidth: 2.0),
+              ),
+              error: (_, __) => getFallbackIcon(context),
+              data: (urls) => _buildImage(context, urls, 0),
+            )));
   }
 }

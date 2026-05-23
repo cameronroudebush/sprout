@@ -19,7 +19,8 @@ export function configureApiDocument(app: INestApplication) {
   Welcome to the ${projName} API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.
 
   ${Configuration.isDevBuild ? `**Note:** If you wish to test the functionality, you must use a login endpoint to properly attach cookies to your browser.` : ""}`.trim();
-  const version = Configuration.version;
+  const gitVersionRegex = /^v\d+\.\d+\.\d+-.*$/;
+  const version = gitVersionRegex.test(Configuration.version) ? Configuration.version.replace(/-.*$/, "") : Configuration.version;
   const config = new DocumentBuilder()
     .setTitle(title)
     .setDescription(description)

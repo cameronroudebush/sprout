@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
-import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
@@ -44,7 +44,7 @@ class AccountItemRow extends ConsumerWidget {
         child: Row(
           spacing: 8,
           children: [
-            AccountLogo(account, width: 32, height: 32),
+            AccountIcon(account, size: 32),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
