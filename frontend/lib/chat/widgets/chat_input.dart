@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/widgets/account_logo.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/mention_controller.dart';
@@ -114,7 +114,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                       final item = items[index];
                       return ListTile(
                         dense: true,
-                        leading: AccountLogo(item),
+                        leading: AccountIcon(item),
                         title: Text(item.name),
                         onTap: () => _applyMention(item),
                       );

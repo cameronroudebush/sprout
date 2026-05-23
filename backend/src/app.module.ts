@@ -7,7 +7,6 @@ import { ConfigurationModule } from "@backend/config/config.module";
 import { Configuration } from "@backend/config/core";
 import { ContextSerializerInterceptor } from "@backend/core/context.serializer";
 import { CoreController } from "@backend/core/core.controller";
-import { ImageProxyController } from "@backend/core/image.proxy.controller";
 import { SproutLogger } from "@backend/core/logger";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { DatabaseModule } from "@backend/database/database.module";
@@ -95,7 +94,7 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     // Always initialize jobs last
     JobsModule,
   ],
-  controllers: [CoreController, CategoryController, CashFlowController, ImageProxyController],
+  controllers: [CoreController, CategoryController, CashFlowController],
   providers: [
     CategoryService,
     CashFlowService,

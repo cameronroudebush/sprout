@@ -37,6 +37,14 @@ These are the fundamental settings required for Sprout to secure your data and s
 | **Jobs**                    |                                    |                  |                                                                                                     |
 | `server.jobs.autoRetryTime` | `sprout_server_jobs_autoRetryTime` | `60`             | How many minutes to wait to re-try failed jobs automatically.                                       |
 
+## Brandfetch
+
+These allow configuration of [Brandfetch](https://brandfetch.com/) to allow the frontend's to display nice UI's. See [more here](../getting-started/configuration.md#brand-assets-with-brandfetch).
+
+| YAML Key                     | Environment Variable                | Default | Description                                                             |
+| ---------------------------- | ----------------------------------- | ------- | ----------------------------------------------------------------------- |
+| `server.brandFetch.clientId` | `sprout_server_brandFetch_clientId` |         | The clientID that Brandfetch provides to allow us to display the icons. |
+
 ## Authentication
 
 Sprout supports two authentication modes. You must choose one via `server.auth.type`.

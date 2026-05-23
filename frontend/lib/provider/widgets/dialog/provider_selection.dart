@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/provider/widgets/provider_logo.dart';
+import 'package:sprout/provider/widgets/provider_icon.dart';
 
 /// A widget that provides the ability to select from a list of providers to add accounts
 class ProviderSelectionList extends StatelessWidget {
@@ -66,11 +66,7 @@ class ProviderSelectionList extends StatelessWidget {
                         // Big Icon
                         Expanded(
                           child: Center(
-                            child: SizedBox(
-                              width: 48,
-                              height: 48,
-                              child: FinanceProviderLogoWidget(provider),
-                            ),
+                            child: FinanceProviderIcon(provider),
                           ),
                         ),
                         // Name

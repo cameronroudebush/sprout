@@ -34,11 +34,13 @@ For a complete list of all available options, please see the **[Advanced Configu
 | `sprout_server_email_host`                   |    No    |               | The SMTP server host (e.g., `smtp.gmail.com`).                                                                                                            |
 | `sprout_server_email_user`                   |    No    |               | The username for your SMTP server.                                                                                                                        |
 | `sprout_server_email_pass`                   |    No    |               | The password or App Password for your SMTP server.                                                                                                        |
+| **BrandFetch**                               |          |               |                                                                                                                                                           |
+| `sprout_server_brandFetch_clientId`          |    No    |               | We utilize [Brandfetch](https://brandfetch.com/) in our frontend's to display nice looking icons. See [more here](#brand-assets-with-brandfetch).         |
 | **Provider - Plaid**                         |          |               |                                                                                                                                                           |
 | `sprout_providers_plaid_clientId`            |    No    |               | Your unique Plaid Client ID found in the dashboard.                                                                                                       |
 | `sprout_providers_plaid_secret`              |    No    |               | Your Plaid Secret key (Sandbox, Development, or Production).                                                                                              |
 
-# Generating an Encryption Key
+## Generating an Encryption Key
 
 Sprout uses `AES-256-GCM` encryption to protect various fields within the database, as well as cookie encryption. You must provide a valid `32-byte` key represented as a `64-character` hexadecimal string.
 
@@ -46,7 +48,7 @@ One complete, you can either place it in your [`configuration.yml`](../developer
 
 You can generate this key using one of the methods below.
 
-## Option 1: Automatic Generation (Easiest)
+### Option 1: Automatic Generation (Easiest)
 
 If you start Sprout without providing an encryption key, the application will generate a secure random key for you, print it to the logs, and then exit (or fail to start).
 
@@ -57,14 +59,27 @@ Error: An encryption key must be specified for Sprout to start and must be exact
 Here is a randomly generated key you might want to use: RANDOM_KEY_HERE
 ```
 
-## Option 2: Linux / macOS
+### Option 2: Linux / macOS
 
 ```bash
 openssl rand -hex 32
 ```
 
-## Option 3: Windows (PowerShell)
+### Option 3: Windows (PowerShell)
 
 ```powershell
 -join ((1..32) | ForEach-Object { "{0:x2}" -f (Get-Random -Min 0 -Max 256) })
 ```
+
+## Brand Assets with Brandfetch
+
+We use the Brandfetch API to keep have deep integration with most brand logos. Instead of storing hundreds of logos manually, we fetch them on the fly based on the domain (e.g., `bankofamerica.com`).
+
+## How to Get Your API Client ID
+
+To use this service to provide brand logos, and not just he default basic logos, you need a **Client ID** from **Brandfetch**. This authenticates your requests for their API's.
+
+1. Create an Account: Go to the [developers webpage](https://brandfetch.com/developers) and sign up.
+2. Locate your client ID for your **Starter Client** by [navigating here](https://developers.brandfetch.com/dashboard/keys).
+3. Add this client ID to the sprout configuration by providing it in the environment variable `sprout_server_brandFetch_clientId`.
+    - For other ways to load this key, please review the [in-depth configuration](../developer/configuration.md).

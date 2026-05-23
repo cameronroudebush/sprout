@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
-import 'package:sprout/holding/widgets/holding_logo.dart';
+import 'package:sprout/holding/widgets/holding_icon.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
@@ -53,7 +53,7 @@ class HoldingRow extends ConsumerWidget {
         child: Row(
           spacing: 12,
           children: [
-            HoldingLogo(holding),
+            HoldingIcon(holding, account!),
 
             // Market data
             Expanded(
