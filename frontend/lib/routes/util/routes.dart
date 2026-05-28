@@ -24,6 +24,7 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/accounts',
     label: 'Accounts',
     icon: Icons.account_balance,
+    category: 'Banking',
     builder: (context, state) => const AccountsPage(),
   ),
   SproutRoute(
@@ -38,24 +39,35 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Transactions',
     icon: Icons.receipt,
     showInBottomNav: true,
+    category: 'Banking',
     builder: (context, state) => const TransactionsPage(),
+  ),
+  SproutRoute(
+    path: '/holdings',
+    label: 'Holdings',
+    icon: Icons.show_chart,
+    category: 'Investments',
+    builder: (context, state) => const HoldingsPage(),
   ),
   SproutRoute(
     path: '/categories',
     label: 'Categories',
     icon: Icons.category,
+    category: 'Management',
     builder: (context, state) => const CategoryOverviewPage(),
   ),
   SproutRoute(
     path: '/rules',
     label: 'Rules',
     icon: Icons.receipt_long_rounded,
+    category: 'Management',
     builder: (context, state) => const TransactionRulesPage(),
   ),
   SproutRoute(
     path: '/subscriptions',
     label: 'Subscriptions',
     icon: Icons.subscriptions,
+    category: 'Banking',
     builder: (context, state) => const SubscriptionsPage(),
   ),
   SproutRoute(
@@ -71,11 +83,5 @@ final List<SproutRoute> authenticatedRoutes = [
     icon: Icons.settings_rounded,
     showInSidebar: false,
     builder: (context, state) => const SettingsPage(),
-  ),
-  SproutRoute(
-    path: '/holdings',
-    label: 'Holdings',
-    icon: Icons.show_chart,
-    builder: (context, state) => const HoldingsPage(),
   ),
 ];

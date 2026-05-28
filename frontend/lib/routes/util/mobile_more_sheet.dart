@@ -11,7 +11,7 @@ class SproutMoreSheet extends ConsumerWidget {
   const SproutMoreSheet({super.key});
 
   /// Returns a greeting for our user
-  String _getGreeting() {
+  static String getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'Good morning,';
     if (hour < 17) return 'Good afternoon,';
@@ -27,7 +27,7 @@ class SproutMoreSheet extends ConsumerWidget {
     final moreRoutes = authenticatedRoutes.where((r) => r.showInSidebar && !r.showInBottomNav).toList();
 
     return SproutBaseDialogWidget(
-      "${_getGreeting()} ${user?.username ?? 'User'}!",
+      "${getGreeting()} ${user?.username ?? 'User'}!",
       titleStyle: theme.textTheme.headlineSmall,
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -12,7 +12,7 @@ export class APIConfig extends Base {
   /** Tracks if email is enabled and functional */
   emailEnabled: boolean;
 
-  /** The brand fetch client ID used for displaying logos. */
+  /** The brandfetch client ID used for displaying logos. */
   brandFetchClientId?: string;
 
   constructor(chatKeyProvidedInBackend: boolean, emailEnabled: boolean, brandFetchClientId?: string) {

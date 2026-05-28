@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
@@ -23,9 +24,9 @@ class LineChartDataProcessor {
         .toList()
         .cast<MapEntry<DateTime, num>>()
         .fold<Map<DateTime, num>>({}, (map, entry) {
-          map[entry.key] = double.parse(entry.value.toStringAsFixed(2));
-          return map;
-        });
+      map[entry.key] = double.parse(entry.value.toStringAsFixed(2));
+      return map;
+    });
   }
 
   /// Takes the filtered historical data from @filterHistoricalData and converts it
@@ -57,5 +58,39 @@ class LineChartDataProcessor {
     if (diff <= 500000) return 100000;
     if (diff <= 1000000) return 200000;
     return 500000;
+  }
+
+  /// Computes a chart data set for an average series
+  static SproutChartSeries computeAverageData(SproutLineChartData processedData) {
+    final spots = processedData.spots;
+    SproutLineChartData data;
+    if (spots.isEmpty) {
+      data = SproutLineChartData(spots: [], sortedEntries: processedData.sortedEntries);
+    }
+    {
+      final double totalSum = spots.fold(0.0, (sum, spot) => sum + spot.y);
+      final double averageY = totalSum / spots.length;
+
+      final averageSpots = List<FlSpot>.generate(
+        spots.length,
+        (index) => FlSpot(index.toDouble(), averageY),
+      );
+
+      data = SproutLineChartData(
+        spots: averageSpots,
+        sortedEntries: processedData.sortedEntries,
+      );
+    }
+
+    return SproutChartSeries(
+      data: data,
+      label: "Average",
+      config: LineSeriesConfig(
+        color: Colors.grey.withOpacity(0.5),
+        isDashed: true,
+        width: 2.0,
+        showInTooltip: false,
+      ),
+    );
   }
 }

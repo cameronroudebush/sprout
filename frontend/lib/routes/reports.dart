@@ -5,13 +5,15 @@ import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_sankey.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_trend.dart';
+import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
-enum DetailChartType { pie, sankey }
+enum DetailChartType { sankey, pie, spending }
 
 /// This page gives the user the ability to track habits over time and generate more useful data reports based on them
 class ReportsPage extends ConsumerStatefulWidget {
@@ -53,10 +55,22 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
     return SingleChildScrollView(
       child: SproutRouteWrapper(
+        size: SproutRouteSize.large,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CashFlowTrendChart(height: 200),
+            SproutLayoutBuilder(
+              (isDesktop, context, constraints) {
+                return SproutCard(
+                  child: SizedBox(
+                    height: 250,
+                    child: CashFlowTrendChart(
+                      barCount: isDesktop ? 10 : 6,
+                    ),
+                  ),
+                );
+              },
+            ),
             _buildMicroDetailSection(theme),
           ],
         ),
@@ -90,7 +104,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
             const Divider(),
 
-            // The View Switcher
+            // Three-option unified SegmentedButton selector tracker module mapping interface
             SegmentedButton<DetailChartType>(
               segments: const [
                 ButtonSegment(
@@ -102,6 +116,11 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   value: DetailChartType.pie,
                   label: Text('Pie'),
                   icon: Icon(Icons.pie_chart_outline),
+                ),
+                ButtonSegment(
+                  value: DetailChartType.spending,
+                  label: Text('Line'),
+                  icon: Icon(Icons.trending_up),
                 ),
               ],
               selected: {_currentDetailChart},
@@ -120,7 +139,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     );
   }
 
-  /// Renders only the chart the user has selected
+  /// Renders only the chart the user has selected, respecting desktop side-by-side design constraints
   Widget _buildActiveDetailChart(ThemeData theme) {
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
     final year = _selectedDate.year;
@@ -134,23 +153,76 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
               selectedDate: _selectedDate,
               view: _currentView,
             );
+          case DetailChartType.spending:
+            return SizedBox(
+              height: isDesktop ? 350 : 300,
+              child: SpendingCompareChart(
+                view: _currentView,
+                selectedDate: _selectedDate,
+              ),
+            );
           case DetailChartType.pie:
+            if (isDesktop) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 300,
+                      child: CategoryPieChart(
+                        dateForCharts,
+                        view: _currentView,
+                        legendPosition: PieLegendPosition.left,
+                        header: const ChartHeader(
+                          title: "Expense Categories",
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      height: 300,
+                      child: CashFlowPieChart(
+                        dateForCharts,
+                        view: _currentView,
+                        showSubheader: true,
+                        legendPosition: PieLegendPosition.none,
+                        header: const ChartHeader(
+                          title: "Cash Flow",
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
             return Column(
-              spacing: 0,
+              spacing: 4,
               children: [
-                CategoryPieChart(
-                  dateForCharts,
-                  view: _currentView,
-                  height: isDesktop ? 600 : 300,
-                  showSubheader: true,
-                  legendPosition: PieLegendPosition.left,
+                SizedBox(
+                  height: 300,
+                  child: CategoryPieChart(
+                    dateForCharts,
+                    view: _currentView,
+                    legendPosition: PieLegendPosition.left,
+                    header: const ChartHeader(
+                      title: "Expense Categories",
+                    ),
+                  ),
                 ),
-                CashFlowPieChart(
-                  dateForCharts,
-                  view: _currentView,
-                  height: isDesktop ? 600 : 300,
-                  showSubheader: true,
-                  legendPosition: PieLegendPosition.none,
+                SizedBox(
+                  height: 300,
+                  child: CashFlowPieChart(
+                    dateForCharts,
+                    view: _currentView,
+                    showSubheader: true,
+                    legendPosition: PieLegendPosition.none,
+                    header: const ChartHeader(
+                      title: "Cash Flow",
+                    ),
+                  ),
                 ),
               ],
             );

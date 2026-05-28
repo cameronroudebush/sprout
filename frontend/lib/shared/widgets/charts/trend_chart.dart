@@ -4,15 +4,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
+import 'package:sprout/shared/widgets/charts/header.dart'; // Added line chart header path dependency
 
 /// A generic, configurable trend chart that displays stacked bars and a trend line.
 class SproutTrendChart extends StatefulWidget {
   const SproutTrendChart({
     super.key,
     required this.data,
-    required this.header,
-    this.subheader,
-    this.height = 300,
+    this.header,
     this.showLegend = true,
     this.topColor = Colors.green,
     this.bottomColor = Colors.red,
@@ -23,14 +22,8 @@ class SproutTrendChart extends StatefulWidget {
   /// The structured data to display
   final List<CashFlowTrendStats>? data;
 
-  /// The main title of the chart
-  final String header;
-
-  /// Optional text displayed below the title
-  final String? subheader;
-
-  /// The height of the chart container
-  final double height;
+  /// The main header module configuration option
+  final ChartHeader? header;
 
   /// Whether to render the legend below the chart
   final bool showLegend;
@@ -57,10 +50,8 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
     final theme = Theme.of(context);
 
     if (widget.data == null || widget.data!.isEmpty) {
-      return SizedBox(
-        height: widget.height,
-        width: double.infinity,
-        child: const Center(child: Text("No data available")),
+      return const Center(
+        child: Text("No data available"),
       );
     }
 
@@ -71,21 +62,11 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            widget.header,
-            style: theme.textTheme.labelLarge?.copyWith(fontSize: 18),
-            textAlign: TextAlign.center,
-          ),
-          if (widget.subheader != null)
-            Text(
-              widget.subheader!,
-              textAlign: TextAlign.center,
-            ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: widget.height,
-            width: double.infinity,
+          if (widget.header != null) widget.header!,
+          if (widget.header != null) const SizedBox(height: 12),
+          Expanded(
             child: Stack(
               children: [
                 _buildBarChart(theme, maxY, minY),
@@ -240,7 +221,7 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
       touchTooltipData: LineTouchTooltipData(
         fitInsideVertically: true,
         fitInsideHorizontally: true,
-        getTooltipColor: (spot) => Color(0xFF4A5568),
+        getTooltipColor: (spot) => const Color(0xFF4A5568),
         tooltipPadding: const EdgeInsets.all(8),
         getTooltipItems: (List<LineBarSpot> touchedSpots) {
           if (touchedSpots.isEmpty) return [];

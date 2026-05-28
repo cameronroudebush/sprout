@@ -16,6 +16,126 @@ class CashFlowApi {
 
   final ApiClient apiClient;
 
+  /// Get spending progression over time for comparison.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [num] targetYear (required):
+  ///
+  /// * [num] targetMonth:
+  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(num targetYear, { num? targetMonth, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/cash-flow/comparison-timeline';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'targetYear', targetYear));
+    if (targetMonth != null) {
+      queryParams.addAll(_queryParams('', 'targetMonth', targetMonth));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get spending progression over time for comparison.
+  ///
+  /// Parameters:
+  ///
+  /// * [num] targetYear (required):
+  ///
+  /// * [num] targetMonth:
+  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(num targetYear, { num? targetMonth, }) async {
+    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(targetYear,  targetMonth: targetMonth, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CashFlowComparisonDTO',) as CashFlowComparisonDTO;
+    
+    }
+    return null;
+  }
+
+  /// Get discrete daily spending totals for a target month canvas calendar widget view.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [num] year (required):
+  ///
+  /// * [num] month (required):
+  Future<Response> cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(num year, num month,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/cash-flow/daily-calendar-spending';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+      queryParams.addAll(_queryParams('', 'year', year));
+      queryParams.addAll(_queryParams('', 'month', month));
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get discrete daily spending totals for a target month canvas calendar widget view.
+  ///
+  /// Parameters:
+  ///
+  /// * [num] year (required):
+  ///
+  /// * [num] month (required):
+  Future<DailySpendingCalendarResponseDTO?> cashFlowControllerGetDailyCalendarSpending(num year, num month,) async {
+    final response = await cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(year, month,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DailySpendingCalendarResponseDTO',) as DailySpendingCalendarResponseDTO;
+    
+    }
+    return null;
+  }
+
   /// Get sankey data by query.
   ///
   /// Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.

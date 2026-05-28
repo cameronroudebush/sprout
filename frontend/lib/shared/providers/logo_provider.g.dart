@@ -74,7 +74,7 @@ final class InstitutionIconProvider extends $FunctionalProvider<
   }
 }
 
-String _$institutionIconHash() => r'cdf680dd1af8b23c2d1b835a92413a77718223e1';
+String _$institutionIconHash() => r'2969026f2bcf6c865bcd6a68900488e5484b8f45';
 
 /// Provides the institutions icon
 

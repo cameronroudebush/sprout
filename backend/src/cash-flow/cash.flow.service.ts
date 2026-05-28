@@ -1,10 +1,25 @@
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
+import { DailySpendingCalendarResponseDTO, DailySpendingItem } from "@backend/cash-flow/model/api/daily.spending.dto";
 import { Category } from "@backend/category/model/category.model";
+import { HistoricalDataPoint } from "@backend/net-worth/model/api/entity.history.dto";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
-import { endOfDay, endOfMonth, format, startOfDay, startOfMonth, subMonths } from "date-fns";
+import {
+  eachDayOfInterval,
+  eachMonthOfInterval,
+  endOfDay,
+  endOfMonth,
+  endOfYear,
+  format,
+  isSameDay,
+  isSameMonth,
+  startOfDay,
+  startOfMonth,
+  startOfYear,
+  subMonths,
+} from "date-fns";
 import { Between, FindOptionsWhere } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
@@ -281,5 +296,91 @@ export class CashFlowService {
     results.sort((a, b) => a.date.getTime() - b.date.getTime());
 
     return new CashFlowSpending(results, topCategoryNames);
+  }
+
+  /**
+   * Compares the current scope against a provided target (Daily mapping over a month or Monthly mapping over a year).
+   */
+  async getSpendingTimeline(user: User, year: number, month?: number) {
+    const isMonthlyMode = month !== undefined && month !== null;
+
+    const startDate = isMonthlyMode ? startOfMonth(new Date(year, month - 1)) : startOfYear(new Date(year, 0));
+    const endDate = isMonthlyMode ? endOfMonth(startDate) : endOfYear(startDate);
+
+    const transactions = Transaction.convertListToTargetCurrency(
+      await Transaction.find({
+        where: {
+          account: { user: { id: user.id } },
+          posted: Between(startDate, endDate),
+          pending: false,
+        },
+        relations: ["category", "account"],
+      }),
+      user,
+    );
+
+    const accumulatedTotals: HistoricalDataPoint[] = [];
+    let runningTotal = 0;
+
+    if (isMonthlyMode) {
+      // Run Daily Cumulative Aggregation over a target month range window
+      const days = eachDayOfInterval({ start: startDate, end: endDate });
+      for (const day of days) {
+        const dailyExpense = transactions
+          .filter((t) => isSameDay(t.posted, day) && t.amount < 0 && !this.isLiabilityAccount(t.account))
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+        runningTotal += dailyExpense;
+        accumulatedTotals.push(new HistoricalDataPoint(day, runningTotal));
+      }
+    } else {
+      // Run Monthly Cumulative Aggregation over a target fiscal year scope window
+      const months = eachMonthOfInterval({ start: startDate, end: endDate });
+      for (const m of months) {
+        const monthlyExpense = transactions
+          .filter((t) => isSameMonth(t.posted, m) && t.amount < 0 && !this.isLiabilityAccount(t.account))
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+        runningTotal += monthlyExpense;
+        accumulatedTotals.push(new HistoricalDataPoint(m, runningTotal));
+      }
+    }
+
+    return accumulatedTotals;
+  }
+
+  /**
+   * Calculates discrete daily spending totals for a specified month and year.
+   * Returns a key-value record mapping the day of the month to its total expenditure.
+   */
+  async getDailySpendingMap(user: User, year: number, month: number) {
+    const startDate = startOfMonth(new Date(year, month - 1));
+    const endDate = endOfMonth(startDate);
+
+    const transactions = Transaction.convertListToTargetCurrency(
+      await Transaction.find({
+        where: {
+          account: { user: { id: user.id } },
+          posted: Between(startDate, endDate),
+          pending: false,
+        },
+        relations: ["account"],
+      }),
+      user,
+    );
+
+    const items: DailySpendingItem[] = [];
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+    for (const day of days) {
+      const dayNumber = day.getDate();
+
+      const totalSpentToday = transactions
+        .filter((t) => isSameDay(t.posted, day) && t.amount < 0 && !this.isLiabilityAccount(t.account))
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+      if (totalSpentToday > 0) items.push(new DailySpendingItem(dayNumber, totalSpentToday));
+    }
+    return new DailySpendingCalendarResponseDTO(items);
   }
 }

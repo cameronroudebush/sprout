@@ -4,29 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
-import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 
 /// This renders a pie chart for the transaction category mapping
 class CategoryPieChart extends ConsumerWidget {
   final PieLegendPosition legendPosition;
-  final double height;
   final DateTime selectedDate;
   final CashFlowView view;
-  final bool showSubheader;
+  final ChartHeader? header;
 
   /// Number of top categories to show
   final int? topN;
 
-  const CategoryPieChart(
-    this.selectedDate, {
-    super.key,
-    required this.legendPosition,
-    required this.height,
-    this.view = CashFlowView.monthly,
-    this.showSubheader = true,
-    this.topN,
-  });
+  const CategoryPieChart(this.selectedDate,
+      {super.key, required this.legendPosition, this.view = CashFlowView.monthly, this.topN, this.header});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,21 +27,16 @@ class CategoryPieChart extends ConsumerWidget {
     final statsAsync = ref.watch(categoryStatsProvider(year: year, month: month));
 
     return statsAsync.when(
-      loading: () => SproutCard(
-        child: SizedBox(
-          height: height + 50,
-          child: const Center(child: CircularProgressIndicator()),
-        ),
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
       ),
-      error: (err, _) => SproutCard(
-        height: height + 65,
-        child: Center(child: Text("Error loading category stats")),
+      error: (err, _) => Center(
+        child: Text("Error loading category stats"),
       ),
       data: (data) {
         final rawData = data?.categoryCount;
         if (rawData == null || rawData.isEmpty) {
-          return SproutCard(
-              height: height, child: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))));
+          return Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)));
         }
 
         final filteredEntries = rawData.entries.where((e) => e.value > 0).toList();
@@ -73,17 +60,12 @@ class CategoryPieChart extends ConsumerWidget {
           finalData = Map.fromEntries(sortedEntries);
         }
 
-        return SproutCard(
-          applySizedBox: false,
-          child: SproutPieChart(
-            data: finalData,
-            colorMapping: colorMapping,
-            header: "Categories",
-            subheader: showSubheader ? CashFlowViewFormatter.getPeriodText(view, selectedDate) : null,
-            legendPosition: legendPosition,
-            showPieTitle: false,
-            height: height,
-          ),
+        return SproutPieChart(
+          data: finalData,
+          colorMapping: colorMapping,
+          legendPosition: legendPosition,
+          showPieTitle: false,
+          header: header,
         );
       },
     );

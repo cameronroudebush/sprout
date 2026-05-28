@@ -490,34 +490,74 @@ async function populateTransactionRules(user: User) {
 async function populateChat(user: User) {
   const logger = new Logger("demo:chat");
   logger.log(`Inserting sample AI chat messages.`);
-  const now = new Date().getTime();
-  await ChatHistory.insertMany([
+  // Start the timeline 10 minutes ago
+  let timeline = new Date().getTime() - 10 * 60 * 1000;
+
+  // Helper to step forward by a set amount of seconds
+  const stepTime = (seconds: number) => {
+    timeline += seconds * 1000;
+    return new Date(timeline);
+  };
+
+  const chats = [
     // Interaction 1
-    new ChatHistory(user, "How much did I spend on food last month?", "user", new Date(now - 60000), false),
+    new ChatHistory(user, "How much did I spend on food last month?", "user", stepTime(0), false),
     new ChatHistory(
       user,
       "Based on your transaction history, you spent a total of $642.50 on food last month, which is about 12% of your total expenses.",
       "model",
-      new Date(now - 55000),
+      stepTime(5),
       false,
     ),
 
     // Interaction 2
-    new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth.", "user", new Date(now - 30000), false),
+    new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth.", "user", stepTime(60), false),
     new ChatHistory(
       user,
       `1. Use $20,000 from High-Yield Savings to pay off the personal loan (Car Loan) to eliminate interest expenses and reduce total liabilities.
        2. Reduce discretionary spending in "Shopping" and "Entertainment" by $200/month, redirecting those funds into your Brokerage account to maximize compound growth.
        Consult a financial advisor before making decisions.`,
       "model",
-      new Date(now - 25000),
+      stepTime(5),
       false,
     ),
 
     // Interaction 3
-    new ChatHistory(user, "What is my largest recurring monthly expense?", "user", new Date(now - 10000), false),
-    new ChatHistory(user, "Your largest recurring expense is your Mortgage payment at $1,800 per month.", "model", new Date(now - 5000), false),
-  ]);
+    new ChatHistory(user, "What is my largest recurring monthly expense?", "user", stepTime(60), false),
+    new ChatHistory(user, "Your largest recurring expense is your Mortgage payment at $1,800 per month.", "model", stepTime(5), false),
+
+    // Interaction 4
+    new ChatHistory(user, "Did my subscription fees go up this month?", "user", stepTime(60), false),
+    new ChatHistory(
+      user,
+      "Yes, your streaming service bundle increased from $14.99 to $18.99 on the 15th. You also had a yearly domain renewal of $12.00 hit your credit card last Tuesday.",
+      "model",
+      stepTime(5),
+      false,
+    ),
+
+    // Interaction 5
+    new ChatHistory(user, "How much do I have left in my entertainment budget for this week?", "user", stepTime(60), false),
+    new ChatHistory(
+      user,
+      "You have $45.20 remaining of your weekly $150.00 entertainment allowance. You've spent $104.80 so far, primarily at 'Cinemark Theatres' and 'The Daily Grind Coffee'.",
+      "model",
+      stepTime(5),
+      false,
+    ),
+
+    // Interaction 6
+    new ChatHistory(user, "Can I afford to buy a $300 bike right now?", "user", stepTime(60), false),
+    new ChatHistory(
+      user,
+      "Your checking account has $1,200, and your upcoming essential bills before your next paycheck total $650. You can comfortably afford the bike using your unallocated cash reserve without dipping into savings.",
+      "model",
+      stepTime(5),
+      false,
+    ),
+  ];
+  // We must execute in order
+  for (const chat of chats) await chat.insert();
 }
 
 /** Creates holdings for investment accounts picked from the given accounts */
