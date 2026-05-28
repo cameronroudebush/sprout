@@ -489,10 +489,12 @@ final class CashFlowComparisonTimelineProvider extends $AsyncNotifierProvider<
     CashFlowComparisonTimeline, CashFlowComparisonDTO?> {
   CashFlowComparisonTimelineProvider._(
       {required CashFlowComparisonTimelineFamily super.from,
-      required (
-        int,
-        int?,
-      )
+      required ({
+        int baselineYear,
+        int? baselineMonth,
+        int targetYear,
+        int? targetMonth,
+      })
           super.argument})
       : super(
           retry: null,
@@ -529,7 +531,7 @@ final class CashFlowComparisonTimelineProvider extends $AsyncNotifierProvider<
 }
 
 String _$cashFlowComparisonTimelineHash() =>
-    r'94dd44454d09a7df1798dc439872f97b35c36d87';
+    r'60e8e3d7d0303fff89e814864a1c0c043285a1d9';
 
 final class CashFlowComparisonTimelineFamily extends $Family
     with
@@ -538,10 +540,12 @@ final class CashFlowComparisonTimelineFamily extends $Family
             AsyncValue<CashFlowComparisonDTO?>,
             CashFlowComparisonDTO?,
             FutureOr<CashFlowComparisonDTO?>,
-            (
-              int,
-              int?,
-            )> {
+            ({
+              int baselineYear,
+              int? baselineMonth,
+              int targetYear,
+              int? targetMonth,
+            })> {
   CashFlowComparisonTimelineFamily._()
       : super(
           retry: null,
@@ -551,13 +555,17 @@ final class CashFlowComparisonTimelineFamily extends $Family
           isAutoDispose: false,
         );
 
-  CashFlowComparisonTimelineProvider call(
-    int year,
-    int? month,
-  ) =>
+  CashFlowComparisonTimelineProvider call({
+    required int baselineYear,
+    int? baselineMonth,
+    required int targetYear,
+    int? targetMonth,
+  }) =>
       CashFlowComparisonTimelineProvider._(argument: (
-        year,
-        month,
+        baselineYear: baselineYear,
+        baselineMonth: baselineMonth,
+        targetYear: targetYear,
+        targetMonth: targetMonth,
       ), from: this);
 
   @override
@@ -566,17 +574,23 @@ final class CashFlowComparisonTimelineFamily extends $Family
 
 abstract class _$CashFlowComparisonTimeline
     extends $AsyncNotifier<CashFlowComparisonDTO?> {
-  late final _$args = ref.$arg as (
-    int,
-    int?,
-  );
-  int get year => _$args.$1;
-  int? get month => _$args.$2;
+  late final _$args = ref.$arg as ({
+    int baselineYear,
+    int? baselineMonth,
+    int targetYear,
+    int? targetMonth,
+  });
+  int get baselineYear => _$args.baselineYear;
+  int? get baselineMonth => _$args.baselineMonth;
+  int get targetYear => _$args.targetYear;
+  int? get targetMonth => _$args.targetMonth;
 
-  FutureOr<CashFlowComparisonDTO?> build(
-    int year,
-    int? month,
-  );
+  FutureOr<CashFlowComparisonDTO?> build({
+    required int baselineYear,
+    int? baselineMonth,
+    required int targetYear,
+    int? targetMonth,
+  });
   @$mustCallSuper
   @override
   void runBuild() {
@@ -590,8 +604,10 @@ abstract class _$CashFlowComparisonTimeline
     element.handleCreate(
         ref,
         () => build(
-              _$args.$1,
-              _$args.$2,
+              baselineYear: _$args.baselineYear,
+              baselineMonth: _$args.baselineMonth,
+              targetYear: _$args.targetYear,
+              targetMonth: _$args.targetMonth,
             ));
   }
 }

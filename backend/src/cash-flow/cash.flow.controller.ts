@@ -122,22 +122,26 @@ export class CashFlowController {
   @Get("comparison-timeline")
   @ApiOperation({ summary: "Get spending progression over time for comparison." })
   @ApiOkResponse({ type: CashFlowComparisonDTO })
+  @ApiQuery({ name: "baselineYear", required: true, type: Number })
+  @ApiQuery({ name: "baselineMonth", required: false, type: Number })
+  @ApiQuery({ name: "targetYear", required: true, type: Number })
   @ApiQuery({ name: "targetMonth", required: false, type: Number })
-  async getComparisonTimeline(@CurrentUser() user: User, @Query("targetYear", ParseIntPipe) targetYear: number, @Query("targetMonth") targetMonth?: string) {
-    const now = new Date();
-    const parsedMonth = targetMonth ? parseInt(targetMonth, 10) : undefined;
-    const isMonthlyMode = parsedMonth !== undefined;
-
-    // Current scope handles either this month (e.g., now.getMonth() + 1) or this complete year (undefined)
+  async getComparisonTimeline(
+    @CurrentUser() user: User,
+    @Query("baselineYear", ParseIntPipe) baselineYear: number,
+    @Query("targetYear", ParseIntPipe) targetYear: number,
+    @Query("baselineMonth") baselineMonth?: string,
+    @Query("targetMonth") targetMonth?: string,
+  ) {
+    const parsedBaselineMonth = baselineMonth ? parseInt(baselineMonth, 10) : undefined;
+    const parsedTargetMonth = targetMonth ? parseInt(targetMonth, 10) : undefined;
+    const isMonthlyMode = parsedBaselineMonth !== undefined;
     const [current, target] = await Promise.all([
-      this.cashFlowService.getSpendingTimeline(user, now.getFullYear(), isMonthlyMode ? now.getMonth() + 1 : undefined),
-      this.cashFlowService.getSpendingTimeline(user, targetYear, parsedMonth),
+      this.cashFlowService.getSpendingTimeline(user, baselineYear, parsedBaselineMonth),
+      this.cashFlowService.getSpendingTimeline(user, targetYear, parsedTargetMonth),
     ]);
-
-    // Determine label layout text formats responsively
-    const currentLabel = isMonthlyMode ? format(now, "MMM yyyy") : format(now, "yyyy");
-    const targetLabel = isMonthlyMode ? format(new Date(targetYear, parsedMonth - 1), "MMM yyyy") : format(new Date(targetYear, 0), "yyyy");
-
+    const currentLabel = isMonthlyMode ? format(new Date(baselineYear, parsedBaselineMonth - 1), "MMM yyyy") : `${baselineYear}`;
+    const targetLabel = isMonthlyMode ? format(new Date(targetYear, parsedTargetMonth! - 1), "MMM yyyy") : `${targetYear}`;
     return new CashFlowComparisonDTO(current, target, currentLabel, targetLabel);
   }
 

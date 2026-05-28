@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/shared/widgets/logo.dart';
 import 'package:sprout/theme/absolute_dark.dart';
-// Import your SproutFullLogo widget path here
 
+/// A loading indicator used for when Sprout is still setting up the app
 class SproutLoadingIndicator extends StatefulWidget {
   final String? message;
   final bool animate;
@@ -21,6 +21,9 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
   late AnimationController _animationController;
   late Animation<double> _revealAnimation;
   late Animation<double> _opacityAnimation;
+
+  /// Tracks when the introductory wipe-in has finished
+  bool _isIntroComplete = false;
 
   @override
   void initState() {
@@ -44,20 +47,30 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
       ),
     );
 
-    // If animate is false, jump straight to the end frame immediately
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_isIntroComplete) {
+        setState(() {
+          _isIntroComplete = true;
+        });
+      }
+    });
+
     if (widget.animate) {
       _animationController.forward();
     } else {
       _animationController.value = 1.0;
+      _isIntroComplete = true;
     }
   }
 
   @override
   void didUpdateWidget(covariant SproutLoadingIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Handle dynamic changes if necessary
-    if (!widget.animate && _animationController.value != 1.0) {
-      _animationController.value = 1.0;
+    if (!widget.animate && !_isIntroComplete) {
+      _animationController.stop();
+      setState(() {
+        _isIntroComplete = true;
+      });
     }
   }
 
@@ -84,30 +97,49 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
                 return Opacity(
                   opacity: _opacityAnimation.value,
                   child: ClipRect(
-                    clipper: LeftToRightClipper(progress: _revealAnimation.value),
+                    clipper: LeftToRightClipper(
+                      progress: _isIntroComplete ? 1.0 : _revealAnimation.value,
+                    ),
                     child: SproutLogo(logoWidth),
                   ),
                 );
               },
             ),
-            if (widget.message != null) ...[
-              const SizedBox(height: 40),
-              AnimatedBuilder(
-                animation: _opacityAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _opacityAnimation.value,
-                    child: Text(
-                      widget.message!,
-                      style: absoluteDarkTheme.textTheme.titleMedium?.copyWith(
-                        color: absoluteDarkTheme.colorScheme.onSurfaceVariant,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  );
-                },
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedOpacity(
+                opacity: _isIntroComplete ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 400),
+                child: _isIntroComplete
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 40.0),
+                        child: SizedBox(
+                          width: logoWidth * 0.8, // Clean visual pairing with logo width
+                          child: Column(
+                            children: [
+                              LinearProgressIndicator(
+                                backgroundColor: absoluteDarkTheme.colorScheme.surfaceContainerHighest,
+                                color: absoluteDarkTheme.colorScheme.primary,
+                              ),
+                              if (widget.message != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  widget.message!,
+                                  style: absoluteDarkTheme.textTheme.titleMedium?.copyWith(
+                                    color: absoluteDarkTheme.colorScheme.onSurfaceVariant,
+                                    letterSpacing: 1.5,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ],
+            ),
           ],
         ),
       ),

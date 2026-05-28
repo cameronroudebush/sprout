@@ -71,7 +71,12 @@ class MonthlySpending extends _$MonthlySpending {
 @Riverpod(keepAlive: true)
 class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
   @override
-  Future<CashFlowComparisonDTO?> build(int year, int? month) async {
+  Future<CashFlowComparisonDTO?> build({
+    required int baselineYear,
+    int? baselineMonth,
+    required int targetYear,
+    int? targetMonth,
+  }) async {
     final api = await ref.watch(cashFlowApiProvider.future);
 
     ref.listen(sseProvider, (prev, next) {
@@ -81,8 +86,10 @@ class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
     });
 
     return await api.cashFlowControllerGetComparisonTimeline(
-      year,
-      targetMonth: month,
+      baselineYear,
+      targetYear,
+      baselineMonth: baselineMonth,
+      targetMonth: targetMonth,
     );
   }
 }
