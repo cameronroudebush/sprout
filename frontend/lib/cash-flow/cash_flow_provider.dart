@@ -67,3 +67,39 @@ class MonthlySpending extends _$MonthlySpending {
   /// Explicitly trigger a refresh if needed
   Future<void> refresh() async => ref.invalidateSelf();
 }
+
+@Riverpod(keepAlive: true)
+class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
+  @override
+  Future<CashFlowComparisonDTO?> build(int year, int? month) async {
+    final api = await ref.watch(cashFlowApiProvider.future);
+
+    ref.listen(sseProvider, (prev, next) {
+      if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
+        ref.invalidateSelf();
+      }
+    });
+
+    return await api.cashFlowControllerGetComparisonTimeline(
+      year,
+      targetMonth: month,
+    );
+  }
+}
+
+/// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
+@Riverpod(keepAlive: true)
+Future<Map<int, double>> dailySpending(Ref ref, {required int month, required int year}) async {
+  ref.listen(sseProvider, (prev, next) {
+    if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
+      ref.invalidateSelf();
+    }
+  });
+  final api = await ref.watch(cashFlowApiProvider.future);
+  final DailySpendingCalendarResponseDTO? response = await api.cashFlowControllerGetDailyCalendarSpending(
+    year,
+    month,
+  );
+  if (response == null || response.spending.isEmpty) return {};
+  return {for (final item in response.spending) item.day.toInt(): item.amount.toDouble()};
+}

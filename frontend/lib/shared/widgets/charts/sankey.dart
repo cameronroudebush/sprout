@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 
 /// A private class to cache heavy mathematical layout computations.
 class _SankeyLayoutData {
@@ -20,6 +21,7 @@ class _SankeyLayoutData {
 
 /// A mobile-friendly, highly performant Sankey chart.
 class SproutSankeyChart extends StatefulWidget {
+  final ChartHeader? header;
   final SankeyData data;
   final String Function(num val)? formatter;
   final void Function(String node, double value)? onNodeTap;
@@ -31,6 +33,7 @@ class SproutSankeyChart extends StatefulWidget {
   const SproutSankeyChart({
     super.key,
     required this.data,
+    this.header,
     this.formatter,
     this.onNodeTap,
     this.onLinkTap,
@@ -150,63 +153,75 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.data.links.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
+    final double calculatedMinHeight = _calculateRequiredHeight(widget.data);
 
-    final double dynamicHeight = _calculateRequiredHeight(widget.data);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.header != null) widget.header!,
+        if (widget.header != null) const SizedBox(height: 16),
+        // Removed Expanded here so it can size dynamically inside scroll views
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Determine dynamic height accurately based on current bounded constraints
+            final double dynamicHeight = (constraints.maxHeight == double.infinity || constraints.maxHeight == 0)
+                ? calculatedMinHeight
+                : max(constraints.maxHeight, calculatedMinHeight);
 
-    Widget chartContent = SizedBox(
-      height: dynamicHeight,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Enforce a minimum width to prevent unreadable squishing on mobile
-          final isScrollableX = constraints.maxWidth < widget.minWidth;
-          final chartWidth = isScrollableX ? widget.minWidth : constraints.maxWidth;
-          final chartSize = Size(chartWidth, dynamicHeight);
+            // Enforce a minimum width to prevent unreadable squishing on mobile
+            final isScrollableX = constraints.maxWidth < widget.minWidth;
+            final chartWidth = isScrollableX ? widget.minWidth : constraints.maxWidth;
+            final chartSize = Size(chartWidth, dynamicHeight);
 
-          // Memoize the heavy layout computation
-          if (_layoutData == null || _lastComputedSize != chartSize) {
-            _layoutData = _computeLayout(chartSize);
-            _lastComputedSize = chartSize;
-          }
+            // Memoize the heavy layout computation
+            if (_layoutData == null || _lastComputedSize != chartSize) {
+              _layoutData = _computeLayout(chartSize);
+              _lastComputedSize = chartSize;
+            }
 
-          Widget chartArea = MouseRegion(
-            onHover: (e) => _handleInteraction(e.localPosition),
-            onExit: (_) => _clearInteraction(),
-            child: GestureDetector(
-              onTapDown: (details) => _handleInteraction(details.localPosition),
-              onTapUp: (_) => _handleTap(),
-              onTapCancel: _clearInteraction,
-              onLongPressStart: (details) => _handleInteraction(details.localPosition),
-              onLongPressMoveUpdate: (details) => _handleInteraction(details.localPosition),
-              onLongPressEnd: (_) => _clearInteraction(),
-              child: CustomPaint(
-                size: chartSize,
-                painter: _SankeyPainter(
-                  layoutData: _layoutData!,
-                  sankeyData: widget.data,
-                  theme: theme,
-                  hoveredNode: _hoveredNode,
-                  hoveredLink: _hoveredLink,
-                  hoverPosition: _hoverPosition,
-                  formatter: widget.formatter,
+            Widget chartArea = MouseRegion(
+              onHover: (e) => _handleInteraction(e.localPosition),
+              onExit: (_) => _clearInteraction(),
+              child: GestureDetector(
+                onTapDown: (details) => _handleInteraction(details.localPosition),
+                onTapUp: (_) => _handleTap(),
+                onTapCancel: _clearInteraction,
+                onLongPressStart: (details) => _handleInteraction(details.localPosition),
+                onLongPressMoveUpdate: (details) => _handleInteraction(details.localPosition),
+                onLongPressEnd: (_) => _clearInteraction(),
+                child: CustomPaint(
+                  size: chartSize,
+                  painter: _SankeyPainter(
+                    layoutData: _layoutData!,
+                    sankeyData: widget.data,
+                    theme: theme,
+                    hoveredNode: _hoveredNode,
+                    hoveredLink: _hoveredLink,
+                    hoverPosition: _hoverPosition,
+                    formatter: widget.formatter,
+                  ),
                 ),
               ),
-            ),
-          );
-
-          if (isScrollableX) {
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: chartArea,
             );
-          }
 
-          return chartArea;
-        },
-      ),
+            if (isScrollableX) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: chartArea,
+              );
+            }
+
+            return chartArea;
+          },
+        ),
+      ],
     );
-
-    return chartContent;
   }
 
   /// The heavy math engine. Extracted here so it only runs when size or data changes.

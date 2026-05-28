@@ -89,6 +89,7 @@ class Auth extends _$Auth {
 
   /// Fires a login using username/password given
   Future<User?> login(String username, String password) async {
+    _isLoggingOut = false;
     final api = await ref.read(authApiProvider.future);
     final response = await api.authControllerLogin(
       UsernamePasswordLoginRequest(username: username, password: password),

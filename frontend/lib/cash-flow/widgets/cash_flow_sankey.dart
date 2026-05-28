@@ -8,8 +8,6 @@ import 'package:sprout/shared/widgets/charts/sankey.dart';
 
 /// This renders an interactive Sankey diagram showing cash flow distributions.
 class CashFlowSankeyChart extends ConsumerWidget {
-  final String title;
-  final String? subheader;
   final DateTime selectedDate;
   final CashFlowView view;
 
@@ -17,8 +15,6 @@ class CashFlowSankeyChart extends ConsumerWidget {
     super.key,
     required this.selectedDate,
     required this.view,
-    this.title = "Cash Flow Distribution",
-    this.subheader,
   });
 
   @override
@@ -27,39 +23,36 @@ class CashFlowSankeyChart extends ConsumerWidget {
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
     final sankeyAsync = ref.watch(sankeyDataProvider(year: year, month: month));
     final formatter = ref.watch(currencyFormatterProvider);
-    final height = 500;
 
     return sankeyAsync.when(
-      loading: () => SproutCard(
-        child: SizedBox(
-          height: height + 50,
-          child: const Center(child: CircularProgressIndicator()),
+      loading: () => const SizedBox(
+        height: 200,
+        child: Center(
+          child: CircularProgressIndicator(),
         ),
       ),
       error: (err, _) => SproutCard(
         child: SizedBox(
-          height: height + 50,
+          height: 100,
           child: Center(child: Text("Error loading chart: $err")),
         ),
       ),
       data: (sankeyData) {
         if (sankeyData.nodes.isEmpty) {
           return SproutCard(
-            child: SizedBox(
-              height: height + 50,
-              child: const Center(child: Text("No flow data available")),
+            child: const SizedBox(
+              height: 100,
+              child: Center(child: Text("No flow data available")),
             ),
           );
         }
 
-        return SproutCard(
-          applySizedBox: false,
-          child: Padding(
-              padding: EdgeInsetsGeometry.all(12),
-              child: SproutSankeyChart(
-                data: sankeyData,
-                formatter: formatter.format,
-              )),
+        return Padding(
+          padding: const EdgeInsets.all(12),
+          child: SproutSankeyChart(
+            data: sankeyData,
+            formatter: formatter.format,
+          ),
         );
       },
     );

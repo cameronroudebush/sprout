@@ -14,12 +14,16 @@ class Institution {
   /// Returns a new [Institution] instance.
   Institution({
     required this.id,
+    this.iconType = InstitutionIconType.icon,
     required this.url,
     required this.name,
     required this.hasError,
   });
 
   String id;
+
+  /// The asset variant variant to request from Brandfetch (icon or symbol)
+  InstitutionIconType iconType;
 
   /// The URL for where this institution is
   String url;
@@ -32,6 +36,7 @@ class Institution {
   @override
   bool operator ==(Object other) => identical(this, other) || other is Institution &&
     other.id == id &&
+    other.iconType == iconType &&
     other.url == url &&
     other.name == name &&
     other.hasError == hasError;
@@ -40,16 +45,18 @@ class Institution {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (iconType.hashCode) +
     (url.hashCode) +
     (name.hashCode) +
     (hasError.hashCode);
 
   @override
-  String toString() => 'Institution[id=$id, url=$url, name=$name, hasError=$hasError]';
+  String toString() => 'Institution[id=$id, iconType=$iconType, url=$url, name=$name, hasError=$hasError]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+      json[r'iconType'] = this.iconType;
       json[r'url'] = this.url;
       json[r'name'] = this.name;
       json[r'hasError'] = this.hasError;
@@ -69,6 +76,8 @@ class Institution {
       assert(() {
         assert(json.containsKey(r'id'), 'Required key "Institution[id]" is missing from JSON.');
         assert(json[r'id'] != null, 'Required key "Institution[id]" has a null value in JSON.');
+        assert(json.containsKey(r'iconType'), 'Required key "Institution[iconType]" is missing from JSON.');
+        assert(json[r'iconType'] != null, 'Required key "Institution[iconType]" has a null value in JSON.');
         assert(json.containsKey(r'url'), 'Required key "Institution[url]" is missing from JSON.');
         assert(json[r'url'] != null, 'Required key "Institution[url]" has a null value in JSON.');
         assert(json.containsKey(r'name'), 'Required key "Institution[name]" is missing from JSON.');
@@ -80,6 +89,7 @@ class Institution {
 
       return Institution(
         id: mapValueOfType<String>(json, r'id')!,
+        iconType: InstitutionIconType.fromJson(json[r'iconType'])!,
         url: mapValueOfType<String>(json, r'url')!,
         name: mapValueOfType<String>(json, r'name')!,
         hasError: mapValueOfType<bool>(json, r'hasError')!,
@@ -131,6 +141,7 @@ class Institution {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'id',
+    'iconType',
     'url',
     'name',
     'hasError',

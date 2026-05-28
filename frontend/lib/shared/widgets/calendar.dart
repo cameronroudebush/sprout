@@ -21,14 +21,11 @@ class SproutCalendar<T> extends StatefulWidget {
   /// Whether to display days from the previous/next month that fill the grid.
   final bool displayOutsideDays;
 
-  const SproutCalendar(
-    this.events,
-    this.isOnDay, {
-    super.key,
-    this.onDaySelected,
-    this.dayDisplay,
-    this.displayOutsideDays = false,
-  });
+  /// If we should allow changing months, days, etc.
+  final bool allowSelection;
+
+  const SproutCalendar(this.events, this.isOnDay,
+      {super.key, this.onDaySelected, this.dayDisplay, this.displayOutsideDays = false, this.allowSelection = true});
 
   @override
   State<SproutCalendar> createState() => _SproutCalendarState<T>();
@@ -101,48 +98,52 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
         children: [
           // Month/Year - Navigation
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.only(left: 12, right: 12, bottom: widget.allowSelection ? 0 : 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                    children: [
-                      Tooltip(
-                        message: "Go to today's date.",
-                        child: IconButton(
-                          icon: const Icon(Icons.today),
-                          onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now())
-                              ? () => _focusDay(DateTime.now())
-                              : null,
+                if (widget.allowSelection)
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      children: [
+                        Tooltip(
+                          message: "Go to today's date.",
+                          child: IconButton(
+                            icon: const Icon(Icons.today),
+                            onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now()) && widget.allowSelection
+                                ? () => _focusDay(DateTime.now())
+                                : null,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                if (!widget.allowSelection) const SizedBox.shrink(),
                 Text(
                   DateFormat.yMMMM().format(_focusedDate),
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurface),
-                        onPressed: _previousMonth,
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.chevron_right, color: theme.colorScheme.onSurface),
-                        onPressed: _nextMonth,
-                      ),
-                    ],
+                if (widget.allowSelection)
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurface),
+                          onPressed: _previousMonth,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.chevron_right, color: theme.colorScheme.onSurface),
+                          onPressed: _nextMonth,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                if (!widget.allowSelection) const SizedBox.shrink()
               ],
             ),
           ),

@@ -481,3 +481,221 @@ abstract class _$MonthlySpending extends $AsyncNotifier<CashFlowSpending?> {
             ));
   }
 }
+
+@ProviderFor(CashFlowComparisonTimeline)
+final cashFlowComparisonTimelineProvider = CashFlowComparisonTimelineFamily._();
+
+final class CashFlowComparisonTimelineProvider extends $AsyncNotifierProvider<
+    CashFlowComparisonTimeline, CashFlowComparisonDTO?> {
+  CashFlowComparisonTimelineProvider._(
+      {required CashFlowComparisonTimelineFamily super.from,
+      required (
+        int,
+        int?,
+      )
+          super.argument})
+      : super(
+          retry: null,
+          name: r'cashFlowComparisonTimelineProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$cashFlowComparisonTimelineHash();
+
+  @override
+  String toString() {
+    return r'cashFlowComparisonTimelineProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  CashFlowComparisonTimeline create() => CashFlowComparisonTimeline();
+
+  @override
+  bool operator ==(Object other) {
+    return other is CashFlowComparisonTimelineProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$cashFlowComparisonTimelineHash() =>
+    r'94dd44454d09a7df1798dc439872f97b35c36d87';
+
+final class CashFlowComparisonTimelineFamily extends $Family
+    with
+        $ClassFamilyOverride<
+            CashFlowComparisonTimeline,
+            AsyncValue<CashFlowComparisonDTO?>,
+            CashFlowComparisonDTO?,
+            FutureOr<CashFlowComparisonDTO?>,
+            (
+              int,
+              int?,
+            )> {
+  CashFlowComparisonTimelineFamily._()
+      : super(
+          retry: null,
+          name: r'cashFlowComparisonTimelineProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  CashFlowComparisonTimelineProvider call(
+    int year,
+    int? month,
+  ) =>
+      CashFlowComparisonTimelineProvider._(argument: (
+        year,
+        month,
+      ), from: this);
+
+  @override
+  String toString() => r'cashFlowComparisonTimelineProvider';
+}
+
+abstract class _$CashFlowComparisonTimeline
+    extends $AsyncNotifier<CashFlowComparisonDTO?> {
+  late final _$args = ref.$arg as (
+    int,
+    int?,
+  );
+  int get year => _$args.$1;
+  int? get month => _$args.$2;
+
+  FutureOr<CashFlowComparisonDTO?> build(
+    int year,
+    int? month,
+  );
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref
+        as $Ref<AsyncValue<CashFlowComparisonDTO?>, CashFlowComparisonDTO?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<CashFlowComparisonDTO?>, CashFlowComparisonDTO?>,
+        AsyncValue<CashFlowComparisonDTO?>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args.$1,
+              _$args.$2,
+            ));
+  }
+}
+
+/// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
+
+@ProviderFor(dailySpending)
+final dailySpendingProvider = DailySpendingFamily._();
+
+/// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
+
+final class DailySpendingProvider extends $FunctionalProvider<
+        AsyncValue<Map<int, double>>,
+        Map<int, double>,
+        FutureOr<Map<int, double>>>
+    with $FutureModifier<Map<int, double>>, $FutureProvider<Map<int, double>> {
+  /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
+  DailySpendingProvider._(
+      {required DailySpendingFamily super.from,
+      required ({
+        int month,
+        int year,
+      })
+          super.argument})
+      : super(
+          retry: null,
+          name: r'dailySpendingProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$dailySpendingHash();
+
+  @override
+  String toString() {
+    return r'dailySpendingProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<int, double>> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<int, double>> create(Ref ref) {
+    final argument = this.argument as ({
+      int month,
+      int year,
+    });
+    return dailySpending(
+      ref,
+      month: argument.month,
+      year: argument.year,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DailySpendingProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$dailySpendingHash() => r'6deee5873002f87a88a09ba0e48e2a8511ab4fd4';
+
+/// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
+
+final class DailySpendingFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            FutureOr<Map<int, double>>,
+            ({
+              int month,
+              int year,
+            })> {
+  DailySpendingFamily._()
+      : super(
+          retry: null,
+          name: r'dailySpendingProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
+
+  DailySpendingProvider call({
+    required int month,
+    required int year,
+  }) =>
+      DailySpendingProvider._(argument: (
+        month: month,
+        year: year,
+      ), from: this);
+
+  @override
+  String toString() => r'dailySpendingProvider';
+}

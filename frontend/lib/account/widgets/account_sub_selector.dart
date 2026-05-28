@@ -75,10 +75,10 @@ class AccountSubTypeSelect extends StatelessWidget {
       dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
       decoration: InputDecoration(
-        prefixIcon: Icon(_getIconForSubType(account.subType), size: 18),
+        // prefixIcon: Icon(_getIconForSubType(account.subType), size: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       value: account.subType,
       items: items.map((AccountSubTypeEnum value) {

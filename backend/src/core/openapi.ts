@@ -40,6 +40,7 @@ export function configureApiDocument(app: INestApplication) {
     .addTag("Cash Flow", "Provides endpoints to analyze and visualize cash flow, showing how money moves between income and expenses using categories.")
     .addTag("Chat", "Provides endpoints to allow querying an LLM with your account data.")
     .addTag("Provider", "Provides endpoints for the various sources that can provide data to Sprout.")
+    .addTag("Institution", "Endpoints for getting institution's related to accounts in Sprout.")
     .build();
   const document = SwaggerModule.createDocument(app, config);
 

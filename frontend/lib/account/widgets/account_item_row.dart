@@ -44,7 +44,7 @@ class AccountItemRow extends ConsumerWidget {
         child: Row(
           spacing: 8,
           children: [
-            AccountIcon(account, size: 32),
+            AccountIcon(account, size: 38),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

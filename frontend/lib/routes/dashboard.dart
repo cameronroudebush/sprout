@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
+import 'package:sprout/cash-flow/widgets/spending_calendar.dart';
+import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
 import 'package:sprout/net-worth/widgets/user_net_worth.dart';
 import 'package:sprout/notification/widgets/home_notifications.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/widgets/dashboard_recent_transactions.dart';
@@ -22,8 +25,8 @@ class DashboardPage extends ConsumerWidget {
         (isDesktop, context, constraints) {
           if (isDesktop) {
             return SproutRouteWrapper(
-              maxWidth: 1280,
-              child: _buildDesktop(ref),
+              size: SproutRouteSize.large,
+              child: _buildDesktop(context, ref),
             );
           } else {
             return SproutRouteWrapper(child: _buildMobile(ref));
@@ -34,44 +37,88 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// Desktop gets a robust 2-column masonry display utilizing flex factors
-  Widget _buildDesktop(WidgetRef ref) {
-    const double gutter = 4.0;
-
+  Widget _buildDesktop(BuildContext context, WidgetRef ref) {
+    final topCategoryCount = 7;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const HomeNotificationsWidget(),
-        const SizedBox(height: gutter),
-
-        // Top section: Net Worth
-        const SproutCard(child: Padding(padding: EdgeInsets.all(12), child: UserNetWorthWidget())),
-        const SizedBox(height: gutter),
-
-        // Middle section
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(flex: 2, child: DashboardAccountsCard()),
-            const SizedBox(width: gutter),
-            Expanded(
+        SizedBox(
+          height: 300,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(
+                flex: 2,
+                child: const SproutCard(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: UserNetWorthWidget(),
+                  ),
+                ),
+              ),
+              Flexible(
                 flex: 1,
-                child: CategoryPieChart(
-                  DateTime.now(),
-                  legendPosition: PieLegendPosition.bottom,
-                  topN: 10,
-                  height: 245,
-                )),
-            const SizedBox(width: gutter),
-            Expanded(flex: 1, child: SubscriptionCalendarWidget(title: "Subscriptions", showDetails: false)),
-          ],
+                child: const SproutCard(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SpendingCompareChart(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: gutter),
-
-        // Bottom section
+        ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 425),
+            child: Stack(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: DashboardAccountsCard(),
+                    ),
+                    // We leave a blank space for the pie chart to sit over
+                    Expanded(flex: 1, child: const SizedBox.shrink()),
+                  ],
+                ),
+                Positioned.fill(
+                  child: Row(
+                    children: [
+                      Expanded(flex: 2, child: const SizedBox.shrink()),
+                      Expanded(
+                        flex: 1,
+                        child: SproutCard(
+                          child: Center(
+                            child: CategoryPieChart(
+                              DateTime.now(),
+                              legendPosition: PieLegendPosition.bottom,
+                              topN: topCategoryCount,
+                              header: ChartHeader(
+                                title: "Top $topCategoryCount Categories",
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(flex: 2, child: DashboardRecentTransactionsCard(count: 7)),
+            Expanded(flex: 1, child: SpendingCalendarWidget()),
+            Expanded(flex: 1, child: DashboardRecentTransactionsCard(count: 9)),
+            Expanded(
+                child: SubscriptionCalendarWidget(
+              title: "Subscriptions",
+              showDetails: false,
+              iconSize: 14,
+            )),
           ],
         ),
       ],
@@ -86,12 +133,14 @@ class DashboardPage extends ConsumerWidget {
         // Important notifications that the user needs to know
         const HomeNotificationsWidget(),
         // Net worth chart
-        SproutCard(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: UserNetWorthWidget(),
-          ),
-        ),
+        SizedBox(
+            height: 250,
+            child: SproutCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: UserNetWorthWidget(),
+              ),
+            )),
         // Account overview
         const DashboardAccountsCard(),
         // Recent transactions

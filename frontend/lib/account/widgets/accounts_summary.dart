@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_group.dart';
-import 'package:sprout/account/widgets/account_total_summary_card.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
-import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a grouped overview of all user accounts.
@@ -39,34 +36,26 @@ class AccountSummaryView extends ConsumerWidget {
 
     // Handle empty state
     if (accounts.isEmpty) {
-      return Center(
-        child: SproutCard(
-          height: 360,
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 8,
-              children: [
-                Icon(Icons.account_balance_wallet_outlined, size: 64, color: theme.colorScheme.primary),
-                Text("No accounts found", style: theme.textTheme.titleLarge),
-                Text(
-                  !individualCards
-                      ? "You haven't added any accounts yet. Head over to the accounts page to get started."
-                      : "Use the floating action button in the bottom right to add a new account!",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-                if (!individualCards)
-                  FilledButton.icon(
-                    onPressed: () => NavigationProvider.redirect('accounts'),
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Account"),
-                  ),
-              ],
-            ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 8,
+        children: [
+          Icon(Icons.account_balance_wallet_outlined, size: 64, color: theme.colorScheme.primary),
+          Text("No accounts found", style: theme.textTheme.titleLarge),
+          Text(
+            !individualCards
+                ? "You haven't added any accounts yet. Head over to the accounts page to get started."
+                : "Use the floating action button in the bottom right to add a new account!",
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
-        ),
+          if (!individualCards)
+            FilledButton.icon(
+              onPressed: () => NavigationProvider.redirect('accounts'),
+              icon: const Icon(Icons.add),
+              label: const Text("Add Account"),
+            ),
+        ],
       );
     }
 
@@ -119,45 +108,36 @@ class AccountSummaryView extends ConsumerWidget {
       );
     }).toList();
 
-    return SproutLayoutBuilder(
-      (isDesktop, context, constraints) {
-        return Column(
-          children: [
-            TotalSummary(accounts: accounts),
-            if (individualCards)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: ChartRangeSelector(large: true),
-              ),
-            if (individualCards)
-              Expanded(
-                child: ListView.builder(
-                  padding: !isDesktop ? const EdgeInsets.only(bottom: 84) : null, // Space for FAB
-                  itemCount: groupedAccounts.length,
-                  itemBuilder: (context, index) => groupedAccounts[index],
-                ),
-              )
-            else
-              // Dashboard view logic (usually nested in another scrollview, so no Expanded here)
-              SproutCard(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...groupedAccounts
-                        .mapIndexed(
-                          (index, widget) => [
-                            widget,
-                            if (index < groupedAccounts.length - 1)
-                              const Divider(height: 0.5, indent: 16, endIndent: 16),
-                          ],
-                        )
-                        .expand((widgets) => widgets),
-                  ],
-                ),
-              ),
-          ],
-        );
-      },
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (individualCards)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: ChartRangeSelector(large: true),
+          ),
+        if (individualCards)
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: groupedAccounts.length,
+            itemBuilder: (context, index) => groupedAccounts[index],
+          )
+        else
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ...groupedAccounts
+                  .mapIndexed(
+                    (index, widget) => [
+                      widget,
+                      if (index < groupedAccounts.length - 1) const Divider(height: 0.5, indent: 16, endIndent: 16),
+                    ],
+                  )
+                  .expand((widgets) => widgets),
+            ],
+          ),
+      ],
     );
   }
 }

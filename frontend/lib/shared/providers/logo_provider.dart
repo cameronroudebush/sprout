@@ -13,9 +13,10 @@ Future<List<String>> institutionIcon(Ref ref, Institution institution, double si
   final host = Uri.parse(institution.url).host;
   final domain = host.replaceFirst(RegExp(r'^www\.'), '');
   final d = size * 2;
+  final type = institution.iconType.value;
 
   return [
-    "https://cdn.brandfetch.io/domain/$domain/fallback/404/h/$d/w/$d/icon?c=$clientId",
+    "https://cdn.brandfetch.io/domain/$domain/fallback/404/h/$d/w/$d/$type?c=$clientId",
   ];
 }
 

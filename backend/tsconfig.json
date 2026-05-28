@@ -7,25 +7,7 @@
     "outDir": "./dist",
     "sourceMap": true,
     "types": ["node", "jest"],
-    "paths": {
-      "@backend/providers/*": ["./src/providers/*"],
-      "@backend/config/*": ["./src/config/*"],
-      "@backend/database/*": ["./src/database/*"],
-      "@backend/core/*": ["./src/core/*"],
-      "@backend/jobs/*": ["./src/jobs/*"],
-      "@backend/transaction/*": ["./src/transaction/*"],
-      "@backend/account/*": ["./src/account/*"],
-      "@backend/user/*": ["./src/user/*"],
-      "@backend/category/*": ["./src/category/*"],
-      "@backend/institution/*": ["./src/institution/*"],
-      "@backend/holding/*": ["./src/holding/*"],
-      "@backend/sse/*": ["./src/sse/*"],
-      "@backend/auth/*": ["./src/auth/*"],
-      "@backend/notification/*": ["./src/notification/*"],
-      "@backend/chat/*": ["./src/chat/*"],
-      "@backend/net-worth/*": ["./src/net-worth/*"],
-      "@backend/email/*": ["./src/email/*"]
-    }
+    "paths": { "@backend/*": ["./src/*"] }
   },
   "include": ["./src/**/*"]
 }
