@@ -28,35 +28,50 @@ class SpendingCompareChart extends ConsumerStatefulWidget {
 class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
   DateTime? _customTargetDate;
   CashFlowView? _lastView;
+  DateTime? _lastRawSelectedDate; // Track the exact raw parent date to catch all increments
 
-  List<DateTime> _getLastYearMonths() {
-    final now = DateTime.now();
-    return List.generate(12, (index) {
-      return DateTime(now.year, now.month - index - 1, 1);
-    });
-  }
-
-  List<DateTime> _getLastFiveYears() {
-    final now = DateTime.now();
-    return List.generate(5, (index) {
-      return DateTime(now.year - index - 1, 1, 1);
-    });
+  // ANCHOR: Generate target choices relative to the ACTIVE parent baseline date, NOT today's date
+  List<DateTime> _getComparisonTargets(DateTime baseline, bool isMonthly) {
+    if (isMonthly) {
+      return List.generate(12, (index) {
+        // Generate the 12 preceding months relative to the inspected month canvas
+        return DateTime(baseline.year, baseline.month - index - 1, 1);
+      });
+    } else {
+      return List.generate(5, (index) {
+        // Generate preceding fiscal years relative to the inspected year canvas
+        return DateTime(baseline.year - index - 1, 1, 1);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isMonthly = widget.view == CashFlowView.monthly;
-    final availableTargets = isMonthly ? _getLastYearMonths() : _getLastFiveYears();
 
-    if (_lastView != widget.view || _customTargetDate == null || !availableTargets.contains(_customTargetDate)) {
+    final baselineDate = widget.selectedDate != null
+        ? DateTime(widget.selectedDate!.year, widget.selectedDate!.month, 1)
+        : DateTime(DateTime.now().year, DateTime.now().month, 1);
+
+    final bool rawDateChanged = _lastRawSelectedDate != widget.selectedDate;
+    final bool viewChanged = _lastView != widget.view;
+
+    final availableTargets = _getComparisonTargets(baselineDate, isMonthly);
+    if (viewChanged || rawDateChanged || _customTargetDate == null || !availableTargets.contains(_customTargetDate)) {
       _customTargetDate = availableTargets.first;
       _lastView = widget.view;
+      _lastRawSelectedDate = widget.selectedDate;
     }
 
     final targetYear = _customTargetDate!.year;
     final targetMonth = isMonthly ? _customTargetDate!.month : null;
 
-    final comparisonAsync = ref.watch(cashFlowComparisonTimelineProvider(targetYear, targetMonth));
+    final comparisonAsync = ref.watch(cashFlowComparisonTimelineProvider(
+      baselineYear: baselineDate.year,
+      baselineMonth: isMonthly ? baselineDate.month : null,
+      targetYear: targetYear,
+      targetMonth: targetMonth,
+    ));
     final formatter = ref.watch(currencyFormatterProvider);
 
     return comparisonAsync.when(
@@ -80,18 +95,21 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
           createSeries(dto.targetMonthData, dto.targetMonthLabel, Colors.grey, true),
         ];
 
+        final String subheaderText =
+            isMonthly ? DateFormat('MMMM yyyy').format(baselineDate) : DateFormat('yyyy').format(baselineDate);
+
         return SproutLineChart(
           series: series,
-          showDateInTooltip: false,
+          showDateInTooltip: isMonthly ? false : true,
           chartRange: isMonthly ? ChartRangeEnum.oneMonth : ChartRangeEnum.oneYear,
-          showXAxis: false,
+          showXAxis: isMonthly ? false : true,
           showYAxis: true,
           showGrid: true,
           showZeroLine: false,
           showLegend: false,
           header: ChartHeader(
             title: "Spending Trend",
-            subheader: series[0].label,
+            subheader: subheaderText,
             right: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

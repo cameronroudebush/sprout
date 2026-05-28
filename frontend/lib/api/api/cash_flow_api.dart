@@ -22,10 +22,14 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
+  /// * [num] baselineYear (required):
+  ///
   /// * [num] targetYear (required):
   ///
+  /// * [num] baselineMonth:
+  ///
   /// * [num] targetMonth:
-  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(num targetYear, { num? targetMonth, }) async {
+  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/comparison-timeline';
 
@@ -36,7 +40,11 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+      queryParams.addAll(_queryParams('', 'baselineYear', baselineYear));
       queryParams.addAll(_queryParams('', 'targetYear', targetYear));
+    if (baselineMonth != null) {
+      queryParams.addAll(_queryParams('', 'baselineMonth', baselineMonth));
+    }
     if (targetMonth != null) {
       queryParams.addAll(_queryParams('', 'targetMonth', targetMonth));
     }
@@ -59,11 +67,15 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
+  /// * [num] baselineYear (required):
+  ///
   /// * [num] targetYear (required):
   ///
+  /// * [num] baselineMonth:
+  ///
   /// * [num] targetMonth:
-  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(num targetYear, { num? targetMonth, }) async {
-    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(targetYear,  targetMonth: targetMonth, );
+  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, }) async {
+    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(baselineYear, targetYear,  baselineMonth: baselineMonth, targetMonth: targetMonth, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

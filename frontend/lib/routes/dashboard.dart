@@ -38,7 +38,7 @@ class DashboardPage extends ConsumerWidget {
 
   /// Desktop gets a robust 2-column masonry display utilizing flex factors
   Widget _buildDesktop(BuildContext context, WidgetRef ref) {
-    final topCategoryCount = 7;
+    final topCategoryCount = 10;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,7 +97,7 @@ class DashboardPage extends ConsumerWidget {
                               legendPosition: PieLegendPosition.bottom,
                               topN: topCategoryCount,
                               header: ChartHeader(
-                                title: "Top $topCategoryCount Categories",
+                                title: "Top $topCategoryCount Purchase Categories",
                               ),
                             ),
                           ),

@@ -2627,8 +2627,24 @@
         "operationId": "CashFlowController_getComparisonTimeline",
         "parameters": [
           {
+            "name": "baselineYear",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "targetYear",
             "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "baselineMonth",
+            "required": false,
             "in": "query",
             "schema": {
               "type": "number"
