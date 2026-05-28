@@ -11,7 +11,10 @@ import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
+import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
+import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
 import 'package:sprout/shared/widgets/charts/range_selector.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// This page displays an overview of all holdings related to the current user
@@ -176,66 +179,83 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
     );
     final formatter = ref.watch(currencyFormatterProvider);
     final userConfig = ref.watch(userConfigProvider).value;
+    return SproutLayoutBuilder((isDesktop, context, constraints) {
+      return SproutCard(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: timelineAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(child: Text("Error: $err")),
+            data: (points) {
+              final dataMap = {for (final p in points) p.date: p.value};
+              final filteredHistorical = LineChartDataProcessor.filterHistoricalData(
+                  dataMap, userConfig?.netWorthRange ?? ChartRangeEnum.oneDay);
+              final data = LineChartDataProcessor.prepareChartData(filteredHistorical);
 
-    return SproutCard(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: timelineAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text("Error: $err")),
-          data: (points) {
-            final chartData = {for (final p in points) p.date: p.value};
-            return Column(
-              children: [
-                Row(
-                  spacing: 4,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(child: SizedBox.shrink()),
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            selectedHoldingAccount?.name ?? "Unknown account",
-                            style: theme.textTheme.labelMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            _selectedHolding!.symbol,
-                            style: theme.textTheme.labelMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [ChartRangeSelector()],
-                      ),
-                    ),
-                  ],
+              final List<SproutChartSeries> seriesList = [
+                SproutChartSeries(
+                  data: data,
+                  label: _selectedHolding!.symbol,
+                  config: LineSeriesConfig(color: theme.colorScheme.primary),
                 ),
-                SproutLineChart(
-                  height: 125,
-                  data: chartData,
-                  chartRange: userConfig?.netWorthRange ?? ChartRangeEnum.oneMonth,
-                  showYAxis: true,
-                  showXAxis: true,
-                  applyPosNegColors: true,
-                  formatValue: (val) => formatter.format(val, compact: true),
-                ),
-              ],
-            );
-          },
+              ];
+
+              if (data.spots.isNotEmpty) seriesList.add(LineChartDataProcessor.computeAverageData(data));
+
+              return Column(
+                children: [
+                  Row(
+                    spacing: 4,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Expanded(child: SizedBox.shrink()),
+                      Expanded(
+                        flex: 4,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              selectedHoldingAccount?.name ?? "Unknown account",
+                              style: theme.textTheme.labelMedium,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              _selectedHolding!.symbol,
+                              style: theme.textTheme.labelMedium,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [ChartRangeSelector()],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                      height: isDesktop ? 200 : 150,
+                      child: SproutLineChart(
+                        series: seriesList,
+                        chartRange: userConfig?.netWorthRange ?? ChartRangeEnum.oneMonth,
+                        showYAxis: true,
+                        showXAxis: true,
+                        showGrid: true,
+                        showLegend: false,
+                        formatValue: (val) => formatter.format(val, compact: true),
+                      )),
+                ],
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

@@ -56,6 +56,6 @@ export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "Configuration for caching." })
   cache = new CacheConfig();
 
-  @ConfigurationMetadata.assign({ comment: "Configuration for brand fetch." })
+  @ConfigurationMetadata.assign({ comment: "Configuration for brandfetch." })
   brandFetch = new BrandFetchConfig();
 }

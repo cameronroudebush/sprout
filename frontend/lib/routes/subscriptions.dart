@@ -4,7 +4,6 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/subscriptions_calendar.dart';
 
@@ -18,23 +17,21 @@ class SubscriptionsPage extends ConsumerWidget {
     final formatter = ref.watch(currencyFormatterProvider);
     final subsAsync = ref.watch(transactionSubscriptionsProvider);
 
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      return SingleChildScrollView(
-        child: SproutRouteWrapper(
-          maxWidth: 768, // Used to force square ratio
-          child: Column(
-            spacing: 4,
-            children: [
-              subsAsync.maybeWhen(
-                data: (subs) => subs.isEmpty ? const SizedBox.shrink() : _buildTotal(subs, theme, formatter),
-                orElse: () => const SizedBox.shrink(),
-              ),
-              const SubscriptionCalendarWidget(),
-            ],
-          ),
+    return SingleChildScrollView(
+      child: SproutRouteWrapper(
+        size: SproutRouteSize.large,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            subsAsync.maybeWhen(
+              data: (subs) => subs.isEmpty ? const SizedBox.shrink() : _buildTotal(subs, theme, formatter),
+              orElse: () => const SizedBox.shrink(),
+            ),
+            const SubscriptionCalendarWidget(),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   /// Builds the total widget that shows how much our monthly cost of subscriptions are and how many of them we have

@@ -1,12 +1,15 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/shared/widgets/logo.dart';
 import 'package:sprout/user/models/extensions/user_extensions.dart';
+import 'package:sprout/user/widgets/user_avatar.dart';
 
 /// A widget that is used to render the side navigation for Sprout. Only used on desktop displays.
 class SproutSideNav extends ConsumerWidget {
@@ -46,84 +49,106 @@ class _InternalSideNavContent extends ConsumerWidget {
     final currentPath = ref.watch(currentRouteProvider);
 
     final navItems = authenticatedRoutes.where((page) => page.showInSidebar).toList();
+    final groupedItems = groupBy<SproutRoute, String?>(navItems, (route) => route.category);
 
     return Container(
-        color: theme.appBarTheme.backgroundColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+      color: theme.appBarTheme.backgroundColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                const SizedBox.shrink(),
+                const SproutLogo(224),
+                const SizedBox.shrink(),
+              ],
+            ),
+          ),
+          Divider(color: theme.dividerColor),
+          const NotificationBell(isDesktop: true),
+          Divider(color: theme.dividerColor),
+
+          // Scrollable Dynamic Grouped Sections
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: groupedItems.entries.map((entry) {
+                final categoryName = entry.key;
+                final routes = entry.value;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox.shrink(),
-                    const SproutLogo(224),
-                    const SizedBox.shrink(),
-                  ],
-                )),
-            Divider(color: theme.dividerColor),
-            const NotificationBell(isDesktop: true),
-            Divider(color: theme.dividerColor),
-
-            // Navigation Items
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: navItems.length,
-                itemBuilder: (context, index) {
-                  final page = navItems[index];
-                  final isSelected = currentPath == page.path;
-
-                  final borderRadius = 12.0;
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: InkWell(
-                      onTap: () => NavigationProvider.redirect(page.path),
-                      borderRadius: BorderRadius.circular(borderRadius),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
-                          borderRadius: BorderRadius.circular(borderRadius),
-                        ),
-                        child: Row(
-                          spacing: 12,
-                          children: [
-                            // Route Icon
-                            Icon(
-                              page.icon,
-                              color: isSelected
-                                  ? theme.colorScheme.onSecondaryContainer
-                                  : theme.colorScheme.onSurfaceVariant,
-                            ),
-                            // Route name
-                            Text(
-                              page.label,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: isSelected
-                                    ? theme.colorScheme.onSecondaryContainer
-                                    : theme.colorScheme.onSurfaceVariant,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              ),
-                              textAlign: TextAlign.start,
-                            ),
-                          ],
+                    // Render Category Header title if key value is defined
+                    if (categoryName != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 2, bottom: 6, top: 6),
+                        child: Text(
+                          categoryName,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
+
+                    // Render the corresponding navigation tiles
+                    ...routes.map((page) {
+                      final isSelected = currentPath == page.path;
+                      const borderRadius = 12.0;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: InkWell(
+                          onTap: () => NavigationProvider.redirect(page.path),
+                          borderRadius: BorderRadius.circular(borderRadius),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+                              borderRadius: BorderRadius.circular(borderRadius),
+                            ),
+                            child: Row(
+                              spacing: 12,
+                              children: [
+                                Icon(
+                                  page.icon,
+                                  color: isSelected
+                                      ? theme.colorScheme.onSecondaryContainer
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                Text(
+                                  page.label,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    color: isSelected
+                                        ? theme.colorScheme.onSecondaryContainer
+                                        : theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                );
+              }).toList(),
             ),
-            Divider(color: theme.dividerColor),
-            // User Profile Section
-            _UserProfileTile(authUser: authUser, onLogout: authNotifier.logout, currentPath: currentPath),
-          ],
-        ));
+          ),
+
+          Divider(color: theme.dividerColor),
+          // User Profile Section
+          _UserProfileTile(authUser: authUser, onLogout: authNotifier.logout, currentPath: currentPath),
+        ],
+      ),
+    );
   }
 }
 
@@ -164,15 +189,7 @@ class _UserProfileTile extends StatelessWidget {
               child: Row(
                 spacing: 12,
                 children: [
-                  // Avatar
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: theme.colorScheme.primary,
-                    child: Text(
-                      authUser?.prettyName[0].toUpperCase() ?? "",
-                      style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
-                    ),
-                  ),
+                  UserAvatar(authUser),
                   // User name
                   Expanded(
                     child: Column(

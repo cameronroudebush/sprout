@@ -9,13 +9,14 @@ class SproutRoute {
   final Widget Function(BuildContext, GoRouterState) builder;
   final bool showInSidebar;
   final bool showInBottomNav;
+  final String? category;
 
-  const SproutRoute({
-    required this.path,
-    required this.label,
-    required this.icon,
-    required this.builder,
-    this.showInSidebar = true,
-    this.showInBottomNav = false,
-  });
+  const SproutRoute(
+      {required this.path,
+      required this.label,
+      required this.icon,
+      required this.builder,
+      this.showInSidebar = true,
+      this.showInBottomNav = false,
+      this.category});
 }

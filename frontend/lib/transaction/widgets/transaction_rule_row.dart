@@ -70,8 +70,8 @@ class TransactionRuleRow extends ConsumerWidget {
       spacing: 4,
       children: [
         const Icon(Icons.arrow_right_alt, size: 16),
-        if (rule.categoryId != null) ...[
-          CategoryIcon(cat!, avatarSize: 16),
+        if (rule.categoryId != null && cat != null) ...[
+          CategoryIcon(cat, avatarSize: 16),
           Flexible(
             child: Text(cat.name, style: effectiveStyle, overflow: TextOverflow.ellipsis),
           ),

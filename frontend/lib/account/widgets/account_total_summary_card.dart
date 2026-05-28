@@ -4,7 +4,6 @@ import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/models/extensions/account_list_extensions.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/shared/widgets/card.dart';
 
 /// This widget renders the total Assets vs Debts across a progress bar and helps display
 ///   the value of each specific account type.
@@ -23,56 +22,69 @@ class TotalSummary extends ConsumerWidget {
     final totalDebts = accounts.totalDebts;
     final visualTotal = totalAssets + totalDebts;
 
-    return SproutCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          spacing: 12,
+    return Column(
+      spacing: 12,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _SummaryLabel(label: "Assets", amount: totalAssets, color: Colors.teal),
-                _SummaryLabel(
-                  label: "Debts",
-                  amount: totalDebts,
-                  color: Colors.redAccent,
-                  isEnd: true,
-                ),
-              ],
+            _SummaryLabel(label: "Assets", amount: totalAssets, color: Colors.teal),
+            _SummaryLabel(
+              label: "Debts",
+              amount: totalDebts,
+              color: Colors.redAccent,
+              isEnd: true,
             ),
-            _buildProgressBar(theme, visualTotal, formatter),
           ],
         ),
-      ),
+        _buildProgressBar(theme, visualTotal, formatter),
+      ],
     );
   }
 
   /// Builds the multi-segmented progress bar
   Widget _buildProgressBar(ThemeData theme, num total, CurrencyFormatter formatter) {
-    return Container(
-      height: 10,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Row(
-        children: AccountExtensions.groupConfig.entries.map((entry) {
-          // Call the extension method for each segment
-          final amount = accounts.sumByType(entry.key);
-          return _barSegment(amount, total, entry.value.color);
-        }).toList(),
-      ),
+    final visibleSegments = AccountExtensions.groupConfig.entries
+        .map((entry) => (entry: entry, amount: accounts.sumByType(entry.key)))
+        .where((data) => data.amount > 0)
+        .toList();
+
+    return Padding(
+      padding: EdgeInsetsGeometry.symmetric(horizontal: 2),
+      child: Container(
+          height: 10,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Row(
+            spacing: 4,
+            children: visibleSegments.map((data) {
+              return _barSegment(data.amount, total, data.entry.value.color);
+            }).toList(),
+          )),
     );
   }
 
   /// Constructs an individual segment with flex proportional to its value
   Widget _barSegment(num value, num total, Color color) {
+    // Define a minimum weight to ensure the segment is always visible
+    const int minFlex = 20;
+
     if (value <= 0 || total <= 0) return const SizedBox.shrink();
+
+    // Calculate proportional flex, but ensure it never falls below minFlex
+    int calculatedFlex = (value / total * 1000).toInt();
+    int finalFlex = calculatedFlex < minFlex ? minFlex : calculatedFlex;
+
     return Expanded(
-      flex: (value / total * 1000).toInt().clamp(1, 1000),
-      child: Container(color: color),
+      flex: finalFlex,
+      child: Container(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
     );
   }
 }

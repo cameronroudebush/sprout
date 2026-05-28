@@ -194,6 +194,8 @@ class ApiClient {
           return AccountSubTypeEnumTypeTransformer().decode(value);
         case 'AccountTypeEnum':
           return AccountTypeEnumTypeTransformer().decode(value);
+        case 'CashFlowComparisonDTO':
+          return CashFlowComparisonDTO.fromJson(value);
         case 'CashFlowSpending':
           return CashFlowSpending.fromJson(value);
         case 'CashFlowStats':
@@ -212,6 +214,10 @@ class ApiClient {
           return ChatRequestDTO.fromJson(value);
         case 'CurrencyOptionsEnum':
           return CurrencyOptionsEnumTypeTransformer().decode(value);
+        case 'DailySpendingCalendarResponseDTO':
+          return DailySpendingCalendarResponseDTO.fromJson(value);
+        case 'DailySpendingItem':
+          return DailySpendingItem.fromJson(value);
         case 'EmailUpdateFrequencyEnum':
           return EmailUpdateFrequencyEnumTypeTransformer().decode(value);
         case 'EntityHistory':
@@ -228,6 +234,8 @@ class ApiClient {
           return Holding.fromJson(value);
         case 'Institution':
           return Institution.fromJson(value);
+        case 'InstitutionIconType':
+          return InstitutionIconTypeTypeTransformer().decode(value);
         case 'MarketIndexDto':
           return MarketIndexDto.fromJson(value);
         case 'MobileTokenExchangeDto':
@@ -276,6 +284,8 @@ class ApiClient {
           return TransactionSubscription.fromJson(value);
         case 'UnsecureAppConfiguration':
           return UnsecureAppConfiguration.fromJson(value);
+        case 'UpdateInstitutionRequest':
+          return UpdateInstitutionRequest.fromJson(value);
         case 'UpdateUserDto':
           return UpdateUserDto.fromJson(value);
         case 'User':

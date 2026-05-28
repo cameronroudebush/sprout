@@ -24,7 +24,7 @@ class APIConfig {
   /// Tracks if email is enabled and functional
   bool emailEnabled;
 
-  /// The brand fetch client ID used for displaying logos.
+  /// The brandfetch client ID used for displaying logos.
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated

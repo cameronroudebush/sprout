@@ -1,10 +1,12 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { DailySpendingCalendarResponseDTO } from "@backend/cash-flow/model/api/daily.spending.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, Query } from "@nestjs/common";
+import { Controller, Get, ParseIntPipe, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { format } from "date-fns";
 import { CashFlowService } from "./cash.flow.service";
+import { CashFlowComparisonDTO } from "./model/api/cash.flow.comparison.dto";
 import { CashFlowSpending } from "./model/api/cash.flow.spending.dto";
 import { CashFlowStats } from "./model/api/cash.flow.stats.dto";
 import { CashFlowTrendStats } from "./model/api/cash.flow.trend.dto";
@@ -115,5 +117,41 @@ export class CashFlowController {
     const months = monthsQuery || 6; // Default to 6 months
     const categoriesLimit = categoriesLimitQuery || 4; // Default to top 4
     return this.cashFlowService.calculateMonthlySpending(user, months, categoriesLimit);
+  }
+
+  @Get("comparison-timeline")
+  @ApiOperation({ summary: "Get spending progression over time for comparison." })
+  @ApiOkResponse({ type: CashFlowComparisonDTO })
+  @ApiQuery({ name: "targetMonth", required: false, type: Number })
+  async getComparisonTimeline(@CurrentUser() user: User, @Query("targetYear", ParseIntPipe) targetYear: number, @Query("targetMonth") targetMonth?: string) {
+    const now = new Date();
+    const parsedMonth = targetMonth ? parseInt(targetMonth, 10) : undefined;
+    const isMonthlyMode = parsedMonth !== undefined;
+
+    // Current scope handles either this month (e.g., now.getMonth() + 1) or this complete year (undefined)
+    const [current, target] = await Promise.all([
+      this.cashFlowService.getSpendingTimeline(user, now.getFullYear(), isMonthlyMode ? now.getMonth() + 1 : undefined),
+      this.cashFlowService.getSpendingTimeline(user, targetYear, parsedMonth),
+    ]);
+
+    // Determine label layout text formats responsively
+    const currentLabel = isMonthlyMode ? format(now, "MMM yyyy") : format(now, "yyyy");
+    const targetLabel = isMonthlyMode ? format(new Date(targetYear, parsedMonth - 1), "MMM yyyy") : format(new Date(targetYear, 0), "yyyy");
+
+    return new CashFlowComparisonDTO(current, target, currentLabel, targetLabel);
+  }
+
+  @Get("daily-calendar-spending")
+  @ApiOperation({
+    summary: "Get discrete daily spending totals for a target month canvas calendar widget view.",
+  })
+  @ApiOkResponse({
+    description: "Map of days to spending amounts returned successfully.",
+    type: DailySpendingCalendarResponseDTO,
+  })
+  @ApiQuery({ name: "year", required: true, type: Number })
+  @ApiQuery({ name: "month", required: true, type: Number })
+  async getDailyCalendarSpending(@CurrentUser() user: User, @Query("year", ParseIntPipe) year: number, @Query("month", ParseIntPipe) month: number) {
+    return await this.cashFlowService.getDailySpendingMap(user, year, month);
   }
 }

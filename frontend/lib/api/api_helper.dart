@@ -70,6 +70,9 @@ String parameterToString(dynamic value) {
   if (value is EmailUpdateFrequencyEnum) {
     return EmailUpdateFrequencyEnumTypeTransformer().encode(value).toString();
   }
+  if (value is InstitutionIconType) {
+    return InstitutionIconTypeTypeTransformer().encode(value).toString();
+  }
   if (value is ProviderTypeEnum) {
     return ProviderTypeEnumTypeTransformer().encode(value).toString();
   }

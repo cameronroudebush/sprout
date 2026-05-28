@@ -17,7 +17,10 @@ class TransactionRow extends ConsumerWidget {
   /// If we should be allowed to click this row to open the dialog
   final bool allowDialog;
 
-  const TransactionRow(this.transaction, {super.key, this.allowDialog = true});
+  /// An icon to use instead
+  final Widget? icon;
+
+  const TransactionRow(this.transaction, {super.key, this.allowDialog = true, this.icon});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,7 +56,7 @@ class TransactionRow extends ConsumerWidget {
             spacing: 16,
             children: [
               // Category
-              CategoryIcon(cat, avatarSize: 16),
+              icon ?? CategoryIcon(cat, avatarSize: 16),
               // Description
               Expanded(
                 child: Column(

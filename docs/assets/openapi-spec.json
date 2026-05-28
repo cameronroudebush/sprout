@@ -283,225 +283,6 @@
         "tags": ["Category"]
       }
     },
-    "/cash-flow/sankey": {
-      "get": {
-        "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
-        "operationId": "CashFlowController_getSankey",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "description": "The year we want the cash flow data for.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "month",
-            "required": false,
-            "in": "query",
-            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "day",
-            "required": false,
-            "in": "query",
-            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "accountId",
-            "required": false,
-            "in": "query",
-            "description": "The ID of the account to retrieve transactions from.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sankey built successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SankeyData"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get sankey data by query.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/stats": {
-      "get": {
-        "description": "Retrieves stats for the users cash flow in more basic terms. Tracking how much went out and how much came in.",
-        "operationId": "CashFlowController_getStats",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "description": "The year we want the cash flow data for.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "month",
-            "required": false,
-            "in": "query",
-            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "day",
-            "required": false,
-            "in": "query",
-            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "accountId",
-            "required": false,
-            "in": "query",
-            "description": "The ID of the account to retrieve transactions from.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Cash flow calculated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CashFlowStats"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get cash flow stats data by query.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/trend": {
-      "get": {
-        "description": "Returns monthly trend breakdown for the requested look-back period.",
-        "operationId": "CashFlowController_getTrend",
-        "parameters": [
-          {
-            "name": "months",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CashFlowTrendStats"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get cash flow trend by month.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/spending": {
-      "get": {
-        "description": "Returns monthly spending breakdown for the requested look-back period, isolating top N categories.",
-        "operationId": "CashFlowController_getSpending",
-        "parameters": [
-          {
-            "name": "months",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "categories",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Spending calculated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CashFlowSpending"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get cash flow spending stats per month.",
-        "tags": ["Cash Flow"]
-      }
-    },
     "/config": {
       "get": {
         "description": "Returns the app configuration for the frontend to be able to reference.",
@@ -2621,6 +2402,366 @@
         "summary": "Merge two accounts.",
         "tags": ["Account"]
       }
+    },
+    "/cash-flow/sankey": {
+      "get": {
+        "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
+        "operationId": "CashFlowController_getSankey",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "description": "The year we want the cash flow data for.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sankey built successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SankeyData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get sankey data by query.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/stats": {
+      "get": {
+        "description": "Retrieves stats for the users cash flow in more basic terms. Tracking how much went out and how much came in.",
+        "operationId": "CashFlowController_getStats",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "description": "The year we want the cash flow data for.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cash flow calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow stats data by query.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/trend": {
+      "get": {
+        "description": "Returns monthly trend breakdown for the requested look-back period.",
+        "operationId": "CashFlowController_getTrend",
+        "parameters": [
+          {
+            "name": "months",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CashFlowTrendStats"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow trend by month.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/spending": {
+      "get": {
+        "description": "Returns monthly spending breakdown for the requested look-back period, isolating top N categories.",
+        "operationId": "CashFlowController_getSpending",
+        "parameters": [
+          {
+            "name": "months",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "categories",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Spending calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowSpending"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow spending stats per month.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/comparison-timeline": {
+      "get": {
+        "operationId": "CashFlowController_getComparisonTimeline",
+        "parameters": [
+          {
+            "name": "targetYear",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "targetMonth",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowComparisonDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get spending progression over time for comparison.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/daily-calendar-spending": {
+      "get": {
+        "operationId": "CashFlowController_getDailyCalendarSpending",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Map of days to spending amounts returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailySpendingCalendarResponseDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get discrete daily spending totals for a target month canvas calendar widget view.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/institution/{id}/update": {
+      "patch": {
+        "description": "Updates properties supported by the DTO for the specific institution.",
+        "operationId": "InstitutionController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInstitutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Institution updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Institution"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Institution with the specified ID not found or does not belong to the user."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update institution.",
+        "tags": ["Institution"]
+      }
     }
   },
   "info": {
@@ -2689,6 +2830,10 @@
     {
       "name": "Provider",
       "description": "Provides endpoints for the various sources that can provide data to Sprout."
+    },
+    {
+      "name": "Institution",
+      "description": "Endpoints for getting institution's related to accounts in Sprout."
     }
   ],
   "servers": [],
@@ -2735,204 +2880,6 @@
         },
         "required": ["categoryCount", "colorMapping"]
       },
-      "SankeyLink": {
-        "type": "object",
-        "properties": {
-          "source": {
-            "type": "string"
-          },
-          "target": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number"
-          },
-          "description": {
-            "type": "string",
-            "description": "A way to help describe what this link is"
-          }
-        },
-        "required": ["source", "target", "value"]
-      },
-      "SankeyData": {
-        "type": "object",
-        "properties": {
-          "colors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "nodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SankeyLink"
-            }
-          }
-        },
-        "required": ["colors", "nodes", "links"]
-      },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "categoryId": {
-            "type": "string",
-            "description": "The Id of the category related to this transaction, if set."
-          },
-          "accountId": {
-            "type": "string",
-            "description": "The Id of the account related to this transaction."
-          },
-          "amount": {
-            "type": "number",
-            "description": "The numeric value converted to the user's preferred currency format. This overrides the original amount property.",
-            "nullable": false
-          },
-          "description": {
-            "type": "string"
-          },
-          "pending": {
-            "type": "boolean"
-          },
-          "posted": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date this transaction posted"
-          },
-          "extra": {
-            "type": "object",
-            "description": "Any extra data that we want to store as JSON"
-          },
-          "manuallyEdited": {
-            "type": "boolean",
-            "description": "Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it.",
-            "default": false
-          }
-        },
-        "required": ["id", "accountId", "amount", "description", "pending", "posted"]
-      },
-      "CashFlowStats": {
-        "type": "object",
-        "properties": {
-          "totalExpense": {
-            "type": "number"
-          },
-          "totalIncome": {
-            "type": "number"
-          },
-          "count": {
-            "type": "number",
-            "description": "How many total transactions we have for this query"
-          },
-          "largestExpense": {
-            "description": "The largest expense we had for this time period",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Transaction"
-              }
-            ]
-          }
-        },
-        "required": ["totalExpense", "totalIncome", "count"]
-      },
-      "CashFlowTrendStats": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string",
-            "description": "The label for the X-axis (e.g., 'Jan', 'Feb')"
-          },
-          "topValue": {
-            "type": "number",
-            "description": "Total income for the month (top bar)"
-          },
-          "bottomValue": {
-            "type": "number",
-            "description": "Total expense for the month as an absolute value (bottom bar)"
-          },
-          "trendValue": {
-            "type": "number",
-            "description": "Net cash flow (Income - Expense) for the trend line"
-          }
-        },
-        "required": ["label", "topValue", "bottomValue", "trendValue"]
-      },
-      "MonthlyCategoryData": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the category"
-          },
-          "amount": {
-            "type": "number",
-            "description": "Total amount spent in this category for this month"
-          },
-          "color": {
-            "type": "string",
-            "description": "Color for the category. Will be a hex code."
-          }
-        },
-        "required": ["name", "amount", "color"]
-      },
-      "MonthlySpendingStats": {
-        "type": "object",
-        "properties": {
-          "categories": {
-            "description": "A breakdown of the top categories for the month based on the request",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlyCategoryData"
-            }
-          },
-          "monthLabel": {
-            "type": "string",
-            "description": "Month label"
-          },
-          "date": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date, just used for sorting"
-          },
-          "totalSpending": {
-            "type": "number",
-            "description": "Total spending for the month"
-          },
-          "periodAverage": {
-            "type": "number",
-            "description": "Average spending across the requested period (for the trend line)"
-          }
-        },
-        "required": ["categories", "monthLabel", "date", "totalSpending", "periodAverage"]
-      },
-      "CashFlowSpending": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlySpendingStats"
-            }
-          },
-          "topCategoryNames": {
-            "description": "The list of top categories identified across the months.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": ["data", "topCategoryNames"]
-      },
       "APIConfig": {
         "type": "object",
         "properties": {
@@ -2946,7 +2893,7 @@
           },
           "brandFetchClientId": {
             "type": "string",
-            "description": "The brand fetch client ID used for displaying logos."
+            "description": "The brandfetch client ID used for displaying logos."
           }
         },
         "required": ["chatKeyProvidedInBackend", "emailEnabled"]
@@ -3201,11 +3148,25 @@
         ],
         "description": "The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA."
       },
+      "InstitutionIconType": {
+        "type": "string",
+        "enum": ["icon", "symbol"],
+        "description": "The asset variant variant to request from Brandfetch (icon or symbol)"
+      },
       "Institution": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
+          },
+          "iconType": {
+            "description": "The asset variant variant to request from Brandfetch (icon or symbol)",
+            "default": "icon",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InstitutionIconType"
+              }
+            ]
           },
           "url": {
             "type": "string",
@@ -3219,7 +3180,7 @@
             "description": "If this institution has connection errors and needs fixed"
           }
         },
-        "required": ["id", "url", "name", "hasError"]
+        "required": ["id", "iconType", "url", "name", "hasError"]
       },
       "Account": {
         "type": "object",
@@ -3422,6 +3383,48 @@
           }
         },
         "required": ["event"]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "The Id of the category related to this transaction, if set."
+          },
+          "accountId": {
+            "type": "string",
+            "description": "The Id of the account related to this transaction."
+          },
+          "amount": {
+            "type": "number",
+            "description": "The numeric value converted to the user's preferred currency format. This overrides the original amount property.",
+            "nullable": false
+          },
+          "description": {
+            "type": "string"
+          },
+          "pending": {
+            "type": "boolean"
+          },
+          "posted": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date this transaction posted"
+          },
+          "extra": {
+            "type": "object",
+            "description": "Any extra data that we want to store as JSON"
+          },
+          "manuallyEdited": {
+            "type": "boolean",
+            "description": "Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it.",
+            "default": false
+          }
+        },
+        "required": ["id", "accountId", "amount", "description", "pending", "posted"]
       },
       "TransactionSubscription": {
         "type": "object",
@@ -3867,6 +3870,234 @@
           }
         },
         "required": ["sourceId"]
+      },
+      "SankeyLink": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "description": "A way to help describe what this link is"
+          }
+        },
+        "required": ["source", "target", "value"]
+      },
+      "SankeyData": {
+        "type": "object",
+        "properties": {
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SankeyLink"
+            }
+          }
+        },
+        "required": ["colors", "nodes", "links"]
+      },
+      "CashFlowStats": {
+        "type": "object",
+        "properties": {
+          "totalExpense": {
+            "type": "number"
+          },
+          "totalIncome": {
+            "type": "number"
+          },
+          "count": {
+            "type": "number",
+            "description": "How many total transactions we have for this query"
+          },
+          "largestExpense": {
+            "description": "The largest expense we had for this time period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            ]
+          }
+        },
+        "required": ["totalExpense", "totalIncome", "count"]
+      },
+      "CashFlowTrendStats": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The label for the X-axis (e.g., 'Jan', 'Feb')"
+          },
+          "topValue": {
+            "type": "number",
+            "description": "Total income for the month (top bar)"
+          },
+          "bottomValue": {
+            "type": "number",
+            "description": "Total expense for the month as an absolute value (bottom bar)"
+          },
+          "trendValue": {
+            "type": "number",
+            "description": "Net cash flow (Income - Expense) for the trend line"
+          }
+        },
+        "required": ["label", "topValue", "bottomValue", "trendValue"]
+      },
+      "MonthlyCategoryData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Total amount spent in this category for this month"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color for the category. Will be a hex code."
+          }
+        },
+        "required": ["name", "amount", "color"]
+      },
+      "MonthlySpendingStats": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "description": "A breakdown of the top categories for the month based on the request",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyCategoryData"
+            }
+          },
+          "monthLabel": {
+            "type": "string",
+            "description": "Month label"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date, just used for sorting"
+          },
+          "totalSpending": {
+            "type": "number",
+            "description": "Total spending for the month"
+          },
+          "periodAverage": {
+            "type": "number",
+            "description": "Average spending across the requested period (for the trend line)"
+          }
+        },
+        "required": ["categories", "monthLabel", "date", "totalSpending", "periodAverage"]
+      },
+      "CashFlowSpending": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlySpendingStats"
+            }
+          },
+          "topCategoryNames": {
+            "description": "The list of top categories identified across the months.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["data", "topCategoryNames"]
+      },
+      "CashFlowComparisonDTO": {
+        "type": "object",
+        "properties": {
+          "currentMonthData": {
+            "description": "Daily cumulative spending for the current month",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          },
+          "targetMonthData": {
+            "description": "Daily cumulative spending for the target comparison month",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          },
+          "currentMonthLabel": {
+            "type": "string",
+            "description": "Label for the current month (e.g., 'May 2026')"
+          },
+          "targetMonthLabel": {
+            "type": "string",
+            "description": "Label for the target comparison month (e.g., 'Apr 2026')"
+          }
+        },
+        "required": ["currentMonthData", "targetMonthData", "currentMonthLabel", "targetMonthLabel"]
+      },
+      "DailySpendingItem": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "number",
+            "description": "The day of the month (1-31).",
+            "example": 15
+          },
+          "amount": {
+            "type": "number",
+            "description": "The total spending amount for this specific day.",
+            "example": 1450
+          }
+        },
+        "required": ["day", "amount"]
+      },
+      "DailySpendingCalendarResponseDTO": {
+        "type": "object",
+        "properties": {
+          "spending": {
+            "description": "List of days containing spending metrics for the target month.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailySpendingItem"
+            }
+          }
+        },
+        "required": ["spending"]
+      },
+      "UpdateInstitutionRequest": {
+        "type": "object",
+        "properties": {
+          "iconType": {
+            "description": "The preferred logo variant style for this institution.",
+            "example": "symbol",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InstitutionIconType"
+              }
+            ]
+          }
+        },
+        "required": ["iconType"]
       }
     }
   }

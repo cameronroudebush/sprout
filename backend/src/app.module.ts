@@ -1,5 +1,6 @@
 import { AccountModule } from "@backend/account/account.module";
 import { AuthModule } from "@backend/auth/auth.module";
+import { CashFlowModule } from "@backend/cash-flow/cash.flow.module";
 import { CategoryController } from "@backend/category/category.controller";
 import { CategoryService } from "@backend/category/category.service";
 import { ChatModule } from "@backend/chat/chat.module";
@@ -12,6 +13,7 @@ import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger
 import { DatabaseModule } from "@backend/database/database.module";
 import { EmailModule } from "@backend/email/email.module";
 import { HoldingModule } from "@backend/holding/holding.module";
+import { InstitutionModule } from "@backend/institution/institution.module";
 import { JobsModule } from "@backend/jobs/jobs.module";
 import { NetWorthModule } from "@backend/net-worth/net-worth.module";
 import { NotificationModule } from "@backend/notification/notification.module";
@@ -25,8 +27,6 @@ import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { KeyvCacheableMemory } from "cacheable";
-import { CashFlowController } from "./cash-flow/cash.flow.controller";
-import { CashFlowService } from "./cash-flow/cash.flow.service";
 
 @Module({
   imports: [
@@ -44,6 +44,8 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     TransactionModule,
     EmailModule,
     AccountModule,
+    CashFlowModule,
+    InstitutionModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -94,10 +96,9 @@ import { CashFlowService } from "./cash-flow/cash.flow.service";
     // Always initialize jobs last
     JobsModule,
   ],
-  controllers: [CoreController, CategoryController, CashFlowController],
+  controllers: [CoreController, CategoryController],
   providers: [
     CategoryService,
-    CashFlowService,
     SproutLogger,
     {
       provide: APP_GUARD,

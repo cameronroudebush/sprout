@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/firebase_provider.dart';
 import 'package:sprout/routes/util/router.dart';
+import 'package:sprout/shared/providers/splash_time_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/shared/widgets/error.dart';
 import 'package:sprout/shared/widgets/lifecycle_observer.dart';
@@ -16,15 +18,13 @@ Future<void> main() async {
   usePathUrlStrategy();
 
   final container = ProviderContainer();
-  // Setup firebase, using cached credentials as provided
   await container.read(firebaseProvider.notifier).configure();
-  // Setup widget provider
   await container.read(widgetSyncProvider.notifier).initializeBackground();
-  // Make sure the widget provider is syncing
+
   container.read(widgetSyncProvider);
-  // Make sure the user provider is tracked
   container.read(userProvider);
-  runApp(UncontrolledProviderScope(container: container, child: SproutApp()));
+
+  runApp(UncontrolledProviderScope(container: container, child: const SproutApp()));
 }
 
 /// The main app entrypoint
@@ -34,36 +34,62 @@ class SproutApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userConfigAsync = ref.watch(userConfigProvider);
+    final splashAsync = ref.watch(sproutSplashManagerProvider);
 
-    return userConfigAsync.when(
-      skipLoadingOnReload: true,
-      loading: () => Theme(
-          data: absoluteDarkTheme,
-          child: Directionality(textDirection: TextDirection.ltr, child: SproutLoadingIndicator())),
-      error: (error, stackTrace) => MaterialApp(
+    final isLoggingOut = ref.watch(authProvider.notifier).isLoggingOut;
+
+    final isLoading = userConfigAsync.isLoading || splashAsync.isLoading;
+    final hasError = userConfigAsync.hasError || splashAsync.hasError;
+
+    if (isLoading) {
+      final String loadingMessage;
+      if (isLoggingOut) {
+        loadingMessage = "Logging out...";
+      } else if (splashAsync.isLoading) {
+        loadingMessage = "Initializing...";
+      } else {
+        loadingMessage = "Loading user data...";
+      }
+
+      return Theme(
+        data: absoluteDarkTheme,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SproutLoadingIndicator(
+            message: loadingMessage,
+            animate: splashAsync.isLoading && !isLoggingOut,
+          ),
+        ),
+      );
+    }
+
+    if (hasError) {
+      final error = userConfigAsync.error ?? splashAsync.error ?? 'Unknown initialization error';
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: absoluteDarkTheme,
         home: SproutErrorPage(
           error: error,
           onRetry: () {
             ref.invalidate(userConfigProvider);
+            ref.invalidate(sproutSplashManagerProvider);
           },
         ),
-      ),
-      data: (_) {
-        final userConfig = ref.watch(userConfigProvider).value;
-        final userConfigNotifier = ref.read(userConfigProvider.notifier);
-        final theme = userConfigNotifier.activeTheme(userConfig);
-        final router = ref.watch(routerProvider);
+      );
+    }
 
-        return SproutLifecycleObserver(
-            child: MaterialApp.router(
-          routerConfig: router,
-          title: "Sprout",
-          theme: theme,
-          debugShowCheckedModeBanner: false,
-        ));
-      },
+    final userConfig = userConfigAsync.value;
+    final userConfigNotifier = ref.read(userConfigProvider.notifier);
+    final theme = userConfigNotifier.activeTheme(userConfig);
+    final router = ref.watch(routerProvider);
+
+    return SproutLifecycleObserver(
+      child: MaterialApp.router(
+        routerConfig: router,
+        title: "Sprout",
+        theme: theme,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

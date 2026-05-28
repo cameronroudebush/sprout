@@ -41,4 +41,4 @@ You can review the [documentation](https://sprout.croudebush.net/getting-started
 
 # Additional Information
 
-[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [📸 Screenshots](https://sprout.croudebush.net/images/mobile) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/getting-started) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)
+[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [📸 Screenshots](https://sprout.croudebush.net/features/mobile) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/getting-started) &nbsp;&nbsp;•&nbsp;&nbsp; [⚖️ License](https://github.com/cameronroudebush/sprout/blob/master/LICENSE.md) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)

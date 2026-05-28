@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/account_tab_item.dart';
-import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/account/widgets/account_merge_dialog.dart';
+import 'package:sprout/account/widgets/account_net_worth.dart';
 import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/institution/institution_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
-import 'package:sprout/net-worth/widgets/generic_net_worth.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/routes/transactions.dart';
@@ -137,19 +137,12 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
         child: _buildNav(tabs, theme),
       );
 
-      return Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Column(
-            children: [
-              if (isDesktop) navWidget,
-              Expanded(
-                child: IndexedStack(index: _selectedIndex, children: tabs.map((tab) => tab.child).toList()),
-              ),
-              if (!isDesktop) SafeArea(top: false, child: navWidget),
-            ],
-          ),
-        ),
+      return Column(
+        children: [
+          if (isDesktop) navWidget,
+          Expanded(child: IndexedStack(index: _selectedIndex, children: tabs.map((tab) => tab.child).toList())),
+          if (!isDesktop) SafeArea(top: false, child: navWidget),
+        ],
       );
     });
   }
@@ -255,16 +248,15 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-            child: GenericNetWorthWidget<AccountChartData>(
-              data: combinedData,
-              getValue: (_) => widget.account.balance,
-              getHistory: (data) => data.history,
-              getTimeline: (data) => data.timeline,
-              invert: widget.account.isDebt,
-            ),
-          ),
+          SizedBox(
+              height: 250,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                child: AccountNetWorthWidget(
+                  account: widget.account,
+                  combinedData: combinedData,
+                ),
+              ))
         ],
       ),
     );
@@ -273,6 +265,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   /// Builds the account overview information
   Widget _buildOverviewSection(ThemeData theme) {
     final account = widget.account;
+    final institution = account.institution; // Reference the nested institution
     final accountProvider = ref.read(accountsProvider.notifier);
     final zillowAsset =
         account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
@@ -302,42 +295,100 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
         // Top card
         _buildBalanceHeroCard(theme, combinedChartData),
         // Configuration
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
-            children: [
-              SproutCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    spacing: 8,
-                    children: [
-                      // Account type
+        ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(horizontal: 0),
+          children: [
+            SproutCard(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  spacing: 8,
+                  children: [
+                    // Account type Dropdown
+                    Row(
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: Text("Account Type", style: theme.textTheme.titleSmall),
+                        ),
+                        SizedBox(
+                          width: 240,
+                          child: DropdownButtonFormField<AccountTypeEnum>(
+                            value: account.type,
+                            isDense: true,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            ),
+                            items: AccountTypeEnum.values.map((type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type.value.toTitleCase, style: theme.textTheme.bodyMedium),
+                              );
+                            }).toList(),
+                            onChanged: (newType) {
+                              if (newType != null && newType != account.type) {
+                                setState(() => account.type = newType);
+                                accountProvider.edit(account);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Account sub type selector
+                    Row(
+                      spacing: 4,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "Account Sub-Type",
+                            style: theme.textTheme.titleSmall,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 240,
+                          child: AccountSubTypeSelect(
+                            account,
+                            onChanged: (newSubType) {
+                              account.subType = newSubType;
+                              accountProvider.edit(account);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Interest Rate Input (Only for Liabilities/Loans)
+                    if (account.type == AccountTypeEnum.loan || account.type == AccountTypeEnum.credit)
                       Row(
                         spacing: 8,
                         children: [
                           Expanded(
-                            child: Text("Account Type", style: theme.textTheme.titleSmall),
+                            child: Text(
+                              "Interest Rate",
+                              style: theme.textTheme.titleSmall,
+                            ),
                           ),
                           SizedBox(
-                            width: 240,
-                            child: DropdownButtonFormField<AccountTypeEnum>(
-                              value: account.type,
-                              isDense: true,
+                            width: 160,
+                            child: TextFormField(
+                              key: Key("${account.id}_rate_${account.interestRate}"),
+                              initialValue: account.interestRate?.toString(),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              textAlign: TextAlign.end,
                               decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.percent, size: 18),
                                 isDense: true,
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               ),
-                              items: AccountTypeEnum.values.map((type) {
-                                return DropdownMenuItem(
-                                  value: type,
-                                  child: Text(type.value.toTitleCase, style: theme.textTheme.bodyMedium),
-                                );
-                              }).toList(),
-                              onChanged: (newType) {
-                                if (newType != null && newType != account.type) {
-                                  setState(() => account.type = newType);
+                              onFieldSubmitted: (value) {
+                                final newVal = double.tryParse(value);
+                                if (newVal != account.interestRate) {
+                                  account.interestRate = newVal;
                                   accountProvider.edit(account);
                                 }
                               },
@@ -345,146 +396,130 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                           ),
                         ],
                       ),
-                      // Account sub type selector
-                      Row(
-                        spacing: 4,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "Account Sub-Type",
-                              style: theme.textTheme.titleSmall,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 240,
-                            child: AccountSubTypeSelect(
-                              account,
-                              onChanged: (newSubType) {
-                                account.subType = newSubType;
-                                accountProvider.edit(account);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
 
-                      // Interest Rate Input (Only for Liabilities/Loans)
-                      if (account.type == AccountTypeEnum.loan || account.type == AccountTypeEnum.credit)
-                        Row(
-                          spacing: 8,
+                    const Divider(),
+
+                    // Institution options for this account
+                    Padding(
+                        padding: EdgeInsetsGeometry.symmetric(horizontal: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Text(
-                                "Interest Rate",
-                                style: theme.textTheme.titleSmall,
-                              ),
+                              child: Text("Institution Logo Style", style: theme.textTheme.titleSmall),
                             ),
-                            SizedBox(
-                              width: 160,
-                              child: TextFormField(
-                                key: Key("${account.id}_rate_${account.interestRate}"),
-                                initialValue: account.interestRate?.toString(),
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                textAlign: TextAlign.end,
-                                decoration: InputDecoration(
-                                  prefixIcon: const Icon(Icons.percent, size: 18),
-                                  isDense: true,
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                ),
-                                onFieldSubmitted: (value) {
-                                  final newVal = double.tryParse(value);
-                                  if (newVal != account.interestRate) {
-                                    account.interestRate = newVal;
-                                    accountProvider.edit(account);
-                                  }
-                                },
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: InstitutionIconType.values.map((type) {
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Radio<InstitutionIconType>(
+                                      value: type,
+                                      groupValue: institution.iconType,
+                                      visualDensity: VisualDensity.compact,
+                                      onChanged: (value) async {
+                                        if (value == null || institution.iconType == value) return;
+                                        final oldType = institution.iconType;
+                                        setState(() => institution.iconType = value);
+                                        try {
+                                          await ref.read(institutionsProvider.notifier).updateIconType(
+                                                institution.id,
+                                                value,
+                                              );
+                                        } catch (e) {
+                                          setState(() => institution.iconType = oldType);
+                                          ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                                        }
+                                      },
+                                    ),
+                                    Text(type.value.toTitleCase, style: theme.textTheme.bodyMedium),
+                                  ],
+                                );
+                              }).toList(),
                             ),
                           ],
+                        )),
+
+                    const Divider(),
+
+                    // Static Read-Only Fields
+                    _buildStaticRow(theme, Icons.account_balance, "Provider", account.provider.toString()),
+
+                    const Divider(),
+
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      runSpacing: 8,
+                      spacing: 8,
+                      children: [
+                        // Merge Button
+                        FilledButton(
+                          onPressed: () async {
+                            showSproutPopup(
+                              context: context,
+                              builder: (ctx) => AccountMergeDialog(account),
+                            );
+                          },
+                          style: ThemeHelpers.secondaryButton,
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 8,
+                            children: [Icon(Icons.merge), Text("Merge Accounts")],
+                          ),
                         ),
-
-                      const Divider(),
-
-                      // Static Read-Only Fields
-                      _buildStaticRow(theme, Icons.account_balance, "Provider", account.provider.toString()),
-
-                      const Divider(),
-
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        runSpacing: 8,
-                        spacing: 8,
-                        children: [
-                          // Merge
+                        if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
                           FilledButton(
                             onPressed: () async {
-                              showSproutPopup(
-                                context: context,
-                                builder: (ctx) => AccountMergeDialog(account),
-                              );
+                              final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
                             },
-                            style: ThemeHelpers.secondaryButton,
-                            child: Row(
+                            style: ThemeHelpers.primaryButton,
+                            child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               spacing: 8,
-                              children: [Icon(Icons.merge), Text("Merge Accounts")],
+                              children: [Icon(Icons.house), Text("View on Zillow")],
                             ),
                           ),
-                          if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
-                            FilledButton(
-                              onPressed: () async {
-                                final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
-                                await launchUrl(url, mode: LaunchMode.externalApplication);
-                              },
-                              style: ThemeHelpers.primaryButton,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 8,
-                                children: [Icon(Icons.house), Text("View on Zillow")],
-                              ),
-                            ),
 
-                          // Delete
-                          FilledButton(
-                            onPressed: () {
-                              // Confirmation dialog
-                              showSproutPopup(
-                                context: context,
-                                builder: (ctx) => SproutBaseDialogWidget(
-                                  'Delete Account',
-                                  showCloseDialogButton: true,
-                                  closeButtonStyle: ThemeHelpers.primaryButton,
-                                  showSubmitButton: true,
-                                  submitButtonText: "Delete",
-                                  submitButtonStyle: ThemeHelpers.errorButton,
-                                  onSubmitClick: () async {
-                                    Navigator.of(context).pop();
-                                    await accountProvider.delete(account.id);
-                                    await NavigationProvider.redirect("/accounts");
-                                  },
-                                  child: Text(
-                                    "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
-                                    textAlign: TextAlign.center,
-                                  ),
+                        // Delete Button
+                        FilledButton(
+                          onPressed: () {
+                            showSproutPopup(
+                              context: context,
+                              builder: (ctx) => SproutBaseDialogWidget(
+                                'Delete Account',
+                                showCloseDialogButton: true,
+                                closeButtonStyle: ThemeHelpers.primaryButton,
+                                showSubmitButton: true,
+                                submitButtonText: "Delete",
+                                submitButtonStyle: ThemeHelpers.errorButton,
+                                onSubmitClick: () async {
+                                  Navigator.of(context).pop();
+                                  await accountProvider.delete(account.id);
+                                  await NavigationProvider.redirect("/accounts");
+                                },
+                                child: Text(
+                                  "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
+                                  textAlign: TextAlign.center,
                                 ),
-                              );
-                            },
-                            style: ThemeHelpers.errorButton,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              spacing: 8,
-                              children: [Icon(Icons.delete), Text("Delete")],
-                            ),
+                              ),
+                            );
+                          },
+                          style: ThemeHelpers.errorButton,
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 8,
+                            children: [Icon(Icons.delete), Text("Delete")],
                           ),
-                        ],
-                      )
-                    ],
-                  ),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );

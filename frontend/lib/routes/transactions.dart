@@ -106,23 +106,22 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ),
           ),
         Expanded(
-          child: masterAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text("Error: $err")),
-            data: (masterState) {
-              if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
-                return const Center(child: Text("No matching transactions found."));
-              }
+            child: masterAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text("Error: $err")),
+          data: (masterState) {
+            if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
+              return const Center(child: Text("No matching transactions found."));
+            }
 
-              return RefreshIndicator(
-                onRefresh: () async => await _fetchPage(reset: true),
-                child: widget.separateByDate
-                    ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
-                    : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
-              );
-            },
-          ),
-        ),
+            return RefreshIndicator(
+              onRefresh: () async => await _fetchPage(reset: true),
+              child: widget.separateByDate
+                  ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
+                  : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
+            );
+          },
+        )),
       ],
     );
   }
@@ -132,6 +131,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final grouped = transactions.groupListsBy((t) => DateTime(t.posted.year, t.posted.month, t.posted.day));
 
     return ListView.builder(
+      shrinkWrap: true,
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: grouped.length + (isLoadingMore ? 1 : 0),
@@ -177,6 +177,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget _buildSingleList(List<dynamic> transactions, bool isLoadingMore) {
     return SproutCard(
       child: ListView.separated(
+        shrinkWrap: true,
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: transactions.length + (isLoadingMore ? 1 : 0),

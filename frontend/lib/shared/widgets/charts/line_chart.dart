@@ -1,259 +1,108 @@
-import 'dart:math';
+import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
-import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
 
 // A record to hold the calculated min and max Y-axis values.
 typedef _YAxisBounds = ({double minY, double maxY});
 
-/// A line chart that displays the given data in a line chart format
+/// A line chart that displays data using the unified SproutChartSeries structure
 class SproutLineChart extends StatelessWidget {
-  /// The main title of the chart
-  final String? header;
-
-  /// Optional text displayed below the title
-  final String? subheader;
-
-  /// If we should wrap the chart and titles in a SproutCard
-  final bool showCard;
-
-  /// If the y axis number should be shown
-  final bool showYAxis;
-
-  /// If the x axis dates should be shown
-  final bool showXAxis;
-
-  /// If the grid should be shown as a background to this chart
-  final bool showGrid;
-  final bool drawVerticalGrid;
-
-  /// If we want a border around the chart
-  final bool showBorder;
-
-  /// The chart range to render of
+  final ChartHeader? header;
+  final List<SproutChartSeries> series;
   final ChartRangeEnum chartRange;
 
-  /// The data to render in this line chart
-  final Map<DateTime, num>? data;
-
-  /// An optional function to format the value displayed in the line chart
-  final String Function(num value)? formatValue;
-
-  /// An optional function to format the yAxis value. Takes precedence over [formatValue]
-  final String Function(num value)? formatYAxis;
-  final int? yAxisSize;
-
-  final double height;
-
-  /// If we should apply red for negative and green for positive colors instead of the usual scheme
-  final bool applyPosNegColors;
-
-  /// If we should show min/max values on the line chart
-  final bool showMinMax;
-
-  /// If we should show a dotted line at 0
+  final bool showYAxis;
+  final bool showXAxis;
+  final bool showGrid;
+  final bool drawVerticalGrid;
+  final bool showLegend;
   final bool showZeroLine;
+  final bool showDateInTooltip;
+
+  final String Function(num value)? formatValue;
+  final String Function(num value)? formatYAxis;
 
   const SproutLineChart({
     super.key,
-    required this.data,
+    required this.series,
     required this.chartRange,
     this.header,
-    this.subheader,
-    this.showCard = false,
     this.formatValue,
+    this.formatYAxis,
     this.showYAxis = false,
     this.showXAxis = false,
     this.showGrid = false,
-    this.showBorder = false,
-    this.height = 250,
-    this.applyPosNegColors = true,
-    this.showMinMax = true,
-    this.showZeroLine = true,
-    this.formatYAxis,
-    this.yAxisSize,
     this.drawVerticalGrid = true,
+    this.showLegend = true,
+    this.showZeroLine = true,
+    this.showDateInTooltip = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (data == null || data!.isEmpty) {
+    if (series.isEmpty || series.every((s) => s.data.spots.isEmpty)) {
       return const SizedBox.shrink();
     }
 
-    final filteredHistoricalData = LineChartDataProcessor.filterHistoricalData(data, chartRange);
-    final preparedData = LineChartDataProcessor.prepareChartData(filteredHistoricalData);
+    final theme = Theme.of(context);
 
-    Widget chartContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (header != null || subheader != null) _buildHeader(theme),
-        if (header != null || subheader != null) const SizedBox(height: 24),
+        if (header != null) header!,
+        const SizedBox(height: 16),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: LineChart(_buildLineChartData(preparedData, chartRange, theme), duration: Duration.zero),
+            child: LineChart(
+              _buildLineChartData(theme),
+              duration: Duration.zero,
+            ),
           ),
         ),
-      ],
-    );
-
-    if (showCard) {
-      return SproutCard(
-        applySizedBox: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(height: height, child: chartContent),
-        ),
-      );
-    }
-
-    return SizedBox(height: height, child: chartContent);
-  }
-
-  /// Builds the header with Title and Subheader matching the other visual components
-  Widget _buildHeader(ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (header != null)
-          Text(
-            header!,
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        if (subheader != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            subheader!,
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-          ),
+        if (showLegend && series.length > 1) ...[
+          const SizedBox(height: 12),
+          _buildLegend(theme),
         ],
       ],
     );
   }
 
-  /// Builds the widget for our necessary line chart by coordinating helper functions.
-  LineChartData _buildLineChartData(SproutLineChartData chartData, ChartRangeEnum selectedChartRange, ThemeData theme) {
-    final spots = chartData.spots;
-    final colorScheme = theme.colorScheme;
-    final positiveColor = applyPosNegColors ? Colors.green : colorScheme.primary;
-    final negativeColor = applyPosNegColors ? colorScheme.error : colorScheme.primary;
-    final yAxisBounds = _calculateYAxisBounds(spots);
-    final segments = _splitDataIntoSegments(spots);
-    final titlesData = _buildTitlesData(theme, chartData, selectedChartRange, yAxisBounds);
-    final touchData = _buildLineTouchData(theme, chartData, positiveColor, negativeColor);
-
-    return LineChartData(
-      minY: yAxisBounds.minY,
-      maxY: yAxisBounds.maxY,
-      minX: 0,
-      maxX: (spots.length - 1).toDouble(),
-      titlesData: titlesData,
-      lineTouchData: touchData,
-      gridData: FlGridData(
-        show: showGrid,
-        drawVerticalLine: drawVerticalGrid,
-        drawHorizontalLine: true,
-        getDrawingHorizontalLine: (_) => FlLine(
-          color: colorScheme.outline.withOpacity(0.15),
-          strokeWidth: 1,
-          dashArray: [4, 4],
-        ),
-        getDrawingVerticalLine: (_) => FlLine(
-          color: colorScheme.outline.withOpacity(0.15),
-          strokeWidth: 1,
-        ),
-      ),
-      borderData: FlBorderData(
-        show: showBorder,
-        border: Border.all(color: colorScheme.outline.withOpacity(0.3), width: 1),
-      ),
-      lineBarsData: [
-        // GREEN LINE (Positive)
-        LineChartBarData(
-          spots: segments.green,
-          color: positiveColor,
-          barWidth: 3,
-          isStrokeCapRound: true,
-          dotData: const FlDotData(show: false),
-          belowBarData: BarAreaData(
-            show: true,
-            color: positiveColor.withOpacity(0.2),
-            cutOffY: 0,
-            applyCutOffY: true,
-          ),
-        ),
-        // RED LINE (Negative)
-        LineChartBarData(
-          spots: segments.red,
-          color: negativeColor,
-          barWidth: 3,
-          isStrokeCapRound: true,
-          dotData: const FlDotData(show: false),
-          aboveBarData: BarAreaData(
-            show: true,
-            color: negativeColor.withOpacity(0.2),
-            cutOffY: 0,
-            applyCutOffY: true,
-          ),
-        ),
-      ],
-      extraLinesData: !showZeroLine
-          ? null
-          : ExtraLinesData(
-              horizontalLines: [
-                HorizontalLine(
-                  y: 0,
-                  color: colorScheme.outline.withOpacity(0.6),
-                  strokeWidth: 1.5,
-                  dashArray: [5, 5],
-                ),
-              ],
+  Widget _buildLegend(ThemeData theme) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 16,
+      runSpacing: 8,
+      children: series.map((s) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: s.config.color ?? theme.colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
             ),
+            const SizedBox(width: 6),
+            Text(s.label, style: theme.textTheme.bodySmall),
+          ],
+        );
+      }).toList(),
     );
   }
 
-  /// Calculates the min and max Y values with appropriate padding.
-  _YAxisBounds _calculateYAxisBounds(List<FlSpot> spots) {
-    final double actualMinY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
-    final double actualMaxY = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
-
-    if (actualMinY == actualMaxY) {
-      final value = actualMinY;
-      // If the value is 0, create a small default range. Otherwise, pad by 50%.
-      final padding = (value == 0) ? 1.0 : value.abs() * 0.5;
-      return (minY: value - padding, maxY: value + padding);
-    }
-
-    final double range = actualMaxY - actualMinY;
-    final double padding = range * 0.1;
-
-    double paddedMinY = actualMinY - padding;
-    double paddedMaxY = actualMaxY + padding;
-
-    // If the original min value was positive, ensure the padded min value does not cross the zero line and become negative.
-    if (actualMinY >= 0) {
-      paddedMinY = max(0, paddedMinY);
-    }
-
-    // If the original max value was negative, ensure the padded max value does not cross the zero line and become positive.
-    if (actualMaxY <= 0) {
-      paddedMaxY = min(0, paddedMaxY);
-    }
-    return (minY: paddedMinY, maxY: paddedMaxY);
-  }
-
-  /// Splits a list of spots into two lists: one for positive values (Green)
-  /// and one for negative values (Red).
-  /// Automatically calculates intersection points at Y=0 to ensure seamless connections.
+  /// Splits a single series dataset into distinct positive (green) and negative (red) segments.
+  /// Computes the exact mid-point intersection on the zero-axis when crossing Y boundaries.
   ({List<FlSpot> green, List<FlSpot> red}) _splitDataIntoSegments(List<FlSpot> spots) {
     if (spots.isEmpty) return (green: [], red: []);
 
@@ -264,70 +113,140 @@ class SproutLineChart extends StatelessWidget {
       final p1 = spots[i];
       final p2 = spots[i + 1];
 
-      // Both points are Positive (or Zero)
+      // Case 1: Both coordinates are positive or zero
       if (p1.y >= 0 && p2.y >= 0) {
         greenSpots.add(p1);
         greenSpots.add(p2);
-        // Add null to break the other line so it doesn't connect disparate segments
+        // Insert a null spot to break the continuous drawing stroke for the red line
         redSpots.add(FlSpot.nullSpot);
       }
-      // Both points are Negative
+      // Case 2: Both coordinates are negative
       else if (p1.y < 0 && p2.y < 0) {
         redSpots.add(p1);
         redSpots.add(p2);
+        // Insert a null spot to break the continuous drawing stroke for the green line
         greenSpots.add(FlSpot.nullSpot);
       }
-      // Line crosses Zero (Positive to Negative)
+      // Case 3: Crossing from positive down to negative
       else if (p1.y >= 0 && p2.y < 0) {
-        // Calculate the exact X where Y=0
         final t = p1.y / (p1.y - p2.y);
         final xZero = p1.x + (p2.x - p1.x) * t;
         final zeroPoint = FlSpot(xZero, 0);
 
-        // Finish Green Segment
         greenSpots.add(p1);
         greenSpots.add(zeroPoint);
-        greenSpots.add(FlSpot.nullSpot); // End Green line here
+        greenSpots.add(FlSpot.nullSpot); // Cut green line here
 
-        // Start Red Segment
-        redSpots.add(FlSpot.nullSpot); // Start Red line here
-        redSpots.add(zeroPoint);
+        redSpots.add(FlSpot.nullSpot);
+        redSpots.add(zeroPoint); // Start red line right at the zero crossing
         redSpots.add(p2);
       }
-      // Line crosses Zero (Negative to Positive)
+      // Case 4: Crossing from negative up to positive
       else if (p1.y < 0 && p2.y >= 0) {
-        final t = p1.y / (p1.y - p2.y); // p1.y is negative, this math still works
+        final t = p1.y / (p1.y - p2.y);
         final xZero = p1.x + (p2.x - p1.x) * t;
         final zeroPoint = FlSpot(xZero, 0);
 
-        // Finish Red Segment
         redSpots.add(p1);
         redSpots.add(zeroPoint);
-        redSpots.add(FlSpot.nullSpot);
+        redSpots.add(FlSpot.nullSpot); // Cut red line here
 
-        // Start Green Segment
         greenSpots.add(FlSpot.nullSpot);
-        greenSpots.add(zeroPoint);
+        greenSpots.add(zeroPoint); // Start green line right at the zero crossing
         greenSpots.add(p2);
       }
     }
-
     return (green: greenSpots, red: redSpots);
   }
 
-  /// Configures the titles (labels) for the X and Y axes.
-  FlTitlesData _buildTitlesData(
-    ThemeData theme,
-    SproutLineChartData chartData,
-    ChartRangeEnum selectedChartRange,
-    _YAxisBounds yAxisBounds,
-  ) {
-    final spots = chartData.spots;
+  /// Builds the top-level LineChartData model configurations by passing individual series styles.
+  LineChartData _buildLineChartData(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    final allSpots = series.expand((s) => s.data.spots).toList();
+    final yAxisBounds = _calculateYAxisBounds(allSpots);
+    final maxPoints = series.fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
 
+    // Compile customized lines collection
+    final List<LineChartBarData> lines = [];
+
+    for (final s in series) {
+      if (s.config.usePositiveNegativeColors) {
+        final segments = _splitDataIntoSegments(s.data.spots);
+
+        if (segments.green.isNotEmpty) {
+          lines.add(LineChartBarData(
+            spots: segments.green,
+            color: Colors.green,
+            barWidth: s.config.width,
+            isCurved: true,
+            preventCurveOverShooting: true,
+            dashArray: s.config.isDashed ? [6, 4] : null,
+            dotData: const FlDotData(show: false),
+          ));
+        }
+        if (segments.red.isNotEmpty) {
+          lines.add(LineChartBarData(
+            spots: segments.red,
+            color: colorScheme.error,
+            barWidth: s.config.width,
+            isCurved: true,
+            preventCurveOverShooting: true,
+            dashArray: s.config.isDashed ? [6, 4] : null,
+            dotData: const FlDotData(show: false),
+          ));
+        }
+      } else {
+        // Standard single-color sequence rendering pass
+        lines.add(LineChartBarData(
+          spots: s.data.spots,
+          color: s.config.color ?? colorScheme.primary,
+          barWidth: s.config.width,
+          isCurved: true,
+          dashArray: s.config.isDashed ? [6, 4] : null,
+          dotData: const FlDotData(show: false),
+        ));
+      }
+    }
+
+    return LineChartData(
+      lineTouchData: _buildTouchData(theme),
+      minY: yAxisBounds.minY,
+      maxY: yAxisBounds.maxY,
+      minX: 0,
+      maxX: maxPoints > 0 ? (maxPoints - 1).toDouble() : 0,
+      titlesData: _buildTitlesData(theme, yAxisBounds),
+      gridData: FlGridData(
+        show: showGrid,
+        drawVerticalLine: drawVerticalGrid,
+        getDrawingHorizontalLine: (_) => FlLine(
+          color: colorScheme.outline.withOpacity(0.15),
+          strokeWidth: 1,
+          dashArray: [4, 4],
+        ),
+      ),
+      lineBarsData: lines,
+      extraLinesData: !showZeroLine
+          ? null
+          : ExtraLinesData(
+              horizontalLines: [
+                HorizontalLine(
+                  y: 0,
+                  color: colorScheme.secondary.withOpacity(0.6),
+                  strokeWidth: 1.5,
+                  dashArray: [5, 5],
+                ),
+              ],
+            ),
+    );
+  }
+
+  FlTitlesData _buildTitlesData(ThemeData theme, _YAxisBounds yAxisBounds) {
+    // Read labels off the first series safely as a structural baseline
+    final baseChartData = series.first.data;
+    final spots = baseChartData.spots;
     final double yRange = yAxisBounds.maxY - yAxisBounds.minY;
     final double yInterval = yRange > 0 ? yRange / 4 : 1.0;
-
-    final double xInterval = max(1.0, (spots.length / 5).floorToDouble());
+    final double xInterval = math.max(1.0, (spots.length / 5).floorToDouble());
 
     return FlTitlesData(
       show: true,
@@ -340,12 +259,12 @@ class SproutLineChart extends StatelessWidget {
           interval: xInterval,
           getTitlesWidget: (value, meta) {
             final int index = value.toInt();
-            if (index < 0 || index >= chartData.sortedEntries.length) {
+            if (index < 0 || index >= baseChartData.sortedEntries.length) {
               return const SizedBox.shrink();
             }
 
-            final date = chartData.sortedEntries[index].key;
-            String format = ChartRangeUtility.getDateFormat(selectedChartRange);
+            final date = baseChartData.sortedEntries[index].key;
+            String format = ChartRangeUtility.getDateFormat(chartRange);
 
             return SideTitleWidget(
               meta: meta,
@@ -389,38 +308,100 @@ class SproutLineChart extends StatelessWidget {
     );
   }
 
-  /// Configures the data displayed when the user touches the chart.
-  LineTouchData _buildLineTouchData(
-    ThemeData theme,
-    SproutLineChartData chartData,
-    Color positiveColor,
-    Color negativeColor,
-  ) {
+  LineTouchData _buildTouchData(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
     return LineTouchData(
       handleBuiltInTouches: true,
+      getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndices) {
+        final currentSeries = series.firstWhereOrNull((s) {
+          if (s.config.usePositiveNegativeColors) {
+            return barData.color == Colors.green || barData.color == theme.colorScheme.error;
+          }
+          return (s.config.color ?? theme.colorScheme.primary) == barData.color;
+        });
+
+        final bool shouldShowBubble = currentSeries?.config.showInTooltip ?? true;
+
+        return spotIndices.map((index) {
+          return TouchedSpotIndicatorData(
+            FlLine(
+              color: shouldShowBubble ? colorScheme.outline : Colors.transparent,
+              strokeWidth: shouldShowBubble ? 1 : 0,
+            ),
+            FlDotData(
+              show: shouldShowBubble,
+              getDotPainter: (spot, percent, barData, index) {
+                return FlDotCirclePainter(
+                  radius: 5,
+                  color: barData.color ?? theme.colorScheme.primary,
+                  strokeWidth: 2,
+                  strokeColor: theme.scaffoldBackgroundColor,
+                );
+              },
+            ),
+          );
+        }).toList();
+      },
       touchTooltipData: LineTouchTooltipData(
         fitInsideHorizontally: true,
         fitInsideVertically: true,
         getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-          return touchedBarSpots.asMap().entries.map((entry) {
-            final index = entry.key;
-            final barSpot = entry.value;
+          // Sort spots by barIndex to keep the tooltip layout rendering cleanly
+          final sortedSpots = List<LineBarSpot>.from(touchedBarSpots)..sort((a, b) => a.barIndex.compareTo(b.barIndex));
 
-            // Only show the tooltip for the very first touched spot
-            if (index != 0) return null;
+          // Track displayed series to avoid duplicate entries when crossing the zero boundary
+          final Set<String> seenLabels = {};
 
-            final flSpot = barSpot.bar.spots[barSpot.spotIndex];
-            if (flSpot.x.toInt() < chartData.sortedEntries.length) {
-              final date = chartData.sortedEntries[flSpot.x.toInt()].key;
+          return sortedSpots.map((barSpot) {
+            final currentSeries = series.firstWhereOrNull((s) {
+                  if (s.config.usePositiveNegativeColors) {
+                    // If it's a split line, the bar color will match either Green or the Error theme color
+                    return barSpot.bar.color == Colors.green || barSpot.bar.color == theme.colorScheme.error;
+                  }
+                  // For standard lines, match the explicit configuration color
+                  return (s.config.color ?? theme.colorScheme.primary) == barSpot.bar.color;
+                }) ??
+                (barSpot.barIndex < series.length ? series[barSpot.barIndex] : series.first);
+
+            if (currentSeries.config.showInTooltip == false || seenLabels.contains(currentSeries.label)) {
+              return const LineTooltipItem(
+                '',
+                TextStyle(fontSize: 0, color: Colors.transparent),
+              );
+            }
+            seenLabels.add(currentSeries.label);
+
+            final chartData = currentSeries.data;
+
+            if (barSpot.x.toInt() < chartData.sortedEntries.length) {
+              final date = chartData.sortedEntries[barSpot.x.toInt()].key;
+
+              // Dynamic Tooltip Color: Match the exact color of the segment being hovered over
+              final lineColor = barSpot.bar.color ?? theme.colorScheme.primary;
+
+              // Only show the timestamp header on the first item within the tooltip window
+              final dateHeader = !showDateInTooltip
+                  ? ""
+                  : barSpot == sortedSpots.first
+                      ? '${DateFormat('MMM dd').format(date)}\n'
+                      : '';
+
+              final seriesLabel = '${currentSeries.label}: ';
+              final formattedValue = formatValue != null ? formatValue!(barSpot.y) : barSpot.y.toString();
 
               return LineTooltipItem(
-                '${DateFormat('MMM dd, yyyy').format(date)}\n',
+                dateHeader,
                 theme.textTheme.labelLarge!,
                 children: [
                   TextSpan(
-                    text: formatValue != null ? formatValue!(flSpot.y) : flSpot.y.toString(),
+                    text: seriesLabel,
+                    style: theme.textTheme.labelLarge,
+                  ),
+                  TextSpan(
+                    text: formattedValue,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: flSpot.y >= 0 ? positiveColor : negativeColor,
+                      color: lineColor,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -431,5 +412,28 @@ class SproutLineChart extends StatelessWidget {
         },
       ),
     );
+  }
+
+  _YAxisBounds _calculateYAxisBounds(List<FlSpot> spots) {
+    if (spots.isEmpty) return (minY: 0.0, maxY: 1.0);
+
+    final double actualMinY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
+    final double actualMaxY = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+
+    if (actualMinY == actualMaxY) {
+      final value = actualMinY;
+      final padding = (value == 0) ? 1.0 : value.abs() * 0.5;
+      return (minY: value - padding, maxY: value + padding);
+    }
+
+    final double range = actualMaxY - actualMinY;
+    final double padding = range * 0.1;
+
+    double paddedMinY = actualMinY - padding;
+    double paddedMaxY = actualMaxY + padding;
+
+    if (actualMinY >= 0) paddedMinY = math.max(0, paddedMinY);
+    if (actualMaxY <= 0) paddedMaxY = math.min(0, paddedMaxY);
+    return (minY: paddedMinY, maxY: paddedMaxY);
   }
 }
