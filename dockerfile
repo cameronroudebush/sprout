@@ -10,7 +10,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:lts-alpine AS backend-build
+FROM node:24-alpine3.23 AS backend-build
 # Install git
 RUN apk add git
 WORKDIR /app
@@ -30,7 +30,7 @@ FROM alpine:3.23.4 AS prod
 EXPOSE 80
 
 # Install some required packages
-RUN apk add --no-cache nginx libstdc++ ca-certificates \
+RUN apk add --no-cache nginx libstdc++  ca-certificates \
     && rm -rf /var/cache/apk/*
 
 # Set some default env variables
