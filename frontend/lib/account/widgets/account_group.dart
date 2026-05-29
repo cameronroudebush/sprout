@@ -78,6 +78,8 @@ class AccountGroupSection extends ConsumerWidget {
           initiallyExpanded: initiallyExpanded,
           enabled: allowExpansion,
           visualDensity: VisualDensity.compact,
+          tilePadding: EdgeInsets.symmetric(horizontal: renderAsCard ? 12 : 0),
+          childrenPadding: EdgeInsets.zero,
           leading: Icon(Icons.circle, color: accentColor, size: 12),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -149,7 +151,7 @@ class AccountGroupSection extends ConsumerWidget {
 
               if (selectedAccounts != null) {
                 return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     children: [
                       if (isSelected)

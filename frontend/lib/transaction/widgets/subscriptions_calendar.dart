@@ -115,7 +115,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
               dayDisplay: (context, events) {
                 return SproutLayoutBuilder((isDesktop, context, constraints) {
                   if (events.isEmpty) return const SizedBox.shrink();
-                  final iconSize = widget.iconSize ?? (isDesktop ? 24 : 16);
+                  final iconSize = widget.iconSize ?? (isDesktop ? 24 : 12);
 
                   final maxLogos = (constraints.maxWidth / (iconSize + 4)).floor().clamp(0, events.length);
                   final displayedEvents = events.take(maxLogos).toList();
@@ -165,7 +165,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                     allowDialog: false,
                     icon: AccountIcon(
                       event.account,
-                      size: 36,
+                      size: 24,
                     ));
               },
             ),
