@@ -101,7 +101,7 @@
   },
   "pkg": {
     "targets": [
-      "latest"
+      "node24-alpine-x64"
     ],
     "assets": [
       "dist/**/*",
