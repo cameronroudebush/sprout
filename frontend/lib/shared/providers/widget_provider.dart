@@ -30,10 +30,28 @@ class WidgetSync extends _$WidgetSync {
   Future<void> build() async {
     if (kIsWeb) return;
 
-    final auth = ref.watch(authProvider).value;
+    final authAsync = ref.watch(authProvider);
+
+    if (authAsync.isLoading || authAsync.hasError) return;
+    final auth = authAsync.value;
 
     if (auth == null) {
       await _saveToNative(null);
+      return;
+    }
+
+    final netWorthAsync = ref.watch(totalNetWorthProvider);
+    final transactionsAsync = ref.watch(transactionsProvider);
+    final userConfigAsync = ref.watch(userConfigProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
+
+    final bool anyLoading = netWorthAsync.isLoading ||
+        transactionsAsync.isLoading ||
+        userConfigAsync.isLoading ||
+        categoriesAsync.isLoading;
+
+    if (anyLoading) {
+      LoggerProvider.debug("WidgetSync: Post-login data hydration in progress. Preserving widget canvas.");
       return;
     }
 
