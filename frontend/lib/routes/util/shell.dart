@@ -14,14 +14,21 @@ import 'package:sprout/shared/widgets/lock.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// A lightweight wrapper that provides persistent navigation (e.g., Side/Bottom Nav).
-class SproutShell extends ConsumerWidget {
+class SproutShell extends ConsumerStatefulWidget {
   final Widget child;
   final GoRouterState? state;
 
   const SproutShell({super.key, required this.child, this.state});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SproutShell> createState() => _SproutShellState();
+}
+
+class _SproutShellState extends ConsumerState<SproutShell> {
+  bool _hasPromptedLock = false;
+
+  @override
+  Widget build(BuildContext context) {
     final authNotifier = ref.read(authProvider.notifier);
     final authState = ref.watch(authProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
@@ -34,6 +41,18 @@ class SproutShell extends ConsumerWidget {
     final needsBioCheck = !kIsWeb && secureModeEnabled && isLoggedIn;
     final isLoading =
         authState.isLoading || (!userConfigAsync.hasValue && userConfigAsync.isLoading) || !bioState.hasInitialized;
+
+    // Wait until loading finishes to trigger the biometric prompt
+    if (isLoading) {
+      _hasPromptedLock = false;
+    } else if (needsBioCheck && bioState.isLocked && !_hasPromptedLock && !bioState.isUnlocking) {
+      _hasPromptedLock = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(biometricsProvider.notifier).tryManualUnlock();
+        }
+      });
+    }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -50,20 +69,23 @@ class SproutShell extends ConsumerWidget {
                   ? Row(
                       children: [
                         if (!authNotifier.isSetupMode) const SproutSideNav(),
-                        Expanded(child: child),
+                        Expanded(child: widget.child),
                       ],
                     )
-                  : child,
+                  : widget.child,
               bottomNavigationBar:
-                  isDesktop || state == null ? null : SproutBottomNav(currentPath: state!.fullPath ?? ""),
+                  isDesktop || widget.state == null ? null : SproutBottomNav(currentPath: widget.state!.fullPath ?? ""),
             ),
-            if (!authNotifier.isSetupMode && isLoading)
-              const Positioned.fill(
-                child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),
-              ),
+
             if (needsBioCheck && bioState.isLocked)
               const Positioned.fill(
                 child: SproutLockWidget(key: ValueKey('sprout_locked_screen')),
+              ),
+
+            // 2. Loading Indicator rendered on absolute top
+            if (!authNotifier.isSetupMode && isLoading)
+              const Positioned.fill(
+                child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),
               ),
           ],
         );
