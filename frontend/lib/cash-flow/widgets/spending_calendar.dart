@@ -19,8 +19,11 @@ class SpendingCalendarWidget extends ConsumerWidget {
     final dailySpendingAsync = ref.watch(dailySpendingProvider(month: now.month, year: now.year));
 
     return dailySpendingAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text("Error loading spending insights")),
+      loading: () => const SproutCard(
+        child: SizedBox(height: 300, child: Center(child: CircularProgressIndicator())),
+      ),
+      error: (err, _) =>
+          const SproutCard(child: SizedBox(height: 300, child: Center(child: Text("Error loading spending insights")))),
       data: (spendingMap) {
         final totalDays = DateTime(now.year, now.month + 1, 0).day;
         final listDaysInMonth = List.generate(totalDays, (i) => i + 1);
