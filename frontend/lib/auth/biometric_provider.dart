@@ -54,7 +54,6 @@ class Biometrics extends _$Biometrics {
     final isManualLogin = ref.read(sessionStatusProvider);
     if (!kIsWeb && conf.secureMode && !isManualLogin) {
       state = state.copyWith(isLocked: true, hasInitialized: true);
-      await tryManualUnlock();
     } else {
       state = state.copyWith(hasInitialized: true);
     }

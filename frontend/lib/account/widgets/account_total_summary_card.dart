@@ -50,7 +50,7 @@ class TotalSummary extends ConsumerWidget {
         .toList();
 
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 2),
+      padding: const EdgeInsetsGeometry.symmetric(horizontal: 0),
       child: Container(
           height: 10,
           clipBehavior: Clip.antiAlias,
