@@ -75,7 +75,14 @@ export class CashFlowService {
         categoryStats.set(catId, { category: transaction.category, inflow: 0, outflow: 0 });
       }
       const stats = categoryStats.get(catId)!;
-      const amount = transaction.amount;
+      let amount = transaction.amount;
+      const isInvestment = transaction.account && transaction.account.type === AccountType.investment;
+
+      const isContributionCategory =
+        transaction.category.name.toLowerCase().includes("contribution") || transaction.category.name.toLowerCase().includes("investment");
+
+      // Invert the amount if it is a negative value AND explicitly a contribution. Some contributions will technically be considered negative which could break this
+      if (isInvestment && amount < 0 && isContributionCategory) amount = Math.abs(amount);
 
       if (amount > 0) {
         // Liability check: Inflows to liability accounts (e.g. credit card payments) are ignored here.

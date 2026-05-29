@@ -61,19 +61,23 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
       });
     }
 
-    return SproutRouteWrapper(
-        child: Column(
+    return Column(
       children: [
-        // Major indices
-        const MajorIndicesBarWidget(),
-        // Performance Chart for selected symbol
-        if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme),
-
-        const Divider(),
+        SproutRouteWrapper(
+            child: Column(
+          children: [
+            // Major indices
+            const MajorIndicesBarWidget(),
+            // Performance Chart for selected symbol
+            if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme),
+            const Divider(),
+          ],
+        )),
 
         // The actual display content
         Expanded(
-          child: SingleChildScrollView(
+            child: SingleChildScrollView(
+          child: SproutRouteWrapper(
             child: Column(
               spacing: 8,
               children: [
@@ -131,9 +135,9 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               ],
             ),
           ),
-        ),
+        )),
       ],
-    ));
+    );
   }
 
   /// Helper to build the warning UI
