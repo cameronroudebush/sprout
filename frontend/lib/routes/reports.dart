@@ -106,6 +106,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
             // Three-option unified SegmentedButton selector tracker module mapping interface
             SegmentedButton<DetailChartType>(
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
               segments: const [
                 ButtonSegment(
                   value: DetailChartType.sankey,

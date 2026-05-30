@@ -181,7 +181,7 @@ Future<T?> showSproutPopup<T>({
     isDismissible: isDismissible,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: 0.1),
+    barrierColor: Colors.black.withValues(alpha: 0.4),
     builder: (context) {
       return Stack(
         children: [

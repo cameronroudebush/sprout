@@ -34,7 +34,7 @@ class ChatBubble extends ConsumerWidget {
         String processedText = message.text;
         processedText = processedText.deIdentifyAccounts(accounts);
         final finalText = isPrivate ? processedText.deIdentifyCurrency() : processedText;
-        final textColor = isAi ? Colors.white : Colors.black;
+        final textColor = isAi ? Colors.white : Colors.white;
 
         return Theme(
           data: theme.copyWith(
@@ -88,7 +88,7 @@ class ChatBubble extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isAi ? theme.colorScheme.secondary : theme.colorScheme.primaryContainer,
+                    color: isAi ? theme.colorScheme.secondary : theme.colorScheme.primary,
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(15),
                       topRight: const Radius.circular(15),

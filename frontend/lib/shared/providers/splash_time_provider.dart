@@ -1,10 +1,6 @@
-import 'package:riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'splash_time_provider.g.dart';
-
-/// A provider that tracks if this is a cold startup or not
-final isColdStartProvider = StateProvider<bool>((ref) => true);
 
 @Riverpod(keepAlive: true)
 class SproutSplashManager extends _$SproutSplashManager {

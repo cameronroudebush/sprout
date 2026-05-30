@@ -64,7 +64,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                 ),
                 if (widget.showDetails)
                   Expanded(
-                    flex: 4,
+                    flex: 5,
                     child: _buildSelectedDayCard(eventsForCurrentDay),
                   ),
               ],
@@ -73,7 +73,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
 
           // Fallback Mobile Layout: Traditional stacked sequence arrangement column pass
           return Column(
-            spacing: 12,
+            spacing: 6,
             children: [
               _buildCalendarCard(subs, theme, isDesktop),
               if (widget.showDetails) _buildSelectedDayCard(eventsForCurrentDay),

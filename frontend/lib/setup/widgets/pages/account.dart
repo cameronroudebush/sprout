@@ -128,7 +128,7 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
           Text(
             'Create Your Admin Account',
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 64 : 24),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 36 : 24),
           ),
           Text(
             'This will be your primary account to manage Sprout.',

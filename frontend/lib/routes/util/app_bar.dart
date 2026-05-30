@@ -24,20 +24,18 @@ class SproutAppBar extends ConsumerWidget implements PreferredSizeWidget {
       final logo = isDesktop || authNotifier.isSetupMode ? SproutLogo(124) : SproutIcon(40);
 
       return AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: _defaultHeight,
-        scrolledUnderElevation: 0,
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        iconTheme: theme.iconTheme.copyWith(color: theme.colorScheme.onPrimaryContainer),
-        elevation: 0,
-        centerTitle: true,
-        title: logo,
-        actions: [if (!isDesktop && !authNotifier.isSetupMode) const NotificationBell()],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Container(color: theme.dividerColor, height: 4.0),
-        ),
-      );
+          automaticallyImplyLeading: false,
+          toolbarHeight: _defaultHeight,
+          scrolledUnderElevation: 0,
+          iconTheme: theme.iconTheme.copyWith(color: theme.colorScheme.onPrimaryContainer),
+          elevation: 0,
+          centerTitle: true,
+          title: logo,
+          actions: [if (!isDesktop && !authNotifier.isSetupMode) const NotificationBell()],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4.0),
+            child: Container(color: theme.dividerColor, height: 4.0),
+          ));
     });
   }
 }

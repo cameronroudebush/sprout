@@ -51,7 +51,6 @@ class SproutBottomNav extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.bottomNavigationBarTheme.backgroundColor,
         border: Border(top: BorderSide(color: theme.dividerColor, width: 4)),
       ),
       child: SafeArea(

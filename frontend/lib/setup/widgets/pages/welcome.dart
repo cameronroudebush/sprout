@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/setup/widgets/pages/wrapper.dart';
-import 'package:sprout/shared/widgets/icon.dart';
 
 /// This page contains the initial page welcoming the user to the app
 class WelcomeSetupPage extends StatelessWidget {
@@ -22,22 +21,12 @@ class WelcomeSetupPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 16,
           children: <Widget>[
-            // Hero Icon or Logo
-            Container(
-              padding: const EdgeInsets.all(36),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
-              ),
-              child: SproutIcon(108),
-            ),
-
             // Main Title
             Text(
               'Welcome to Sprout!',
               style: theme.textTheme.displayMedium?.copyWith(
                 fontWeight: FontWeight.w900,
-                fontSize: isDesktop ? 64 : 36,
+                fontSize: isDesktop ? 48 : 36,
                 color: theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,

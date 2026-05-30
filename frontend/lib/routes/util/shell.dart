@@ -10,7 +10,6 @@ import 'package:sprout/routes/util/bottom_nav.dart';
 import 'package:sprout/routes/util/desktop_header.dart';
 import 'package:sprout/routes/util/sidenav.dart';
 import 'package:sprout/shared/widgets/layout.dart';
-import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/shared/widgets/lock.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -97,16 +96,9 @@ class _SproutShellState extends ConsumerState<SproutShell> {
               bottomNavigationBar:
                   isDesktop || widget.state == null ? null : SproutBottomNav(currentPath: widget.state!.fullPath ?? ""),
             ),
-
             if (needsBioCheck && bioState.isLocked)
               const Positioned.fill(
                 child: SproutLockWidget(key: ValueKey('sprout_locked_screen')),
-              ),
-
-            // Loading Indicator rendered on absolute top
-            if (!authNotifier.isSetupMode && isLoading)
-              const Positioned.fill(
-                child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),
               ),
           ],
         );

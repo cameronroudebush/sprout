@@ -8,6 +8,7 @@ import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
@@ -91,38 +92,42 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final masterAsync = ref.watch(transactionsProvider);
     final filteredTransactions = ref.watch(filteredTransactionsProvider);
 
-    return Column(
-      children: [
-        if (widget.allowFiltering)
-          Container(
-            width: double.infinity,
-            color: theme.scaffoldBackgroundColor,
-            child: SproutRouteWrapper(
-              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-              child: TransactionFilterBar(
-                accountId: widget.accountId,
-                onFilterChanged: () => _fetchPage(),
+    return SproutLayoutBuilder(
+      (isDesktop, context, constraints) {
+        return Column(
+          children: [
+            if (widget.allowFiltering)
+              Container(
+                width: double.infinity,
+                color: theme.scaffoldBackgroundColor,
+                child: SproutRouteWrapper(
+                  padding: EdgeInsets.fromLTRB(16, isDesktop ? 0 : 12, 16, 0),
+                  child: TransactionFilterBar(
+                    accountId: widget.accountId,
+                    onFilterChanged: () => _fetchPage(),
+                  ),
+                ),
               ),
-            ),
-          ),
-        Expanded(
-            child: masterAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text("Error: $err")),
-          data: (masterState) {
-            if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
-              return const Center(child: Text("No matching transactions found."));
-            }
+            Expanded(
+                child: masterAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, _) => Center(child: Text("Error: $err")),
+              data: (masterState) {
+                if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
+                  return const Center(child: Text("No transactions found"));
+                }
 
-            return RefreshIndicator(
-              onRefresh: () async => await _fetchPage(reset: true),
-              child: widget.separateByDate
-                  ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
-                  : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
-            );
-          },
-        )),
-      ],
+                return RefreshIndicator(
+                  onRefresh: () async => await _fetchPage(reset: true),
+                  child: widget.separateByDate
+                      ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
+                      : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
+                );
+              },
+            )),
+          ],
+        );
+      },
     );
   }
 

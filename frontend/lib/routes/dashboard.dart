@@ -134,13 +134,9 @@ class DashboardPage extends ConsumerWidget {
         const HomeNotificationsWidget(),
         // Net worth chart
         SizedBox(
-            height: 250,
-            child: SproutCard(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: UserNetWorthWidget(),
-              ),
-            )),
+          height: 200,
+          child: UserNetWorthWidget(mobile: true),
+        ),
         // Account overview
         const DashboardAccountsCard(),
         // Recent transactions
