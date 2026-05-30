@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 /// The original dark theme of Sprout that utilizes it's primary colors as necessary
 final ThemeData coloredDarkTheme = FlexThemeData.dark(
+  fontFamily: 'RobotoCrisp',
   colors: const FlexSchemeColor(
     primary: Color(0xff6b9ac4),
     primaryContainer: Color(0xff001e2c),

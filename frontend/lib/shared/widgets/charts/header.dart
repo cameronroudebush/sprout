@@ -27,7 +27,10 @@ class ChartHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (title != null)
-                  Text(title!, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    title!,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
                 if (subheader != null)
                   Text(subheader!, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
               ],

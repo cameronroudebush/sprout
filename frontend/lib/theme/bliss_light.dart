@@ -5,6 +5,7 @@ import 'package:sprout/theme/helpers.dart';
 
 /// A lighter theme for people that light to hurt their eyes
 final ThemeData blissLightTheme = FlexThemeData.light(
+  fontFamily: 'RobotoCrisp',
   colors: const FlexSchemeColor(
     primary: ThemeHelpers.primaryBlue,
     primaryContainer: Color(0xffd1e4ff),

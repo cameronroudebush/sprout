@@ -5,6 +5,7 @@ import 'package:sprout/theme/helpers.dart';
 
 /// Absolute dark defines a super dark theme
 final ThemeData absoluteDarkTheme = FlexThemeData.dark(
+  fontFamily: 'RobotoCrisp',
   colors: const FlexSchemeColor(
     primary: ThemeHelpers.primaryBlue,
     primaryContainer: Color(0xff001e2c),
