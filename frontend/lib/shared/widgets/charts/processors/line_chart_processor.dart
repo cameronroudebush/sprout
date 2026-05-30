@@ -86,11 +86,7 @@ class LineChartDataProcessor {
       data: data,
       label: "Average",
       config: LineSeriesConfig(
-        color: Colors.grey.withOpacity(0.5),
-        isDashed: true,
-        width: 2.0,
-        showInTooltip: false,
-      ),
+          color: Colors.grey.withOpacity(0.5), isDashed: true, width: 2.0, showInTooltip: false, showArea: false),
     );
   }
 }

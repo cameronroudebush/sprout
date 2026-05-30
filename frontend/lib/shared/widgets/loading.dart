@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sprout/shared/widgets/logo.dart';
-import 'package:sprout/theme/absolute_dark.dart';
 
 /// A loading indicator used for when Sprout is still setting up the app
 class SproutLoadingIndicator extends StatefulWidget {
@@ -85,8 +84,10 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
     final size = MediaQuery.sizeOf(context);
     final logoWidth = (size.width * 0.65).clamp(240.0, 480.0);
 
+    final currentTheme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: absoluteDarkTheme.colorScheme.surface,
+      backgroundColor: currentTheme.scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -115,19 +116,19 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
                     ? Padding(
                         padding: const EdgeInsets.only(top: 40.0),
                         child: SizedBox(
-                          width: logoWidth * 0.8, // Clean visual pairing with logo width
+                          width: logoWidth * 0.8,
                           child: Column(
                             children: [
                               LinearProgressIndicator(
-                                backgroundColor: absoluteDarkTheme.colorScheme.surfaceContainerHighest,
-                                color: absoluteDarkTheme.colorScheme.primary,
+                                backgroundColor: currentTheme.colorScheme.surfaceContainerHighest,
+                                color: currentTheme.colorScheme.primary,
                               ),
                               if (widget.message != null) ...[
                                 const SizedBox(height: 16),
                                 Text(
                                   widget.message!,
-                                  style: absoluteDarkTheme.textTheme.titleMedium?.copyWith(
-                                    color: absoluteDarkTheme.colorScheme.onSurfaceVariant,
+                                  style: currentTheme.textTheme.titleMedium?.copyWith(
+                                    color: currentTheme.colorScheme.onSurfaceVariant,
                                     letterSpacing: 1.5,
                                   ),
                                   textAlign: TextAlign.center,
@@ -147,6 +148,7 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
   }
 }
 
+/// Helper widget that allows us to show our logo from left to right
 class LeftToRightClipper extends CustomClipper<Rect> {
   final double progress;
   LeftToRightClipper({required this.progress});

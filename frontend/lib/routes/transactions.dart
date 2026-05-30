@@ -98,7 +98,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             width: double.infinity,
             color: theme.scaffoldBackgroundColor,
             child: SproutRouteWrapper(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
               child: TransactionFilterBar(
                 accountId: widget.accountId,
                 onFilterChanged: () => _fetchPage(),

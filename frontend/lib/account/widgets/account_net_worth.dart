@@ -50,7 +50,6 @@ class AccountNetWorthWidget extends ConsumerWidget {
             config: LineSeriesConfig(
               color: account.isDebt ? theme.colorScheme.error : theme.colorScheme.primary,
               usePositiveNegativeColors: !account.isDebt,
-              width: 3.0,
             ),
           ),
         ];

@@ -19,9 +19,10 @@ class ChatBubble extends ConsumerWidget {
   const ChatBubble({super.key, required this.message});
 
   /// Renders the message data using GPT markdown
-  Widget _getGPTMarkdown(BuildContext context, WidgetRef ref) {
+  Widget _getGPTMarkdown(BuildContext context, WidgetRef ref, bool isAi) {
     final userConfigAsync = ref.watch(userConfigProvider);
     final accountsAsync = ref.watch(accountsProvider);
+    final theme = Theme.of(context);
 
     // If accounts are still loading, don't render the text yet to avoid flashing raw IDs
     return accountsAsync.when(
@@ -33,17 +34,18 @@ class ChatBubble extends ConsumerWidget {
         String processedText = message.text;
         processedText = processedText.deIdentifyAccounts(accounts);
         final finalText = isPrivate ? processedText.deIdentifyCurrency() : processedText;
+        final textColor = isAi ? Colors.white : Colors.black;
 
         return Theme(
-          data: Theme.of(context).copyWith(
-            textTheme: Theme.of(context).textTheme.copyWith(
-                  headlineLarge: const TextStyle(color: Colors.white, fontSize: 22),
-                  headlineMedium: const TextStyle(color: Colors.white, fontSize: 20),
-                  headlineSmall: const TextStyle(color: Colors.white, fontSize: 18),
-                  titleLarge: const TextStyle(color: Colors.white, fontSize: 16),
-                ),
+          data: theme.copyWith(
+            textTheme: theme.textTheme.copyWith(
+              headlineLarge: TextStyle(color: textColor, fontSize: 22),
+              headlineMedium: TextStyle(color: textColor, fontSize: 20),
+              headlineSmall: TextStyle(color: textColor, fontSize: 18),
+              titleLarge: TextStyle(color: textColor, fontSize: 16),
+            ),
           ),
-          child: GptMarkdown(finalText, style: const TextStyle(color: Colors.white, fontSize: 14)),
+          child: GptMarkdown(finalText, style: TextStyle(color: textColor, fontSize: 14)),
         );
       },
     );
@@ -94,7 +96,7 @@ class ChatBubble extends ConsumerWidget {
                       bottomRight: isAi ? const Radius.circular(15) : Radius.zero,
                     ),
                   ),
-                  child: message.isThinking ? const TypingIndicator() : _getGPTMarkdown(context, ref),
+                  child: message.isThinking ? const TypingIndicator() : _getGPTMarkdown(context, ref, isAi),
                 ),
               ),
 

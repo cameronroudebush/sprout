@@ -32,7 +32,7 @@ class SproutAppBar extends ConsumerWidget implements PreferredSizeWidget {
         elevation: 0,
         centerTitle: true,
         title: logo,
-        actions: [if (!isDesktop && !authNotifier.isSetupMode) const NotificationBell(isDesktop: false)],
+        actions: [if (!isDesktop && !authNotifier.isSetupMode) const NotificationBell()],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Container(color: theme.dividerColor, height: 4.0),

@@ -141,3 +141,23 @@ class BatchedLivePrices extends _$BatchedLivePrices {
     } catch (_) {}
   }
 }
+
+/// Provides the 7-day historical performance timeline for major market indicies.
+/// Updates automatically on a rolling 1-hour interval matching the backend's cache policy.
+@Riverpod(keepAlive: true)
+class MajorIndicesTimeline extends _$MajorIndicesTimeline {
+  Timer? _refreshTimer;
+
+  @override
+  Future<List<MajorIndexTimelineDto>> build() async {
+    // Refresh history timelines every hour to match backend cache lifetimes.
+    _refreshTimer = Timer.periodic(
+      const Duration(hours: 1),
+      (_) => ref.invalidateSelf(),
+    );
+
+    ref.onDispose(() => _refreshTimer?.cancel());
+    final api = await ref.watch(holdingApiProvider.future);
+    return await api.holdingControllerGetMajorIndicesTimeline() ?? [];
+  }
+}

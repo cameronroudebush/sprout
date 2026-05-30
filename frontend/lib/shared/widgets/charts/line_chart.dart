@@ -61,7 +61,7 @@ class SproutLineChart extends StatelessWidget {
         const SizedBox(height: 16),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: LineChart(
               _buildLineChartData(theme),
               duration: Duration.zero,
@@ -69,8 +69,8 @@ class SproutLineChart extends StatelessWidget {
           ),
         ),
         if (showLegend && series.length > 1) ...[
-          const SizedBox(height: 12),
           _buildLegend(theme),
+          const SizedBox(height: 8),
         ],
       ],
     );
@@ -101,111 +101,100 @@ class SproutLineChart extends StatelessWidget {
     );
   }
 
-  /// Splits a single series dataset into distinct positive (green) and negative (red) segments.
-  /// Computes the exact mid-point intersection on the zero-axis when crossing Y boundaries.
-  ({List<FlSpot> green, List<FlSpot> red}) _splitDataIntoSegments(List<FlSpot> spots) {
-    if (spots.isEmpty) return (green: [], red: []);
-
-    final List<FlSpot> greenSpots = [];
-    final List<FlSpot> redSpots = [];
-
-    for (int i = 0; i < spots.length - 1; i++) {
-      final p1 = spots[i];
-      final p2 = spots[i + 1];
-
-      // Case 1: Both coordinates are positive or zero
-      if (p1.y >= 0 && p2.y >= 0) {
-        greenSpots.add(p1);
-        greenSpots.add(p2);
-        // Insert a null spot to break the continuous drawing stroke for the red line
-        redSpots.add(FlSpot.nullSpot);
-      }
-      // Case 2: Both coordinates are negative
-      else if (p1.y < 0 && p2.y < 0) {
-        redSpots.add(p1);
-        redSpots.add(p2);
-        // Insert a null spot to break the continuous drawing stroke for the green line
-        greenSpots.add(FlSpot.nullSpot);
-      }
-      // Case 3: Crossing from positive down to negative
-      else if (p1.y >= 0 && p2.y < 0) {
-        final t = p1.y / (p1.y - p2.y);
-        final xZero = p1.x + (p2.x - p1.x) * t;
-        final zeroPoint = FlSpot(xZero, 0);
-
-        greenSpots.add(p1);
-        greenSpots.add(zeroPoint);
-        greenSpots.add(FlSpot.nullSpot); // Cut green line here
-
-        redSpots.add(FlSpot.nullSpot);
-        redSpots.add(zeroPoint); // Start red line right at the zero crossing
-        redSpots.add(p2);
-      }
-      // Case 4: Crossing from negative up to positive
-      else if (p1.y < 0 && p2.y >= 0) {
-        final t = p1.y / (p1.y - p2.y);
-        final xZero = p1.x + (p2.x - p1.x) * t;
-        final zeroPoint = FlSpot(xZero, 0);
-
-        redSpots.add(p1);
-        redSpots.add(zeroPoint);
-        redSpots.add(FlSpot.nullSpot); // Cut red line here
-
-        greenSpots.add(FlSpot.nullSpot);
-        greenSpots.add(zeroPoint); // Start green line right at the zero crossing
-        greenSpots.add(p2);
-      }
-    }
-    return (green: greenSpots, red: redSpots);
-  }
-
   /// Builds the top-level LineChartData model configurations by passing individual series styles.
   LineChartData _buildLineChartData(ThemeData theme) {
     final colorScheme = theme.colorScheme;
     final allSpots = series.expand((s) => s.data.spots).toList();
     final yAxisBounds = _calculateYAxisBounds(allSpots);
     final maxPoints = series.fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
-
-    // Compile customized lines collection
     final List<LineChartBarData> lines = [];
 
-    for (final s in series) {
-      if (s.config.usePositiveNegativeColors) {
-        final segments = _splitDataIntoSegments(s.data.spots);
+    final bool isAllPositive = yAxisBounds.minY >= 0;
+    final bool isAllNegative = yAxisBounds.maxY <= 0;
+    final bool crossesZero = !isAllPositive && !isAllNegative;
 
-        if (segments.green.isNotEmpty) {
-          lines.add(LineChartBarData(
-            spots: segments.green,
-            color: Colors.green,
-            barWidth: s.config.width,
-            isCurved: true,
-            preventCurveOverShooting: true,
-            dashArray: s.config.isDashed ? [6, 4] : null,
-            dotData: const FlDotData(show: false),
-          ));
-        }
-        if (segments.red.isNotEmpty) {
-          lines.add(LineChartBarData(
-            spots: segments.red,
-            color: colorScheme.error,
-            barWidth: s.config.width,
-            isCurved: true,
-            preventCurveOverShooting: true,
-            dashArray: s.config.isDashed ? [6, 4] : null,
-            dotData: const FlDotData(show: false),
-          ));
-        }
+    for (final s in series) {
+      final bool isSplitColor = s.config.usePositiveNegativeColors;
+
+      final Color baseColor = s.config.color ?? colorScheme.primary;
+      final Color posColor = isSplitColor ? Colors.green : baseColor;
+      final Color negColor = isSplitColor ? colorScheme.error : baseColor;
+      final double areaOpacity = isSplitColor ? 0.20 : 0.25;
+
+      Color? lineColor;
+      LinearGradient? lineGradient;
+
+      if (isSplitColor && crossesZero) {
+        final double totalRange = yAxisBounds.maxY - yAxisBounds.minY;
+        final double zeroFraction = (yAxisBounds.maxY / totalRange).clamp(0.0, 1.0);
+
+        lineGradient = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [posColor, posColor, negColor, negColor],
+          stops: [0.0, zeroFraction, zeroFraction, 1.0],
+        );
       } else {
-        // Standard single-color sequence rendering pass
-        lines.add(LineChartBarData(
-          spots: s.data.spots,
-          color: s.config.color ?? colorScheme.primary,
-          barWidth: s.config.width,
-          isCurved: true,
-          dashArray: s.config.isDashed ? [6, 4] : null,
-          dotData: const FlDotData(show: false),
-        ));
+        lineColor = (isSplitColor && isAllNegative) ? negColor : posColor;
       }
+
+      BarAreaData? belowBar;
+      BarAreaData? aboveBar;
+
+      if (isAllPositive) {
+        belowBar = BarAreaData(
+          show: s.config.showArea,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(0.00)],
+          ),
+        );
+      } else if (isAllNegative) {
+        aboveBar = BarAreaData(
+          show: s.config.showArea,
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [negColor.withOpacity(0), negColor.withOpacity(areaOpacity)],
+          ),
+        );
+      } else {
+        belowBar = BarAreaData(
+          show: s.config.showArea,
+          cutOffY: 0,
+          applyCutOffY: true,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(0.00)],
+          ),
+        );
+
+        aboveBar = BarAreaData(
+          show: s.config.showArea,
+          cutOffY: 0,
+          applyCutOffY: true,
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [negColor.withOpacity(areaOpacity), negColor.withOpacity(0.00)],
+          ),
+        );
+      }
+
+      lines.add(LineChartBarData(
+        spots: s.data.spots,
+        isCurved: true,
+        preventCurveOverShooting: true,
+        barWidth: s.config.width,
+        dashArray: s.config.isDashed ? [6, 4] : null,
+        dotData: const FlDotData(show: false),
+        color: lineColor,
+        gradient: lineGradient,
+        belowBarData: belowBar,
+        aboveBarData: aboveBar,
+      ));
     }
 
     return LineChartData(
@@ -313,14 +302,10 @@ class SproutLineChart extends StatelessWidget {
     return LineTouchData(
       handleBuiltInTouches: true,
       getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndices) {
-        final currentSeries = series.firstWhereOrNull((s) {
-          if (s.config.usePositiveNegativeColors) {
-            return barData.color == Colors.green || barData.color == theme.colorScheme.error;
-          }
-          return (s.config.color ?? theme.colorScheme.primary) == barData.color;
-        });
+        final int seriesIndex = series.indexWhere((s) => s.data.spots == barData.spots);
+        final currentSeries = seriesIndex != -1 ? series[seriesIndex] : series.first;
 
-        final bool shouldShowBubble = currentSeries?.config.showInTooltip ?? true;
+        final bool shouldShowBubble = currentSeries.config.showInTooltip;
 
         return spotIndices.map((index) {
           return TouchedSpotIndicatorData(
@@ -331,9 +316,16 @@ class SproutLineChart extends StatelessWidget {
             FlDotData(
               show: shouldShowBubble,
               getDotPainter: (spot, percent, barData, index) {
+                final Color activeHoverColor;
+                if (currentSeries.config.usePositiveNegativeColors) {
+                  final double baselineValue = 0.0;
+                  activeHoverColor = spot.y >= baselineValue ? Colors.green : theme.colorScheme.error;
+                } else {
+                  activeHoverColor = barData.color ?? theme.colorScheme.primary;
+                }
                 return FlDotCirclePainter(
                   radius: 5,
-                  color: barData.color ?? theme.colorScheme.primary,
+                  color: activeHoverColor,
                   strokeWidth: 2,
                   strokeColor: theme.scaffoldBackgroundColor,
                 );
@@ -345,6 +337,9 @@ class SproutLineChart extends StatelessWidget {
       touchTooltipData: LineTouchTooltipData(
         fitInsideHorizontally: true,
         fitInsideVertically: true,
+        getTooltipColor: (LineBarSpot touchedSpot) {
+          return theme.primaryColorDark;
+        },
         getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
           // Sort spots by barIndex to keep the tooltip layout rendering cleanly
           final sortedSpots = List<LineBarSpot>.from(touchedBarSpots)..sort((a, b) => a.barIndex.compareTo(b.barIndex));
@@ -375,11 +370,12 @@ class SproutLineChart extends StatelessWidget {
 
             if (barSpot.x.toInt() < chartData.sortedEntries.length) {
               final date = chartData.sortedEntries[barSpot.x.toInt()].key;
-
-              // Dynamic Tooltip Color: Match the exact color of the segment being hovered over
-              final lineColor = barSpot.bar.color ?? theme.colorScheme.primary;
-
-              // Only show the timestamp header on the first item within the tooltip window
+              final Color lineColor;
+              if (currentSeries.config.usePositiveNegativeColors) {
+                lineColor = barSpot.y >= 0 ? Colors.green : theme.colorScheme.error;
+              } else {
+                lineColor = currentSeries.config.color ?? theme.colorScheme.primary;
+              }
               final dateHeader = !showDateInTooltip
                   ? ""
                   : barSpot == sortedSpots.first
@@ -389,17 +385,21 @@ class SproutLineChart extends StatelessWidget {
               final seriesLabel = '${currentSeries.label}: ';
               final formattedValue = formatValue != null ? formatValue!(barSpot.y) : barSpot.y.toString();
 
+              final tooltipTextStyle = theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white,
+              );
+
               return LineTooltipItem(
                 dateHeader,
-                theme.textTheme.labelLarge!,
+                tooltipTextStyle!,
                 children: [
                   TextSpan(
                     text: seriesLabel,
-                    style: theme.textTheme.labelLarge,
+                    style: tooltipTextStyle,
                   ),
                   TextSpan(
                     text: formattedValue,
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: tooltipTextStyle.copyWith(
                       color: lineColor,
                       fontWeight: FontWeight.bold,
                     ),

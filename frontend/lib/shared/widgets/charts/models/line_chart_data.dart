@@ -15,12 +15,16 @@ class LineSeriesConfig {
   /// If we should ignore our default [color] and instead use green/red for positive and negative values
   final bool usePositiveNegativeColors;
 
+  /// If we should render shading below the line
+  final bool showArea;
+
   const LineSeriesConfig(
       {this.color,
       this.isDashed = false,
       this.width = 3.0,
       this.usePositiveNegativeColors = false,
-      this.showInTooltip = true});
+      this.showInTooltip = true,
+      this.showArea = true});
 }
 
 /// Contains the data to render alongside other configuration for a line

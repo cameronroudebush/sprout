@@ -7,6 +7,7 @@ import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
 import 'package:sprout/routes/util/app_bar.dart';
 import 'package:sprout/routes/util/bottom_nav.dart';
+import 'package:sprout/routes/util/desktop_header.dart';
 import 'package:sprout/routes/util/sidenav.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/loading.dart';
@@ -69,7 +70,27 @@ class _SproutShellState extends ConsumerState<SproutShell> {
                   ? Row(
                       children: [
                         if (!authNotifier.isSetupMode) const SproutSideNav(),
-                        Expanded(child: widget.child),
+                        // Desktop has a fancy little card in card design
+                        Expanded(
+                          child: Container(
+                            color: theme.cardTheme.color ?? theme.cardColor,
+                            padding: const EdgeInsets.all(12.0),
+                            child: Container(
+                              clipBehavior: Clip.antiAlias,
+                              decoration: BoxDecoration(
+                                color: theme.scaffoldBackgroundColor,
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(children: [
+                                  if (!authNotifier.isSetupMode) const SproutDesktopHeader(),
+                                  Expanded(child: widget.child)
+                                ]),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     )
                   : widget.child,
@@ -82,7 +103,7 @@ class _SproutShellState extends ConsumerState<SproutShell> {
                 child: SproutLockWidget(key: ValueKey('sprout_locked_screen')),
               ),
 
-            // 2. Loading Indicator rendered on absolute top
+            // Loading Indicator rendered on absolute top
             if (!authNotifier.isSetupMode && isLoading)
               const Positioned.fill(
                 child: SproutLoadingIndicator(key: ValueKey('sprout_loading')),

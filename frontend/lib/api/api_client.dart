@@ -236,6 +236,10 @@ class ApiClient {
           return Institution.fromJson(value);
         case 'InstitutionIconType':
           return InstitutionIconTypeTypeTransformer().decode(value);
+        case 'MajorIndexTimelineDto':
+          return MajorIndexTimelineDto.fromJson(value);
+        case 'MajorIndexTimelinePoint':
+          return MajorIndexTimelinePoint.fromJson(value);
         case 'MarketIndexDto':
           return MarketIndexDto.fromJson(value);
         case 'MobileTokenExchangeDto':

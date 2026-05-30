@@ -28,18 +28,15 @@ class SpendingCompareChart extends ConsumerStatefulWidget {
 class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
   DateTime? _customTargetDate;
   CashFlowView? _lastView;
-  DateTime? _lastRawSelectedDate; // Track the exact raw parent date to catch all increments
+  DateTime? _lastRawSelectedDate;
 
-  // ANCHOR: Generate target choices relative to the ACTIVE parent baseline date, NOT today's date
   List<DateTime> _getComparisonTargets(DateTime baseline, bool isMonthly) {
     if (isMonthly) {
       return List.generate(12, (index) {
-        // Generate the 12 preceding months relative to the inspected month canvas
         return DateTime(baseline.year, baseline.month - index - 1, 1);
       });
     } else {
       return List.generate(5, (index) {
-        // Generate preceding fiscal years relative to the inspected year canvas
         return DateTime(baseline.year - index - 1, 1, 1);
       });
     }
@@ -86,7 +83,10 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
           return SproutChartSeries(
             data: chartData,
             label: label,
-            config: LineSeriesConfig(color: color, isDashed: isDashed),
+            config: LineSeriesConfig(
+              color: color,
+              isDashed: isDashed,
+            ),
           );
         }
 

@@ -6,20 +6,7 @@ import { HistoricalDataPoint } from "@backend/net-worth/model/api/entity.history
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
-import {
-  eachDayOfInterval,
-  eachMonthOfInterval,
-  endOfDay,
-  endOfMonth,
-  endOfYear,
-  format,
-  isSameDay,
-  isSameMonth,
-  startOfDay,
-  startOfMonth,
-  startOfYear,
-  subMonths,
-} from "date-fns";
+import { endOfDay, endOfMonth, endOfYear, format, startOfDay, startOfMonth, startOfYear, subMonths } from "date-fns";
 import { Between, FindOptionsWhere } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
@@ -93,20 +80,12 @@ export class CashFlowService {
       }
     }
 
-    // We calculate totals based on the NET result of each category.
     let totalIncome = 0;
     let totalExpense = 0;
 
     for (const { inflow, outflow } of categoryStats.values()) {
-      const net = inflow - outflow;
-
-      if (net > 0) {
-        // Net Income (e.g. Salary, or Refunds > Spending)
-        totalIncome += net;
-      } else {
-        // Net Expense (e.g. Groceries, Rent)
-        totalExpense += Math.abs(net);
-      }
+      totalIncome += inflow;
+      totalExpense += outflow;
     }
 
     // Find largest single expense (for insights) - remains purely transaction-based
@@ -131,7 +110,7 @@ export class CashFlowService {
     const categories = await Category.find({ where: { user: { id: user.id } }, relations: ["parentCategory"] });
     const categoryMap = new Map<string, Category>(categories.map((c) => [c.id, c]));
 
-    const incomeHubName = "Inflows";
+    const incomeHubName = "Flow Through";
     const linksMap = new Map<string, SankeyLink>();
     const colors: SankeyData["colors"] = { [incomeHubName]: Colors.incomeColor };
 
@@ -166,45 +145,40 @@ export class CashFlowService {
       return path;
     };
 
-    let netSavings = 0;
+    let totalGrossIncome = 0;
+    let totalGrossExpense = 0;
 
     for (const { category, inflow, outflow } of categoryStats.values()) {
-      const net = inflow - outflow;
+      totalGrossIncome += inflow;
+      totalGrossExpense += outflow;
 
-      // Skip balanced transfers (e.g. Checking -> Savings, where net is 0)
-      if (Math.abs(net) < 0.01) continue;
-
-      if (net > 0) {
-        // NET INCOME
-        // Example: Salary, or Refunds > Spending
-        let sourceName = `${category.name} `; // We add a space at the end, just in case there is an overlap on in vs out
+      if (inflow > 0.01) {
+        let sourceName = `${category.name} `;
         if (sourceName.trim() === incomeHubName) sourceName = `${sourceName} `;
+        addOrUpdateLink(sourceName, incomeHubName, inflow);
+      }
 
-        addOrUpdateLink(sourceName, incomeHubName, net);
-        netSavings += net;
-      } else {
-        // NET EXPENSE
-        // Example: Mortgage, Groceries
-        const absNet = Math.abs(net);
+      if (outflow > 0.01) {
         const path = getCategoryPath(category);
-
         let currentSourceName = incomeHubName;
+
         for (const node of path) {
-          addOrUpdateLink(currentSourceName, node.name, absNet);
+          addOrUpdateLink(currentSourceName, node.name, outflow);
           currentSourceName = node.name;
         }
-        netSavings -= absNet;
       }
     }
 
-    // Handle Surplus / Deficit Nodes
-    if (netSavings > 0.01) {
+    // Handle Global Surplus / Deficit Nodes
+    const globalNet = totalGrossIncome - totalGrossExpense;
+
+    if (globalNet > 0.01) {
       const target = "Savings / Unallocated";
-      addOrUpdateLink(incomeHubName, target, netSavings, "You earned more than you spent! Good Job!");
+      addOrUpdateLink(incomeHubName, target, globalNet, "You earned more than you spent! Good Job!");
       colors[target] = "#48BB78";
-    } else if (netSavings < -0.01) {
+    } else if (globalNet < -0.01) {
       const source = "Deficit";
-      addOrUpdateLink(source, incomeHubName, Math.abs(netSavings), "You spent more than you earned!");
+      addOrUpdateLink(source, incomeHubName, Math.abs(globalNet), "You spent more than you earned!");
       colors[source] = "#F56565";
     }
 
@@ -239,32 +213,26 @@ export class CashFlowService {
       const month = targetDate.getMonth() + 1;
 
       // Reuse the main calculator
-      const { categoryStats } = await this.calculateFlows(user, year, month);
+      const { categoryStats, totalExpense } = await this.calculateFlows(user, year, month);
 
       const monthKey = format(targetDate, "yyyy-MM");
       const stats: MonthlySpendingStats = {
         monthLabel: format(targetDate, "MMM").toUpperCase(),
         date: targetDate,
         categories: [],
-        totalSpending: 0,
+        totalSpending: totalExpense,
         periodAverage: 0,
       };
 
+      totalPeriodSpending += totalExpense;
       const currentMonthCats = new Map<string, number>();
 
-      for (const { category, outflow, inflow } of categoryStats.values()) {
-        // Calculate Net Expense for this category
-        // If (Outflow - Inflow) is positive, it's a Net Spend.
-        const netSpend = outflow - inflow;
-
-        if (netSpend < 0.01) continue; // Skip income categories or refunds
-
-        stats.totalSpending += netSpend;
-        totalPeriodSpending += netSpend;
+      for (const { category, outflow } of categoryStats.values()) {
+        if (outflow <= 0) continue;
 
         const catName = category.name;
-        currentMonthCats.set(catName, (currentMonthCats.get(catName) || 0) + netSpend);
-        globalCategoryTotals.set(catName, (globalCategoryTotals.get(catName) || 0) + netSpend);
+        currentMonthCats.set(catName, (currentMonthCats.get(catName) || 0) + outflow);
+        globalCategoryTotals.set(catName, (globalCategoryTotals.get(catName) || 0) + outflow);
       }
 
       monthlyStatsMap.set(monthKey, stats);
@@ -314,42 +282,28 @@ export class CashFlowService {
     const startDate = isMonthlyMode ? startOfMonth(new Date(year, month - 1)) : startOfYear(new Date(year, 0));
     const endDate = isMonthlyMode ? endOfMonth(startDate) : endOfYear(startDate);
 
-    const transactions = Transaction.convertListToTargetCurrency(
-      await Transaction.find({
-        where: {
-          account: { user: { id: user.id } },
-          posted: Between(startDate, endDate),
-          pending: false,
-        },
-        relations: ["category", "account"],
-      }),
-      user,
-    );
-
     const accumulatedTotals: HistoricalDataPoint[] = [];
     let runningTotal = 0;
 
     if (isMonthlyMode) {
-      // Run Daily Cumulative Aggregation over a target month range window
-      const days = eachDayOfInterval({ start: startDate, end: endDate });
-      for (const day of days) {
-        const dailyExpense = transactions
-          .filter((t) => isSameDay(t.posted, day) && t.amount < 0 && !this.isLiabilityAccount(t.account))
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      const totalDaysInMonth = endDate.getDate();
 
-        runningTotal += dailyExpense;
-        accumulatedTotals.push(new HistoricalDataPoint(day, runningTotal));
+      for (let d = 1; d <= totalDaysInMonth; d++) {
+        const { totalExpense } = await this.calculateFlows(user, year, month, d);
+
+        runningTotal += totalExpense;
+
+        const dayDate = new Date(year, month - 1, d);
+        accumulatedTotals.push(new HistoricalDataPoint(dayDate, runningTotal));
       }
     } else {
-      // Run Monthly Cumulative Aggregation over a target fiscal year scope window
-      const months = eachMonthOfInterval({ start: startDate, end: endDate });
-      for (const m of months) {
-        const monthlyExpense = transactions
-          .filter((t) => isSameMonth(t.posted, m) && t.amount < 0 && !this.isLiabilityAccount(t.account))
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      for (let m = 1; m <= 12; m++) {
+        const { totalExpense } = await this.calculateFlows(user, year, m);
 
-        runningTotal += monthlyExpense;
-        accumulatedTotals.push(new HistoricalDataPoint(m, runningTotal));
+        runningTotal += totalExpense;
+
+        const monthDate = new Date(year, m - 1, 1);
+        accumulatedTotals.push(new HistoricalDataPoint(monthDate, runningTotal));
       }
     }
 
@@ -364,29 +318,13 @@ export class CashFlowService {
     const startDate = startOfMonth(new Date(year, month - 1));
     const endDate = endOfMonth(startDate);
 
-    const transactions = Transaction.convertListToTargetCurrency(
-      await Transaction.find({
-        where: {
-          account: { user: { id: user.id } },
-          posted: Between(startDate, endDate),
-          pending: false,
-        },
-        relations: ["account"],
-      }),
-      user,
-    );
-
     const items: DailySpendingItem[] = [];
-    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    const totalDaysInMonth = endDate.getDate();
 
-    for (const day of days) {
-      const dayNumber = day.getDate();
+    for (let d = 1; d <= totalDaysInMonth; d++) {
+      const { totalExpense } = await this.calculateFlows(user, year, month, d);
 
-      const totalSpentToday = transactions
-        .filter((t) => isSameDay(t.posted, day) && t.amount < 0 && !this.isLiabilityAccount(t.account))
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-      if (totalSpentToday > 0) items.push(new DailySpendingItem(dayNumber, totalSpentToday));
+      if (totalExpense > 0) items.push(new DailySpendingItem(d, totalExpense));
     }
     return new DailySpendingCalendarResponseDTO(items);
   }

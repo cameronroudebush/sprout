@@ -455,3 +455,58 @@ abstract class _$BatchedLivePrices
     element.handleCreate(ref, build);
   }
 }
+
+/// Provides the 7-day historical performance timeline for major market indicies.
+/// Updates automatically on a rolling 1-hour interval matching the backend's cache policy.
+
+@ProviderFor(MajorIndicesTimeline)
+final majorIndicesTimelineProvider = MajorIndicesTimelineProvider._();
+
+/// Provides the 7-day historical performance timeline for major market indicies.
+/// Updates automatically on a rolling 1-hour interval matching the backend's cache policy.
+final class MajorIndicesTimelineProvider extends $AsyncNotifierProvider<
+    MajorIndicesTimeline, List<MajorIndexTimelineDto>> {
+  /// Provides the 7-day historical performance timeline for major market indicies.
+  /// Updates automatically on a rolling 1-hour interval matching the backend's cache policy.
+  MajorIndicesTimelineProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'majorIndicesTimelineProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$majorIndicesTimelineHash();
+
+  @$internal
+  @override
+  MajorIndicesTimeline create() => MajorIndicesTimeline();
+}
+
+String _$majorIndicesTimelineHash() =>
+    r'dcf0818b25f00ff8e78b1766b917d9750f5d94ef';
+
+/// Provides the 7-day historical performance timeline for major market indicies.
+/// Updates automatically on a rolling 1-hour interval matching the backend's cache policy.
+
+abstract class _$MajorIndicesTimeline
+    extends $AsyncNotifier<List<MajorIndexTimelineDto>> {
+  FutureOr<List<MajorIndexTimelineDto>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<MajorIndexTimelineDto>>,
+        List<MajorIndexTimelineDto>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<MajorIndexTimelineDto>>,
+            List<MajorIndexTimelineDto>>,
+        AsyncValue<List<MajorIndexTimelineDto>>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}

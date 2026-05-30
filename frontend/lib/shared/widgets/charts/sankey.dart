@@ -376,7 +376,6 @@ class _SankeyPainter extends CustomPainter {
   final Offset? hoverPosition;
   final String Function(num val)? formatter;
 
-  final Color _tooltipBgColor = const Color(0xFF4A5568);
   final Color _defaultNodeColor = const Color(0xFF38A169);
 
   _SankeyPainter({
@@ -514,7 +513,7 @@ class _SankeyPainter extends CustomPainter {
 
     // Draw Background
     final rect = Rect.fromLTWH(dx, dy, tooltipWidth, tooltipHeight);
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), Paint()..color = _tooltipBgColor);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), Paint()..color = theme.primaryColorDark);
 
     // Paint Text Stack Centered
     double currentDy = dy + 8.0;

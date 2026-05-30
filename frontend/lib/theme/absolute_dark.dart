@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/theme/helpers.dart';
 
-/// Absolute dark defines an OLED theme
+/// Absolute dark defines a super dark theme
 final ThemeData absoluteDarkTheme = FlexThemeData.dark(
   colors: const FlexSchemeColor(
     primary: ThemeHelpers.primaryBlue,
@@ -39,8 +39,38 @@ final ThemeData absoluteDarkTheme = FlexThemeData.dark(
   platform: TargetPlatform.windows,
   cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
 ).copyWith(
+  popupMenuTheme: const PopupMenuThemeData(
+    color: Color(0xff080808),
+    surfaceTintColor: Colors.transparent,
+  ),
+  menuTheme: MenuThemeData(
+    style: MenuStyle(
+      backgroundColor: WidgetStateProperty.all(const Color(0xff080808)),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+    ),
+  ),
+  dropdownMenuTheme: DropdownMenuThemeData(
+    menuStyle: MenuStyle(
+      backgroundColor: WidgetStateProperty.all(const Color(0xff080808)),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+    ),
+  ),
+  dividerTheme: DividerThemeData(color: const Color(0xff116383).withOpacity(.40)),
+  chipTheme: ChipThemeData(
+    backgroundColor: const Color(0xff080808),
+    disabledColor: const Color(0xff080808).withOpacity(0.4),
+    labelStyle: const TextStyle(fontSize: 13, color: Colors.white),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(color: const Color(0xff116383).withOpacity(0.3), width: 1),
+    ),
+  ),
+  cardTheme: const CardThemeData(color: Color(0xff080808)),
+  dialogTheme: const DialogThemeData(backgroundColor: Color(0xff080808)),
+  listTileTheme: const ListTileThemeData(),
+  drawerTheme: const DrawerThemeData(),
   progressIndicatorTheme: const ProgressIndicatorThemeData(
-    color: Color(0xff6b9ac4),
+    color: ThemeHelpers.primaryBlue,
     refreshBackgroundColor: Color(0xff000000),
   ),
   appBarTheme: const AppBarTheme(backgroundColor: Color(0xff000000)),
@@ -48,8 +78,8 @@ final ThemeData absoluteDarkTheme = FlexThemeData.dark(
     backgroundColor: Color(0xff000000),
     unselectedItemColor: Colors.white,
   ),
-  canvasColor: const Color(0xff000000),
-  dividerColor: Color(0xff116383),
+  canvasColor: const Color(0xff080808),
+  dividerColor: const Color(0xff116383),
   tooltipTheme: TooltipThemeData(
     decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
     textStyle: const TextStyle(color: Colors.white, fontSize: 12),
@@ -57,8 +87,9 @@ final ThemeData absoluteDarkTheme = FlexThemeData.dark(
     showDuration: const Duration(seconds: 2),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-    foregroundColor: Colors.white,
-    side: const BorderSide(color: Colors.white, width: 1),
-  )),
+    style: OutlinedButton.styleFrom(
+      foregroundColor: Colors.white,
+      side: const BorderSide(color: Colors.white, width: 1),
+    ),
+  ),
 );
