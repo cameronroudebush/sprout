@@ -34,7 +34,7 @@ class LoginPage extends ConsumerWidget {
                   spacing: 24,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Welcome Back!', style: theme.textTheme.headlineMedium),
+                    Text('Welcome Back!', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                     LoginForm(),
                   ],
                 ),

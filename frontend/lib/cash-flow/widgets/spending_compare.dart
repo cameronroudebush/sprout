@@ -110,29 +110,33 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
           header: ChartHeader(
             title: "Spending Trend",
             subheader: subheaderText,
-            right: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                DropdownButtonHideUnderline(
+            right: Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                width: 100,
+                child: DropdownButtonHideUnderline(
                   child: DropdownButton<DateTime>(
                     isDense: true,
+                    isExpanded: true,
                     padding: EdgeInsets.zero,
                     value: _customTargetDate,
                     items: availableTargets
                         .map((date) => DropdownMenuItem(
                               value: date,
-                              child: Text(
-                                isMonthly
-                                    ? "vs ${DateFormat('MMM yyyy').format(date)}"
-                                    : "vs ${DateFormat('yyyy').format(date)}",
-                                style: const TextStyle(fontSize: 12),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  isMonthly
+                                      ? "vs ${DateFormat('MMM yyyy').format(date)}"
+                                      : "vs ${DateFormat('yyyy').format(date)}",
+                                ),
                               ),
                             ))
                         .toList(),
                     onChanged: (val) => setState(() => _customTargetDate = val!),
                   ),
-                )
-              ],
+                ),
+              ),
             ),
           ),
           formatValue: (val) => formatter.format(val),
