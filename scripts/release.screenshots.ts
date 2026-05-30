@@ -345,7 +345,7 @@ export async function captureScreenshots() {
         });
 
         // Wait a moment for data to load
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Capture the data
         const { data } = await Page.captureScreenshot({
