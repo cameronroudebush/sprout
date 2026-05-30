@@ -3,6 +3,7 @@ import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { HoldingService } from "@backend/holding/holding.service";
+import { MajorIndexTimelineDto } from "@backend/holding/model/api/major.index.timeline.dto";
 import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
@@ -77,6 +78,29 @@ export class HoldingController {
     return history.history;
   }
 
+  @Get("live/major")
+  @ApiOperation({
+    summary: "Returns major holding prices.",
+    description: "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
+  })
+  @ApiOkResponse({ description: "Successfully acquired major ticker prices.", type: [MarketIndexDto] })
+  async getLiveMajor(@CurrentUser() _user: User) {
+    return await this.holdingService.getMajorIndices();
+  }
+
+  @Get("timeline/major")
+  @ApiOperation({
+    summary: "Get 7-day historical performance for major market indices.",
+    description: "Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.",
+  })
+  @ApiOkResponse({
+    description: "Successfully fetched major index timeline records.",
+    type: [MajorIndexTimelineDto],
+  })
+  async getMajorIndicesTimeline(@CurrentUser() _user: User) {
+    return await this.holdingService.getMajorIndicesTimeline();
+  }
+
   @Get("timeline/:id")
   @ApiOperation({
     summary: "Get timeline of a specific holding.",
@@ -87,16 +111,6 @@ export class HoldingController {
     const holding = await Holding.findOne({ where: { account: { user: { id: user.id } }, id } });
     if (holding == null) throw new NotFoundException();
     return (await this.holdingService.getTimelineForHolding(holding)).timeline();
-  }
-
-  @Get("live/major")
-  @ApiOperation({
-    summary: "Returns major holding prices.",
-    description: "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
-  })
-  @ApiOkResponse({ description: "Successfully acquired major ticker prices.", type: [MarketIndexDto] })
-  async getLiveMajor(@CurrentUser() _user: User) {
-    return await this.holdingService.getMajorIndices();
   }
 
   @Get("live")

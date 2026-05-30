@@ -105,7 +105,6 @@ class UserConfigNotifier extends _$UserConfigNotifier {
   /// Returns true for success
   Future<bool> _sendUpdate(UserConfig updatedConfig) async {
     final previousState = state;
-    state = const AsyncLoading();
     try {
       final api = await ref.read(userConfigApiProvider.future);
       final result = await api.userConfigControllerEdit(updatedConfig);

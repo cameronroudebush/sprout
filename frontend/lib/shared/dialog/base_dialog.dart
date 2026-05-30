@@ -56,7 +56,7 @@ class SproutBaseDialogWidget extends StatelessWidget {
             width: 36,
             height: 4,
             margin: const EdgeInsets.only(top: 12, bottom: 8),
-            decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
           ),
         ],
         Padding(
@@ -77,7 +77,7 @@ class SproutBaseDialogWidget extends StatelessWidget {
             ],
           ),
         ),
-        Divider(height: 1, thickness: 1, color: theme.dividerColor.withValues(alpha: 0.5)),
+        const Divider(height: 1, thickness: 1),
       ],
     );
   }
@@ -117,9 +117,8 @@ class SproutBaseDialogWidget extends StatelessWidget {
   Widget _buildMobileSheet(BuildContext context, ThemeData theme) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: theme.cardTheme.color,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1),
       ),
       child: SafeArea(
         child: Column(
@@ -141,9 +140,8 @@ class SproutBaseDialogWidget extends StatelessWidget {
         maxWidth: 640,
       ),
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5), width: 1),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -169,7 +167,7 @@ Future<T?> showSproutPopup<T>({
   if (isDesktop) {
     return showDialog<T>(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.1),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       barrierDismissible: isDismissible,
       builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),

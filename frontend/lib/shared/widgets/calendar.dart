@@ -2,12 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sprout/shared/models/extensions/box_decoration_extensions.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
 /// A generic calendar intended to display the given content
 class SproutCalendar<T> extends StatefulWidget {
   /// The events to display
   final List<T> events;
+
+  /// A function that allows decoration of specific day cells
+  final BoxDecoration? Function(BuildContext context, List<T> events)? cellDecorationBuilder;
 
   /// On day selected callback
   final void Function(DateTime day, List<T> events)? onDaySelected;
@@ -24,8 +28,16 @@ class SproutCalendar<T> extends StatefulWidget {
   /// If we should allow changing months, days, etc.
   final bool allowSelection;
 
-  const SproutCalendar(this.events, this.isOnDay,
-      {super.key, this.onDaySelected, this.dayDisplay, this.displayOutsideDays = false, this.allowSelection = true});
+  const SproutCalendar(
+    this.events,
+    this.isOnDay, {
+    super.key,
+    this.onDaySelected,
+    this.dayDisplay,
+    this.displayOutsideDays = false,
+    this.allowSelection = true,
+    this.cellDecorationBuilder,
+  });
 
   @override
   State<SproutCalendar> createState() => _SproutCalendarState<T>();
@@ -158,9 +170,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
               return Center(
                 child: Text(
                   dayHeaders[index],
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onPrimary.withOpacity(0.6),
-                  ),
+                  style: theme.textTheme.bodySmall,
                 ),
               );
             },
@@ -190,9 +200,8 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                     events: eventsForDay,
                     displayOutsideDays: widget.displayOutsideDays,
                     eventMarkerBuilder: widget.dayDisplay,
-                    onDaySelected: (day, List<T> events) {
-                      _focusDay(day);
-                    },
+                    cellDecorationBuilder: widget.cellDecorationBuilder,
+                    onDaySelected: (day, List<T> events) => _focusDay(day),
                   );
                 },
               )),
@@ -219,6 +228,7 @@ class _CalendarCell<T> extends StatelessWidget {
   final bool displayOutsideDays;
   final Widget Function(BuildContext context, List<T> events)? eventMarkerBuilder;
   final void Function(DateTime day, List<T> events)? onDaySelected;
+  final BoxDecoration? Function(BuildContext context, List<T> events)? cellDecorationBuilder;
 
   const _CalendarCell({
     super.key,
@@ -227,6 +237,7 @@ class _CalendarCell<T> extends StatelessWidget {
     required this.events,
     required this.displayOutsideDays,
     required this.eventMarkerBuilder,
+    this.cellDecorationBuilder,
     this.onDaySelected,
   });
 
@@ -241,18 +252,20 @@ class _CalendarCell<T> extends StatelessWidget {
     // Hide the day if it's not in the current month and the flag is off
     if (!displayOutsideDays && !isThisMonth) return Container();
 
+    final defaultDecoration = BoxDecoration(
+        color: isFocused ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        border: isToday
+            ? BoxBorder.all(color: theme.colorScheme.secondary)
+            : BoxBorder.all(color: Colors.grey.withValues(alpha: 0.3)));
+    final customDecoration = cellDecorationBuilder?.call(context, events);
+
     return InkWell(
       onTap: () => onDaySelected?.call(date, events),
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: isFocused ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: isToday
-              ? BoxBorder.all(color: theme.colorScheme.secondary)
-              : BoxBorder.all(color: Colors.grey.withValues(alpha: 0.3)),
-        ),
+        decoration: defaultDecoration.merge(customDecoration),
         child: Column(
           children: [
             //  Day Number

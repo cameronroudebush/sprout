@@ -44,7 +44,7 @@ final class BiometricsProvider
   }
 }
 
-String _$biometricsHash() => r'aa39643fd4bd429b1a30fb9b09d1560afb39a469';
+String _$biometricsHash() => r'5fef9e997c8cc7f375f50b9d9fe0fefad6ccd0a8';
 
 /// A provider that tracks our current biometric lock/unlock state and how to do the loc/unlock
 

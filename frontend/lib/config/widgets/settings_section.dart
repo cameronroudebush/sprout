@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/shared/widgets/card.dart';
 
 /// A wrapper widget that groups multiple settings tiles into a single logical section.
 ///
@@ -22,27 +23,21 @@ class SettingSection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16, bottom: 8),
           child: Text(
             title,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
+            style: theme.textTheme.bodyLarge?.copyWith(),
           ),
         ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: theme.cardTheme.color,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.dividerColor, width: 1),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              for (int i = 0; i < children.length; i++) ...[
-                children[i],
-                if (i < children.length - 1)
-                  Divider(height: 1, thickness: 1, indent: 16, endIndent: 16, color: theme.dividerColor),
+        SproutCard(
+          child: Material(
+            color: Colors.transparent,
+            type: MaterialType.transparency,
+            child: Column(
+              children: [
+                for (int i = 0; i < children.length; i++) ...[
+                  children[i],
+                  if (i < children.length - 1) const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],

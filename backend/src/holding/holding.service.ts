@@ -1,4 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
+import { MajorIndexTimelineDto, MajorIndexTimelinePoint } from "@backend/holding/model/api/major.index.timeline.dto";
 import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { EntityHistory } from "@backend/net-worth/model/api/entity.history.dto";
@@ -7,6 +8,12 @@ import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Cache } from "cache-manager";
 import YahooFinance from "yahoo-finance2";
+
+const MAJOR_INDICES: Record<string, { name: string; color: string }> = {
+  "^GSPC": { name: "S&P 500", color: "#2196F3" }, // Blue
+  "^DJI": { name: "DJIA", color: "#FF9800" }, // Orange
+  "^IXIC": { name: "NASDAQ", color: "#9C27B0" }, // Purple
+};
 
 /**
  * This service provides holdings common functions
@@ -78,13 +85,67 @@ export class HoldingService {
   }
 
   /** Fetches the live data for major indices. */
-  async getMajorIndices(symbols = ["^GSPC", "^DJI", "^IXIC"], ttlMs?: number) {
-    return (await this.getLiveHoldingPrices(symbols, ttlMs)).map((x) => {
-      // Adjust their names
-      if (x.symbol === "^GSPC") x.name = "S&P 500";
-      else if (x.symbol === "^DJI") x.name = "DIJA";
-      else if (x.symbol === "^IXIC") x.name = "NASDAQ";
+  async getMajorIndices(ttlMs?: number) {
+    return (await this.getLiveHoldingPrices(Object.keys(MAJOR_INDICES), ttlMs)).map((x) => {
+      x.name = MAJOR_INDICES[x.symbol]?.name ?? x.symbol;
       return x;
     });
+  }
+
+  /**
+   * Fetches the 7-day historical performance timeline for the Big Three market indices.
+   */
+  async getMajorIndicesTimeline(ttlMs: number = 60 * 60 * 1000): Promise<MajorIndexTimelineDto[]> {
+    const symbols = Object.keys(MAJOR_INDICES);
+    const cacheKey = "holding:major:timeline:7d";
+    const cachedData = await this.cacheManager.get<any[]>(cacheKey);
+    if (cachedData) return cachedData;
+
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+
+      // Fetch all three indices in a concurrent batch operation
+      const historicalResults = await Promise.all(
+        symbols.map((symbol) =>
+          this.yf
+            .chart(symbol, {
+              period1: startDate,
+              interval: "1d",
+            })
+            .catch(() => null),
+        ),
+      );
+
+      const results = symbols.map((symbol, index) => {
+        const rawChart = historicalResults[index];
+        const indexConfig = MAJOR_INDICES[symbol];
+        const name = indexConfig?.name ?? symbol;
+        const color = indexConfig?.color ?? "#888888";
+
+        const timeline: MajorIndexTimelinePoint[] = [];
+        if (rawChart && Array.isArray(rawChart.quotes) && rawChart.quotes.length > 0) {
+          const validQuotes = rawChart.quotes.filter((q) => q && q.date && q.close !== undefined && q.close !== null);
+          if (validQuotes.length > 0) {
+            const dayOnePrice = validQuotes[0]?.close ?? 0;
+            for (const quote of validQuotes) {
+              const price = quote.close ?? 0;
+              const changePercent = dayOnePrice > 0 ? ((price - dayOnePrice) / dayOnePrice) * 100 : 0.0;
+              timeline.push({
+                date: new Date(quote.date),
+                value: price,
+                changePercent: parseFloat(changePercent.toFixed(4)),
+              });
+            }
+          }
+        }
+        return new MajorIndexTimelineDto({ symbol, name, color, timeline });
+      });
+
+      await this.cacheManager.set(cacheKey, results, ttlMs);
+      return results;
+    } catch (error) {
+      throw new HttpException("Failed to retrieve market history timeline", HttpStatus.SERVICE_UNAVAILABLE);
+    }
   }
 }

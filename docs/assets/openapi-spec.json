@@ -1715,6 +1715,70 @@
         "tags": ["Holding"]
       }
     },
+    "/holding/live/major": {
+      "get": {
+        "description": "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
+        "operationId": "HoldingController_getLiveMajor",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully acquired major ticker prices.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketIndexDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns major holding prices.",
+        "tags": ["Holding"]
+      }
+    },
+    "/holding/timeline/major": {
+      "get": {
+        "description": "Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.",
+        "operationId": "HoldingController_getMajorIndicesTimeline",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully fetched major index timeline records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MajorIndexTimelineDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get 7-day historical performance for major market indices.",
+        "tags": ["Holding"]
+      }
+    },
     "/holding/timeline/{id}": {
       "get": {
         "description": "Retrieves the value change over time of a holding given by it's ID.",
@@ -1753,38 +1817,6 @@
           }
         ],
         "summary": "Get timeline of a specific holding.",
-        "tags": ["Holding"]
-      }
-    },
-    "/holding/live/major": {
-      "get": {
-        "description": "Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.",
-        "operationId": "HoldingController_getLiveMajor",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successfully acquired major ticker prices.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MarketIndexDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Returns major holding prices.",
         "tags": ["Holding"]
       }
     },
@@ -3692,21 +3724,6 @@
         },
         "required": ["last1Day", "last7Days", "lastMonth", "lastThreeMonths", "lastSixMonths", "lastYear", "allTime"]
       },
-      "HistoricalDataPoint": {
-        "type": "object",
-        "properties": {
-          "date": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date of the record"
-          },
-          "value": {
-            "type": "number",
-            "description": "The numerical currency value"
-          }
-        },
-        "required": ["date", "value"]
-      },
       "MarketIndexDto": {
         "type": "object",
         "properties": {
@@ -3749,6 +3766,70 @@
           }
         },
         "required": ["price", "symbol", "name", "change", "changePercent", "lastUpdated"]
+      },
+      "MajorIndexTimelinePoint": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-05-29T13:30:00.000Z"
+          },
+          "value": {
+            "type": "number",
+            "description": "The raw closing nominal price.",
+            "example": 7580.06
+          },
+          "changePercent": {
+            "type": "number",
+            "description": "The percentage change relative to day one of the lookback window.",
+            "example": 0.81
+          }
+        },
+        "required": ["date", "value", "changePercent"]
+      },
+      "MajorIndexTimelineDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "The official Yahoo Finance ticker index symbol code.",
+            "example": "^GSPC"
+          },
+          "name": {
+            "type": "string",
+            "description": "The readable corporate clean name matching the index symbol.",
+            "example": "S&P 500"
+          },
+          "color": {
+            "type": "string",
+            "description": "The hexadecimal color token string representing this brand asset.",
+            "example": "#2196F3"
+          },
+          "timeline": {
+            "description": "The historical performance point ledger tracking both raw price and performance percentages.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MajorIndexTimelinePoint"
+            }
+          }
+        },
+        "required": ["symbol", "name", "color", "timeline"]
+      },
+      "HistoricalDataPoint": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date of the record"
+          },
+          "value": {
+            "type": "number",
+            "description": "The numerical currency value"
+          }
+        },
+        "required": ["date", "value"]
       },
       "TotalNetWorthDTO": {
         "type": "object",

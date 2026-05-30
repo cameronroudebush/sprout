@@ -16,6 +16,7 @@ import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
+import 'package:sprout/theme/widgets/theme_picker.dart';
 import 'package:sprout/user/models/extensions/use_config_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -47,6 +48,11 @@ class SettingsPage extends ConsumerWidget {
     }
   }
 
+  /// Opens a new webpage to the documentation
+  static Future<void> openDocumentation() async {
+    await launchUrl(Uri.parse("https://sprout.croudebush.net"));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(secureConfigProvider).value;
@@ -65,24 +71,11 @@ class SettingsPage extends ConsumerWidget {
 
     // Define child lists for conditional sections
     final appearanceChildren = [
-      ActionSettingTile(
-        title: "App Theme",
-        subtitle: "Customize how Sprout looks",
-        icon: Icons.palette_outlined,
-        trailing: DropdownButtonHideUnderline(
-          child: DropdownButton<ThemeStyleEnum>(
-            value: userConfig.themeStyle,
-            alignment: Alignment.centerRight,
-            onChanged: (ThemeStyleEnum? newValue) {
-              if (newValue != null) {
-                _update(ref, (c) => c.copyWith(themeStyle: newValue));
-              }
-            },
-            items: ThemeStyleEnum.values
-                .map((style) => DropdownMenuItem(value: style, child: Text(style.value.toTitleCase)))
-                .toList(),
-          ),
-        ),
+      ThemePicker(
+        currentStyle: userConfig.themeStyle,
+        onThemeChanged: (ThemeStyleEnum style) {
+          _update(ref, (c) => c.copyWith(themeStyle: style));
+        },
       ),
       ActionSettingTile(
         title: "Display Currency",
@@ -149,7 +142,7 @@ class SettingsPage extends ConsumerWidget {
     final userHasEmail = user != null && user.email != null && user.email!.isNotEmpty;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 8),
       child: SproutRouteWrapper(
         child: Column(
           spacing: 16,
@@ -162,7 +155,7 @@ class SettingsPage extends ConsumerWidget {
                   title: "Username",
                   subtitle: user?.username ?? "Unknown",
                   icon: Icons.person_outline,
-                  trailing: SizedBox.shrink(),
+                  trailing: const SizedBox.shrink(),
                 ),
                 ActionSettingTile(
                   title: "Email Address",
@@ -214,10 +207,10 @@ class SettingsPage extends ConsumerWidget {
               ],
             ),
 
-            // Appearance (Always shown as it has children)
+            // Appearance
             SettingSection(title: "Appearance", children: appearanceChildren),
 
-            // Privacy & Security (Only shown if children exist)
+            // Privacy & Security
             if (privacyChildren.isNotEmpty) SettingSection(title: "Privacy & Security", children: privacyChildren),
 
             // Integrations
@@ -282,7 +275,7 @@ class SettingsPage extends ConsumerWidget {
                     subtitle: sseConnected ? "Connected" : "Disconnected",
                     icon: Icons.sync,
                     trailing: Padding(
-                      padding: EdgeInsetsGeometry.only(right: 14),
+                      padding: const EdgeInsets.only(right: 14),
                       child: Icon(Icons.circle, color: sseConnected ? Colors.green : Colors.red, size: 12),
                     ),
                   ),
@@ -290,7 +283,7 @@ class SettingsPage extends ConsumerWidget {
                     title: "Sprout Documentation",
                     subtitle: "Need some help? Get it here",
                     icon: Icons.help,
-                    onTap: () => launchUrl(Uri.parse("https://sprout.croudebush.net")),
+                    onTap: () => openDocumentation(),
                   ),
                   ActionSettingTile(
                     title: "Connection Url",
