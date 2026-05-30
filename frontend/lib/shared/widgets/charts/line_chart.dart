@@ -25,25 +25,29 @@ class SproutLineChart extends StatelessWidget {
   final bool showLegend;
   final bool showZeroLine;
   final bool showDateInTooltip;
+  final bool showBorder;
+  final EdgeInsets padding;
 
   final String Function(num value)? formatValue;
   final String Function(num value)? formatYAxis;
 
-  const SproutLineChart({
-    super.key,
-    required this.series,
-    required this.chartRange,
-    this.header,
-    this.formatValue,
-    this.formatYAxis,
-    this.showYAxis = false,
-    this.showXAxis = false,
-    this.showGrid = false,
-    this.drawVerticalGrid = true,
-    this.showLegend = true,
-    this.showZeroLine = true,
-    this.showDateInTooltip = true,
-  });
+  SproutLineChart(
+      {super.key,
+      required this.series,
+      required this.chartRange,
+      this.header,
+      this.formatValue,
+      this.formatYAxis,
+      this.showYAxis = false,
+      this.showXAxis = false,
+      this.showGrid = false,
+      this.drawVerticalGrid = true,
+      this.showLegend = true,
+      this.showZeroLine = true,
+      this.showDateInTooltip = true,
+      this.showBorder = true,
+      EdgeInsets? padding})
+      : padding = padding ?? EdgeInsets.symmetric(horizontal: showXAxis ? 24 : 8);
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +65,7 @@ class SproutLineChart extends StatelessWidget {
         const SizedBox(height: 16),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: padding,
             child: LineChart(
               _buildLineChartData(theme),
               duration: Duration.zero,
@@ -204,6 +208,13 @@ class SproutLineChart extends StatelessWidget {
       minX: 0,
       maxX: maxPoints > 0 ? (maxPoints - 1).toDouble() : 0,
       titlesData: _buildTitlesData(theme, yAxisBounds),
+      borderData: FlBorderData(
+        show: showBorder,
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
       gridData: FlGridData(
         show: showGrid,
         drawVerticalLine: drawVerticalGrid,

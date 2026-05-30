@@ -120,6 +120,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               if (accounts.isNotEmpty && hasHoldings) ...[
                 _buildPerformanceChart(theme, isDesktop),
               ],
+              if (!isDesktop) const Divider(),
             ],
           ),
         ),
@@ -252,7 +253,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
           if (data.spots.isNotEmpty) seriesList.add(LineChartDataProcessor.computeAverageData(data));
 
           return SizedBox(
-              height: isDesktop ? 300 : 150,
+              height: isDesktop ? 300 : 200,
               child: SproutLineChart(
                 series: seriesList,
                 header: ChartHeader(

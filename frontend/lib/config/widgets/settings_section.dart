@@ -11,7 +11,9 @@ class SettingSection extends StatelessWidget {
   /// The list of settings tiles (usually [SwitchSettingTile] or [ActionSettingTile]).
   final List<Widget> children;
 
-  const SettingSection({super.key, required this.title, required this.children});
+  final double? elevation;
+
+  const SettingSection({super.key, required this.title, required this.children, this.elevation});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class SettingSection extends StatelessWidget {
           ),
         ),
         SproutCard(
+          elevation: elevation,
           child: Material(
             color: Colors.transparent,
             type: MaterialType.transparency,

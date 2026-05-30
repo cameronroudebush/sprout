@@ -27,6 +27,7 @@ class SproutCard extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
 
     final card = Card(
+      elevation: elevation,
       clipBehavior: clip ? Clip.antiAlias : Clip.none,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
