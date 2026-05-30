@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
-import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
@@ -19,17 +18,11 @@ class SproutSideNav extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     return Row(
       children: [
         const SizedBox(
           width: 260,
           child: _InternalSideNavContent(),
-        ),
-        VerticalDivider(
-          width: 1,
-          thickness: 1,
-          color: theme.dividerColor,
         ),
         if (child != null) Expanded(child: child!),
       ],
@@ -50,9 +43,12 @@ class _InternalSideNavContent extends ConsumerWidget {
 
     final navItems = authenticatedRoutes.where((page) => page.showInSidebar).toList();
     final groupedItems = groupBy<SproutRoute, String?>(navItems, (route) => route.category);
+    final navBackgroundColor = theme.cardTheme.color ?? theme.cardColor;
 
-    return Container(
-      color: theme.appBarTheme.backgroundColor,
+    return Material(
+      elevation: 4.0,
+      color: navBackgroundColor,
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -68,9 +64,6 @@ class _InternalSideNavContent extends ConsumerWidget {
               ],
             ),
           ),
-          Divider(color: theme.dividerColor),
-          const NotificationBell(isDesktop: true),
-          Divider(color: theme.dividerColor),
 
           // Scrollable Dynamic Grouped Sections
           Expanded(
@@ -143,7 +136,6 @@ class _InternalSideNavContent extends ConsumerWidget {
             ),
           ),
 
-          Divider(color: theme.dividerColor),
           // User Profile Section
           _UserProfileTile(authUser: authUser, onLogout: authNotifier.logout, currentPath: currentPath),
         ],
@@ -179,12 +171,14 @@ class _UserProfileTile extends StatelessWidget {
           return InkWell(
             onTap: () => controller.isOpen ? controller.close() : controller.open(),
             borderRadius: BorderRadius.circular(16),
+            hoverColor: theme.colorScheme.primary.withOpacity(0.15),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                border: Border.all(color: theme.colorScheme.outlineVariant),
                 borderRadius: BorderRadius.circular(16),
-                color: isSettings ? theme.colorScheme.secondaryContainer : null,
+                color: isSettings
+                    ? theme.colorScheme.secondaryContainer
+                    : theme.colorScheme.surfaceVariant.withOpacity(0.3),
               ),
               child: Row(
                 spacing: 12,

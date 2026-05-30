@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +30,8 @@ class SpendingCalendarWidget extends ConsumerWidget {
         final totalDays = DateTime(now.year, now.month + 1, 0).day;
         final listDaysInMonth = List.generate(totalDays, (i) => i + 1);
 
+        final maxSpending = spendingMap.values.isNotEmpty ? spendingMap.values.reduce((a, b) => math.max(a, b)) : 0.0;
+
         return SproutCard(
           child: Padding(
             padding: const EdgeInsets.only(top: 4, bottom: 6),
@@ -48,6 +52,18 @@ class SpendingCalendarWidget extends ConsumerWidget {
                     return gridDay.month == now.month && gridDay.day == dayItem;
                   },
                   allowSelection: false,
+                  cellDecorationBuilder: (context, matchingItems) {
+                    if (matchingItems.isEmpty || maxSpending <= 0) return null;
+                    final dayItem = matchingItems.first;
+                    final totalSpentToday = spendingMap[dayItem] ?? 0.0;
+                    if (totalSpentToday <= 0) return null;
+                    final intensityRatio = totalSpentToday / maxSpending;
+                    final calculatedAlpha = (intensityRatio * 0.45).clamp(0.05, 0.5);
+                    return BoxDecoration(
+                      color: theme.colorScheme.error.withOpacity(calculatedAlpha),
+                      borderRadius: BorderRadius.circular(8),
+                    );
+                  },
                   dayDisplay: (context, matchingItems) {
                     if (matchingItems.isEmpty) return const SizedBox.shrink();
                     final targetDay = matchingItems.first;

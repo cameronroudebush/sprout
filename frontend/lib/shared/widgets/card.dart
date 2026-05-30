@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// A generic card for use in sprout that better aligns the default styling
+/// A generic card for use in sprout that utilizes elevation instead of flat borders
+/// for a clean, dimensional aesthetic.
 class SproutCard extends StatelessWidget {
   final Widget? child;
   final double? widthMultiplier;
   final bool applySizedBox;
   final double? height;
   final Color? bgColor;
-  final Color? borderColor;
+  final double? elevation;
   final bool clip;
 
   const SproutCard({
@@ -17,21 +18,18 @@ class SproutCard extends StatelessWidget {
     this.applySizedBox = true,
     this.height,
     this.bgColor,
-    this.borderColor,
+    this.elevation,
     this.clip = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
 
     final card = Card(
-      color: bgColor ?? theme.cardTheme.color,
       clipBehavior: clip ? Clip.antiAlias : Clip.none,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
-        side: BorderSide(color: borderColor ?? theme.dividerColor, width: 2),
       ),
       child: child,
     );

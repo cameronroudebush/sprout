@@ -30,7 +30,9 @@ class AccountHoldingsList extends ConsumerWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: sortedHoldings.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, __) => Divider(
+              height: 1,
+            ),
             itemBuilder: (context, index) {
               final holding = sortedHoldings[index];
               final isSelected = selectedId == holding.id;

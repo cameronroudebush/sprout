@@ -221,7 +221,7 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
       touchTooltipData: LineTouchTooltipData(
         fitInsideVertically: true,
         fitInsideHorizontally: true,
-        getTooltipColor: (spot) => const Color(0xFF4A5568),
+        getTooltipColor: (spot) => theme.primaryColorDark,
         tooltipPadding: const EdgeInsets.all(8),
         getTooltipItems: (List<LineBarSpot> touchedSpots) {
           if (touchedSpots.isEmpty) return [];

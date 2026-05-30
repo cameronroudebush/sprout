@@ -35,11 +35,18 @@ class SproutApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userConfigAsync = ref.watch(userConfigProvider);
     final splashAsync = ref.watch(sproutSplashManagerProvider);
-
+    final isColdStart = ref.watch(isColdStartProvider);
     final isLoggingOut = ref.watch(authProvider.notifier).isLoggingOut;
-
-    final isLoading = userConfigAsync.isLoading || splashAsync.isLoading;
+    final isConfigLoading = !userConfigAsync.hasValue && userConfigAsync.isLoading;
+    final isLoading = isColdStart && (isConfigLoading || splashAsync.isLoading);
     final hasError = userConfigAsync.hasError || splashAsync.hasError;
+
+    // Turn off cold start flag once initial startup sequences completely resolve
+    if (isColdStart && !isConfigLoading && !splashAsync.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(isColdStartProvider.notifier).state = false;
+      });
+    }
 
     if (isLoading) {
       final String loadingMessage;
@@ -51,9 +58,14 @@ class SproutApp extends ConsumerWidget {
         loadingMessage = "Loading user data...";
       }
 
-      return Theme(
-        data: absoluteDarkTheme,
-        child: Directionality(
+      final fallbackTheme = userConfigAsync.hasValue
+          ? ref.read(userConfigProvider.notifier).activeTheme(userConfigAsync.value)
+          : absoluteDarkTheme;
+
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: fallbackTheme,
+        home: Directionality(
           textDirection: TextDirection.ltr,
           child: SproutLoadingIndicator(
             message: loadingMessage,

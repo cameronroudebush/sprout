@@ -60,7 +60,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
               children: [
                 Expanded(
                   flex: 4,
-                  child: _buildCalendarCard(subs, theme),
+                  child: _buildCalendarCard(subs, theme, isDesktop),
                 ),
                 if (widget.showDetails)
                   Expanded(
@@ -75,7 +75,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
           return Column(
             spacing: 12,
             children: [
-              _buildCalendarCard(subs, theme),
+              _buildCalendarCard(subs, theme, isDesktop),
               if (widget.showDetails) _buildSelectedDayCard(eventsForCurrentDay),
             ],
           );
@@ -85,7 +85,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
   }
 
   /// Builds the calendar card to display in a calendar format of when the subs are
-  Widget _buildCalendarCard(List<TransactionSubscription> subs, ThemeData theme) {
+  Widget _buildCalendarCard(List<TransactionSubscription> subs, ThemeData theme, bool isDesktop) {
     return SproutCard(
       child: Padding(
         padding: const EdgeInsets.only(top: 4, bottom: 6),
@@ -113,9 +113,9 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                 }
               },
               dayDisplay: (context, events) {
-                return SproutLayoutBuilder((isDesktop, context, constraints) {
+                return SproutLayoutBuilder((_, context, constraints) {
                   if (events.isEmpty) return const SizedBox.shrink();
-                  final iconSize = widget.iconSize ?? (isDesktop ? 24 : 12);
+                  final iconSize = widget.iconSize ?? (isDesktop ? 28 : 12);
 
                   final maxLogos = (constraints.maxWidth / (iconSize + 4)).floor().clamp(0, events.length);
                   final displayedEvents = events.take(maxLogos).toList();
@@ -126,7 +126,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                     spacing: 4,
                     children: [
                       ...displayedEvents.map(
-                        (e) => AccountIcon(e.account, size: iconSize),
+                        (e) => AccountIcon(e.account, size: iconSize.toDouble()),
                       ),
                       if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: iconSize * 0.8)),
                     ],

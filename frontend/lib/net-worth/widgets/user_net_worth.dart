@@ -44,9 +44,7 @@ class UserNetWorthWidget extends ConsumerWidget {
           SproutChartSeries(
             data: processedChartData,
             label: "Net Worth",
-            config: LineSeriesConfig(
-              usePositiveNegativeColors: true,
-            ),
+            config: LineSeriesConfig(usePositiveNegativeColors: true),
           ),
         ];
 

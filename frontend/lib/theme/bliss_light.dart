@@ -35,14 +35,42 @@ final ThemeData blissLightTheme = FlexThemeData.light(
   platform: TargetPlatform.windows,
   cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
 ).copyWith(
+  popupMenuTheme: const PopupMenuThemeData(
+    color: Color(0xfff5f8fc), // Slightly darker, premium off-white surface tone
+    surfaceTintColor: Colors.transparent,
+  ),
+  menuTheme: MenuThemeData(
+    style: MenuStyle(
+      backgroundColor: WidgetStateProperty.all(const Color(0xfff5f8fc)),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+    ),
+  ),
+  dropdownMenuTheme: DropdownMenuThemeData(
+    menuStyle: MenuStyle(
+      backgroundColor: WidgetStateProperty.all(const Color(0xfff5f8fc)),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+    ),
+  ),
+  dividerTheme: DividerThemeData(color: const Color(0xff116383).withOpacity(.20)),
+  chipTheme: ChipThemeData(
+    backgroundColor: const Color(0xfff5f8fc),
+    disabledColor: const Color(0xfff5f8fc).withOpacity(0.5),
+    labelStyle: const TextStyle(fontSize: 13, color: Color(0xff001d36)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(color: const Color(0xff116383).withOpacity(0.15), width: 1),
+    ),
+  ),
+  cardTheme: const CardThemeData(color: Color(0xfff5f8fc)),
+  dialogTheme: const DialogThemeData(backgroundColor: Color(0xfff5f8fc)),
   appBarTheme: const AppBarTheme(backgroundColor: Colors.white, foregroundColor: Color(0xff001d36)),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Colors.white,
     selectedItemColor: ThemeHelpers.primaryBlue,
     unselectedItemColor: Colors.black,
   ),
-  canvasColor: const Color(0xffd1e4ff),
-  dividerColor: Color(0xff116383),
+  canvasColor: const Color(0xfff5f8fc),
+  dividerColor: const Color(0xff116383),
   tooltipTheme: TooltipThemeData(
     decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
     textStyle: const TextStyle(color: Colors.white, fontSize: 12),
@@ -50,8 +78,9 @@ final ThemeData blissLightTheme = FlexThemeData.light(
     showDuration: const Duration(seconds: 2),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-    foregroundColor: Colors.black,
-    side: const BorderSide(color: Colors.black, width: 1),
-  )),
+    style: OutlinedButton.styleFrom(
+      foregroundColor: Colors.black,
+      side: const BorderSide(color: Colors.black, width: 1),
+    ),
+  ),
 );

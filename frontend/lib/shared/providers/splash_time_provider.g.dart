@@ -20,7 +20,7 @@ final class SproutSplashManagerProvider
           argument: null,
           retry: null,
           name: r'sproutSplashManagerProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -34,7 +34,7 @@ final class SproutSplashManagerProvider
 }
 
 String _$sproutSplashManagerHash() =>
-    r'fa3d7c5f0101f40da46e4f3aef196fc9bec0508d';
+    r'c128d430b1f10e5fdd014511f7ec9f237b715446';
 
 abstract class _$SproutSplashManager extends $AsyncNotifier<bool> {
   FutureOr<bool> build();

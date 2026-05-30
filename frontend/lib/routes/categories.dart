@@ -31,7 +31,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
       leading: CategoryIcon(c),
       title: Text(c.name, style: theme.textTheme.bodyLarge),
       onTap: () => _openEditSheet(c),
-      trailing: Icon(Icons.chevron_right, color: theme.dividerColor),
+      trailing: Icon(Icons.chevron_right),
     );
   }
 
@@ -50,6 +50,7 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
+
     return Scaffold(
       floatingActionButton: SproutSpeedDial(
         actions: [FABAction(icon: Icons.add, label: 'New Category', onTap: (context) => _openEditSheet(null))],
@@ -60,6 +61,11 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
         data: (categories) {
           final topLevel = categories.where((c) => c.parentCategoryId == null).toList()
             ..sort((a, b) => a.name.compareTo(b.name));
+
+          final List<Widget> allTiles = [];
+          for (final root in topLevel) {
+            allTiles.addAll(_buildCategoryTree(root, categories, 0));
+          }
 
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -79,19 +85,21 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
                       ),
                     ),
                   ),
-                  SproutCard(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: topLevel.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        return Column(
-                          children: _buildCategoryTree(topLevel[index], categories, 0),
-                        );
-                      },
+
+                  if (allTiles.isNotEmpty)
+                    SproutCard(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (int i = 0; i < allTiles.length; i++) ...[
+                            allTiles[i],
+                            // Render a divider line underneath every element except the absolute final item
+                            if (i < allTiles.length - 1) Divider(height: 1, thickness: 1),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
+
                   // Padding for FAB
                   const SizedBox(height: 80),
                 ],

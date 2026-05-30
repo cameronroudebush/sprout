@@ -34,6 +34,28 @@ final ThemeData coloredDarkTheme = FlexThemeData.dark(
   platform: TargetPlatform.windows,
   cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
 ).copyWith(
+  popupMenuTheme: const PopupMenuThemeData(
+    color: Color(0xff191c20),
+    surfaceTintColor: Colors.transparent,
+  ),
+  menuTheme: MenuThemeData(
+    style: MenuStyle(
+      backgroundColor: WidgetStateProperty.all(const Color(0xff191c20)),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+    ),
+  ),
+  dropdownMenuTheme: DropdownMenuThemeData(
+    menuStyle: MenuStyle(
+      backgroundColor: WidgetStateProperty.all(const Color(0xff191c20)),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+    ),
+  ),
+  dividerTheme: DividerThemeData(color: Color(0xff116383).withOpacity(.35)),
+  chipTheme: ChipThemeData(
+    backgroundColor: const Color(0xff191c20),
+    disabledColor: const Color(0xff191c20).withOpacity(0.4),
+    labelStyle: const TextStyle(fontSize: 13, color: Colors.white),
+  ),
   cardTheme: const CardThemeData(color: Color(0xff191c20)),
   dialogTheme: DialogThemeData(backgroundColor: Color(0xff14171b)),
   listTileTheme: ListTileThemeData(),
@@ -47,7 +69,7 @@ final ThemeData coloredDarkTheme = FlexThemeData.dark(
     backgroundColor: Color(0xff001e2c),
     unselectedItemColor: Colors.white,
   ),
-  canvasColor: const Color(0xff001e2c),
+  canvasColor: const Color(0xff191c20),
   dividerColor: Color(0xff116383),
   tooltipTheme: TooltipThemeData(
     decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),

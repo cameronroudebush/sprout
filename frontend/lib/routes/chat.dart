@@ -73,21 +73,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                           ),
                         ),
                 ),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border(top: BorderSide(color: theme.dividerColor, width: 0.5)),
-                  ),
-                  child: SproutRouteWrapper(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 8,
-                      children: [
-                        _buildQuickActions(isLoading),
-                        ChatInput(isLoading: isLoading),
-                      ],
-                    ),
+                const Divider(),
+                SproutRouteWrapper(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
+                      _buildQuickActions(isLoading),
+                      ChatInput(isLoading: isLoading),
+                    ],
                   ),
                 ),
               ],
