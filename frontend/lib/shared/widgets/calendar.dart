@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/shared/models/extensions/box_decoration_extensions.dart';
@@ -46,22 +44,6 @@ class SproutCalendar<T> extends StatefulWidget {
 class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
   // The month and year currently being displayed on the calendar.
   DateTime _focusedDate = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-    // Delay this execution by 1 millisecond
-    Timer(const Duration(milliseconds: 1), () {
-      final date = DateTime.now();
-      // Find events for the specific day from our grouped map.
-      final eventsForDay = widget.events.where((e) {
-        return widget.isOnDay(date, e);
-      }).toList();
-      if (widget.onDaySelected != null) {
-        widget.onDaySelected!(date, eventsForDay);
-      }
-    });
-  }
 
   /// Moves the calendar to the previous month.
   void _previousMonth() {
