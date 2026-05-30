@@ -35,29 +35,11 @@ class SproutApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userConfigAsync = ref.watch(userConfigProvider);
     final splashAsync = ref.watch(sproutSplashManagerProvider);
-    final isColdStart = ref.watch(isColdStartProvider);
-    final isLoggingOut = ref.watch(authProvider.notifier).isLoggingOut;
-    final isConfigLoading = !userConfigAsync.hasValue && userConfigAsync.isLoading;
-    final isLoading = isColdStart && (isConfigLoading || splashAsync.isLoading);
-    final hasError = userConfigAsync.hasError || splashAsync.hasError;
+    final authState = ref.watch(authProvider);
+    final isLoggedIn = authState.value != null;
+    final hasError = (isLoggedIn && userConfigAsync.hasError) || splashAsync.hasError;
 
-    // Turn off cold start flag once initial startup sequences completely resolve
-    if (isColdStart && !isConfigLoading && !splashAsync.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(isColdStartProvider.notifier).state = false;
-      });
-    }
-
-    if (isLoading) {
-      final String loadingMessage;
-      if (isLoggingOut) {
-        loadingMessage = "Logging out...";
-      } else if (splashAsync.isLoading) {
-        loadingMessage = "Initializing...";
-      } else {
-        loadingMessage = "Loading user data...";
-      }
-
+    if (splashAsync.isLoading) {
       final fallbackTheme = userConfigAsync.hasValue
           ? ref.read(userConfigProvider.notifier).activeTheme(userConfigAsync.value)
           : absoluteDarkTheme;
@@ -68,8 +50,8 @@ class SproutApp extends ConsumerWidget {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: SproutLoadingIndicator(
-            message: loadingMessage,
-            animate: splashAsync.isLoading && !isLoggingOut,
+            message: "Initializing...",
+            animate: splashAsync.isLoading,
           ),
         ),
       );

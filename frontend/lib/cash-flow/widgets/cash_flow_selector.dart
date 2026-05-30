@@ -55,6 +55,10 @@ class CashFlowSelector extends StatelessWidget {
                 spacing: 8,
                 children: [
                   ToggleButtons(
+                    constraints: const BoxConstraints(
+                      minHeight: 28.0,
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Disables material margin padding
                     isSelected: [currentView == CashFlowView.monthly, currentView == CashFlowView.yearly],
                     onPressed: (index) {
                       onViewChanged(index == 0 ? CashFlowView.monthly : CashFlowView.yearly);

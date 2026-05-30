@@ -64,9 +64,9 @@ final ThemeData coloredDarkTheme = FlexThemeData.dark(
     color: Color(0xff6b9ac4),
     refreshBackgroundColor: Color(0xff6b9ac4),
   ),
-  appBarTheme: const AppBarTheme(backgroundColor: Color(0xff001e2c)),
+  appBarTheme: const AppBarTheme(backgroundColor: Color(0xff191c20)),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-    backgroundColor: Color(0xff001e2c),
+    backgroundColor: Color(0xff191c20),
     unselectedItemColor: Colors.white,
   ),
   canvasColor: const Color(0xff191c20),

@@ -140,6 +140,7 @@ class SettingsPage extends ConsumerWidget {
     ];
 
     final userHasEmail = user != null && user.email != null && user.email!.isNotEmpty;
+    final settingElevation = onlyShowSetup ? 0.0 : null;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 8),
@@ -149,6 +150,7 @@ class SettingsPage extends ConsumerWidget {
           children: [
             // Profile
             SettingSection(
+              elevation: settingElevation,
               title: "User Profile",
               children: [
                 ActionSettingTile(
@@ -208,13 +210,15 @@ class SettingsPage extends ConsumerWidget {
             ),
 
             // Appearance
-            SettingSection(title: "Appearance", children: appearanceChildren),
+            SettingSection(elevation: settingElevation, title: "Appearance", children: appearanceChildren),
 
             // Privacy & Security
-            if (privacyChildren.isNotEmpty) SettingSection(title: "Privacy & Security", children: privacyChildren),
+            if (privacyChildren.isNotEmpty)
+              SettingSection(elevation: settingElevation, title: "Privacy & Security", children: privacyChildren),
 
             // Integrations
             SettingSection(
+              elevation: settingElevation,
               title: "Integrations",
               children: [
                 ActionSettingTile(
@@ -254,6 +258,7 @@ class SettingsPage extends ConsumerWidget {
             // System details
             if (!onlyShowSetup)
               SettingSection(
+                elevation: settingElevation,
                 title: "System Details",
                 children: [
                   ActionSettingTile(

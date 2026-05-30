@@ -37,7 +37,7 @@ class TotalSummary extends ConsumerWidget {
             ),
           ],
         ),
-        _buildProgressBar(theme, visualTotal, formatter),
+        if (accounts.isNotEmpty) _buildProgressBar(theme, visualTotal, formatter),
       ],
     );
   }
