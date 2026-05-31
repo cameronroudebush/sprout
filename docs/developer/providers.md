@@ -133,20 +133,13 @@ Unlike SimpleFIN’s setup tokens, Plaid requires a coordinated dance between yo
 **3. Product Readiness**
 Plaid data is partitioned into **Products** (Transactions, Investments, Liabilities). When a user first links an account, you cannot simply grab data immediately. You often have to wait for an initial background pull to complete, which can lead to `PRODUCT_NOT_READY` errors if your sync logic is too aggressive.
 
-### The Payoff: Real-Time Data & Rich Metadata
-
-Despite the maintenance **tax**, Plaid is the only provider that offers a truly **live** experience.
-
-**Sync Frequency**
-While SimpleFIN is typically limited to daily refreshes due to upstream caching, **Plaid can be synced up to 4 times per day** in our background workers. This ensures that a morning coffee purchase shows up in Sprout by lunchtime.
-
 ### Takeaways & Improvements
 
 Plaid is a **high-maintenance**, **high-reward** provider. It is the best choice for users who want a "set it and forget it" experience with maximum detail.
 
 | **Strength**                                                                                                                                | **Area for Improvement**                                                                                                                               |
 | :------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Data Freshness:** Supports up to 4 syncs per day, providing near real-time updates.                                                       | **High Cost:** Plaid is significantly more expensive. While they have a free "Development" tier, Production usage carries per-item and per-call costs. |
+| **Data Freshness:** Supports up to multiple syncs per day, providing near real-time updates.                                                | **High Cost:** Plaid is significantly more expensive. While they have a free "Development" tier, Production usage carries per-item and per-call costs. |
 | **Rich Metadata:** Includes merchant logos, high-fidelity categories, and investment holdings (shares, cost basis, etc.).                   | **Integration Heavy:** Requires SDKs for both frontend (Flutter) and backend (Node/TS), plus complex token exchange logic.                             |
 | **Reliability:** Direct OAuth integrations with major banks (Chase, Wells Fargo) mean fewer "broken" connections compared to proxy bridges. |                                                                                                                                                        |
 
