@@ -16,7 +16,6 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { AxiosError } from "axios";
-import { format, subDays } from "date-fns";
 import {
   CountryCode,
   LinkTokenCreateRequest,
@@ -30,6 +29,7 @@ import {
   Security as PlaidSecurity,
   Transaction as PlaidTransaction,
   Products,
+  RemovedTransaction,
 } from "plaid";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
@@ -87,29 +87,39 @@ export class PlaidProviderService extends ProviderBase {
           access_token: asset.accessToken,
         });
 
-        // Fetch Holdings for the entire institution (Investment accounts only)
+        const hasInvestmentAccount = accountsResponse.data.accounts.some((acc) => this.mapType(acc.type) === AccountType.investment);
         let allHoldings: PlaidHolding[] | undefined = undefined;
         let securities: PlaidSecurity[] | undefined = undefined;
-        try {
-          await this.rateLimit(user).incrementOrError();
-          const holdingsResponse = await this.plaidClient!.investmentsHoldingsGet({
-            access_token: asset.accessToken,
-          });
-          securities = holdingsResponse.data.securities;
-          allHoldings = holdingsResponse.data.holdings;
-        } catch (e) {}
+        // Fetch Holdings for the entire institution, only if this is an investment account
+        if (hasInvestmentAccount) {
+          try {
+            await this.rateLimit(user).incrementOrError();
+            const holdingsResponse = await this.plaidClient!.investmentsHoldingsGet({
+              access_token: asset.accessToken,
+            });
+            securities = holdingsResponse.data.securities;
+            allHoldings = holdingsResponse.data.holdings;
+          } catch (e) {}
+        }
 
         // Fetch all the transactions for all the accounts
-        let allTransactions: PlaidTransaction[] = [];
+        let addedTransactions: PlaidTransaction[] = [];
+        let modifiedTransactions: PlaidTransaction[] = [];
+        let removedTransactions: RemovedTransaction[] = [];
         try {
-          if (!accountsOnly) allTransactions = await this.fetchAllInstitutionTransactions(user, asset);
+          if (!accountsOnly) {
+            const syncData = await this.fetchAllInstitutionTransactions(user, asset);
+            addedTransactions = syncData.added;
+            modifiedTransactions = syncData.modified;
+            removedTransactions = syncData.removed;
+          }
         } catch (e) {
           this.logger.error(e);
         }
 
         for (const acc of accountsResponse.data.accounts) {
           let account = this.convertPlaidAccount(acc, user, asset.institution);
-          let plaidAsset = await PlaidAsset.findOne({ where: { account: { user: { id: user.id } } }, relations: ["account"] });
+          let plaidAsset = await PlaidAsset.findOne({ where: { account: { id: acc.account_id, user: { id: user.id } } }, relations: ["account"] });
 
           // This is a new account. Handle it like so.
           if (plaidAsset == null) {
@@ -119,9 +129,10 @@ export class PlaidProviderService extends ProviderBase {
             account = plaidAsset.account;
           }
 
-          // Convert all transactions
-          const accountTransactions = allTransactions.filter((t) => t.account_id === acc.account_id);
+          // Convert added + modified transactions. These will be upserted.
+          const accountTransactions = addedTransactions.concat(modifiedTransactions).filter((t) => t.account_id === acc.account_id);
           const transactions = await this.convertPlaidTransactions(accountTransactions, account, user);
+          const removedTransactionIds = removedTransactions.filter((t) => t.account_id === acc.account_id).map((t) => t.transaction_id);
 
           // Overarching holding objects considering securities
           const accountHoldings =
@@ -133,6 +144,7 @@ export class PlaidProviderService extends ProviderBase {
             account,
             holdings: accountHoldings,
             transactions: transactions,
+            removedTransactionIds: removedTransactionIds,
           });
 
           // Successful update, make sure we don't track as an error
@@ -261,32 +273,39 @@ export class PlaidProviderService extends ProviderBase {
    * for the last N days, handling Plaid's pagination.
    */
   private async fetchAllInstitutionTransactions(user: User, instAsset: PlaidInstitutionAsset) {
-    const startDate = format(subDays(new Date(), Configuration.providers.lookBackDays), "yyyy-MM-dd");
-    const endDate = format(new Date(), "yyyy-MM-dd");
+    let allAdded: PlaidTransaction[] = [];
+    let allModified: PlaidTransaction[] = [];
+    let allRemoved: RemovedTransaction[] = [];
 
-    let allTxns: PlaidTransaction[] = [];
-    let offset = 0;
-    const count = 500;
     let hasMore = true;
+    let cursor = instAsset.syncCursor || undefined;
 
     while (hasMore) {
       await this.rateLimit(user).incrementOrError();
-      const response = await this.plaidClient!.transactionsGet({
+      const response = await this.plaidClient!.transactionsSync({
         access_token: instAsset.accessToken,
-        start_date: startDate,
-        end_date: endDate,
+        cursor: cursor,
+        count: 100,
         options: {
-          count,
-          offset,
           include_personal_finance_category: true,
         },
       });
 
-      allTxns = allTxns.concat(response.data.transactions);
-      offset += response.data.transactions.length;
-      hasMore = allTxns.length < response.data.total_transactions;
+      allAdded = allAdded.concat(response.data.added);
+      allModified = allModified.concat(response.data.modified);
+      allRemoved = allRemoved.concat(response.data.removed);
+
+      cursor = response.data.next_cursor;
+      hasMore = response.data.has_more;
     }
-    return allTxns;
+
+    // Save the newly acquired cursor back to the database
+    if (instAsset.syncCursor !== cursor) {
+      instAsset.syncCursor = cursor;
+      await instAsset.update();
+    }
+
+    return { added: allAdded, modified: allModified, removed: allRemoved };
   }
 
   /** Converts the given plaid account to Sprout's local model. Does not insert. */
@@ -309,10 +328,16 @@ export class PlaidProviderService extends ProviderBase {
 
   /** Converts Plaid's transaction format to Sprout's local Transaction model */
   private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, user: User) {
+    const uniqueCategoryNames = Array.from(new Set(transactions.map((t) => t.personal_finance_category?.primary || t.category?.[0] || "Uncategorized")));
+    const categoryMap = new Map<string, Category>();
+    for (const name of uniqueCategoryNames) {
+      const category = await Category.getOrCreate(name, user);
+      categoryMap.set(name, category);
+    }
     return await Promise.all(
       transactions.map(async (t) => {
         const categoryName = t.personal_finance_category?.primary || t.category?.[0] || "Uncategorized";
-        const category = await Category.getOrCreate(categoryName, user);
+        const category = categoryMap.get(categoryName)!;
         const newTransaction = new Transaction(t.amount * -1, new Date(t.date), t.name ?? t.merchant_name, category, t.pending ?? false, account);
         newTransaction.id = t.transaction_id;
         newTransaction.extra = { code: t.transaction_code, location: t.location };

@@ -18,7 +18,7 @@ import { User } from "@backend/user/model/user.model";
 import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { subDays, subMinutes } from "date-fns";
 import { merge } from "lodash";
-import { LessThan, MoreThan } from "typeorm";
+import { In, LessThan, MoreThan } from "typeorm";
 import { BackgroundJob } from "./base";
 
 /** This job is the orchestrator that controls syncing all available providers */
@@ -156,6 +156,9 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
             if (data.account.institution.hasError) institutionErrors.add(data.account.institution.name);
             // Sync transactions
             if (data.transactions && data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions!);
+            // Clean up removed transactions
+            if (data.removedTransactionIds && data.removedTransactionIds.length > 0)
+              await Transaction.delete({ id: In(data.removedTransactionIds), account: { user: { id: user.id } } });
             // Sync holdings if investment type
             if (data.holdings && accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
 
@@ -194,6 +197,7 @@ class ProviderSyncJob extends BackgroundJob<Sync | null> {
 
   /** Updates all transaction data for the given account that matches the given transaction */
   private async updateTransactionData(accountInDb: Account, transactions: Transaction[]) {
+    // TODO: Change this to do a .save to prevent over-taxing the database
     for (const transaction of transactions) {
       transaction.account = accountInDb;
       // If the transaction description is empty, fill it with something

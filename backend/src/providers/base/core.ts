@@ -33,5 +33,16 @@ export abstract class ProviderBase {
    * @param user The user we want accounts for.
    * @param accountsOnly If we only want accounts and not included holdings or transactions.
    */
-  abstract get(user: User, accountsOnly: boolean): Promise<Array<{ account: Account; transactions?: Transaction[]; holdings?: Holding[] }>>;
+  abstract get(
+    user: User,
+    accountsOnly: boolean,
+  ): Promise<
+    Array<{
+      account: Account;
+      transactions?: Transaction[];
+      /** Transactions the provider said no longer exist. */
+      removedTransactionIds?: string[];
+      holdings?: Holding[];
+    }>
+  >;
 }

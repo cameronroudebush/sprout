@@ -84,7 +84,7 @@ To use Plaid with your self-hosted instance of Sprout, you must provide your own
 
 !!! warning
 
-    While I've added support for it based on a requirement I set for myself, the price alone makes it not worth it. This may be removed in the future due to said cost. We highly recommend using SimpleFIN.
+    This integration is in active development and while Plaid can cost "per request", we recommend you consider this before using it.
 
 !!! danger "Security Warning"
 
@@ -120,5 +120,4 @@ Follow these steps to get your credentials and connect your first account:
 
 ### Why Choose Plaid?
 
-- **Real-time Sync**: Plaid offers robust support for transaction "Sync," allowing us to update your data often.
 - **Industry Standard**: Most major US banks have "OAuth" integrations with Plaid, meaning you often don't have to share your bank password with Plaid at all—you simply authorize Sprout through your bank's own website.
