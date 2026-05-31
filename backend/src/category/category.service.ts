@@ -16,18 +16,14 @@ export class CategoryService {
     if (month) month -= 1;
     const results = Transaction.getRepository()
       .createQueryBuilder("t")
-      // Join account to filter by user
       .innerJoin("t.account", "account")
-      // Join category for grouping
       .leftJoin("t.category", "category")
-      // First filter: Must belong to the specified user and optionally account
       .where("account.userId = :userId", { userId: user.id });
 
     if (accountId != null) {
       results.andWhere("account.id = :accountId", { accountId: accountId });
     }
 
-    // Second filter: Must be within the date range, only if given
     if (month != null && year != null) {
       const queryDate = new Date(year, month ?? 0, 1);
       results.andWhere({

@@ -25,35 +25,25 @@ export class TransactionService {
   async findSubscriptions(user: User, requiredCount = Configuration.transaction.subscriptionCount) {
     const range = subMonths(new Date(), 6);
 
-    // Get our data from the db
     const potentialSubs = (await Transaction.getRepository()
       .createQueryBuilder("transaction")
       .select("transaction.description", "description")
       .addSelect("transaction.amount", "amount")
       .addSelect("transaction.accountId", "accountId")
-      // Aggregates
       .addSelect("COUNT(*)", "count")
       .addSelect("MIN(transaction.posted)", "startDate")
       .addSelect("MAX(transaction.id)", "latestTransactionId")
       .addSelect("(julianday(MAX(transaction.posted)) - julianday(MIN(transaction.posted))) / (COUNT(*) - 1)", "avgIntervalDays")
-      // Joins & Filters
       .innerJoin("transaction.account", "account")
       .where("account.userId = :userId", { userId: user.id })
       .andWhere("transaction.posted >= :range", { range })
       .andWhere("transaction.amount < 0") // Expenses only
-      // Grouping
       .groupBy("transaction.accountId")
-      // .addGroupBy("transaction.description")
       .addGroupBy("transaction.amount")
-      // Frequency Filter
       .having("count >= :requiredCount", { requiredCount })
-      // Consistency Filter: Must appear in at least N distinct months to be a sub
       .andHaving("COUNT(DISTINCT strftime('%Y-%m', transaction.posted)) >= :requiredCount", { requiredCount })
-      // Filter out if 'Days Since Last Transaction' > 'Avg Interval' as this sub may be cancelled
       .andHaving("(julianday('now') - julianday(MAX(transaction.posted))) <= (avgIntervalDays + 10)")
       .getRawMany()) as (TransactionSubscription & { avgIntervalDays: number; latestTransactionId: string; accountId: string })[];
-
-    // Convert subs to the type
     const typedPotentialSubs = await Promise.all(
       potentialSubs.map(async (p) => {
         return TransactionSubscription.fromPlain({
@@ -65,8 +55,6 @@ export class TransactionService {
         });
       }),
     );
-
-    // Cleanup to see what's valid
     const subs = typedPotentialSubs.filter((sub) => {
       if (sub.period === BillingPeriod.UNKNOWN) return false;
       if (sub.account.type === AccountType.investment) return false; // Don't consider the stock purchases

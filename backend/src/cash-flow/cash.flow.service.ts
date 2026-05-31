@@ -322,9 +322,9 @@ export class CashFlowService {
     const totalDaysInMonth = endDate.getDate();
 
     for (let d = 1; d <= totalDaysInMonth; d++) {
-      const { totalExpense } = await this.calculateFlows(user, year, month, d);
-
-      if (totalExpense > 0) items.push(new DailySpendingItem(d, totalExpense));
+      const { totalExpense, totalIncome } = await this.calculateFlows(user, year, month, d);
+      const netFlow = totalIncome - totalExpense;
+      if (netFlow !== 0) items.push(new DailySpendingItem(d, netFlow));
     }
     return new DailySpendingCalendarResponseDTO(items);
   }

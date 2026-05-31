@@ -9,7 +9,6 @@ import { User } from "@backend/user/model/user.model";
 import { BadRequestException } from "@nestjs/common";
 import { ProviderRateLimit } from "../base/rate-limit";
 
-// Mock external dependencies and configuration
 jest.mock("@backend/config/core", () => ({
   Configuration: {
     providers: {
@@ -47,8 +46,6 @@ describe("SimpleFINProviderService", () => {
     (ProviderRateLimit as unknown as jest.Mock).mockImplementation(() => ({
       incrementOrError: mockIncrementOrError,
     }));
-
-    // Mock global fetch
     global.fetch = jest.fn();
   });
 
@@ -77,7 +74,6 @@ describe("SimpleFINProviderService", () => {
   });
 
   describe("determineAccountType (Branch Coverage)", () => {
-    // Accessing private method via bracket notation or cast for testing purposes
     const determineType = (name: string, balance: number, holdings: any[]) => (service as any).determineAccountType(name, balance, holdings);
 
     it("should return credit when balance <= 0 and name contains keyword", () => {

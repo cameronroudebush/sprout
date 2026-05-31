@@ -90,7 +90,6 @@ class UserConfigNotifier extends _$UserConfigNotifier {
   }
 
   /// Safely update the config using a callback for full type-safety.
-  /// Usage: ref.read(userConfigProvider.notifier).update((c) => c.copyWith(privateMode: true));
   Future<void> updateConfig(UserConfig Function(UserConfig) callback) async {
     final current = state.value;
     if (current == null) return;

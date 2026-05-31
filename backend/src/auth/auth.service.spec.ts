@@ -192,12 +192,10 @@ describe("AuthService", () => {
 
   describe("performOIDCRefresh", () => {
     beforeEach(() => {
-      // Force all tests in this block to use fake timers natively
       jest.useFakeTimers();
     });
 
     afterEach(() => {
-      // Instantly resolve the 10-second setTimeout in the finally block to prevent memory leaks
       jest.runAllTimers();
       jest.useRealTimers();
     });

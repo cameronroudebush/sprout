@@ -11,7 +11,6 @@ import { TransactionRuleService } from "@backend/transaction/transaction.rule.se
 import { User } from "@backend/user/model/user.model";
 import { Test, TestingModule } from "@nestjs/testing";
 
-// Explicitly provide structural placeholders for inherited methods so spyOn can bind to them
 jest.mock("@backend/account/model/account.model", () => {
   return {
     Account: {

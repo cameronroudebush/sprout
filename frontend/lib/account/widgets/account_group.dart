@@ -131,7 +131,7 @@ class AccountGroupSection extends ConsumerWidget {
 
               // Main row content
               Widget row = Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [

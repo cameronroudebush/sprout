@@ -17,7 +17,7 @@ export type LocalJWTContent = { username: string };
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger("service:auth");
-  // Allowed mobile schemes for redirect of OIDC auth
+  /** Allowed mobile schemes for redirect of OIDC auth */
   static readonly ALLOWED_MOBILE_SCHEME = "net.croudebush.sprout";
   /** The cookie name we store the id token in. */
   static readonly idTokenCookie = "id";
@@ -111,7 +111,6 @@ export class AuthService {
     try {
       const target = new URL(targetUrl);
       const source = new URL(publicUrl);
-      // Compare Hostnames (e.g. api.mysite.com vs mysite.com or localhost vs localhost)
       return target.hostname === source.hostname;
     } catch (e) {
       // Invalid URL format
