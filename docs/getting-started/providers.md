@@ -84,7 +84,7 @@ To use Plaid with your self-hosted instance of Sprout, you must provide your own
 
 !!! warning
 
-    While I've added support for it based on a requirement I set for myself, the price alone makes it not worth it. This may be removed in the future due to said cost. We highly recommend using SimpleFin.
+    While I've added support for it based on a requirement I set for myself, the price alone makes it not worth it. This may be removed in the future due to said cost. We highly recommend using SimpleFIN.
 
 !!! danger "Security Warning"
 
