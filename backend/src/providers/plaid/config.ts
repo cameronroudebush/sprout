@@ -1,5 +1,6 @@
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { BaseProviderConfig } from "@backend/providers/base/config";
+import { SimpleFINConfig } from "@backend/providers/simple-fin/config";
 import { PlaidEnvironments } from "plaid";
 
 /** The configuration for the Plaid provider */
@@ -7,8 +8,8 @@ export class PlaidConfig extends BaseProviderConfig {
   @ConfigurationMetadata.assign({ comment: "If this provider is enabled to execute syncs in the background", restrictedValues: [true, false] })
   override bgSyncEnabled = true;
 
-  @ConfigurationMetadata.assign({ comment: "How often to update this provider. Default is to run every 6 hours, starting at 6am." })
-  override syncFrequency: string = "0 */6 * * *";
+  @ConfigurationMetadata.assign({ comment: "How often to update this provider." })
+  override syncFrequency: string = new SimpleFINConfig().syncFrequency; // Keep it in line with SimpleFIN defaults
 
   @ConfigurationMetadata.assign({ comment: "How many API calls we allow per day, per user, for this provider." })
   rateLimit: number = 100;
