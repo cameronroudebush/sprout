@@ -34,20 +34,14 @@ export class UserController {
   async me(@CurrentUser(true) user: User, @Req() req: Request) {
     const authConfig = Configuration.server.auth;
     const allowNewUsers = await this.userService.allowUserCreation();
-    // No user? Check setup status
     if (user == null) {
-      // Check for oidc strategy. 404's will trigger the frontend to allow a new user to be created.
       if (authConfig.type === "oidc" && allowNewUsers) {
         const setup = (req as any).setupUser as UserSetupContext | undefined;
-        // No setup user? That means we didn't make it through user validation via the auth guard
         if (setup == null) throw new UnauthorizedException();
         else throw new NotFoundException(); // We do have setup info? Then go ahead and create a new one
-      }
-      // Check for local strategy. If we don't have any users, safe to assume this is first time setup.
-      else if (authConfig.type === "local" && allowNewUsers) throw new NotFoundException();
+      } else if (authConfig.type === "local" && allowNewUsers) throw new NotFoundException();
       else if (user == null) throw new UnauthorizedException(); // Else this isn't a setup request. Hit em with an unauthorized
     }
-    // Oh, we do have a user. Go ahead and return it then
     return await User.findOne({ where: { id: user.id } });
   }
 

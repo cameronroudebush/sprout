@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/shared/models/extensions/box_decoration_extensions.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
 /// A generic calendar intended to display the given content
@@ -26,16 +27,16 @@ class SproutCalendar<T> extends StatefulWidget {
   /// If we should allow changing months, days, etc.
   final bool allowSelection;
 
-  const SproutCalendar(
-    this.events,
-    this.isOnDay, {
-    super.key,
-    this.onDaySelected,
-    this.dayDisplay,
-    this.displayOutsideDays = false,
-    this.allowSelection = true,
-    this.cellDecorationBuilder,
-  });
+  final String? subheader;
+
+  const SproutCalendar(this.events, this.isOnDay,
+      {super.key,
+      this.onDaySelected,
+      this.dayDisplay,
+      this.displayOutsideDays = false,
+      this.allowSelection = true,
+      this.cellDecorationBuilder,
+      this.subheader});
 
   @override
   State<SproutCalendar> createState() => _SproutCalendarState<T>();
@@ -114,10 +115,10 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                     ),
                   ),
                 if (!widget.allowSelection) const SizedBox.shrink(),
-                Text(
-                  DateFormat.yMMMM().format(_focusedDate),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: ChartHeader(
+                    title: DateFormat.yMMMM().format(_focusedDate),
+                    subheader: widget.subheader,
                   ),
                 ),
                 if (widget.allowSelection)

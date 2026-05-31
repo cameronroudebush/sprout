@@ -169,3 +169,18 @@ class TransactionSubscriptions extends _$TransactionSubscriptions {
 
   Future<void> refresh() async => ref.invalidateSelf();
 }
+
+/// A provider that grabs transactions just for the given day
+@riverpod
+Future<List<Transaction>> transactionsForDay(Ref ref, DateTime day) async {
+  final api = await ref.watch(transactionApiProvider.future);
+  final startOfDay = DateTime(day.year, day.month, day.day, 0, 0, 0);
+  final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
+  final items = await api.transactionControllerGetByQuery(
+    startIndex: 0,
+    endIndex: 100,
+    startDate: startOfDay,
+    endDate: endOfDay,
+  );
+  return items ?? [];
+}

@@ -8,8 +8,8 @@ import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
 class LineChartDataProcessor {
   /// Filters a raw map of historical data based on a selected time range
   ///
-  /// @historicalData The data to process and filter
-  /// @selectedChartRange The chart range we want to keep the data within
+  /// [historicalData] The data to process and filter
+  /// [selectedChartRange] The chart range we want to keep the data within
   static Map<DateTime, num> filterHistoricalData(
     Map<DateTime, num>? historicalData,
     ChartRangeEnum selectedChartRange,

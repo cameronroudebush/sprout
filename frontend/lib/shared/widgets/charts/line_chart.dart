@@ -124,6 +124,7 @@ class SproutLineChart extends StatelessWidget {
       final Color posColor = isSplitColor ? Colors.green : baseColor;
       final Color negColor = isSplitColor ? colorScheme.error : baseColor;
       final double areaOpacity = isSplitColor ? 0.20 : 0.25;
+      final double bottomRange = 0.01;
 
       Color? lineColor;
       LinearGradient? lineGradient;
@@ -151,7 +152,7 @@ class SproutLineChart extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(0.00)],
+            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(bottomRange)],
           ),
         );
       } else if (isAllNegative) {
@@ -160,7 +161,7 @@ class SproutLineChart extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [negColor.withOpacity(0), negColor.withOpacity(areaOpacity)],
+            colors: [negColor.withOpacity(bottomRange), negColor.withOpacity(areaOpacity)],
           ),
         );
       } else {
@@ -171,7 +172,7 @@ class SproutLineChart extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(0.00)],
+            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(bottomRange)],
           ),
         );
 

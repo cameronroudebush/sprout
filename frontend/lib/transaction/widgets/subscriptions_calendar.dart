@@ -19,14 +19,10 @@ class SubscriptionCalendarWidget extends ConsumerStatefulWidget {
   /// If true, and [showDetails] is false, clicking one of these will instead open a popup
   final bool detailsPopup;
 
-  /// Optional title displayed above the calendar
-  final String? title;
-
   /// Target icon sizing
   final double? iconSize;
 
-  const SubscriptionCalendarWidget(
-      {super.key, this.showDetails = true, this.detailsPopup = true, this.title, this.iconSize});
+  const SubscriptionCalendarWidget({super.key, this.showDetails = true, this.detailsPopup = true, this.iconSize});
 
   @override
   ConsumerState<SubscriptionCalendarWidget> createState() => _SubscriptionCalendarWidgetState();
@@ -89,52 +85,40 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
     return SproutCard(
       child: Padding(
         padding: const EdgeInsets.only(top: 4, bottom: 6),
-        child: Column(
-          children: [
-            if (widget.title != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 2, bottom: 6),
-                child: Text(
-                  widget.title!,
-                  style: theme.textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            SproutCalendar(
-              subs,
-              (day, event) => event.isBilledOn(day),
-              onDaySelected: (day, events) {
-                setState(() => _selectedDay = day);
+        child: SproutCalendar(
+          subs,
+          (day, event) => event.isBilledOn(day),
+          subheader: "Subscriptions",
+          onDaySelected: (day, events) {
+            setState(() => _selectedDay = day);
 
-                // Open the popup if details are hidden, popups are active, and there are actual events
-                if (!widget.showDetails && widget.detailsPopup && events.isNotEmpty) {
-                  final typedEvents = events.cast<TransactionSubscription>().toList();
-                  _openDetailsPopup(typedEvents);
-                }
-              },
-              dayDisplay: (context, events) {
-                return SproutLayoutBuilder((_, context, constraints) {
-                  if (events.isEmpty) return const SizedBox.shrink();
-                  final iconSize = widget.iconSize ?? (isDesktop ? 28 : 12);
+            // Open the popup if details are hidden, popups are active, and there are actual events
+            if (!widget.showDetails && widget.detailsPopup && events.isNotEmpty) {
+              final typedEvents = events.cast<TransactionSubscription>().toList();
+              _openDetailsPopup(typedEvents);
+            }
+          },
+          dayDisplay: (context, events) {
+            return SproutLayoutBuilder((_, context, constraints) {
+              if (events.isEmpty) return const SizedBox.shrink();
+              final iconSize = widget.iconSize ?? (isDesktop ? 28 : 12);
 
-                  final maxLogos = (constraints.maxWidth / (iconSize + 4)).floor().clamp(0, events.length);
-                  final displayedEvents = events.take(maxLogos).toList();
-                  final remainingCount = events.length - displayedEvents.length;
+              final maxLogos = (constraints.maxWidth / (iconSize + 4)).floor().clamp(0, events.length);
+              final displayedEvents = events.take(maxLogos).toList();
+              final remainingCount = events.length - displayedEvents.length;
 
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 4,
-                    children: [
-                      ...displayedEvents.map(
-                        (e) => AccountIcon(e.account, size: iconSize.toDouble()),
-                      ),
-                      if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: iconSize * 0.8)),
-                    ],
-                  );
-                });
-              },
-            ),
-          ],
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 4,
+                children: [
+                  ...displayedEvents.map(
+                    (e) => AccountIcon(e.account, size: iconSize.toDouble()),
+                  ),
+                  if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: iconSize * 0.8)),
+                ],
+              );
+            });
+          },
         ),
       ),
     );

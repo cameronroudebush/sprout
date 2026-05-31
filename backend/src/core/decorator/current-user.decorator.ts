@@ -8,10 +8,7 @@ import { createParamDecorator, ExecutionContext, InternalServerErrorException } 
  */
 export const CurrentUser = createParamDecorator((allowFailure: boolean = false, ctx: ExecutionContext): User | null => {
   const request = ctx.switchToHttp().getRequest();
-  // If user exists, return it immediately
   if (request.user) return request.user;
-  // If user is missing but failure is allowed, return null
   if (allowFailure) return null;
-  // Default behavior: Strict enforcement
   throw new InternalServerErrorException("User must be defined for request");
 });

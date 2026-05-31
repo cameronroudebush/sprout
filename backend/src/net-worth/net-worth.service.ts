@@ -145,7 +145,7 @@ export class NetWorthService {
     // Helper to extract value based on type
     const getValue = (h: T) => (h instanceof AccountHistory ? h.balance : h.marketValue);
 
-    // Helper to get Source ID (Account ID or Holding ID) to distinguish data sources
+    // Helper to get Source ID to distinguish data sources
     const getSourceId = (h: T) => {
       if (h instanceof AccountHistory) return h.account?.id || (h as any).accountId;
       if (h instanceof HoldingHistory) return h.holding?.id || (h as any).holdingId;
@@ -206,7 +206,6 @@ export class NetWorthService {
       timeline: (maxPoints = 500) => {
         // If we have fewer points than the max, return everything
         if (dailySnapshots.length <= maxPoints) return dailySnapshots.map((x) => new HistoricalDataPoint(x.date, x.netWorth));
-        // Downsample: Calculate a step size to evenly skip items
         const step = dailySnapshots.length / maxPoints;
         const sampledData = [];
         for (let i = 0; i < maxPoints; i++) {
@@ -232,7 +231,6 @@ export class NetWorthService {
     // Find the snapshot closest to the start date requested
     let startSnapshot = snapshots.find((x) => isSameDay(x.date, startDate));
 
-    // Fallback: if exact date not found (rare due to gap filling), use the first available
     if (!startSnapshot) startSnapshot = snapshots[0];
 
     const endVal = todaySnapshot?.netWorth ?? 0;
@@ -242,9 +240,7 @@ export class NetWorthService {
     let percentChange = 0;
 
     if (startVal !== 0) percentChange = (valueChange / Math.abs(startVal)) * 100;
-    else if (endVal !== 0)
-      // Previous value was 0, new is not. Treat as 100% or -100% change
-      percentChange = endVal > 0 ? 100 : -100;
+    else if (endVal !== 0) percentChange = endVal > 0 ? 100 : -100;
 
     // Invert logic for liability accounts (negative net worth accounts)
     if (relatedAccount?.isNegativeNetWorth) {

@@ -28,14 +28,12 @@ export class CurrencyHelper {
     return function (constructor: Function) {
       const target = constructor.prototype;
       const targetKey = sourceProperty as string;
-      // Define the Swagger/OpenAPI documentation
       ApiProperty({
         type: "number",
         required: true,
         nullable: false,
         description: `The numeric value converted to the user's preferred currency format. This overrides the original ${targetKey} property.`,
       })(target, targetKey);
-      // Transform logic: Convert the amount and replace the property
       Transform(
         ({ obj, options }) => {
           const originalAmount = obj[targetKey];

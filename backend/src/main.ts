@@ -35,8 +35,6 @@ async function main() {
   new ConfigurationService(new SproutLogger(projName, { logLevels: ["verbose"] })).load();
   Configuration.isRunningScript = Configuration.isDevBuild && process.argv[2] != null;
 
-  // Now that the config is loaded, we can import modules that may reference the app module directly.
-
   // Check if we have scripts to run
   if (Configuration.isRunningScript) await checkScript();
 

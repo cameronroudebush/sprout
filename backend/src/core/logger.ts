@@ -37,7 +37,7 @@ export class SproutLogger extends ConsoleLogger {
     let output = this.stringifyMessage(message, logLevel);
     const timestamp = this.getTimestamp();
 
-    // Strip ANSI color codes (e.g., `\x1B[33m`) and brackets from the context
+    // Strip ANSI color codes
     const rawContext = contextMessage
       .replace(/[\u001b\u009b][[()#;?]*.{0,2}?[0-9;]*.{0,2}?[mGK]/g, "")
       .replace(/[\[\]]/g, "")
