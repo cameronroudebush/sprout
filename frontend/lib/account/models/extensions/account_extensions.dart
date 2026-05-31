@@ -19,7 +19,6 @@ extension AccountExtensions on Account {
     return type == AccountTypeEnum.credit || type == AccountTypeEnum.loan;
   }
 
-  /// Optional: Returns true if the account is an asset (Depository, Investment, etc.)
   bool get isAsset {
     return !isDebt;
   }

@@ -31,6 +31,7 @@ class NotificationBell extends ConsumerWidget {
 
     return PopupMenuButton<String>(
       onOpened: () => _handleNotificationMenuOpened(ref),
+      tooltip: "Show notifications",
       padding: EdgeInsets.zero,
       menuPadding: EdgeInsets.zero,
       offset: Offset(0, 50),

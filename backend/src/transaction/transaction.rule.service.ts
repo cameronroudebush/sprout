@@ -25,22 +25,16 @@ export class TransactionRuleService {
    * @param resetCategories If true, transactions that match no rules will have their categories set to null.
    */
   async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false, force = false, resetCategories = false) {
-    // Fetches rules in descending order of priority. Higher `order` values are processed first.
     const rules = await TransactionRule.find({
       where: { user: { id: user.id } },
       order: { order: "DESC" },
     });
-
-    // Fetches all potentially relevant transactions just once.
     const transactions = await Transaction.find({
       where: {
         category: onlyApplyToEmpty ? IsNull() : undefined,
         account: { id: account?.id, user: { id: user.id } },
       },
     });
-
-    // This Set will store the IDs of transactions that have already been matched
-    // by a higher-priority rule, preventing them from being processed again.
     const matchedTransactionIds = new Set<string>();
 
     for (const rule of rules) {
@@ -48,12 +42,8 @@ export class TransactionRuleService {
 
       let currentRuleMatches = rule.matches;
 
-      // Iterate through all transactions for each rule.
       for (const transaction of transactions) {
-        // If this transaction has already been claimed by a rule with higher priority, skip it.
         if (matchedTransactionIds.has(transaction.id)) continue;
-
-        // Handle requirements where certain rules only apply to certain accounts
         if (rule.account != null && transaction.account.id !== rule.account.id) continue;
 
         let isMatch = false;
@@ -62,7 +52,6 @@ export class TransactionRuleService {
           if (rule.strict) {
             isMatch = transaction.description === rule.value;
           } else {
-            // For non-strict matches, check if the description includes any of the piped values.
             const values = rule.value.split("|").map((s) => s.toLowerCase().trim());
             for (const val of values) {
               if (transaction.description.toLowerCase().includes(val)) {
@@ -73,31 +62,19 @@ export class TransactionRuleService {
           }
         } else if (rule.type === "amount") {
           const amountValue = parseFloat(rule.value);
-          // For amount, strict and non-strict are treated as an exact match for now.
           isMatch = transaction.amount === amountValue;
         }
-
-        // The transaction matches the rule. Update its info only if we're allowed based on manually edited status.
         if (isMatch && (!transaction.manuallyEdited || (transaction.manuallyEdited && force))) {
           transaction.category = rule.category;
           transaction.manuallyEdited = false; // Reset this in the case it's set
           await transaction.update();
-
-          // Increment the match count for this specific rule.
           currentRuleMatches++;
-
-          // Add the transaction's ID to our set to mark it as "claimed".
           matchedTransactionIds.add(transaction.id);
         }
       }
-
-      // Update the rule's match count with the number of transactions it uniquely claimed.
       rule.matches = currentRuleMatches;
       await rule.update();
     }
-
-    // If force is enabled, find transactions that were not "claimed" by any rule
-    // and ensure their category is set to null.
     if (resetCategories)
       for (const transaction of transactions)
         if (!matchedTransactionIds.has(transaction.id) && transaction.category !== null) {
@@ -114,14 +91,9 @@ export class TransactionRuleService {
    */
   async reorderRules(user: User, _ruleIdToMove: string, newOrder: number) {
     const rules = await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" } });
-
-    // The 'newOrder' from the client is the desired 1-based position.
     const targetPosition = newOrder;
-
-    // Find if there is a rule in that slot
     const matchingPriority = rules.findIndex((x) => x.order === targetPosition);
     if (matchingPriority != -1) {
-      // Slide all down past that element
       const transactionsToSlide = await TransactionRule.find({
         where: { order: MoreThanOrEqual(targetPosition!), user: { id: user.id } },
         order: { order: "ASC" },
@@ -129,7 +101,6 @@ export class TransactionRuleService {
       await Promise.all(
         transactionsToSlide.map(async (x, i) => {
           const expectedIndex = x.order + 1;
-          // Handle a case where we don't need to push elements down if there is a gap in priority order
           if (expectedIndex === targetPosition + (i + 1)) {
             x.order = x.order + 1;
             await x.update();

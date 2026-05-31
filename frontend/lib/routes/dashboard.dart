@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
-import 'package:sprout/cash-flow/widgets/spending_calendar.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_calendar.dart';
 import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
 import 'package:sprout/net-worth/widgets/user_net_worth.dart';
@@ -111,14 +111,14 @@ class DashboardPage extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(flex: 1, child: SpendingCalendarWidget()),
+            Expanded(flex: 1, child: CashFlowCalendarWidget()),
             Expanded(flex: 1, child: DashboardRecentTransactionsCard(count: 9)),
             Expanded(
-                child: SubscriptionCalendarWidget(
-              title: "Subscriptions",
-              showDetails: false,
-              iconSize: 14,
-            )),
+              child: SubscriptionCalendarWidget(
+                showDetails: false,
+                iconSize: 14,
+              ),
+            ),
           ],
         ),
       ],

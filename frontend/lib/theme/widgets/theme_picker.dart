@@ -6,8 +6,7 @@ import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/theme/bliss_light.dart';
 import 'package:sprout/theme/colored_dark.dart';
 
-/// An inline theme choice selector grid that renders high-fidelity
-/// miniature mockup dashboard visualizations of Sprout's styles.
+/// An inline theme choice selector
 class ThemePicker extends StatelessWidget {
   final ThemeStyleEnum currentStyle;
   final ValueChanged<ThemeStyleEnum> onThemeChanged;

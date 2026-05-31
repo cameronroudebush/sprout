@@ -171,7 +171,6 @@ export class ConfigurationService {
     const interval = cronParser.parse(cron);
     const nextRun = interval.next().toDate();
     const now = new Date();
-    // Milliseconds until the next cron job fires
     return nextRun.getTime() - now.getTime() + buffer;
   }
 }

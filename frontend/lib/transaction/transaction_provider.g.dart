@@ -238,3 +238,92 @@ abstract class _$TransactionSubscriptions
     element.handleCreate(ref, build);
   }
 }
+
+/// A provider that grabs transactions just for the given day
+
+@ProviderFor(transactionsForDay)
+final transactionsForDayProvider = TransactionsForDayFamily._();
+
+/// A provider that grabs transactions just for the given day
+
+final class TransactionsForDayProvider extends $FunctionalProvider<
+        AsyncValue<List<Transaction>>,
+        List<Transaction>,
+        FutureOr<List<Transaction>>>
+    with
+        $FutureModifier<List<Transaction>>,
+        $FutureProvider<List<Transaction>> {
+  /// A provider that grabs transactions just for the given day
+  TransactionsForDayProvider._(
+      {required TransactionsForDayFamily super.from,
+      required DateTime super.argument})
+      : super(
+          retry: null,
+          name: r'transactionsForDayProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionsForDayHash();
+
+  @override
+  String toString() {
+    return r'transactionsForDayProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Transaction>> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Transaction>> create(Ref ref) {
+    final argument = this.argument as DateTime;
+    return transactionsForDay(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TransactionsForDayProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$transactionsForDayHash() =>
+    r'08aa786c5ffc6a4519e4a110fbffc72e9b388cf6';
+
+/// A provider that grabs transactions just for the given day
+
+final class TransactionsForDayFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<Transaction>>, DateTime> {
+  TransactionsForDayFamily._()
+      : super(
+          retry: null,
+          name: r'transactionsForDayProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// A provider that grabs transactions just for the given day
+
+  TransactionsForDayProvider call(
+    DateTime day,
+  ) =>
+      TransactionsForDayProvider._(argument: day, from: this);
+
+  @override
+  String toString() => r'transactionsForDayProvider';
+}

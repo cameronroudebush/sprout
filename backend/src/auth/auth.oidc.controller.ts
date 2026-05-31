@@ -136,8 +136,6 @@ export class OIDCController {
       const { id_token, access_token, refresh_token } = response.data;
       // Clear the temporary cookie
       res.clearCookie("oidc_pending");
-
-      // We validate again to ensure the cookie wasn't tampered with (though it is signed) or that the logic hasn't drifted.
       if (!this.authService.isValidRedirectUrl(targetUrl, publicUrl)) {
         this.logger.warn(`Open redirect attempt detected to: ${targetUrl}`);
         throw new UnauthorizedException("Invalid redirect target");
@@ -188,7 +186,7 @@ export class OIDCController {
       );
       throw new UnauthorizedException("Invalid app verifier");
     } else {
-      // It matched so go ahead and attack cookies
+      // It matched so go ahead and attach cookies
       this.authService.setCookieTokens(res, tokens.idToken, tokens.accessToken, tokens.refreshToken);
     }
   }

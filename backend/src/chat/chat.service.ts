@@ -44,17 +44,12 @@ export class ChatService {
             return response;
           } catch (e: any) {
             // Check if the error object itself contains a message string that looks like JSON
-            if (e?.message)
-              // Attempt to parse the message string in case it's a JSON-encoded ApiError
-              throw JSON.parse(e.message)?.error as ApiError;
-
-            // Fallback: handle cases where the error follows the structure e.error.message
+            if (e?.message) throw JSON.parse(e.message)?.error as ApiError;
             const err = e?.error as ApiError | undefined;
             if (err?.message) throw err.message;
 
             throw e;
           } finally {
-            // Update the chat with the response
             chat.isThinking = false;
             await chat.update();
             this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
@@ -188,18 +183,10 @@ export class ChatService {
 
     for (const msg of history) {
       let text = msg.text.trim();
-
-      // Skip failed model responses or pure error noise
       if (msg.role === "model" && (text === "" || text.includes("Refresh if the problem persists") || text.includes(ChatHistory.DEFAULT_MODEL_TEXT))) continue;
-      // Scrub the "Code: 429" hallucination prefix from valid responses
       if (msg.role === "model") text = text.replace(/^\(Code: 429\)\s*/i, "");
-      // Double check after scrubbing that we still have text
       if (text === "") continue;
-
       if (idMap) text = msg.deIdentifyText(idMap);
-
-      // Ensure role alternation (AI requirement: user -> model -> user)
-      // If the last added message has the same role as the current one, replace it.
       if (formatted.length > 0 && formatted[formatted.length - 1]?.role === msg.role) formatted[formatted.length - 1]!.parts = [{ text }];
       else
         formatted.push({

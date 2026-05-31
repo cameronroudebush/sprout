@@ -4,11 +4,6 @@ import 'package:sprout/api/api.dart';
 extension TransactionSubscriptionExtensions on TransactionSubscription {
   /// **Determines if the subscription is expected to be billed on the given [date].**
   ///
-  /// This logic handles various billing periods, including the edge case for
-  /// subscriptions starting on a day that doesn't exist in a subsequent month
-  /// (e.g., started on Jan 31, checking for February). In that case, it will
-  /// match the last day of the shorter month.
-  ///
   /// Returns `true` if a billing event occurs on the specified day, otherwise `false`.
   bool isBilledOn(DateTime date) {
     // Normalize dates to midnight to ignore time-of-day components.
