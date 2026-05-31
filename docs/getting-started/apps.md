@@ -9,34 +9,50 @@ While the Web UI and PWA offer great flexibility, we also provide a native mobil
 
 ## Android
 
-We offer a native Android application designed to provide the best possible mobile experience for Sprout users.
+We offer a native Android application built with Flutter to provide a smooth, integrated mobile experience for Sprout users.
 
 ### Installation Methods
 
-- **Google Play Store:** The official app is available on the [Google Play Store](https://play.google.com/store/apps/details?id=net.croudebush.sprout&pcampaignid=web_share).
-- **Manual Downloads (APK):** If you prefer to sideload the app or avoid app stores entirely, you can download the latest APKs directly from the [GitHub Releases page](https://github.com/cameronroudebush/sprout/releases).
+#### Official Google Play Store (Closed Testing)
+
+The official app is hosted on the Google Play Store. Because the app is currently in an active testing phase, you must join our testing community to gain visibility of the store listing.
+
+**Steps to Gain Access:**
+
+1. **Join the Testing Group:** Navigate to the [Sprout Android Testing Google Group](https://groups.google.com/g/sprout-testers).
+2. **Opt-In:** Click the **Join Group** button while logged into the primary Google Account associated with your Android device.
+3. **Download the App:** Once your group membership is active, click this [Google Play Store Link](https://play.google.com/store/apps/details?id=net.croudebush.sprout) to view the listing, opt into the testing track, and download the app directly to your device.
+
+_Note: If you run into any issues gaining access via the group link, please reach out to the maintainer via the contact information listed on the [developer's GitHub profile](https://github.com/cameronroudebush)._
+
+#### Manual Installation (Sideload APK)
+
+If you prefer to avoid app stores entirely or want to test independent builds, you can download the latest compiled production APKs directly from the [GitHub Releases page](https://github.com/cameronroudebush/sprout/releases).
 
 ### Home Screen Widgets
 
-The Android app includes native home screen widgets so you can monitor your finances without opening the app.
+The Android app includes native home screen widgets designed to keep you updated on your financial status at a glance.
 
 - **Overview Widget:** Displays a quick snapshot of your current net worth, including recent numerical and percentage changes.
 - **Transactions Widget:** Shows a scrolling list of your most recent transactions, displaying the merchant, category, amount, and pending status.
 
-!!! note
+!!! note "Widget Requirements"
 
-    - Widgets update every hour in the background to keep your data fresh without draining your battery.
-    - To be able to see data in widgets, you must update your user settings to allow widgets.
+    - **Background Updates:** Widgets automatically refresh roughly once every hour to keep your data fresh without impacting battery life.
+    - **Configuration Required:** To see widget support on your home screen, you must explicitly enable the widget permissions under your **User Settings** inside the app.
 
-### Alpha / Beta Testing
-
-The Android app is currently in an Alpha/Beta testing phase. To get access to the Play Store listing or to test upcoming, unreleased features:
-
-1.  You must explicitly request access to the testing track.
-2.  Email the developer directly to be added. Contact information can be found on the [developer's GitHub profile](https://github.com/cameronroudebush).
+---
 
 ## iOS
 
-At this time, we do not offer a native iOS application. We hope to bring Sprout to the App Store in the future.
+At this time, **we do not offer a native iOS application** on the Apple App Store. We hope to expand the Flutter codebase to iOS devices in a future development cycle.
 
-**Apple Users:** In the meantime, we highly recommend installing Sprout as a [Progressive Web App (PWA)](./access.md#progressive-web-app-pwa) via Safari. This will give you an app-like icon on your home screen and a full-screen, native-feeling browsing experience.
+### Recommended Setup for Apple Users
+
+In the meantime, you can achieve a nearly identical native app experience by installing Sprout as a **Progressive Web App (PWA)**:
+
+1. Open your Sprout Web UI instance inside **Safari** on your iPhone or iPad.
+2. Tap the **Share** button in the browser toolbar.
+3. Scroll down and select **Add to Home Screen**.
+
+For more information, see the [PWA Setup Guide](./access.md#progressive-web-app-pwa).
