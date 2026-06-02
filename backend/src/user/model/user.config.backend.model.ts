@@ -7,7 +7,10 @@ class DeviceCheck {
   })
   enabled = true;
 
-  @ConfigurationMetadata.assign({ comment: "When to check for user devices that we haven't seen in awhile. Should be cron expression." })
+  @ConfigurationMetadata.assign({
+    comment: "When to check for user devices that we haven't seen in awhile. Should be cron expression.",
+    externalControlDisabled: true,
+  })
   time: string = "0 */6 * * *";
 
   @ConfigurationMetadata.assign({ comment: "How many days it takes for a device to be considered stuck." })

@@ -5,9 +5,8 @@ import CronExpressionParser, { CronExpression } from "cron-parser";
 import { addMinutes } from "date-fns";
 
 /** A generic class that lets us create background jobs based on a cronjob timeframe. Intended to be used as an extension. */
-export abstract class BackgroundJob<T extends any> {
-  protected readonly logger: Logger;
-
+export abstract class BackgroundJob<T extends any = any> {
+  protected logger: Logger;
   private interval!: CronExpression;
 
   /**

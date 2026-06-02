@@ -6,7 +6,7 @@ class RedisConfig {
   host!: string;
 
   @ConfigurationMetadata.assign({ comment: "The port to connect to redis at." })
-  port!: string;
+  port: number = 6379;
 
   @ConfigurationMetadata.assign({ comment: "The optional password for connecting to redis." })
   password?: string;

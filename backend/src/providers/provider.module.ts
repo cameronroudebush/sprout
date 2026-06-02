@@ -1,6 +1,9 @@
+import { NotificationModule } from "@backend/notification/notification.module";
+import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
 import { PlaidProviderController } from "@backend/providers/plaid/plaid.controller";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
+import { PlaidWebhookController } from "@backend/providers/plaid/plaid.webhook.controller";
 import { BaseProviderController } from "@backend/providers/provider.controller";
 import { SimpleFinProviderController } from "@backend/providers/simple-fin/simple-fin.controller";
 import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
@@ -11,12 +14,22 @@ import { TransactionModule } from "@backend/transaction/transaction.module";
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 
-const ALL_PROVIDERS = [SimpleFINProviderService, ZillowProviderService, PlaidProviderService];
+const ALL_PROVIDERS = [SimpleFINProviderService, PlaidProviderService, ZillowProviderService];
 
 @Module({
-  imports: [HttpModule, SSEModule, TransactionModule],
-  controllers: [BaseProviderController, SimpleFinProviderController, ZillowProviderController, PlaidProviderController],
+  imports: [HttpModule, SSEModule, TransactionModule, NotificationModule],
+  controllers: [
+    BaseProviderController,
+    // SimpleFIN
+    SimpleFinProviderController,
+    // Zillow
+    ZillowProviderController,
+    // Plaid
+    PlaidProviderController,
+    PlaidWebhookController,
+  ],
   providers: [
+    ProviderSyncService,
     ...ALL_PROVIDERS,
     {
       provide: PROVIDER_LIST_TOKEN,
@@ -24,6 +37,6 @@ const ALL_PROVIDERS = [SimpleFINProviderService, ZillowProviderService, PlaidPro
       inject: ALL_PROVIDERS,
     },
   ],
-  exports: [PROVIDER_LIST_TOKEN, ...ALL_PROVIDERS],
+  exports: [ProviderSyncService, PROVIDER_LIST_TOKEN, ...ALL_PROVIDERS],
 })
 export class ProviderModule {}

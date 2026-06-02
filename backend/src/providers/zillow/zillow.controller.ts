@@ -3,6 +3,8 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderType } from "@backend/providers/base/provider.type";
@@ -20,6 +22,7 @@ import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, Api
 @Controller("provider/zillow")
 @ApiTags("Provider")
 @AuthGuard.attach()
+@EnabledGuard.attach(Configuration.providers.zillow.enabled)
 export class ZillowProviderController {
   private readonly logger = new Logger("provider:controller:zillow");
   constructor(

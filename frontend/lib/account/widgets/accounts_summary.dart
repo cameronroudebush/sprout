@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_group.dart';
+import 'package:sprout/account/widgets/accounts_empty.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
@@ -15,53 +16,24 @@ import 'package:sprout/user/user_config_provider.dart';
 /// Includes a visual breakdown of Assets vs. Debts and uses expandable
 /// sections to maintain a clean, scannable interface.
 class AccountSummaryView extends ConsumerWidget {
+  final bool collapsible;
+
   /// The accounts to render
   final List<Account> accounts;
 
   /// If each grouping should be rendered as it's own card. We use this heavily to determine if this is displayed on the dashboard vs it's own page
   final bool individualCards;
 
-  const AccountSummaryView({
-    super.key,
-    required this.accounts,
-    this.individualCards = true,
-  });
+  const AccountSummaryView({super.key, required this.accounts, this.individualCards = true, this.collapsible = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final config = AccountExtensions.groupConfig;
     final historyAsync = ref.watch(historicalAccountDataProvider);
     final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ?? ChartRangeEnum.oneDay;
 
     // Handle empty state
-    if (accounts.isEmpty) {
-      return Center(
-          child: Padding(
-              padding: EdgeInsetsGeometry.only(bottom: 8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: 8,
-                children: [
-                  Icon(Icons.account_balance_wallet_outlined, size: 64, color: theme.colorScheme.primary),
-                  Text("No accounts found", style: theme.textTheme.titleLarge),
-                  Text(
-                    !individualCards
-                        ? "You haven't added any accounts yet. Head over to the accounts page to get started."
-                        : "Use the floating action button in the bottom right to add a new account!",
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                  if (!individualCards)
-                    FilledButton.icon(
-                      onPressed: () => NavigationProvider.redirect('accounts'),
-                      icon: const Icon(Icons.add),
-                      label: const Text("Add Account"),
-                    ),
-                ],
-              )));
-    }
+    if (accounts.isEmpty) return AccountsEmptyWidget(showRedirect: !individualCards);
 
     final groupedAccounts =
         config.keys.where((type) => accounts.any((a) => a.type == type) && config[type] != null).map((type) {
@@ -108,7 +80,8 @@ class AccountSummaryView extends ConsumerWidget {
         totalChange: totalGroupValueChange,
         selectedRange: selectedRange,
         historyList: historyAsync.value,
-        onAccountClick: (acc) => NavigationProvider.redirect('accounts', queryParameters: {'id': acc.id}),
+        allowExpansion: collapsible,
+        onAccountClick: (acc) => NavigationProvider.redirect('accounts/details', queryParameters: {'id': acc.id}),
       );
     }).toList();
 

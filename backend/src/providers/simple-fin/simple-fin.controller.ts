@@ -1,6 +1,8 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -18,6 +20,7 @@ import { randomUUID } from "crypto";
 @Controller("provider/simple-fin")
 @ApiTags("Provider")
 @AuthGuard.attach()
+@EnabledGuard.attach(Configuration.providers.simpleFIN.enabled)
 export class SimpleFinProviderController {
   constructor(
     private readonly simpleFinProviderService: SimpleFINProviderService,

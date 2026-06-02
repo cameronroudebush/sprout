@@ -2,7 +2,7 @@ import { Configuration } from "@backend/config/core";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { Injectable } from "@nestjs/common";
 import { LessThan } from "typeorm";
-import { BackgroundJob } from "./base";
+import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job that executes to check user devices and clean them up if we haven't seen them in awhile */
 @Injectable()
@@ -22,8 +22,7 @@ export class UserDeviceJob extends BackgroundJob<any> {
       lastSeenAt: LessThan(cutoffDate),
     });
 
-    if (result.affected && result.affected > 0) {
-      this.logger.warn(`Cleaning up ${result.affected} user devices that we haven't seen in awhile.`);
-    } else this.logger.log("No user devices to clean up.");
+    if (result.affected && result.affected > 0) this.logger.warn(`Cleaning up ${result.affected} user devices that we haven't seen in awhile.`);
+    else this.logger.log("No user devices to clean up.");
   }
 }

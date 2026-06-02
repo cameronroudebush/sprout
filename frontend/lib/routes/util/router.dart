@@ -10,8 +10,14 @@ import 'package:sprout/routes/connection_setup.dart';
 import 'package:sprout/routes/setup.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
+import 'package:sprout/shared/providers/splash_time_provider.dart';
+import 'package:sprout/shared/widgets/loading.dart';
+
+/// Intended initial redirect path
+String? _intendedPath;
 
 /// Defines a notifier that allows us to subscribe to necessary configuration
 class RouterNotifier extends ChangeNotifier {
@@ -30,12 +36,39 @@ class RouterNotifier extends ChangeNotifier {
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = RouterNotifier(ref);
 
+  // Recursive mapper to automatically build nested GoRoute trees
+  List<GoRoute> mapRoutes(List<SproutRoute> sproutRoutes, {bool isRoot = true}) {
+    return sproutRoutes.map((route) {
+      // GoRouter children must have relative paths. Clean up leading slashes for sub-routes.
+      final cleanPath = !isRoot && route.path.startsWith('/') ? route.path.substring(1) : route.path;
+      return GoRoute(
+        path: cleanPath,
+        pageBuilder: (context, state) => NoTransitionPage(child: route.builder(context, state)),
+        routes: route.routes != null ? mapRoutes(route.routes!, isRoot: false) : const [],
+      );
+    }).toList();
+  }
+
   final router = GoRouter(
     navigatorKey: NavigationProvider.key,
     refreshListenable: notifier,
-    initialLocation: '/login',
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [
+      GoRoute(
+        path: '/loading',
+        pageBuilder: (context, state) {
+          final splashAsync = ref.watch(sproutSplashManagerProvider);
+          return NoTransitionPage(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SproutLoadingIndicator(
+                message: "Initializing...",
+                animate: splashAsync.isLoading,
+              ),
+            ),
+          );
+        },
+      ),
       // Routes that don't require Auth
       GoRoute(
         path: '/login',
@@ -57,12 +90,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Routes that do require auth
       ShellRoute(
         builder: (context, state, child) => SproutShell(state: state, child: child),
-        routes: authenticatedRoutes.map((route) {
-          return GoRoute(
-            path: route.path,
-            pageBuilder: (context, state) => NoTransitionPage(child: route.builder(context, state)),
-          );
-        }).toList(),
+        routes: mapRoutes(authenticatedRoutes),
       ),
     ],
   );
@@ -79,6 +107,16 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 String? _authRedirect(Ref ref, GoRouterState state) {
+  final splashAsync = ref.read(sproutSplashManagerProvider);
+  final currentPath = state.uri.path;
+
+  if (splashAsync.isLoading) {
+    if (_intendedPath == null && currentPath != '/loading') {
+      _intendedPath = state.uri.toString();
+    }
+    return currentPath == '/loading' ? null : '/loading';
+  }
+
   final connUrlState = ref.read(connectionUrlProvider);
   final authState = ref.read(authProvider);
 
@@ -97,15 +135,23 @@ String? _authRedirect(Ref ref, GoRouterState state) {
 
   // Authentication Logic
   final isLoggedIn = authState.value != null;
-  final isGoingToLogin = state.matchedLocation == '/login';
+  final isGoingToLogin = currentPath == '/login';
 
   if (!isLoggedIn) {
     // If not logged in and not on login page, send to login
     return isGoingToLogin ? null : '/login';
   }
 
-  // If already logged in but trying to go to login, kick to home
-  if (isLoggedIn && isGoingToLogin) {
+  if (_intendedPath != null) {
+    final target = _intendedPath!;
+    _intendedPath = null;
+    if (target != '/loading' && target != '/login') {
+      return target;
+    }
+  }
+
+  // If they are logged in but somehow stuck on /login or /loading without an intended path, push to home
+  if (isGoingToLogin || currentPath == '/loading') {
     return '/';
   }
 

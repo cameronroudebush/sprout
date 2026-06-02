@@ -1,10 +1,11 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
+import { AccountType } from "@backend/account/model/account.type";
 import { DatabaseService } from "@backend/database/database.service";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
+import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
@@ -48,10 +49,12 @@ describe("AccountController", () => {
   };
 
   const mockProviderSyncJob = {
-    updateNow: jest.fn(),
-  } as any;
+    jobs: [],
+    syncUserAllProviders: jest.fn(),
+  };
 
   beforeEach(async () => {
+    mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([Sync.fromPlain({ id: "mock-sync-id", status: "complete" })]);
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AccountController],
       providers: [
@@ -69,7 +72,11 @@ describe("AccountController", () => {
         },
         {
           provide: ProviderSyncOrchestratorJob,
-          useValue: { jobs: [mockProviderSyncJob] },
+          useValue: mockProviderSyncJob,
+        },
+        {
+          provide: PlaidProviderService,
+          useValue: { unlinkInstitution: jest.fn() },
         },
       ],
     }).compile();
@@ -205,36 +212,36 @@ describe("AccountController", () => {
   describe("manualSync", () => {
     it("should run sync and trigger SSE events on successful jobs", async () => {
       (Sync.findOne as jest.Mock).mockResolvedValue(null);
-      mockProviderSyncJob.updateNow.mockResolvedValue({ status: "complete" });
+      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([{ status: "complete" }]);
 
       await controller.manualSync(mockUser, false);
 
       expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.updateNow).toHaveBeenCalledWith(mockUser, false);
+      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
     });
 
     it("should run sync and trigger only SYNC SSE event on failed jobs", async () => {
       (Sync.findOne as jest.Mock).mockResolvedValue(null);
-      mockProviderSyncJob.updateNow.mockResolvedValue({ status: "failed" });
+      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([{ status: "failed" }]);
 
       await controller.manualSync(mockUser, false);
 
       expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.updateNow).toHaveBeenCalledWith(mockUser, false);
+      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
       expect(sseService.sendToUser).not.toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
     });
 
     it("should filter out undefined/null job results", async () => {
       (Sync.findOne as jest.Mock).mockResolvedValue(null);
-      mockProviderSyncJob.updateNow.mockResolvedValue(null);
+      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([null]);
 
       await controller.manualSync(mockUser, false);
 
       expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.updateNow).toHaveBeenCalledWith(mockUser, false);
+      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
       expect(sseService.sendToUser).not.toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
     });
@@ -243,17 +250,17 @@ describe("AccountController", () => {
       (Sync.findOne as jest.Mock).mockResolvedValue({ status: "in-progress" });
 
       await expect(controller.manualSync(mockUser, false)).rejects.toThrow(InternalServerErrorException);
-      expect(mockProviderSyncJob.updateNow).not.toHaveBeenCalled();
+      expect(mockProviderSyncJob.syncUserAllProviders).not.toHaveBeenCalled();
     });
 
     it("should force a manual sync even if a sync is already running when force is true", async () => {
       (Sync.findOne as jest.Mock).mockResolvedValue({ status: "in-progress" });
-      mockProviderSyncJob.updateNow.mockResolvedValue({ status: "complete" });
+      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([{ status: "complete" }]);
 
       await controller.manualSync(mockUser, true);
 
       expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.updateNow).toHaveBeenCalledWith(mockUser, false);
+      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
     });

@@ -8,7 +8,6 @@ import 'package:sprout/shared/providers/splash_time_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/shared/widgets/error.dart';
 import 'package:sprout/shared/widgets/lifecycle_observer.dart';
-import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/user_provider.dart';
@@ -39,24 +38,7 @@ class SproutApp extends ConsumerWidget {
     final isLoggedIn = authState.value != null;
     final hasError = (isLoggedIn && userConfigAsync.hasError) || splashAsync.hasError;
 
-    if (splashAsync.isLoading) {
-      final fallbackTheme = userConfigAsync.hasValue
-          ? ref.read(userConfigProvider.notifier).activeTheme(userConfigAsync.value)
-          : absoluteDarkTheme;
-
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: fallbackTheme,
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SproutLoadingIndicator(
-            message: "Initializing...",
-            animate: splashAsync.isLoading,
-          ),
-        ),
-      );
-    }
-
+    // Handle global initialization errors
     if (hasError) {
       final error = userConfigAsync.error ?? splashAsync.error ?? 'Unknown initialization error';
       return MaterialApp(

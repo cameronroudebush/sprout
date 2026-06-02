@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
 import 'package:sprout/transaction/transaction_rule_provider.dart';
@@ -46,35 +47,31 @@ class TransactionRulesPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: rulesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text("Error: $err")),
-        data: (prov) {
-          if (prov.rules.isEmpty) {
-            return SproutRouteWrapper(
-              child: Center(
-                child: SizedBox(
-                  height: 164,
-                  child: SproutCard(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        spacing: 12,
-                        children: [
-                          Icon(Icons.rule_folder_outlined, size: 64, color: theme.colorScheme.primary),
-                          const Text("No rules found. Add one to start organizing!",
-                              textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
-                        ],
-                      ),
-                    ),
+      body: rulesAsync.whenDefault(
+        customErrorMessage: "Failed to load transaction rules",
+        emptyCondition: (prov) => prov.rules.isEmpty,
+        emptyWidget: SproutRouteWrapper(
+          child: SizedBox(
+            height: 164,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                spacing: 12,
+                children: [
+                  Icon(Icons.rule_folder_outlined, size: 64, color: theme.colorScheme.primary),
+                  const Text(
+                    "No rules found. Add one to start organizing!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18),
                   ),
-                ),
+                ],
               ),
-            );
-          }
-
+            ),
+          ),
+        ),
+        data: (prov) {
           return SingleChildScrollView(
-            padding: EdgeInsetsGeometry.only(bottom: 84),
+            padding: const EdgeInsets.only(bottom: 84),
             child: SproutRouteWrapper(
               child: Column(
                 spacing: 12,

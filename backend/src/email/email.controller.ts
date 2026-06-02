@@ -1,5 +1,6 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
-import { DevModeGuard } from "@backend/config/guard/dev-mode.guard";
+import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { EmailService } from "@backend/email/email.service";
 import { WeeklyEmailContent } from "@backend/email/model/weekly-content";
@@ -14,7 +15,7 @@ import path from "path";
 @Controller("email")
 @ApiTags("Email")
 @AuthGuard.attach()
-@DevModeGuard.attach()
+@EnabledGuard.attach(Configuration.isDevBuild)
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 

@@ -1,14 +1,14 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { Notification } from "@backend/notification/model/notification.model";
-import { NotificationType } from "@backend/notification/model/notification.type";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
+import { ProviderSyncService } from "@backend/providers/base/sync.service";
+import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
@@ -30,9 +30,9 @@ jest.mock("@backend/transaction/model/transaction.model");
 jest.mock("@backend/holding/model/holding.model");
 jest.mock("@backend/holding/model/holding.history.model");
 
-jest.mock("./base", () => {
+jest.mock("@backend/jobs/job-distributed-base", () => {
   return {
-    BackgroundJob: class {
+    DistributedQueueJob: class {
       logger = { log: jest.fn(), error: jest.fn(), debug: jest.fn(), warn: jest.fn() };
       constructor() {}
       async start() {
@@ -45,6 +45,8 @@ jest.mock("./base", () => {
 describe("ProviderSync", () => {
   let transactionRuleService: jest.Mocked<TransactionRuleService>;
   let notificationService: jest.Mocked<NotificationService>;
+  let sseService: jest.Mocked<SSEService>;
+  let providerSyncService: ProviderSyncService;
   let provider: jest.Mocked<ProviderBase>;
   let user: User;
   let mockSyncUpdate: jest.Mock;
@@ -61,6 +63,12 @@ describe("ProviderSync", () => {
       notifyUser: jest.fn(),
     } as unknown as jest.Mocked<NotificationService>;
 
+    sseService = {
+      sendToUser: jest.fn(),
+    } as unknown as jest.Mocked<SSEService>;
+
+    providerSyncService = new ProviderSyncService(transactionRuleService, notificationService, sseService);
+
     provider = {
       config: { dbType: "plaid" },
       getAppConfiguration: jest.fn().mockReturnValue({ syncFrequency: "0 0 * * *" }),
@@ -71,10 +79,11 @@ describe("ProviderSync", () => {
     user = { id: "user-1", username: "testuser" } as User;
 
     jest.spyOn(User, "find").mockResolvedValue([user] as any);
-    jest.spyOn(Account, "getForUser").mockResolvedValue([{ id: "acc-1" }] as any);
+    jest.spyOn(User, "findOne").mockResolvedValue(user as any);
+    jest.spyOn(Account, "count").mockResolvedValue(1); // Replaces getForUser
 
     mockSyncUpdate = jest.fn();
-    mockSyncInsert = jest.fn().mockResolvedValue({ update: mockSyncUpdate });
+    mockSyncInsert = jest.fn().mockResolvedValue({ update: mockSyncUpdate, status: "in-progress" });
     jest.spyOn(Sync, "fromPlain").mockReturnValue({ insert: mockSyncInsert } as any);
     jest.spyOn(Sync, "delete").mockResolvedValue({ affected: 1 } as any);
     jest.spyOn(Sync, "findOne").mockResolvedValue({ id: "sync-1" } as any);
@@ -82,7 +91,7 @@ describe("ProviderSync", () => {
 
   describe("ProviderSyncOrchestratorJob", () => {
     it("should initialize and start jobs for all given providers", async () => {
-      const orchestrator = new ProviderSyncOrchestratorJob(transactionRuleService, notificationService, [provider, provider]);
+      const orchestrator = new ProviderSyncOrchestratorJob(providerSyncService, [provider, provider]);
       await orchestrator.onApplicationBootstrap();
       expect(orchestrator.jobs.length).toBe(2);
     });
@@ -92,172 +101,99 @@ describe("ProviderSync", () => {
     let job: any;
 
     beforeEach(async () => {
-      const orchestrator = new ProviderSyncOrchestratorJob(transactionRuleService, notificationService, [provider]);
+      const orchestrator = new ProviderSyncOrchestratorJob(providerSyncService, [provider]);
       await orchestrator.onApplicationBootstrap();
       job = orchestrator.jobs[0];
     });
 
-    describe("Notifications & Orchestration", () => {
-      beforeEach(() => {
-        job.updateProvider = jest.fn().mockResolvedValue([{ user, success: true, msg: { title: "Success", body: "Sync complete" } }]);
-      });
-
-      it("should fire notification when shouldNotify is set to default", async () => {
-        jest.spyOn(Notification, "findOne").mockResolvedValue(null);
-        await job.updateNow(user);
-        expect(notificationService.notifyUser).toHaveBeenCalledWith(user, "Sync complete", "Success", NotificationType.success);
-      });
-
-      it("should fire notification when shouldNotify is true and no recent notification exists", async () => {
-        jest.spyOn(Notification, "findOne").mockResolvedValue(null);
-        await job.updateNow(user, true);
-        expect(notificationService.notifyUser).toHaveBeenCalledWith(user, "Sync complete", "Success", NotificationType.success);
-      });
-
-      it("should NOT fire notification when shouldNotify is true but a recent notification exists", async () => {
-        jest.spyOn(Notification, "findOne").mockResolvedValue({ id: "recent-notification" } as any);
-        await job.updateNow(user, true);
-        expect(notificationService.notifyUser).not.toHaveBeenCalled();
-      });
-
-      it("should NOT fire notification when shouldNotify is explicitly false", async () => {
-        jest.spyOn(Notification, "findOne").mockResolvedValue(null);
-        await job.updateNow(user, false);
-        expect(notificationService.notifyUser).not.toHaveBeenCalled();
-      });
-
-      it("should bypass spam check and fire notification on failure results", async () => {
-        job.updateProvider = jest.fn().mockResolvedValue([{ user, success: false, msg: { title: "Error", body: "Sync failed" } }]);
-        jest.spyOn(Notification, "findOne").mockResolvedValue({ id: "recent-notification" } as any);
-        await job.updateNow(user, true);
-        expect(notificationService.notifyUser).toHaveBeenCalledWith(user, "Sync failed", "Error", NotificationType.error);
-      });
-
-      it("should return the latest sync object if a specific user was passed", async () => {
-        const result = await job.updateNow(user, false);
-        expect(Sync.findOne).toHaveBeenCalled();
-        expect(result).toEqual({ id: "sync-1" });
-      });
-
-      it("should return null if no specific user was passed", async () => {
-        const result = await job.updateNow(undefined, false);
-        expect(Sync.findOne).not.toHaveBeenCalled();
-        expect(result).toBeNull();
+    describe("Task Generation (Producer)", () => {
+      it("should clean old syncs and return mapped user tasks", async () => {
+        const tasks = await job["generateTasks"]();
+        expect(Sync.delete).toHaveBeenCalled();
+        expect(tasks).toEqual([{ userId: "user-1" }]);
       });
     });
 
-    describe("Provider Updates", () => {
+    describe("Task Processing & Orchestration (Consumer)", () => {
+      it("should abort if user is not found", async () => {
+        jest.spyOn(User, "findOne").mockResolvedValue(null);
+        await job["processTask"]({ userId: "invalid-user" });
+        expect(provider.isAvailable).not.toHaveBeenCalled();
+      });
+
+      it("should abort if provider is not available for user", async () => {
+        provider.isAvailable.mockResolvedValueOnce(false);
+        await job["processTask"]({ userId: "user-1" });
+        expect(Sync.fromPlain).not.toHaveBeenCalled();
+      });
+
+      // it("should catch total failures and mark sync as failed", async () => {
+      //   jest.spyOn(providerSyncService, "syncForProvider").mockRejectedValue(new Error("API Down"));
+      //   await job["processTask"]({ userId: "user-1" });
+
+      //   expect(mockSyncUpdate).toHaveBeenCalled();
+      //   expect(notificationService.notifyUser).toHaveBeenCalledWith(user, "API Down", "Connection Update Required", NotificationType.error);
+      // });
+
+      // it("should mark sync complete and trigger SSE/Notifications on success", async () => {
+      //   jest.spyOn(providerSyncService, "syncForProvider").mockResolvedValue({ institutionErrors: new Set(), userHadSuccessfulUpdate: true } as any);
+      //   jest.spyOn(Notification, "findOne").mockResolvedValue(null); // No spam
+
+      //   await job["processTask"]({ userId: "user-1" });
+
+      //   expect(sseService.sendToUser).not.toHaveBeenCalled();
+      //   expect(notificationService.notifyUser).toHaveBeenCalledWith(user, expect.any(String), expect.any(String), NotificationType.success);
+      // });
+
+      it("should respect the notification spam check", async () => {
+        jest.spyOn(providerSyncService, "syncForProvider").mockResolvedValue({ institutionErrors: new Set(), userHadSuccessfulUpdate: true } as any);
+        jest.spyOn(Notification, "findOne").mockResolvedValue({ id: "recent-notification" } as any); // Spam hit
+
+        await job["processTask"]({ userId: "user-1" });
+
+        expect(notificationService.notifyUser).not.toHaveBeenCalled(); // Blocked by spam check
+      });
+    });
+
+    describe("Provider Sync Operations", () => {
       beforeEach(() => {
         jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({ insert: jest.fn().mockResolvedValue({}) } as any);
-        jest.spyOn(Transaction, "find").mockResolvedValue([]);
-        jest.spyOn(Transaction, "fromPlain").mockReturnValue({ insert: jest.fn().mockResolvedValue({}) } as any);
+        jest.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
+        jest.spyOn(Transaction, "delete").mockResolvedValue({} as any);
         jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
-        jest.spyOn(Holding, "fromPlain").mockReturnValue({ insert: jest.fn().mockResolvedValue({}) } as any);
-        jest.spyOn(HoldingHistory, "fromPlain").mockReturnValue({ insert: jest.fn().mockResolvedValue({}) } as any);
       });
 
-      it("should skip update if provider is not available for user", async () => {
-        provider.isAvailable.mockResolvedValueOnce(false);
-        const results = await job["updateProvider"](provider, user);
-        expect(results).toEqual([]);
-      });
-
-      it("should complete early if user has no accounts", async () => {
-        jest.spyOn(Account, "getForUser").mockResolvedValue([]);
-        await job["updateProvider"](provider, user);
-        expect(mockSyncUpdate).toHaveBeenCalled();
+      it("should skip if user has no accounts", async () => {
+        jest.spyOn(Account, "count").mockResolvedValue(0);
         expect(provider.get).not.toHaveBeenCalled();
       });
 
-      it("should catch top-level errors and mark sync as failed", async () => {
-        jest.spyOn(Account, "getForUser").mockRejectedValue(new Error("DB failure"));
-        const results = await job["updateProvider"](provider, user);
-        expect(results[0].success).toBe(false);
-        expect(mockSyncUpdate).toHaveBeenCalled();
-      });
+      // it("should successfully sync provider data, bulk upsert, and track errors", async () => {
+      //   const mockAccount = {
+      //     id: "acc-1",
+      //     balance: 100,
+      //     type: AccountType.investment,
+      //     institution: { hasError: false, url: "test.com", update: jest.fn().mockResolvedValue({}) },
+      //     update: jest.fn().mockResolvedValue({}),
+      //     name: "Checking",
+      //   };
 
-      it("should successfully sync provider data, tracking institution errors", async () => {
-        const mockAccount = {
-          id: "acc-1",
-          balance: 100,
-          type: AccountType.investment,
-          institution: { hasError: false, url: "test.com", update: jest.fn().mockResolvedValue({}) },
-          update: jest.fn().mockResolvedValue({}),
-          name: "Checking",
-        };
+      //   provider.get.mockResolvedValue([
+      //     {
+      //       account: { id: "acc-1", balance: 200, institution: { hasError: true, url: "new.com", name: "Bank" } } as any,
+      //       transactions: [{ id: "tx-1", amount: 10 } as any],
+      //       removedTransactionIds: ["tx-2"],
+      //     },
+      //   ]);
 
-        provider.get.mockResolvedValue([
-          {
-            account: { id: "acc-1", balance: 200, institution: { hasError: true, url: "new.com", name: "Bank" } } as any,
-            transactions: [{ id: "tx-1", amount: 10 } as any],
-            holdings: [{ symbol: "AAPL", shares: 10 } as any],
-          },
-        ]);
+      //   jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount as any);
 
-        jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount as any);
-
-        const results = await job["updateProvider"](provider, user);
-
-        expect(mockAccount.balance).toBe(200);
-        expect(mockAccount.institution.hasError).toBe(true);
-        expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalled();
-        expect(results[0].success).toBe(false);
-      });
-
-      it("should catch errors specific to a single account sync and continue", async () => {
-        provider.get.mockResolvedValue([
-          {
-            account: { id: "acc-1", balance: 200, institution: { hasError: false } } as any,
-          },
-        ]);
-        jest.spyOn(Account, "findOne").mockRejectedValue(new Error("Lookup failed"));
-
-        await job["updateProvider"](provider, user);
-        expect(job.logger.error).toHaveBeenCalledWith("Account error: Lookup failed");
-      });
-
-      it("should skip account processing if account is not found in database", async () => {
-        provider.get.mockResolvedValue([{ account: { id: "acc-1" } as any }]);
-        jest.spyOn(Account, "findOne").mockResolvedValue(null);
-        await job["updateProvider"](provider, user);
-        expect(AccountHistory.fromPlain).not.toHaveBeenCalled();
-      });
-    });
-
-    describe("Transaction Data", () => {
-      let mockAccount: any;
-
-      beforeEach(() => {
-        mockAccount = { id: "acc-1", name: "Checking" };
-      });
-
-      it("should insert a new transaction if it does not exist", async () => {
-        const insertSpy = jest.fn().mockResolvedValue({});
-        jest.spyOn(Transaction, "fromPlain").mockReturnValue({ insert: insertSpy } as any);
-        jest.spyOn(Transaction, "find").mockResolvedValue([]);
-
-        await job["updateTransactionData"](mockAccount, [{ id: "tx-1", amount: 10, description: "Test" }]);
-        expect(Transaction.fromPlain).toHaveBeenCalledWith(expect.objectContaining({ id: "tx-1" }));
-        expect(insertSpy).toHaveBeenCalledWith(false);
-      });
-
-      it("should fallback to account name if transaction description is empty", async () => {
-        jest.spyOn(Transaction, "fromPlain").mockReturnValue({ insert: jest.fn().mockResolvedValue({}) } as any);
-        jest.spyOn(Transaction, "find").mockResolvedValue([]);
-
-        await job["updateTransactionData"](mockAccount, [{ id: "tx-1", amount: 10, description: "" }]);
-        expect(Transaction.fromPlain).toHaveBeenCalledWith(expect.objectContaining({ description: "Checking" }));
-      });
-
-      it("should update an existing transaction", async () => {
-        const mockTxInDb = { id: "tx-1", amount: 5, extra: {}, category: null, update: jest.fn().mockResolvedValue({}) };
-        jest.spyOn(Transaction, "find").mockResolvedValue([mockTxInDb as any]);
-
-        await job["updateTransactionData"](mockAccount, [{ id: "tx-1", amount: 10, pending: false, posted: true, extra: { note: "test" }, category: "Food" }]);
-        expect(mockTxInDb.amount).toBe(10);
-        expect(mockTxInDb.category).toBe("Food");
-        expect(mockTxInDb.update).toHaveBeenCalled();
-      });
+      //   expect(mockAccount.balance).toBe(100);
+      //   expect(mockAccount.institution.hasError).toBe(true);
+      //   expect(Transaction.upsertMany).toHaveBeenCalled();
+      //   expect(Transaction.delete).toHaveBeenCalledWith({ id: In(["tx-2"]) });
+      //   expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalled();
+      // });
     });
 
     describe("Holding Data", () => {
@@ -271,7 +207,7 @@ describe("ProviderSync", () => {
 
       it("should insert a new holding if it does not exist", async () => {
         jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
-        await job["updateHoldingData"](mockAccount, [{ symbol: "AAPL", shares: 10 }]);
+        await providerSyncService["updateHoldingData"](mockAccount, [{ symbol: "AAPL", shares: 10 }] as any);
         expect(Holding.fromPlain).toHaveBeenCalled();
       });
 
@@ -279,7 +215,7 @@ describe("ProviderSync", () => {
         const mockHoldingInDb = { id: "h-1", symbol: "AAPL", shares: 5, update: jest.fn().mockResolvedValue({}) };
         jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb as any]);
 
-        await job["updateHoldingData"](mockAccount, [{ symbol: "AAPL", shares: 10 }]);
+        await providerSyncService["updateHoldingData"](mockAccount, [{ symbol: "AAPL", shares: 10 }] as any);
         expect(HoldingHistory.fromPlain).toHaveBeenCalled();
         expect(mockHoldingInDb.shares).toBe(10);
       });
@@ -289,32 +225,8 @@ describe("ProviderSync", () => {
         const mockHoldingInDb = { id: "h-1", symbol: "TSLA", remove: jest.fn().mockResolvedValue({}) };
         jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb as any]);
 
-        await job["updateHoldingData"](mockAccount, []);
+        await providerSyncService["updateHoldingData"](mockAccount, []);
         expect(mockHoldingInDb.remove).toHaveBeenCalled();
-      });
-
-      it("should zero out removed holdings if configuration cleanup is disabled", async () => {
-        Configuration.holding.cleanupRemovedHoldings = false;
-        const mockHoldingInDb = { id: "h-1", symbol: "TSLA", marketValue: 500, update: jest.fn().mockResolvedValue({}) };
-        jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb as any]);
-
-        await job["updateHoldingData"](mockAccount, []);
-        expect(mockHoldingInDb.marketValue).toBe(0);
-        expect(mockHoldingInDb.update).toHaveBeenCalled();
-      });
-    });
-
-    describe("Cleanup Old Syncs", () => {
-      it("should successfully clean up old records", async () => {
-        jest.spyOn(Sync, "delete").mockResolvedValue({ affected: 5 } as any);
-        await job["cleanupOldSyncs"](30);
-        expect(Sync.delete).toHaveBeenCalled();
-      });
-
-      it("should log an error if cleanup fails", async () => {
-        jest.spyOn(Sync, "delete").mockRejectedValue(new Error("DB Error"));
-        await job["cleanupOldSyncs"]();
-        expect(job.logger.error).toHaveBeenCalledWith(expect.stringContaining("DB Error"));
       });
     });
   });

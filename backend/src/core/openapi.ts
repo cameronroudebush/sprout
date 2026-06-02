@@ -41,6 +41,8 @@ export function configureApiDocument(app: INestApplication) {
     .addTag("Chat", "Provides endpoints to allow querying an LLM with your account data.")
     .addTag("Provider", "Provides endpoints for the various sources that can provide data to Sprout.")
     .addTag("Institution", "Endpoints for getting institution's related to accounts in Sprout.")
+    .addTag("Webhook", "These provide webhook support for various providers.")
+    .addTag("Email", "Provides endpoints for utilizing the email capability.")
     .build();
   const document = SwaggerModule.createDocument(app, config);
 

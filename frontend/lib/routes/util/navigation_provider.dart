@@ -57,9 +57,9 @@ class NavigationProvider {
   }
 
   /// Standard back navigation
-  static void back(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
+  static void back(BuildContext context, WidgetRef ref) {
+    if (GoRouter.of(context).canPop()) {
+      GoRouter.of(context).pop();
     }
   }
 

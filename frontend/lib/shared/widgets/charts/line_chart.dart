@@ -349,6 +349,7 @@ class SproutLineChart extends StatelessWidget {
       touchTooltipData: LineTouchTooltipData(
         fitInsideHorizontally: true,
         fitInsideVertically: true,
+        maxContentWidth: 200,
         getTooltipColor: (LineBarSpot touchedSpot) {
           return theme.primaryColorDark;
         },
@@ -384,7 +385,7 @@ class SproutLineChart extends StatelessWidget {
               final date = chartData.sortedEntries[barSpot.x.toInt()].key;
               final Color lineColor;
               if (currentSeries.config.usePositiveNegativeColors) {
-                lineColor = barSpot.y >= 0 ? Colors.green : theme.colorScheme.error;
+                lineColor = barSpot.y >= 0 ? Colors.green : Colors.red;
               } else {
                 lineColor = currentSeries.config.color ?? theme.colorScheme.primary;
               }

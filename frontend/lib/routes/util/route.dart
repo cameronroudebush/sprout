@@ -11,6 +11,9 @@ class SproutRoute {
   final bool showInBottomNav;
   final String? category;
 
+  /// Nested child routes
+  final List<SproutRoute>? routes;
+
   const SproutRoute(
       {required this.path,
       required this.label,
@@ -18,5 +21,6 @@ class SproutRoute {
       required this.builder,
       this.showInSidebar = true,
       this.showInBottomNav = false,
-      this.category});
+      this.category,
+      this.routes});
 }

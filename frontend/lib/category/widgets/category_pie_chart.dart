@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 
@@ -26,22 +27,14 @@ class CategoryPieChart extends ConsumerWidget {
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
     final statsAsync = ref.watch(categoryStatsProvider(year: year, month: month));
 
-    return statsAsync.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(),
-      ),
-      error: (err, _) => Center(
-        child: Text("Error loading category stats"),
-      ),
+    return statsAsync.whenDefault(
+      emptyCondition: (data) => data == null || data.categoryCount.isEmpty,
+      emptyWidget: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
       data: (data) {
-        final rawData = data?.categoryCount;
-        if (rawData == null || rawData.isEmpty) {
-          return Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)));
-        }
-
+        final rawData = data!.categoryCount;
         final filteredEntries = rawData.entries.where((e) => e.value > 0).toList();
         final sortedEntries = filteredEntries.sortedBy((e) => e.value).reversed.toList();
-        final colorMapping = data!.colorMapping.map((a, b) => MapEntry(a, b.toColor));
+        final colorMapping = data.colorMapping.map((a, b) => MapEntry(a, b.toColor));
 
         Map<String, num> finalData = {};
 

@@ -18,7 +18,7 @@ export class BackupConfig {
   @ConfigurationMetadata.assign({ comment: "How many backups we should keep" })
   count: number = 30;
 
-  @ConfigurationMetadata.assign({ comment: "When to backup the database. Default is once a day at 4am." })
+  @ConfigurationMetadata.assign({ comment: "When to backup the database. Default is once a day at 4am.", externalControlDisabled: true })
   time: string = "0 4 * * *";
 
   @ConfigurationMetadata.assign({ comment: "Where to place the backup files." })

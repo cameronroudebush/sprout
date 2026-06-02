@@ -68,10 +68,6 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.data == null || widget.data!.isEmpty) {
-      return const Center(child: Text("No data available"));
-    }
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       child: Column(

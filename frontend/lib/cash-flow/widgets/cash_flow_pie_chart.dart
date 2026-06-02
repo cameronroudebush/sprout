@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
@@ -29,19 +30,10 @@ class CashFlowPieChart extends ConsumerWidget {
     final statsAsync = ref.watch(cashFlowStatsProvider(year: year, month: month));
     final formatter = ref.watch(currencyFormatterProvider);
 
-    return statsAsync.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(),
-      ),
-      error: (err, _) => Center(child: Text("Error loading chart: $err")),
+    return statsAsync.whenDefault(
+      emptyWidget: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
       data: (stats) {
-        if (stats == null) {
-          return Center(
-            child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)),
-          );
-        }
-
-        final totalIncome = stats.totalIncome;
+        final totalIncome = stats!.totalIncome;
         final totalExpense = stats.totalExpense;
 
         // Create mapping or handle zero state

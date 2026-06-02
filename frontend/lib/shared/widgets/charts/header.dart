@@ -16,10 +16,9 @@ class ChartHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-        padding: EdgeInsetsGeometry.only(left: 12, top: 8, right: 12),
+        padding: EdgeInsetsGeometry.only(left: 12, top: 8, bottom: 4, right: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(child: left ?? SizedBox.shrink()),
             Column(
@@ -29,7 +28,7 @@ class ChartHeader extends StatelessWidget {
                 if (title != null)
                   Text(
                     title!,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 if (subheader != null)
                   Text(subheader!, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
