@@ -9,6 +9,7 @@ class StuckTransactionConfig {
 
   @ConfigurationMetadata.assign({
     comment: "When to check for stuck pending transactions that didn't get cleaned up by the provider. Should be a cron expression.",
+    externalControlDisabled: true,
   })
   time: string = "0 */6 * * *";
 

@@ -1,6 +1,9 @@
 import { Account } from "@backend/account/model/account.model";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { PublicURL } from "@backend/core/decorator/public.url.decorator";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
@@ -14,6 +17,7 @@ import { ApiBody, ApiCreatedResponse, ApiOperation, ApiQuery, ApiTags } from "@n
 @Controller("provider/plaid")
 @ApiTags("Provider")
 @AuthGuard.attach()
+@EnabledGuard.attach(Configuration.providers.plaid.enabled)
 export class PlaidProviderController {
   private readonly logger = new Logger("provider:controller:plaid");
   constructor(
@@ -25,9 +29,9 @@ export class PlaidProviderController {
   @ApiOperation({ summary: "Create a Plaid link token" })
   @ApiCreatedResponse({ description: "Link created successfully.", type: PlaidLinkTokenDTO })
   @ApiQuery({ name: "institutionId", required: false, type: String })
-  async createLinkToken(@CurrentUser() user: User, @Query("institutionId") institutionId?: string) {
+  async createLinkToken(@CurrentUser() user: User, @PublicURL() publicUrl: string, @Query("institutionId") institutionId?: string) {
     try {
-      return await this.plaidProviderService.generateLinkToken(user, institutionId);
+      return await this.plaidProviderService.generateLinkToken(user, publicUrl, institutionId);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException("Failed to generate Plaid link token.");

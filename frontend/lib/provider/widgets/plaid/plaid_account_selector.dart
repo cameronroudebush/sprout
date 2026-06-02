@@ -34,7 +34,7 @@ class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
     _successSubscription = PlaidLink.onSuccess.listen(_onPlaidSuccess);
     PlaidLink.onExit.listen((exit) {
       if (exit.error != null) {
-        LoggerProvider.error("Plaid Exit Error: ${exit.error?.displayMessage}");
+        LoggerProvider.error("Plaid Exit Error: ${exit.error}");
       } else {
         ref
             .read(notificationsProvider.notifier)

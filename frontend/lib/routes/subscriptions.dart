@@ -17,19 +17,17 @@ class SubscriptionsPage extends ConsumerWidget {
     final formatter = ref.watch(currencyFormatterProvider);
     final subsAsync = ref.watch(transactionSubscriptionsProvider);
 
-    return SingleChildScrollView(
-      child: SproutRouteWrapper(
-        size: SproutRouteSize.large,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            subsAsync.maybeWhen(
-              data: (subs) => subs.isEmpty ? const SizedBox.shrink() : _buildTotal(subs, theme, formatter),
-              orElse: () => const SizedBox.shrink(),
-            ),
-            const SubscriptionCalendarWidget(),
-          ],
-        ),
+    return SproutRouteWrapper(
+      size: SproutRouteSize.large,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          subsAsync.maybeWhen(
+            data: (subs) => subs.isEmpty ? const SizedBox.shrink() : _buildTotal(subs, theme, formatter),
+            orElse: () => const SizedBox.shrink(),
+          ),
+          const Expanded(child: SubscriptionCalendarWidget()),
+        ],
       ),
     );
   }

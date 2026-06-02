@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/routes/account_details.dart';
 import 'package:sprout/routes/accounts.dart';
 import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
@@ -21,12 +22,25 @@ final List<SproutRoute> authenticatedRoutes = [
     builder: (context, state) => const DashboardPage(),
   ),
   SproutRoute(
-    path: '/accounts',
-    label: 'Accounts',
-    icon: Icons.account_balance,
-    category: 'Banking',
-    builder: (context, state) => const AccountsPage(),
-  ),
+      path: '/accounts',
+      label: 'Accounts',
+      icon: Icons.account_balance,
+      category: 'Banking',
+      builder: (context, state) => const AccountsPage(),
+      routes: [
+        SproutRoute(
+          path: '/details',
+          label: 'Account Details',
+          icon: Icons.account_balance_wallet,
+          category: 'Banking',
+          showInSidebar: false,
+          showInBottomNav: false,
+          builder: (context, state) {
+            final accountId = state.uri.queryParameters['id'] ?? state.uri.queryParameters['acc'];
+            return AccountDetailsPage(accountId: accountId);
+          },
+        ),
+      ]),
   SproutRoute(
     path: '/chat',
     label: 'Chat',

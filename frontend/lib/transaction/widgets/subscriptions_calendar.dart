@@ -4,11 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/calendar.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/extensions/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
+import 'package:sprout/transaction/widgets/subscriptions_empty.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
 /// A reusable calendar widget that displays detected recurring subscriptions.
@@ -36,26 +38,20 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
     final theme = Theme.of(context);
     final subsAsync = ref.watch(transactionSubscriptionsProvider);
 
-    return subsAsync.when(
-      loading: () => const SproutCard(
-        child: SizedBox(height: 300, child: Center(child: CircularProgressIndicator())),
-      ),
-      error: (err, _) => const SproutCard(
-        child: SizedBox(height: 300, child: Center(child: Text("Error loading subscriptions"))),
-      ),
+    return subsAsync.whenDefault(
+      emptyCondition: (subs) => subs.isEmpty,
+      emptyWidget: SubscriptionsEmptyWidget(),
       data: (subs) {
-        if (subs.isEmpty) return _buildEmptyState(theme);
-
         final eventsForCurrentDay = subs.where((s) => s.isBilledOn(_selectedDay)).toList();
 
         return SproutLayoutBuilder((isDesktop, context, constraints) {
           if (isDesktop) {
-            // Desktop Layout: Side-by-side alignment splits
             return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 6,
                   child: _buildCalendarCard(subs, theme, isDesktop),
                 ),
                 if (widget.showDetails)
@@ -67,7 +63,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
             );
           }
 
-          // Fallback Mobile Layout: Traditional stacked sequence arrangement column pass
+          // Mobile
           return Column(
             spacing: 6,
             children: [
@@ -83,43 +79,40 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
   /// Builds the calendar card to display in a calendar format of when the subs are
   Widget _buildCalendarCard(List<TransactionSubscription> subs, ThemeData theme, bool isDesktop) {
     return SproutCard(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 4, bottom: 6),
-        child: SproutCalendar(
-          subs,
-          (day, event) => event.isBilledOn(day),
-          subheader: "Subscriptions",
-          onDaySelected: (day, events) {
-            setState(() => _selectedDay = day);
+      child: SproutCalendar(
+        subs,
+        (day, event) => event.isBilledOn(day),
+        subheader: "Subscriptions",
+        onDaySelected: (day, events) {
+          setState(() => _selectedDay = day);
 
-            // Open the popup if details are hidden, popups are active, and there are actual events
-            if (!widget.showDetails && widget.detailsPopup && events.isNotEmpty) {
-              final typedEvents = events.cast<TransactionSubscription>().toList();
-              _openDetailsPopup(typedEvents);
-            }
-          },
-          dayDisplay: (context, events) {
-            return SproutLayoutBuilder((_, context, constraints) {
-              if (events.isEmpty) return const SizedBox.shrink();
-              final iconSize = widget.iconSize ?? (isDesktop ? 28 : 12);
+          // Open the popup if details are hidden, popups are active, and there are actual events
+          if (!widget.showDetails && widget.detailsPopup && events.isNotEmpty) {
+            final typedEvents = events.cast<TransactionSubscription>().toList();
+            _openDetailsPopup(typedEvents);
+          }
+        },
+        dayDisplay: (context, events) {
+          return SproutLayoutBuilder((_, context, constraints) {
+            if (events.isEmpty) return const SizedBox.shrink();
+            final iconSize = widget.iconSize ?? (isDesktop ? 28 : 12);
 
-              final maxLogos = (constraints.maxWidth / (iconSize + 4)).floor().clamp(0, events.length);
-              final displayedEvents = events.take(maxLogos).toList();
-              final remainingCount = events.length - displayedEvents.length;
+            final maxLogos = (constraints.maxWidth / (iconSize + 4)).floor().clamp(0, events.length);
+            final displayedEvents = events.take(maxLogos).toList();
+            final remainingCount = events.length - displayedEvents.length;
 
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 4,
-                children: [
-                  ...displayedEvents.map(
-                    (e) => AccountIcon(e.account, size: iconSize.toDouble()),
-                  ),
-                  if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: iconSize * 0.8)),
-                ],
-              );
-            });
-          },
-        ),
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 4,
+              children: [
+                ...displayedEvents.map(
+                  (e) => AccountIcon(e.account, size: iconSize.toDouble()),
+                ),
+                if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: iconSize * 0.8)),
+              ],
+            );
+          });
+        },
       ),
     );
   }
@@ -166,31 +159,6 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
     }
 
     return SproutCard(child: cardContent);
-  }
-
-  /// Builds a display of what to do when we have no subscriptions
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: SizedBox(
-        height: 220,
-        child: SproutCard(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              spacing: 12,
-              children: [
-                Icon(Icons.calendar_month, size: 48, color: theme.colorScheme.primary),
-                const Text("No Subscriptions Found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                const Text(
-                  "Sprout detects recurring bills automatically from your history. Check back later to see if Sprout has detected any.",
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   /// Used to show a popup of subscription details instead of rendering below the calendar.

@@ -13,6 +13,7 @@ import 'package:sprout/institution/institution_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
+import 'package:sprout/provider/widgets/provider_icon.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -265,8 +266,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   /// Builds the account overview information
   Widget _buildOverviewSection(ThemeData theme) {
     final account = widget.account;
-    final institution = account.institution; // Reference the nested institution
+    final institution = account.institution;
     final accountProvider = ref.read(accountsProvider.notifier);
+    final providers = ref.watch(providerConfigProvider).value;
+    final provider = providers?.firstWhereOrNull((x) => x.dbType == account.provider);
     final zillowAsset =
         account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
 
@@ -400,7 +403,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
                 // Institution options for this account
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.only(right: 8),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -441,10 +444,23 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                   ),
                 ),
 
-                const Divider(),
-
-                // Static Read-Only Fields
-                _buildStaticRow(theme, Icons.account_balance, "Provider", account.provider.toString()),
+                // Provider info
+                if (provider != null) ...[
+                  const Divider(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Row(
+                      children: [
+                        Text("Provider", style: theme.textTheme.bodyMedium),
+                        const Spacer(),
+                        FinanceProviderIcon(provider, size: 36),
+                        Padding(
+                            padding: EdgeInsetsGeometry.only(left: 8),
+                            child: Text(account.provider.toString().toTitleCase, style: theme.textTheme.bodyMedium)),
+                      ],
+                    ),
+                  ),
+                ],
 
                 const Divider(),
 
@@ -548,22 +564,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   /// Builds the transactions to display related to this account
   Widget _buildTransactionSection(BuildContext context, WidgetRef ref) {
     return TransactionsPage(accountId: widget.account.id, padding: EdgeInsetsGeometry.zero);
-  }
-
-  /// Helper for configuration fields that are read only
-  Widget _buildStaticRow(ThemeData theme, IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 12),
-          Text(label, style: theme.textTheme.bodyMedium),
-          const Spacer(),
-          Text(value, style: theme.textTheme.bodyMedium),
-        ],
-      ),
-    );
   }
 
   /// Returns a badge that displays what type of account this is

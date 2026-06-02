@@ -43,30 +43,14 @@ class SproutCalendar<T> extends StatefulWidget {
 }
 
 class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
-  // The month and year currently being displayed on the calendar.
   DateTime _focusedDate = DateTime.now();
 
-  /// Moves the calendar to the previous month.
-  void _previousMonth() {
-    setState(() {
-      _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, -1);
-    });
-  }
-
-  /// Moves the calendar to the next month.
-  void _nextMonth() {
-    setState(() {
-      _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, 1);
-    });
-  }
+  void _previousMonth() => setState(() => _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, -1));
+  void _nextMonth() => setState(() => _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, 1));
 
   void _focusDay(DateTime day) {
-    final events = widget.events.where((e) {
-      return widget.isOnDay(day, e);
-    }).toList();
-    setState(() {
-      _focusedDate = day;
-    });
+    final events = widget.events.where((e) => widget.isOnDay(day, e)).toList();
+    setState(() => _focusedDate = day);
     if (widget.onDaySelected != null) {
       widget.onDaySelected!(day, events);
     }
@@ -78,9 +62,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
 
     var days = _getDaysInMonth(_focusedDate);
     if (!widget.displayOutsideDays) {
-      // Find the index of the last day that actually belongs to the current month
       final lastDayOfMonthIndex = days.lastIndexWhere((d) => d.month == _focusedDate.month);
-      // Calculate how many weeks (rows) are needed to include that day.
       final weeksNeeded = (lastDayOfMonthIndex ~/ 7) + 1;
       days = days.take(weeksNeeded * 7).toList();
     }
@@ -93,7 +75,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
         children: [
           // Month/Year - Navigation
           Padding(
-            padding: EdgeInsets.only(left: 12, right: 12, bottom: widget.allowSelection ? 0 : 6),
+            padding: EdgeInsets.only(left: 8, right: 8, bottom: widget.allowSelection ? 0 : 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -143,51 +125,45 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
             ),
           ),
           const Divider(height: 1),
-          // Day of Week Headers
-          GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
-            itemCount: 7,
-            itemBuilder: (context, index) {
-              return Center(
-                child: Text(
-                  dayHeaders[index],
-                  style: theme.textTheme.bodySmall,
-                ),
-              );
-            },
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: dayHeaders.map((h) {
+                return Expanded(
+                  child: Center(
+                    child: Text(h, style: theme.textTheme.bodySmall),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
 
-          // Calendar Grid
+          // Calendar Grid Layout
           Padding(
-              padding: EdgeInsetsGeometry.symmetric(horizontal: 6, vertical: 2),
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  childAspectRatio: isDesktop ? 1.75 : 1,
-                ),
-                itemCount: days.length,
-                itemBuilder: (context, index) {
-                  final date = days[index];
-                  // Find events for the specific day from our grouped map.
-                  final eventsForDay = widget.events.where((e) {
-                    return widget.isOnDay(date, e);
-                  }).toList();
-
-                  return _CalendarCell(
-                    date: date,
-                    focusedDate: _focusedDate,
-                    events: eventsForDay,
-                    displayOutsideDays: widget.displayOutsideDays,
-                    eventMarkerBuilder: widget.dayDisplay,
-                    cellDecorationBuilder: widget.cellDecorationBuilder,
-                    onDaySelected: (day, List<T> events) => _focusDay(day),
-                  );
-                },
-              )),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                childAspectRatio: isDesktop ? 1.75 : 1,
+              ),
+              itemCount: days.length,
+              itemBuilder: (context, index) {
+                final date = days[index];
+                final eventsForDay = widget.events.where((e) => widget.isOnDay(date, e)).toList();
+                return _CalendarCell(
+                  date: date,
+                  focusedDate: _focusedDate,
+                  events: eventsForDay,
+                  displayOutsideDays: widget.displayOutsideDays,
+                  eventMarkerBuilder: widget.dayDisplay,
+                  cellDecorationBuilder: widget.cellDecorationBuilder,
+                  onDaySelected: (day, List<T> events) => _focusDay(day),
+                );
+              },
+            ),
+          ),
         ],
       );
     });

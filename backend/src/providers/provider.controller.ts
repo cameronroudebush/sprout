@@ -6,6 +6,7 @@ import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Get, Inject } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { cloneDeep } from "lodash";
 
 /** This controller provides endpoints for basic provider functionality shared across all providers */
 @Controller("provider")
@@ -24,11 +25,13 @@ export class BaseProviderController {
   @ApiOkResponse({ description: "The list of available providers and their status.", type: [ProviderConfig] })
   async getConfig(@CurrentUser() user: User) {
     return await Promise.all(
-      this.providers.map(async (x) => {
-        const config = x.config;
-        config.enabled = await x.isAvailable(user);
-        return config;
-      }),
+      this.providers
+        .filter((x) => x.getAppConfiguration().enabled)
+        .map(async (x) => {
+          const config = cloneDeep(x.config);
+          config.enabled = await x.isAvailable(user);
+          return config;
+        }),
     );
   }
 }

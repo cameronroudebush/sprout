@@ -2,12 +2,11 @@ import { Configuration } from "@backend/config/core";
 import { WeeklyEmailContent } from "@backend/email/model/weekly-content";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
-import { EmailUpdateFrequency } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { MailerService } from "@nestjs-modules/mailer";
 import { BadRequestException, Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { subDays } from "date-fns";
-import { IsNull, MoreThanOrEqual, Not } from "typeorm";
+import { MoreThanOrEqual } from "typeorm";
 
 /** A service that provides email capability to Sprout, assuming it's configured. */
 @Injectable()
@@ -26,17 +25,9 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  /** Sends status email updates for all users with it enabled. Collects data for the last week. */
-  async sendStatusUpdateForAllUsers() {
-    Configuration.server.email.validate();
-    const users = await User.find({ where: { email: Not(IsNull()), config: { emailUpdateFrequency: EmailUpdateFrequency.WEEKLY } } });
-    this.logger.debug(`Located ${users.length} to update`);
-    await Promise.all(users.map((user) => this.sendWeeklyUpdate(user)));
-  }
-
   /** Sends the weekly update to the users email, if configured */
-  async sendWeeklyUpdate(user: User) {
-    // This will be checked by {@link sendStatusUpdateForAllUsers}, but this is just in case
+  async sendWeeklyUpdate(user?: User | null) {
+    if (user == null) return; // Ignore undefined users
     if (!user.email) throw new BadRequestException("This user does not have an email specified");
     // Build the content for this user
     const oneWeekAgo = subDays(new Date(), 7);

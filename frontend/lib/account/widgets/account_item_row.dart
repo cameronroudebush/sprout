@@ -40,7 +40,7 @@ class AccountItemRow extends ConsumerWidget {
     return InkWell(
       onTap: onAccountClick,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           spacing: 8,
           children: [

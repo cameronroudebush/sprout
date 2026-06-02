@@ -127,15 +127,20 @@ export class HoldingService {
         if (rawChart && Array.isArray(rawChart.quotes) && rawChart.quotes.length > 0) {
           const validQuotes = rawChart.quotes.filter((q) => q && q.date && q.close !== undefined && q.close !== null);
           if (validQuotes.length > 0) {
-            const dayOnePrice = validQuotes[0]?.close ?? 0;
-            for (const quote of validQuotes) {
+            // Track the previous day's price to calculate day-over-day change
+            let previousPrice = validQuotes[0]?.close ?? 0;
+            for (let i = 0; i < validQuotes.length; i++) {
+              const quote = validQuotes[i];
+              if (!quote) continue;
               const price = quote.close ?? 0;
-              const changePercent = dayOnePrice > 0 ? ((price - dayOnePrice) / dayOnePrice) * 100 : 0.0;
+              let changePercent = 0.0;
+              if (i > 0 && previousPrice > 0) changePercent = ((price - previousPrice) / previousPrice) * 100;
               timeline.push({
                 date: new Date(quote.date),
                 value: price,
                 changePercent: parseFloat(changePercent.toFixed(4)),
               });
+              previousPrice = price;
             }
           }
         }

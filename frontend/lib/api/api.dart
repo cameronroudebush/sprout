@@ -45,6 +45,7 @@ part 'api/transaction_api.dart';
 part 'api/transaction_rule_api.dart';
 part 'api/user_api.dart';
 part 'api/user_config_api.dart';
+part 'api/webhook_api.dart';
 
 part 'model/api_config.dart';
 part 'model/account.dart';
@@ -87,6 +88,7 @@ part 'model/plaid_link_dto.dart';
 part 'model/plaid_link_token_dto.dart';
 part 'model/plaid_metadata_dto.dart';
 part 'model/provider_config.dart';
+part 'model/provider_sub_type_enum.dart';
 part 'model/provider_type_enum.dart';
 part 'model/register_device_dto.dart';
 part 'model/sse_data.dart';

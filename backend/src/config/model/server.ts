@@ -10,13 +10,6 @@ import { NotificationConfig } from "@backend/notification/model/notification.con
 import { LOG_LEVELS, LogLevel } from "@nestjs/common";
 
 class ExchangeRateConfig {
-  @ConfigurationMetadata.assign({
-    comment: "If we should automatically check for updated exchange rate in the background",
-    restrictedValues: [true, false],
-    externalControlDisabled: true,
-  })
-  enabled = true;
-
   @ConfigurationMetadata.assign({ comment: "How often we want to check for updated currency exchange rates.", externalControlDisabled: true })
   time: string = "0 */6 * * *";
 }

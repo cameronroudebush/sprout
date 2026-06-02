@@ -6,10 +6,7 @@ import 'package:sprout/shared/widgets/logo_base.dart';
 
 /// A widget used to display finance provider logos
 class FinanceProviderIcon extends LogoBaseWidget<ProviderConfig> {
-  @override
-  double get size => 64;
-
-  const FinanceProviderIcon(super.logoClass, {super.key});
+  const FinanceProviderIcon(super.logoClass, {super.key, super.size = 64});
 
   @override
   ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, ProviderConfig data, double size) {

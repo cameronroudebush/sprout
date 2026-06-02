@@ -49,7 +49,8 @@ class SproutMoreSheet extends ConsumerWidget {
                 textDirection: TextDirection.rtl,
                 runSpacing: 16,
                 children: moreRoutes.map((route) {
-                  final isSelected = NavigationProvider.currentRoute == route.path;
+                  final currentPath = NavigationProvider.currentRoute;
+                  final bool isSelected = route.path == '/' ? currentPath == '/' : currentPath.startsWith(route.path);
 
                   return SizedBox(
                     width: itemWidth,
