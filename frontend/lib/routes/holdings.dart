@@ -9,6 +9,7 @@ import 'package:sprout/holding/widgets/account_holding_list.dart';
 import 'package:sprout/holding/widgets/market_indices_bar.dart';
 import 'package:sprout/holding/widgets/market_indicies_timeline.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/header.dart';
@@ -34,72 +35,91 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
+    final accountsAsync = ref.watch(accountsProvider);
 
-    // Filter to just investment accounts as those contain holdings
-    final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
+    return accountsAsync.whenDefault(
+      customErrorMessage: "Failed to load investment profile",
+      emptyWidget: _buildWarningCard(
+        theme,
+        icon: Icons.account_balance_wallet_outlined,
+        message: "No accounts found to choose from",
+      ),
+      data: (state) {
+        final accounts = state.accounts;
+        final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
+        final hasHoldings = investmentAccounts.any((account) {
+          return ref.watch(accountHoldingsProvider(account.id).select((state) => state.value?.isNotEmpty == true));
+        });
 
-    // Aggregating all holdings across all investment accounts to check if we have data
-    final hasHoldings = investmentAccounts.any((account) {
-      return ref.watch(accountHoldingsProvider(account.id).select((state) => state.value?.isNotEmpty == true));
-    });
-
-    // Auto select default holding
-    if (!_hasInitialSelection && hasHoldings) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _selectedHolding == null) {
-          for (final account in investmentAccounts) {
-            final holdings = ref.read(accountHoldingsProvider(account.id)).value ?? [];
-            if (holdings.isNotEmpty) {
-              setState(() {
-                _selectedHolding = holdings.first;
-                _hasInitialSelection = true;
-              });
-              break; // Stop after finding the first one
-            }
-          }
-        }
-      });
-    }
-
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      if (isDesktop) {
-        return SproutRouteWrapper(
-          size: SproutRouteSize.large,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 6,
-                child: SingleChildScrollView(
-                  child: _buildMarketPanel(theme, accounts, hasHoldings, isDesktop),
-                ),
-              ),
-              const VerticalDivider(width: 32, thickness: 1),
-              Expanded(
-                flex: 5,
-                child: SingleChildScrollView(
-                  child: _buildHoldingsPanel(theme, accounts, investmentAccounts, hasHoldings),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return SproutRouteWrapper(
-        child: Column(
-          children: [
-            _buildMarketPanel(theme, accounts, hasHoldings, isDesktop),
-            Expanded(
-              child: SingleChildScrollView(
-                child: _buildHoldingsPanel(theme, accounts, investmentAccounts, hasHoldings),
-              ),
+        // Intercept profile if accounts exist but none have active investment holdings
+        if (!hasHoldings) {
+          return SproutRouteWrapper(
+            child: _buildWarningCard(
+              theme,
+              icon: Icons.pie_chart_outline,
+              message: "No holdings found in your investment accounts",
             ),
-          ],
-        ),
-      );
-    });
+          );
+        }
+
+        // Auto select default holding
+        if (!_hasInitialSelection) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _selectedHolding == null) {
+              for (final account in investmentAccounts) {
+                final holdings = ref.read(accountHoldingsProvider(account.id)).value ?? [];
+                if (holdings.isNotEmpty) {
+                  setState(() {
+                    _selectedHolding = holdings.first;
+                    _hasInitialSelection = true;
+                  });
+                  break; // Stop after finding the first one
+                }
+              }
+            }
+          });
+        }
+
+        return SproutLayoutBuilder((isDesktop, context, constraints) {
+          if (isDesktop) {
+            return SproutRouteWrapper(
+              size: SproutRouteSize.large,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: SingleChildScrollView(
+                      child: _buildMarketPanel(theme, accounts, hasHoldings, isDesktop),
+                    ),
+                  ),
+                  const VerticalDivider(width: 32, thickness: 1),
+                  Expanded(
+                    flex: 5,
+                    child: SingleChildScrollView(
+                      child: _buildHoldingsPanel(theme, investmentAccounts),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return SproutRouteWrapper(
+            child: Column(
+              children: [
+                _buildMarketPanel(theme, accounts, hasHoldings, isDesktop),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: _buildHoldingsPanel(theme, investmentAccounts),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+      },
+    );
   }
 
   /// Combines index trends and charts without nesting inner ScrollViews
@@ -128,62 +148,48 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
     );
   }
 
-  /// Renders the active warning cards or holdings data maps
-  Widget _buildHoldingsPanel(
-      ThemeData theme, List<Account> accounts, List<Account> investmentAccounts, bool hasHoldings) {
+  /// Renders active holdings data maps safely since empty checks are handled upstream
+  Widget _buildHoldingsPanel(ThemeData theme, List<Account> investmentAccounts) {
     return SproutRouteWrapper(
       child: Column(
         spacing: 8,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (accounts.isEmpty)
-            _buildWarningCard(
-              theme,
-              icon: Icons.account_balance_wallet_outlined,
-              message: "No accounts found to choose from",
-            )
-          else if (!hasHoldings)
-            _buildWarningCard(
-              theme,
-              icon: Icons.pie_chart_outline,
-              message: "No holdings found in your investment accounts",
-            )
-          else
-            ...investmentAccounts.map((account) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8, top: 8),
-                    child: Row(
-                      spacing: 12,
-                      children: [
-                        AccountIcon(account),
-                        Expanded(
-                          child: Text(
-                            account.name,
-                            style: theme.textTheme.titleMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+          ...investmentAccounts.map((account) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 8),
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      AccountIcon(account),
+                      Expanded(
+                        child: Text(
+                          account.name,
+                          style: theme.textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  AccountHoldingsList(
-                    accountId: account.id,
-                    selectedId: _selectedHolding?.id,
-                    onSelect: (holding) {
-                      setState(() {
-                        _selectedHolding = holding;
-                      });
-                    },
-                  ),
-                ],
-              );
-            }),
+                ),
+                AccountHoldingsList(
+                  accountId: account.id,
+                  selectedId: _selectedHolding?.id,
+                  onSelect: (holding) {
+                    setState(() {
+                      _selectedHolding = holding;
+                    });
+                  },
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -191,27 +197,17 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
 
   /// Helper to build the warning UI
   Widget _buildWarningCard(ThemeData theme, {required IconData icon, required String message}) {
-    return Center(
-      child: SizedBox(
-        height: 180,
-        child: SproutCard(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 12,
-              children: [
-                Icon(icon, size: 48, color: theme.colorScheme.secondary),
-                Text(
-                  message,
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 12,
+      children: [
+        Icon(icon, size: 64, color: theme.colorScheme.secondary),
+        Text(
+          message,
+          style: theme.textTheme.titleLarge,
+          textAlign: TextAlign.center,
         ),
-      ),
+      ],
     );
   }
 
@@ -232,10 +228,10 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
     );
     final formatter = ref.watch(currencyFormatterProvider);
     final userConfig = ref.watch(userConfigProvider).value;
+
     return SproutCard(
-      child: timelineAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text("Error: $err")),
+      child: timelineAsync.whenDefault(
+        customErrorMessage: "Error loading historical trends",
         data: (points) {
           final dataMap = {for (final p in points) p.date: p.value};
           final filteredHistorical =

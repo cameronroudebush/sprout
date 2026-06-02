@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["build.ts"]
+  "exclude": ["build.ts", "**/*spec.ts"]
 }

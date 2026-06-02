@@ -1,5 +1,5 @@
 import { Base } from "@backend/core/model/base";
-import { ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ApiProperty } from "@nestjs/swagger";
 
 /** This class represents a finance provider and some metadata on their connection */
@@ -9,6 +9,11 @@ export class ProviderConfig extends Base {
     enumName: "ProviderTypeEnum",
   })
   dbType: ProviderType;
+  @ApiProperty({
+    enum: ProviderSubType,
+    enumName: "ProviderSubTypeEnum",
+  })
+  subType: ProviderSubType;
   /** The name of this provider */
   name: string;
   /** Link to this provider */
@@ -20,12 +25,13 @@ export class ProviderConfig extends Base {
   /** If this provider is available to this user. Only used during frontend communication */
   enabled: boolean = false;
 
-  constructor(name: string, dbType: ProviderType, url: string, logoUrl: string, accountFixUrl?: string) {
+  constructor(name: string, dbType: ProviderType, subType: ProviderSubType, url: string, logoUrl: string, accountFixUrl?: string) {
     super();
     this.name = name;
     this.dbType = dbType;
     this.url = url;
     this.logoUrl = logoUrl;
     this.accountFixUrl = accountFixUrl;
+    this.subType = subType;
   }
 }

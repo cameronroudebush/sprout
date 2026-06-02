@@ -1,7 +1,7 @@
 import { Account } from "@backend/account/model/account.model";
 import { Configuration } from "@backend/config/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
-import { ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
 import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { User } from "@backend/user/model/user.model";
@@ -18,7 +18,13 @@ import { ProviderRateLimit } from "../base/rate-limit";
 export class ZillowProviderService extends ProviderBase {
   override getAppConfiguration = () => Configuration.providers.zillow;
   private readonly logger = new Logger("provider:service:zillow");
-  config = new ProviderConfig("Zillow", ProviderType.zillow, "https://www.zillow.com", "https://www.zillow.com/apple-touch-icon.png");
+  config = new ProviderConfig(
+    "Zillow",
+    ProviderType.zillow,
+    ProviderSubType.realEstate,
+    "https://www.zillow.com",
+    "https://www.zillow.com/apple-touch-icon.png",
+  );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.zillow, Configuration.providers.zillow.rateLimit, user);
   override isAvailable = async (_user: User) => true;
   /** Impit instance used for scraping */

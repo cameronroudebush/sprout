@@ -2,20 +2,21 @@ import { ConfigurationModule } from "@backend/config/config.module";
 import { Configuration } from "@backend/config/core";
 import { EmailModule } from "@backend/email/email.module";
 import { DatabaseBackupJob } from "@backend/jobs/backup";
-import { BackgroundJob } from "@backend/jobs/base";
 import { ExchangeRateJob } from "@backend/jobs/exchange-rate";
+import { BackgroundJob } from "@backend/jobs/job-base";
 import { PendingTransactionJob } from "@backend/jobs/pending.transaction";
 import { StatusEmailJob } from "@backend/jobs/status-email";
 import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
 import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
+import { SSEModule } from "@backend/sse/sse.module";
 import { TransactionModule } from "@backend/transaction/transaction.module";
 import { Module, OnApplicationBootstrap } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 
 @Module({
-  imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule, ConfigurationModule],
+  imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule, ConfigurationModule, SSEModule],
   controllers: [],
   providers: [ExchangeRateJob, DatabaseBackupJob, PendingTransactionJob, UserDeviceJob, StatusEmailJob, ProviderSyncOrchestratorJob],
   exports: [ProviderSyncOrchestratorJob],

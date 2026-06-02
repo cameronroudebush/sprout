@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/theme/helpers.dart';
+import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
@@ -11,68 +11,44 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
   /// How many recent transactions we want
   final int count;
 
-  const DashboardRecentTransactionsCard({super.key, this.count = 10});
+  /// Whether the widget is rendering on a mobile screen context
+  final bool mobile;
+
+  const DashboardRecentTransactionsCard({super.key, this.count = 10, this.mobile = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final transactionsAsync = ref.watch(transactionsProvider);
+
+    Widget content = transactionsAsync.whenDefault(
+      expanded: false,
+      customErrorMessage: "Failed to load transactions",
+      emptyCondition: (state) => state.transactions.isEmpty,
+      data: (state) {
+        final recent = state.transactions.take(count).toList();
+
+        return ListView.separated(
+          shrinkWrap: mobile,
+          physics: mobile ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+          itemCount: recent.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 0),
+          itemBuilder: (context, index) {
+            return TransactionRow(recent[index]);
+          },
+        );
+      },
+    );
 
     return SproutCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: mobile ? MainAxisSize.min : MainAxisSize.max,
         spacing: 4,
         children: [
-          Padding(
-            padding: EdgeInsetsGeometry.fromLTRB(12, 8, 12, 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Recent Activity",
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                SizedBox(
-                  height: 32,
-                  child: FilledButton(
-                    onPressed: () => NavigationProvider.redirect('/transactions'),
-                    style: ThemeHelpers.primaryButton,
-                    child: const Text("See All"),
-                  ),
-                ),
-              ],
-            ),
+          ChartHeader(
+            title: "Recent Activity",
           ),
-          transactionsAsync.when(
-            data: (state) {
-              final recent = state.transactions.take(count).toList();
-              if (recent.isEmpty) {
-                return const SizedBox(
-                    height: 300,
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsetsGeometry.directional(bottom: 12),
-                        child: Text("No recent transactions"),
-                      ),
-                    ));
-              }
-              return ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: recent.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 0),
-                itemBuilder: (context, index) {
-                  return TransactionRow(recent[index]);
-                },
-              );
-            },
-            loading: () => const SizedBox(height: 250, child: Center(child: CircularProgressIndicator())),
-            error: (e, _) => const Padding(
-                padding: EdgeInsetsGeometry.only(bottom: 12),
-                child: Center(child: Text("Failed to load transactions"))),
-          ),
+          mobile ? content : Expanded(child: content),
         ],
       ),
     );

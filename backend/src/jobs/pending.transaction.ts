@@ -3,7 +3,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { Injectable } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
-import { BackgroundJob } from "./base";
+import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job that executes to check things like stuck pending transactions */
 @Injectable()
@@ -15,15 +15,11 @@ export class PendingTransactionJob extends BackgroundJob<any> {
   protected async update() {
     this.logger.log("Checking for stuck pending transactions...");
     const oneWeekAgo = subDays(new Date(), Configuration.transaction.struckTransactions.days);
-    const stuckTransactions = await Transaction.find({
-      where: {
-        pending: true,
-        posted: LessThan(oneWeekAgo),
-      },
+    const result = await Transaction.delete({
+      pending: true,
+      posted: LessThan(oneWeekAgo),
     });
-    if (stuckTransactions.length > 0) {
-      this.logger.warn(`Removing ${stuckTransactions.length} stuck pending transactions.`);
-      await Transaction.deleteMany(stuckTransactions.map((x) => x.id));
-    } else this.logger.log("No stuck pending transactions!");
+    if ((result.affected ?? 0) > 0) this.logger.warn(`Removed ${result.affected} stuck pending transactions.`);
+    else this.logger.log("No stuck pending transactions!");
   }
 }

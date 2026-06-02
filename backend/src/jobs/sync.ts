@@ -1,25 +1,16 @@
-import { AccountHistory } from "@backend/account/model/account.history.model";
-import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
-import { Configuration } from "@backend/config/core";
-import { CustomTypes } from "@backend/core/model/utility/custom.types";
-import { Utility } from "@backend/core/model/utility/utility";
-import { HoldingHistory } from "@backend/holding/model/holding.history.model";
-import { Holding } from "@backend/holding/model/holding.model";
+import { DistributedQueueJob } from "@backend/jobs/job-distributed-base";
 import { Sync } from "@backend/jobs/model/sync.model";
-import { Notification } from "@backend/notification/model/notification.model";
-import { NotificationType } from "@backend/notification/model/notification.type";
-import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
+import { ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
-import { Transaction } from "@backend/transaction/model/transaction.model";
-import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
 import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
-import { subDays, subMinutes } from "date-fns";
-import { merge } from "lodash";
-import { In, LessThan, MoreThan } from "typeorm";
-import { BackgroundJob } from "./base";
+import { subDays } from "date-fns";
+import { LessThan } from "typeorm";
+
+/** Represents the type for the distributed jobs */
+type SyncTaskPayload = { userId: string };
 
 /** This job is the orchestrator that controls syncing all available providers */
 @Injectable()
@@ -28,268 +19,67 @@ export class ProviderSyncOrchestratorJob implements OnApplicationBootstrap {
   jobs: Array<ProviderSyncJob> = [];
 
   constructor(
-    private readonly transactionRuleService: TransactionRuleService,
-    private readonly notificationService: NotificationService,
+    private readonly providerSyncService: ProviderSyncService,
     @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
   ) {}
 
   async onApplicationBootstrap() {
-    this.jobs = await Promise.all(this.providers.map(async (x) => await new ProviderSyncJob(this.transactionRuleService, this.notificationService, x).start()));
+    this.jobs = await Promise.all(this.providers.map(async (x) => await new ProviderSyncJob(x, this.providerSyncService).start()));
+  }
+
+  /**
+   * Public API to trigger a manual sync for a specific user across all active providers.
+   * Pushes the tasks directly to the distributed/local queues.
+   */
+  async syncUserAllProviders(user: User) {
+    return await Promise.all(this.jobs.map(async (job) => await job.processTask({ userId: user.id })));
+  }
+
+  /** Targets and invokes a background sync task for a single specific provider type */
+  async syncUserSingleProvider(user: User, providerType: ProviderType) {
+    const targetJob = this.jobs.find((job) => job.provider.config.dbType === providerType);
+    if (!targetJob) throw new Error(`Sync job runner for provider type '${providerType}' was not found or is disabled.`);
+    return await targetJob.processTask({ userId: user.id });
   }
 }
 
 /** The nested job for each specific actual provider */
-class ProviderSyncJob extends BackgroundJob<Sync | null> {
+class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
   constructor(
-    private readonly transactionRuleService: TransactionRuleService,
-    private readonly notificationService: NotificationService,
-    private readonly provider: ProviderBase,
+    public readonly provider: ProviderBase,
+    private readonly providerSyncService: ProviderSyncService,
   ) {
     const config = provider.getAppConfiguration();
-    super(`provider:sync:${provider.config.dbType}`, config.syncFrequency, config.bgSyncEnabled);
+    super(`provider:sync:${provider.config.dbType}`, config.syncFrequency, config.enabled);
   }
 
-  public override async updateNow(user?: User, shouldNotify?: boolean) {
-    return await this.update(user, shouldNotify);
-  }
-
-  /**
-   * @param shouldNotify If we should notify users of their results. Enabled by default.
-   */
-  protected async update(user?: User, shouldNotify = true) {
-    this.logger.log(`Starting sync cycle... ${user ? `(Manual trigger for ${user.username})` : ""}`);
-    const results = await this.updateProvider(this.provider, user);
-    // Handle notifications separately based on results
-    if (shouldNotify)
-      for (const result of results)
-        await this.notify(result.user, result.msg, result.success ? NotificationType.success : NotificationType.error, result.success);
+  // Grabs all active user IDs and queues them. Cleans up old syncs once per cycle.
+  protected async generateTasks(): Promise<SyncTaskPayload[]> {
+    // Run DB cleanup for old sync records while the lock is held
     await this.cleanupOldSyncs();
-    // If we we're given a single user, find their most recent sync status
-    if (user)
-      return await Sync.findOne({
-        where: { user: { id: user.id } },
-        order: { time: "DESC" },
-      });
-    return null;
+
+    const users = await User.find({ select: ["id"] });
+    return users.map((u) => ({ userId: u.id }));
   }
 
-  /**
-   * Sends notifications on successes, handles not spamming the user if another one was sent within 5 minutes.
-   * @param spamCheck If we should check if a recent notification was already sent. If this is true, and a recent
-   *  one was sent, we don't send another.
-   */
-  private async notify(user: User, msg: { title: string; body: string }, type: NotificationType, spamCheck: boolean) {
-    let recentNotification: CustomTypes.Nullable<Notification> = undefined;
-    if (spamCheck)
-      recentNotification = await Notification.findOne({
-        where: {
-          user: { id: user.id },
-          type: NotificationType.success,
-          createdAt: MoreThan(subMinutes(new Date(), 5)),
-        },
-      });
-    if (recentNotification == null) await this.notificationService.notifyUser(user, msg.body, msg.title, type);
+  // Orchestrates the sync lifecycle, error handling, and sync history for a single user
+  async processTask(task: SyncTaskPayload) {
+    const user = await User.findOne({ where: { id: task.userId } });
+    if (!user) return;
+    return await this.providerSyncService.syncForProvider(user, this.provider);
   }
 
-  /**
-   * Starts an update for the given provider.
-   *
-   * @param specificUser If given, will only process this user
-   * @returns boolean indicating if the provider sync was successful for all users
-   */
-  private async updateProvider(provider: ProviderBase, specificUser?: User) {
-    const results: Array<{ user: User; success: boolean; msg: { title: string; body: string } }> = [];
-    // Handle each user, or only the given user
-    const users = specificUser ? [specificUser] : await User.find({});
-    // Handle each user's accounts
-    for (const user of users) {
-      if (!(await provider.isAvailable(user))) {
-        this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
-        continue;
-      }
-      // Create unique sync status
-      const sync = await Sync.fromPlain({
-        time: new Date(),
-        status: "in-progress",
-        provider: provider.config.dbType,
-      }).insert();
-      sync.user = user;
-      try {
-        // Sync transactions and account balances. Only do it for existing accounts.
-        const userAccounts = await Account.getForUser(user);
-        // If we don't have any user accounts, don't bother querying because we'll have nothing to update
-        if (userAccounts.length === 0) {
-          sync.status = "complete";
-          await sync.update();
-          continue;
-        }
-
-        const accounts = await provider.get(user, false);
-        let userHadSuccessfulUpdate = false;
-        const institutionErrors = new Set<string>();
-
-        for (const data of accounts) {
-          try {
-            const accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } } });
-            if (!accountInDB) continue;
-
-            // Set old account history
-            await AccountHistory.fromPlain({
-              account: accountInDB,
-              balance: accountInDB.balance,
-              availableBalance: accountInDB.availableBalance,
-              time: subDays(new Date(), 1),
-            }).insert();
-
-            // Update current account
-            accountInDB.balance = data.account.balance;
-            accountInDB.availableBalance = data.account.availableBalance;
-            await accountInDB.update();
-
-            // Update current institution if in database
-            const institution = accountInDB.institution;
-            institution.hasError = data.account.institution.hasError;
-            institution.url = data.account.institution.url;
-            await institution.update();
-
-            // Check if the institution reports an error
-            if (data.account.institution.hasError) institutionErrors.add(data.account.institution.name);
-            // Sync transactions
-            if (data.transactions && data.transactions.length !== 0) await this.updateTransactionData(accountInDB, data.transactions!);
-            // Clean up removed transactions
-            if (data.removedTransactionIds && data.removedTransactionIds.length > 0)
-              await Transaction.delete({ id: In(data.removedTransactionIds), account: { user: { id: user.id } } });
-            // Sync holdings if investment type
-            if (data.holdings && accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
-
-            // If we reached this point, this specific account sync was valid
-            userHadSuccessfulUpdate = true;
-          } catch (e) {
-            this.logger.error(`Account error: ${(e as Error).message}`);
-          }
-        }
-
-        // Always apply rules if at least one account updated successfully
-        if (userHadSuccessfulUpdate) await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
-
-        // Finalize status and notify the user as necessary
-        if (institutionErrors.size > 0) {
-          const names = Array.from(institutionErrors);
-          sync.status = "failed";
-          sync.failureReason = `Connection lost with ${names.join(", ")}`;
-          results.push({ user, success: false, msg: { title: "Connection Update Required", body: sync.failureReason } });
-        } else {
-          sync.status = "complete";
-          results.push({ user, success: true, msg: this.getSuccessMessage() });
-        }
-        // Finalize by updating the sync
-        await sync.update();
-      } catch (e) {
-        // Catch-all for a total user-provider failure
-        sync.status = "failed";
-        sync.failureReason = (e as Error).message;
-        await sync.update();
-        results.push({ user, success: false, msg: { title: "Unknown Sync Error", body: sync.failureReason } });
-      }
-    }
-    return results;
-  }
-
-  /** Updates all transaction data for the given account that matches the given transaction */
-  private async updateTransactionData(accountInDb: Account, transactions: Transaction[]) {
-    // TODO: Change this to do a .save to prevent over-taxing the database
-    for (const transaction of transactions) {
-      transaction.account = accountInDb;
-      // If the transaction description is empty, fill it with something
-      if (transaction.description === "" || !transaction.description) transaction.description = accountInDb.name;
-      let transactionInDb = (await Transaction.find({ where: { id: transaction.id, account: { id: accountInDb.id } } }))[0];
-      // If we aren't tracking this transaction yet, go ahead and add it
-      if (transactionInDb == null) transactionInDb = await Transaction.fromPlain(transaction).insert(false);
-      else {
-        // Update our related transaction
-        transactionInDb.amount = transaction.amount;
-        transactionInDb.pending = transaction.pending;
-        transactionInDb.posted = transaction.posted;
-        transactionInDb.extra = merge(transactionInDb.extra, transaction.extra);
-        // If we haven't already set it's category, go ahead and set it
-        if (transactionInDb.category == null) transactionInDb.category = transaction.category;
-        await transactionInDb.update();
-      }
-    }
-  }
-
-  /**
-   * Updates holding data for the given account and holding information set.
-   */
-  private async updateHoldingData(accountInDb: Account, holdings: Holding[]) {
-    const holdingsInDb = await Holding.getForAccount(accountInDb);
-    // Process any of the holding info as given by the provider
-    for (const holding of holdings) {
-      holding.account = accountInDb;
-      let holdingInDBIndex = holdingsInDb.findIndex((x) => x.symbol === holding.symbol);
-      let holdingInDB = holdingsInDb[holdingInDBIndex];
-      // If we aren't tracking this holding yet, start tracking it
-      if (holdingInDB == null) holdingInDB = await Holding.fromPlain(holding).insert(false);
-      else {
-        // Set old holding history
-        await HoldingHistory.fromPlain({
-          holding: holdingInDB,
-          costBasis: holdingInDB.costBasis,
-          marketValue: holdingInDB.marketValue,
-          purchasePrice: holdingInDB.purchasePrice,
-          shares: holdingInDB.shares,
-          time: subDays(new Date(), 1),
-        }).insert();
-
-        // Update current holding values
-        holdingInDB.costBasis = holding.costBasis;
-        holdingInDB.marketValue = holding.marketValue;
-        holdingInDB.purchasePrice = holding.purchasePrice;
-        holdingInDB.shares = holding.shares;
-        await holdingInDB.update();
-
-        // Remove it from the list so we don't process it later
-        holdingsInDb.splice(holdingInDBIndex, 1);
-      }
-    }
-
-    // Any holdings that we're not processed are probably removed (or the provider is having an error) so handle them below
-    for (const remainingHolding of holdingsInDb) {
-      // WARN: This will remove holdings history completely.
-      if (Configuration.holding.cleanupRemovedHoldings) {
-        this.logger.warn(`Removing holding with ID ${remainingHolding.id} because it was not found in the provider info.`);
-        await remainingHolding.remove();
-      } else {
-        // Cleanup the holding but keep it just so we still have the history
-        remainingHolding.marketValue = 0;
-        remainingHolding.costBasis = 0;
-        remainingHolding.purchasePrice = 0;
-        remainingHolding.shares = 0;
-        await remainingHolding.update();
-      }
-    }
-  }
-
-  /** Removes sync history older than N days to maintain database performance. */
+  /** Cleans up old sync history to prevent table bloat */
   private async cleanupOldSyncs(days = 60) {
     try {
-      const thirtyDaysAgo = subDays(new Date(), days);
+      const cutoffDate = subDays(new Date(), days);
       const result = await Sync.delete({
-        time: LessThan(thirtyDaysAgo),
+        time: LessThan(cutoffDate),
         provider: this.provider.config.dbType,
       });
-      const cleaned = result.affected;
-      this.logger.log(`Removed ${cleaned} old sync record${cleaned !== 1 ? "s" : ""}.`);
+      if (result.affected && result.affected > 0) this.logger.log(`Removed ${result.affected} old sync record(s).`);
     } catch (e) {
       this.logger.error(`Failed to cleanup old sync records: ${(e as Error).message}`);
     }
-  }
-
-  /** Returns the message for a success when this provider is updated */
-  private getSuccessMessage() {
-    return Utility.randomFromArray([
-      { title: `Accounts Synced`, body: `Your accounts are up to date.` },
-      { title: "You're All Caught Up", body: "We've finished syncing your accounts." },
-    ]);
   }
 }

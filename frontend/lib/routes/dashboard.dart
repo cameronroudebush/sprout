@@ -43,14 +43,14 @@ class DashboardPage extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const HomeNotificationsWidget(),
-        SizedBox(
+        const SizedBox(
           height: 300,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
                 flex: 2,
-                child: const SproutCard(
+                child: SproutCard(
                   child: Padding(
                     padding: EdgeInsets.all(12),
                     child: UserNetWorthWidget(),
@@ -59,7 +59,7 @@ class DashboardPage extends ConsumerWidget {
               ),
               Flexible(
                 flex: 1,
-                child: const SproutCard(
+                child: SproutCard(
                   child: Padding(
                     padding: EdgeInsets.all(12),
                     child: SpendingCompareChart(),
@@ -70,24 +70,24 @@ class DashboardPage extends ConsumerWidget {
           ),
         ),
         ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 425),
+            constraints: const BoxConstraints(maxHeight: 409),
             child: Stack(
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
+                    const Expanded(
                       flex: 2,
                       child: DashboardAccountsCard(),
                     ),
                     // We leave a blank space for the pie chart to sit over
-                    Expanded(flex: 1, child: const SizedBox.shrink()),
+                    const Expanded(flex: 1, child: SizedBox.shrink()),
                   ],
                 ),
                 Positioned.fill(
                   child: Row(
                     children: [
-                      Expanded(flex: 2, child: const SizedBox.shrink()),
+                      const Expanded(flex: 2, child: SizedBox.shrink()),
                       Expanded(
                         flex: 1,
                         child: SproutCard(
@@ -108,18 +108,22 @@ class DashboardPage extends ConsumerWidget {
                 ),
               ],
             )),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(flex: 1, child: CashFlowCalendarWidget()),
-            Expanded(flex: 1, child: DashboardRecentTransactionsCard(count: 9)),
-            Expanded(
-              child: SubscriptionCalendarWidget(
-                showDetails: false,
-                iconSize: 14,
+        const SizedBox(
+          height: 500,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(flex: 1, child: SproutCard(child: CashFlowCalendarWidget())),
+              Expanded(flex: 1, child: DashboardRecentTransactionsCard(count: 9)),
+              Expanded(
+                child: SproutCard(
+                    child: SubscriptionCalendarWidget(
+                  showDetails: false,
+                  iconSize: 14,
+                )),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -133,14 +137,16 @@ class DashboardPage extends ConsumerWidget {
         // Important notifications that the user needs to know
         const HomeNotificationsWidget(),
         // Net worth chart
-        SizedBox(
+        const SizedBox(
           height: 200,
           child: UserNetWorthWidget(mobile: true),
         ),
         // Account overview
         const DashboardAccountsCard(),
         // Recent transactions
-        const DashboardRecentTransactionsCard(),
+        const DashboardRecentTransactionsCard(
+          mobile: true,
+        ),
       ],
     );
   }

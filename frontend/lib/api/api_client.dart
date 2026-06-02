@@ -264,6 +264,8 @@ class ApiClient {
           return PlaidMetadataDTO.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
+        case 'ProviderSubTypeEnum':
+          return ProviderSubTypeEnumTypeTransformer().decode(value);
         case 'ProviderTypeEnum':
           return ProviderTypeEnumTypeTransformer().decode(value);
         case 'RegisterDeviceDto':

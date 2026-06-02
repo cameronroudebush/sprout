@@ -3,7 +3,7 @@ import { TimeZone } from "@backend/config/model/tz";
 import { Injectable } from "@nestjs/common";
 import fs from "fs";
 import path from "path";
-import { BackgroundJob } from "./base";
+import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job to execute routinely for backing up the database. */
 @Injectable()

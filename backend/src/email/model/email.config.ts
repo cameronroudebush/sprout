@@ -5,7 +5,7 @@ export class EmailConfig {
   @ConfigurationMetadata.assign({ comment: "If emails should be supported.", restrictedValues: [true, false] })
   enabled: boolean = false;
 
-  @ConfigurationMetadata.assign({ comment: "When to send weekly status updates. Default is 12pm, every sunday." })
+  @ConfigurationMetadata.assign({ comment: "When to send weekly status updates. Default is 12pm, every sunday.", externalControlDisabled: true })
   sendTime: string = "0 12 * * 0";
 
   @ConfigurationMetadata.assign({ comment: "The email that we will send as." })

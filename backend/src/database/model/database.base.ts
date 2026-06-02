@@ -3,7 +3,7 @@ import { CustomTypes } from "@backend/core/model/utility/custom.types";
 import { DatabaseService } from "@backend/database/database.service";
 import { ApiProperty } from "@nestjs/swagger";
 import { decorate } from "ts-mixer";
-import { FindManyOptions, FindOneOptions, FindOptionsWhere, In, PrimaryGeneratedColumn, Repository } from "typeorm";
+import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, In, PrimaryGeneratedColumn, Repository, SaveOptions } from "typeorm";
 
 /** This class implements a bunch of common functionality that can be reused for other models that utilize the database */
 export class DatabaseBase extends DBBase {
@@ -106,6 +106,16 @@ export class DatabaseBase extends DBBase {
   /** Given a column name, returns the sum of all values matching the where clause */
   static async sum<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, columnName: CustomTypes.PropertyNames<T, number>, options: FindOptionsWhere<T>) {
     return await new this().getRepository().sum(columnName as any, options);
+  }
+
+  /** Upserts this element into the database. */
+  async upsert() {
+    return await this.getRepository().save(this);
+  }
+
+  /** Updates records if their primary key matches, otherwise inserts them. */
+  static async upsertMany<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, elements: Array<DeepPartial<T>>, options?: SaveOptions) {
+    return await new this().getRepository().save(elements, { chunk: 999, ...options });
   }
 
   /**

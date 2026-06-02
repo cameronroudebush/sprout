@@ -1,5 +1,6 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
-import { DevModeGuard } from "@backend/config/guard/dev-mode.guard";
+import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { FirebaseConfigDTO } from "@backend/notification/model/api/firebase.config.dto";
 import { FirebaseNotificationDTO } from "@backend/notification/model/api/firebase.notification.dto";
@@ -84,7 +85,7 @@ export class NotificationController {
     summary: "Send Test Notification",
     description: "Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.",
   })
-  @DevModeGuard.attach()
+  @EnabledGuard.attach(Configuration.isDevBuild)
   async notify(@CurrentUser() user: User) {
     this.notificationService.notifyUser(user, "This is a test of the notification pipeline", "Test notification", NotificationType.warning);
   }

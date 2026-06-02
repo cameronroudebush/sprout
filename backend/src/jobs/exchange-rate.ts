@@ -5,7 +5,7 @@ import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { Inject, Injectable } from "@nestjs/common";
 import YahooFinance from "yahoo-finance2";
-import { BackgroundJob } from "./base";
+import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job that runs in the background to automatically update exchange rates */
 @Injectable()
@@ -20,7 +20,7 @@ export class ExchangeRateJob extends BackgroundJob<any> {
     private readonly configService: ConfigurationService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
-    super("exchange-rate", Configuration.server.exchangeRate.time, Configuration.server.exchangeRate.enabled, true);
+    super("exchange-rate", Configuration.server.exchangeRate.time, true, true);
   }
 
   protected async update() {

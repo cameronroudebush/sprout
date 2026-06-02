@@ -32,7 +32,7 @@ class UserNetWorthWidget extends ConsumerWidget {
       error: (e, _) => const Center(child: Text("Error loading data")),
       data: (dto) {
         if (dto == null || dto.timeline.isEmpty) {
-          return const Center(child: Text("Start adding accounts to get started!"));
+          return const Center(child: Text("Start adding accounts to view your net worth"));
         }
 
         final config = ref.watch(userConfigProvider).value;

@@ -91,7 +91,7 @@ class _InternalSideNavContent extends ConsumerWidget {
 
                     // Render the corresponding navigation tiles
                     ...routes.map((page) {
-                      final isSelected = currentPath == page.path;
+                      final bool isSelected = page.path == '/' ? currentPath == '/' : currentPath.startsWith(page.path);
                       const borderRadius = 12.0;
 
                       return Padding(

@@ -7,7 +7,7 @@ import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
-import { ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
 import { PlaidAsset } from "@backend/providers/plaid/model/plaid.asset";
@@ -40,12 +40,18 @@ import { ProviderRateLimit } from "../base/rate-limit";
 @Injectable()
 export class PlaidProviderService extends ProviderBase {
   override getAppConfiguration = () => Configuration.providers.plaid;
-  private readonly logger = new Logger("provider:service:plaid");
-  config = new ProviderConfig("Plaid", ProviderType.plaid, "https://plaid.com/", "https://plaid.com/assets/img/favicons/apple-touch-icon.png");
+  private readonly logger = new Logger("provider:plaid:service");
+  config = new ProviderConfig(
+    "Plaid",
+    ProviderType.plaid,
+    ProviderSubType.bankingInvestments,
+    "https://plaid.com/",
+    "https://plaid.com/assets/img/favicons/apple-touch-icon.png",
+  );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.plaid, Configuration.providers.plaid.rateLimit, user);
   override isAvailable = async (_user: User) => !!Configuration.providers.plaid.secret && !!Configuration.providers.plaid.clientId;
   /** The client for talking with plaid for account info */
-  private readonly plaidClient?: PlaidApi;
+  public readonly plaidClient!: PlaidApi;
 
   constructor() {
     super();
@@ -72,130 +78,132 @@ export class PlaidProviderService extends ProviderBase {
 
   override async get(user: User, accountsOnly: boolean) {
     this.checkPlaidClient();
-
-    // Find all Plaid credentials for this user
     const institutions = await PlaidInstitutionAsset.find({
       where: { institution: { user: { id: user.id } } },
       relations: ["institution"],
     });
+    const results: Awaited<ReturnType<PlaidProviderService["syncSingleInstitution"]>> = [];
+    const updates = (await Promise.all(institutions.flatMap(async (asset) => await this.syncSingleInstitution(user, asset, accountsOnly)))).flat();
+    results.push(...updates);
+    return results;
+  }
+
+  /** Syncs a single institution */
+  private async syncSingleInstitution(user: User, asset: PlaidInstitutionAsset, accountsOnly: boolean) {
     const results = [];
-    for (const asset of institutions) {
-      try {
-        // Fetch Balances/Accounts
-        await this.rateLimit(user).incrementOrError();
-        const accountsResponse = await this.plaidClient!.accountsGet({
-          access_token: asset.accessToken,
-        });
+    try {
+      // Fetch Balances/Accounts
+      await this.rateLimit(user).incrementOrError();
+      const accountsResponse = await this.plaidClient!.accountsGet({
+        access_token: asset.accessToken,
+      });
 
-        const hasInvestmentAccount = accountsResponse.data.accounts.some((acc) => this.mapType(acc.type) === AccountType.investment);
-        let allHoldings: PlaidHolding[] | undefined = undefined;
-        let securities: PlaidSecurity[] | undefined = undefined;
-        // Fetch Holdings for the entire institution, only if this is an investment account
-        if (hasInvestmentAccount) {
-          try {
-            await this.rateLimit(user).incrementOrError();
-            const holdingsResponse = await this.plaidClient!.investmentsHoldingsGet({
-              access_token: asset.accessToken,
-            });
-            securities = holdingsResponse.data.securities;
-            allHoldings = holdingsResponse.data.holdings;
-          } catch (e) {}
-        }
-
-        // Fetch all the transactions for all the accounts
-        let addedTransactions: PlaidTransaction[] = [];
-        let modifiedTransactions: PlaidTransaction[] = [];
-        let removedTransactions: RemovedTransaction[] = [];
+      const hasInvestmentAccount = accountsResponse.data.accounts.some((acc) => this.mapType(acc.type) === AccountType.investment);
+      let allHoldings: PlaidHolding[] | undefined = undefined;
+      let securities: PlaidSecurity[] | undefined = undefined;
+      // Fetch Holdings for the entire institution, only if this is an investment account
+      if (hasInvestmentAccount) {
         try {
-          if (!accountsOnly) {
-            const syncData = await this.fetchAllInstitutionTransactions(user, asset);
-            addedTransactions = syncData.added;
-            modifiedTransactions = syncData.modified;
-            removedTransactions = syncData.removed;
-          }
-        } catch (e) {
-          this.logger.error(e);
-        }
-
-        for (const acc of accountsResponse.data.accounts) {
-          let account = this.convertPlaidAccount(acc, user, asset.institution);
-          let plaidAsset = await PlaidAsset.findOne({ where: { account: { id: acc.account_id, user: { id: user.id } } }, relations: ["account"] });
-
-          // This is a new account. Handle it like so.
-          if (plaidAsset == null) {
-            account = await account.insert();
-            plaidAsset = await new PlaidAsset(account, acc.account_id).insert();
-          } else {
-            account = plaidAsset.account;
-          }
-
-          // Convert added + modified transactions. These will be upserted.
-          const accountTransactions = addedTransactions.concat(modifiedTransactions).filter((t) => t.account_id === acc.account_id);
-          const transactions = await this.convertPlaidTransactions(accountTransactions, account, user);
-          const removedTransactionIds = removedTransactions.filter((t) => t.account_id === acc.account_id).map((t) => t.transaction_id);
-
-          // Overarching holding objects considering securities
-          const accountHoldings =
-            allHoldings && securities
-              ? allHoldings.filter((h) => h.account_id === acc.account_id).map((h) => this.convertPlaidHolding(h, securities, account))
-              : undefined;
-
-          results.push({
-            account,
-            holdings: accountHoldings,
-            transactions: transactions,
-            removedTransactionIds: removedTransactionIds,
+          await this.rateLimit(user).incrementOrError();
+          const holdingsResponse = await this.plaidClient!.investmentsHoldingsGet({
+            access_token: asset.accessToken,
           });
+          securities = holdingsResponse.data.securities;
+          allHoldings = holdingsResponse.data.holdings;
+        } catch (e) {}
+      }
 
-          // Successful update, make sure we don't track as an error
-          account.institution.hasError = false;
+      // Fetch all the transactions for all the accounts
+      let addedTransactions: PlaidTransaction[] = [];
+      let modifiedTransactions: PlaidTransaction[] = [];
+      let removedTransactions: RemovedTransaction[] = [];
+      try {
+        if (!accountsOnly) {
+          const syncData = await this.fetchAllInstitutionTransactions(user, asset);
+          addedTransactions = syncData.added;
+          modifiedTransactions = syncData.modified;
+          removedTransactions = syncData.removed;
         }
       } catch (e) {
         this.logger.error(e);
-        const plaidError = (e as AxiosError).response?.data as PlaidError;
-        if (plaidError && plaidError.error_type === "ITEM_ERROR") {
-          this.logger.warn(`Plaid Item Error for ${asset.institution.name}: ${plaidError.error_code}`);
-          // These specific codes mean the user MUST take action in the UI
-          const criticalErrors = ["ITEM_LOGIN_REQUIRED", "PENDING_EXPIRATION", "INVALID_ACCESS_TOKEN"];
-          if (criticalErrors.includes(plaidError.error_code)) asset.institution.hasError = true;
+      }
+
+      for (const acc of accountsResponse.data.accounts) {
+        let account = this.convertPlaidAccount(acc, user, asset.institution);
+        let plaidAsset = await PlaidAsset.findOne({ where: { plaidAccountId: acc.account_id, account: { user: { id: user.id } } }, relations: ["account"] });
+
+        // This is a new account. Handle it like so.
+        if (plaidAsset == null) {
+          account = await account.insert();
+          plaidAsset = await new PlaidAsset(account, acc.account_id).insert();
+        } else {
+          account = plaidAsset.account;
         }
+
+        // Convert added + modified transactions. These will be upserted.
+        const accountTransactions = addedTransactions.concat(modifiedTransactions).filter((t) => t.account_id === acc.account_id);
+        const transactions = await this.convertPlaidTransactions(accountTransactions, account, user);
+        const removedTransactionIds = removedTransactions.filter((t) => t.account_id === acc.account_id).map((t) => t.transaction_id);
+
+        // Overarching holding objects considering securities
+        const accountHoldings =
+          allHoldings && securities
+            ? allHoldings.filter((h) => h.account_id === acc.account_id).map((h) => this.convertPlaidHolding(h, securities, account))
+            : undefined;
+
+        results.push({
+          account,
+          holdings: accountHoldings,
+          transactions: transactions,
+          removedTransactionIds: removedTransactionIds,
+        });
+
+        // Successful update, make sure we don't track as an error
+        account.institution.hasError = false;
+      }
+    } catch (e) {
+      this.logger.error(e);
+      const plaidError = (e as AxiosError).response?.data as PlaidError;
+      if (plaidError && plaidError.error_type === "ITEM_ERROR") {
+        this.logger.warn(`Plaid Item Error for ${asset.institution.name}: ${plaidError.error_code}`);
+        // These specific codes mean the user MUST take action in the UI
+        const criticalErrors = ["ITEM_LOGIN_REQUIRED", "PENDING_EXPIRATION", "INVALID_ACCESS_TOKEN"];
+        if (criticalErrors.includes(plaidError.error_code)) asset.institution.hasError = true;
       }
     }
 
     return results;
   }
 
-  /**
-   * Generates a short-lived link_token to initialize Plaid Link on the mobile/web frontend.
-   */
-  async generateLinkToken(user: User, institutionId?: string) {
+  /** Generates a short-lived link_token to initialize Plaid Link on the mobile/web frontend. */
+  async generateLinkToken(user: User, publicUrl: string, institutionId?: string) {
     this.checkPlaidClient();
+    const webhookUrl = `${publicUrl}${Configuration.server.basePath}/webhooks/plaid`;
+    this.logger.debug(`Plaid webhook configured to ${webhookUrl}`);
     const config = {
       user: { client_user_id: user.id },
       client_name: "Sprout",
       country_codes: [CountryCode.Us],
       language: "en",
+      webhook: webhookUrl,
+      // Allows us to specify theme. Might add feature for this in the future
+      // link_customization_name: user.config.themeStyle.toString(),
     } as LinkTokenCreateRequest;
     try {
       await this.rateLimit(user).incrementOrError();
       if (institutionId) {
-        // Update mode
         const instAsset = await PlaidInstitutionAsset.findOne({
           where: { institution: { id: institutionId, user: { id: user.id } } },
         });
-
         if (!instAsset) throw new InternalServerErrorException("Existing Plaid connection not found.");
-
         config.access_token = instAsset.accessToken;
       } else {
-        // New token mode
-        config.products = [Products.Transactions, Products.Investments];
+        config.products = [Products.Transactions];
       }
-
       const response = await this.plaidClient!.linkTokenCreate(config);
       return new PlaidLinkTokenDTO(response.data.link_token);
     } catch (error) {
-      throw new InternalServerErrorException("Could not initialize Plaid.");
+      throw new InternalServerErrorException(`Could not initialize Plaid: ${error as AxiosError}`);
     }
   }
 
@@ -306,6 +314,34 @@ export class PlaidProviderService extends ProviderBase {
     }
 
     return { added: allAdded, modified: allModified, removed: allRemoved };
+  }
+
+  /**
+   * Completely removes an institution asset link from Plaid's servers to cease billing.
+   * Assumes the calling controller has already verified no active accounts rely on this item.
+   */
+  async unlinkInstitution(user: User, institutionId: string) {
+    this.checkPlaidClient();
+    const instAsset = await PlaidInstitutionAsset.findOne({
+      where: { institution: { id: institutionId, user: { id: user.id } } },
+      relations: ["institution"],
+    });
+    // If it's already gone, silently return true so the controller can finish deleting the institution
+    if (!instAsset) return true;
+    this.logger.log(`Removing Plaid Item billing connection for: ${instAsset.institution.name}`);
+    // Tell Plaid to stop tracking and billing for this Item
+    try {
+      await this.rateLimit(user).incrementOrError();
+      await this.plaidClient.itemRemove({
+        access_token: instAsset.accessToken,
+      });
+      return true;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const plaidError = axiosError.response?.data as PlaidError;
+      this.logger.error(plaidError);
+      return false;
+    }
   }
 
   /** Converts the given plaid account to Sprout's local model. Does not insert. */

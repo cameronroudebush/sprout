@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/widgets/account_details.dart';
 import 'package:sprout/account/widgets/account_total_summary_card.dart';
+import 'package:sprout/account/widgets/accounts_empty.dart';
 import 'package:sprout/account/widgets/accounts_summary.dart';
 import 'package:sprout/provider/widgets/dialog/provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
 
@@ -41,22 +41,12 @@ class AccountsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Automatically extract the account ID from the GoRouter state
-    final String? accountId = GoRouterState.of(context).uri.queryParameters['id'];
     final accountsAsync = ref.watch(accountsProvider);
 
-    return accountsAsync.when(
+    return accountsAsync.whenDefault(
+      emptyCondition: (state) => state.accounts.isEmpty,
+      emptyWidget: const AccountsEmptyWidget(showRedirect: false),
       data: (state) {
-        // If we have an account Id, return the account details view
-        if (accountId != null) {
-          final account = state.accounts.firstWhere((a) => a.id == accountId, orElse: () => state.accounts.first);
-          return Scaffold(
-            body: SproutRouteWrapper(
-              child: AccountDetailsView(account: account),
-            ),
-          );
-        }
-
         return Scaffold(
           body: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -69,27 +59,26 @@ class AccountsPage extends ConsumerWidget {
                       SproutCard(
                           child: Padding(
                               padding: EdgeInsetsGeometry.all(12), child: TotalSummary(accounts: state.accounts))),
-                      AccountSummaryView(accounts: state.accounts),
+                      AccountSummaryView(
+                        accounts: state.accounts,
+                        collapsible: false,
+                      ),
                     ],
                   )),
             ),
           ),
-          floatingActionButton: accountId != null
-              ? null
-              : SproutSpeedDial(
-                  actions: [
-                    FABAction(
-                      icon: Icons.add,
-                      label: 'Add Account',
-                      onTap: (context) => showSproutPopup(context: context, builder: (_) => const ProviderDialog()),
-                    ),
-                    FABAction(icon: Icons.refresh, label: 'Sync All', onTap: (context) => _showSyncPopup(context, ref)),
-                  ],
-                ),
+          floatingActionButton: SproutSpeedDial(
+            actions: [
+              FABAction(
+                icon: Icons.add,
+                label: 'Add Account',
+                onTap: (context) => showSproutPopup(context: context, builder: (_) => const ProviderDialog()),
+              ),
+              FABAction(icon: Icons.refresh, label: 'Sync All', onTap: (context) => _showSyncPopup(context, ref)),
+            ],
+          ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Error: $err')),
     );
   }
 }

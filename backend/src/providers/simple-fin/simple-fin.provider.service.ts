@@ -5,7 +5,7 @@ import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
-import { ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
@@ -30,6 +30,7 @@ export class SimpleFINProviderService extends ProviderBase {
   config = new ProviderConfig(
     "SimpleFIN",
     ProviderType.simpleFin,
+    ProviderSubType.bankingInvestments,
     "https://www.simplefin.org/",
     "https://beta-bridge.simplefin.org/static/logo.svg",
     "https://beta-bridge.simplefin.org/my-account",
