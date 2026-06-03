@@ -1,324 +1,358 @@
+import { setupTests } from "@backend/test/helpers";
+setupTests();
+
+import { AccountController } from "@backend/account/account.controller";
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
-import { DatabaseService } from "@backend/database/database.service";
+import { Institution } from "@backend/institution/model/institution.model";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
+import { ProviderType } from "@backend/providers/base/provider.type";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
-import { SSEService } from "../sse/sse.service";
-import { AccountController } from "./account.controller";
+import * as dateFns from "date-fns";
 
 describe("AccountController", () => {
   let controller: AccountController;
-  let sseService: SSEService;
+  let sseService: jest.Mocked<SSEService>;
+  let databaseService: any;
+  let providerSyncOrchestrator: jest.Mocked<ProviderSyncOrchestratorJob>;
+  let plaidProvider: jest.Mocked<PlaidProviderService>;
+  let mockUser: User;
 
-  const mockUser = { id: "user-123" } as User;
-
-  const mockAccount = {
-    id: "acc-1",
-    name: "Savings Account",
-    user: mockUser,
-    type: AccountType.depository,
-    subType: AccountSubType.savings,
-    interestRate: 0.05,
-    update: jest.fn().mockResolvedValue({ id: "acc-1", name: "Updated Name" }),
-  } as unknown as Account;
-
-  const mockSourceAccount = {
-    id: "acc-2",
-    name: "Old Savings",
-    user: mockUser,
-    type: AccountType.depository,
-    subType: AccountSubType.checking,
-  } as unknown as Account;
-
-  const mockTransactionManager = {
-    save: jest.fn(),
-    createQueryBuilder: jest.fn(() => ({
-      update: jest.fn().mockReturnThis(),
-      set: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      execute: jest.fn(),
-    })),
-    remove: jest.fn(),
-  };
-
-  const mockProviderSyncJob = {
-    jobs: [],
-    syncUserAllProviders: jest.fn(),
-  };
-
-  beforeEach(async () => {
-    mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([Sync.fromPlain({ id: "mock-sync-id", status: "complete" })]);
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [AccountController],
-      providers: [
-        {
-          provide: SSEService,
-          useValue: { sendToUser: jest.fn() },
-        },
-        {
-          provide: DatabaseService,
-          useValue: {
-            source: {
-              transaction: jest.fn(async (cb) => cb(mockTransactionManager)),
-            },
-          },
-        },
-        {
-          provide: ProviderSyncOrchestratorJob,
-          useValue: mockProviderSyncJob,
-        },
-        {
-          provide: PlaidProviderService,
-          useValue: { unlinkInstitution: jest.fn() },
-        },
-      ],
-    }).compile();
-
-    controller = module.get<AccountController>(AccountController);
-    sseService = module.get<SSEService>(SSEService);
-
-    // Mocks for static AR methods
-    Account.findOne = jest.fn();
-    Account.find = jest.fn();
-    Account.deleteById = jest.fn();
-    Sync.findOne = jest.fn();
-    AccountHistory.insertForNewAccount = jest.fn();
-
-    // Reset the mutable mockAccount so tests don't leak state changes
-    mockAccount.name = "Savings Account";
-    mockAccount.type = AccountType.depository;
-    mockAccount.subType = AccountSubType.savings;
-    mockAccount.interestRate = 0.05;
-
+  beforeEach(() => {
     jest.clearAllMocks();
-  });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+    sseService = {
+      sendToUser: jest.fn(),
+    } as any;
+
+    databaseService = {
+      source: {
+        transaction: jest.fn(),
+      },
+    };
+
+    providerSyncOrchestrator = {
+      syncUserAllProviders: jest.fn(),
+    } as any;
+
+    plaidProvider = {
+      unlinkInstitution: jest.fn(),
+    } as any;
+
+    mockUser = User.fromPlain({ id: "user-123" });
+
+    controller = new AccountController(sseService, databaseService, providerSyncOrchestrator, plaidProvider);
   });
 
   describe("getById", () => {
-    it("should return an account if found", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(mockAccount);
+    it("should return the account when it exists and belongs to the user", async () => {
+      const mockAccount = Account.fromPlain({ id: "acc-1", name: "Savings" });
+      const findOneSpy = jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
       const result = await controller.getById("acc-1", mockUser);
-      expect(result).toEqual(mockAccount);
-      expect(Account.findOne).toHaveBeenCalledWith({
-        where: { id: "acc-1", user: { id: mockUser.id } },
+
+      expect(findOneSpy).toHaveBeenCalledWith({
+        where: { id: "acc-1", user: { id: "user-123" } },
       });
+      expect(result).toBe(mockAccount);
     });
 
-    it("should throw NotFoundException if account not found", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(null);
+    it("should throw NotFoundException when the account does not exist", async () => {
+      jest.spyOn(Account, "findOne").mockResolvedValue(null);
 
-      await expect(controller.getById("invalid", mockUser)).rejects.toThrow(NotFoundException);
+      await expect(controller.getById("acc-invalid", mockUser)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe("delete", () => {
-    it("should delete and notify via SSE", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(mockAccount);
-      (Account.deleteById as jest.Mock).mockResolvedValue({ affected: 1 });
+    it("should throw NotFoundException if account to delete is not found", async () => {
+      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+
+      await expect(controller.delete("acc-invalid", mockUser)).rejects.toThrow(NotFoundException);
+    });
+
+    it("should throw InternalServerErrorException if delete action affects 0 records", async () => {
+      const mockAccount = Account.fromPlain({ id: "acc-1", institution: { id: "inst-1" }, provider: "manual" });
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 0 } as any);
+
+      await expect(controller.delete("acc-1", mockUser)).rejects.toThrow(InternalServerErrorException);
+    });
+
+    it("should delete account, skip institution cleanup if accounts remain, and push notification", async () => {
+      const mockInstitution = Institution.fromPlain({ id: "inst-1", name: "Bank" });
+      const mockAccount = Account.fromPlain({ id: "acc-1", institution: mockInstitution, provider: "manual" });
+
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      jest.spyOn(Account, "count").mockResolvedValue(2);
 
       const result = await controller.delete("acc-1", mockUser);
 
-      expect(result).toContain("deleted successfully");
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
       expect(Account.deleteById).toHaveBeenCalledWith("acc-1");
+      expect(Account.count).toHaveBeenCalledWith({ where: { institution: { id: "inst-1" } } });
+      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
+      expect(result).toBe("Account with ID acc-1 deleted successfully.");
     });
 
-    it("should throw NotFoundException if account to delete not found", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(null);
+    it("should clean up regular institution if 0 remaining accounts are left", async () => {
+      const mockInstitution = Institution.fromPlain({ id: "inst-1", name: "Bank" });
+      const mockAccount = Account.fromPlain({ id: "acc-1", institution: mockInstitution, provider: "manual" });
 
-      await expect(controller.delete("invalid", mockUser)).rejects.toThrow(NotFoundException);
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      jest.spyOn(Account, "count").mockResolvedValue(0);
+      const deleteInstitutionSpy = jest.spyOn(Institution, "delete").mockResolvedValue({} as any);
+
+      await controller.delete("acc-1", mockUser);
+
+      expect(deleteInstitutionSpy).toHaveBeenCalledWith({ id: "inst-1" });
+      expect(plaidProvider.unlinkInstitution).not.toHaveBeenCalled();
     });
 
-    it("should throw InternalServerErrorException if delete operation affects 0 rows", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(mockAccount);
-      (Account.deleteById as jest.Mock).mockResolvedValue({ affected: 0 });
+    it("should trigger plaid unlinking during institution cleanup if provider is plaid", async () => {
+      const mockInstitution = Institution.fromPlain({ id: "inst-plaid", name: "Plaid Bank" });
+      const mockAccount = Account.fromPlain({ id: "acc-1", institution: mockInstitution, provider: ProviderType.plaid });
 
-      await expect(controller.delete("acc-1", mockUser)).rejects.toThrow(InternalServerErrorException);
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      jest.spyOn(Account, "count").mockResolvedValue(0);
+      jest.spyOn(Institution, "delete").mockResolvedValue({} as any);
+
+      await controller.delete("acc-1", mockUser);
+
+      expect(plaidProvider.unlinkInstitution).toHaveBeenCalledWith(mockUser, "inst-plaid");
+      expect(Institution.delete).toHaveBeenCalledWith({ id: "inst-plaid" });
+    });
+
+    it("should bypass cleanup entirely if the account has no associated institution", async () => {
+      const mockAccount = Account.fromPlain({ id: "acc-1", provider: "manual" });
+
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      const countSpy = jest.spyOn(Account, "count");
+
+      await controller.delete("acc-1", mockUser);
+
+      expect(countSpy).not.toHaveBeenCalled();
     });
   });
 
   describe("edit", () => {
-    it("should update all allowed account fields and trigger SSE", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(mockAccount);
-      const updateDto = {
-        name: "New Valid Name",
+    it("should throw NotFoundException if account does not exist for editing", async () => {
+      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+
+      await expect(controller.edit("acc-1", mockUser, { name: "Valid Name" })).rejects.toThrow(NotFoundException);
+    });
+
+    it("should throw BadRequestException if target name modification is shorter than 5 characters", async () => {
+      const mockAccount = Account.fromPlain({ id: "acc-1" });
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+
+      await expect(controller.edit("acc-1", mockUser, { name: "shor" })).rejects.toThrow(BadRequestException);
+    });
+
+    it("should apply updates, save, and notify user when all fields are supplied perfectly", async () => {
+      const mockAccount = Account.fromPlain({
+        id: "acc-1",
+        name: "Old Name",
+        type: AccountType.depository,
+        subType: null,
+        interestRate: null,
+      });
+      mockAccount.update = jest.fn().mockResolvedValue({ id: "acc-1" });
+
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+
+      const payload = {
+        name: "  Brand New Name  ",
         type: AccountType.credit,
-        subType: AccountSubType.travel,
-        interestRate: 15.5,
-      } as any;
+        subType: "checking" as any,
+        interestRate: 4.5,
+      };
 
-      await controller.edit("acc-1", mockUser, updateDto);
+      const result = await controller.edit("acc-1", mockUser, payload);
 
+      expect(mockAccount.name).toBe("Brand New Name");
+      expect(mockAccount.type).toBe(AccountType.credit);
+      expect(mockAccount.subType).toBe("checking");
+      expect(mockAccount.interestRate).toBe(4.5);
       expect(mockAccount.update).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-      expect(mockAccount.name).toBe("New Valid Name");
-      expect(mockAccount.type).toBe(AccountType.credit);
-      expect(mockAccount.subType).toBe(AccountSubType.travel);
-      expect(mockAccount.interestRate).toBe(15.5);
+      expect(result).toEqual({ id: "acc-1" });
     });
 
-    it("should partially update fields if some are not provided", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(mockAccount);
-      const originalName = mockAccount.name;
-      const originalType = mockAccount.type;
-      const updateDto = { subType: AccountSubType.checking } as any;
+    it("should preserve original attributes if payload parameters are omitted", async () => {
+      const mockAccount = Account.fromPlain({
+        id: "acc-1",
+        name: "Preserved Name",
+        type: AccountType.depository,
+        subType: "savings",
+        interestRate: 1.2,
+      });
+      mockAccount.update = jest.fn().mockResolvedValue({ id: "acc-1" });
 
-      await controller.edit("acc-1", mockUser, updateDto);
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
-      expect(mockAccount.update).toHaveBeenCalled();
-      expect(mockAccount.name).toBe(originalName);
-      expect(mockAccount.type).toBe(originalType);
-      expect(mockAccount.subType).toBe(AccountSubType.checking);
-    });
+      await controller.edit("acc-1", mockUser, {});
 
-    it("should throw NotFoundException if account to edit is not found", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(null);
-      const updateDto = { name: "New Name" };
-
-      await expect(controller.edit("invalid", mockUser, updateDto)).rejects.toThrow(NotFoundException);
-    });
-
-    it("should throw BadRequestException if name is too short", async () => {
-      (Account.findOne as jest.Mock).mockResolvedValue(mockAccount);
-      const updateDto = { name: "Shot" };
-
-      await expect(controller.edit("acc-1", mockUser, updateDto)).rejects.toThrow(BadRequestException);
+      expect(mockAccount.name).toBe("Preserved Name");
+      expect(mockAccount.type).toBe(AccountType.depository);
+      expect(mockAccount.subType).toBe("savings");
+      expect(mockAccount.interestRate).toBe(1.2);
     });
   });
 
   describe("getAccounts", () => {
-    it("should return an array of accounts for the user", async () => {
-      (Account.find as jest.Mock).mockResolvedValue([mockAccount]);
+    it("should yield all profiles linked to the current user reference", async () => {
+      const mockCollection = [Account.fromPlain({ id: "1" }), Account.fromPlain({ id: "2" })];
+      const findSpy = jest.spyOn(Account, "find").mockResolvedValue(mockCollection);
 
       const result = await controller.getAccounts(mockUser);
-      expect(result).toEqual([mockAccount]);
-      expect(Account.find).toHaveBeenCalledWith({
-        where: { user: { id: mockUser.id } },
-      });
+
+      expect(findSpy).toHaveBeenCalledWith({ where: { user: { id: "user-123" } } });
+      expect(result).toBe(mockCollection);
     });
   });
 
   describe("manualSync", () => {
-    it("should run sync and trigger SSE events on successful jobs", async () => {
-      (Sync.findOne as jest.Mock).mockResolvedValue(null);
-      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([{ status: "complete" }]);
+    it("should throw InternalServerErrorException if an active daily sync exists and force parameter is omitted", async () => {
+      jest.useFakeTimers().setSystemTime(new Date("2026-06-02T10:00:00.000Z"));
+      jest.spyOn(Sync, "findOne").mockResolvedValue(Sync.fromPlain({ id: "sync-1" }));
 
-      await controller.manualSync(mockUser, false);
+      await expect(controller.manualSync(mockUser)).rejects.toThrow(InternalServerErrorException);
+      expect(dateFns.startOfDay).toHaveBeenCalled();
 
-      expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
+      jest.useRealTimers();
     });
 
-    it("should run sync and trigger only SYNC SSE event on failed jobs", async () => {
-      (Sync.findOne as jest.Mock).mockResolvedValue(null);
-      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([{ status: "failed" }]);
-
-      await controller.manualSync(mockUser, false);
-
-      expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
-      expect(sseService.sendToUser).not.toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-    });
-
-    it("should filter out undefined/null job results", async () => {
-      (Sync.findOne as jest.Mock).mockResolvedValue(null);
-      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([null]);
-
-      await controller.manualSync(mockUser, false);
-
-      expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
-      expect(sseService.sendToUser).not.toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-    });
-
-    it("should throw InternalServerErrorException if sync is already running and force is false", async () => {
-      (Sync.findOne as jest.Mock).mockResolvedValue({ status: "in-progress" });
-
-      await expect(controller.manualSync(mockUser, false)).rejects.toThrow(InternalServerErrorException);
-      expect(mockProviderSyncJob.syncUserAllProviders).not.toHaveBeenCalled();
-    });
-
-    it("should force a manual sync even if a sync is already running when force is true", async () => {
-      (Sync.findOne as jest.Mock).mockResolvedValue({ status: "in-progress" });
-      mockProviderSyncJob.syncUserAllProviders.mockResolvedValue([{ status: "complete" }]);
+    it("should proceed with synchronization regardless of active syncs if force flag is activated", async () => {
+      jest.spyOn(Sync, "findOne").mockResolvedValue(Sync.fromPlain({ id: "sync-1" }));
+      providerSyncOrchestrator.syncUserAllProviders.mockResolvedValue([]);
 
       await controller.manualSync(mockUser, true);
 
-      expect(Sync.findOne).toHaveBeenCalled();
-      expect(mockProviderSyncJob.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
+      expect(providerSyncOrchestrator.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
+      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
+    });
+
+    it("should bypass active sync warning if no synchronization process is marked in-progress", async () => {
+      jest.spyOn(Sync, "findOne").mockResolvedValue(null);
+      providerSyncOrchestrator.syncUserAllProviders.mockResolvedValue([Sync.fromPlain({ status: "completed" })]);
+
+      await controller.manualSync(mockUser, false);
+
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
+    });
+
+    it("should suppress FORCE_UPDATE event broadcast if every sync outcome reports as failed", async () => {
+      jest.spyOn(Sync, "findOne").mockResolvedValue(null);
+      providerSyncOrchestrator.syncUserAllProviders.mockResolvedValue([Sync.fromPlain({ status: "failed" })]);
+
+      await controller.manualSync(mockUser, false);
+
+      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
+      expect(sseService.sendToUser).not.toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
     });
   });
 
   describe("mergeAccounts", () => {
-    it("should successfully merge two accounts and trigger SSE", async () => {
-      // Mock finding both accounts
-      (Account.findOne as jest.Mock).mockResolvedValueOnce(mockAccount).mockResolvedValueOnce(mockSourceAccount);
+    it("should throw BadRequestException when trying to fuse an account with its own ID", async () => {
+      await expect(controller.mergeAccounts("acc-same", { sourceId: "acc-same" }, mockUser)).rejects.toThrow(BadRequestException);
+    });
 
-      const request = { sourceId: "acc-2" } as any;
+    it("should throw NotFoundException when one or both accounts are missing from lookup", async () => {
+      jest.spyOn(Account, "findOne").mockResolvedValueOnce(null);
 
-      const result = await controller.mergeAccounts("acc-1", request, mockUser);
+      await expect(controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser)).rejects.toThrow(NotFoundException);
+    });
 
-      expect(Account.findOne).toHaveBeenCalledTimes(2);
-      expect(AccountHistory.insertForNewAccount).toHaveBeenCalledWith(mockAccount, true);
-      expect(mockTransactionManager.remove).toHaveBeenCalledWith(mockSourceAccount);
+    it("should throw BadRequestException if target and source profiles maintain different core account types", async () => {
+      const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.depository });
+      const mockSource = Account.fromPlain({ id: "acc-source", type: AccountType.credit });
+
+      jest.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
+
+      await expect(controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser)).rejects.toThrow(BadRequestException);
+    });
+
+    it("should execute transactional operations smoothly, update subType, merge history/entities, and do cleanup", async () => {
+      const mockInstitution = Institution.fromPlain({ id: "inst-src" });
+      const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.depository, subType: null });
+      const mockSource = Account.fromPlain({
+        id: "acc-source",
+        type: AccountType.depository,
+        subType: "checking" as any,
+        institution: mockInstitution,
+        provider: "manual",
+      });
+
+      jest.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
+
+      const mockQueryBuilder = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({}),
+      };
+
+      const mockManager = {
+        save: jest.fn().mockResolvedValue({}),
+        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+        remove: jest.fn().mockResolvedValue({}),
+      };
+
+      jest.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
+      jest.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+      jest.spyOn(Account, "count").mockResolvedValue(0);
+      jest.spyOn(Institution, "delete").mockResolvedValue({} as any);
+
+      const result = await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
+
+      expect(mockManager.save).toHaveBeenCalledWith(mockTarget);
+      expect(mockTarget.subType).toBe("checking");
+      expect(mockQueryBuilder.update).toHaveBeenCalledTimes(4);
+      expect(AccountHistory.insertForNewAccount).toHaveBeenCalledWith(mockTarget, true);
+      expect(mockManager.remove).toHaveBeenCalledWith(mockSource);
+      expect(Institution.delete).toHaveBeenCalledWith({ id: "inst-src" });
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-      expect(result).toEqual(mockAccount);
+      expect(result).toBe(mockTarget);
     });
 
-    it("should update target subType if null and source has one", async () => {
-      const targetWithoutSubType = { ...mockAccount, subType: null } as unknown as Account;
-      (Account.findOne as jest.Mock).mockResolvedValueOnce(targetWithoutSubType).mockResolvedValueOnce(mockSourceAccount);
+    it("should retain preexisting subType on target account if both target and source carry subType values", async () => {
+      const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.depository, subType: "savings" as any });
+      const mockSource = Account.fromPlain({ id: "acc-source", type: AccountType.depository, subType: "checking" as any });
 
-      const request = { sourceId: "acc-2" } as any;
+      jest.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
 
-      await controller.mergeAccounts("acc-1", request, mockUser);
+      const mockQueryBuilder = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({}),
+      };
 
-      expect(targetWithoutSubType.subType).toBe(mockSourceAccount.subType);
-      expect(mockTransactionManager.save).toHaveBeenCalledWith(targetWithoutSubType);
-    });
+      const mockManager = {
+        save: jest.fn(),
+        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+        remove: jest.fn(),
+      };
 
-    it("should throw BadRequestException if targetId and sourceId are the same", async () => {
-      const request = { sourceId: "acc-1" } as any;
+      jest.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
+      jest.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+      jest.spyOn(Account, "count").mockResolvedValue(1);
 
-      await expect(controller.mergeAccounts("acc-1", request, mockUser)).rejects.toThrow(BadRequestException);
-      expect(Account.findOne).not.toHaveBeenCalled();
-    });
+      await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
 
-    it("should throw NotFoundException if one or both accounts do not exist", async () => {
-      // Target exists, source does not
-      (Account.findOne as jest.Mock).mockResolvedValueOnce(mockAccount).mockResolvedValueOnce(null);
-
-      const request = { sourceId: "acc-2" } as any;
-
-      await expect(controller.mergeAccounts("acc-1", request, mockUser)).rejects.toThrow(NotFoundException);
-    });
-
-    it("should throw BadRequestException if accounts are of different types", async () => {
-      const creditSourceAccount = { ...mockSourceAccount, type: AccountType.credit } as unknown as Account;
-      (Account.findOne as jest.Mock)
-        .mockResolvedValueOnce(mockAccount) // DEPOSITORY
-        .mockResolvedValueOnce(creditSourceAccount);
-
-      const request = { sourceId: "acc-2" } as any;
-
-      await expect(controller.mergeAccounts("acc-1", request, mockUser)).rejects.toThrow(BadRequestException);
+      expect(mockManager.save).not.toHaveBeenCalled();
+      expect(mockTarget.subType).toBe("savings");
     });
   });
 });
