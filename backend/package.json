@@ -95,6 +95,7 @@
     "start": "nest start --watch",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:watch:cov": "jest --watchAll --coverage",
     "test:cov": "jest --coverage",
     "build": "cross-env NODE_ENV=prod nest build && pkg package.json",
     "migrate": "cross-var typeorm-ts-node-commonjs migration:generate -d ./src/scripts/generate.migration.ts ./src/database/migration/sqlite/$npm_config_name",
