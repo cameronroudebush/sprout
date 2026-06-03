@@ -26,6 +26,7 @@ export async function startupServer(projName: string) {
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
       logger: new SproutLogger(projName, { logLevels }),
       cors: !Configuration.isDevBuild,
+      rawBody: true,
     });
     // All endpoints live under /api
     app.setGlobalPrefix(Configuration.server.basePath);
