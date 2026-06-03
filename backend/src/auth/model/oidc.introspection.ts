@@ -2,7 +2,7 @@ import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { Base } from "@backend/core/model/base";
 import { Logger, UnauthorizedException } from "@nestjs/common";
-import { Expose } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 import { formatDistanceToNow } from "date-fns";
 
 /** Used to store the introspection result from the OIDC providers */
@@ -21,6 +21,7 @@ export class OIDCIntrospectionResult extends Base {
   username!: string;
 
   /** Returns if this is expired */
+  @Exclude()
   get isExpired() {
     return Date.now() / 1000 >= this.expiresAt;
   }
