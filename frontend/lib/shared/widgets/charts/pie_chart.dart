@@ -66,6 +66,18 @@ class _SproutPieChartState extends State<SproutPieChart> {
     Colors.blueGrey,
   ];
 
+  /// Helper to resolve the correct color for an individual data entry key.
+  Color _resolveColor(String key) {
+    if (widget.colorMapping != null && widget.colorMapping!.containsKey(key)) {
+      return widget.colorMapping![key]!;
+    }
+    if (key.startsWith('+')) {
+      return Colors.blueGrey.shade300;
+    }
+    final int hash = key.hashCode;
+    return colors[hash.abs() % colors.length];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -154,7 +166,6 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
   /// Generates the sections for the pie chart using proportional constraints
   List<PieChartSectionData> _generatePieSections(double chartSize) {
-    int i = 0;
     // Base thickness calculation for standard rings
     final double baseRadius = chartSize * 0.22;
 
@@ -162,7 +173,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
       final isTouched = index == touchedIndex;
 
       return PieChartSectionData(
-        color: widget.colorMapping?[entry.key] ?? colors[i++ % colors.length],
+        color: _resolveColor(entry.key),
         value: entry.value.toDouble(),
         radius: isTouched ? baseRadius * 1.15 : baseRadius,
         title: (isTouched || widget.showPieValue)
@@ -187,7 +198,6 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
     final legendItems = entries.map((entry) {
       final isOthers = entry.key.startsWith("+");
-      final color = widget.colorMapping?[entry.key] ?? Colors.grey;
 
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -198,7 +208,7 @@ class _SproutPieChartState extends State<SproutPieChart> {
               width: 10,
               height: 10,
               decoration: BoxDecoration(
-                color: color,
+                color: _resolveColor(entry.key),
                 shape: isOthers ? BoxShape.rectangle : BoxShape.circle,
               ),
             ),

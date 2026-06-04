@@ -6,6 +6,8 @@ import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account_holding_list.dart';
+import 'package:sprout/holding/widgets/holding_mover.dart';
+import 'package:sprout/holding/widgets/holding_pie_chart.dart';
 import 'package:sprout/holding/widgets/market_indices_bar.dart';
 import 'package:sprout/holding/widgets/market_indicies_timeline.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
@@ -124,6 +126,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
 
   /// Combines index trends and charts without nesting inner ScrollViews
   Widget _buildMarketPanel(ThemeData theme, List<Account> accounts, bool hasHoldings, bool isDesktop) {
+    final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -132,13 +135,35 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const MajorIndicesBarWidget(),
-              if (isDesktop) ...[
-                const Divider(),
-                const SizedBox(height: 300, child: SproutCard(child: MajorIndicesTimelineWidget())),
-              ],
-              const Divider(),
               if (accounts.isNotEmpty && hasHoldings) ...[
                 _buildPerformanceChart(theme, isDesktop),
+              ],
+              if (isDesktop) ...[
+                const Divider(),
+                SizedBox(
+                  height: 300,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Expanded(
+                        flex: 6,
+                        child: SproutCard(child: MajorIndicesTimelineWidget()),
+                      ),
+                      if (hasHoldings)
+                        Expanded(
+                          flex: 3,
+                          child: SproutCard(
+                            child: HoldingPieChart(
+                              investmentAccounts: investmentAccounts,
+                              topN: 3,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts))
               ],
               if (!isDesktop) const Divider(),
             ],
