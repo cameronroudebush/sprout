@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,11 +48,7 @@ class NavigationProvider {
     }
     final uri = Uri(path: target, queryParameters: params).toString();
 
-    if (kIsWeb) {
-      router.go(uri);
-    } else {
-      router.push(uri);
-    }
+    router.push(uri);
   }
 
   /// Standard back navigation
