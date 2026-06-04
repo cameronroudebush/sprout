@@ -6,12 +6,19 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 
 /// This widget renders the total Assets vs Debts across a progress bar and helps display
-///   the value of each specific account type.
+/// the value of each specific account type.
 class TotalSummary extends ConsumerWidget {
   /// The accounts to render
   final List<Account> accounts;
 
-  const TotalSummary({super.key, required this.accounts});
+  /// Whether to show the percentage label inside each bar segment
+  final bool showPercentages;
+
+  const TotalSummary({
+    super.key,
+    required this.accounts,
+    this.showPercentages = true,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,39 +57,68 @@ class TotalSummary extends ConsumerWidget {
         .toList();
 
     return Padding(
-      padding: const EdgeInsetsGeometry.symmetric(horizontal: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Container(
-          height: 10,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Row(
-            spacing: 4,
-            children: visibleSegments.map((data) {
-              return _barSegment(data.amount, total, data.entry.value.color);
-            }).toList(),
-          )),
+        height: 16,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          spacing: 2,
+          children: visibleSegments.map((data) {
+            return _barSegment(
+              data.amount,
+              total,
+              data.entry.value.color,
+              data.entry.value.title,
+              theme,
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
-  /// Constructs an individual segment with flex proportional to its value
-  Widget _barSegment(num value, num total, Color color) {
-    // Define a minimum weight to ensure the segment is always visible
+  /// Constructs an individual segment wrapped in a Tooltip
+  Widget _barSegment(num value, num total, Color color, String title, ThemeData theme) {
     const int minFlex = 20;
 
     if (value <= 0 || total <= 0) return const SizedBox.shrink();
 
-    // Calculate proportional flex, but ensure it never falls below minFlex
+    final double percentage = (value / total) * 100;
     int calculatedFlex = (value / total * 1000).toInt();
     int finalFlex = calculatedFlex < minFlex ? minFlex : calculatedFlex;
+    final String tooltipPercent = percentage.toStringAsFixed(1);
 
     return Expanded(
       flex: finalFlex,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8.0),
+      child: Tooltip(
+        message: "$title: $tooltipPercent%",
+        preferBelow: false,
+        verticalOffset: 12,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool canFitText = showPercentages && constraints.maxWidth > 28;
+
+            return Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              alignment: Alignment.center,
+              child: canFitText
+                  ? Text(
+                      "${percentage.toStringAsFixed(0)}%",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            );
+          },
         ),
       ),
     );

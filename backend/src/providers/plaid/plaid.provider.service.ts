@@ -2,7 +2,6 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType, AccountTypeIsLiability } from "@backend/account/model/account.type";
-import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -363,18 +362,10 @@ export class PlaidProviderService extends ProviderBase {
   }
 
   /** Converts Plaid's transaction format to Sprout's local Transaction model */
-  private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, user: User) {
-    const uniqueCategoryNames = Array.from(new Set(transactions.map((t) => t.personal_finance_category?.primary || t.category?.[0] || "Uncategorized")));
-    const categoryMap = new Map<string, Category>();
-    for (const name of uniqueCategoryNames) {
-      const category = await Category.getOrCreate(name, user);
-      categoryMap.set(name, category);
-    }
+  private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, _user: User) {
     return await Promise.all(
       transactions.map(async (t) => {
-        const categoryName = t.personal_finance_category?.primary || t.category?.[0] || "Uncategorized";
-        const category = categoryMap.get(categoryName)!;
-        const newTransaction = new Transaction(t.amount * -1, new Date(t.date), t.name ?? t.merchant_name, category, t.pending ?? false, account);
+        const newTransaction = new Transaction(t.amount * -1, new Date(t.date), t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
         newTransaction.id = t.transaction_id;
         newTransaction.extra = { code: t.transaction_code, location: t.location };
         return newTransaction;

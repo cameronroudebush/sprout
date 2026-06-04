@@ -191,6 +191,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                 controller: _controller,
                 focusNode: _focusNode,
                 enabled: !widget.isLoading,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   isDense: true,
                   hintText: "Ask Sprout anything...",
