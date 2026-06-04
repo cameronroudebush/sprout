@@ -510,3 +510,93 @@ abstract class _$MajorIndicesTimeline
     element.handleCreate(ref, build);
   }
 }
+
+/// Provider that allows us to track the expanded holding values based on current live prices
+
+@ProviderFor(expandedHolding)
+final expandedHoldingProvider = ExpandedHoldingFamily._();
+
+/// Provider that allows us to track the expanded holding values based on current live prices
+
+final class ExpandedHoldingProvider extends $FunctionalProvider<ExpandedHolding,
+    ExpandedHolding, ExpandedHolding> with $Provider<ExpandedHolding> {
+  /// Provider that allows us to track the expanded holding values based on current live prices
+  ExpandedHoldingProvider._(
+      {required ExpandedHoldingFamily super.from,
+      required Holding super.argument})
+      : super(
+          retry: null,
+          name: r'expandedHoldingProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$expandedHoldingHash();
+
+  @override
+  String toString() {
+    return r'expandedHoldingProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<ExpandedHolding> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ExpandedHolding create(Ref ref) {
+    final argument = this.argument as Holding;
+    return expandedHolding(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ExpandedHolding value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ExpandedHolding>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ExpandedHoldingProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$expandedHoldingHash() => r'3195ce252b4fa9c03f252c0009937b2852013d3d';
+
+/// Provider that allows us to track the expanded holding values based on current live prices
+
+final class ExpandedHoldingFamily extends $Family
+    with $FunctionalFamilyOverride<ExpandedHolding, Holding> {
+  ExpandedHoldingFamily._()
+      : super(
+          retry: null,
+          name: r'expandedHoldingProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Provider that allows us to track the expanded holding values based on current live prices
+
+  ExpandedHoldingProvider call(
+    Holding holding,
+  ) =>
+      ExpandedHoldingProvider._(argument: holding, from: this);
+
+  @override
+  String toString() => r'expandedHoldingProvider';
+}

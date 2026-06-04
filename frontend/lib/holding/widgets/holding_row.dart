@@ -1,11 +1,8 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/holding_icon.dart';
-import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 
@@ -15,32 +12,18 @@ class HoldingRow extends ConsumerWidget {
   final bool isSelected;
   final VoidCallback onSelect;
 
-  const HoldingRow({super.key, required this.holding, required this.isSelected, required this.onSelect});
+  const HoldingRow({
+    super.key,
+    required this.holding,
+    required this.isSelected,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
-
-    final holdingHistoryAsync = ref.watch(accountHoldingHistoryProvider(holding.id));
-    final frame = holdingHistoryAsync.value?.getValueByFrame(ChartRangeEnum.oneDay);
-    ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
-    final livePrices = ref.watch(batchedLivePricesProvider);
-    final liveData = livePrices[holding.symbol];
-
-    final livePrice = liveData?.price ?? (holding.marketValue / holding.shares);
-    final liveMarketValue = livePrice * holding.shares;
-
-    final dayChange = liveMarketValue - holding.marketValue;
-    final dayPercent = holding.marketValue != 0 ? (dayChange / holding.marketValue) * 100 : 0.0;
-
-    final account = ref.watch(
-      accountsProvider.select((asyncState) {
-        return asyncState.value?.accounts.firstWhereOrNull(
-          (a) => a.id == holding.accountId,
-        );
-      }),
-    );
+    final rowState = ref.watch(expandedHoldingProvider(holding));
 
     return InkWell(
       onTap: onSelect,
@@ -53,33 +36,27 @@ class HoldingRow extends ConsumerWidget {
         child: Row(
           spacing: 12,
           children: [
-            HoldingIcon(holding, account!),
-
-            // Market data
+            if (rowState.account != null) HoldingIcon(holding, rowState.account!),
+            // Market data column
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
                 children: [
-                  // Symbol & Total Market Value
+                  // Symbol & Total Market Value Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        spacing: 8,
-                        children: [
-                          Text(holding.symbol, style: theme.textTheme.titleMedium),
-                        ],
-                      ),
+                      Text(holding.symbol, style: theme.textTheme.titleMedium),
                       Text(
-                        formatter.format(liveMarketValue),
+                        formatter.format(rowState.liveMarketValue),
                         style: theme.textTheme.titleMedium,
                       ),
                     ],
                   ),
 
-                  // Price Type (Live/Prev) & Price Change
-                  if (liveData != null)
+                  // Intraday Realtime Live Data Changes
+                  if (rowState.isLive)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -88,7 +65,9 @@ class HoldingRow extends ConsumerWidget {
                           children: [
                             Text(
                               "Intraday Change",
-                              style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
                             Tooltip(
                               message:
@@ -102,14 +81,14 @@ class HoldingRow extends ConsumerWidget {
                           ],
                         ),
                         SproutChangeWidget(
-                          totalChange: dayChange,
-                          percentageChange: dayPercent,
+                          totalChange: rowState.dayChange,
+                          percentageChange: rowState.dayPercent,
                           fontSize: theme.textTheme.labelMedium!.fontSize!,
                         ),
                       ],
                     ),
 
-                  // Provider Source
+                  // Historical Settled Brokerage Delta Values
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -124,7 +103,7 @@ class HoldingRow extends ConsumerWidget {
                           ),
                           Tooltip(
                             message:
-                                "This is the most recent change reported by ${account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
+                                "This is the most recent change reported by ${rowState.account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
                             child: Icon(
                               Icons.info_outline,
                               size: 12,
@@ -133,10 +112,10 @@ class HoldingRow extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      if (frame != null)
+                      if (rowState.historicalFrame != null)
                         SproutChangeWidget(
-                          totalChange: frame.valueChange,
-                          percentageChange: frame.percentChange,
+                          totalChange: rowState.historicalFrame?.valueChange,
+                          percentageChange: rowState.historicalFrame?.percentChange,
                           fontSize: theme.textTheme.labelMedium!.fontSize!,
                           useExtendedPeriodString: false,
                         ),
