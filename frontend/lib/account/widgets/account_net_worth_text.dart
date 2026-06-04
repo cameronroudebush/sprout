@@ -27,7 +27,7 @@ class AccountNetWorthText extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
     final value = account.balance;
-    final balanceColor = account.isDebt ? (-value).toBalanceColor(theme) : value.toBalanceColor(theme);
+    final balanceColor = value.toBalanceColor(theme);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

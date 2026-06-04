@@ -53,7 +53,6 @@ class ChatBubble extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final auth = ref.watch(authProvider).value;
     bool isAi = message.role == ChatHistoryRoleEnum.model;
@@ -83,8 +82,11 @@ class ChatBubble extends ConsumerWidget {
               ],
 
               // The Chat Bubble
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: size.width * (isDesktop ? .35 : 0.7)),
+              Flexible(
+                  child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isDesktop ? (constraints.maxWidth * 0.7).clamp(0.0, 800.0) : constraints.maxWidth * 0.75,
+                ),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -98,7 +100,7 @@ class ChatBubble extends ConsumerWidget {
                   ),
                   child: message.isThinking ? const TypingIndicator() : _getGPTMarkdown(context, ref, isAi),
                 ),
-              ),
+              )),
 
               // Current User Avatar
               if (!isAi) ...[

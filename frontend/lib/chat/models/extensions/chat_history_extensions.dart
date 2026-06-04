@@ -14,7 +14,20 @@ extension ChatHistoryExtensions on String {
       pattern,
       onMatch: (Match match) {
         final id = match.group(1);
-        return idMap.containsKey(id) ? "**${idMap[id]}**" : match.group(0)!;
+        final fullMatch = match.group(0)!;
+
+        // If we have the account, replace it with the formatted name
+        if (idMap.containsKey(id)) {
+          return "**${idMap[id]}**";
+        }
+        // If we don't have the account, but the original text started with '@'
+        else if (fullMatch.startsWith('@')) {
+          return "**UNKNOWN ACCOUNT**";
+        }
+        // Otherwise, return the text exactly as it was
+        else {
+          return fullMatch;
+        }
       },
       onNonMatch: (nonMatch) => nonMatch,
     );
