@@ -144,7 +144,7 @@ class AccountGroupSection extends ConsumerWidget {
                     ),
                     if (showErrors)
                       // Display the error badge if the institution has an error
-                      Positioned(left: -10, top: 2, child: SproutErrorIcon(hasError: hasError, size: 12)),
+                      Positioned(left: -4, top: 2, child: SproutErrorIcon(hasError: hasError, size: 14)),
                   ],
                 ),
               );

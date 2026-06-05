@@ -17,7 +17,7 @@ class TotalSummary extends ConsumerWidget {
   const TotalSummary({
     super.key,
     required this.accounts,
-    this.showPercentages = true,
+    this.showPercentages = false,
   });
 
   @override

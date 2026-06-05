@@ -12,6 +12,12 @@ class SproutBottomNav extends ConsumerWidget {
 
   const SproutBottomNav({super.key, required this.currentPath});
 
+  /// Helper function to determine if a route matches the current path (including subroutes)
+  bool isRouteMatch(String routePath, String currentPath) {
+    if (routePath == '/') return currentPath == '/';
+    return currentPath == routePath || currentPath.startsWith('$routePath/');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -42,7 +48,7 @@ class SproutBottomNav extends ConsumerWidget {
 
     // If no primary match, check if it's a "More" route to highlight the Menu (last index)
     if (!hasMatch) {
-      final isMoreRoute = authenticatedRoutes.any((r) => r.path == currentPath && !r.showInBottomNav);
+      final isMoreRoute = authenticatedRoutes.any((r) => !r.showInBottomNav && isRouteMatch(r.path, currentPath));
       if (isMoreRoute) {
         effectiveIndex = displayItems.length - 1;
         hasMatch = true;
