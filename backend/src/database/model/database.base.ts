@@ -3,7 +3,7 @@ import { CustomTypes } from "@backend/core/model/utility/custom.types";
 import { DatabaseService } from "@backend/database/database.service";
 import { ApiProperty } from "@nestjs/swagger";
 import { decorate } from "ts-mixer";
-import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, In, PrimaryGeneratedColumn, Repository, SaveOptions } from "typeorm";
+import { FindManyOptions, FindOneOptions, FindOptionsWhere, In, PrimaryGeneratedColumn, QueryDeepPartialEntity, Repository } from "typeorm";
 
 /** This class implements a bunch of common functionality that can be reused for other models that utilize the database */
 export class DatabaseBase extends DBBase {
@@ -114,8 +114,16 @@ export class DatabaseBase extends DBBase {
   }
 
   /** Updates records if their primary key matches, otherwise inserts them. */
-  static async upsertMany<T extends DatabaseBase>(this: CustomTypes.Constructor<T>, elements: Array<DeepPartial<T>>, options?: SaveOptions) {
-    return await new this().getRepository().save(elements, { chunk: 999, ...options });
+  static async upsertMany<T extends DatabaseBase>(
+    this: CustomTypes.Constructor<T>,
+    elements: Array<QueryDeepPartialEntity<T>>,
+    conflictPaths: string[] = ["id"],
+  ) {
+    if (elements.length === 0) return;
+    const repository = new this().getRepository();
+    return await repository.upsert(elements, {
+      conflictPaths: conflictPaths,
+    });
   }
 
   /**

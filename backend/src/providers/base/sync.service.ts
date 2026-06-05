@@ -17,6 +17,7 @@ import { TransactionRuleService } from "@backend/transaction/transaction.rule.se
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
 import { subDays, subMinutes } from "date-fns";
+import { merge } from "lodash";
 import { In, MoreThan } from "typeorm";
 
 /** Generic sync service to sync provider account info for users. Dynamically used across background jobs and manual calls. */
@@ -164,14 +165,24 @@ export class ProviderSyncService {
 
   /** Secure, high-performance bulk upsert for transactions */
   private async updateTransactionDataBulk(accountInDb: Account, transactions: Transaction[]) {
-    const transactionEntities = transactions.map((t) => ({
-      ...t,
-      account: accountInDb,
-      description: t.description || accountInDb.name,
-      categoryId: t.category?.id,
-    }));
-
-    await Transaction.upsertMany(transactionEntities);
+    for (const transaction of transactions) {
+      transaction.account = accountInDb;
+      // If the transaction description is empty, fill it with something
+      if (transaction.description === "" || !transaction.description) transaction.description = accountInDb.name;
+      let transactionInDb = (await Transaction.find({ where: { id: transaction.id, account: { id: accountInDb.id } } }))[0];
+      // If we aren't tracking this transaction yet, go ahead and add it
+      if (transactionInDb == null) transactionInDb = await Transaction.fromPlain(transaction).insert(false);
+      else {
+        // Update our related transaction
+        transactionInDb.amount = transaction.amount;
+        transactionInDb.pending = transaction.pending;
+        transactionInDb.posted = transaction.posted;
+        transactionInDb.extra = merge(transactionInDb.extra, transaction.extra);
+        // If we haven't already set it's category, go ahead and set it
+        if (transactionInDb.category == null) transactionInDb.category = transaction.category;
+        await transactionInDb.update();
+      }
+    }
   }
 
   /** Syncs holdings and records holding history */

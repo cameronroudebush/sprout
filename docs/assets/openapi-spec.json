@@ -991,6 +991,38 @@
         ],
         "summary": "Edit transaction.",
         "tags": ["Transaction"]
+      },
+      "delete": {
+        "description": "Deletes a transaction by the given ID.",
+        "operationId": "TransactionController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Transaction with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete transaction.",
+        "tags": ["Transaction"]
       }
     },
     "/transaction": {
