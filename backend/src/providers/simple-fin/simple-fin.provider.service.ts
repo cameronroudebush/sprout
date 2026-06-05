@@ -131,7 +131,7 @@ export class SimpleFINProviderService extends ProviderBase {
     endpoint = "/accounts",
     params = {
       /** The start date to look for transactions of */
-      transactionStartDate: subDays(new Date(), Configuration.providers.lookBackDays),
+      transactionStartDate: subDays(new Date(), Configuration.providers.simpleFIN.lookBackDays),
       /** If we want pending transactions */
       pending: true,
     },

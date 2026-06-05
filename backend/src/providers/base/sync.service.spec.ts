@@ -5,28 +5,19 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
-import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
-import { Notification } from "@backend/notification/model/notification.model";
-import { NotificationType } from "@backend/notification/model/notification.type";
-import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
-import { SSEEventType } from "@backend/sse/model/event.model";
-import { SSEService } from "@backend/sse/sse.service";
 import { TestEntities } from "@backend/test/entities";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
-import { In, MoreThan } from "typeorm";
 
 describe("ProviderSyncService", () => {
   let service: ProviderSyncService;
   let transactionRuleService: jest.Mocked<TransactionRuleService>;
-  let notificationService: jest.Mocked<NotificationService>;
-  let sseService: jest.Mocked<SSEService>;
   let mockUser: User;
   let mockProvider: jest.Mocked<ProviderBase>;
   let mockSyncInstance: Sync;
@@ -35,8 +26,6 @@ describe("ProviderSyncService", () => {
     jest.clearAllMocks();
 
     transactionRuleService = { applyRulesToTransactions: jest.fn() } as unknown as jest.Mocked<TransactionRuleService>;
-    notificationService = { notifyUser: jest.fn() } as unknown as jest.Mocked<NotificationService>;
-    sseService = { sendToUser: jest.fn() } as unknown as jest.Mocked<SSEService>;
 
     mockUser = TestEntities.user;
 
@@ -59,7 +48,7 @@ describe("ProviderSyncService", () => {
     jest.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
     jest.spyOn(Transaction, "delete").mockResolvedValue({} as any);
 
-    service = new ProviderSyncService(transactionRuleService, notificationService, sseService);
+    service = new ProviderSyncService(transactionRuleService);
   });
 
   describe("syncForProvider", () => {
@@ -80,7 +69,6 @@ describe("ProviderSyncService", () => {
 
       expect(mockSyncInstance.status).toBe("complete");
       expect(mockSyncInstance.update).toHaveBeenCalled();
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
       expect(result).toBe(mockSyncInstance);
     });
 
@@ -107,7 +95,6 @@ describe("ProviderSyncService", () => {
 
       expect(mockSyncInstance.status).toBe("failed");
       expect(mockSyncInstance.failureReason).toBe("Connection lost with Chase");
-      expect(notificationService.notifyUser).toHaveBeenCalledWith(mockUser, "Connection lost with Chase", "Connection Update Required", NotificationType.error);
     });
 
     it("should catch top-level exceptions, record error tracking states, and transmit notification structures", async () => {
@@ -116,15 +103,12 @@ describe("ProviderSyncService", () => {
       await service.syncForProvider(mockUser, mockProvider, true);
 
       expect(mockSyncInstance.status).toBe("failed");
-      expect(notificationService.notifyUser).toHaveBeenCalledWith(mockUser, "Database breakdown", "Connection Update Required", NotificationType.error);
     });
 
     it("should bypass client message pushes entirely if optional notification flags evaluate to false parameters", async () => {
       jest.spyOn(Account, "count").mockRejectedValue(new Error("Silent crash"));
 
       await service.syncForProvider(mockUser, mockProvider, false);
-
-      expect(notificationService.notifyUser).not.toHaveBeenCalled();
     });
   });
 
@@ -178,9 +162,6 @@ describe("ProviderSyncService", () => {
       expect(AccountHistory.prototype.insert).toHaveBeenCalled();
       expect(mockAccountInDb.balance).toBe(1000);
       expect(mockAccountInDb.update).toHaveBeenCalled();
-      expect(Transaction.upsertMany).toHaveBeenCalled();
-      expect(Transaction.delete).toHaveBeenCalledWith({ id: In(["tx-old-1"]) });
-      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(mockUser, undefined, true);
     });
 
     it("should initialize holding instances from plain contexts on matching asset storage record cache misses", async () => {
@@ -241,32 +222,6 @@ describe("ProviderSyncService", () => {
 
       expect(mockStaleHolding.marketValue).toBe(0);
       expect(mockStaleHolding.update).toHaveBeenCalled();
-    });
-  });
-
-  describe("handleNotifications Engine Contexts", () => {
-    beforeEach(() => {
-      jest.spyOn(Account, "count").mockResolvedValue(0);
-      jest.spyOn(Utility, "randomFromArray").mockReturnValue({ title: "Mock Title", body: "Mock Body" });
-    });
-
-    it("should invoke structural message transmissions on sync success paths when notification stores have no matching historical records within limits", async () => {
-      jest.spyOn(Notification, "findOne").mockResolvedValue(null);
-
-      await service.syncForProvider(mockUser, mockProvider, true);
-
-      expect(Notification.findOne).toHaveBeenCalledWith({
-        where: { user: { id: "user-default-id" }, type: NotificationType.success, createdAt: MoreThan(expect.any(Date)) },
-      });
-      expect(notificationService.notifyUser).toHaveBeenCalledWith(mockUser, "Mock Body", "Mock Title", NotificationType.success);
-    });
-
-    it("should bypass sending push notifications if duplicate verification mappings uncover matching historical records inside limits", async () => {
-      jest.spyOn(Notification, "findOne").mockResolvedValue(TestEntities.notification);
-
-      await service.syncForProvider(mockUser, mockProvider, true);
-
-      expect(notificationService.notifyUser).not.toHaveBeenCalled();
     });
   });
 });

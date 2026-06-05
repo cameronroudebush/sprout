@@ -10,7 +10,11 @@ import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
 
 /** Represents the type for the distributed jobs */
-type SyncTaskPayload = { userId: string };
+type SyncTaskPayload = {
+  userId: string;
+  /** If we should notify the user of these results */
+  notify?: boolean;
+};
 
 /** This job is the orchestrator that controls syncing all available providers */
 @Injectable()
@@ -31,15 +35,15 @@ export class ProviderSyncOrchestratorJob implements OnApplicationBootstrap {
    * Public API to trigger a manual sync for a specific user across all active providers.
    * Pushes the tasks directly to the distributed/local queues.
    */
-  async syncUserAllProviders(user: User) {
-    return await Promise.all(this.jobs.map(async (job) => await job.processTask({ userId: user.id })));
+  async syncUserAllProviders(user: User, notify: boolean) {
+    return await Promise.all(this.jobs.map(async (job) => await job.processTask({ userId: user.id, notify })));
   }
 
   /** Targets and invokes a background sync task for a single specific provider type */
-  async syncUserSingleProvider(user: User, providerType: ProviderType) {
+  async syncUserSingleProvider(user: User, providerType: ProviderType, notify: boolean) {
     const targetJob = this.jobs.find((job) => job.provider.config.dbType === providerType);
     if (!targetJob) throw new Error(`Sync job runner for provider type '${providerType}' was not found or is disabled.`);
-    return await targetJob.processTask({ userId: user.id });
+    return await targetJob.processTask({ userId: user.id, notify });
   }
 }
 
@@ -66,7 +70,7 @@ class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
   async processTask(task: SyncTaskPayload) {
     const user = await User.findOne({ where: { id: task.userId } });
     if (!user) return;
-    return await this.providerSyncService.syncForProvider(user, this.provider);
+    return await this.providerSyncService.syncForProvider(user, this.provider, task.notify);
   }
 
   /** Cleans up old sync history to prevent table bloat */

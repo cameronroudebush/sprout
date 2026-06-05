@@ -139,7 +139,7 @@ export class AccountController {
     }
 
     // Update all providers for user
-    const syncs = (await this.providerSyncOrchestrator.syncUserAllProviders(user)).filter((x) => x) as Sync[];
+    const syncs = (await this.providerSyncOrchestrator.syncUserAllProviders(user, false)).filter((x) => x) as Sync[];
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC);
     // Tell to re-request data if we had any success

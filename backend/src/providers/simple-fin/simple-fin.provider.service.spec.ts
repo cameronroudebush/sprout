@@ -14,8 +14,8 @@ jest.mock("@backend/config/core", () => ({
     providers: {
       simpleFIN: {
         rateLimit: 100,
+        lookBackDays: 30,
       },
-      lookBackDays: 30,
     },
     encryptionKey: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   },
