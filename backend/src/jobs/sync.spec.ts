@@ -54,9 +54,9 @@ describe("ProviderSyncOrchestratorJob", () => {
       const processTaskSpy = jest.spyOn(orchestrator.jobs[0]!, "processTask").mockResolvedValue({} as any);
       jest.spyOn(orchestrator.jobs[1]!, "processTask").mockResolvedValue({} as any);
 
-      await orchestrator.syncUserAllProviders(mockUser);
+      await orchestrator.syncUserAllProviders(mockUser, false);
 
-      expect(processTaskSpy).toHaveBeenCalledWith({ userId: "user-abc" });
+      expect(processTaskSpy).toHaveBeenCalledWith({ userId: "user-abc", notify: false });
     });
   });
 
@@ -67,9 +67,9 @@ describe("ProviderSyncOrchestratorJob", () => {
       const targetSpy = jest.spyOn(orchestrator.jobs[0]!, "processTask").mockResolvedValue({ status: "ok" } as any);
       const skippedSpy = jest.spyOn(orchestrator.jobs[1]!, "processTask");
 
-      const result = await orchestrator.syncUserSingleProvider(mockUser, ProviderType.plaid);
+      const result = await orchestrator.syncUserSingleProvider(mockUser, ProviderType.plaid, false);
 
-      expect(targetSpy).toHaveBeenCalledWith({ userId: "user-abc" });
+      expect(targetSpy).toHaveBeenCalledWith({ userId: "user-abc", notify: false });
       expect(skippedSpy).not.toHaveBeenCalled();
       expect(result).toEqual({ status: "ok" });
     });
@@ -77,7 +77,7 @@ describe("ProviderSyncOrchestratorJob", () => {
     it("should throw a standard Error description when no matching profile runner handles the requested target", async () => {
       await orchestrator.onApplicationBootstrap();
 
-      await expect(orchestrator.syncUserSingleProvider(mockUser, "non-existent-provider" as ProviderType)).rejects.toThrow(
+      await expect(orchestrator.syncUserSingleProvider(mockUser, "non-existent-provider" as ProviderType, false)).rejects.toThrow(
         new Error("Sync job runner for provider type 'non-existent-provider' was not found or is disabled."),
       );
     });
@@ -108,10 +108,10 @@ describe("ProviderSyncOrchestratorJob", () => {
         const findOneSpy = jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
         providerSyncService.syncForProvider.mockResolvedValue({ status: "synced" } as any);
 
-        const result = await instance.processTask({ userId: "user-abc" });
+        const result = await instance.processTask({ userId: "user-abc", notify: false });
 
         expect(findOneSpy).toHaveBeenCalledWith({ where: { id: "user-abc" } });
-        expect(providerSyncService.syncForProvider).toHaveBeenCalledWith(mockUser, instance.provider);
+        expect(providerSyncService.syncForProvider).toHaveBeenCalledWith(mockUser, instance.provider, false);
         expect(result).toEqual({ status: "synced" });
       });
 

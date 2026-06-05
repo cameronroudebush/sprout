@@ -238,7 +238,7 @@ describe("AccountController", () => {
 
       await controller.manualSync(mockUser, true);
 
-      expect(providerSyncOrchestrator.syncUserAllProviders).toHaveBeenCalledWith(mockUser);
+      expect(providerSyncOrchestrator.syncUserAllProviders).toHaveBeenCalledWith(mockUser, false);
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
     });
 

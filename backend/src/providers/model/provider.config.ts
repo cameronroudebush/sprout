@@ -4,8 +4,11 @@ import { ZillowConfig } from "@backend/providers/zillow/config";
 import { ConfigurationMetadata } from "../../config/model/configuration.metadata";
 
 export class ProvidersConfig {
-  @ConfigurationMetadata.assign({ comment: "How many days to look back for transactional data across all providers." })
-  lookBackDays: number = 14;
+  @ConfigurationMetadata.assign({
+    comment: "How often we want to check for to send updated notifications to users for new data.",
+    externalControlDisabled: true,
+  })
+  notificationTime: string = "*/15 * * * *";
 
   @ConfigurationMetadata.assign({ comment: "SimpleFIN configuration: https://www.simplefin.org/" })
   simpleFIN = new SimpleFINConfig();
