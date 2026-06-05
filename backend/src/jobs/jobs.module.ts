@@ -7,6 +7,7 @@ import { BackgroundJob } from "@backend/jobs/job-base";
 import { PendingTransactionJob } from "@backend/jobs/pending.transaction";
 import { StatusEmailJob } from "@backend/jobs/status-email";
 import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
+import { SyncNotificationJob } from "@backend/jobs/sync.notification";
 import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
@@ -18,7 +19,7 @@ import { ModuleRef } from "@nestjs/core";
 @Module({
   imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule, ConfigurationModule, SSEModule],
   controllers: [],
-  providers: [ExchangeRateJob, DatabaseBackupJob, PendingTransactionJob, UserDeviceJob, StatusEmailJob, ProviderSyncOrchestratorJob],
+  providers: [ExchangeRateJob, DatabaseBackupJob, PendingTransactionJob, UserDeviceJob, StatusEmailJob, ProviderSyncOrchestratorJob, SyncNotificationJob],
   exports: [ProviderSyncOrchestratorJob],
 })
 export class JobsModule implements OnApplicationBootstrap {

@@ -2,39 +2,29 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
-import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Sync } from "@backend/jobs/model/sync.model";
-import { Notification } from "@backend/notification/model/notification.model";
-import { NotificationType } from "@backend/notification/model/notification.type";
-import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderBase } from "@backend/providers/base/core";
-import { SSEEventType } from "@backend/sse/model/event.model";
-import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
-import { subDays, subMinutes } from "date-fns";
+import { subDays } from "date-fns";
 import { merge } from "lodash";
-import { In, MoreThan } from "typeorm";
+import { In } from "typeorm";
 
 /** Generic sync service to sync provider account info for users. Dynamically used across background jobs and manual calls. */
 @Injectable()
 export class ProviderSyncService {
   private readonly logger = new Logger("provider:sync:service");
 
-  constructor(
-    private readonly transactionRuleService: TransactionRuleService,
-    private readonly notificationService: NotificationService,
-    private readonly sseService: SSEService,
-  ) {}
+  constructor(private readonly transactionRuleService: TransactionRuleService) {}
 
   /**
    * Given a user and a provider, initiates a sync for them by grabbing their accounts and updating them in the database
    *
-   * @param notify If we should send a notification that the user has new data.
+   * @param notify If we should send a notification that the user has new data. This will be batched and sent via the {@link SyncNotificationJob}.
    */
   async syncForProvider(user: User, provider: ProviderBase, notify = true) {
     if (!(await provider.isAvailable(user))) {
@@ -47,6 +37,7 @@ export class ProviderSyncService {
       time: new Date(),
       status: "in-progress",
       provider: provider.config.dbType,
+      notified: !notify, // Invert notify case. If we don't want notified, this makes us think we already told the user and vice versa.
     }).insert();
     sync.user = user;
     try {
@@ -59,12 +50,10 @@ export class ProviderSyncService {
         sync.status = "complete";
       }
       await sync.update();
-      if (notify) await this.handleNotifications(user, sync.status === "complete", sync.failureReason);
     } catch (e) {
       sync.status = "failed";
       sync.failureReason = (e as Error).message;
       await sync.update();
-      if (notify) await this.handleNotifications(user, false, sync.failureReason);
     }
     return sync;
   }
@@ -132,35 +121,6 @@ export class ProviderSyncService {
     if (userHadSuccessfulUpdate) await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
 
     return { institutionErrors, userHadSuccessfulUpdate };
-  }
-
-  /** Determines which notifications to send based on the sync outcome */
-  private async handleNotifications(user: User, isSuccess: boolean, failureReason?: string) {
-    if (isSuccess) {
-      // Real-time UI refresh
-      this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
-      // Push Notification (With Spam Check)
-      const recentNotification = await Notification.findOne({
-        where: {
-          user: { id: user.id },
-          type: NotificationType.success,
-          createdAt: MoreThan(subMinutes(new Date(), 5)),
-        },
-      });
-
-      if (!recentNotification) {
-        const message = this.getSuccessMessage();
-        await this.notificationService.notifyUser(user, message.body, message.title, NotificationType.success);
-      }
-    } else {
-      // Send error alert, bypass spam check so the user knows about it.
-      await this.notificationService.notifyUser(
-        user,
-        failureReason || "An unknown error occurred while syncing.",
-        "Connection Update Required",
-        NotificationType.error,
-      );
-    }
   }
 
   /** Secure, high-performance bulk upsert for transactions */
@@ -231,13 +191,5 @@ export class ProviderSyncService {
         await remainingHolding.update();
       }
     }
-  }
-
-  /** Returns a random message for a success when this provider is updated. */
-  private getSuccessMessage() {
-    return Utility.randomFromArray([
-      { title: `Accounts Synced`, body: `Your accounts are up to date.` },
-      { title: "You're All Caught Up", body: "We've finished syncing your accounts." },
-    ]);
   }
 }

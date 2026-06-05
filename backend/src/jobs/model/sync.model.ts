@@ -23,12 +23,16 @@ export class Sync extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
   declare failureReason?: string;
 
-  @DatabaseDecorators.column({ nullable: true })
-  declare provider?: ProviderType;
+  @DatabaseDecorators.column({ nullable: false })
+  provider!: ProviderType;
 
   /** This user properly allows us to track if this sync was for a specific user */
   @ManyToOne(() => User, { nullable: true, onDelete: "CASCADE", eager: false })
   @ApiHideProperty()
   @Exclude({ toPlainOnly: true })
   declare user?: User;
+
+  /** Tracks if the user was notified of this sync information */
+  @DatabaseDecorators.column({ default: false })
+  notified?: boolean;
 }
