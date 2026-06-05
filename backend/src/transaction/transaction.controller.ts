@@ -9,7 +9,7 @@ import { TransactionSubscription } from "@backend/transaction/model/api/transact
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Patch, Query } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Query } from "@nestjs/common";
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { endOfDay, startOfDay } from "date-fns";
 import { Between, FindOptionsWhere, ILike, In, IsNull, Like } from "typeorm";
@@ -58,6 +58,22 @@ export class TransactionController {
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
 
     return updated;
+  }
+
+  @Delete(":id")
+  @ApiOperation({
+    summary: "Delete transaction.",
+    description: "Deletes a transaction by the given ID.",
+  })
+  @ApiOkResponse({ description: "Transaction deleted successfully." })
+  @ApiNotFoundResponse({ description: "Transaction with the specified ID not found." })
+  async delete(@Param("id") id: string, @CurrentUser() user: User) {
+    const matchingTransaction = await Transaction.findOne({ where: { id: id, account: { user: { id: user.id } } } });
+    if (matchingTransaction == null) throw new NotFoundException("Failed to locate a matching transaction to delete.");
+    await matchingTransaction.remove();
+    // Deleting a transaction has a lot of effect on reports and other locations. Tell the frontend to update all data.
+    this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+    return `Transaction with ID ${id} deleted successfully.`;
   }
 
   @Get()
