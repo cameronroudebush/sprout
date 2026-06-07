@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/shared/dialog/base_dialog.dart';
 
 /// A notification widget that displays the given notification in a pretty format
 class NotificationItem extends StatelessWidget {
@@ -25,6 +26,22 @@ class NotificationItem extends StatelessWidget {
     this.isFloating = false,
   });
 
+  /// Opens a dialog to show the notification on tap
+  void onTap(BuildContext context) {
+    showSproutPopup(
+      context: context,
+      builder: (ctx) => SproutBaseDialogWidget(
+        notification.title,
+        showCloseDialogButton: true,
+        showSubmitButton: false,
+        child: Text(
+          notification.message,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -37,76 +54,79 @@ class NotificationItem extends StatelessWidget {
       _ => (Icons.info_outline_rounded, theme.colorScheme.primary),
     };
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: notification.isRead ? null : color.withValues(alpha: 0.05),
-        border: isFloating ? Border.all(color: theme.dividerColor, width: 1) : null,
-        borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        spacing: 12,
-        children: [
-          // Type Icon
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(icon, color: color, size: 20),
-              if (showSpinner)
-                SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: color)),
-            ],
-          ),
-
-          // Text Content
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 4,
+    return InkWell(
+      onTap: () => onTap(context),
+      borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: notification.isRead ? null : color.withValues(alpha: 0.05),
+          borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          spacing: 12,
+          children: [
+            // Type Icon
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: showUnreadIndicator && !notification.isRead ? MainAxisSize.max : MainAxisSize.min,
-                  children: [
-                    // Title
-                    Flexible(
-                      child: Text(
-                        notification.title,
-                        maxLines: 5,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelLarge?.copyWith(),
-                      ),
-                    ),
-                    // Unread indicator
-                    if (showUnreadIndicator && !notification.isRead)
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                      ),
-                  ],
-                ),
-                // Message
-                if (notification.message != "")
-                  Text(
-                    notification.message,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                if (showDate)
-                  // Date
-                  Text(
-                    DateFormat('MM-dd-yyyy').format(notification.createdAt),
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                  ),
+                Icon(icon, color: color, size: 20),
+                if (showSpinner)
+                  SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: color)),
               ],
             ),
-          ),
-        ],
+
+            // Text Content
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 4,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: showUnreadIndicator && !notification.isRead ? MainAxisSize.max : MainAxisSize.min,
+                    children: [
+                      // Title
+                      Flexible(
+                        child: Text(
+                          notification.title,
+                          maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelLarge?.copyWith(),
+                        ),
+                      ),
+                      // Unread indicator
+                      if (showUnreadIndicator && !notification.isRead)
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                        ),
+                    ],
+                  ),
+                  // Message
+                  if (notification.message != "")
+                    Text(
+                      notification.message,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                  if (showDate)
+                    // Date
+                    Text(
+                      DateFormat('MM-dd-yyyy').format(notification.createdAt),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
