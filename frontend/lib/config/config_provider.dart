@@ -12,7 +12,7 @@ Future<String?> connectionUrl(Ref ref) async {
   if (kIsWeb) {
     Uri uri = Uri.base;
     final leading = '${uri.scheme}://${uri.host}';
-    return "${kDebugMode ? '$leading:8001' : leading}/api";
+    return "${kDebugMode && leading.contains("localhost") ? '$leading:8001' : leading}/api";
   } else {
     String? storedUrl = await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey);
     return (storedUrl == null || storedUrl.isEmpty) ? null : "$storedUrl/api";
