@@ -83,7 +83,7 @@ abstract class _$TotalNetWorth extends $AsyncNotifier<TotalNetWorthDTO?> {
   FutureOr<TotalNetWorthDTO?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<TotalNetWorthDTO?>, TotalNetWorthDTO?>;
     final element = ref.element as $ClassProviderElement<
@@ -91,7 +91,7 @@ abstract class _$TotalNetWorth extends $AsyncNotifier<TotalNetWorthDTO?> {
         AsyncValue<TotalNetWorthDTO?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -133,7 +133,7 @@ abstract class _$HistoricalAccountData
   FutureOr<List<EntityHistory>?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<List<EntityHistory>?>, List<EntityHistory>?>;
     final element = ref.element as $ClassProviderElement<
@@ -141,7 +141,7 @@ abstract class _$HistoricalAccountData
         AsyncValue<List<EntityHistory>?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -234,7 +234,7 @@ abstract class _$AccountTimeline
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<HistoricalDataPoint>?>,
         List<HistoricalDataPoint>?>;
     final element = ref.element as $ClassProviderElement<
@@ -243,7 +243,7 @@ abstract class _$AccountTimeline
         AsyncValue<List<HistoricalDataPoint>?>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,

@@ -77,7 +77,7 @@ abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
   FutureOr<TransactionState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<TransactionState>, TransactionState>;
     final element = ref.element as $ClassProviderElement<
@@ -85,7 +85,7 @@ abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
         AsyncValue<TransactionState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -128,14 +128,14 @@ abstract class _$TransactionFilterState extends $Notifier<TransactionFilter> {
   TransactionFilter build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TransactionFilter, TransactionFilter>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<TransactionFilter, TransactionFilter>,
         TransactionFilter,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -226,7 +226,7 @@ abstract class _$TransactionSubscriptions
   FutureOr<List<TransactionSubscription>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<TransactionSubscription>>,
         List<TransactionSubscription>>;
     final element = ref.element as $ClassProviderElement<
@@ -235,7 +235,7 @@ abstract class _$TransactionSubscriptions
         AsyncValue<List<TransactionSubscription>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

@@ -465,7 +465,7 @@ abstract class _$MonthlySpending extends $AsyncNotifier<CashFlowSpending?> {
   });
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<CashFlowSpending?>, CashFlowSpending?>;
     final element = ref.element as $ClassProviderElement<
@@ -473,7 +473,7 @@ abstract class _$MonthlySpending extends $AsyncNotifier<CashFlowSpending?> {
         AsyncValue<CashFlowSpending?>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               months: _$args.months,
@@ -593,7 +593,7 @@ abstract class _$CashFlowComparisonTimeline
   });
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<CashFlowComparisonDTO?>, CashFlowComparisonDTO?>;
     final element = ref.element as $ClassProviderElement<
@@ -601,7 +601,7 @@ abstract class _$CashFlowComparisonTimeline
         AsyncValue<CashFlowComparisonDTO?>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               baselineYear: _$args.baselineYear,

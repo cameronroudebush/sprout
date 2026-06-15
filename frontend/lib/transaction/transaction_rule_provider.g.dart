@@ -82,7 +82,7 @@ abstract class _$TransactionRules extends $AsyncNotifier<TransactionRuleState> {
   FutureOr<TransactionRuleState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<TransactionRuleState>, TransactionRuleState>;
     final element = ref.element as $ClassProviderElement<
@@ -90,6 +90,6 @@ abstract class _$TransactionRules extends $AsyncNotifier<TransactionRuleState> {
         AsyncValue<TransactionRuleState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -162,7 +162,7 @@ abstract class _$UnsecureConfig
   FutureOr<UnsecureAppConfiguration?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<UnsecureAppConfiguration?>,
         UnsecureAppConfiguration?>;
     final element = ref.element as $ClassProviderElement<
@@ -171,7 +171,7 @@ abstract class _$UnsecureConfig
         AsyncValue<UnsecureAppConfiguration?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -211,13 +211,13 @@ abstract class _$SecureConfig extends $AsyncNotifier<APIConfig?> {
   FutureOr<APIConfig?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<APIConfig?>, APIConfig?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<APIConfig?>, APIConfig?>,
         AsyncValue<APIConfig?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -82,7 +82,7 @@ abstract class _$Chat extends $AsyncNotifier<List<ChatHistory>> {
   FutureOr<List<ChatHistory>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<List<ChatHistory>>, List<ChatHistory>>;
     final element = ref.element as $ClassProviderElement<
@@ -90,6 +90,6 @@ abstract class _$Chat extends $AsyncNotifier<List<ChatHistory>> {
         AsyncValue<List<ChatHistory>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
