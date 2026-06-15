@@ -76,14 +76,14 @@ abstract class _$Accounts extends $AsyncNotifier<AccountState> {
   FutureOr<AccountState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<AccountState>, AccountState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<AccountState>, AccountState>,
         AsyncValue<AccountState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

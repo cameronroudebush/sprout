@@ -84,11 +84,11 @@ abstract class _$SessionStatus extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<bool, bool>, bool, Object?, Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -121,13 +121,13 @@ abstract class _$Auth extends $AsyncNotifier<User?> {
   FutureOr<User?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<User?>, User?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<User?>, User?>,
         AsyncValue<User?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

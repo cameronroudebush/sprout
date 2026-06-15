@@ -51,13 +51,13 @@ abstract class _$Sse extends $Notifier<SseConnectionState> {
   SseConnectionState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<SseConnectionState, SseConnectionState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<SseConnectionState, SseConnectionState>,
         SseConnectionState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -52,13 +52,13 @@ abstract class _$Biometrics extends $Notifier<BiometricState> {
   BiometricState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BiometricState, BiometricState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<BiometricState, BiometricState>,
         BiometricState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
