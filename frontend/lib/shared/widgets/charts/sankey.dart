@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// A private class to cache heavy mathematical layout computations.
 class _SankeyLayoutData {
@@ -21,7 +21,7 @@ class _SankeyLayoutData {
 
 /// A mobile-friendly, highly performant Sankey chart.
 class SproutSankeyChart extends StatefulWidget {
-  final ChartHeader? header;
+  final SproutChartHeader? header;
   final SankeyData data;
   final String Function(num val)? formatter;
   final void Function(String node, double value)? onNodeTap;

@@ -136,7 +136,7 @@ export class PlaidProviderService extends ProviderBase {
           account = await account.insert();
           plaidAsset = await new PlaidAsset(account, acc.account_id).insert();
         } else {
-          account = plaidAsset.account;
+          account.id = plaidAsset.account.id;
         }
 
         // Convert added + modified transactions. These will be upserted.

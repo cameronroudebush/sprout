@@ -40,9 +40,9 @@ export class HoldingService {
    * Fetches live prices for a given array of symbols.
    * Checks the cache for each symbol individually before querying Yahoo Finance for the missing ones.
    * @param symbols Array of ticker symbols to fetch
-   * @param ttlMs Cache timeout in milliseconds (default: 5 minutes)
+   * @param ttlMs Cache timeout in milliseconds (default: 15 minutes)
    */
-  async getLiveHoldingPrices(symbols: string[], ttlMs: number = 5 * 60 * 1000): Promise<MarketIndexDto[]> {
+  async getLiveHoldingPrices(symbols: string[], ttlMs: number = 15 * 60 * 1000): Promise<MarketIndexDto[]> {
     try {
       const uniqueSymbols = [...new Set(symbols)];
 
@@ -61,19 +61,61 @@ export class HoldingService {
 
       // Batch Request for Missing Symbols
       if (missingSymbols.length > 0) {
-        const rawQuotes = await this.yf.quote(missingSymbols);
-        const quotesArray = Array.isArray(rawQuotes) ? rawQuotes : [rawQuotes];
+        const summaries = await Promise.all(
+          missingSymbols.map(async (symbol) => {
+            try {
+              const summary = await this.yf.quoteSummary(symbol, {
+                modules: ["price", "summaryDetail"],
+              });
+              return { symbol, summary };
+            } catch {
+              return { symbol, summary: null };
+            }
+          }),
+        );
 
         // Concurrent Cache Update
         await Promise.all(
-          quotesArray.map(async (quote) => {
-            if (!quote || !quote.symbol) return;
+          summaries.map(async ({ symbol, summary }) => {
+            if (!summary || !summary.price) return;
+            let rawYield = summary.summaryDetail?.dividendYield ?? summary.summaryDetail?.yield ?? 0.0;
+            const isMutualFund = summary.price.quoteType === "MUTUALFUND";
 
-            const dto = new MarketIndexDto(quote);
+            if (isMutualFund) {
+              try {
+                const today = new Date();
+                const oneYearAgo = new Date();
+                oneYearAgo.setFullYear(today.getFullYear() - 1);
+                const chartEvents = await this.yf.chart(symbol, {
+                  period1: oneYearAgo,
+                  period2: today,
+                  interval: "1d",
+                });
+                const historicalDividends = chartEvents.events?.dividends;
+                if (historicalDividends && historicalDividends.length > 0) {
+                  const totalCashDistributed = historicalDividends.reduce((sum, evt) => sum + (evt.amount ?? 0), 0);
+                  const currentPrice = summary.price.regularMarketPrice;
+                  if (currentPrice && currentPrice > 0) {
+                    const historicalYieldCalculated = totalCashDistributed / currentPrice;
+                    if (historicalYieldCalculated > rawYield) {
+                      rawYield = historicalYieldCalculated;
+                    }
+                  }
+                }
+              } catch {}
+            }
+            const combinedPayload = {
+              ...summary.price,
+              ...summary.summaryDetail,
+              symbol: summary.price.symbol ?? symbol,
+              shortName: summary.price.shortName || summary.price.regularMarketSource,
+              dividendYield: rawYield ? rawYield * 100 : 0.0,
+            };
+            const dto = new MarketIndexDto(combinedPayload);
             finalResults.push(dto);
 
             // Cache the result
-            await this.cacheManager.set(`quote:${quote.symbol}`, dto, ttlMs);
+            await this.cacheManager.set(`quote:${dto.symbol}`, dto, ttlMs);
           }),
         );
       }

@@ -7,26 +7,28 @@ class TransactionState {
   final num totalCount;
   final bool isLoadingMore;
   final bool hasReachedMax;
+  final bool initialLoadComplete;
 
-  TransactionState({
-    required this.transactions,
-    required this.totalCount,
-    this.isLoadingMore = false,
-    this.hasReachedMax = false,
-  });
+  TransactionState(
+      {required this.transactions,
+      required this.totalCount,
+      this.isLoadingMore = false,
+      this.hasReachedMax = false,
+      this.initialLoadComplete = false});
 
   TransactionState copyWith({
     List<Transaction>? transactions,
     num? totalCount,
     bool? isLoadingMore,
     bool? hasReachedMax,
+    bool? initialLoadComplete,
   }) {
     return TransactionState(
-      transactions: transactions ?? this.transactions,
-      totalCount: totalCount ?? this.totalCount,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-    );
+        transactions: transactions ?? this.transactions,
+        totalCount: totalCount ?? this.totalCount,
+        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        initialLoadComplete: initialLoadComplete ?? this.initialLoadComplete);
   }
 }
 

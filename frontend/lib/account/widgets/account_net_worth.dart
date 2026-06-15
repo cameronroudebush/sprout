@@ -49,7 +49,7 @@ class AccountNetWorthWidget extends ConsumerWidget {
             label: account.name,
             config: LineSeriesConfig(
               color: account.isDebt ? theme.colorScheme.error : theme.colorScheme.primary,
-              usePositiveNegativeColors: !account.isDebt,
+              usePositiveNegativeColors: true,
             ),
           ),
         ];

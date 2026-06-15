@@ -5,7 +5,7 @@ import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
-import 'package:sprout/shared/widgets/charts/range_selector.dart';
+import 'package:sprout/shared/widgets/charts/util/range_selector.dart';
 
 /// A widget that just display's the users current net worth
 class UserNetWorthText extends ConsumerWidget {

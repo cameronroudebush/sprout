@@ -17,7 +17,9 @@ export class SSEService {
    * @param payload Any additional payload data to send.
    */
   sendToUser(user: User, event: SSEEvent["data"]["event"], payload?: Base) {
-    this.eventSource.next({ user, data: { event, payload } });
+    setImmediate(() => {
+      this.eventSource.next({ user, data: { event, payload } });
+    });
   }
 
   /**
