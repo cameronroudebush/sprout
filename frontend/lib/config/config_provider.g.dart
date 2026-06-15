@@ -44,7 +44,7 @@ final class ConnectionUrlProvider
   }
 }
 
-String _$connectionUrlHash() => r'ea696a98649748a5981c31d9adc9fbfb02f1c59d';
+String _$connectionUrlHash() => r'2114679c92a2be511aa0a27a678102f482460cef';
 
 /// Future that produces the configuration API configured with the base path
 /// DOES NOT HAVE AUTHENTICATION

@@ -39,26 +39,31 @@ class TransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final ScrollController _scrollController = ScrollController();
   int _filteredOffset = 0;
+  ProviderSubscription<dynamic>? _initFetchSub;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = GoRouterState.of(context);
       final catId = state.uri.queryParameters['categoryId'];
 
-      ref.read(transactionFilterStateProvider.notifier).update(
-            TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
-          );
-
-      _fetchPage();
+      _initFetchSub =
+          ref.listenManual(transactionsProvider.select((value) => value.value?.initialLoadComplete), (prev, next) {
+        _initFetchSub?.close();
+        ref.read(transactionFilterStateProvider.notifier).update(
+              TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
+            );
+        _fetchPage();
+      });
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _initFetchSub?.close();
     super.dispose();
   }
 
@@ -67,11 +72,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final filters = ref.read(transactionFilterStateProvider);
     await ref.read(transactionsProvider.notifier).fetchFilteredPage(
           startIndex: reset ? 0 : _filteredOffset,
-          accountId: filters.accountId,
-          catId: filters.categoryId,
-          search: filters.search,
-          dateRange: filters.dateRange,
-          pending: filters.pending,
+          filter: filters,
+          reset: reset,
         );
   }
 

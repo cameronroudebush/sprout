@@ -9,7 +9,7 @@ import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
 import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
-import 'package:sprout/shared/widgets/charts/range_selector.dart';
+import 'package:sprout/shared/widgets/charts/util/range_selector.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// A net worth widget that displays the users overall net worth across all accounts with text and a chart

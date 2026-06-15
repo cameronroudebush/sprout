@@ -14,6 +14,7 @@ import { In } from "typeorm";
 /** Payload for the notification worker */
 type SyncNotificationPayload = { userId: string };
 
+/** A job that checks provider syncs on a schedule to see when users need notified. This allows us to aggregate the notifications. */
 @Injectable()
 export class SyncNotificationJob extends DistributedQueueJob<SyncNotificationPayload> {
   constructor(
@@ -31,6 +32,7 @@ export class SyncNotificationJob extends DistributedQueueJob<SyncNotificationPay
       .andWhere("sync.status IN (:...statuses)", { statuses: ["complete", "failed"] })
       .groupBy("sync.userId")
       .getRawMany();
+    this.logger.debug(`${pendingUsers.length} user(s) have notifications to send.`);
     return pendingUsers.map((row) => ({ userId: row.userId }));
   }
 
@@ -51,6 +53,7 @@ export class SyncNotificationJob extends DistributedQueueJob<SyncNotificationPay
     const latestSyncs = this.deduplicateByProvider(syncs);
 
     try {
+      this.logger.debug(`Sending aggregation for ${user.username}.`);
       // Send the batched notification
       await this.sendDigest(user, latestSyncs);
       // Mark all as notified

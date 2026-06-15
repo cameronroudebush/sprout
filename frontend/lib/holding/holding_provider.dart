@@ -196,5 +196,87 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
     dayPercent: dayPercent,
     historicalFrame: frame,
     isLive: liveData != null,
+    previousClose: liveData?.previousClose,
+    dayLow: liveData?.dayLow,
+    dayHigh: liveData?.dayHigh,
+    marketState: liveData?.marketState,
+    dividendYield: liveData?.dividendYield,
+    basePrice: livePrice,
+    baseSymbol: liveData?.symbol ?? holding.symbol,
+    baseName: liveData?.name ?? holding.symbol,
+    baseChange: liveData?.change ?? dayChange,
+    baseChangePercent: liveData?.changePercent ?? dayPercent,
+    baseLastUpdated: liveData?.lastUpdated ?? DateTime.now().toIso8601String(),
   );
+}
+
+/// Aggregates and calculates estimated dividend values across multiple investment accounts.
+@riverpod
+AsyncValue<Map<String, num>> aggregatedAccountDividends(
+  Ref ref, {
+  required List<Account> investmentAccounts,
+  int? topN,
+}) {
+  final Map<String, double> aggregatedDividends = {};
+  bool anyLoading = false;
+  Object? caughtError;
+  StackTrace? caughtStackTrace;
+
+  for (var account in investmentAccounts) {
+    final holdingsState = ref.watch(accountHoldingsProvider(account.id));
+
+    holdingsState.when(
+      data: (list) {
+        for (var holding in list) {
+          final symbol = holding.symbol.toUpperCase().trim();
+          if (symbol.isEmpty) continue;
+
+          final expanded = ref.watch(expandedHoldingProvider(holding));
+          final double dividendYield = (expanded.dividendYield ?? 0) / 100;
+          final double estimatedDividendIncome = expanded.liveMarketValue * dividendYield;
+
+          if (estimatedDividendIncome > 0) {
+            aggregatedDividends[symbol] = (aggregatedDividends[symbol] ?? 0.0) + estimatedDividendIncome;
+          }
+        }
+      },
+      loading: () => anyLoading = true,
+      error: (err, stack) {
+        caughtError = err;
+        caughtStackTrace = stack;
+      },
+    );
+  }
+
+  // Propagate upstream loading or error states safely to the widget
+  if (caughtError != null) {
+    return AsyncValue.error(caughtError!, caughtStackTrace ?? StackTrace.current);
+  }
+  if (anyLoading) {
+    return const AsyncValue.loading();
+  }
+
+  // Once all assets are resolved, process sorting and grouping constraints
+  final sortedEntries = aggregatedDividends.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  final Map<String, num> finalChartData = {};
+
+  if (topN != null && sortedEntries.length > topN) {
+    final topPositions = sortedEntries.take(topN);
+    final overflowPositions = sortedEntries.skip(topN);
+    final double overflowSum = overflowPositions.fold(0.0, (sum, item) => sum + item.value);
+
+    for (var pos in topPositions) {
+      finalChartData[pos.key] = pos.value;
+    }
+    if (overflowSum > 0) {
+      final label = "+${overflowPositions.length} other positions";
+      finalChartData[label] = overflowSum;
+    }
+  } else {
+    for (var pos in sortedEntries) {
+      finalChartData[pos.key] = pos.value;
+    }
+  }
+
+  return AsyncValue.data(finalChartData);
 }

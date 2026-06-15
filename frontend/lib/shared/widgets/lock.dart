@@ -8,11 +8,32 @@ import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/icon.dart';
 
 /// This widget is intended to display when the app is locked by biometrics
-class SproutLockWidget extends ConsumerWidget {
+class SproutLockWidget extends ConsumerStatefulWidget {
   const SproutLockWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SproutLockWidget> createState() => _SproutLockWidgetState();
+}
+
+class _SproutLockWidgetState extends ConsumerState<SproutLockWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Safely triggers the biometric prompt immediately after the layout renders
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handleUnlock());
+  }
+
+  Future<void> _handleUnlock() async {
+    final bioState = ref.read(biometricsProvider);
+    if (bioState.isUnlocking) return;
+    final success = await ref.read(biometricsProvider.notifier).tryManualUnlock();
+    if (success && mounted) {
+      NavigationProvider.redirect("/");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bioState = ref.watch(biometricsProvider);
 
@@ -30,34 +51,27 @@ class SproutLockWidget extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 16,
                 children: [
-                  // Hero Brand Element
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const SproutIcon(96),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Security Text
                   Text(
                     "Sprout is Locked",
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 12),
                   Text(
                     "Biometric authentication is required to access your financial data and account balances.",
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  const SizedBox(height: 32),
-
-                  // Action Button
                   SizedBox(
                     width: 240,
                     height: 48,
@@ -82,9 +96,6 @@ class SproutLockWidget extends ConsumerWidget {
                       ),
                     ),
                   ),
-
-                  // Subtle Logout Option
-                  const SizedBox(height: 24),
                   TextButton(
                     onPressed: () => ref.read(authProvider.notifier).logout(),
                     child: Text("Switch Account or Logout",

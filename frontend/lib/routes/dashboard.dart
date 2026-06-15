@@ -8,8 +8,8 @@ import 'package:sprout/net-worth/widgets/user_net_worth.dart';
 import 'package:sprout/notification/widgets/home_notifications.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
-import 'package:sprout/shared/widgets/charts/pie_chart.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/widgets/dashboard_recent_transactions.dart';
 import 'package:sprout/transaction/widgets/subscriptions_calendar.dart';
@@ -94,9 +94,9 @@ class DashboardPage extends ConsumerWidget {
                           child: Center(
                             child: CategoryPieChart(
                               DateTime.now(),
-                              legendPosition: PieLegendPosition.bottom,
+                              legendPosition: SproutChartLegendPosition.bottom,
                               topN: topCategoryCount,
-                              header: ChartHeader(
+                              header: SproutChartHeader(
                                 title: "Top $topCategoryCount Purchase Categories",
                               ),
                             ),

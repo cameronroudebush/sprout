@@ -1,3 +1,4 @@
+import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Utility } from "@backend/core/model/utility/utility";
@@ -8,14 +9,22 @@ import { subDays } from "date-fns";
 export class WeeklyEmailContent {
   /** A list of fun or insightful financial quotes */
   private static readonly quotes = [
-    // Actual quotes
+    // Classics
     `"A penny saved, is a penny earned." - Benjamin Franklin`,
     `"Rule No. 1: Never lose money. Rule No. 2: Never forget rule No. 1." - Warren Buffett`,
-    // Other sayings
+    `"The safe way to double your money is to fold it over once and put it in your pocket." - Kin Hubbard`,
+    `"There is a giant difference between earning a great deal of money and being rich." - Marlene Dietrich`,
+    `"Too many people spend money they haven't earned, to buy things they don't want, to impress people they don't like." - Will Rogers`,
+    // Mindset & Lifestyle
     `The goal isn't more money. The goal is living life on your terms.`,
     `Financial freedom is available to those who learn about it and work for it.`,
     `"Stop buying things you don't need, to impress people you don't like."`,
     `Investing in yourself is the best investment you will ever make.`,
+    `Do not save what is left after spending, but spend what is left after saving.`,
+    // Automation & Consistency
+    `Small habits compounded over time create massive wealth.`,
+    `The bit by bit accumulation of small savings is the foundation of wealth.`,
+    `Wealth is not about having a lot of money; it's about having a lot of options.`,
   ];
 
   /** A list greetings */
@@ -51,7 +60,17 @@ export class WeeklyEmailContent {
     this.weeklyIncomeText = CurrencyHelper.format(weeklyIncome, user);
     this.weeklyIncome = weeklyIncome;
     this.transactionCount = transactionCount;
-    this.transactions = transactions.map((x) => ({ ...x, amountText: CurrencyHelper.format(x.amount, user) }));
+    this.transactions = transactions.map((x) => {
+      // Truncate the description so it's not so insanely long
+      const max = Configuration.server.email.maxDescriptionLength;
+      const description = x.description.length > max ? x.description.substring(0, max) + "..." : x.description;
+
+      return {
+        ...x,
+        description,
+        amountText: CurrencyHelper.format(x.amount, user),
+      };
+    });
   }
 
   /** Returns an instance of `this` with fake data */

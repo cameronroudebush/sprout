@@ -4,7 +4,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
-import 'package:sprout/shared/widgets/charts/header.dart'; // Added line chart header path dependency
+import 'package:sprout/shared/widgets/charts/models/color.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/shared/widgets/charts/util/layout.dart';
 
 /// A generic, configurable trend chart that displays stacked bars and a trend line.
 class SproutTrendChart extends StatefulWidget {
@@ -23,7 +26,7 @@ class SproutTrendChart extends StatefulWidget {
   final List<CashFlowTrendStats>? data;
 
   /// The main header module configuration option
-  final ChartHeader? header;
+  final SproutChartHeader? header;
 
   /// Whether to render the legend below the chart
   final bool showLegend;
@@ -59,25 +62,15 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
     final minY = _calculateMinY();
     final lineThemeColor = widget.trendLineColor ?? theme.colorScheme.onSurface;
 
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SproutChartLayoutFrame(
+      header: widget.header,
+      data: {},
+      legendPosition: widget.showLegend ? SproutChartLegendPosition.bottom : SproutChartLegendPosition.none,
+      colorResolver: const SproutChartColorResolver(colorMapping: {}),
+      chartArea: Stack(
         children: [
-          if (widget.header != null) widget.header!,
-          if (widget.header != null) const SizedBox(height: 12),
-          Expanded(
-            child: Stack(
-              children: [
-                _buildBarChart(theme, maxY, minY),
-                _buildLineChart(lineThemeColor, maxY, minY),
-              ],
-            ),
-          ),
-          if (widget.showLegend) ...[
-            const SizedBox(height: 16),
-            _buildLegend(lineThemeColor),
-          ],
+          _buildBarChart(theme, maxY, minY),
+          _buildLineChart(lineThemeColor, maxY, minY),
         ],
       ),
     );
@@ -253,39 +246,6 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
           ];
         },
       ),
-    );
-  }
-
-  /// Renders the visual legend map beneath the chart.
-  Widget _buildLegend(Color lineColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _legendItem("Income", widget.topColor),
-        const SizedBox(width: 16),
-        _legendItem("Expense", widget.bottomColor),
-        const SizedBox(width: 16),
-        _legendItem("Net Cash Flow", lineColor, isLine: true),
-      ],
-    );
-  }
-
-  /// Helper to generate individual legend items.
-  Widget _legendItem(String label, Color color, {bool isLine = false}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: isLine ? 2 : 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(isLine ? 0 : 2),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
     );
   }
 }

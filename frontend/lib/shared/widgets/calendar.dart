@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/shared/models/extensions/box_decoration_extensions.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
 /// A generic calendar intended to display the given content
@@ -98,7 +98,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                   ),
                 if (!widget.allowSelection) const SizedBox.shrink(),
                 Expanded(
-                  child: ChartHeader(
+                  child: SproutChartHeader(
                     title: DateFormat.yMMMM().format(_focusedDate),
                     subheader: widget.subheader,
                   ),

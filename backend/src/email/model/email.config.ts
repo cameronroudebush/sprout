@@ -2,6 +2,9 @@ import { ConfigurationMetadata } from "@backend/config/model/configuration.metad
 
 /** Configuration for using email with Sprout */
 export class EmailConfig {
+  @ConfigurationMetadata.assign({ comment: "How long for transaction descriptions before truncating.", externalControlDisabled: true })
+  maxDescriptionLength = 50;
+
   @ConfigurationMetadata.assign({ comment: "If emails should be supported.", restrictedValues: [true, false] })
   enabled: boolean = false;
 

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/trend_chart.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// Renders a trend chart for cash flow utilizing the generic SproutTrendChart.
 class CashFlowTrendChart extends ConsumerWidget {
@@ -40,7 +40,7 @@ class CashFlowTrendChart extends ConsumerWidget {
 
         return SproutTrendChart(
           data: statsList,
-          header: ChartHeader(
+          header: SproutChartHeader(
             title: "Cash Flow Trend",
           ),
           showLegend: showLegend,

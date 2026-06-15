@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
+import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
@@ -89,116 +90,126 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final filters = ref.watch(transactionFilterStateProvider);
-    final categories = ref.watch(categoriesProvider).value ?? [];
+    final categoriesAsync = ref.watch(categoriesProvider);
     final radius = BorderRadius.circular(4);
+    return categoriesAsync.whenDefault(
+      data: (cats) {
+        final allAvailableCategories = [...cats];
+        allAvailableCategories.insert(0, CategoryDropdown.unknownCategory);
+        allAvailableCategories.insert(0, CategoryDropdown.fakeAllCategory);
 
-    final initialCategory =
-        categories.firstWhereOrNull((c) => c.id == filters.categoryId) ?? CategoryDropdown.fakeAllCategory;
+        final initialCategory = allAvailableCategories.firstWhereOrNull(
+              (c) => c.id == filters.categoryId,
+            ) ??
+            CategoryDropdown.fakeAllCategory;
 
-    // Search Component
-    final searchField = TextField(
-      controller: _searchController,
-      decoration: InputDecoration(
-        hintText: 'Search...',
-        prefixIcon: const Icon(Icons.search, size: 20),
-        isDense: true,
-        border: OutlineInputBorder(borderRadius: radius),
-      ),
-      onChanged: _onSearchChanged,
-    );
-
-    // Date Menu Component
-    final dateMenu = PopupMenuButton<String>(
-      padding: EdgeInsets.zero,
-      menuPadding: EdgeInsets.zero,
-      onSelected: _applyDatePreset,
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'All Time', child: Text('All Time')),
-        const PopupMenuItem(value: 'This Month', child: Text('This Month')),
-        const PopupMenuItem(value: 'Last Week', child: Text('Last Week')),
-        const PopupMenuItem(value: 'Last Month', child: Text('Last Month')),
-      ],
-      child: IgnorePointer(
-        child: OutlinedButton.icon(
-          onPressed: () {}, // Handled by PopupMenuButton
-          style: OutlinedButton.styleFrom(
-            foregroundColor: filters.dateRange != null ? Colors.white : null,
-            backgroundColor: filters.dateRange != null ? theme.colorScheme.primary : null,
-            shape: RoundedRectangleBorder(borderRadius: radius),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        // Search Component
+        final searchField = TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Search...',
+            prefixIcon: const Icon(Icons.search, size: 20),
+            isDense: true,
+            border: OutlineInputBorder(borderRadius: radius),
           ),
-          icon: Icon(filters.dateRange != null ? Icons.date_range : Icons.calendar_month, size: 18),
-          label: Text(filters.dateRange == null ? "Date" : "Filtered"),
-        ),
-      ),
-    );
+          onChanged: _onSearchChanged,
+        );
 
-    final resetVisible = filters.dateRange != null ||
-        (filters.categoryId != null && filters.categoryId != "all") ||
-        filters.pending != null ||
-        filters.search.isNotEmpty;
-    final resetButton = IconButton(
-        onPressed: () {
-          _searchController.clear();
-          _updateFilter(TransactionFilter(accountId: widget.accountId));
-        },
-        icon: const Icon(Icons.refresh_rounded));
-
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      final categoryDropdown = CategoryDropdown(
-          initialCategory.id, (cat) => _updateFilter(filters.copyWith(categoryId: cat?.id)),
-          displayAllCategoryButton: true);
-
-      final isFiltered = filters.pending == true;
-      final pendingChip = FilledButton(
-        style: FilledButton.styleFrom(
-            backgroundColor: !isFiltered ? theme.scaffoldBackgroundColor : theme.colorScheme.primary,
-            foregroundColor: !isFiltered ? theme.colorScheme.onBackground : theme.colorScheme.onPrimary,
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-            shape: RoundedRectangleBorder(
-              side: BorderSide(color: theme.colorScheme.onBackground, width: 1),
-              borderRadius: radius,
-            )),
-        onPressed: () {
-          final val = filters.pending == null ? true : false;
-          filters.pending = val ? true : null;
-          _updateFilter(filters);
-        },
-        child: Row(
-          spacing: 8,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [if (filters.pending == true) Icon(Icons.check), const Text("Pending")],
-        ),
-      );
-
-      if (isDesktop) {
-        return SproutCard(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              spacing: 12,
-              children: [
-                Expanded(flex: 3, child: searchField),
-                Expanded(flex: 2, child: categoryDropdown),
-                dateMenu,
-                pendingChip,
-                if (resetVisible) resetButton
-              ],
+        // Date Menu Component
+        final dateMenu = PopupMenuButton<String>(
+          padding: EdgeInsets.zero,
+          menuPadding: EdgeInsets.zero,
+          onSelected: _applyDatePreset,
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 'All Time', child: Text('All Time')),
+            const PopupMenuItem(value: 'This Month', child: Text('This Month')),
+            const PopupMenuItem(value: 'Last Week', child: Text('Last Week')),
+            const PopupMenuItem(value: 'Last Month', child: Text('Last Month')),
+          ],
+          child: IgnorePointer(
+            child: OutlinedButton.icon(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                foregroundColor: filters.dateRange != null ? Colors.white : null,
+                backgroundColor: filters.dateRange != null ? theme.colorScheme.primary : null,
+                shape: RoundedRectangleBorder(borderRadius: radius),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+              icon: Icon(filters.dateRange != null ? Icons.date_range : Icons.calendar_month, size: 18),
+              label: Text(filters.dateRange == null ? "Date" : "Filtered"),
             ),
           ),
         );
-      }
 
-      // Mobile
-      return Column(
-        spacing: 8,
-        children: [
-          Row(spacing: 8, children: [Expanded(child: searchField), Expanded(child: categoryDropdown)]),
-          Row(
+        final resetVisible = filters.dateRange != null ||
+            (filters.categoryId != null && filters.categoryId != "all") ||
+            filters.pending != null ||
+            filters.search.isNotEmpty;
+
+        final resetButton = IconButton(
+            onPressed: () {
+              _searchController.clear();
+              _updateFilter(TransactionFilter(accountId: widget.accountId));
+            },
+            icon: const Icon(Icons.refresh_rounded));
+
+        return SproutLayoutBuilder((isDesktop, context, constraints) {
+          final categoryDropdown = CategoryDropdown(
+              initialCategory.id, (cat) => _updateFilter(filters.copyWith(categoryId: cat?.id)),
+              displayAllCategoryButton: true);
+
+          final isFiltered = filters.pending == true;
+          final pendingChip = FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: !isFiltered ? theme.scaffoldBackgroundColor : theme.colorScheme.primary,
+                foregroundColor: !isFiltered ? theme.colorScheme.onBackground : theme.colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: theme.colorScheme.onBackground, width: 1),
+                  borderRadius: radius,
+                )),
+            onPressed: () {
+              final val = filters.pending == null ? true : false;
+              filters.pending = val ? true : null;
+              _updateFilter(filters);
+            },
+            child: Row(
               spacing: 8,
-              children: [Expanded(child: dateMenu), Expanded(child: pendingChip), if (resetVisible) resetButton]),
-        ],
-      );
-    });
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [if (filters.pending == true) const Icon(Icons.check), const Text("Pending")],
+            ),
+          );
+
+          if (isDesktop) {
+            return SproutCard(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  spacing: 12,
+                  children: [
+                    Expanded(flex: 3, child: searchField),
+                    Expanded(flex: 2, child: categoryDropdown),
+                    dateMenu,
+                    pendingChip,
+                    if (resetVisible) resetButton
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Mobile Layout
+          return Column(
+            spacing: 8,
+            children: [
+              Row(spacing: 8, children: [Expanded(child: searchField), Expanded(child: categoryDropdown)]),
+              Row(
+                  spacing: 8,
+                  children: [Expanded(child: dateMenu), Expanded(child: pendingChip), if (resetVisible) resetButton]),
+            ],
+          );
+        });
+      },
+    );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
@@ -22,24 +21,32 @@ class Transactions extends _$Transactions {
 
   @override
   Future<TransactionState> build() async {
-    final api = await ref.watch(transactionApiProvider.future);
-    final total = await api.transactionControllerGetTotal();
-    final initial = await api.transactionControllerGetByQuery(startIndex: 0, endIndex: pageSize);
-
     // Listen for SSE data
-    ref.listen(sseProvider, (prev, next) {
+    ref.listen(sseProvider, (prev, next) async {
       final data = next.latestData;
+      final currentFilter = ref.read(transactionFilterStateProvider);
       if (data?.event == SSEDataEventEnum.forceUpdate) {
+        // Fetch the filter
+        await fetchFilteredPage(startIndex: 0, filter: currentFilter, reset: true);
         // Re-fetch the first page
-        fetchFilteredPage(
+        await fetchFilteredPage(
           startIndex: 0,
-          reset: true, // We need to clear the list for a force update
-          // Do not include additional filters so we grab all data
+          // Do not include additional filters so we grab all initial data for the dashboard
         );
       }
     });
 
-    return TransactionState(transactions: initial ?? [], totalCount: total?.total ?? 0);
+    state = AsyncData(TransactionState(
+      transactions: [],
+      totalCount: 0,
+    ));
+
+    await ref.watch(transactionApiProvider.future);
+    await fetchFilteredPage(startIndex: 0);
+    final updatedState = state.value!.copyWith(initialLoadComplete: true);
+    state = AsyncData(updatedState);
+
+    return updatedState;
   }
 
   /// Fetches data matching the given filter with the given index
@@ -47,30 +54,26 @@ class Transactions extends _$Transactions {
   ///   could cause issues where data might disappear more than you expect.
   Future<void> fetchFilteredPage({
     required int startIndex,
-    String? accountId,
-    String? catId,
-    String? search,
-    DateTimeRange? dateRange,
-    bool? pending,
+    TransactionFilter? filter,
     bool reset = false,
   }) async {
     final current = state.value;
-    if (current == null || current.isLoadingMore) return;
+    if (current == null) return;
     state = AsyncData(current.copyWith(isLoadingMore: true));
     try {
       final api = await ref.read(transactionApiProvider.future);
 
-      String? apiCategory = catId == "all" ? null : catId;
+      String? apiCategory = filter?.categoryId == "all" ? null : filter?.categoryId;
 
       final nextItems = await api.transactionControllerGetByQuery(
         startIndex: startIndex,
         endIndex: startIndex + pageSize,
-        accountId: accountId,
+        accountId: filter?.accountId,
         category: apiCategory,
-        description: search,
-        startDate: dateRange?.start,
-        endDate: dateRange?.end,
-        pending: pending,
+        description: filter?.search,
+        startDate: filter?.dateRange?.start,
+        endDate: filter?.dateRange?.end,
+        pending: filter?.pending,
       );
 
       if (nextItems != null) {
