@@ -36,29 +36,22 @@ class Transactions extends _$Transactions {
       }
     });
 
-    state = AsyncData(TransactionState(
-      transactions: [],
-      totalCount: 0,
-    ));
+    final api = await ref.watch(transactionApiProvider.future);
+    final total = await api.transactionControllerGetTotal();
+    final initial = await fetchFilteredPage(startIndex: 0);
 
-    await ref.watch(transactionApiProvider.future);
-    await fetchFilteredPage(startIndex: 0);
-    final updatedState = state.value!.copyWith(initialLoadComplete: true);
-    state = AsyncData(updatedState);
-
-    return updatedState;
+    return TransactionState(transactions: initial, totalCount: total?.total ?? 0);
   }
 
   /// Fetches data matching the given filter with the given index
   /// [reset] If we should reset the entire list. Warning, this
   ///   could cause issues where data might disappear more than you expect.
-  Future<void> fetchFilteredPage({
+  Future<List<Transaction>> fetchFilteredPage({
     required int startIndex,
     TransactionFilter? filter,
     bool reset = false,
   }) async {
-    final current = state.value;
-    if (current == null) return;
+    final current = state.value ?? TransactionState(transactions: [], totalCount: 0);
     state = AsyncData(current.copyWith(isLoadingMore: true));
     try {
       final api = await ref.read(transactionApiProvider.future);
@@ -89,8 +82,10 @@ class Transactions extends _$Transactions {
           ),
         );
       }
+      return state.value?.transactions ?? [];
     } catch (e) {
       state = AsyncData(current.copyWith(isLoadingMore: false));
+      return [];
     }
   }
 

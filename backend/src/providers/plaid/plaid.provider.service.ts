@@ -15,6 +15,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { AxiosError } from "axios";
+import { merge } from "lodash";
 import {
   CountryCode,
   LinkTokenCreateRequest,
@@ -136,7 +137,7 @@ export class PlaidProviderService extends ProviderBase {
           account = await account.insert();
           plaidAsset = await new PlaidAsset(account, acc.account_id).insert();
         } else {
-          account.id = plaidAsset.account.id;
+          account = merge(plaidAsset.account, account);
         }
 
         // Convert added + modified transactions. These will be upserted.
