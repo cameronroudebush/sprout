@@ -1,7 +1,7 @@
 # -------------------------------
 #       Build Frontend
 # -------------------------------
-FROM ghcr.io/adrianjagielak/flutter:3.44.1 AS frontend-build
+FROM ghcr.io/adrianjagielak/flutter:3.44.2 AS frontend-build
 WORKDIR /app
 COPY .git .git
 COPY ./frontend ./
@@ -25,7 +25,7 @@ RUN npm run build
 # -------------------------------
 #      Build Final Result
 # -------------------------------
-FROM alpine:3.23.4 AS prod
+FROM alpine:3.24.0 AS prod
 # Using port 80 like normal
 EXPOSE 80
 
