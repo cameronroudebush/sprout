@@ -39,7 +39,6 @@ class TransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final ScrollController _scrollController = ScrollController();
   int _filteredOffset = 0;
-  ProviderSubscription<dynamic>? _initFetchSub;
 
   @override
   void initState() {
@@ -49,21 +48,16 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       final state = GoRouterState.of(context);
       final catId = state.uri.queryParameters['categoryId'];
 
-      _initFetchSub =
-          ref.listenManual(transactionsProvider.select((value) => value.value?.initialLoadComplete), (prev, next) {
-        _initFetchSub?.close();
-        ref.read(transactionFilterStateProvider.notifier).update(
-              TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
-            );
-        _fetchPage();
-      });
+      ref.read(transactionFilterStateProvider.notifier).update(
+            TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
+          );
+      _fetchPage();
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _initFetchSub?.close();
     super.dispose();
   }
 
