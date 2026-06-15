@@ -39,13 +39,13 @@ abstract class _$WidgetSync extends $AsyncNotifier<void> {
   FutureOr<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<void>, void>,
         AsyncValue<void>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

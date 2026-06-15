@@ -73,14 +73,14 @@ abstract class _$Categories extends $AsyncNotifier<List<Category>> {
   FutureOr<List<Category>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Category>>, List<Category>>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<List<Category>>, List<Category>>,
         AsyncValue<List<Category>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -169,11 +169,11 @@ abstract class _$UnknownCategoryCount extends $AsyncNotifier<int> {
   ]);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<int>, int>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<int>, int>, AsyncValue<int>, Object?, Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,

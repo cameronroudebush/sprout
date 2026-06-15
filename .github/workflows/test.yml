@@ -35,7 +35,7 @@ jobs:
 
       # Upload the generated report directly to Codecov
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v6.0.1
+        uses: codecov/codecov-action@v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./backend/coverage/

@@ -108,13 +108,13 @@ abstract class _$UserConfigNotifier extends $AsyncNotifier<UserConfig?> {
   FutureOr<UserConfig?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<UserConfig?>, UserConfig?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<UserConfig?>, UserConfig?>,
         AsyncValue<UserConfig?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

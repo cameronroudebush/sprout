@@ -130,14 +130,14 @@ abstract class _$AccountHoldings extends $AsyncNotifier<List<Holding>> {
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Holding>>, List<Holding>>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<List<Holding>>, List<Holding>>,
         AsyncValue<List<Holding>>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,
@@ -230,14 +230,14 @@ abstract class _$AccountHoldingHistory extends $AsyncNotifier<EntityHistory?> {
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<EntityHistory?>, EntityHistory?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<EntityHistory?>, EntityHistory?>,
         AsyncValue<EntityHistory?>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,
@@ -334,7 +334,7 @@ abstract class _$HoldingTimeline
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<HistoricalDataPoint>>,
         List<HistoricalDataPoint>>;
     final element = ref.element as $ClassProviderElement<
@@ -343,7 +343,7 @@ abstract class _$HoldingTimeline
         AsyncValue<List<HistoricalDataPoint>>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,
@@ -387,7 +387,7 @@ abstract class _$MajorIndices extends $AsyncNotifier<List<MarketIndexDto>> {
   FutureOr<List<MarketIndexDto>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<List<MarketIndexDto>>, List<MarketIndexDto>>;
     final element = ref.element as $ClassProviderElement<
@@ -395,7 +395,7 @@ abstract class _$MajorIndices extends $AsyncNotifier<List<MarketIndexDto>> {
         AsyncValue<List<MarketIndexDto>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -444,7 +444,7 @@ abstract class _$BatchedLivePrices
   Map<String, MarketIndexDto> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<Map<String, MarketIndexDto>, Map<String, MarketIndexDto>>;
     final element = ref.element as $ClassProviderElement<
@@ -452,7 +452,7 @@ abstract class _$BatchedLivePrices
         Map<String, MarketIndexDto>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -498,7 +498,7 @@ abstract class _$MajorIndicesTimeline
   FutureOr<List<MajorIndexTimelineDto>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<MajorIndexTimelineDto>>,
         List<MajorIndexTimelineDto>>;
     final element = ref.element as $ClassProviderElement<
@@ -507,7 +507,7 @@ abstract class _$MajorIndicesTimeline
         AsyncValue<List<MajorIndexTimelineDto>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
