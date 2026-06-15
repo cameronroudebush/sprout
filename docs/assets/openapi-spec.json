@@ -3893,6 +3893,11 @@
             "type": "string",
             "nullable": true
           },
+          "dividendYield": {
+            "type": "number",
+            "nullable": true,
+            "description": "Annual dividend yield as a full percentage (e.g., 1.5 for 1.5%)"
+          },
           "price": {
             "type": "number",
             "nullable": false,

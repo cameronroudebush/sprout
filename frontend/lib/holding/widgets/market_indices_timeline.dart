@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
 import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// A widget that displays a 7-day comparative history chart for the major market indices
 class MajorIndicesTimelineWidget extends ConsumerWidget {
@@ -51,7 +51,7 @@ class MajorIndicesTimelineWidget extends ConsumerWidget {
         return SproutLineChart(
           series: chartSeriesList,
           chartRange: selectedRange,
-          header: ChartHeader(
+          header: SproutChartHeader(
             title: title,
           ),
           showYAxis: true,

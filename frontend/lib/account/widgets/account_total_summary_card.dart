@@ -104,7 +104,7 @@ class TotalSummary extends ConsumerWidget {
             return Container(
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(2),
               ),
               alignment: Alignment.center,
               child: canFitText

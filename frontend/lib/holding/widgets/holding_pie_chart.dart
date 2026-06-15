@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// Renders a pie chart displaying the aggregated asset allocation across ALL investment accounts.
 class HoldingPieChart extends ConsumerWidget {
@@ -59,9 +60,9 @@ class HoldingPieChart extends ConsumerWidget {
 
     return SproutPieChart(
         data: finalChartData,
-        legendPosition: PieLegendPosition.bottom,
+        legendPosition: SproutChartLegendPosition.bottom,
         showPieTitle: false,
-        header: const ChartHeader(title: "Holding Allocation"),
+        header: const SproutChartHeader(title: "Holding Allocation"),
         formatValue: formatter.format);
   }
 }

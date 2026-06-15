@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +16,8 @@ import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/routes/util/shell.dart';
 import 'package:sprout/shared/providers/splash_time_provider.dart';
 import 'package:sprout/shared/widgets/loading.dart';
+import 'package:sprout/shared/widgets/lock.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// Intended initial redirect path
 String? _intendedPath;
@@ -34,6 +37,8 @@ class RouterNotifier extends ChangeNotifier {
 
 /// This provides the GoRouter for all of Sprout so pages know what is available
 final routerProvider = Provider<GoRouter>((ref) {
+  // Helps web track URL's while acting the same as mobile
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   final notifier = RouterNotifier(ref);
 
   // Recursive mapper to automatically build nested GoRoute trees
@@ -68,6 +73,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: '/locked',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: SproutLockWidget(),
+        ),
       ),
       // Routes that don't require Auth
       GoRoute(
@@ -134,7 +145,21 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   if (ref.read(authProvider.notifier).isSetupMode) return '/setup';
 
   // Authentication Logic
+  final bioState = ref.read(biometricsProvider);
   final isLoggedIn = authState.value != null;
+
+  // Check biometric lock state
+  final userConfigAsync = ref.read(userConfigProvider);
+  final secureModeEnabled = userConfigAsync.value?.secureMode ?? false;
+  final needsBioCheck = !kIsWeb && secureModeEnabled && isLoggedIn;
+
+  if (needsBioCheck && bioState.isLocked) {
+    if (_intendedPath == null && currentPath != '/locked' && currentPath != '/loading') {
+      _intendedPath = state.uri.toString();
+    }
+    return currentPath == '/locked' ? null : '/locked';
+  }
+
   final isGoingToLogin = currentPath == '/login';
 
   if (!isLoggedIn) {
@@ -145,13 +170,13 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   if (_intendedPath != null) {
     final target = _intendedPath!;
     _intendedPath = null;
-    if (target != '/loading' && target != '/login') {
+    if (target != '/loading' && target != '/login' && target != '/locked') {
       return target;
     }
   }
 
   // If they are logged in but somehow stuck on /login or /loading without an intended path, push to home
-  if (isGoingToLogin || currentPath == '/loading') {
+  if (isGoingToLogin || currentPath == '/loading' || currentPath == '/locked') {
     return '/';
   }
 

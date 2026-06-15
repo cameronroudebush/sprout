@@ -2,7 +2,7 @@ import 'package:sprout/api/api.dart';
 
 /// Defines a holding that contains additional information to calculate live day changes as well as additional
 ///   historical information.
-class ExpandedHolding {
+class ExpandedHolding extends MarketIndexDto {
   final Holding holding;
   final Account? account;
   final num livePrice;
@@ -12,7 +12,7 @@ class ExpandedHolding {
   final dynamic historicalFrame;
   final bool isLive;
 
-  const ExpandedHolding({
+  ExpandedHolding({
     required this.holding,
     required this.account,
     required this.livePrice,
@@ -21,5 +21,23 @@ class ExpandedHolding {
     required this.dayPercent,
     required this.historicalFrame,
     required this.isLive,
-  });
+    super.previousClose,
+    super.dayLow,
+    super.dayHigh,
+    super.marketState,
+    super.dividendYield,
+    required num basePrice,
+    required String baseSymbol,
+    required String baseName,
+    required num baseChange,
+    required num baseChangePercent,
+    required String baseLastUpdated,
+  }) : super(
+          price: basePrice,
+          symbol: baseSymbol,
+          name: baseName,
+          change: baseChange,
+          changePercent: baseChangePercent,
+          lastUpdated: baseLastUpdated,
+        );
 }

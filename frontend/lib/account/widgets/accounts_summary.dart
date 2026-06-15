@@ -8,7 +8,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/shared/widgets/charts/range_selector.dart';
+import 'package:sprout/shared/widgets/charts/util/range_selector.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders a grouped overview of all user accounts.

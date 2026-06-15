@@ -575,7 +575,7 @@ final class ExpandedHoldingProvider extends $FunctionalProvider<ExpandedHolding,
   }
 }
 
-String _$expandedHoldingHash() => r'3195ce252b4fa9c03f252c0009937b2852013d3d';
+String _$expandedHoldingHash() => r'84bb90f739a7b95c07ac4a7b1ec705128d9019e0';
 
 /// Provider that allows us to track the expanded holding values based on current live prices
 
@@ -599,4 +599,117 @@ final class ExpandedHoldingFamily extends $Family
 
   @override
   String toString() => r'expandedHoldingProvider';
+}
+
+/// Aggregates and calculates estimated dividend values across multiple investment accounts.
+
+@ProviderFor(aggregatedAccountDividends)
+final aggregatedAccountDividendsProvider = AggregatedAccountDividendsFamily._();
+
+/// Aggregates and calculates estimated dividend values across multiple investment accounts.
+
+final class AggregatedAccountDividendsProvider extends $FunctionalProvider<
+    AsyncValue<Map<String, num>>,
+    AsyncValue<Map<String, num>>,
+    AsyncValue<Map<String, num>>> with $Provider<AsyncValue<Map<String, num>>> {
+  /// Aggregates and calculates estimated dividend values across multiple investment accounts.
+  AggregatedAccountDividendsProvider._(
+      {required AggregatedAccountDividendsFamily super.from,
+      required ({
+        List<Account> investmentAccounts,
+        int? topN,
+      })
+          super.argument})
+      : super(
+          retry: null,
+          name: r'aggregatedAccountDividendsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$aggregatedAccountDividendsHash();
+
+  @override
+  String toString() {
+    return r'aggregatedAccountDividendsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<Map<String, num>>> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AsyncValue<Map<String, num>> create(Ref ref) {
+    final argument = this.argument as ({
+      List<Account> investmentAccounts,
+      int? topN,
+    });
+    return aggregatedAccountDividends(
+      ref,
+      investmentAccounts: argument.investmentAccounts,
+      topN: argument.topN,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<Map<String, num>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<Map<String, num>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AggregatedAccountDividendsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$aggregatedAccountDividendsHash() =>
+    r'4baa1b38c1e3d779a9260cdaa7d6dffbf639fe80';
+
+/// Aggregates and calculates estimated dividend values across multiple investment accounts.
+
+final class AggregatedAccountDividendsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            AsyncValue<Map<String, num>>,
+            ({
+              List<Account> investmentAccounts,
+              int? topN,
+            })> {
+  AggregatedAccountDividendsFamily._()
+      : super(
+          retry: null,
+          name: r'aggregatedAccountDividendsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Aggregates and calculates estimated dividend values across multiple investment accounts.
+
+  AggregatedAccountDividendsProvider call({
+    required List<Account> investmentAccounts,
+    int? topN,
+  }) =>
+      AggregatedAccountDividendsProvider._(argument: (
+        investmentAccounts: investmentAccounts,
+        topN: topN,
+      ), from: this);
+
+  @override
+  String toString() => r'aggregatedAccountDividendsProvider';
 }

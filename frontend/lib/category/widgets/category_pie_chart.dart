@@ -5,15 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// This renders a pie chart for the transaction category mapping
 class CategoryPieChart extends ConsumerWidget {
-  final PieLegendPosition legendPosition;
+  final SproutChartLegendPosition legendPosition;
   final DateTime selectedDate;
   final CashFlowView view;
-  final ChartHeader? header;
+  final SproutChartHeader? header;
 
   /// Number of top categories to show
   final int? topN;

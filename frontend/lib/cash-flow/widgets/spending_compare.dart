@@ -5,10 +5,10 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
 import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// A generic widget that provides spending comparison timeline analyses
 class SpendingCompareChart extends ConsumerStatefulWidget {
@@ -107,7 +107,7 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
           showGrid: true,
           showZeroLine: false,
           showLegend: false,
-          header: ChartHeader(
+          header: SproutChartHeader(
             title: "Spending Trend",
             subheader: subheaderText,
             right: Align(

@@ -9,8 +9,8 @@ import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
-import 'package:sprout/shared/widgets/charts/pie_chart.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
 enum DetailChartType { sankey, pie, spending }
@@ -176,8 +176,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                       child: CategoryPieChart(
                         dateForCharts,
                         view: _currentView,
-                        legendPosition: PieLegendPosition.left,
-                        header: const ChartHeader(
+                        legendPosition: SproutChartLegendPosition.left,
+                        header: const SproutChartHeader(
                           title: "Expense Categories",
                         ),
                       ),
@@ -190,8 +190,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         dateForCharts,
                         view: _currentView,
                         showSubheader: true,
-                        legendPosition: PieLegendPosition.none,
-                        header: const ChartHeader(
+                        legendPosition: SproutChartLegendPosition.none,
+                        header: const SproutChartHeader(
                           title: "Cash Flow",
                         ),
                       ),
@@ -209,8 +209,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   child: CategoryPieChart(
                     dateForCharts,
                     view: _currentView,
-                    legendPosition: PieLegendPosition.left,
-                    header: const ChartHeader(
+                    legendPosition: SproutChartLegendPosition.left,
+                    header: const SproutChartHeader(
                       title: "Expense Categories",
                     ),
                   ),
@@ -221,8 +221,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     dateForCharts,
                     view: _currentView,
                     showSubheader: true,
-                    legendPosition: PieLegendPosition.none,
-                    header: const ChartHeader(
+                    legendPosition: SproutChartLegendPosition.none,
+                    header: const SproutChartHeader(
                       title: "Cash Flow",
                     ),
                   ),

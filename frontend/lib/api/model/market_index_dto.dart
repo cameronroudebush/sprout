@@ -17,6 +17,7 @@ class MarketIndexDto {
     this.dayLow,
     this.dayHigh,
     this.marketState,
+    this.dividendYield,
     required this.price,
     required this.symbol,
     required this.name,
@@ -32,6 +33,9 @@ class MarketIndexDto {
   num? dayHigh;
 
   MarketIndexDtoMarketStateEnum? marketState;
+
+  /// Annual dividend yield as a full percentage (e.g., 1.5 for 1.5%)
+  num? dividendYield;
 
   /// The numeric value converted to the user's preferred currency format. This overrides the original price property.
   num price;
@@ -52,6 +56,7 @@ class MarketIndexDto {
     other.dayLow == dayLow &&
     other.dayHigh == dayHigh &&
     other.marketState == marketState &&
+    other.dividendYield == dividendYield &&
     other.price == price &&
     other.symbol == symbol &&
     other.name == name &&
@@ -66,6 +71,7 @@ class MarketIndexDto {
     (dayLow == null ? 0 : dayLow!.hashCode) +
     (dayHigh == null ? 0 : dayHigh!.hashCode) +
     (marketState == null ? 0 : marketState!.hashCode) +
+    (dividendYield == null ? 0 : dividendYield!.hashCode) +
     (price.hashCode) +
     (symbol.hashCode) +
     (name.hashCode) +
@@ -74,7 +80,7 @@ class MarketIndexDto {
     (lastUpdated.hashCode);
 
   @override
-  String toString() => 'MarketIndexDto[previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
+  String toString() => 'MarketIndexDto[previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -97,6 +103,11 @@ class MarketIndexDto {
       json[r'marketState'] = this.marketState;
     } else {
       json[r'marketState'] = null;
+    }
+    if (this.dividendYield != null) {
+      json[r'dividendYield'] = this.dividendYield;
+    } else {
+      json[r'dividendYield'] = null;
     }
       json[r'price'] = this.price;
       json[r'symbol'] = this.symbol;
@@ -144,6 +155,9 @@ class MarketIndexDto {
             ? null
             : num.parse('${json[r'dayHigh']}'),
         marketState: MarketIndexDtoMarketStateEnum.fromJson(json[r'marketState']),
+        dividendYield: json[r'dividendYield'] == null
+            ? null
+            : num.parse('${json[r'dividendYield']}'),
         price: num.parse('${json[r'price']}'),
         symbol: mapValueOfType<String>(json, r'symbol')!,
         name: mapValueOfType<String>(json, r'name')!,

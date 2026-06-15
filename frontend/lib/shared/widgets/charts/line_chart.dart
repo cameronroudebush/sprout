@@ -5,16 +5,19 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
+import 'package:sprout/shared/widgets/charts/models/color.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/shared/widgets/charts/util/layout.dart';
 
 // A record to hold the calculated min and max Y-axis values.
 typedef _YAxisBounds = ({double minY, double maxY});
 
 /// A line chart that displays data using the unified SproutChartSeries structure
 class SproutLineChart extends StatelessWidget {
-  final ChartHeader? header;
+  final SproutChartHeader? header;
   final List<SproutChartSeries> series;
   final ChartRangeEnum chartRange;
 
@@ -47,7 +50,15 @@ class SproutLineChart extends StatelessWidget {
       this.showDateInTooltip = true,
       this.showBorder = true,
       EdgeInsets? padding})
-      : padding = padding ?? EdgeInsets.symmetric(horizontal: showXAxis ? 24 : 8);
+      : padding = padding ?? EdgeInsets.symmetric(horizontal: showXAxis ? 12 : 8);
+
+  Color _resolveSpotColor(double y, SproutChartSeries s, ThemeData theme) {
+    if (!s.config.usePositiveNegativeColors) {
+      return s.config.color ?? theme.colorScheme.primary;
+    }
+    if (y == 0) return Colors.white;
+    return y > 0 ? Colors.green : theme.colorScheme.error;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,51 +68,28 @@ class SproutLineChart extends StatelessWidget {
 
     final theme = Theme.of(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (header != null) header!,
-        const SizedBox(height: 16),
-        Expanded(
-          child: Padding(
-            padding: padding,
-            child: LineChart(
-              _buildLineChartData(theme),
-              duration: Duration.zero,
-            ),
-          ),
-        ),
-        if (showLegend && series.length > 1) ...[
-          _buildLegend(theme),
-          const SizedBox(height: 8),
-        ],
-      ],
-    );
-  }
+    final Map<String, num> dummyData = {
+      for (final s in series) s.label: s.data.spots.isNotEmpty ? s.data.spots.first.y : 0
+    };
 
-  Widget _buildLegend(ThemeData theme) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 16,
-      runSpacing: 8,
-      children: series.map((s) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: s.config.color ?? theme.colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(s.label, style: theme.textTheme.bodySmall),
-          ],
-        );
-      }).toList(),
+    final Map<String, Color> dummyMapping = {
+      for (final s in series)
+        if (s.config.color != null) s.label: s.config.color!
+    };
+
+    return SproutChartLayoutFrame(
+      header: header,
+      data: dummyData,
+      legendPosition:
+          showLegend && series.length > 1 ? SproutChartLegendPosition.bottom : SproutChartLegendPosition.none,
+      colorResolver: SproutChartColorResolver(colorMapping: dummyMapping),
+      chartArea: Padding(
+        padding: padding,
+        child: LineChart(
+          _buildLineChartData(theme),
+          duration: Duration.zero,
+        ),
+      ),
     );
   }
 
@@ -111,14 +99,22 @@ class SproutLineChart extends StatelessWidget {
     final allSpots = series.expand((s) => s.data.spots).toList();
     final yAxisBounds = _calculateYAxisBounds(allSpots);
     final maxPoints = series.fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
-    final List<LineChartBarData> lines = [];
 
+    final double yRange = yAxisBounds.maxY - yAxisBounds.minY;
+    final double safeYInterval = yRange > 0.001 ? math.max(0.01, yRange / 4) : 1.0;
+    final double safeXInterval = math.max(1.0, (maxPoints / 5).floorToDouble());
+
+    final baseChartData = series.reduce((a, b) => a.data.spots.length > b.data.spots.length ? a : b).data;
+
+    final List<LineChartBarData> lines = [];
     final bool isAllPositive = yAxisBounds.minY >= 0;
-    final bool isAllNegative = yAxisBounds.maxY <= 0;
-    final bool crossesZero = !isAllPositive && !isAllNegative;
+    final bool isAllNegative = yAxisBounds.maxY < 0;
 
     for (final s in series) {
       final bool isSplitColor = s.config.usePositiveNegativeColors;
+      final double lineMaxY = s.data.spots.isEmpty ? 0 : s.data.spots.map((e) => e.y).reduce(math.max);
+      final double lineMinY = s.data.spots.isEmpty ? 0 : s.data.spots.map((e) => e.y).reduce(math.min);
+      final bool isSeriesFlatZero = s.data.spots.isNotEmpty && lineMaxY == 0 && lineMinY == 0;
 
       final Color baseColor = s.config.color ?? colorScheme.primary;
       final Color posColor = isSplitColor ? Colors.green : baseColor;
@@ -129,18 +125,63 @@ class SproutLineChart extends StatelessWidget {
       Color? lineColor;
       LinearGradient? lineGradient;
 
-      if (isSplitColor && crossesZero) {
-        final double totalRange = yAxisBounds.maxY - yAxisBounds.minY;
-        final double zeroFraction = (yAxisBounds.maxY / totalRange).clamp(0.0, 1.0);
+      if (isSplitColor) {
+        if (isSeriesFlatZero) {
+          lineColor = Colors.white;
+          lineGradient = null;
+        } else if (lineMinY >= 0) {
+          if (lineMinY == 0) {
+            final double totalRange = lineMaxY - lineMinY;
+            final double zeroFraction = (lineMaxY / totalRange).clamp(0.0, 1.0);
+            lineGradient = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.green, Colors.green, Colors.white],
+              stops: [0.0, (zeroFraction - 0.02).clamp(0.0, 1.0), 1.0],
+            );
+          } else {
+            lineColor = Colors.green;
+            lineGradient = null;
+          }
+        } else if (lineMaxY <= 0) {
+          if (lineMaxY == 0) {
+            lineGradient = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.white, theme.colorScheme.error, theme.colorScheme.error],
+              stops: [0.0, 0.05, 1.0],
+            );
+          } else {
+            lineColor = theme.colorScheme.error;
+            lineGradient = null;
+          }
+        } else {
+          final double totalRange = lineMaxY - lineMinY;
+          final double zeroFraction = (lineMaxY / totalRange).clamp(0.0, 1.0);
 
-        lineGradient = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [posColor, posColor, negColor, negColor],
-          stops: [0.0, zeroFraction, zeroFraction, 1.0],
-        );
+          lineGradient = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.green,
+              Colors.green,
+              Colors.white,
+              Colors.white,
+              theme.colorScheme.error,
+              theme.colorScheme.error,
+            ],
+            stops: [
+              0.0,
+              (zeroFraction - 0.01).clamp(0.0, 1.0),
+              (zeroFraction - 0.01).clamp(0.0, 1.0),
+              (zeroFraction + 0.01).clamp(0.0, 1.0),
+              (zeroFraction + 0.01).clamp(0.0, 1.0),
+              1.0,
+            ],
+          );
+        }
       } else {
-        lineColor = (isSplitColor && isAllNegative) ? negColor : posColor;
+        lineColor = baseColor;
       }
 
       BarAreaData? belowBar;
@@ -207,8 +248,8 @@ class SproutLineChart extends StatelessWidget {
       minY: yAxisBounds.minY,
       maxY: yAxisBounds.maxY,
       minX: 0,
-      maxX: maxPoints > 0 ? (maxPoints - 1).toDouble() : 0,
-      titlesData: _buildTitlesData(theme, yAxisBounds),
+      maxX: maxPoints > 1 ? (maxPoints - 1).toDouble() : 1.0,
+      titlesData: _buildTitlesData(theme, safeYInterval, safeXInterval, baseChartData),
       borderData: FlBorderData(
         show: showBorder,
         border: Border.all(
@@ -219,6 +260,8 @@ class SproutLineChart extends StatelessWidget {
       gridData: FlGridData(
         show: showGrid,
         drawVerticalLine: drawVerticalGrid,
+        horizontalInterval: safeYInterval,
+        verticalInterval: safeXInterval,
         getDrawingHorizontalLine: (_) => FlLine(
           color: colorScheme.outline.withOpacity(0.15),
           strokeWidth: 1,
@@ -241,14 +284,8 @@ class SproutLineChart extends StatelessWidget {
     );
   }
 
-  FlTitlesData _buildTitlesData(ThemeData theme, _YAxisBounds yAxisBounds) {
-    // Read labels off the first series safely as a structural baseline
-    final baseChartData = series.first.data;
-    final spots = baseChartData.spots;
-    final double yRange = yAxisBounds.maxY - yAxisBounds.minY;
-    final double yInterval = yRange > 0 ? yRange / 4 : 1.0;
-    final double xInterval = math.max(1.0, (spots.length / 5).floorToDouble());
-
+  FlTitlesData _buildTitlesData(
+      ThemeData theme, double yInterval, double xInterval, SproutLineChartData baseChartData) {
     return FlTitlesData(
       show: true,
       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -284,7 +321,7 @@ class SproutLineChart extends StatelessWidget {
           reservedSize: 40,
           interval: yInterval,
           getTitlesWidget: (value, meta) {
-            if (value == meta.max || value == meta.min) {
+            if (yInterval != 1.0 && (value == meta.max || value == meta.min)) {
               return const SizedBox.shrink();
             }
 
@@ -328,13 +365,7 @@ class SproutLineChart extends StatelessWidget {
             FlDotData(
               show: shouldShowBubble,
               getDotPainter: (spot, percent, barData, index) {
-                final Color activeHoverColor;
-                if (currentSeries.config.usePositiveNegativeColors) {
-                  final double baselineValue = 0.0;
-                  activeHoverColor = spot.y >= baselineValue ? Colors.green : theme.colorScheme.error;
-                } else {
-                  activeHoverColor = barData.color ?? theme.colorScheme.primary;
-                }
+                final Color activeHoverColor = _resolveSpotColor(spot.y, currentSeries, theme);
                 return FlDotCirclePainter(
                   radius: 5,
                   color: activeHoverColor,
@@ -383,12 +414,7 @@ class SproutLineChart extends StatelessWidget {
 
             if (barSpot.x.toInt() < chartData.sortedEntries.length) {
               final date = chartData.sortedEntries[barSpot.x.toInt()].key;
-              final Color lineColor;
-              if (currentSeries.config.usePositiveNegativeColors) {
-                lineColor = barSpot.y >= 0 ? Colors.green : Colors.red;
-              } else {
-                lineColor = currentSeries.config.color ?? theme.colorScheme.primary;
-              }
+              final Color lineColor = _resolveSpotColor(barSpot.y, currentSeries, theme);
               final dateHeader = !showDateInTooltip
                   ? ""
                   : barSpot == sortedSpots.first
@@ -433,9 +459,13 @@ class SproutLineChart extends StatelessWidget {
     final double actualMinY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
     final double actualMaxY = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
 
+    if (actualMinY == 0 && actualMaxY == 0) {
+      return (minY: 0.0, maxY: 1.0);
+    }
+
     if (actualMinY == actualMaxY) {
       final value = actualMinY;
-      final padding = (value == 0) ? 1.0 : value.abs() * 0.5;
+      final double padding = math.max(1.0, (value.abs() * 0.2).ceilToDouble());
       return (minY: value - padding, maxY: value + padding);
     }
 

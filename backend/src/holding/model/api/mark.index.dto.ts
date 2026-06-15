@@ -58,6 +58,11 @@ export class MarketIndexDto {
   @IsISO8601()
   lastUpdated: string;
 
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ required: false, nullable: true, description: "Annual dividend yield as a full percentage (e.g., 1.5 for 1.5%)" })
+  dividendYield?: number;
+
   constructor(quote: any) {
     this.symbol = quote.symbol;
     this.name = quote.shortName || quote.longName || quote.symbol;
@@ -70,5 +75,6 @@ export class MarketIndexDto {
     this.change = quote.regularMarketChange ?? 0;
     this.changePercent = quote.regularMarketChangePercent ?? 0;
     this.lastUpdated = quote.regularMarketTime ? new Date(quote.regularMarketTime).toISOString() : new Date().toISOString();
+    this.dividendYield = quote.dividendYield;
   }
 }

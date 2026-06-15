@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
@@ -45,7 +45,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
         mainAxisSize: mobile ? MainAxisSize.min : MainAxisSize.max,
         spacing: 4,
         children: [
-          ChartHeader(
+          SproutChartHeader(
             title: "Recent Activity",
           ),
           mobile ? content : Expanded(child: content),

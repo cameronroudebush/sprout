@@ -16,6 +16,55 @@ class TransactionApi {
 
   final ApiClient apiClient;
 
+  /// Delete transaction.
+  ///
+  /// Deletes a transaction by the given ID.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<Response> transactionControllerDeleteWithHttpInfo(String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/transaction/{id}'
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete transaction.
+  ///
+  /// Deletes a transaction by the given ID.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<void> transactionControllerDelete(String id,) async {
+    final response = await transactionControllerDeleteWithHttpInfo(id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Edit transaction.
   ///
   /// Edits a transaction by the given ID.

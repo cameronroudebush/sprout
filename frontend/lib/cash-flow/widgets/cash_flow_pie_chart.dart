@@ -4,16 +4,17 @@ import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/shared/widgets/charts/header.dart';
+import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// This renders a pie chart for cash flow on how much money came in versus went out
 class CashFlowPieChart extends ConsumerWidget {
-  final PieLegendPosition legendPosition;
+  final SproutChartLegendPosition legendPosition;
   final DateTime selectedDate;
   final CashFlowView view;
   final bool showSubheader;
-  final ChartHeader? header;
+  final SproutChartHeader? header;
 
   const CashFlowPieChart(this.selectedDate,
       {super.key,

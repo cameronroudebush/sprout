@@ -93,8 +93,6 @@ class CategoryDropdown extends ConsumerWidget {
         var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParentId);
         if (displayAllCategoryButton && selectedValue == null) selectedValue = CategoryDropdown.fakeAllCategory;
 
-        // Build the display list
-        // Filter out special IDs and parents to get "clean" top-level categories
         final topLevel = cats
             .where(
               (c) =>
@@ -106,7 +104,6 @@ class CategoryDropdown extends ConsumerWidget {
             .toList()
           ..sort((a, b) => a.name.compareTo(b.name));
 
-        // Pin the specials back to the TOP of the display list
         topLevel.insert(0, unknownCategory);
         if (displayAllCategoryButton) topLevel.insert(0, fakeAllCategory);
 

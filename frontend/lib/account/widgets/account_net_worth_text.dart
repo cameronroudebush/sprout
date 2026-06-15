@@ -5,7 +5,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
-import 'package:sprout/shared/widgets/charts/range_selector.dart';
+import 'package:sprout/shared/widgets/charts/util/range_selector.dart';
 
 /// Widget that displays the current accounts value
 class AccountNetWorthText extends ConsumerWidget {
