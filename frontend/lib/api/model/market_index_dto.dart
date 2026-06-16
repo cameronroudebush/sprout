@@ -13,6 +13,7 @@ part of openapi.api;
 class MarketIndexDto {
   /// Returns a new [MarketIndexDto] instance.
   MarketIndexDto({
+    required this.type,
     this.previousClose,
     this.dayLow,
     this.dayHigh,
@@ -25,6 +26,9 @@ class MarketIndexDto {
     required this.changePercent,
     required this.lastUpdated,
   });
+
+  /// The type of financial instrument
+  MarketIndexDtoTypeEnum type;
 
   num? previousClose;
 
@@ -52,6 +56,7 @@ class MarketIndexDto {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is MarketIndexDto &&
+    other.type == type &&
     other.previousClose == previousClose &&
     other.dayLow == dayLow &&
     other.dayHigh == dayHigh &&
@@ -67,6 +72,7 @@ class MarketIndexDto {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (type.hashCode) +
     (previousClose == null ? 0 : previousClose!.hashCode) +
     (dayLow == null ? 0 : dayLow!.hashCode) +
     (dayHigh == null ? 0 : dayHigh!.hashCode) +
@@ -80,10 +86,11 @@ class MarketIndexDto {
     (lastUpdated.hashCode);
 
   @override
-  String toString() => 'MarketIndexDto[previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
+  String toString() => 'MarketIndexDto[type=$type, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'type'] = this.type;
     if (this.previousClose != null) {
       json[r'previousClose'] = this.previousClose;
     } else {
@@ -129,6 +136,8 @@ class MarketIndexDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
+        assert(json.containsKey(r'type'), 'Required key "MarketIndexDto[type]" is missing from JSON.');
+        assert(json[r'type'] != null, 'Required key "MarketIndexDto[type]" has a null value in JSON.');
         assert(json.containsKey(r'price'), 'Required key "MarketIndexDto[price]" is missing from JSON.');
         assert(json[r'price'] != null, 'Required key "MarketIndexDto[price]" has a null value in JSON.');
         assert(json.containsKey(r'symbol'), 'Required key "MarketIndexDto[symbol]" is missing from JSON.');
@@ -145,6 +154,7 @@ class MarketIndexDto {
       }());
 
       return MarketIndexDto(
+        type: MarketIndexDtoTypeEnum.fromJson(json[r'type'])!,
         previousClose: json[r'previousClose'] == null
             ? null
             : num.parse('${json[r'previousClose']}'),
@@ -211,6 +221,7 @@ class MarketIndexDto {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'type',
     'price',
     'symbol',
     'name',
@@ -219,6 +230,95 @@ class MarketIndexDto {
     'lastUpdated',
   };
 }
+
+/// The type of financial instrument
+class MarketIndexDtoTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const MarketIndexDtoTypeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const EQUITY = MarketIndexDtoTypeEnum._(r'EQUITY');
+  static const MUTUALFUND = MarketIndexDtoTypeEnum._(r'MUTUALFUND');
+  static const MONEYMARKET = MarketIndexDtoTypeEnum._(r'MONEYMARKET');
+  static const ETF = MarketIndexDtoTypeEnum._(r'ETF');
+  static const INDEX = MarketIndexDtoTypeEnum._(r'INDEX');
+  static const CURRENCY = MarketIndexDtoTypeEnum._(r'CURRENCY');
+  static const CRYPTOCURRENCY = MarketIndexDtoTypeEnum._(r'CRYPTOCURRENCY');
+
+  /// List of all possible values in this [enum][MarketIndexDtoTypeEnum].
+  static const values = <MarketIndexDtoTypeEnum>[
+    EQUITY,
+    MUTUALFUND,
+    MONEYMARKET,
+    ETF,
+    INDEX,
+    CURRENCY,
+    CRYPTOCURRENCY,
+  ];
+
+  static MarketIndexDtoTypeEnum? fromJson(dynamic value) => MarketIndexDtoTypeEnumTypeTransformer().decode(value);
+
+  static List<MarketIndexDtoTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <MarketIndexDtoTypeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = MarketIndexDtoTypeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [MarketIndexDtoTypeEnum] to String,
+/// and [decode] dynamic data back to [MarketIndexDtoTypeEnum].
+class MarketIndexDtoTypeEnumTypeTransformer {
+  factory MarketIndexDtoTypeEnumTypeTransformer() => _instance ??= const MarketIndexDtoTypeEnumTypeTransformer._();
+
+  const MarketIndexDtoTypeEnumTypeTransformer._();
+
+  String encode(MarketIndexDtoTypeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a MarketIndexDtoTypeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  MarketIndexDtoTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'EQUITY': return MarketIndexDtoTypeEnum.EQUITY;
+        case r'MUTUALFUND': return MarketIndexDtoTypeEnum.MUTUALFUND;
+        case r'MONEYMARKET': return MarketIndexDtoTypeEnum.MONEYMARKET;
+        case r'ETF': return MarketIndexDtoTypeEnum.ETF;
+        case r'INDEX': return MarketIndexDtoTypeEnum.INDEX;
+        case r'CURRENCY': return MarketIndexDtoTypeEnum.CURRENCY;
+        case r'CRYPTOCURRENCY': return MarketIndexDtoTypeEnum.CRYPTOCURRENCY;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [MarketIndexDtoTypeEnumTypeTransformer] instance.
+  static MarketIndexDtoTypeEnumTypeTransformer? _instance;
+}
+
 
 
 class MarketIndexDtoMarketStateEnum {

@@ -56,7 +56,9 @@ class HoldingRow extends ConsumerWidget {
                   ),
 
                   // Intraday Realtime Live Data Changes
-                  if (rowState.isLive)
+                  if (rowState.isLive &&
+                      rowState.changePercent != 0 &&
+                      rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

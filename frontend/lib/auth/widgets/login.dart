@@ -35,6 +35,12 @@ class LoginPage extends ConsumerWidget {
                       offset: const Offset(4, 0),
                     ),
                   ],
+                  border: Border(
+                    right: BorderSide(
+                      color: theme.colorScheme.secondary,
+                      width: 4.0,
+                    ),
+                  ),
                 ),
                 child: SafeArea(
                   child: Padding(
@@ -80,7 +86,9 @@ class LoginPage extends ConsumerWidget {
         return Stack(
           children: [
             Positioned.fill(
-              child: const LoginBackgroundWidget(),
+              child: const LoginBackgroundWidget(
+                showText: false,
+              ),
             ),
             SafeArea(
               child: Center(
