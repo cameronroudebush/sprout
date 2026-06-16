@@ -2,9 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
-import 'package:sprout/holding/models/expanded_holding.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
+
+/// Helps tracking merged movers so we don't say the same symbol multiple times
+class _MergedMover {
+  final String symbol;
+  final num liveMarketValue;
+  final num dayChange;
+  final num dayPercent;
+
+  _MergedMover({
+    required this.symbol,
+    required this.liveMarketValue,
+    required this.dayChange,
+    required this.dayPercent,
+  });
+}
 
 /// A widget that displays the top market gainers and losers from the users holdings.
 class HoldingMoverWidget extends ConsumerWidget {
@@ -20,16 +34,34 @@ class HoldingMoverWidget extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
 
-    final List<ExpandedHolding> allStates = [];
+    final Map<String, _MergedMover> mergedHoldings = {};
 
     for (final account in investmentAccounts) {
       final holdings = ref.watch(accountHoldingsProvider(account.id)).value ?? [];
       for (final holding in holdings) {
         final state = ref.watch(expandedHoldingProvider(holding));
-        allStates.add(state);
+        final symbol = holding.symbol;
+
+        if (mergedHoldings.containsKey(symbol)) {
+          final existing = mergedHoldings[symbol]!;
+          mergedHoldings[symbol] = _MergedMover(
+            symbol: symbol,
+            liveMarketValue: existing.liveMarketValue + state.liveMarketValue,
+            dayChange: existing.dayChange + state.dayChange,
+            dayPercent: state.dayPercent,
+          );
+        } else {
+          mergedHoldings[symbol] = _MergedMover(
+            symbol: symbol,
+            liveMarketValue: state.liveMarketValue,
+            dayChange: state.dayChange,
+            dayPercent: state.dayPercent,
+          );
+        }
       }
     }
 
+    final allStates = mergedHoldings.values.toList();
     allStates.sort((a, b) => b.dayPercent.compareTo(a.dayPercent));
 
     final gainers = allStates.where((s) => s.dayPercent > 0).take(count).toList();
@@ -87,7 +119,7 @@ class HoldingMoverWidget extends ConsumerWidget {
   }
 
   /// Builds the list of movers
-  Widget _buildMoverList(BuildContext context, String title, List<ExpandedHolding> movers, CurrencyFormatter formatter,
+  Widget _buildMoverList(BuildContext context, String title, List<_MergedMover> movers, CurrencyFormatter formatter,
       {required bool isGainer}) {
     final theme = Theme.of(context);
     final sectionColor = isGainer ? Colors.green : Colors.redAccent;
@@ -131,7 +163,7 @@ class HoldingMoverWidget extends ConsumerWidget {
               dense: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               title: Text(
-                mover.holding.symbol,
+                mover.symbol,
                 style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               trailing: Column(

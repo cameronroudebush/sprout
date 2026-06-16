@@ -11,6 +11,8 @@ class ExpandedHolding extends MarketIndexDto {
   final num dayPercent;
   final dynamic historicalFrame;
   final bool isLive;
+  final num totalGain;
+  final num totalGainPercent;
 
   ExpandedHolding({
     required this.holding,
@@ -32,6 +34,8 @@ class ExpandedHolding extends MarketIndexDto {
     required num baseChange,
     required num baseChangePercent,
     required String baseLastUpdated,
+    required this.totalGain,
+    required this.totalGainPercent,
   }) : super(
           price: basePrice,
           symbol: baseSymbol,

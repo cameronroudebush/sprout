@@ -101,7 +101,7 @@ class _IndexTile extends ConsumerWidget {
           ),
         SproutChangeWidget(
           totalChange: data.change,
-          percentageChange: data.changePercent,
+          percentageChange: data.changePercent * 100,
           mainAxisAlignment: MainAxisAlignment.center,
           showValue: false,
           fontSize: theme.textTheme.labelMedium!.fontSize!,
