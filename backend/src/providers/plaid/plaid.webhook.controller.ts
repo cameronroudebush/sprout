@@ -1,10 +1,26 @@
+import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
+import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
-import { BadRequestException, Body, Controller, Headers, Logger, Post, RawBodyRequest, Req } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { User } from "@backend/user/model/user.model";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Post,
+  Put,
+  RawBodyRequest,
+  Req,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
 import crypto from "crypto";
 import { Request } from "express";
 import jwt from "jsonwebtoken";
@@ -50,6 +66,35 @@ export class PlaidWebhookController {
     // Don't await so plaid isn't waiting on us.
     this.handleWebhook(payload);
     return { status: "received" };
+  }
+
+  @Put("migrate-url")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Bulk update all registered Plaid webhooks",
+    description:
+      "Iterates through all database items and pushes the updated webhook destination url to Plaid's servers. This is useful if you change where your server is located.",
+  })
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        baseUrl: { type: "string", example: "https://new-domain.com" },
+      },
+      required: ["baseUrl"],
+    },
+  })
+  @AuthGuard.attach()
+  async migrateWebhookUrls(@CurrentUser() user: User, @Body("baseUrl") baseUrl: string) {
+    if (!user.admin) throw new UnauthorizedException("You must be an admin to perform this capability.");
+    if (!baseUrl || !baseUrl.startsWith("http")) throw new BadRequestException("A valid base URL starting with http/https is required.");
+    // Strips trailing slashes cleanly if provided to prevent double-slashes in the service map
+    const sanitizedBaseUrl = baseUrl.replace(/\/+$/, "");
+    const results = await this.plaidProvider.updateAllItemWebhooks(sanitizedBaseUrl);
+    return {
+      message: "Webhook migration sequence complete.",
+      ...results,
+    };
   }
 
   /** Handles the webhook by calling the proper sync state. */

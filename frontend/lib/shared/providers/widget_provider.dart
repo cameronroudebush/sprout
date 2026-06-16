@@ -40,6 +40,8 @@ class WidgetSync extends _$WidgetSync {
       return;
     }
 
+    _setupDataChangeListeners();
+
     final netWorthAsync = ref.watch(totalNetWorthProvider);
     final transactionsAsync = ref.watch(transactionsProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
@@ -57,6 +59,18 @@ class WidgetSync extends _$WidgetSync {
 
     _setupListeners();
     await updateData();
+  }
+
+  /// Listens to data changes (like transactions completing their load)
+  /// and updates the native widget immediately.
+  void _setupDataChangeListeners() {
+    // Listen to the transactions provider state changes
+    ref.listen(transactionsProvider, (previous, next) async {
+      if (next.hasValue && !next.isLoading && !next.hasError) {
+        LoggerProvider.debug("WidgetSync: Transactions changed and loaded. Refreshing native widget.");
+        await updateData();
+      }
+    });
   }
 
   void _setupListeners() {
