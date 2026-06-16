@@ -12,6 +12,16 @@ export enum MarketState {
   POSTPOST = "POSTPOST", // Occurs late evening
 }
 
+export enum MarketQuoteType {
+  EQUITY = "EQUITY",
+  MUTUALFUND = "MUTUALFUND",
+  MONEYMARKET = "MONEYMARKET",
+  ETF = "ETF",
+  INDEX = "INDEX",
+  CURRENCY = "CURRENCY",
+  CRYPTOCURRENCY = "CRYPTOCURRENCY",
+}
+
 @CurrencyHelper.ExposeCurrencyFields<MarketIndexDto>("price", "currency")
 export class MarketIndexDto {
   @IsString()
@@ -19,6 +29,10 @@ export class MarketIndexDto {
 
   @IsString()
   name: string;
+
+  @IsEnum(MarketQuoteType)
+  @ApiProperty({ enum: MarketQuoteType, description: "The type of financial instrument" })
+  type: MarketQuoteType;
 
   @IsNumber()
   price: number;
@@ -76,5 +90,6 @@ export class MarketIndexDto {
     this.changePercent = quote.regularMarketChangePercent ?? 0;
     this.lastUpdated = quote.regularMarketTime ? new Date(quote.regularMarketTime).toISOString() : new Date().toISOString();
     this.dividendYield = quote.dividendYield;
+    this.type = quote.quoteType as MarketQuoteType;
   }
 }
