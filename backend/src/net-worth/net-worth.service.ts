@@ -5,7 +5,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { EntityHistory, EntityHistoryDataPoint, HistoricalDataPoint } from "@backend/net-worth/model/api/entity.history.dto";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
-import { differenceInDays, eachDayOfInterval, format, isSameDay, startOfDay, subDays } from "date-fns";
+import { differenceInDays, eachDayOfInterval, format, startOfDay, subDays } from "date-fns";
 
 /** Type that represents our net worth at a specific date */
 type NetWorthSnapshot = { date: Date; netWorth: number };
@@ -191,14 +191,22 @@ export class NetWorthService {
     const getFrame = (daysBack: number): EntityHistoryDataPoint => {
       const index = dailySnapshots.length - 1 - daysBack;
       const targetSnapshot = dailySnapshots[index < 0 ? 0 : index];
-      return this.calculateChange(dailySnapshots, targetSnapshot?.date || subDays(today, daysBack), relatedAccount);
+      return this.calculateChange(dailySnapshots, targetSnapshot, targetSnapshot?.date || subDays(today, daysBack), relatedAccount);
     };
-
-    const allTimeFrame = this.calculateChange(dailySnapshots, firstHistoryDate, relatedAccount);
+    const earliestSnapshot = dailySnapshots[0];
+    const allTimeFrame = this.calculateChange(dailySnapshots, earliestSnapshot, firstHistoryDate, relatedAccount);
 
     return {
       /** The entity history of the various time frames */
-      history: new EntityHistory(getFrame(1), getFrame(7), getFrame(30), getFrame(90), getFrame(180), getFrame(365), allTimeFrame),
+      history: new EntityHistory(
+        getFrame(1), // 1 Day
+        getFrame(6), // 1 Week
+        getFrame(29), // 1 Month
+        getFrame(89), // 3 Months
+        getFrame(179), // 6 Months
+        getFrame(364), // 1 Year
+        allTimeFrame,
+      ),
       /**
        * A historical representation of a timeline. Potentially expensive to generate
        * @param maxPoints The maximum number of data points we want to display
@@ -225,11 +233,8 @@ export class NetWorthService {
   }
 
   /** Standardized calc for determining value and percentage change for snapshots of data */
-  private calculateChange(snapshots: NetWorthSnapshot[], startDate: Date, relatedAccount?: Account) {
+  private calculateChange(snapshots: NetWorthSnapshot[], startSnapshot: NetWorthSnapshot | undefined, startDate: Date, relatedAccount?: Account) {
     const todaySnapshot = snapshots[snapshots.length - 1];
-
-    // Find the snapshot closest to the start date requested
-    let startSnapshot = snapshots.find((x) => isSameDay(x.date, startDate));
 
     if (!startSnapshot) startSnapshot = snapshots[0];
 

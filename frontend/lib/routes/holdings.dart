@@ -23,7 +23,7 @@ import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 // Available tabs
-enum MobileMarketTab { overview, market }
+enum MobileMarketTab { holdings, overview }
 
 /// This page displays an overview of all holdings related to the current user
 class HoldingsPage extends ConsumerStatefulWidget {
@@ -37,7 +37,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   /// The selected holding we're showing the performance of
   Holding? _selectedHolding;
   bool _hasInitialSelection = false;
-  MobileMarketTab _currentTab = MobileMarketTab.overview;
+  MobileMarketTab _currentTab = MobileMarketTab.holdings;
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +167,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
           return SproutRouteWrapper(
             child: Column(
               children: [
-                if (_currentTab == MobileMarketTab.overview) ...[
+                if (_currentTab == MobileMarketTab.holdings) ...[
                   const MajorIndicesBarWidget(),
                   if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme, isDesktop),
                 ],
@@ -176,7 +176,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (_currentTab == MobileMarketTab.overview) ...[
+                        if (_currentTab == MobileMarketTab.holdings) ...[
                           _buildHoldingsPanel(theme, investmentAccounts),
                         ] else ...[
                           const SproutCard(
@@ -212,12 +212,12 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                       ),
                       segments: const [
                         ButtonSegment(
-                          value: MobileMarketTab.overview,
-                          label: Text('Overview'),
+                          value: MobileMarketTab.holdings,
+                          label: Text('Holdings'),
                         ),
                         ButtonSegment(
-                          value: MobileMarketTab.market,
-                          label: Text('Market'),
+                          value: MobileMarketTab.overview,
+                          label: Text('Overview'),
                         ),
                       ],
                       selected: {_currentTab},

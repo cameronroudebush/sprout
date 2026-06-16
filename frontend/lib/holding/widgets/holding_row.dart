@@ -121,6 +121,37 @@ class HoldingRow extends ConsumerWidget {
                         ),
                     ],
                   ),
+
+                  // Total Value Change (All-Time)
+                  if (rowState.totalGainPercent != 0)
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Row(
+                        spacing: 4,
+                        children: [
+                          Text(
+                            "Total Value Change",
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          Tooltip(
+                            message:
+                                "The total all-time gains or losses for this holding based on your average cost basis. This value updates less often and may lag behind live market movements.",
+                            child: Icon(
+                              Icons.info_outline,
+                              size: 12,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SproutChangeWidget(
+                        totalChange: rowState.totalGain,
+                        percentageChange: rowState.totalGainPercent,
+                        fontSize: theme.textTheme.labelMedium!.fontSize!,
+                        useExtendedPeriodString: false,
+                      ),
+                    ])
                 ],
               ),
             ),

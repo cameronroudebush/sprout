@@ -15,7 +15,10 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
     bool expanded = false,
   }) {
     Widget buildLoading() => const Center(
-          child: CircularProgressIndicator(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 24.0),
+            child: CircularProgressIndicator(),
+          ),
         );
 
     Widget buildError(Object err) => Center(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/auth/widgets/login_bg.dart';
 import 'package:sprout/auth/widgets/login_form.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -12,59 +13,123 @@ class LoginPage extends ConsumerWidget {
 
   const LoginPage({super.key, this.onLoginSuccess});
 
-  Widget _buildForm(BuildContext context, WidgetRef ref, bool isDesktop) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final config = ref.watch(unsecureConfigProvider).value;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 640, maxHeight: 640),
-      child: Padding(
-        padding: const EdgeInsets.all(22.0),
-        child: SproutCard(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : 12),
-                  child: SproutLogo(isDesktop ? 600 : 400),
-                ),
-                Column(
-                  spacing: 24,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Welcome Back!', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    LoginForm(),
+    return Scaffold(
+      body: SproutLayoutBuilder((isDesktop, context, constraints) {
+        // Desktop
+        if (isDesktop) {
+          return Row(
+            children: [
+              Container(
+                width: 480,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(4, 0),
+                    ),
                   ],
                 ),
-                Text(config?.version ?? ""),
-              ],
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 48.0),
+                    child: Column(
+                      children: [
+                        SproutLogo(400),
+                        const Spacer(),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 24,
+                          children: [
+                            Text(
+                              'Welcome Back!',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const LoginForm(),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          config?.version ?? "",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: LoginBackgroundWidget(),
+              ),
+            ],
+          );
+        }
+
+        // Mobile
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: const LoginBackgroundWidget(),
             ),
-          ),
-        ),
-      ),
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: SproutCard(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SproutLogo(300),
+                              const SizedBox(height: 32),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 24,
+                                children: [
+                                  Text(
+                                    'Welcome Back!',
+                                    style: theme.textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const LoginForm(),
+                                ],
+                              ),
+                              const SizedBox(height: 32),
+                              Text(
+                                config?.version ?? "",
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
     );
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      final form = _buildForm(context, ref, isDesktop);
-      final mediaSize = MediaQuery.of(context).size;
-
-      return SizedBox(
-        height: mediaSize.height,
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/${isDesktop ? 'login/login.png' : 'login/login.mobile.png'}'),
-              fit: BoxFit.fill,
-            ),
-          ),
-          child: Center(child: form),
-        ),
-      );
-    });
   }
 }
