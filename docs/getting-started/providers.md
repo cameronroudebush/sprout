@@ -117,3 +117,4 @@ Follow these steps to get your credentials and connect your first account:
 ### Why Choose Plaid?
 
 - **Industry Standard**: Most major US banks have "OAuth" integrations with Plaid, meaning you often don't have to share your bank password with Plaid at all—you simply authorize Sprout through your bank's own website.
+- **Update Timing**: Plaid utilizes webhooks to help tell Sprout to request new data more often than other providers might.

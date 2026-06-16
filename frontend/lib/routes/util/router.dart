@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +56,19 @@ final routerProvider = Provider<GoRouter>((ref) {
     }).toList();
   }
 
+  /// Used to display in the loading indicator
+  final loadingPhrases = [
+    "Watering your compounding interest...",
+    "Sowing the seeds of generational wealth...",
+    "Fertilizing your portfolio...",
+    "Harvesting your gains...",
+    "Planting pennies, growing dollars...",
+    "Tilling the financial soil...",
+    "Convincing your savings to stretch a little taller...",
+    "Pruning the bad investments...",
+    "Watering the money tree...",
+  ];
+
   final router = GoRouter(
     navigatorKey: NavigationProvider.key,
     refreshListenable: notifier,
@@ -63,11 +78,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/loading',
         pageBuilder: (context, state) {
           final splashAsync = ref.watch(sproutSplashManagerProvider);
+          final randomPhrase = loadingPhrases[Random().nextInt(loadingPhrases.length)];
           return NoTransitionPage(
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: SproutLoadingIndicator(
-                message: "Initializing...",
+                message: randomPhrase,
                 animate: splashAsync.isLoading,
               ),
             ),
