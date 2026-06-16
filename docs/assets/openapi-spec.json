@@ -914,6 +914,52 @@
         "tags": ["Webhook"]
       }
     },
+    "/webhooks/plaid/migrate-url": {
+      "put": {
+        "description": "Iterates through all database items and pushes the updated webhook destination url to Plaid's servers. This is useful if you change where your server is located.",
+        "operationId": "PlaidWebhookController_migrateWebhookUrls",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "baseUrl": {
+                    "type": "string",
+                    "example": "https://new-domain.com"
+                  }
+                },
+                "required": ["baseUrl"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bulk update all registered Plaid webhooks",
+        "tags": ["Webhook"]
+      }
+    },
     "/sse": {
       "get": {
         "operationId": "SSEController_sse",
@@ -3876,6 +3922,11 @@
       "MarketIndexDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "enum": ["EQUITY", "MUTUALFUND", "MONEYMARKET", "ETF", "INDEX", "CURRENCY", "CRYPTOCURRENCY"],
+            "type": "string",
+            "description": "The type of financial instrument"
+          },
           "previousClose": {
             "type": "number",
             "nullable": true
@@ -3919,7 +3970,7 @@
             "type": "string"
           }
         },
-        "required": ["price", "symbol", "name", "change", "changePercent", "lastUpdated"]
+        "required": ["type", "price", "symbol", "name", "change", "changePercent", "lastUpdated"]
       },
       "MajorIndexTimelinePoint": {
         "type": "object",

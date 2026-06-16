@@ -42,6 +42,13 @@ class HoldingMoverWidget extends ConsumerWidget {
         final state = ref.watch(expandedHoldingProvider(holding));
         final symbol = holding.symbol;
 
+        final isMutualFund = state.type == MarketIndexDtoTypeEnum.MUTUALFUND;
+        final isMarketOpen = state.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
+
+        if (isMutualFund && isMarketOpen) {
+          continue; // Skip calculating daily moves for mutual funds until post-close updates land
+        }
+
         if (mergedHoldings.containsKey(symbol)) {
           final existing = mergedHoldings[symbol]!;
           mergedHoldings[symbol] = _MergedMover(

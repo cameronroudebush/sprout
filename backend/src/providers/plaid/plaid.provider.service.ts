@@ -15,6 +15,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { AxiosError } from "axios";
+import { isToday, parseISO, set } from "date-fns";
 import { merge } from "lodash";
 import {
   CountryCode,
@@ -344,6 +345,35 @@ export class PlaidProviderService extends ProviderBase {
     }
   }
 
+  /**
+   * Iterates through every Plaid item connection in the database and updates
+   * its destination webhook URL to match a new server domain layout.
+   */
+  async updateAllItemWebhooks(newBaseUrl: string): Promise<{ successCount: number; failureCount: number }> {
+    this.checkPlaidClient();
+    const assets = await PlaidInstitutionAsset.find({
+      relations: ["institution"],
+    });
+    const targetWebhookUrl = `${newBaseUrl}${Configuration.server.basePath}/webhooks/plaid`;
+    this.logger.log(`Starting bulk update of Plaid webhooks to target: ${targetWebhookUrl}`);
+    let successCount = 0;
+    let failureCount = 0;
+    for (const asset of assets) {
+      try {
+        await this.plaidClient.itemWebhookUpdate({
+          access_token: asset.accessToken,
+          webhook: targetWebhookUrl,
+        });
+        this.logger.debug(`Successfully updated webhook for Plaid Item ID: ${asset.itemId} (${asset.institution?.name})`);
+        successCount++;
+      } catch (error) {
+        this.logger.error(`Failed to update webhook for Plaid Item ID: ${asset.itemId}`, error);
+        failureCount++;
+      }
+    }
+    return { successCount, failureCount };
+  }
+
   /** Converts the given plaid account to Sprout's local model. Does not insert. */
   private convertPlaidAccount(acc: PlaidAccount, user: User, institution: Institution) {
     const accType = this.mapType(acc.type);
@@ -364,9 +394,24 @@ export class PlaidProviderService extends ProviderBase {
 
   /** Converts Plaid's transaction format to Sprout's local Transaction model */
   private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, _user: User) {
+    const now = new Date();
+
     return await Promise.all(
       transactions.map(async (t) => {
-        const newTransaction = new Transaction(t.amount * -1, new Date(t.date), t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
+        // Parse Plaid's 'YYYY-MM-DD' safely as a local date profile
+        const parsedDate = parseISO(t.date);
+
+        // If it's today, inject the current live system time. Otherwise, parseISO automatically defaults it to local midnight (00:00:00).
+        const transactionDate = isToday(parsedDate)
+          ? set(parsedDate, {
+              hours: now.getHours(),
+              minutes: now.getMinutes(),
+              seconds: now.getSeconds(),
+              milliseconds: now.getMilliseconds(),
+            })
+          : parsedDate;
+
+        const newTransaction = new Transaction(t.amount * -1, transactionDate, t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
         newTransaction.id = t.transaction_id;
         newTransaction.extra = { code: t.transaction_code, location: t.location };
         return newTransaction;
