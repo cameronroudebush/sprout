@@ -121,7 +121,7 @@ export class ChatService {
       await Transaction.find({
         where: { account: { user: { id: user.id } }, posted: MoreThan(historicalTimeFrame) },
         order: { posted: "DESC" },
-        relations: ["category"],
+        relations: { category: true },
       }),
       user,
     );

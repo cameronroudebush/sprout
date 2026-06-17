@@ -24,7 +24,7 @@ export class StatusEmailJob extends DistributedQueueJob<EmailTaskPayload> {
         email: Not(IsNull()),
         config: { emailUpdateFrequency: EmailUpdateFrequency.WEEKLY },
       },
-      select: ["id"],
+      select: { id: true },
     });
 
     this.logger.log(`Located ${users.length} users due for a status email update.`);

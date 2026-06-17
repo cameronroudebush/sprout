@@ -56,9 +56,8 @@ class HoldingRow extends ConsumerWidget {
                   ),
 
                   // Intraday Realtime Live Data Changes
-                  if (rowState.isLive &&
-                      rowState.changePercent != 0 &&
-                      rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND)
+                  if (rowState.changePercent != 0 &&
+                      (rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND || !rowState.isLive))
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -108,7 +107,7 @@ class HoldingRow extends ConsumerWidget {
                                 "This is the most recent change reported by ${rowState.account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
                             child: Icon(
                               Icons.info_outline,
-                              size: 12,
+                              size: 14,
                               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                           ),
@@ -141,7 +140,7 @@ class HoldingRow extends ConsumerWidget {
                                 "The total all-time gains or losses for this holding based on your average cost basis. This value updates less often and may lag behind live market movements.",
                             child: Icon(
                               Icons.info_outline,
-                              size: 12,
+                              size: 14,
                               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                           ),

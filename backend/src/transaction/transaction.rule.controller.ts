@@ -39,7 +39,7 @@ export class TransactionRuleController {
   })
   @ApiOkResponse({ description: "Transaction rules found successfully.", type: [TransactionRule] })
   async get(@CurrentUser() user: User) {
-    return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" }, relations: ["category.parentCategory"] });
+    return await TransactionRule.find({ where: { user: { id: user.id } }, order: { order: "ASC" }, relations: { category: { parentCategory: true } } });
   }
 
   @Delete(":id")
@@ -91,7 +91,7 @@ export class TransactionRuleController {
     await this.transactionRuleService.applyRulesToTransactions(user);
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
 
-    return TransactionRule.findOne({ where: { id: updatedRule.id }, relations: ["category.parentCategory"] });
+    return TransactionRule.findOne({ where: { id: updatedRule.id }, relations: { category: { parentCategory: true } } });
   }
 
   @Post()

@@ -81,7 +81,7 @@ export class PlaidProviderService extends ProviderBase {
     this.checkPlaidClient();
     const institutions = await PlaidInstitutionAsset.find({
       where: { institution: { user: { id: user.id } } },
-      relations: ["institution"],
+      relations: { institution: true },
     });
     const results: Awaited<ReturnType<PlaidProviderService["syncSingleInstitution"]>> = [];
     const updates = (await Promise.all(institutions.flatMap(async (asset) => await this.syncSingleInstitution(user, asset, accountsOnly)))).flat();
@@ -131,7 +131,10 @@ export class PlaidProviderService extends ProviderBase {
 
       for (const acc of accountsResponse.data.accounts) {
         let account = this.convertPlaidAccount(acc, user, asset.institution);
-        let plaidAsset = await PlaidAsset.findOne({ where: { plaidAccountId: acc.account_id, account: { user: { id: user.id } } }, relations: ["account"] });
+        let plaidAsset = await PlaidAsset.findOne({
+          where: { plaidAccountId: acc.account_id, account: { user: { id: user.id } } },
+          relations: { account: true },
+        });
 
         // This is a new account. Handle it like so.
         if (plaidAsset == null) {
@@ -325,7 +328,7 @@ export class PlaidProviderService extends ProviderBase {
     this.checkPlaidClient();
     const instAsset = await PlaidInstitutionAsset.findOne({
       where: { institution: { id: institutionId, user: { id: user.id } } },
-      relations: ["institution"],
+      relations: { institution: true },
     });
     // If it's already gone, silently return true so the controller can finish deleting the institution
     if (!instAsset) return true;
@@ -352,7 +355,7 @@ export class PlaidProviderService extends ProviderBase {
   async updateAllItemWebhooks(newBaseUrl: string): Promise<{ successCount: number; failureCount: number }> {
     this.checkPlaidClient();
     const assets = await PlaidInstitutionAsset.find({
-      relations: ["institution"],
+      relations: { institution: true },
     });
     const targetWebhookUrl = `${newBaseUrl}${Configuration.server.basePath}/webhooks/plaid`;
     this.logger.log(`Starting bulk update of Plaid webhooks to target: ${targetWebhookUrl}`);
