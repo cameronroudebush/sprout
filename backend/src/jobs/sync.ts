@@ -62,7 +62,7 @@ class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
     // Run DB cleanup for old sync records while the lock is held
     await this.cleanupOldSyncs();
 
-    const users = await User.find({ select: ["id"] });
+    const users = await User.find({ select: { id: true } });
     return users.map((u) => ({ userId: u.id }));
   }
 

@@ -1,3 +1,4 @@
+import { Account } from "@backend/account/model/account.model";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CategoryService } from "@backend/category/category.service";
 import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
@@ -9,7 +10,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { IsNull } from "typeorm";
+import { FindOptionsWhere, IsNull } from "typeorm";
 
 /** This controller contains endpoints for {@link Category} models which allow us to group transactions. */
 @Controller("category")
@@ -28,7 +29,7 @@ export class CategoryController {
   })
   @ApiOkResponse({ description: "Categories found successfully.", type: [Category] })
   async getCategories(@CurrentUser() user: User) {
-    return await Category.find({ where: { user: { id: user.id } }, relations: ["parentCategory"] });
+    return await Category.find({ where: { user: { id: user.id } }, relations: { parentCategory: true } });
   }
 
   @Get("stats")
@@ -64,7 +65,10 @@ export class CategoryController {
   @ApiQuery({ name: "accountId", required: false, type: String, description: "The ID of the account to retrieve transactions from." })
   @ApiOkResponse({ description: "Unknown category stats found successfully.", schema: { type: "integer", format: "int32" } })
   async getUnknownCategoryStats(@CurrentUser() user: User, @Query("accountId") accountId?: string) {
-    return await Transaction.count({ where: { category: IsNull(), pending: false, account: { id: accountId, user: { id: user.id } } } });
+    const account: FindOptionsWhere<Account> = { user: { id: user.id } };
+    if (accountId) account.id = accountId;
+    const where: FindOptionsWhere<Transaction> = { category: IsNull(), pending: false, account };
+    return await Transaction.count({ where });
   }
 
   @Post()
@@ -102,7 +106,7 @@ export class CategoryController {
   @ApiOkResponse({ description: "Category deleted successfully." })
   @ApiNotFoundResponse({ description: "Category with the specified ID not found." })
   async delete(@Param("id") id: string, @CurrentUser() user: User) {
-    const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } }, relations: ["parentCategory"] });
+    const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } }, relations: { parentCategory: true } });
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to delete.");
 
     // If the deleted category has children, reassign them to the deleted category's parent

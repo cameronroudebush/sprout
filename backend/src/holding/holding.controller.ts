@@ -70,7 +70,7 @@ export class HoldingController {
   async getSpecificHoldingHistory(@Param("id") id: string, @CurrentUser() user: User) {
     const holding = await Holding.findOne({
       where: { id, account: { user: { id: user.id } } },
-      relations: ["account"],
+      relations: { account: true },
     });
     if (!holding) throw new NotFoundException(`Failed to find holding with id ${id}`);
     const history = await this.netWorthService.getHistoryForHolding(holding);

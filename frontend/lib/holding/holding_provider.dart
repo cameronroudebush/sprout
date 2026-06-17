@@ -107,7 +107,7 @@ class BatchedLivePrices extends _$BatchedLivePrices {
         return;
       }
 
-      final symbolsToFetch = _pendingSymbols.toList();
+      final symbolsToFetch = _pendingSymbols.toList()..sort();
       _pendingSymbols.clear();
 
       try {
@@ -134,7 +134,8 @@ class BatchedLivePrices extends _$BatchedLivePrices {
     if (state.isEmpty) return;
     try {
       final api = await ref.read(holdingApiProvider.future);
-      final results = await api.holdingControllerGetLivePrices(state.keys.toList());
+      final sortedSymbols = state.keys.toList()..sort();
+      final results = await api.holdingControllerGetLivePrices(sortedSymbols);
       if (results != null) {
         final newState = Map<String, MarketIndexDto>.from(state);
         for (final data in results) {

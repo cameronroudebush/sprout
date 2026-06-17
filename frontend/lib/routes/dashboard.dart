@@ -70,7 +70,7 @@ class DashboardPage extends ConsumerWidget {
           ),
         ),
         ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 409),
+            constraints: const BoxConstraints(maxHeight: 425),
             child: Stack(
               children: [
                 Row(

@@ -293,7 +293,7 @@ async function createTransactions(user: User, accounts: Account[], days: number)
     await Promise.all(subCategoryCreations);
     logger.log(`Updated ${subCategoryCreations.length} categories with parent relationships.`);
     // Re-fetch categories to ensure parent relationships are loaded for getCategory()
-    const allCategories = await Category.find({ where: { user: { id: user.id } }, relations: ["parentCategory"] });
+    const allCategories = await Category.find({ where: { user: { id: user.id } }, relations: { parentCategory: true } });
     for (const newCategory of allCategories) {
       categoryCache.set(newCategory.name, newCategory);
     }
