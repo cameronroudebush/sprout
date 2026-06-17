@@ -74,7 +74,7 @@ export class AccountController {
   async delete(@Param("id") id: string, @CurrentUser() user: User) {
     const matchingAccountForUser = await Account.findOne({
       where: { id: id, user: { id: user.id } },
-      relations: ["institution"],
+      relations: { institution: true },
     });
     if (matchingAccountForUser == null) throw new NotFoundException(`Account with ID ${id} not found or does not belong to the user.`);
     const deleteResult = await Account.deleteById(id);
@@ -161,8 +161,8 @@ export class AccountController {
     if (targetId === sourceId) throw new BadRequestException("Cannot merge an account into itself.");
 
     // Fetch both accounts ensuring they belong to the current user
-    const targetAccount = await Account.findOne({ where: { id: targetId, user: { id: user.id } }, relations: ["institution"] });
-    const sourceAccount = await Account.findOne({ where: { id: sourceId, user: { id: user.id } }, relations: ["institution"] });
+    const targetAccount = await Account.findOne({ where: { id: targetId, user: { id: user.id } }, relations: { institution: true } });
+    const sourceAccount = await Account.findOne({ where: { id: sourceId, user: { id: user.id } }, relations: { institution: true } });
 
     if (!targetAccount || !sourceAccount) throw new NotFoundException("One or both accounts were not found or do not belong to you.");
     if (targetAccount.type !== sourceAccount.type) throw new BadRequestException("Only accounts of the same type can be merged.");

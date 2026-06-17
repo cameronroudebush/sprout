@@ -80,7 +80,7 @@ export class ProviderSyncService {
 
     for (const data of accounts) {
       try {
-        const accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: ["institution"] });
+        const accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
         // Skip missing accounts. We will not insert them, that's the link job from the specific provider.
         if (!accountInDB) continue;
 

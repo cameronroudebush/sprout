@@ -36,7 +36,7 @@ describe("StatusEmailJob", () => {
           email: Not(IsNull()),
           config: { emailUpdateFrequency: EmailUpdateFrequency.WEEKLY },
         },
-        select: ["id"],
+        select: { id: true },
       });
       expect(logSpy).toHaveBeenCalledWith("Located 2 users due for a status email update.");
       expect(result).toEqual([{ userId: "user-alpha" }, { userId: "user-beta" }]);
