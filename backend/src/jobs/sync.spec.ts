@@ -95,7 +95,7 @@ describe("ProviderSyncOrchestratorJob", () => {
         const result = await (instance as any).generateTasks();
 
         expect(cleanupSpy).toHaveBeenCalled();
-        expect(findSpy).toHaveBeenCalledWith({ select: ["id"] });
+        expect(findSpy).toHaveBeenCalledWith({ select: { id: true } });
         expect(result).toEqual([{ userId: "u1" }, { userId: "u2" }]);
       });
     });

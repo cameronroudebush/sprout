@@ -103,7 +103,7 @@ export class PlaidWebhookController {
     if (!item_id) return;
     const instAsset = await PlaidInstitutionAsset.findOne({
       where: { itemId: item_id },
-      relations: ["institution", "institution.user"],
+      relations: { institution: { user: true } },
     });
     if (!instAsset) {
       this.logger.warn(`Failed to locate matching institution to update: ${item_id}`);

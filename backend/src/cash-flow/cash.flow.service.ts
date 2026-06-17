@@ -44,13 +44,15 @@ export class CashFlowService {
     }
 
     // Fetch Transactions
+    const account: FindOptionsWhere<Account> = { user: { id: user.id } };
+    if (accountId) account.id = accountId;
     const where = {
-      account: { id: accountId, user: { id: user.id } },
+      account,
       posted: between,
       pending: false,
     } as FindOptionsWhere<Transaction>;
-
-    const transactions = Transaction.convertListToTargetCurrency(await Transaction.find({ where, relations: ["category", "account"] }), user);
+    const transactionsRaw = await Transaction.find({ where });
+    const transactions = Transaction.convertListToTargetCurrency(transactionsRaw, user);
 
     const categoryStats = new Map<string, { category: Category; inflow: number; outflow: number }>();
 
@@ -107,7 +109,7 @@ export class CashFlowService {
     const { categoryStats } = await this.calculateFlows(user, year, month, day, accountId);
 
     // Load full category tree for path mapping
-    const categories = await Category.find({ where: { user: { id: user.id } }, relations: ["parentCategory"] });
+    const categories = await Category.find({ where: { user: { id: user.id } }, relations: { parentCategory: true } });
     const categoryMap = new Map<string, Category>(categories.map((c) => [c.id, c]));
 
     const incomeHubName = "Flow Through";

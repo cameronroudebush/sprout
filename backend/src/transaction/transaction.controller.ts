@@ -127,7 +127,7 @@ export class TransactionController {
         const currentId = queue.shift()!;
         const children = await Category.find({
           where: { parentCategory: { id: currentId } },
-          select: ["id"], // Only fetch the IDs for efficiency
+          select: { id: true }, // Only fetch the IDs for efficiency
         });
 
         for (const child of children) {
@@ -146,18 +146,22 @@ export class TransactionController {
       dateFilter = Between(startOfDay(new Date(startDate)), endOfDay(new Date(endDate)));
     }
 
+    const account: FindOptionsWhere<Account> = { user: { id: user.id } };
+    if (accountId) account.id = accountId;
+    const where: FindOptionsWhere<Transaction> = {
+      account,
+    };
+    if (pending) where.pending = pending;
+    if (dateFilter) where.posted = dateFilter;
+    if (description) where.description = Like(`%${description}%`);
+    if (categoryQuery) where.category = categoryQuery;
+
     return await Transaction.find({
       skip: startIndex,
       take: endIndex,
-      where: {
-        account: { id: accountId, user: { id: user.id } },
-        category: categoryQuery,
-        description: description ? Like(`%${description}%`) : undefined,
-        posted: dateFilter,
-        pending: pending === undefined ? undefined : pending,
-      },
+      where,
       order: { posted: "DESC", pending: "DESC", description: "ASC" },
-      relations: ["category", "category.parentCategory"],
+      relations: { category: { parentCategory: true } },
     });
   }
 
