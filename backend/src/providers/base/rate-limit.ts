@@ -4,7 +4,7 @@ import { ProviderType } from "@backend/providers/base/provider.type";
 import { User } from "@backend/user/model/user.model";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
-import { ManyToOne } from "typeorm";
+import { FindOptionsWhere, ManyToOne } from "typeorm";
 
 /**
  * This class is used to provide a rate limit to different providers. This is required
@@ -44,7 +44,9 @@ export class ProviderRateLimit extends DatabaseBase {
 
   /** Either increments the current count and last updated date or throws an error if there will be too many calls. */
   async incrementOrError() {
-    const inDb = await ProviderRateLimit.findOne({ where: { name: this.name, user: { id: this.user?.id } } });
+    const where: FindOptionsWhere<ProviderRateLimit> = { name: this.name };
+    if (this.user) where.user = { id: this.user.id };
+    const inDb = await ProviderRateLimit.findOne({ where });
     const today = new Date();
     // No limit tracked in the db? Create one.
     if (inDb == null) {

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/api/base_api.dart';
-import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/shared/providers/extensions/sse_auto_refresh.dart';
 
 part 'cash_flow_provider.g.dart';
 
@@ -16,14 +16,7 @@ Future<CashFlowApi> cashFlowApi(Ref ref) async {
 /// Sankey data based on time
 @Riverpod(keepAlive: true)
 Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
-  // Automatically refresh on SSE forceUpdate
-  ref.listen(sseProvider, (prev, next) {
-    final event = next.latestData?.event;
-    if (event == SSEDataEventEnum.forceUpdate) {
-      ref.invalidateSelf();
-    }
-  });
-
+  ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
   final data = await api.cashFlowControllerGetSankey(year, month: month, day: day, accountId: accountId);
 
@@ -41,6 +34,7 @@ Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day,
 /// State for cash flow stats
 @Riverpod(keepAlive: true)
 Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+  ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
   return await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: accountId);
 }
@@ -48,6 +42,7 @@ Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, in
 /// State for cash flow trends
 @Riverpod(keepAlive: true)
 Future<List<CashFlowTrendStats>?> cashFlowTrend(Ref ref, int months) async {
+  ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
   return await api.cashFlowControllerGetTrend(months);
 }
@@ -77,13 +72,8 @@ class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
     required int targetYear,
     int? targetMonth,
   }) async {
+    ref.refreshOnForceUpdate();
     final api = await ref.watch(cashFlowApiProvider.future);
-
-    ref.listen(sseProvider, (prev, next) {
-      if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
-        ref.invalidateSelf();
-      }
-    });
 
     return await api.cashFlowControllerGetComparisonTimeline(
       baselineYear,
@@ -97,11 +87,7 @@ class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
 /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
 @Riverpod(keepAlive: true)
 Future<Map<int, double>> dailySpending(Ref ref, {required int month, required int year}) async {
-  ref.listen(sseProvider, (prev, next) {
-    if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
-      ref.invalidateSelf();
-    }
-  });
+  ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
   final DailySpendingCalendarResponseDTO? response = await api.cashFlowControllerGetDailyCalendarSpending(
     year,

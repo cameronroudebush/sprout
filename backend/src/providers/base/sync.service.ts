@@ -54,6 +54,7 @@ export class ProviderSyncService {
       sync.status = "failed";
       sync.failureReason = (e as Error).message;
       await sync.update();
+      this.logger.error(`An error occurred during a sync: ${e}`);
     }
     return sync;
   }
