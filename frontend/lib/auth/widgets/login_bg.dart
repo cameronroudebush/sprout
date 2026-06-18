@@ -119,8 +119,14 @@ class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with Sing
 
     if (widget.textOptions.isEmpty || !widget.showText) return;
     int textCount = ((size.width * size.height) / 80000).floor();
-    for (int i = 0; i < textCount; i++) {
-      String text = widget.textOptions[_random.nextInt(widget.textOptions.length)];
+    // Create a unique, shuffled list from textOptions
+    final List<String> uniquePool = List.from(widget.textOptions)..shuffle(_random);
+    // Ensure we don't try to pull more unique items than available in the pool
+    final int maxUniqueCount = min(textCount, uniquePool.length);
+
+    for (int i = 0; i < maxUniqueCount; i++) {
+      // Pull sequentially from our already shuffled, unique pool
+      String text = uniquePool[i];
       double fontSize = _random.nextDouble() * 12 + 12;
       double opacity = _random.nextDouble() * 0.15 + 0.05;
       double vx = _random.nextDouble() * 0.4 + 0.1;
