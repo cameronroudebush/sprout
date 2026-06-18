@@ -25,6 +25,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
   late TextEditingController _nameController;
   String? _selectedIcon;
   String? _selectedParentId;
+  late bool _excludeFromCashFlow;
+  late bool _canBeHighestExpense;
 
   @override
   void initState() {
@@ -32,6 +34,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
     _nameController = TextEditingController(text: widget.category?.name);
     _selectedIcon = widget.category?.icon ?? "payment";
     _selectedParentId = widget.category?.parentCategoryId;
+    _excludeFromCashFlow = widget.category?.excludeFromCashFlow ?? false;
+    _canBeHighestExpense = widget.category?.canBeHighestExpense ?? true;
   }
 
   @override
@@ -71,6 +75,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
       name: name,
       icon: _selectedIcon,
       parentCategoryId: _selectedParentId,
+      excludeFromCashFlow: _excludeFromCashFlow,
+      canBeHighestExpense: _canBeHighestExpense,
     );
 
     if (widget.category == null) {
@@ -87,6 +93,9 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final helpStyle = const TextStyle(fontSize: 12, color: Colors.grey);
+
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _nameController,
       builder: (context, value, child) {
@@ -106,7 +115,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
               : IconButton.filled(
                   style: ThemeHelpers.errorButton,
                   onPressed: () => _confirmDelete(context),
-                  icon: Icon(Icons.delete),
+                  icon: const Icon(Icons.delete),
                 ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -126,6 +135,46 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                 (newValue) => setState(() => _selectedParentId = newValue?.id),
                 editingCategoryId: widget.category?.id,
                 label: "Parent Category",
+              ),
+
+              // Exclude From Cash Flow Toggle
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Exclude from Cash Flow", style: theme.textTheme.titleMedium),
+                        Text("If we should exclude this category from cash flow calculations.", style: helpStyle),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _excludeFromCashFlow,
+                    onChanged: (newValue) => setState(() => _excludeFromCashFlow = newValue),
+                  ),
+                ],
+              ),
+
+              // Can Be Highest Expense Toggle
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Allow as Highest Expense", style: theme.textTheme.titleMedium),
+                        Text(
+                            "If this category can be considered a \"high expense\" when calculating cash flow stats. Turn off for things like credit card payments.",
+                            style: helpStyle),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _canBeHighestExpense,
+                    onChanged: (newValue) => setState(() => _canBeHighestExpense = newValue),
+                  ),
+                ],
               ),
             ],
           ),

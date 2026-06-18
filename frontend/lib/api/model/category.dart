@@ -17,6 +17,8 @@ class Category {
     required this.name,
     this.parentCategoryId,
     this.icon,
+    this.excludeFromCashFlow = false,
+    this.canBeHighestExpense = true,
   });
 
   String id;
@@ -41,12 +43,20 @@ class Category {
   ///
   String? icon;
 
+  /// If we should exclude this category from cash flow calculations
+  bool excludeFromCashFlow;
+
+  /// If this category can be considered a \"high expense\" when calculating cash flow stats. You'd want to turn this off for things like credit card payments.
+  bool canBeHighestExpense;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is Category &&
     other.id == id &&
     other.name == name &&
     other.parentCategoryId == parentCategoryId &&
-    other.icon == icon;
+    other.icon == icon &&
+    other.excludeFromCashFlow == excludeFromCashFlow &&
+    other.canBeHighestExpense == canBeHighestExpense;
 
   @override
   int get hashCode =>
@@ -54,10 +64,12 @@ class Category {
     (id.hashCode) +
     (name.hashCode) +
     (parentCategoryId == null ? 0 : parentCategoryId!.hashCode) +
-    (icon == null ? 0 : icon!.hashCode);
+    (icon == null ? 0 : icon!.hashCode) +
+    (excludeFromCashFlow.hashCode) +
+    (canBeHighestExpense.hashCode);
 
   @override
-  String toString() => 'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon]';
+  String toString() => 'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, excludeFromCashFlow=$excludeFromCashFlow, canBeHighestExpense=$canBeHighestExpense]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -73,6 +85,8 @@ class Category {
     } else {
       json[r'icon'] = null;
     }
+      json[r'excludeFromCashFlow'] = this.excludeFromCashFlow;
+      json[r'canBeHighestExpense'] = this.canBeHighestExpense;
     return json;
   }
 
@@ -91,6 +105,10 @@ class Category {
         assert(json[r'id'] != null, 'Required key "Category[id]" has a null value in JSON.');
         assert(json.containsKey(r'name'), 'Required key "Category[name]" is missing from JSON.');
         assert(json[r'name'] != null, 'Required key "Category[name]" has a null value in JSON.');
+        assert(json.containsKey(r'excludeFromCashFlow'), 'Required key "Category[excludeFromCashFlow]" is missing from JSON.');
+        assert(json[r'excludeFromCashFlow'] != null, 'Required key "Category[excludeFromCashFlow]" has a null value in JSON.');
+        assert(json.containsKey(r'canBeHighestExpense'), 'Required key "Category[canBeHighestExpense]" is missing from JSON.');
+        assert(json[r'canBeHighestExpense'] != null, 'Required key "Category[canBeHighestExpense]" has a null value in JSON.');
         return true;
       }());
 
@@ -99,6 +117,8 @@ class Category {
         name: mapValueOfType<String>(json, r'name')!,
         parentCategoryId: mapValueOfType<String>(json, r'parentCategoryId'),
         icon: mapValueOfType<String>(json, r'icon'),
+        excludeFromCashFlow: mapValueOfType<bool>(json, r'excludeFromCashFlow')!,
+        canBeHighestExpense: mapValueOfType<bool>(json, r'canBeHighestExpense')!,
       );
     }
     return null;
@@ -148,6 +168,8 @@ class Category {
   static const requiredKeys = <String>{
     'id',
     'name',
+    'excludeFromCashFlow',
+    'canBeHighestExpense',
   };
 }
 

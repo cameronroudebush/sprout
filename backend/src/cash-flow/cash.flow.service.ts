@@ -53,12 +53,8 @@ export class CashFlowService {
 
     for (const transaction of transactions) {
       if (!transaction.category) continue;
-      // Grab the current category name
-      const catName = transaction.category.name.toLowerCase();
-      // Explicitly ignore credit card payments
-      if (catName.includes("credit card payment")) continue;
-      // Explicitly ignore internal depository transfers (Checking to Savings)
-      if (catName.includes("transfer") && transaction.account.type === AccountType.depository) continue;
+      // Exclude if requested
+      if (transaction.category.excludeFromCashFlow) continue;
 
       const catId = transaction.category.id;
       if (!categoryStats.has(catId)) {
@@ -95,12 +91,9 @@ export class CashFlowService {
     }
 
     let largestExpense: Transaction | undefined;
-    for (const transaction of transactions) {
-      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) {
-        // Exclude credit card payments from being marked as your "Largest Expense" insight, because that's not helpful
-        if (!transaction.category?.name.toLowerCase().includes("credit card payment")) largestExpense = transaction;
-      }
-    }
+    for (const transaction of transactions)
+      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount))
+        if (transaction.category?.canBeHighestExpense ?? true) largestExpense = transaction;
 
     return { totalIncome, totalExpense, categoryStats, transactionCount: transactions.length, largestExpense };
   }
