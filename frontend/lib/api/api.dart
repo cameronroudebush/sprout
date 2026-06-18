@@ -87,6 +87,7 @@ part 'model/plaid_institution_dto.dart';
 part 'model/plaid_link_dto.dart';
 part 'model/plaid_link_token_dto.dart';
 part 'model/plaid_metadata_dto.dart';
+part 'model/plaid_webhook_controller_migrate_webhook_urls_request.dart';
 part 'model/provider_config.dart';
 part 'model/provider_sub_type_enum.dart';
 part 'model/provider_type_enum.dart';

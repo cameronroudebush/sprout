@@ -3,7 +3,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
-import { IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { startCase } from "lodash";
 import { JoinColumn, ManyToOne } from "typeorm";
 
@@ -36,6 +36,16 @@ export class Category extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
   icon?: string;
 
+  /** If we should exclude this category from cash flow calculations */
+  @IsBoolean()
+  @DatabaseDecorators.column({ default: false })
+  excludeFromCashFlow: boolean = false;
+
+  /** If this category can be considered a "high expense" when calculating cash flow stats. You'd want to turn this off for things like credit card payments. */
+  @IsBoolean()
+  @DatabaseDecorators.column({ default: true })
+  canBeHighestExpense: boolean = true;
+
   /** The parent category this category belongs to */
   @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
   @JoinColumn({ name: "parentCategoryId" })
@@ -50,12 +60,14 @@ export class Category extends DatabaseBase {
   @ApiProperty({ required: false })
   parentCategoryId!: string;
 
-  constructor(user: User, name: string, parentCategory?: Category, icon?: string) {
+  constructor(user: User, name: string, parentCategory?: Category, icon?: string, excludeFromCashFlow = false, canBeHighestExpense = true) {
     super();
     this.user = user;
     this.name = name;
     this.parentCategory = parentCategory;
     this.icon = icon;
+    this.excludeFromCashFlow = excludeFromCashFlow;
+    this.canBeHighestExpense = canBeHighestExpense;
   }
 
   /**
