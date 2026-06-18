@@ -55,4 +55,52 @@ class WebhookApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
+
+  /// Bulk update all registered Plaid webhooks
+  ///
+  /// Iterates through all database items and pushes the updated webhook destination url to Plaid's servers. This is useful if you change where your server is located.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [PlaidWebhookControllerMigrateWebhookUrlsRequest] plaidWebhookControllerMigrateWebhookUrlsRequest (required):
+  Future<Response> plaidWebhookControllerMigrateWebhookUrlsWithHttpInfo(PlaidWebhookControllerMigrateWebhookUrlsRequest plaidWebhookControllerMigrateWebhookUrlsRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/webhooks/plaid/migrate-url';
+
+    // ignore: prefer_final_locals
+    Object? postBody = plaidWebhookControllerMigrateWebhookUrlsRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Bulk update all registered Plaid webhooks
+  ///
+  /// Iterates through all database items and pushes the updated webhook destination url to Plaid's servers. This is useful if you change where your server is located.
+  ///
+  /// Parameters:
+  ///
+  /// * [PlaidWebhookControllerMigrateWebhookUrlsRequest] plaidWebhookControllerMigrateWebhookUrlsRequest (required):
+  Future<void> plaidWebhookControllerMigrateWebhookUrls(PlaidWebhookControllerMigrateWebhookUrlsRequest plaidWebhookControllerMigrateWebhookUrlsRequest,) async {
+    final response = await plaidWebhookControllerMigrateWebhookUrlsWithHttpInfo(plaidWebhookControllerMigrateWebhookUrlsRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

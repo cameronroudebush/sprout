@@ -131,6 +131,7 @@ export class CategoryController {
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to edit.");
     // Update the category object
     const updatedCategory = Category.fromPlain({
+      ...matchingCategory,
       ...update,
       name: (update.name ?? matchingCategory.name).trim(),
       user: user,

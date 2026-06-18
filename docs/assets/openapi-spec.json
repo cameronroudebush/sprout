@@ -2997,9 +2997,19 @@
           "icon": {
             "type": "string",
             "description": "The icon to use for this category. If one is not given, we'll use the default."
+          },
+          "excludeFromCashFlow": {
+            "type": "boolean",
+            "description": "If we should exclude this category from cash flow calculations",
+            "default": false
+          },
+          "canBeHighestExpense": {
+            "type": "boolean",
+            "description": "If this category can be considered a \"high expense\" when calculating cash flow stats. You'd want to turn this off for things like credit card payments.",
+            "default": true
           }
         },
-        "required": ["id", "name"]
+        "required": ["id", "name", "excludeFromCashFlow", "canBeHighestExpense"]
       },
       "CategoryStats": {
         "type": "object",
