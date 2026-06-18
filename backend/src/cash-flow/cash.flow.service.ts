@@ -7,7 +7,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { endOfDay, endOfMonth, endOfYear, format, startOfDay, startOfMonth, startOfYear, subMonths } from "date-fns";
-import { Between, FindOptionsWhere } from "typeorm";
+import { Between, FindOptionsWhere, In } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
 import { Colors } from "./model/colors";
@@ -15,26 +15,11 @@ import { Colors } from "./model/colors";
 @Injectable()
 export class CashFlowService {
   /**
-   * Helper to determine if an account behaves as a Liability.
-   * Inflows to these accounts (e.g. paying off a credit card or mortgage)
-   * are NOT income; they are debt reduction.
-   */
-  private isLiabilityAccount(account: Account): boolean {
-    switch (account.type) {
-      case AccountType.loan:
-      case AccountType.credit:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  /**
    * Core calculation engine.
-   * Aggregates transactions into Inflow/Outflow per category.
+   * Aggregates transactions into Inflow/Outflow per category. Only considers certain account types (depository, credit)
    */
   async calculateFlows(user: User, year: number, month?: number, day?: number, accountId?: string) {
-    if (month) month -= 1; // Adjust to 0-index
+    if (month) month -= 1;
     let between;
     if (month == null) {
       between = Between(new Date(year, 0, 1), new Date(year, 11, 31, 23, 59, 59, 999));
@@ -43,39 +28,47 @@ export class CashFlowService {
       between = day == null ? Between(startOfMonth(queryDate), endOfMonth(queryDate)) : Between(startOfDay(queryDate), endOfDay(queryDate));
     }
 
-    // Fetch Transactions
-    const account: FindOptionsWhere<Account> = { user: { id: user.id } };
-    if (accountId) account.id = accountId;
+    // Account types we only track for data flow
+    const validCashFlowTypes = [
+      AccountType.depository, // Checking/Savings
+      AccountType.credit, // Credit Cards
+    ];
+
+    const accountWhere: FindOptionsWhere<Account> = {
+      user: { id: user.id },
+      type: In(validCashFlowTypes),
+    };
+    if (accountId) accountWhere.id = accountId;
+
     const where = {
-      account,
+      account: accountWhere,
       posted: between,
       pending: false,
     } as FindOptionsWhere<Transaction>;
-    const transactionsRaw = await Transaction.find({ where });
+
+    const transactionsRaw = await Transaction.find({ where, relations: { account: true, category: true } });
     const transactions = Transaction.convertListToTargetCurrency(transactionsRaw, user);
 
     const categoryStats = new Map<string, { category: Category; inflow: number; outflow: number }>();
 
     for (const transaction of transactions) {
       if (!transaction.category) continue;
+      // Grab the current category name
+      const catName = transaction.category.name.toLowerCase();
+      // Explicitly ignore credit card payments
+      if (catName.includes("credit card payment")) continue;
+      // Explicitly ignore internal depository transfers (Checking to Savings)
+      if (catName.includes("transfer") && transaction.account.type === AccountType.depository) continue;
 
       const catId = transaction.category.id;
       if (!categoryStats.has(catId)) {
         categoryStats.set(catId, { category: transaction.category, inflow: 0, outflow: 0 });
       }
+
       const stats = categoryStats.get(catId)!;
-      let amount = transaction.amount;
-      const isInvestment = transaction.account && transaction.account.type === AccountType.investment;
-
-      const isContributionCategory =
-        transaction.category.name.toLowerCase().includes("contribution") || transaction.category.name.toLowerCase().includes("investment");
-
-      // Invert the amount if it is a negative value AND explicitly a contribution. Some contributions will technically be considered negative which could break this
-      if (isInvestment && amount < 0 && isContributionCategory) amount = Math.abs(amount);
+      const amount = transaction.amount;
 
       if (amount > 0) {
-        // Liability check: Inflows to liability accounts (e.g. credit card payments) are ignored here.
-        if (transaction.account && this.isLiabilityAccount(transaction.account)) continue;
         stats.inflow += amount;
       } else {
         stats.outflow += Math.abs(amount);
@@ -85,16 +78,27 @@ export class CashFlowService {
     let totalIncome = 0;
     let totalExpense = 0;
 
-    for (const { inflow, outflow } of categoryStats.values()) {
-      totalIncome += inflow;
-      totalExpense += outflow;
+    // Apply netting
+    for (const stats of categoryStats.values()) {
+      const netFlow = stats.inflow - stats.outflow;
+
+      if (netFlow > 0) {
+        stats.inflow = netFlow;
+        stats.outflow = 0;
+      } else {
+        stats.outflow = Math.abs(netFlow);
+        stats.inflow = 0;
+      }
+
+      totalIncome += stats.inflow;
+      totalExpense += stats.outflow;
     }
 
-    // Find largest single expense (for insights) - remains purely transaction-based
     let largestExpense: Transaction | undefined;
     for (const transaction of transactions) {
       if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) {
-        largestExpense = transaction;
+        // Exclude credit card payments from being marked as your "Largest Expense" insight, because that's not helpful
+        if (!transaction.category?.name.toLowerCase().includes("credit card payment")) largestExpense = transaction;
       }
     }
 

@@ -3,7 +3,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
-import { IsNull, MoreThanOrEqual } from "typeorm";
+import { FindOptionsWhere, IsNull, MoreThanOrEqual } from "typeorm";
 
 /** This class provides functions to help with {@link TransactionRule}'s */
 @Injectable()
@@ -29,11 +29,14 @@ export class TransactionRuleService {
       where: { user: { id: user.id } },
       order: { order: "DESC" },
     });
+    const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
+    if (account) accountWhere.id = account.id;
+    const where: FindOptionsWhere<Transaction> = {
+      category: onlyApplyToEmpty ? IsNull() : undefined,
+      account: accountWhere,
+    };
     const transactions = await Transaction.find({
-      where: {
-        category: onlyApplyToEmpty ? IsNull() : undefined,
-        account: { id: account?.id, user: { id: user.id } },
-      },
+      where,
     });
     const matchedTransactionIds = new Set<string>();
 
