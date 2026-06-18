@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 
 extension SproutAsyncValueX<T> on AsyncValue<T> {
   /// A standardized `.when` that automatically handles Sprout's default loading, error, and empty UIs.
@@ -21,12 +22,18 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
           ),
         );
 
-    Widget buildError(Object err) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(customErrorMessage ?? "Error: $err"),
-          ),
-        );
+    Widget buildError(Object err) {
+      // Clean-up message so it doesn't contain an entire stack trace
+      final cleanMessage =
+          err.toString().split('\n').takeWhile((line) => !line.trim().startsWith(RegExp(r'#\d+'))).join('\n').trim();
+
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(customErrorMessage ?? cleanMessage),
+        ),
+      );
+    }
 
     Widget buildEmpty() => Center(
           child: Padding(
@@ -58,7 +65,14 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
         return data(d);
       },
       loading: () => expanded ? Expanded(child: buildLoading()) : buildLoading(),
-      error: (err, _) => expanded ? Expanded(child: buildError(err)) : buildError(err),
+      error: (err, stack) {
+        LoggerProvider.error(
+          'SproutAsyncValueX caught an error',
+          error: err,
+          stackTrace: stack,
+        );
+        return expanded ? Expanded(child: buildError(err)) : buildError(err);
+      },
     );
   }
 }

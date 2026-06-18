@@ -25,6 +25,7 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
   // Custom precise animations mapped to the CSS timeline
   late Animation<double> _drawAnimation;
   late Animation<double> _fillAnimation;
+  late Animation<double> _flowerTranslateAnimation;
   late Animation<double> _popAnimation;
   late Animation<double> _textOpacityAnimation;
   late Animation<double> _textTranslateAnimation;
@@ -64,11 +65,15 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
       CurvedAnimation(parent: _animationController, curve: const Interval(0.258, 0.387, curve: Curves.easeInOut)),
     );
 
+    _flowerTranslateAnimation = Tween<double>(begin: 55.0, end: 135.0).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.516, 0.677, curve: Curves.easeInOutCubic)),
+    );
+
     _popAnimation = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.18).chain(CurveTween(curve: Curves.easeOutCubic)), weight: 50),
       TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0).chain(CurveTween(curve: Curves.easeInCubic)), weight: 50),
     ]).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.580, 0.838)),
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.677, 0.935)),
     );
 
     _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -134,6 +139,7 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
                     painter: SproutAnimatedPainter(
                       drawProgress: widget.animate ? _drawAnimation.value : 1.0,
                       fillProgress: widget.animate ? _fillAnimation.value : 1.0,
+                      flowerTranslateX: widget.animate ? _flowerTranslateAnimation.value : 135.0,
                       popScale: widget.animate ? _popAnimation.value : 1.0,
                       textOpacity: widget.animate ? _textOpacityAnimation.value : 1.0,
                       textTranslateY: widget.animate ? _textTranslateAnimation.value : 0.0,
@@ -192,6 +198,7 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
 class SproutAnimatedPainter extends CustomPainter {
   final double drawProgress;
   final double fillProgress;
+  final double flowerTranslateX;
   final double popScale;
   final double textOpacity;
   final double textTranslateY;
@@ -204,6 +211,7 @@ class SproutAnimatedPainter extends CustomPainter {
   SproutAnimatedPainter({
     required this.drawProgress,
     required this.fillProgress,
+    required this.flowerTranslateX,
     required this.popScale,
     required this.textOpacity,
     required this.textTranslateY,
@@ -226,7 +234,7 @@ class SproutAnimatedPainter extends CustomPainter {
     canvas.scale(scale, scale);
 
     canvas.save();
-    canvas.translate(135, -45);
+    canvas.translate(flowerTranslateX, -45);
     canvas.scale(2.3);
 
     // Handle Transform Origin -> "Center Box"
@@ -292,6 +300,7 @@ class SproutAnimatedPainter extends CustomPainter {
   bool shouldRepaint(covariant SproutAnimatedPainter oldDelegate) {
     return drawProgress != oldDelegate.drawProgress ||
         fillProgress != oldDelegate.fillProgress ||
+        flowerTranslateX != oldDelegate.flowerTranslateX ||
         popScale != oldDelegate.popScale ||
         textOpacity != oldDelegate.textOpacity ||
         textTranslateY != oldDelegate.textTranslateY;

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 
 /// Represents a rendered particle that can grab onto other particles
 class Particle {
@@ -100,10 +101,10 @@ class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with Sing
     super.dispose();
   }
 
-  void _initElements(Size size, Color primaryColor) {
+  void _initElements(Size size, Color primaryColor, bool isDesktop) {
     _particles.clear();
     _texts.clear();
-    int particleCount = ((size.width * size.height) / 10000).floor();
+    int particleCount = ((size.width * size.height) / (isDesktop ? 10000 : 8000)).floor();
     for (int i = 0; i < particleCount; i++) {
       _particles.add(
         Particle(
@@ -226,59 +227,61 @@ class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with Sing
     final secondaryColor = colors.secondary;
     final palette = [primaryColor, secondaryColor];
 
-    return ClipRect(
-      child: ColoredBox(
-        color: bgColor,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            Size currentSize = Size(constraints.maxWidth, constraints.maxHeight);
-            if (_lastSize != currentSize) {
-              _lastSize = currentSize;
-              _initElements(currentSize, primaryColor);
-            }
+    return SproutLayoutBuilder((isDesktop, ctx, ctr) {
+      return ClipRect(
+        child: ColoredBox(
+          color: bgColor,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              Size currentSize = Size(constraints.maxWidth, constraints.maxHeight);
+              if (_lastSize != currentSize) {
+                _lastSize = currentSize;
+                _initElements(currentSize, primaryColor, isDesktop);
+              }
 
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                MouseRegion(
-                  onHover: _onPointerHover,
-                  onExit: _onPointerExit,
-                  child: GestureDetector(
-                    onPanUpdate: _onPanUpdate,
-                    onPanEnd: _onPanEnd,
-                    child: CustomPaint(
-                      painter: _ParticlePainter(
-                        particles: _particles,
-                        texts: _texts,
-                        animation: _controller,
-                        palette: palette,
-                        lineColor: primaryColor,
-                      ),
-                      size: Size.infinite,
-                    ),
-                  ),
-                ),
-                IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: Alignment.center,
-                        radius: 1.5,
-                        colors: [
-                          Colors.transparent,
-                          bgColor.withOpacity(0.85),
-                        ],
-                        stops: const [0.0, 1.0],
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  MouseRegion(
+                    onHover: _onPointerHover,
+                    onExit: _onPointerExit,
+                    child: GestureDetector(
+                      onPanUpdate: _onPanUpdate,
+                      onPanEnd: _onPanEnd,
+                      child: CustomPaint(
+                        painter: _ParticlePainter(
+                          particles: _particles,
+                          texts: _texts,
+                          animation: _controller,
+                          palette: palette,
+                          lineColor: primaryColor,
+                        ),
+                        size: Size.infinite,
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                  IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 1.5,
+                          colors: [
+                            Colors.transparent,
+                            bgColor.withOpacity(0.85),
+                          ],
+                          stops: const [0.0, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

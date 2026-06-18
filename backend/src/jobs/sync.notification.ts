@@ -95,7 +95,7 @@ export class SyncNotificationJob extends DistributedQueueJob<SyncNotificationPay
       await this.notificationService.notifyUser(
         user,
         `Action Required: We had trouble syncing some accounts. Details: ${combinedErrorDetails}`,
-        "Connection Updates Required",
+        "Connection Error",
         NotificationType.error,
       );
     } else if (successes.length > 0) {
