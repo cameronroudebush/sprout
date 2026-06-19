@@ -65,9 +65,11 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
       final authState = ref.read(authProvider);
 
       if (authState.value != null) {
-        ref
-            .read(notificationsProvider.notifier)
-            .openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning, duration: 7);
+        Future.microtask(() {
+          ref
+              .read(notificationsProvider.notifier)
+              .openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning, duration: 7);
+        });
         await auth.logout();
       }
     },

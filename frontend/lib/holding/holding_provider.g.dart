@@ -435,7 +435,7 @@ final class BatchedLivePricesProvider
   }
 }
 
-String _$batchedLivePricesHash() => r'cfb474137afc897d4301374b89b3c61392549b1d';
+String _$batchedLivePricesHash() => r'c63238f72ede49fd4e17a21f1aa4aac4504fa917';
 
 /// A DataLoader style provider that batches requests from the UI
 
@@ -575,7 +575,7 @@ final class ExpandedHoldingProvider extends $FunctionalProvider<ExpandedHolding,
   }
 }
 
-String _$expandedHoldingHash() => r'84bb90f739a7b95c07ac4a7b1ec705128d9019e0';
+String _$expandedHoldingHash() => r'248937fd603d1152d961146f610438d8556c7f98';
 
 /// Provider that allows us to track the expanded holding values based on current live prices
 

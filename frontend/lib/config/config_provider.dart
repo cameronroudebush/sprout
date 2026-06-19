@@ -69,6 +69,10 @@ class UnsecureConfig extends _$UnsecureConfig {
     await future;
   }
 
+  bool isDemoMode() {
+    return state.value?.demoMode != null;
+  }
+
   /// Triggers a retry
   Future<void> retry() async {
     ref.invalidateSelf();

@@ -21,7 +21,7 @@ export class SyncNotificationJob extends DistributedQueueJob<SyncNotificationPay
     private readonly notificationService: NotificationService,
     private readonly sseService: SSEService,
   ) {
-    super("provider:sync:notification", Configuration.providers.notificationTime, true);
+    super("provider:sync:notification", Configuration.providers.syncNotifications.time, Configuration.providers.syncNotifications.enabled);
   }
 
   protected async generateTasks(): Promise<SyncNotificationPayload[]> {

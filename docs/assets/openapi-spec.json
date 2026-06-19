@@ -3049,12 +3049,32 @@
         },
         "required": ["chatKeyProvidedInBackend", "emailEnabled"]
       },
+      "DemoCredentials": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": ["username", "password"]
+      },
       "UnsecureAppConfiguration": {
         "type": "object",
         "properties": {
           "authMode": {
             "type": "string",
             "enum": ["oidc", "local"]
+          },
+          "demoMode": {
+            "description": "Present only when the application is running in an auto-authenticating demo environment",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DemoCredentials"
+              }
+            ]
           },
           "version": {
             "type": "string",

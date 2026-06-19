@@ -1,4 +1,5 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { CustomTypes } from "@backend/core/model/utility/custom.types";
 import { SSEEventType } from "@backend/sse/model/event.model";
@@ -42,6 +43,7 @@ export class UserConfigController {
   @ApiOkResponse({ description: "User configuration updated successfully.", type: UserConfig })
   @ApiNotFoundResponse({ description: "User configuration couldn't be found." })
   @ApiBody({ type: UserConfig })
+  @EnabledGuard.attachDemoMode()
   async edit(@CurrentUser() user: User, @Body() conf: UserConfig) {
     const existingConfig = await UserConfig.findOne({ where: { user: { id: user.id } } });
     if (existingConfig == null) throw new NotFoundException(); // This shouldn't be possible

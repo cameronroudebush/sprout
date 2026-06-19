@@ -2,6 +2,7 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { ChatService } from "@backend/chat/chat.service";
 import { ChatRequestDTO } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -24,6 +25,7 @@ export class ChatController {
   @ApiOperation({ summary: "Utilizes the LLM prompt engine to help you discuss your finances." })
   @ApiOkResponse({ description: "Returns the generated text from the prompt." })
   @ApiConflictResponse({ description: "Thrown if the LLM is already running a request for the current user." })
+  @EnabledGuard.attachDemoMode()
   async new(@CurrentUser() user: User, @Body() data: ChatRequestDTO) {
     // Determine if we're still processing a previous response
     const isLoading = await ChatHistory.count({ where: { user: { id: user.id }, isThinking: true } });

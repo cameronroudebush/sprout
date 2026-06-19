@@ -4,6 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_icon_dropdown.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/theme/helpers.dart';
 
@@ -95,6 +96,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final helpStyle = const TextStyle(fontSize: 12, color: Colors.grey);
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _nameController,
@@ -106,11 +108,11 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
           isEdit ? "Edit Category" : "New Category",
           showCloseDialogButton: true,
           closeButtonText: "Cancel",
-          showSubmitButton: true,
+          showSubmitButton: !isDemoMode,
           submitButtonText: "Save",
           allowSubmitClick: canSave,
           onSubmitClick: () => _handleSave(context),
-          extraButtons: !isEdit
+          extraButtons: !isEdit || isDemoMode
               ? null
               : IconButton.filled(
                   style: ThemeHelpers.errorButton,

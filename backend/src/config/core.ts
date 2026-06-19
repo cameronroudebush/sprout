@@ -15,6 +15,11 @@ export class Configuration {
   @ConfigurationMetadata.assign({ comment: "The encryption key to protect certain content within sprout. DO NOT LOSE THIS." })
   static encryptionKey = process.env["ENCRYPTION_KEY"] ?? "";
 
+  @ConfigurationMetadata.assign({
+    comment: "If the application should run in demo mode. Most capability will be disabled and data will be dynamically generated.",
+  })
+  static isDemoMode = false;
+
   @ConfigurationMetadata.assign({ comment: "Configuration for the various providers" })
   static providers = new ProvidersConfig();
 

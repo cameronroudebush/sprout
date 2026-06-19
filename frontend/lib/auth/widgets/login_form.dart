@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
@@ -88,6 +89,13 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     final theme = Theme.of(context);
     final configState = ref.watch(unsecureConfigProvider);
     final authState = ref.watch(authProvider);
+    final config = ref.watch(unsecureConfigProvider).value;
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
+
+    if (isDemoMode) {
+      _usernameController.text = config!.demoMode!.username;
+      _passwordController.text = config.demoMode!.password;
+    }
 
     // If Auth is currently performing the initial background check
     final isInitializing = authState.isLoading && !authState.hasValue;
@@ -98,6 +106,14 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         child: Column(
           spacing: 12,
           children: [
+            if (isDemoMode && !kDebugMode)
+              SproutNotificationWidget(
+                SproutNotification(
+                  "Demo mode is enabled. Please login below.",
+                  theme.colorScheme.primary,
+                  theme.colorScheme.onPrimary,
+                ),
+              ),
             if (_errorMessage.isNotEmpty)
               SproutNotificationWidget(
                 SproutNotification(_errorMessage, theme.colorScheme.error, theme.colorScheme.onError),
@@ -122,6 +138,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                               controller: _usernameController,
                               decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
                               autofillHints: const [AutofillHints.username],
+                              enabled: !isDemoMode,
                             ),
                             TextField(
                               controller: _passwordController,
@@ -129,6 +146,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                               obscureText: true,
                               autofillHints: const [AutofillHints.password],
                               onSubmitted: (_) => _handleLogin(),
+                              enabled: !isDemoMode,
                             ),
                           ],
                         ),

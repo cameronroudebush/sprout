@@ -26,6 +26,7 @@ export abstract class DistributedQueueJob<TaskPayload> extends BackgroundJob<any
 
   /** Intercept the start sequence to initialize queues before the cron runs */
   public override async start() {
+    if (!this.enabled) return super.start();
     this.logger.log(`Initializing Queue infrastructure...`);
 
     const isRedisEnabled = Configuration.server.cache.type === "redis";

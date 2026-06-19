@@ -1,5 +1,6 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -49,6 +50,7 @@ export class TransactionRuleController {
   })
   @ApiOkResponse({ description: "Transaction rule deleted successfully." })
   @ApiNotFoundResponse({ description: "Transaction rule with the specified ID not found." })
+  @EnabledGuard.attachDemoMode()
   async delete(@Param("id") id: string, @CurrentUser() user: User) {
     // Grab it from the database to make sure it exists for this user
     const ruleInDb = await TransactionRule.findOne({ where: { id: id, user: { id: user.id } } });
@@ -68,6 +70,7 @@ export class TransactionRuleController {
   @ApiOkResponse({ description: "Transaction rule updated successfully.", type: TransactionRule })
   @ApiNotFoundResponse({ description: "Transaction rule with the specified ID not found, does not belong to the user, or doesn't have a matching category." })
   @ApiBody({ type: TransactionRule })
+  @EnabledGuard.attachDemoMode()
   async edit(@Param("id") id: string, @CurrentUser() user: User, @Body() rule: TransactionRule) {
     const matchingRule = await TransactionRule.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingRule == null) throw new NotFoundException("Failed to find matching rule to update.");
@@ -102,6 +105,7 @@ export class TransactionRuleController {
   @ApiCreatedResponse({ description: "Transaction rule added successfully.", type: TransactionRule })
   @ApiNotFoundResponse({ description: "Failed to locate a matching category for this transaction rule based on given content." })
   @ApiBody({ type: TransactionRule })
+  @EnabledGuard.attachDemoMode()
   async create(@Body() data: TransactionRule, @CurrentUser() user: User) {
     const rule = TransactionRule.fromPlain(data);
     rule.value = rule.value.trim();
@@ -148,6 +152,7 @@ export class TransactionRuleController {
   @ApiOkResponse({
     description: "Rules were successfully processed and applied to transactions.",
   })
+  @EnabledGuard.attachDemoMode()
   async applyRules(
     @CurrentUser() user: User,
     @Query("force", new DefaultValuePipe(false), ParseBoolPipe) force: boolean,

@@ -218,6 +218,8 @@ class ApiClient {
           return DailySpendingCalendarResponseDTO.fromJson(value);
         case 'DailySpendingItem':
           return DailySpendingItem.fromJson(value);
+        case 'DemoCredentials':
+          return DemoCredentials.fromJson(value);
         case 'EmailUpdateFrequencyEnum':
           return EmailUpdateFrequencyEnumTypeTransformer().decode(value);
         case 'EntityHistory':

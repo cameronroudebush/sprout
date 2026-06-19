@@ -122,4 +122,4 @@ final class BaseAuthenticatedClientProvider extends $FunctionalProvider<
 }
 
 String _$baseAuthenticatedClientHash() =>
-    r'fc6f3f2cfc29195c9450dd5d06647deae8f454d6';
+    r'0558852c48c724b0c357b42097929b76868ea090';

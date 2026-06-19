@@ -5,6 +5,7 @@ import 'package:sprout/account/widgets/account_dropdown.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_rule_provider.dart';
@@ -149,14 +150,15 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isEdit = widget.rule != null;
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
     return SproutBaseDialogWidget(
       isEdit ? "Edit Rule" : "Add Rule",
       showCloseDialogButton: true,
       closeButtonText: "Cancel",
-      showSubmitButton: true,
+      showSubmitButton: !isDemoMode,
       onSubmitClick: _submit,
-      extraButtons: !isEdit
+      extraButtons: !isEdit || isDemoMode
           ? null
           : IconButton.filled(
               style: ThemeHelpers.errorButton,

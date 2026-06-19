@@ -58,7 +58,7 @@ class NotificationItem extends StatelessWidget {
       onTap: () => onTap(context),
       borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
           color: notification.isRead ? null : color.withValues(alpha: 0.05),
           borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),

@@ -37,6 +37,7 @@ export class EmailController {
     summary: "Send Test Weekly Email",
     description: "Notifies the current user about their weekly update via email. Only works in dev mode.",
   })
+  @EnabledGuard.attachDemoMode()
   async notify(@CurrentUser() user: User) {
     this.emailService.sendWeeklyUpdate(user);
   }

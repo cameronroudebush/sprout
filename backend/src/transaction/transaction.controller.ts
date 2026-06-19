@@ -1,6 +1,7 @@
 import { Account } from "@backend/account/model/account.model";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -34,6 +35,7 @@ export class TransactionController {
   @ApiOkResponse({ description: "Transaction updated successfully.", type: Transaction })
   @ApiNotFoundResponse({ description: "Transaction with the specified ID not found." })
   @ApiBody({ type: Transaction })
+  @EnabledGuard.attachDemoMode()
   async edit(@Param("id") id: string, @CurrentUser() user: User, @Body() transaction: Transaction) {
     const matchingTransaction = await Transaction.findOne({ where: { id: id, account: { user: { id: user.id } } } });
     if (matchingTransaction == null) throw new NotFoundException("Failed to locate a matching transaction to assign update.");
@@ -67,6 +69,7 @@ export class TransactionController {
   })
   @ApiOkResponse({ description: "Transaction deleted successfully." })
   @ApiNotFoundResponse({ description: "Transaction with the specified ID not found." })
+  @EnabledGuard.attachDemoMode()
   async delete(@Param("id") id: string, @CurrentUser() user: User) {
     const matchingTransaction = await Transaction.findOne({ where: { id: id, account: { user: { id: user.id } } } });
     if (matchingTransaction == null) throw new NotFoundException("Failed to locate a matching transaction to delete.");

@@ -17,9 +17,6 @@ export async function checkScript() {
       case "generate.api-spec":
         await require("./scripts/generate.api-spec").generateOpenApiSpec(process.argv[3]);
         process.exit(0);
-      case "populate.demo.data":
-        await require("./scripts/populate.demo.data").populateDemoData(parseInt(process.argv[3] ?? "150"));
-        process.exit(0);
       default:
         throw new Error("Failed to locate matching script to execute");
     }

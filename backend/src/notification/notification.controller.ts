@@ -86,6 +86,7 @@ export class NotificationController {
     description: "Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.",
   })
   @EnabledGuard.attach(Configuration.isDevBuild)
+  @EnabledGuard.attachDemoMode()
   async notify(@CurrentUser() user: User) {
     this.notificationService.notifyUser(user, "This is a test of the notification pipeline", "Test notification", NotificationType.warning);
   }

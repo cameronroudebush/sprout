@@ -27,10 +27,8 @@ npm run export:api:spec
 
 # Generate Demo Data
 
-To generate demo data for the database, please run the following:
+To generate demo data for the database, you must set the app to run in demo mode which can be done by setting the following environment variable:
 
-```sh
-npm run populate:demo:data
+```env
+sprout_isDemoMode=true
 ```
-
-**Note**: The login credentials will then be `username`: `demo`, `password`: `Demodemo`
