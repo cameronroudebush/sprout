@@ -23,10 +23,7 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
         );
 
     Widget buildError(Object err) {
-      // Clean-up message so it doesn't contain an entire stack trace
-      final cleanMessage =
-          err.toString().split('\n').takeWhile((line) => !line.trim().startsWith(RegExp(r'#\d+'))).join('\n').trim();
-
+      final cleanMessage = err.toString().split('\n').first;
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(12.0),

@@ -153,7 +153,7 @@ final class UnsecureConfigProvider
   UnsecureConfig create() => UnsecureConfig();
 }
 
-String _$unsecureConfigHash() => r'ee8aa5398ad51d009aa002886b4dc197aed1606d';
+String _$unsecureConfigHash() => r'd8782a98cf9f994926d38efc0d04927f6e041639';
 
 /// Extension upon unsecure config that allows state management using riverpod
 

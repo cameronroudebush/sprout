@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
@@ -106,11 +107,12 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
     return SproutBaseDialogWidget(
       "Edit Transaction",
       showCloseDialogButton: true,
       closeButtonText: "Cancel",
-      showSubmitButton: true,
+      showSubmitButton: !isDemoMode,
       allowSubmitClick: _valHasChanged() && (_formKey.currentState?.validate() ?? false),
       onSubmitClick: _submit,
       child: SizedBox(

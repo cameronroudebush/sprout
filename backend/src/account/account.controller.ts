@@ -3,6 +3,7 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountMergeDTO } from "@backend/account/model/api/account.merge.dto";
 import { AccountEditRequest } from "@backend/account/model/api/edit.request.dto";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { DatabaseService } from "@backend/database/database.service";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -71,6 +72,7 @@ export class AccountController {
   })
   @ApiOkResponse({ description: "Account deleted successfully." })
   @ApiNotFoundResponse({ description: "Account with the specified ID not found." })
+  @EnabledGuard.attachDemoMode()
   async delete(@Param("id") id: string, @CurrentUser() user: User) {
     const matchingAccountForUser = await Account.findOne({
       where: { id: id, user: { id: user.id } },
@@ -93,6 +95,7 @@ export class AccountController {
   @ApiOkResponse({ description: "Account updated successfully.", type: Account })
   @ApiNotFoundResponse({ description: "Account with the specified ID not found or does not belong to the user." })
   @ApiBody({ type: AccountEditRequest })
+  @EnabledGuard.attachDemoMode()
   async edit(@Param("id") id: string, @CurrentUser() user: User, @Body() updatedAccount: AccountEditRequest) {
     const matchingAccount = await Account.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingAccount == null) throw new NotFoundException(`Account with ID ${id} not found or does not belong to the user.`);
@@ -125,6 +128,7 @@ export class AccountController {
     description: "Runs a manual sync to update all provider accounts.",
   })
   @ApiOkResponse({ description: "Manual sync completed successfully." })
+  @EnabledGuard.attachDemoMode()
   @AuthGuard.attach()
   async manualSync(@CurrentUser() user: User, @Query("force") force: boolean = false) {
     const runningSync = await Sync.findOne({
@@ -156,6 +160,7 @@ export class AccountController {
   @ApiOkResponse({ description: "Accounts merged successfully.", type: Account })
   @ApiNotFoundResponse({ description: "One or both accounts not found or do not belong to the user." })
   @ApiBody({ type: AccountMergeDTO })
+  @EnabledGuard.attachDemoMode()
   async mergeAccounts(@Param("id") targetId: string, @Body() request: AccountMergeDTO, @CurrentUser() user: User) {
     const { sourceId } = request;
     if (targetId === sourceId) throw new BadRequestException("Cannot merge an account into itself.");

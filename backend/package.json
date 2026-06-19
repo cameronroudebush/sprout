@@ -99,8 +99,7 @@
     "test:cov": "jest --coverage",
     "build": "cross-env NODE_ENV=prod nest build && pkg package.json",
     "migrate": "cross-var typeorm-ts-node-commonjs migration:generate -d ./src/scripts/generate.migration.ts ./src/database/migration/sqlite/$npm_config_name",
-    "export:api:spec": "nest start -- generate.api-spec ../docs/assets/openapi-spec.json",
-    "populate:demo:data": "nest start -- populate.demo.data"
+    "export:api:spec": "nest start -- generate.api-spec ../docs/assets/openapi-spec.json"
   },
   "pkg": {
     "targets": [

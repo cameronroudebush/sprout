@@ -3,6 +3,7 @@ import { Configuration } from "@backend/config/core";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { DemoDataService } from "@backend/demo/demo.data.service";
 import { User } from "@backend/user/model/user.model";
 import { UserService } from "@backend/user/user.service";
 import { Controller, Get } from "@nestjs/common";
@@ -33,6 +34,7 @@ export class ConfigController {
   })
   @ApiOkResponse({ description: "Unsecure app configuration obtained successfully.", type: UnsecureAppConfiguration })
   async getUnsecure() {
-    return new UnsecureAppConfiguration(Configuration.version, Configuration.server.auth.type, await this.userService.allowUserCreation());
+    const demoCredentials = Configuration.isDemoMode ? DemoDataService.credentials : undefined;
+    return new UnsecureAppConfiguration(Configuration.version, Configuration.server.auth.type, await this.userService.allowUserCreation(), demoCredentials);
   }
 }

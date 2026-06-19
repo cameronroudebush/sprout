@@ -9,12 +9,12 @@ import { BackgroundJob } from "./job-base";
 @Injectable()
 export class PendingTransactionJob extends BackgroundJob<any> {
   constructor() {
-    super("transaction:pending", Configuration.transaction.struckTransactions.time, Configuration.transaction.struckTransactions.enabled, true);
+    super("transaction:pending", Configuration.transaction.stuckTransactions.time, Configuration.transaction.stuckTransactions.enabled, true);
   }
 
   protected async update() {
     this.logger.log("Checking for stuck pending transactions...");
-    const oneWeekAgo = subDays(new Date(), Configuration.transaction.struckTransactions.days);
+    const oneWeekAgo = subDays(new Date(), Configuration.transaction.stuckTransactions.days);
     const result = await Transaction.delete({
       pending: true,
       posted: LessThan(oneWeekAgo),

@@ -29,6 +29,7 @@ export class PlaidProviderController {
   @ApiOperation({ summary: "Create a Plaid link token" })
   @ApiCreatedResponse({ description: "Link created successfully.", type: PlaidLinkTokenDTO })
   @ApiQuery({ name: "institutionId", required: false, type: String })
+  @EnabledGuard.attachDemoMode()
   async createLinkToken(@CurrentUser() user: User, @PublicURL() publicUrl: string, @Query("institutionId") institutionId?: string) {
     try {
       return await this.plaidProviderService.generateLinkToken(user, publicUrl, institutionId);
@@ -49,6 +50,7 @@ export class PlaidProviderController {
   })
   @ApiCreatedResponse({ description: "Accounts linked successfully.", type: [Account] })
   @ApiBody({ type: PlaidLinkDTO })
+  @EnabledGuard.attachDemoMode()
   async exchangeAndLink(@CurrentUser() user: User, @Body() dto: PlaidLinkDTO) {
     try {
       const accounts = await this.plaidProviderService.exchangeAndCreateAccounts(user, dto);

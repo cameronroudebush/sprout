@@ -65,6 +65,7 @@ part 'model/chat_request_dto.dart';
 part 'model/currency_options_enum.dart';
 part 'model/daily_spending_calendar_response_dto.dart';
 part 'model/daily_spending_item.dart';
+part 'model/demo_credentials.dart';
 part 'model/email_update_frequency_enum.dart';
 part 'model/entity_history.dart';
 part 'model/entity_history_data_point.dart';

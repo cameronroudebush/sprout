@@ -58,6 +58,7 @@ export class SimpleFinProviderController {
   })
   @ApiCreatedResponse({ description: "Provider accounts linked successfully.", type: [Account] })
   @ApiBody({ type: [Account] })
+  @EnabledGuard.attachDemoMode()
   async linkAccounts(@Body() accountsToLink: [Account], @CurrentUser() user: User) {
     const providerAccounts = await this.simpleFinProviderService.get(user, true);
     // Add these new accounts to the database

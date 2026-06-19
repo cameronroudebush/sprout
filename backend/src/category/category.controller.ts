@@ -3,6 +3,7 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CategoryService } from "@backend/category/category.service";
 import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { Category } from "@backend/category/model/category.model";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -79,6 +80,7 @@ export class CategoryController {
   @ApiCreatedResponse({ description: "Category added successfully.", type: Category })
   @ApiConflictResponse({ description: "A similar category already exists." })
   @ApiBody({ type: Category })
+  @EnabledGuard.attachDemoMode()
   async create(@Body() data: Category, @CurrentUser() user: User) {
     const category = Category.fromPlain(data);
     category.user = user;
@@ -105,6 +107,7 @@ export class CategoryController {
   })
   @ApiOkResponse({ description: "Category deleted successfully." })
   @ApiNotFoundResponse({ description: "Category with the specified ID not found." })
+  @EnabledGuard.attachDemoMode()
   async delete(@Param("id") id: string, @CurrentUser() user: User) {
     const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } }, relations: { parentCategory: true } });
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to delete.");
@@ -126,6 +129,7 @@ export class CategoryController {
   @ApiOkResponse({ description: "Category updated successfully.", type: Category })
   @ApiNotFoundResponse({ description: "Category with the specified ID not found or does not belong to the user." })
   @ApiBody({ type: Category })
+  @EnabledGuard.attachDemoMode()
   async edit(@Param("id") id: string, @CurrentUser() user: User, @Body() update: Category) {
     const matchingCategory = await Category.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingCategory == null) throw new NotFoundException("Failed to find matching category to edit.");

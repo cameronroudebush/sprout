@@ -5,6 +5,7 @@ import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/mention_controller.dart';
+import 'package:sprout/config/config_provider.dart';
 
 /// The input component that allows the user to specify the message to send to the AI
 ///   with some additional handlings added to it
@@ -174,6 +175,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
   @override
   Widget build(BuildContext context) {
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
     final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
     for (var acc in accounts) {
       _controller.idToNameMap[acc.id] = acc.name;
@@ -190,7 +192,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
-                enabled: !widget.isLoading,
+                enabled: !widget.isLoading && !isDemoMode,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   isDense: true,
@@ -201,12 +203,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                 onSubmitted: (_) => _send(),
               ),
             ),
-            FloatingActionButton(
-              onPressed: widget.isLoading ? null : _send,
-              child: widget.isLoading
-                  ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.send),
-            ),
+            if (!isDemoMode)
+              FloatingActionButton(
+                onPressed: widget.isLoading ? null : _send,
+                child: widget.isLoading
+                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.send),
+              ),
           ],
         ),
       ),

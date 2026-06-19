@@ -4,6 +4,7 @@ import { EncryptionTransformer } from "@backend/core/decorator/encryption.decora
 import { setupOpenApiHelp } from "@backend/core/openapi";
 import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { DemoDataService } from "@backend/demo/demo.data.service";
 import { Logger, LogLevel, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -68,6 +69,13 @@ export async function startupServer(projName: string) {
     const databaseService = app.get(DatabaseService);
     await databaseService.init();
     DatabaseBase.database = databaseService;
+
+    // Handle demo data setup
+    if (Configuration.isDemoMode) {
+      logger.warn("Running in demo mode. You will not be able to edit any data and your database WILL be dropped.");
+      await app.get(DemoDataService).populateDemoData();
+    }
+
     await app.listen(Configuration.server.port);
     logger.log(`Server ready on port ${Configuration.server.port}`);
   } catch (e) {

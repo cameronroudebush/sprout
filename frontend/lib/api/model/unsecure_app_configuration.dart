@@ -14,11 +14,21 @@ class UnsecureAppConfiguration {
   /// Returns a new [UnsecureAppConfiguration] instance.
   UnsecureAppConfiguration({
     required this.authMode,
+    this.demoMode,
     required this.version,
     required this.allowUserCreation,
   });
 
   UnsecureAppConfigurationAuthModeEnum authMode;
+
+  /// Present only when the application is running in an auto-authenticating demo environment
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DemoCredentials? demoMode;
 
   /// Version of the backend
   String version;
@@ -28,6 +38,7 @@ class UnsecureAppConfiguration {
   @override
   bool operator ==(Object other) => identical(this, other) || other is UnsecureAppConfiguration &&
     other.authMode == authMode &&
+    other.demoMode == demoMode &&
     other.version == version &&
     other.allowUserCreation == allowUserCreation;
 
@@ -35,15 +46,21 @@ class UnsecureAppConfiguration {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (authMode.hashCode) +
+    (demoMode == null ? 0 : demoMode!.hashCode) +
     (version.hashCode) +
     (allowUserCreation.hashCode);
 
   @override
-  String toString() => 'UnsecureAppConfiguration[authMode=$authMode, version=$version, allowUserCreation=$allowUserCreation]';
+  String toString() => 'UnsecureAppConfiguration[authMode=$authMode, demoMode=$demoMode, version=$version, allowUserCreation=$allowUserCreation]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'authMode'] = this.authMode;
+    if (this.demoMode != null) {
+      json[r'demoMode'] = this.demoMode;
+    } else {
+      json[r'demoMode'] = null;
+    }
       json[r'version'] = this.version;
       json[r'allowUserCreation'] = this.allowUserCreation;
     return json;
@@ -71,6 +88,7 @@ class UnsecureAppConfiguration {
 
       return UnsecureAppConfiguration(
         authMode: UnsecureAppConfigurationAuthModeEnum.fromJson(json[r'authMode'])!,
+        demoMode: DemoCredentials.fromJson(json[r'demoMode']),
         version: mapValueOfType<String>(json, r'version')!,
         allowUserCreation: mapValueOfType<bool>(json, r'allowUserCreation')!,
       );

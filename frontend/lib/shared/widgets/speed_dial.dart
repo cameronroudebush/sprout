@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/config/config_provider.dart';
 
 /// Class that defines what our FAB button can do
 class FABAction {
@@ -11,22 +13,23 @@ class FABAction {
 
 /// This widget is a reusable component that is injected within the shell to provide floating action buttons based on the current route context.
 ///   It supports a dial in the event you have more than one [FABAction].
-class SproutSpeedDial extends StatefulWidget {
+class SproutSpeedDial extends ConsumerStatefulWidget {
   /// The list of actions to display
   final List<FABAction> actions;
 
   const SproutSpeedDial({super.key, required this.actions});
 
   @override
-  State<SproutSpeedDial> createState() => _SproutSpeedDialState();
+  ConsumerState<SproutSpeedDial> createState() => _SproutSpeedDialState();
 }
 
-class _SproutSpeedDialState extends State<SproutSpeedDial> {
+class _SproutSpeedDialState extends ConsumerState<SproutSpeedDial> {
   bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    if (widget.actions.isEmpty) return const SizedBox.shrink();
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
+    if (widget.actions.isEmpty || isDemoMode) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
 

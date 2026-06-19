@@ -33,6 +33,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final chatAsync = ref.watch(chatProvider);
     final configAsync = ref.watch(secureConfigProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
     return userConfigAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -80,7 +81,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 8,
                     children: [
-                      _buildQuickActions(isLoading),
+                      if (!isDemoMode) _buildQuickActions(isLoading),
                       ChatInput(isLoading: isLoading),
                     ],
                   ),

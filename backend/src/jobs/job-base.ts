@@ -18,7 +18,7 @@ export abstract class BackgroundJob<T extends any = any> {
   constructor(
     public jobName: string,
     private cronTime: string,
-    private enabled: boolean,
+    public enabled: boolean,
     private shouldExecuteImmediately = false,
   ) {
     this.logger = new Logger(`job:${jobName}`);
