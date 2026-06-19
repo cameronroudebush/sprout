@@ -51,11 +51,16 @@ class HoldingMoverWidget extends ConsumerWidget {
 
         if (mergedHoldings.containsKey(symbol)) {
           final existing = mergedHoldings[symbol]!;
+          final combinedMarketValue = existing.liveMarketValue + state.liveMarketValue;
+          final combinedDayChange = existing.dayChange + state.dayChange;
+          final previousDayValue = combinedMarketValue - combinedDayChange;
+          final combinedDayPercent = previousDayValue != 0 ? (combinedDayChange / previousDayValue) * 100 : 0.0;
+
           mergedHoldings[symbol] = _MergedMover(
             symbol: symbol,
-            liveMarketValue: existing.liveMarketValue + state.liveMarketValue,
-            dayChange: existing.dayChange + state.dayChange,
-            dayPercent: state.dayPercent,
+            liveMarketValue: combinedMarketValue,
+            dayChange: combinedDayChange,
+            dayPercent: combinedDayPercent,
           );
         } else {
           mergedHoldings[symbol] = _MergedMover(

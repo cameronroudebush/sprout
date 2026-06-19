@@ -99,6 +99,7 @@ export class DemoDataService {
     await this.database.source.dropDatabase();
     await this.database.executeMigrations();
 
+    this.logger.log("Starting to populate demo data....");
     /// Populate all of our data
     const user = await this.createUser();
     const accounts = await this.createAccounts(user);

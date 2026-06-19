@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/config/config_provider.dart';
 
 /// A settings tile used for navigation or triggering an immediate action.
 ///
 /// Displays a [title], an optional [subtitle], and a [trailing] widget
-class ActionSettingTile extends StatelessWidget {
+class ActionSettingTile extends ConsumerWidget {
   /// The primary label for the action.
   final String title;
 
@@ -29,14 +31,16 @@ class ActionSettingTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
       leading: Icon(icon),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right, size: 16),
-      onTap: onTap,
+      trailing: trailing ?? (isDemoMode ? null : const Icon(Icons.chevron_right, size: 16)),
+      onTap: isDemoMode ? null : onTap,
     );
   }
 }
