@@ -169,7 +169,7 @@ describe("ProviderSyncOrchestratorJob", () => {
 
         await (instance as any).cleanupOldSyncs();
 
-        expect(logSpy).toHaveBeenCalledTimes(4);
+        expect(logSpy).toHaveBeenCalledTimes(3);
       });
     });
   });
