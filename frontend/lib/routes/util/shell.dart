@@ -43,7 +43,7 @@ class _SproutShellState extends ConsumerState<SproutShell> {
           body: Column(children: [
             if (isDemoMode && !kDebugMode)
               Padding(
-                  padding: EdgeInsetsGeometry.only(left: 24, right: 24, top: 2),
+                  padding: EdgeInsetsGeometry.only(left: 24, right: 24, top: 1),
                   child: SproutNotificationWidget(
                     SproutNotification(
                       "Thanks for trying Sprout! Note that some features are disabled to preserve the demo data.",
