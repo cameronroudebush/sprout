@@ -48,6 +48,7 @@ export class ZillowProviderController {
   })
   @ApiCreatedResponse({ description: "Property data retrieved successfully.", type: ZillowPropertyResultDto })
   @ApiBody({ type: ZillowPropertyDTO })
+  @EnabledGuard.attachDemoMode()
   async lookupProperty(@CurrentUser() user: User, @Body() lookupDto: ZillowPropertyDTO) {
     let data: Awaited<ReturnType<ZillowProviderService["getInfoByAddress"]>> | undefined;
     try {
@@ -67,6 +68,7 @@ export class ZillowProviderController {
   })
   @ApiCreatedResponse({ description: "Zillow property linked successfully.", type: Account })
   @ApiBody({ type: ZillowPropertyDTO })
+  @EnabledGuard.attachDemoMode()
   async link(@CurrentUser() user: User, @Body() linkDto: ZillowPropertyDTO): Promise<Account> {
     const { address, city, state, zip } = linkDto;
 

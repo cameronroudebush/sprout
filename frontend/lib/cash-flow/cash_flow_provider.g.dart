@@ -118,7 +118,7 @@ final class SankeyDataProvider extends $FunctionalProvider<
   }
 }
 
-String _$sankeyDataHash() => r'663aee4dc0e8937bf533f78333406418bfe8816e';
+String _$sankeyDataHash() => r'596f7ab3b4ba9d5f6c914062971606492bd9127b';
 
 /// Sankey data based on time
 
@@ -232,7 +232,7 @@ final class CashFlowStatsProvider extends $FunctionalProvider<
   }
 }
 
-String _$cashFlowStatsHash() => r'918718ba8c35e7be9569a9b1b87807b53eff15fa';
+String _$cashFlowStatsHash() => r'00b04a53b081fa4e9e193e7105a53559a659f01b';
 
 /// State for cash flow stats
 
@@ -335,7 +335,7 @@ final class CashFlowTrendProvider extends $FunctionalProvider<
   }
 }
 
-String _$cashFlowTrendHash() => r'f3864bd8a015c9f0fb64386cdaec321fe528a539';
+String _$cashFlowTrendHash() => r'4bcda03740348c8424aa1cc7fe1559b9f7f6180a';
 
 /// State for cash flow trends
 
@@ -531,7 +531,7 @@ final class CashFlowComparisonTimelineProvider extends $AsyncNotifierProvider<
 }
 
 String _$cashFlowComparisonTimelineHash() =>
-    r'60e8e3d7d0303fff89e814864a1c0c043285a1d9';
+    r'942f0a03a195b068e6dbfd4519f485e1e7d6f77f';
 
 final class CashFlowComparisonTimelineFamily extends $Family
     with
@@ -680,7 +680,7 @@ final class DailySpendingProvider extends $FunctionalProvider<
   }
 }
 
-String _$dailySpendingHash() => r'6deee5873002f87a88a09ba0e48e2a8511ab4fd4';
+String _$dailySpendingHash() => r'2b7fc0a3ae4504359e2083e817ac79d347565fbc';
 
 /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
 

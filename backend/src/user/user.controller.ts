@@ -1,5 +1,6 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserCreationResponse } from "@backend/user/model/api/creation.response.dto";
@@ -53,6 +54,7 @@ export class UserController {
   @ApiOkResponse({ description: "User updated successfully.", type: User })
   @ApiUnauthorizedResponse({ description: "User is not authenticated." })
   @AuthGuard.attach()
+  @EnabledGuard.attachDemoMode()
   async updateMe(@CurrentUser() user: User, @Body() data: UpdateUserDto) {
     const updateData: Partial<User> = {};
 
@@ -89,6 +91,7 @@ export class UserController {
   @ApiCreatedResponse({ description: "User created successfully.", type: UserCreationResponse })
   @ApiBadRequestResponse({ description: "New users are not allowed to be created." })
   @AuthGuard.attachOptional()
+  @EnabledGuard.attachDemoMode()
   async create(@Body() data: UserCreationRequest, @Req() req: Request) {
     if (!(await this.userService.allowUserCreation())) throw new BadRequestException("New users are not permitted.");
     else {
@@ -114,6 +117,7 @@ export class UserController {
   })
   @ApiOkResponse({ description: "Device registered" })
   @AuthGuard.attach()
+  @EnabledGuard.attachDemoMode()
   async registerDevice(@CurrentUser() user: User, @Body() data: RegisterDeviceDto) {
     // Check if this specific token is already registered
     let device = await UserDevice.findOne({ where: { fcmToken: data.token } });

@@ -1,4 +1,5 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { UpdateInstitutionRequest } from "@backend/institution/model/api/institution.update.dto";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -30,6 +31,7 @@ export class InstitutionController {
     description: "Institution with the specified ID not found or does not belong to the user.",
   })
   @ApiBody({ type: UpdateInstitutionRequest })
+  @EnabledGuard.attachDemoMode()
   async update(@Param("id") id: string, @CurrentUser() user: User, @Body() body: UpdateInstitutionRequest): Promise<Institution> {
     const matchingInstitution = await Institution.findOne({ where: { id: id, user: { id: user.id } } });
     if (!matchingInstitution) throw new NotFoundException(`Institution with ID ${id} not found or does not belong to the user.`);

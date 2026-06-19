@@ -20,7 +20,7 @@ class StuckTransactionConfig {
 /** Contains transaction configuration options */
 export class TransactionConfig {
   @ConfigurationMetadata.assign({ comment: "Configuration for when and how to check for stuck transactions (pending)." })
-  struckTransactions = new StuckTransactionConfig();
+  stuckTransactions = new StuckTransactionConfig();
 
   @ConfigurationMetadata.assign({ comment: "How many occurrences of similar transactions counts as a subscription." })
   subscriptionCount: number = 3;

@@ -11,6 +11,7 @@ import { CoreController } from "@backend/core/core.controller";
 import { SproutLogger } from "@backend/core/logger";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { DatabaseModule } from "@backend/database/database.module";
+import { DemoModule } from "@backend/demo/demo.module";
 import { EmailModule } from "@backend/email/email.module";
 import { HoldingModule } from "@backend/holding/holding.module";
 import { InstitutionModule } from "@backend/institution/institution.module";
@@ -46,6 +47,7 @@ import { KeyvCacheableMemory } from "cacheable";
     AccountModule,
     CashFlowModule,
     InstitutionModule,
+    DemoModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,

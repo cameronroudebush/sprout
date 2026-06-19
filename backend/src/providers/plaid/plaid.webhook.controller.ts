@@ -45,6 +45,7 @@ export class PlaidWebhookController {
     description:
       "Used to listen for responses from plaid to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.",
   })
+  @EnabledGuard.attachDemoMode()
   async handlePlaidWebhook(@Headers() headers: Record<string, string>, @Req() req: RawBodyRequest<Request>, @Body() payload: WebhookUpdateAcknowledgedWebhook) {
     const signedJwt = headers["plaid-verification"] || headers["plaid-verification-signature"];
     const rawBody = req.rawBody?.toString();
@@ -85,6 +86,7 @@ export class PlaidWebhookController {
     },
   })
   @AuthGuard.attach()
+  @EnabledGuard.attachDemoMode()
   async migrateWebhookUrls(@CurrentUser() user: User, @Body("baseUrl") baseUrl: string) {
     if (!user.admin) throw new UnauthorizedException("You must be an admin to perform this capability.");
     if (!baseUrl || !baseUrl.startsWith("http")) throw new BadRequestException("A valid base URL starting with http/https is required.");
