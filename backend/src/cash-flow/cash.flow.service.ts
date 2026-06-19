@@ -92,8 +92,11 @@ export class CashFlowService {
 
     let largestExpense: Transaction | undefined;
     for (const transaction of transactions)
-      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount))
-        if (transaction.category?.canBeHighestExpense ?? true) largestExpense = transaction;
+      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) {
+        const category = transaction.category;
+        // An expense can only be the largest if it's NOT excluded AND explicitly allowed
+        if (category && !category.excludeFromCashFlow && category.canBeHighestExpense) largestExpense = transaction;
+      }
 
     return { totalIncome, totalExpense, categoryStats, transactionCount: transactions.length, largestExpense };
   }

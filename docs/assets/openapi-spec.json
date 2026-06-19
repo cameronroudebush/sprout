@@ -3000,12 +3000,12 @@
           },
           "excludeFromCashFlow": {
             "type": "boolean",
-            "description": "If we should exclude this category from cash flow calculations",
+            "description": "If true, drops this category from the cash flow calculation engine entirely.\nUse this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.",
             "default": false
           },
           "canBeHighestExpense": {
             "type": "boolean",
-            "description": "If this category can be considered a \"high expense\" when calculating cash flow stats. You'd want to turn this off for things like credit card payments.",
+            "description": "If true, allows transactions in this category to compete for the \"Highest Single Expense\" callout metric on dashboards.\nTurn this off for massive baseline overheads or pass-through entries (e.g., Credit Card Payments, Taxes, Rent)\nso they don't drown out useful transaction highlights while still preserving accurate total cash flow volume.",
             "default": true
           }
         },

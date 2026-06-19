@@ -36,12 +36,19 @@ export class Category extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
   icon?: string;
 
-  /** If we should exclude this category from cash flow calculations */
+  /**
+   * If true, drops this category from the cash flow calculation engine entirely.
+   * Use this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.
+   */
   @IsBoolean()
   @DatabaseDecorators.column({ default: false })
   excludeFromCashFlow: boolean = false;
 
-  /** If this category can be considered a "high expense" when calculating cash flow stats. You'd want to turn this off for things like credit card payments. */
+  /**
+   * If true, allows transactions in this category to compete for the "Highest Single Expense" callout metric on dashboards.
+   * Turn this off for massive baseline overheads or pass-through entries (e.g., Credit Card Payments, Taxes, Rent)
+   * so they don't drown out useful transaction highlights while still preserving accurate total cash flow volume.
+   */
   @IsBoolean()
   @DatabaseDecorators.column({ default: true })
   canBeHighestExpense: boolean = true;

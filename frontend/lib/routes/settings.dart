@@ -69,6 +69,7 @@ class SettingsPage extends ConsumerWidget {
     final isSyncing = accountsState.value?.manualSyncIsRunning == true;
     final backendUrl = ref.watch(secureConfigApiProvider).value?.apiClient.basePath;
     final simpleFinEnabled = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin) != null;
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
     if (userConfig == null || config == null) {
       return const Center(child: CircularProgressIndicator());
@@ -237,20 +238,21 @@ class SettingsPage extends ConsumerWidget {
       ],
       "System Details": [
         if (!onlyShowSetup) ...[
-          ActionSettingTile(
-            title: "Background Sync",
-            subtitle: "Request a fresh sync of all providers",
-            icon: Icons.schedule,
-            trailing: isSyncing
-                ? const Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () => ref.read(accountsProvider.notifier).manualSync(),
-                  ),
-          ),
+          if (!isDemoMode)
+            ActionSettingTile(
+              title: "Background Sync",
+              subtitle: "Request a fresh sync of all providers",
+              icon: Icons.schedule,
+              trailing: isSyncing
+                  ? const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: () => ref.read(accountsProvider.notifier).manualSync(),
+                    ),
+            ),
           ActionSettingTile(
             title: "Real-time Connection",
             subtitle: sseConnected ? "Connected" : "Disconnected",
