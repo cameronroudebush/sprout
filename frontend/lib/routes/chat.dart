@@ -42,7 +42,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         final bool llmConfigured =
             (configAsync.value?.chatKeyProvidedInBackend ?? false) || (userConfig?.geminiKey?.isNotEmpty ?? false);
 
-        if (!llmConfigured) {
+        if (!llmConfigured && !isDemoMode) {
           return SproutRouteWrapper(child: _buildNoConfigState(theme));
         }
 

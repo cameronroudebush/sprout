@@ -117,19 +117,50 @@ class _SproutPieChartState extends State<SproutPieChart> {
 
     return chartData.entries.where((e) => e.value > 0).sortedBy((e) => e.value).mapIndexed((index, entry) {
       final isTouched = index == touchedIndex;
+      final formattedVal = widget.formatValue?.call(entry.value) ?? entry.value.toString();
 
       return PieChartSectionData(
         color: _colorResolver.resolve(entry.key),
         value: entry.value.toDouble(),
         radius: isTouched ? baseRadius * 1.15 : baseRadius,
-        title: (isTouched || widget.showPieValue)
-            ? '${entry.key}\n(${widget.formatValue?.call(entry.value) ?? entry.value})'
-            : (widget.showPieTitle ? entry.key : ' '),
-        titleStyle: TextStyle(
-          fontSize: isTouched ? 12 : (widget.showPieTitle ? 10 : 0),
+        showTitle: !isTouched && widget.showPieTitle,
+        title: widget.showPieValue ? formattedVal : entry.key,
+        titleStyle: const TextStyle(
+          fontSize: 12,
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
+        badgePositionPercentageOffset: 0.9,
+        badgeWidget: isTouched
+            ? Builder(
+                builder: (context) {
+                  final theme = Theme.of(context);
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.primaryColorDark,
+                      borderRadius: BorderRadius.circular(6),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: Text(
+                      '${entry.key}\n$formattedVal',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  );
+                },
+              )
+            : null,
       );
     }).toList();
   }
