@@ -20,7 +20,10 @@ class TransactionRow extends ConsumerWidget {
   /// An icon to use instead
   final Widget? icon;
 
-  const TransactionRow(this.transaction, {super.key, this.allowDialog = true, this.icon});
+  /// Content to render below the row
+  final Widget? child;
+
+  const TransactionRow(this.transaction, {super.key, this.allowDialog = true, this.icon, this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,6 +80,7 @@ class TransactionRow extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (child != null) child!,
               // End content
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

@@ -58,7 +58,7 @@ export class TransactionSubscription extends Base {
   static classifyPeriod(days: number): BillingPeriod {
     if (days >= 5.5 && days <= 8.5) return BillingPeriod.WEEKLY;
     if (days >= 12 && days <= 20) return BillingPeriod.BI_WEEKLY;
-    if (days >= 24 && days <= 45) return BillingPeriod.MONTHLY;
+    if (days >= 21 && days <= 45) return BillingPeriod.MONTHLY;
     if (days >= 83 && days <= 97) return BillingPeriod.QUARTERLY;
     if (days >= 170 && days <= 190) return BillingPeriod.SEMI_ANNUALLY;
     if (days >= 350 && days <= 380) return BillingPeriod.YEARLY;

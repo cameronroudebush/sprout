@@ -27,4 +27,15 @@ extension StringCasingExtension on String {
     final fullHex = hexColor.length == 6 ? 'FF$hexColor' : hexColor;
     return Color(int.parse("0x$fullHex"));
   }
+
+  /// Converts common code identifiers or raw strings into a clean, presentation-ready Title Case format.
+  String get toPrettyCase {
+    if (isEmpty) return '';
+    String result = replaceAllMapped(
+      RegExp(r'(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])'),
+      (match) => ' ',
+    );
+    result = result.replaceAll(RegExp(r'[-_\s]+'), ' ');
+    return result.trim().toTitleCase;
+  }
 }

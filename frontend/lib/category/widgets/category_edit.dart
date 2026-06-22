@@ -27,7 +27,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
   String? _selectedIcon;
   String? _selectedParentId;
   late bool _excludeFromCashFlow;
-  late bool _canBeHighestExpense;
+  late bool _increasedSubVariance;
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
     _selectedIcon = widget.category?.icon ?? "payment";
     _selectedParentId = widget.category?.parentCategoryId;
     _excludeFromCashFlow = widget.category?.excludeFromCashFlow ?? false;
-    _canBeHighestExpense = widget.category?.canBeHighestExpense ?? true;
+    _increasedSubVariance = widget.category?.increasedSubVariance ?? true;
   }
 
   @override
@@ -77,7 +77,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
       icon: _selectedIcon,
       parentCategoryId: _selectedParentId,
       excludeFromCashFlow: _excludeFromCashFlow,
-      canBeHighestExpense: _canBeHighestExpense,
+      increasedSubVariance: _increasedSubVariance,
     );
 
     if (widget.category == null) {
@@ -139,7 +139,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                 label: "Parent Category",
               ),
 
-              // Exclude From Cash Flow Toggle
+              // Exclude from cash flow toggle
               Row(
                 children: [
                   Expanded(
@@ -158,23 +158,23 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                 ],
               ),
 
-              // Can Be Highest Expense Toggle
+              // Increased sub variance toggle
               Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Allow as Highest Expense", style: theme.textTheme.titleMedium),
+                        Text("Increased subscription variance", style: theme.textTheme.titleMedium),
                         Text(
-                            "If this category can be considered a \"high expense\" when calculating cash flow stats. Turn off for things like credit card payments.",
+                            "If this category should allow for a wider variance when trying to auto determine subscriptions. You'll normally want to turn this on for things like utilities.",
                             style: helpStyle),
                       ],
                     ),
                   ),
                   Switch(
-                    value: _canBeHighestExpense,
-                    onChanged: (newValue) => setState(() => _canBeHighestExpense = newValue),
+                    value: _increasedSubVariance,
+                    onChanged: (newValue) => setState(() => _increasedSubVariance = newValue),
                   ),
                 ],
               ),

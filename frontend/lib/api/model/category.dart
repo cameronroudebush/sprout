@@ -18,7 +18,7 @@ class Category {
     this.parentCategoryId,
     this.icon,
     this.excludeFromCashFlow = false,
-    this.canBeHighestExpense = true,
+    this.increasedSubVariance = false,
   });
 
   String id;
@@ -43,11 +43,11 @@ class Category {
   ///
   String? icon;
 
-  /// If we should exclude this category from cash flow calculations
+  /// If true, drops this category from the cash flow calculation engine entirely. Use this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.
   bool excludeFromCashFlow;
 
-  /// If this category can be considered a \"high expense\" when calculating cash flow stats. You'd want to turn this off for things like credit card payments.
-  bool canBeHighestExpense;
+  /// If true, increases the variance supported by the subscription algorithm so it can better determine this to be included  in monthly costs. This defaults to false.
+  bool increasedSubVariance;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is Category &&
@@ -56,7 +56,7 @@ class Category {
     other.parentCategoryId == parentCategoryId &&
     other.icon == icon &&
     other.excludeFromCashFlow == excludeFromCashFlow &&
-    other.canBeHighestExpense == canBeHighestExpense;
+    other.increasedSubVariance == increasedSubVariance;
 
   @override
   int get hashCode =>
@@ -66,10 +66,10 @@ class Category {
     (parentCategoryId == null ? 0 : parentCategoryId!.hashCode) +
     (icon == null ? 0 : icon!.hashCode) +
     (excludeFromCashFlow.hashCode) +
-    (canBeHighestExpense.hashCode);
+    (increasedSubVariance.hashCode);
 
   @override
-  String toString() => 'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, excludeFromCashFlow=$excludeFromCashFlow, canBeHighestExpense=$canBeHighestExpense]';
+  String toString() => 'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, excludeFromCashFlow=$excludeFromCashFlow, increasedSubVariance=$increasedSubVariance]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -86,7 +86,7 @@ class Category {
       json[r'icon'] = null;
     }
       json[r'excludeFromCashFlow'] = this.excludeFromCashFlow;
-      json[r'canBeHighestExpense'] = this.canBeHighestExpense;
+      json[r'increasedSubVariance'] = this.increasedSubVariance;
     return json;
   }
 
@@ -107,8 +107,8 @@ class Category {
         assert(json[r'name'] != null, 'Required key "Category[name]" has a null value in JSON.');
         assert(json.containsKey(r'excludeFromCashFlow'), 'Required key "Category[excludeFromCashFlow]" is missing from JSON.');
         assert(json[r'excludeFromCashFlow'] != null, 'Required key "Category[excludeFromCashFlow]" has a null value in JSON.');
-        assert(json.containsKey(r'canBeHighestExpense'), 'Required key "Category[canBeHighestExpense]" is missing from JSON.');
-        assert(json[r'canBeHighestExpense'] != null, 'Required key "Category[canBeHighestExpense]" has a null value in JSON.');
+        assert(json.containsKey(r'increasedSubVariance'), 'Required key "Category[increasedSubVariance]" is missing from JSON.');
+        assert(json[r'increasedSubVariance'] != null, 'Required key "Category[increasedSubVariance]" has a null value in JSON.');
         return true;
       }());
 
@@ -118,7 +118,7 @@ class Category {
         parentCategoryId: mapValueOfType<String>(json, r'parentCategoryId'),
         icon: mapValueOfType<String>(json, r'icon'),
         excludeFromCashFlow: mapValueOfType<bool>(json, r'excludeFromCashFlow')!,
-        canBeHighestExpense: mapValueOfType<bool>(json, r'canBeHighestExpense')!,
+        increasedSubVariance: mapValueOfType<bool>(json, r'increasedSubVariance')!,
       );
     }
     return null;
@@ -169,7 +169,7 @@ class Category {
     'id',
     'name',
     'excludeFromCashFlow',
-    'canBeHighestExpense',
+    'increasedSubVariance',
   };
 }
 

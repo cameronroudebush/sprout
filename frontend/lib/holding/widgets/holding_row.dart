@@ -90,38 +90,39 @@ class HoldingRow extends ConsumerWidget {
                     ),
 
                   // Historical Settled Brokerage Delta Values
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        spacing: 4,
-                        children: [
-                          Text(
-                            "Settled Value Change",
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  if (rowState.historicalFrame != null && rowState.historicalFrame.valueChange != 0)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          spacing: 4,
+                          children: [
+                            Text(
+                              "Settled Value Change",
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                              ),
                             ),
-                          ),
-                          Tooltip(
-                            message:
-                                "This is the most recent change reported by ${rowState.account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
-                            child: Icon(
-                              Icons.info_outline,
-                              size: 14,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            Tooltip(
+                              message:
+                                  "This is the most recent change reported by ${rowState.account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 14,
+                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      if (rowState.historicalFrame != null)
-                        SproutChangeWidget(
-                          totalChange: rowState.historicalFrame?.valueChange,
-                          percentageChange: rowState.historicalFrame?.percentChange,
-                          fontSize: theme.textTheme.labelMedium!.fontSize!,
-                          useExtendedPeriodString: false,
+                          ],
                         ),
-                    ],
-                  ),
+                        if (rowState.historicalFrame != null)
+                          SproutChangeWidget(
+                            totalChange: rowState.historicalFrame?.valueChange,
+                            percentageChange: rowState.historicalFrame?.percentChange,
+                            fontSize: theme.textTheme.labelMedium!.fontSize!,
+                            useExtendedPeriodString: false,
+                          ),
+                      ],
+                    ),
 
                   // Total Value Change (All-Time)
                   if (rowState.totalGainPercent != 0)

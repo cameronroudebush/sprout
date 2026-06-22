@@ -50,8 +50,8 @@ class CashFlowCalendarWidget extends ConsumerWidget {
           },
           subheader: "Cash Flow",
           allowSelection: false,
-          onDaySelected: (day, events) {
-            if (events.isEmpty) return;
+          onDaySelected: (day, events, wasAutomatic) {
+            if (events.isEmpty || wasAutomatic) return;
             showSproutPopup(
               context: context,
               builder: (ctx) => SproutBaseDialogWidget(

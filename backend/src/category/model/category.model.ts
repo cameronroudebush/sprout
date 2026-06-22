@@ -45,13 +45,12 @@ export class Category extends DatabaseBase {
   excludeFromCashFlow: boolean = false;
 
   /**
-   * If true, allows transactions in this category to compete for the "Highest Single Expense" callout metric on dashboards.
-   * Turn this off for massive baseline overheads or pass-through entries (e.g., Credit Card Payments, Taxes, Rent)
-   * so they don't drown out useful transaction highlights while still preserving accurate total cash flow volume.
+   * If true, increases the variance supported by the subscription algorithm so it can better determine this to be included
+   *  in monthly costs. This defaults to false.
    */
   @IsBoolean()
-  @DatabaseDecorators.column({ default: true })
-  canBeHighestExpense: boolean = true;
+  @DatabaseDecorators.column({ default: false })
+  increasedSubVariance: boolean = false;
 
   /** The parent category this category belongs to */
   @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL", eager: false })
@@ -67,14 +66,14 @@ export class Category extends DatabaseBase {
   @ApiProperty({ required: false })
   parentCategoryId!: string;
 
-  constructor(user: User, name: string, parentCategory?: Category, icon?: string, excludeFromCashFlow = false, canBeHighestExpense = true) {
+  constructor(user: User, name: string, parentCategory?: Category, icon?: string, excludeFromCashFlow = false, increasedSubVariance = false) {
     super();
     this.user = user;
     this.name = name;
     this.parentCategory = parentCategory;
     this.icon = icon;
     this.excludeFromCashFlow = excludeFromCashFlow;
-    this.canBeHighestExpense = canBeHighestExpense;
+    this.increasedSubVariance = increasedSubVariance;
   }
 
   /**

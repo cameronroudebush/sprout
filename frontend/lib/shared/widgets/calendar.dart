@@ -13,7 +13,7 @@ class SproutCalendar<T> extends StatefulWidget {
   final BoxDecoration? Function(BuildContext context, List<T> events)? cellDecorationBuilder;
 
   /// On day selected callback
-  final void Function(DateTime day, List<T> events)? onDaySelected;
+  final void Function(DateTime day, List<T> events, bool wasAutomatic)? onDaySelected;
 
   /// A callback used to determine what we display each day
   final Widget Function(BuildContext context, List<T> events)? dayDisplay;
@@ -45,14 +45,37 @@ class SproutCalendar<T> extends StatefulWidget {
 class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
   DateTime _focusedDate = DateTime.now();
 
-  void _previousMonth() => setState(() => _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, -1));
-  void _nextMonth() => setState(() => _focusedDate = DateUtils.addMonthsToMonthDate(_focusedDate, 1));
+  void _previousMonth() {
+    final prevMonth = DateUtils.addMonthsToMonthDate(_focusedDate, -1);
+    _focusTargetDayInMonth(prevMonth);
+  }
 
-  void _focusDay(DateTime day) {
+  void _nextMonth() {
+    final nextMonth = DateUtils.addMonthsToMonthDate(_focusedDate, 1);
+    _focusTargetDayInMonth(nextMonth);
+  }
+
+  /// Helper that decides whether to auto-select "today's day" or fall back to the 1st of the month
+  void _focusTargetDayInMonth(DateTime targetMonth) {
+    final now = DateTime.now();
+    DateTime targetDay;
+
+    // If the month we are navigating to is the current calendar month, default to today's date
+    if (targetMonth.year == now.year && targetMonth.month == now.month) {
+      targetDay = now;
+    } else {
+      // Otherwise, pick the first day of that specific month
+      targetDay = DateTime(targetMonth.year, targetMonth.month, 1);
+    }
+
+    _focusDay(targetDay, wasAutomatic: true);
+  }
+
+  void _focusDay(DateTime day, {bool wasAutomatic = false}) {
     final events = widget.events.where((e) => widget.isOnDay(day, e)).toList();
     setState(() => _focusedDate = day);
     if (widget.onDaySelected != null) {
-      widget.onDaySelected!(day, events);
+      widget.onDaySelected!(day, events, wasAutomatic);
     }
   }
 
@@ -68,8 +91,11 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
     }
 
     final dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    final totalWeeks = days.length / 7;
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
+      final double dynamicAspectRatio = isDesktop ? (totalWeeks > 5 ? 2.1 : 1.75) : (totalWeeks > 5 ? 1.2 : 1.0);
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -89,7 +115,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                           child: IconButton(
                             icon: const Icon(Icons.today),
                             onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now()) && widget.allowSelection
-                                ? () => _focusDay(DateTime.now())
+                                ? () => _focusDay(DateTime.now(), wasAutomatic: true)
                                 : null,
                           ),
                         ),
@@ -99,7 +125,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                 if (!widget.allowSelection) const SizedBox.shrink(),
                 Expanded(
                   child: SproutChartHeader(
-                    title: DateFormat.yMMMM().format(_focusedDate),
+                    title: DateFormat.yMMM().format(_focusedDate),
                     subheader: widget.subheader,
                   ),
                 ),
@@ -146,7 +172,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 7,
-                childAspectRatio: isDesktop ? 1.75 : 1,
+                childAspectRatio: dynamicAspectRatio,
               ),
               itemCount: days.length,
               itemBuilder: (context, index) {
