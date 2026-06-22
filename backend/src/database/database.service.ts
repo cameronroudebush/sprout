@@ -20,6 +20,13 @@ export class DatabaseService {
     this.logger.log(`Attempting connection at: ${this.source.options.database}`);
     await this.source.initialize();
     this.logger.verbose(`Connection successful`);
+
+    // Inject custom functions
+    if (Configuration.database.isSqlite) {
+      this.logger.verbose("Injecting custom capabilities into SQLite driver...");
+      this.injectSQLiteRegexFunctions();
+    }
+
     if (!(await this.databaseExists())) {
       this.logger.verbose("Initializing a new database");
       await this.executeMigrations();
@@ -87,6 +94,36 @@ export class DatabaseService {
     } else {
       await source.query("PRAGMA foreign_keys=OFF;");
       await source.query("PRAGMA legacy_alter_table=ON;");
+    }
+  }
+
+  /**
+   * Directly interfaces with the underlying driver connection to register
+   * REGEXP and REGEXP_REPLACE functions.
+   */
+  private injectSQLiteRegexFunctions() {
+    try {
+      const nativeDb = (this.source.driver as any).databaseConnection;
+      if (!nativeDb || typeof nativeDb.function !== "function") {
+        this.logger.warn("Could not find native better-sqlite3 instance to inject regex properties.");
+        return;
+      }
+
+      // Standard REGEXP operator support
+      nativeDb.function("REGEXP", (pattern: string, text: any) => {
+        if (text == null) return 0;
+        return new RegExp(pattern, "i").test(String(text)) ? 1 : 0;
+      });
+
+      // Powerful string replacing capabilities (e.g. `REGEXP_REPLACE(text, pattern, replacement)`)
+      nativeDb.function("REGEXP_REPLACE", (text: any, pattern: string, replacement: string) => {
+        if (text == null) return "";
+        return String(text).replace(new RegExp(pattern, "gi"), replacement);
+      });
+
+      this.logger.verbose("Successfully injected native REGEXP and REGEXP_REPLACE methods into better-sqlite3!");
+    } catch (error) {
+      this.logger.error("Failed to inject regular expression hooks into better-sqlite3 driver wrapper", error);
     }
   }
 }

@@ -1,3 +1,4 @@
+import { CashFlowModule } from "@backend/cash-flow/cash.flow.module";
 import { Configuration } from "@backend/config/core";
 import { EmailController } from "@backend/email/email.controller";
 import { NetWorthModule } from "@backend/net-worth/net-worth.module";
@@ -10,6 +11,7 @@ import { EmailService } from "./email.service";
 @Module({
   imports: [
     NetWorthModule,
+    CashFlowModule,
     MailerModule.forRoot({
       transport: {
         host: Configuration.server.email.host,

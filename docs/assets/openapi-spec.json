@@ -2271,255 +2271,6 @@
         "tags": ["Email"]
       }
     },
-    "/account/{id}": {
-      "get": {
-        "description": "Retrieves an account by the given ID.",
-        "operationId": "AccountController_getById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "Account with the specified ID not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get account by ID.",
-        "tags": ["Account"]
-      },
-      "delete": {
-        "description": "Deletes an account by the given ID.",
-        "operationId": "AccountController_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account deleted successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "Account with the specified ID not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete account by ID.",
-        "tags": ["Account"]
-      },
-      "patch": {
-        "description": "Edits an account by the given ID.",
-        "operationId": "AccountController_edit",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountEditRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Account updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "Account with the specified ID not found or does not belong to the user."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Edit account.",
-        "tags": ["Account"]
-      }
-    },
-    "/account": {
-      "get": {
-        "description": "Retrieves all accounts for the authenticated user.",
-        "operationId": "AccountController_getAccounts",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Accounts found successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Account"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get accounts.",
-        "tags": ["Account"]
-      }
-    },
-    "/account/sync": {
-      "put": {
-        "description": "Runs a manual sync to update all provider accounts.",
-        "operationId": "AccountController_manualSync",
-        "parameters": [
-          {
-            "name": "force",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Manual sync completed successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          },
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Run a manual sync.",
-        "tags": ["Account"]
-      }
-    },
-    "/account/{id}/merge": {
-      "post": {
-        "description": "Merges a source account into the target account by Id, updating all related historical data and deleting the source. Intended purely to migrate from one account as your base to another, in the event the provider changes the structure. You should consider the Target Id (in the query) will be the remaining account. The source account will be provided by the body.",
-        "operationId": "AccountController_mergeAccounts",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountMergeDTO"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Accounts merged successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "One or both accounts not found or do not belong to the user."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Merge two accounts.",
-        "tags": ["Account"]
-      }
-    },
     "/cash-flow/sankey": {
       "get": {
         "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
@@ -2845,6 +2596,255 @@
         "tags": ["Cash Flow"]
       }
     },
+    "/account/{id}": {
+      "get": {
+        "description": "Retrieves an account by the given ID.",
+        "operationId": "AccountController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Account with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get account by ID.",
+        "tags": ["Account"]
+      },
+      "delete": {
+        "description": "Deletes an account by the given ID.",
+        "operationId": "AccountController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Account with the specified ID not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete account by ID.",
+        "tags": ["Account"]
+      },
+      "patch": {
+        "description": "Edits an account by the given ID.",
+        "operationId": "AccountController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountEditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "Account with the specified ID not found or does not belong to the user."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit account.",
+        "tags": ["Account"]
+      }
+    },
+    "/account": {
+      "get": {
+        "description": "Retrieves all accounts for the authenticated user.",
+        "operationId": "AccountController_getAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Accounts found successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get accounts.",
+        "tags": ["Account"]
+      }
+    },
+    "/account/sync": {
+      "put": {
+        "description": "Runs a manual sync to update all provider accounts.",
+        "operationId": "AccountController_manualSync",
+        "parameters": [
+          {
+            "name": "force",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Manual sync completed successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Run a manual sync.",
+        "tags": ["Account"]
+      }
+    },
+    "/account/{id}/merge": {
+      "post": {
+        "description": "Merges a source account into the target account by Id, updating all related historical data and deleting the source. Intended purely to migrate from one account as your base to another, in the event the provider changes the structure. You should consider the Target Id (in the query) will be the remaining account. The source account will be provided by the body.",
+        "operationId": "AccountController_mergeAccounts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountMergeDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accounts merged successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "404": {
+            "description": "One or both accounts not found or do not belong to the user."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Merge two accounts.",
+        "tags": ["Account"]
+      }
+    },
     "/institution/{id}/update": {
       "patch": {
         "description": "Updates properties supported by the DTO for the specific institution.",
@@ -3003,13 +3003,13 @@
             "description": "If true, drops this category from the cash flow calculation engine entirely.\nUse this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.",
             "default": false
           },
-          "canBeHighestExpense": {
+          "increasedSubVariance": {
             "type": "boolean",
-            "description": "If true, allows transactions in this category to compete for the \"Highest Single Expense\" callout metric on dashboards.\nTurn this off for massive baseline overheads or pass-through entries (e.g., Credit Card Payments, Taxes, Rent)\nso they don't drown out useful transaction highlights while still preserving accurate total cash flow volume.",
-            "default": true
+            "description": "If true, increases the variance supported by the subscription algorithm so it can better determine this to be included\n in monthly costs. This defaults to false.",
+            "default": false
           }
         },
-        "required": ["id", "name", "excludeFromCashFlow", "canBeHighestExpense"]
+        "required": ["id", "name", "excludeFromCashFlow", "increasedSubVariance"]
       },
       "CategoryStats": {
         "type": "object",
@@ -4077,41 +4077,6 @@
         },
         "required": ["value", "history", "timeline"]
       },
-      "AccountEditRequest": {
-        "type": "object",
-        "properties": {
-          "subType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountSubTypeEnum"
-              }
-            ]
-          },
-          "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountTypeEnum"
-              }
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "interestRate": {
-            "type": "number"
-          }
-        }
-      },
-      "AccountMergeDTO": {
-        "type": "object",
-        "properties": {
-          "sourceId": {
-            "type": "string",
-            "description": "The ID of the source account to merge and delete."
-          }
-        },
-        "required": ["sourceId"]
-      },
       "SankeyLink": {
         "type": "object",
         "properties": {
@@ -4324,6 +4289,41 @@
           }
         },
         "required": ["spending"]
+      },
+      "AccountEditRequest": {
+        "type": "object",
+        "properties": {
+          "subType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountSubTypeEnum"
+              }
+            ]
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountTypeEnum"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "interestRate": {
+            "type": "number"
+          }
+        }
+      },
+      "AccountMergeDTO": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "description": "The ID of the source account to merge and delete."
+          }
+        },
+        "required": ["sourceId"]
       },
       "UpdateInstitutionRequest": {
         "type": "object",

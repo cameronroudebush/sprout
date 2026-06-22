@@ -1,8 +1,10 @@
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/api/base_api.dart';
+import 'package:sprout/shared/providers/extensions/sse_auto_refresh.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 
@@ -162,6 +164,7 @@ class TransactionSubscriptions extends _$TransactionSubscriptions {
   @override
   Future<List<TransactionSubscription>> build() async {
     final api = await ref.watch(transactionApiProvider.future);
+    ref.refreshOnForceUpdate();
     return await api.transactionControllerSubscriptions() ?? [];
   }
 
@@ -182,3 +185,6 @@ Future<List<Transaction>> transactionsForDay(Ref ref, DateTime day) async {
   );
   return items ?? [];
 }
+
+// Keep track of the active targeted calendar snapshot frame
+final selectedCalendarMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());

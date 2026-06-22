@@ -58,6 +58,11 @@ module.exports = function (options, argv) {
             from: path.resolve("src", "email", "templates"),
             to: "templates",
           },
+          {
+            from: "**/*.sql",
+            context: path.resolve(__dirname, "src"),
+            noErrorOnMissing: true,
+          },
         ],
       }),
       // Define relevant variables

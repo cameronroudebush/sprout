@@ -31,7 +31,7 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
           shrinkWrap: mobile,
           physics: mobile ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
           itemCount: recent.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 0),
+          separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             return TransactionRow(recent[index]);
           },

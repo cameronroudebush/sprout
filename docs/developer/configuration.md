@@ -118,11 +118,10 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## Transactions
 
-| YAML Key                                | Environment Variable                           | Default | Description                                                              |
-| --------------------------------------- | ---------------------------------------------- | ------- | ------------------------------------------------------------------------ |
-| `transaction.stuckTransactions.enabled` | `sprout_transaction_stuckTransactions_enabled` | `true`  | If we should check for stuck transactions.                               |
-| `transaction.stuckTransactions.days`    | `sprout_transaction_stuckTransactions_days`    | `7`     | Days before a pending transaction is considered "stuck" and removed.     |
-| `transaction.subscriptionCount`         | `sprout_transaction_subscriptionCount`         | `3`     | Number of similar recurring charges required to identify a Subscription. |
+| YAML Key                                | Environment Variable                           | Default | Description                                                          |
+| --------------------------------------- | ---------------------------------------------- | ------- | -------------------------------------------------------------------- |
+| `transaction.stuckTransactions.enabled` | `sprout_transaction_stuckTransactions_enabled` | `true`  | If we should check for stuck transactions.                           |
+| `transaction.stuckTransactions.days`    | `sprout_transaction_stuckTransactions_days`    | `7`     | Days before a pending transaction is considered "stuck" and removed. |
 
 ## Holdings
 

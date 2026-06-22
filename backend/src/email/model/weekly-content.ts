@@ -72,13 +72,4 @@ export class WeeklyEmailContent {
       };
     });
   }
-
-  /** Returns an instance of `this` with fake data */
-  static asFake(user: User) {
-    return new WeeklyEmailContent(user, 142550.0, 450.25, 500, 12, [
-      { description: "Grocery Store", category: "shopping", amount: -85.2 },
-      { description: "Utility Bill", category: "utilities", amount: -120.0 },
-      { description: "Freelance Payout", category: "paycheck", amount: 500.0 },
-    ]);
-  }
 }

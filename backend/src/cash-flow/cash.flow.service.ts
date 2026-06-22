@@ -7,7 +7,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { endOfDay, endOfMonth, endOfYear, format, startOfDay, startOfMonth, startOfYear, subMonths } from "date-fns";
-import { Between, FindOptionsWhere, In } from "typeorm";
+import { Between, FindOperator, FindOptionsWhere, In } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
 import { Colors } from "./model/colors";
@@ -18,13 +18,15 @@ export class CashFlowService {
    * Core calculation engine.
    * Aggregates transactions into Inflow/Outflow per category. Only considers certain account types (depository, credit)
    */
-  async calculateFlows(user: User, year: number, month?: number, day?: number, accountId?: string) {
+  async calculateFlows(user: User, year?: number, month?: number, day?: number, accountId?: string, customRange?: FindOperator<Date>) {
     if (month) month -= 1;
     let between;
-    if (month == null) {
-      between = Between(new Date(year, 0, 1), new Date(year, 11, 31, 23, 59, 59, 999));
+    if (customRange) {
+      between = customRange;
+    } else if (month == null) {
+      between = Between(new Date(year!, 0, 1), new Date(year!, 11, 31, 23, 59, 59, 999));
     } else {
-      const queryDate = new Date(year, month, day ?? 1);
+      const queryDate = new Date(year!, month, day ?? 1);
       between = day == null ? Between(startOfMonth(queryDate), endOfMonth(queryDate)) : Between(startOfDay(queryDate), endOfDay(queryDate));
     }
 
@@ -46,15 +48,29 @@ export class CashFlowService {
       pending: false,
     } as FindOptionsWhere<Transaction>;
 
-    const transactionsRaw = await Transaction.find({ where, relations: { account: true, category: true } });
+    const transactionsRaw = await Transaction.find({ where, relations: { account: true, category: true }, order: { posted: "DESC" } });
+    /** All raw transactions, converted to the users currency */
     const transactions = Transaction.convertListToTargetCurrency(transactionsRaw, user);
+    /** Transactions that only include what was actually calculated for our cash flow */
+    const filteredTransactions: Array<Transaction> = [];
 
     const categoryStats = new Map<string, { category: Category; inflow: number; outflow: number }>();
+    let largestExpense: Transaction | undefined;
 
     for (const transaction of transactions) {
+      // Check largest expense
+      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) {
+        const category = transaction.category;
+        // An expense can only be the largest if it's not excluded from engine calculation
+        if (category && !category.excludeFromCashFlow) largestExpense = transaction;
+      }
+
+      // Perform grouping calculation stats for this category info
       if (!transaction.category) continue;
       // Exclude if requested
       if (transaction.category.excludeFromCashFlow) continue;
+
+      filteredTransactions.push(transaction);
 
       const catId = transaction.category.id;
       if (!categoryStats.has(catId)) {
@@ -90,15 +106,7 @@ export class CashFlowService {
       totalExpense += stats.outflow;
     }
 
-    let largestExpense: Transaction | undefined;
-    for (const transaction of transactions)
-      if (transaction.amount < 0 && (largestExpense == null || transaction.amount < largestExpense.amount)) {
-        const category = transaction.category;
-        // An expense can only be the largest if it's NOT excluded AND explicitly allowed
-        if (category && !category.excludeFromCashFlow && category.canBeHighestExpense) largestExpense = transaction;
-      }
-
-    return { totalIncome, totalExpense, categoryStats, transactionCount: transactions.length, largestExpense };
+    return { totalIncome, totalExpense, categoryStats, transactionCount: transactions.length, largestExpense, transactions, filteredTransactions };
   }
 
   /**

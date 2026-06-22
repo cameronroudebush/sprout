@@ -3,7 +3,6 @@ import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { EmailService } from "@backend/email/email.service";
-import { WeeklyEmailContent } from "@backend/email/model/weekly-content";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Get, Post, Res } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -48,6 +47,7 @@ export class EmailController {
     description: "Renders the weekly update email with some fake data. Only works in dev mode.",
   })
   async previewWeeklyUpdate(@CurrentUser() user: User, @Res() res: Response) {
-    await this.renderEjsContent(WeeklyEmailContent.asFake(user), "weekly-update", res);
+    const content = await this.emailService.getWeeklyEmailContent(user);
+    await this.renderEjsContent(content, "weekly-update", res);
   }
 }
