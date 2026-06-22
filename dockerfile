@@ -25,7 +25,7 @@ RUN npm run build
 # -------------------------------
 #      Build Final Result
 # -------------------------------
-FROM alpine:3.24.0 AS prod
+FROM alpine:3.24.1 AS prod
 # Using port 80 like normal
 EXPOSE 80
 
