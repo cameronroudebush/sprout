@@ -1,6 +1,5 @@
-import { ConfigurationRequirement } from "@backend/config/model/config.requirement";
+import { CONFIGURATION_REQUIREMENTS } from "@backend/config/model/config.requirement";
 import { SproutLogger } from "@backend/core/logger";
-import { BaseProviderConfig } from "@backend/providers/base/config";
 import { Injectable } from "@nestjs/common";
 import cronParser from "cron-parser";
 import fs from "fs";
@@ -19,60 +18,6 @@ export class ConfigurationService {
 
   /** Separator used for env variable lookup */
   static readonly ENV_VARIABLE_SEPARATOR = "_";
-
-  private readonly validationRequirements: ConfigurationRequirement[] = [
-    {
-      name: "Demo Mode Auth Restrictions",
-      validate: () => !(Configuration.isDemoMode && Configuration.server?.auth?.type === "oidc"),
-      fix: (logger) => {
-        logger.error("Configuration Conflict: OIDC authentication cannot be enabled while running in Demo Mode. Defaulting auth mode to 'local'.");
-        Configuration.server.auth.type = "local";
-      },
-    },
-    {
-      name: "Demo Mode Provider Restrictions",
-      validate: () => {
-        if (!Configuration.isDemoMode) return true;
-        return !Object.values(Configuration.providers).some((provider: any) => provider instanceof BaseProviderConfig && provider.enabled === true);
-      },
-      fix: (logger) => {
-        for (const [providerKey, provider] of Object.entries(Configuration.providers)) {
-          if (provider instanceof BaseProviderConfig && provider.enabled === true) {
-            logger.warn(`Configuration Restricton: External provider "${providerKey}" cannot be enabled in Demo Mode. Force disabling background syncs.`);
-            provider.enabled = false;
-          }
-        }
-      },
-    },
-    {
-      name: "Demo Mode Job Restrictions",
-      validate: () => {
-        if (!Configuration.isDemoMode) return true;
-        return (
-          !Configuration.database.backup.enabled &&
-          !Configuration.transaction.stuckTransactions.enabled &&
-          !Configuration.user.deviceCheck.enabled &&
-          !Configuration.server.email.enabled &&
-          !Configuration.providers.syncNotifications.enabled
-        );
-      },
-      fix: (logger) => {
-        const features = {
-          "Database Backup": Configuration.database.backup,
-          "Stuck Transactions": Configuration.transaction.stuckTransactions,
-          "Device Integrity Check": Configuration.user.deviceCheck,
-          "Email Notifications": Configuration.server.email,
-          "Sync Notifications": Configuration.providers.syncNotifications,
-        };
-
-        for (const [name, config] of Object.entries(features))
-          if (config?.enabled) {
-            logger.warn(`Configuration Restriction: "${name}" jobs cannot run in Demo Mode. Force disabling.`);
-            config.enabled = false;
-          }
-      },
-    },
-  ];
 
   /** Returns the header to display at the top of the config file */
   private get configHeader() {
@@ -225,12 +170,20 @@ export class ConfigurationService {
 
   /** Validates explicit cross-property configuration rules after initialization */
   private validateConfigurationRequirements() {
-    for (const requirement of this.validationRequirements)
+    for (const requirement of CONFIGURATION_REQUIREMENTS) {
       try {
-        if (!requirement.validate()) requirement.fix(this.logger);
+        if (!requirement.validate()) {
+          requirement.fix(this.logger);
+          if (requirement.fatal) {
+            this.logger.error(`Fatal Configuration Error: Rule "${requirement.name}" failed verification. Halting backend execution.`);
+            process.exit(1);
+          }
+        }
       } catch (e) {
         this.logger.error(`Exception occurred processing validation rule "${requirement.name}": ${(e as Error).message}`);
+        if (requirement.fatal) process.exit(1);
       }
+    }
   }
 
   /** Given a cron time, determines how many milliseconds it is until the next run. */
