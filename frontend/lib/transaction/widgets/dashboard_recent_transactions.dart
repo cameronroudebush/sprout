@@ -27,14 +27,16 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
       data: (state) {
         final recent = state.transactions.take(count).toList();
 
-        return ListView.separated(
-          shrinkWrap: mobile,
-          physics: mobile ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
-          itemCount: recent.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            return TransactionRow(recent[index]);
-          },
+        return Material(
+          child: ListView.separated(
+            shrinkWrap: mobile,
+            physics: mobile ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+            itemCount: recent.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              return TransactionRow(recent[index]);
+            },
+          ),
         );
       },
     );

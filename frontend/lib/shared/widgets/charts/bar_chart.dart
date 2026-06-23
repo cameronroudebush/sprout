@@ -11,6 +11,8 @@ class SproutBarChart extends StatefulWidget {
   final Map<String, num>? data;
   final SproutChartHeader? header;
   final SproutChartLegendPosition legendPosition;
+
+  /// If the individual bar should have it's title
   final bool showBarTitle;
   final Map<String, Color>? colorMapping;
   final String Function(num value)? formatValue;

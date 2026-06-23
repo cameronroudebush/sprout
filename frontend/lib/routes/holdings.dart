@@ -132,7 +132,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                                     child: SproutCard(
                                       child: HoldingPieChart(
                                         investmentAccounts: investmentAccounts,
-                                        topN: 3,
+                                        topN: 5,
                                       ),
                                     ),
                                   ),
@@ -140,7 +140,11 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                             ),
                           ),
                           SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts)),
-                          SproutCard(child: HoldingDividendsWidget(investmentAccounts: investmentAccounts)),
+                          SproutCard(
+                              child: HoldingDividendsWidget(
+                            investmentAccounts: investmentAccounts,
+                            isDesktop: isDesktop,
+                          )),
                         ],
                       ),
                     ),
@@ -191,12 +195,14 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                                 height: 250,
                                 child: HoldingPieChart(
                                   investmentAccounts: investmentAccounts,
-                                  topN: 3,
+                                  topN: 5,
                                 ),
                               ),
                             ),
                           SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts)),
-                          SproutCard(child: HoldingDividendsWidget(investmentAccounts: investmentAccounts)),
+                          SproutCard(
+                              child:
+                                  HoldingDividendsWidget(investmentAccounts: investmentAccounts, isDesktop: isDesktop)),
                         ],
                       ],
                     ),
@@ -346,6 +352,16 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               header: SproutChartHeader(
                 title: selectedHoldingAccount?.name ?? "Unknown account",
                 subheader: _selectedHolding!.symbol,
+                right: Tooltip(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  message:
+                      "This is the most recent change reported by ${selectedHoldingAccount?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
+                ),
               ),
               chartRange: userConfig?.netWorthRange ?? ChartRangeEnum.oneMonth,
               showYAxis: true,

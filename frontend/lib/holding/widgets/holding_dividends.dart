@@ -12,10 +12,12 @@ import 'package:sprout/shared/widgets/charts/util/header.dart';
 class HoldingDividendsWidget extends ConsumerWidget {
   final List<Account> investmentAccounts;
   final int? topN;
+  final bool isDesktop;
 
   const HoldingDividendsWidget({
     super.key,
     required this.investmentAccounts,
+    required this.isDesktop,
     this.topN,
   });
 
@@ -39,8 +41,8 @@ class HoldingDividendsWidget extends ConsumerWidget {
           height: 300,
           child: SproutBarChart(
             data: finalChartData,
-            legendPosition: SproutChartLegendPosition.bottom,
-            showBarTitle: false,
+            legendPosition: isDesktop ? SproutChartLegendPosition.none : SproutChartLegendPosition.bottom,
+            showBarTitle: isDesktop,
             header: SproutChartHeader(
               title: "Dividend Income",
               subheader: "Estimated Annual Yield: $formattedTotal",

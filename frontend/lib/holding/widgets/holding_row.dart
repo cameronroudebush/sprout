@@ -24,6 +24,8 @@ class HoldingRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
     final rowState = ref.watch(expandedHoldingProvider(holding));
+    final int currentDay = DateTime.now().weekday;
+    final bool isWeekend = currentDay == DateTime.saturday || currentDay == DateTime.sunday;
 
     return InkWell(
       onTap: onSelect,
@@ -56,7 +58,8 @@ class HoldingRow extends ConsumerWidget {
                   ),
 
                   // Intraday Realtime Live Data Changes
-                  if (rowState.changePercent != 0 &&
+                  if (!isWeekend &&
+                      rowState.changePercent != 0 &&
                       (rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND || !rowState.isLive))
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,6 +107,7 @@ class HoldingRow extends ConsumerWidget {
                               ),
                             ),
                             Tooltip(
+                              constraints: const BoxConstraints(maxWidth: 280),
                               message:
                                   "This is the most recent change reported by ${rowState.account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
                               child: Icon(
