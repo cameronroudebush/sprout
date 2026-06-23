@@ -26,16 +26,17 @@ Sprout is designed to be flexible. You can configure the application using eithe
 
 These are the fundamental settings required for Sprout to secure your data and start up.
 
-| YAML Key                    | Environment Variable               | Default          | Description                                                                                         |
-| --------------------------- | ---------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
-| `encryptionKey`             | `sprout_encryptionKey`             | **Required**     | A **64-character hex string** used to encrypt database fields and cookies.                          |
-| `server.port`               | `sprout_server_port`               | `8001`           | The HTTP port the backend server listens on.                                                        |
-| `server.logLevels`          | `sprout_server_logLevels`          | `log,error,warn` | A list of log levels to output. Valid options: `verbose`, `debug`, `log`, `warn`, `error`, `fatal`. |
-| **Rate limits**             |                                    |                  |                                                                                                     |
-| `server.rateLimit.ttl`      | `sprout_server_rateLimit_ttl`      | `60000`          | How long the limit window is.                                                                       |
-| `server.rateLimit.limit`    | `sprout_server_rateLimit_limit`    | `1000`           | How many requests we can have in the limit window.                                                  |
-| **Jobs**                    |                                    |                  |                                                                                                     |
-| `server.jobs.autoRetryTime` | `sprout_server_jobs_autoRetryTime` | `60`             | How many minutes to wait to re-try failed jobs automatically.                                       |
+| YAML Key                    | Environment Variable               | Default          | Description                                                                                                                                                    |
+| --------------------------- | ---------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `encryptionKey`             | `sprout_encryptionKey`             | **Required**     | A **64-character hex string** used to encrypt database fields and cookies.                                                                                     |
+| `server.port`               | `sprout_server_port`               | `8001`           | The HTTP port the backend server listens on.                                                                                                                   |
+| `server.publicUrl`          | `publicUrl`                        |                  | The public URL where Sprout is hosted (e.g., https://sprout.my-domain.com). Highly recommended in production to protect against Host Header Injection attacks. |
+| `server.logLevels`          | `sprout_server_logLevels`          | `log,error,warn` | A list of log levels to output. Valid options: `verbose`, `debug`, `log`, `warn`, `error`, `fatal`.                                                            |
+| **Rate limits**             |                                    |                  |                                                                                                                                                                |
+| `server.rateLimit.ttl`      | `sprout_server_rateLimit_ttl`      | `60000`          | How long the limit window is.                                                                                                                                  |
+| `server.rateLimit.limit`    | `sprout_server_rateLimit_limit`    | `1000`           | How many requests we can have in the limit window.                                                                                                             |
+| **Jobs**                    |                                    |                  |                                                                                                                                                                |
+| `server.jobs.autoRetryTime` | `sprout_server_jobs_autoRetryTime` | `60`             | How many minutes to wait to re-try failed jobs automatically.                                                                                                  |
 
 ## Brandfetch
 
