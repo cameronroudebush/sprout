@@ -16,6 +16,14 @@ class ExchangeRateConfig {
 
 /** Options that should be provided to the core of the web server */
 export class ServerConfig {
+  @ConfigurationMetadata.assign({
+    comment: [
+      "The public URL where Sprout is hosted (e.g., https://sprout.my-domain.com).",
+      "Highly recommended in production to protect against Host Header Injection attacks.",
+    ],
+  })
+  publicUrl?: string;
+
   @ConfigurationMetadata.assign({ comment: "The port to accept backend requests on." })
   port: number = 8001;
 
