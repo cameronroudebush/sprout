@@ -21,8 +21,14 @@ fi
 
 # --- Get Version Info ---
 
-# Total number of commits used as our build number
-BUILD_NUMBER=$(git rev-list --count HEAD)
+COMMIT_COUNT=$(git rev-list --count HEAD)
+BUILD_NAME=$(git describe --tags --always)
+
+if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+  BUILD_NUMBER=$(( (COMMIT_COUNT * 10) + 2 ))
+else
+  BUILD_NUMBER=$(( (COMMIT_COUNT * 10) + 1 ))
+fi
 
 # Git describe gives us our string formatted version
 BUILD_NAME=$(git describe --tags --always)
