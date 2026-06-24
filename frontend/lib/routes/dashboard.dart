@@ -10,6 +10,7 @@ import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/shared/widgets/height_matched_row.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/widgets/dashboard_recent_transactions.dart';
 import 'package:sprout/transaction/widgets/subscriptions_calendar.dart';
@@ -70,44 +71,25 @@ class DashboardPage extends ConsumerWidget {
           ),
         ),
         ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 425),
-            child: Stack(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Expanded(
-                      flex: 2,
-                      child: DashboardAccountsCard(),
-                    ),
-                    // We leave a blank space for the pie chart to sit over
-                    const Expanded(flex: 1, child: SizedBox.shrink()),
-                  ],
-                ),
-                Positioned.fill(
-                  child: Row(
-                    children: [
-                      const Expanded(flex: 2, child: SizedBox.shrink()),
-                      Expanded(
-                        flex: 1,
-                        child: SproutCard(
-                          child: Center(
-                            child: CategoryPieChart(
-                              DateTime.now(),
-                              legendPosition: SproutChartLegendPosition.bottom,
-                              topN: topCategoryCount,
-                              header: SproutChartHeader(
-                                title: "Top $topCategoryCount Purchase Categories",
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+          constraints: const BoxConstraints(maxHeight: 425),
+          child: HeightMatchedRow(
+            leadFlex: 2,
+            followingFlex: 1,
+            leadChild: const DashboardAccountsCard(),
+            followingChild: SproutCard(
+              child: Center(
+                child: CategoryPieChart(
+                  DateTime.now(),
+                  legendPosition: SproutChartLegendPosition.bottom,
+                  topN: topCategoryCount,
+                  header: SproutChartHeader(
+                    title: "Top $topCategoryCount Purchase Categories",
                   ),
                 ),
-              ],
-            )),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(
           height: 500,
           child: Row(

@@ -66,7 +66,7 @@ Your finances are unique, and your tracking should be too. Sprout allows you to 
 
 Recurring charges can easily go unnoticed. Sprout analyzes your transaction history to help you stay on top of your commitments.
 
-- **Auto-Detection:** The system identifies consistent, recurring charges (within a 10% variance) to flag potential subscriptions.
+- **Auto-Detection:** The system identifies consistent, recurring charges to flag potential subscriptions.
 - **Frequency Analysis:** Tracks how often you are charged, helping you audit your monthly obligations and identify unused services.
 
 ## See it in Action

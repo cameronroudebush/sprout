@@ -86,12 +86,7 @@ export class ProviderSyncService {
         if (!accountInDB) continue;
 
         // Save Account Balance History
-        await AccountHistory.fromPlain({
-          account: accountInDB,
-          balance: accountInDB.balance,
-          availableBalance: accountInDB.availableBalance,
-          time: subDays(new Date(), 1),
-        }).insert();
+        await AccountHistory.insertForAccount(accountInDB);
 
         // Update Current Account Balances
         accountInDB.balance = data.account.balance;

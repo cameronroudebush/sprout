@@ -51,6 +51,7 @@ export class PlaidProviderService extends ProviderBase {
   );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.plaid, Configuration.providers.plaid.rateLimit, user);
   override isAvailable = async (_user: User) => !!Configuration.providers.plaid.secret && !!Configuration.providers.plaid.clientId;
+
   /** The client for talking with plaid for account info */
   public readonly plaidClient!: PlaidApi;
 
@@ -83,9 +84,13 @@ export class PlaidProviderService extends ProviderBase {
       where: { institution: { user: { id: user.id } } },
       relations: { institution: true },
     });
+
+    // Run sequentially to prevent 429's
     const results: Awaited<ReturnType<PlaidProviderService["syncSingleInstitution"]>> = [];
-    const updates = (await Promise.all(institutions.flatMap(async (asset) => await this.syncSingleInstitution(user, asset, accountsOnly)))).flat();
-    results.push(...updates);
+    for (const asset of institutions) {
+      const updates = await this.syncSingleInstitution(user, asset, accountsOnly);
+      results.push(...updates);
+    }
     return results;
   }
 
@@ -102,8 +107,9 @@ export class PlaidProviderService extends ProviderBase {
       const hasInvestmentAccount = accountsResponse.data.accounts.some((acc) => this.mapType(acc.type) === AccountType.investment);
       let allHoldings: PlaidHolding[] | undefined = undefined;
       let securities: PlaidSecurity[] | undefined = undefined;
-      // Fetch Holdings for the entire institution, only if this is an investment account
-      if (hasInvestmentAccount) {
+
+      // In a production background sync, skip holdings unless explicitly requested via webhooks or manual refresh
+      if (hasInvestmentAccount && !accountsOnly) {
         try {
           await this.rateLimit(user).incrementOrError();
           const holdingsResponse = await this.plaidClient!.investmentsHoldingsGet({
@@ -111,19 +117,24 @@ export class PlaidProviderService extends ProviderBase {
           });
           securities = holdingsResponse.data.securities;
           allHoldings = holdingsResponse.data.holdings;
-        } catch (e) {}
+        } catch (e) {
+          this.logger.warn(`Failed to fetch holdings for ${asset.institution.name}`);
+        }
       }
 
       // Fetch all the transactions for all the accounts
       let addedTransactions: PlaidTransaction[] = [];
       let modifiedTransactions: PlaidTransaction[] = [];
       let removedTransactions: RemovedTransaction[] = [];
+      let newCursor = asset.syncCursor;
+
       try {
         if (!accountsOnly) {
           const syncData = await this.fetchAllInstitutionTransactions(user, asset);
           addedTransactions = syncData.added;
           modifiedTransactions = syncData.modified;
           removedTransactions = syncData.removed;
+          newCursor = syncData.nextCursor;
         }
       } catch (e) {
         this.logger.error(e);
@@ -160,6 +171,7 @@ export class PlaidProviderService extends ProviderBase {
           holdings: accountHoldings,
           transactions: transactions,
           removedTransactionIds: removedTransactionIds,
+          newCursor: newCursor,
         });
 
         // Successful update, make sure we don't track as an error
@@ -214,22 +226,29 @@ export class PlaidProviderService extends ProviderBase {
   /**
    * Exchanges the public_token from the frontend for an access_token,
    * then fetches and saves the chosen accounts as new accounts for Sprout. Only
-   *  intended to be used during linking.
+   * intended to be used during linking.
    */
   async exchangeAndCreateAccounts(user: User, dto: PlaidLinkDTO) {
     this.checkPlaidClient();
     const metadata = dto.metadata;
+    let accessToken: string | undefined;
+    let itemId: string | undefined;
+
+    // Isolate token exchange to prevent DB errors from leaving ghost items on Plaid servers
     try {
-      // Exchange public token
       await this.rateLimit(user).incrementOrError();
       const exchangeResponse = await this.plaidClient!.itemPublicTokenExchange({
         public_token: dto.publicToken,
       });
 
-      const accessToken = exchangeResponse.data.access_token;
-      const itemId = exchangeResponse.data.item_id;
+      accessToken = exchangeResponse.data.access_token;
+      itemId = exchangeResponse.data.item_id;
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to exchange public token. ${error}`);
+    }
 
-      // Fetch Account details from Plaid to sync
+    // Secondary block handles local operations. If this fails, the Plaid item is wiped.
+    try {
       await this.rateLimit(user).incrementOrError();
       const accountsResponse = await this.plaidClient!.accountsGet({
         access_token: accessToken,
@@ -239,16 +258,23 @@ export class PlaidProviderService extends ProviderBase {
       const instName = metadata.institution.name;
       const plaidInstId = metadata.institution.institution_id;
       let institution = await Institution.findOne({ where: { user: { id: user.id }, name: instName } });
+
       if (!institution) {
         await this.rateLimit(user).incrementOrError();
         const instResponse = await this.plaidClient!.institutionsGetById({
           institution_id: plaidInstId,
           country_codes: [CountryCode.Us],
-          options: {
-            include_optional_metadata: true,
-          },
+          options: { include_optional_metadata: true },
         });
         institution = await new Institution(instResponse.data.institution.url ?? this.config.url, instName, false, user).insert();
+      } else {
+        // Remove duplicate institutions if user bypassed frontend update UI
+        const existingAsset = await PlaidInstitutionAsset.findOne({ where: { institution: { id: institution.id } } });
+        if (existingAsset && existingAsset.itemId !== itemId) {
+          await this.plaidClient.itemRemove({ access_token: accessToken });
+          accessToken = undefined; // Clear so the catch block doesn't try to remove it again
+          throw new InternalServerErrorException("This bank is already linked. If you need to fix a connection, please use the update settings.");
+        }
       }
 
       // Store the Plaid credential linked to this institution
@@ -266,16 +292,37 @@ export class PlaidProviderService extends ProviderBase {
 
       return await Promise.all(
         accountsResponse.data.accounts.map(async (acc) => {
-          const newAccount = this.convertPlaidAccount(acc, user, institution);
-          // Insert our new account into the db with some history
-          await newAccount.insert();
-          await AccountHistory.insertForNewAccount(newAccount);
-          // Insert a plaid asset so we know how it links back
-          await new PlaidAsset(newAccount, acc.account_id).insert();
-          return newAccount;
+          // Upsert logic to prevent duplicate checking/savings on update flow
+          let plaidAsset = await PlaidAsset.findOne({
+            where: { plaidAccountId: acc.account_id, account: { user: { id: user.id } } },
+            relations: { account: true },
+          });
+
+          if (!plaidAsset) {
+            // This is a genuinely new account under this institution
+            const newAccount = this.convertPlaidAccount(acc, user, institution);
+            await newAccount.insert();
+            await AccountHistory.insertForNewAccount(newAccount);
+            await new PlaidAsset(newAccount, acc.account_id).insert();
+            return newAccount;
+          } else {
+            // This account already exists. Update its balance/details instead of creating a duplicate
+            const accountToUpdate = this.convertPlaidAccount(acc, user, institution);
+            const mergedAccount = merge(plaidAsset.account, accountToUpdate);
+            await mergedAccount.update();
+            await AccountHistory.insertForAccount(plaidAsset.account);
+            return mergedAccount;
+          }
         }),
       );
     } catch (error) {
+      // If a database crash or validation error occurs, ensure we wipe the orphaned Plaid item
+      if (accessToken)
+        try {
+          await this.plaidClient!.itemRemove({ access_token: accessToken });
+        } catch (e) {
+          this.logger.error("Failed to clean up orphaned Plaid item after DB crash.", e);
+        }
       throw new InternalServerErrorException(`Failed to link Plaid accounts. ${error}`);
     }
   }
@@ -311,13 +358,7 @@ export class PlaidProviderService extends ProviderBase {
       hasMore = response.data.has_more;
     }
 
-    // Save the newly acquired cursor back to the database
-    if (instAsset.syncCursor !== cursor) {
-      instAsset.syncCursor = cursor;
-      await instAsset.update();
-    }
-
-    return { added: allAdded, modified: allModified, removed: allRemoved };
+    return { added: allAdded, modified: allModified, removed: allRemoved, nextCursor: cursor };
   }
 
   /**
