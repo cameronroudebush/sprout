@@ -21,11 +21,13 @@ void showSproutEditDialog({
   final controller = TextEditingController(text: currentValue);
   final isChanged = ValueNotifier<bool>(false);
 
-  void submit() {
+  Future<void> submit(BuildContext dialogContext) async {
     final newValue = controller.text.trim();
     if (newValue != (currentValue ?? "")) {
-      onSave(newValue);
-      Navigator.pop(context);
+      try {
+        await onSave(newValue);
+        if (context.mounted) Navigator.pop(dialogContext);
+      } catch (_) {}
     }
   }
 
@@ -35,7 +37,7 @@ void showSproutEditDialog({
 
   showSproutPopup(
     context: context,
-    builder: (context) => SproutBaseDialogWidget(
+    builder: (innerContext) => SproutBaseDialogWidget(
       title,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -52,7 +54,7 @@ void showSproutEditDialog({
             autofocus: true,
             obscureText: obscureText,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) => submit(),
+            onSubmitted: (_) => submit(innerContext),
             decoration: InputDecoration(
               labelText: label,
               prefixIcon: Icon(icon),
@@ -77,7 +79,7 @@ void showSproutEditDialog({
                   valueListenable: isChanged,
                   builder: (context, changed, _) {
                     return FilledButton(
-                      onPressed: changed ? submit : null,
+                      onPressed: changed ? () => submit(innerContext) : null,
                       child: const Text("Save"),
                     );
                   },

@@ -26,7 +26,7 @@ export class Account extends DatabaseBase {
   provider: ProviderType;
 
   /** The institution associated to this account */
-  @ManyToOne(() => Institution, (i) => i.id, { eager: true, cascade: true })
+  @ManyToOne(() => Institution, (i) => i.id, { eager: true, cascade: ["insert", "update"] })
   institution: Institution;
 
   /** The user this account belongs to */
