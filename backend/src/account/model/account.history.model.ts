@@ -32,6 +32,16 @@ export class AccountHistory extends DatabaseBase {
     this.availableBalance = availableBalance;
   }
 
+  /** Inserts the given account as one day old history */
+  static async insertForAccount(accountInDB: Account) {
+    await AccountHistory.fromPlain({
+      account: accountInDB,
+      balance: accountInDB.balance,
+      availableBalance: accountInDB.availableBalance,
+      time: subDays(new Date(), 1),
+    }).insert();
+  }
+
   /**
    * Given an account, inserts a one day old account history intended to be used with new accounts. This will help
    *    make sure we can properly calculate when the account was added

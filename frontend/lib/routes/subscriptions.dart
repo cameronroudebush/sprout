@@ -31,15 +31,18 @@ class SubscriptionsPage extends ConsumerWidget {
         (isDesktop, context, constraints) {
           // Mobile
           if (!isDesktop) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    totalHeader,
-                    const SubscriptionCalendarWidget(),
-                  ],
+            return Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      totalHeader,
+                      const SubscriptionCalendarWidget(),
+                    ],
+                  ),
                 ),
               ),
             );

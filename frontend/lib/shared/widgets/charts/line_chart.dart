@@ -422,8 +422,8 @@ class SproutLineChart extends StatelessWidget {
                       : '';
 
               final seriesLabel = '${currentSeries.label}: ';
-              final formattedValue = formatValue != null ? formatValue!(barSpot.y) : barSpot.y.toString();
-
+              final rawValue = formatValue != null ? formatValue!(barSpot.y) : barSpot.y.toString();
+              final formattedValue = rawValue.replaceAll('-', '\u2011').replaceAll(' ', '\u00A0');
               final tooltipTextStyle = theme.textTheme.labelLarge?.copyWith(
                 color: Colors.white,
               );
