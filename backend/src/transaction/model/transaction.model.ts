@@ -3,6 +3,7 @@ import { Category } from "@backend/category/model/category.model";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { TransactionExtraData } from "@backend/transaction/model/transaction.extra.model";
 import { User } from "@backend/user/model/user.model";
 import { Optional } from "@nestjs/common";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
@@ -54,7 +55,9 @@ export class Transaction extends DatabaseBase {
 
   /** Any extra data that we want to store as JSON */
   @DatabaseDecorators.jsonColumn({ nullable: true })
-  extra?: object;
+  @ApiProperty({ type: TransactionExtraData })
+  @Optional()
+  extra?: TransactionExtraData;
 
   /** Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it. */
   @DatabaseDecorators.jsonColumn({ nullable: true })

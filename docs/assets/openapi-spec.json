@@ -3045,6 +3045,10 @@
           "brandFetchClientId": {
             "type": "string",
             "description": "The brandfetch client ID used for displaying logos."
+          },
+          "tileServer": {
+            "type": "string",
+            "description": "The tile server to use for frontend mapping display."
           }
         },
         "required": ["chatKeyProvidedInBackend", "emailEnabled"]
@@ -3566,6 +3570,60 @@
         },
         "required": ["event"]
       },
+      "TransactionLocation": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "lat": {
+            "type": "number",
+            "nullable": true
+          },
+          "lon": {
+            "type": "number",
+            "nullable": true
+          },
+          "postal_code": {
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "store_number": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "TransactionExtraData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionLocation"
+              }
+            ]
+          }
+        }
+      },
       "Transaction": {
         "type": "object",
         "properties": {
@@ -3579,6 +3637,14 @@
           "accountId": {
             "type": "string",
             "description": "The Id of the account related to this transaction."
+          },
+          "extra": {
+            "description": "Any extra data that we want to store as JSON",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionExtraData"
+              }
+            ]
           },
           "amount": {
             "type": "number",
@@ -3595,10 +3661,6 @@
             "format": "date-time",
             "type": "string",
             "description": "The date this transaction posted"
-          },
-          "extra": {
-            "type": "object",
-            "description": "Any extra data that we want to store as JSON"
           },
           "manuallyEdited": {
             "type": "boolean",

@@ -23,7 +23,12 @@ export class ConfigController {
   @AuthGuard.attach()
   @ApiOkResponse({ description: "The configuration that external services may want to know about.", type: APIConfig })
   async get(@CurrentUser() _user: User) {
-    return new APIConfig(Configuration.server.prompt.hasChatKey, Configuration.server.email.enabled, Configuration.server.brandFetch.clientId);
+    return new APIConfig(
+      Configuration.server.prompt.hasChatKey,
+      Configuration.server.email.enabled,
+      Configuration.server.brandFetch.clientId,
+      Configuration.transaction.tileServer,
+    );
   }
 
   @Get("unsecure")
