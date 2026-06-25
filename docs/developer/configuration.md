@@ -119,10 +119,12 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## Transactions
 
-| YAML Key                                | Environment Variable                           | Default | Description                                                          |
-| --------------------------------------- | ---------------------------------------------- | ------- | -------------------------------------------------------------------- |
-| `transaction.stuckTransactions.enabled` | `sprout_transaction_stuckTransactions_enabled` | `true`  | If we should check for stuck transactions.                           |
-| `transaction.stuckTransactions.days`    | `sprout_transaction_stuckTransactions_days`    | `7`     | Days before a pending transaction is considered "stuck" and removed. |
+| YAML Key                                | Environment Variable                           | Default | Description                                                                              |
+| --------------------------------------- | ---------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `transaction.tileServer`                | `sprout_transaction_tileServer`                |         | A tile server to use to visualize transaction locations for providers that support that. |
+| **Stuck Transactions**                  |                                                |         |                                                                                          |
+| `transaction.stuckTransactions.enabled` | `sprout_transaction_stuckTransactions_enabled` | `true`  | If we should check for stuck transactions.                                               |
+| `transaction.stuckTransactions.days`    | `sprout_transaction_stuckTransactions_days`    | `7`     | Days before a pending transaction is considered "stuck" and removed.                     |
 
 ## Holdings
 

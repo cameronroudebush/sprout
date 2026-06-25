@@ -288,6 +288,10 @@ class ApiClient {
           return TotalTransactions.fromJson(value);
         case 'Transaction':
           return Transaction.fromJson(value);
+        case 'TransactionExtraData':
+          return TransactionExtraData.fromJson(value);
+        case 'TransactionLocation':
+          return TransactionLocation.fromJson(value);
         case 'TransactionRule':
           return TransactionRule.fromJson(value);
         case 'TransactionSubscription':

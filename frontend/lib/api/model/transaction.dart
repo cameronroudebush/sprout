@@ -16,11 +16,11 @@ class Transaction {
     required this.id,
     this.categoryId,
     required this.accountId,
+    this.extra,
     required this.amount,
     required this.description,
     required this.pending,
     required this.posted,
-    this.extra,
     this.manuallyEdited = false,
   });
 
@@ -38,6 +38,15 @@ class Transaction {
   /// The Id of the account related to this transaction.
   String accountId;
 
+  /// Any extra data that we want to store as JSON
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  TransactionExtraData? extra;
+
   /// The numeric value converted to the user's preferred currency format. This overrides the original amount property.
   num amount;
 
@@ -48,15 +57,6 @@ class Transaction {
   /// The date this transaction posted
   DateTime posted;
 
-  /// Any extra data that we want to store as JSON
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  Object? extra;
-
   /// Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it.
   bool manuallyEdited;
 
@@ -65,11 +65,11 @@ class Transaction {
     other.id == id &&
     other.categoryId == categoryId &&
     other.accountId == accountId &&
+    other.extra == extra &&
     other.amount == amount &&
     other.description == description &&
     other.pending == pending &&
     other.posted == posted &&
-    other.extra == extra &&
     other.manuallyEdited == manuallyEdited;
 
   @override
@@ -78,15 +78,15 @@ class Transaction {
     (id.hashCode) +
     (categoryId == null ? 0 : categoryId!.hashCode) +
     (accountId.hashCode) +
+    (extra == null ? 0 : extra!.hashCode) +
     (amount.hashCode) +
     (description.hashCode) +
     (pending.hashCode) +
     (posted.hashCode) +
-    (extra == null ? 0 : extra!.hashCode) +
     (manuallyEdited.hashCode);
 
   @override
-  String toString() => 'Transaction[id=$id, categoryId=$categoryId, accountId=$accountId, amount=$amount, description=$description, pending=$pending, posted=$posted, extra=$extra, manuallyEdited=$manuallyEdited]';
+  String toString() => 'Transaction[id=$id, categoryId=$categoryId, accountId=$accountId, extra=$extra, amount=$amount, description=$description, pending=$pending, posted=$posted, manuallyEdited=$manuallyEdited]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -97,15 +97,15 @@ class Transaction {
       json[r'categoryId'] = null;
     }
       json[r'accountId'] = this.accountId;
-      json[r'amount'] = this.amount;
-      json[r'description'] = this.description;
-      json[r'pending'] = this.pending;
-      json[r'posted'] = this.posted.toUtc().toIso8601String();
     if (this.extra != null) {
       json[r'extra'] = this.extra;
     } else {
       json[r'extra'] = null;
     }
+      json[r'amount'] = this.amount;
+      json[r'description'] = this.description;
+      json[r'pending'] = this.pending;
+      json[r'posted'] = this.posted.toUtc().toIso8601String();
       json[r'manuallyEdited'] = this.manuallyEdited;
     return json;
   }
@@ -140,11 +140,11 @@ class Transaction {
         id: mapValueOfType<String>(json, r'id')!,
         categoryId: mapValueOfType<String>(json, r'categoryId'),
         accountId: mapValueOfType<String>(json, r'accountId')!,
+        extra: TransactionExtraData.fromJson(json[r'extra']),
         amount: num.parse('${json[r'amount']}'),
         description: mapValueOfType<String>(json, r'description')!,
         pending: mapValueOfType<bool>(json, r'pending')!,
         posted: mapDateTime(json, r'posted', r'')!,
-        extra: mapValueOfType<Object>(json, r'extra'),
         manuallyEdited: mapValueOfType<bool>(json, r'manuallyEdited') ?? false,
       );
     }

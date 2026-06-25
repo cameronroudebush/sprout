@@ -100,6 +100,8 @@ part 'model/theme_style_enum.dart';
 part 'model/total_net_worth_dto.dart';
 part 'model/total_transactions.dart';
 part 'model/transaction.dart';
+part 'model/transaction_extra_data.dart';
+part 'model/transaction_location.dart';
 part 'model/transaction_rule.dart';
 part 'model/transaction_subscription.dart';
 part 'model/unsecure_app_configuration.dart';
