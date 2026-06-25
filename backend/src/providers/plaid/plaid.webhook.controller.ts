@@ -64,8 +64,9 @@ export class PlaidWebhookController {
       this.logger.error("Webhook signature verification failed.");
       throw new BadRequestException("Invalid webhook signature");
     }
-    // Don't await so plaid isn't waiting on us.
+    // Handle what to do with our webhook. Don't await so Plaid knows we received it.
     this.handleWebhook(payload);
+    // Tell Plaid this was successful
     return { status: "received" };
   }
 
@@ -99,25 +100,46 @@ export class PlaidWebhookController {
     };
   }
 
-  /** Handles the webhook by calling the proper sync state. */
+  /** Handles what to do with incoming webhooks. */
   private async handleWebhook(payload: WebhookUpdateAcknowledgedWebhook) {
-    const { webhook_type, item_id } = payload;
-    if (!item_id) return;
-    const instAsset = await PlaidInstitutionAsset.findOne({
-      where: { itemId: item_id },
-      relations: { institution: { user: true } },
-    });
-    if (!instAsset) {
-      this.logger.warn(`Failed to locate matching institution to update: ${item_id}`);
-      return;
-    }
-    const user = instAsset.institution.user;
+    const webhookType = payload.webhook_type;
+    const webhookCode = payload.webhook_code;
+
     try {
-      this.logger.log(`Queueing sync task via orchestrator for user: ${instAsset.institution.user.username} [${webhook_type}]`);
-      await this.providerSyncService.syncForProvider(user, this.plaidProvider, false);
-    } catch (error) {
-      this.logger.error(`Failed to execute webhook handler`, error);
+      switch (webhookType) {
+        case "TRANSACTIONS":
+          // Only handle SYNC_UPDATES_AVAILABLE to not hit their servers twice for the same data
+          if (webhookCode === "SYNC_UPDATES_AVAILABLE") {
+            const asset = await this.getPlaidInstitutionAsset(payload);
+            const user = asset.institution.user;
+            this.logger.log(`Queueing Webhook based sync for: ${user.username} [${webhookType}]`);
+            await this.providerSyncService.syncForProvider(user, this.plaidProvider, false);
+          } else this.logger.warn(`Ignoring unknown TRANSACTIONS webhook: ${webhookCode}`);
+          break;
+
+        case "ITEM":
+          if (webhookCode === "ERROR") {
+            // Handle marking that an institution needs updated
+            const asset = await this.getPlaidInstitutionAsset(payload);
+            await this.providerSyncService.flagInstitution(asset.institution, true);
+          } else this.logger.warn(`Ignoring unknown ERROR webhook: ${webhookCode}`);
+          break;
+
+        default:
+          this.logger.log(`Ignoring webhook type ${webhookType} / ${webhookCode}`);
+      }
+    } catch (e) {
+      this.logger.error(`Failed to execute webhook handler`, e);
     }
+  }
+
+  /** Given the payload, returns the institution asset, throws an error if it doesn't exist */
+  private async getPlaidInstitutionAsset(payload: WebhookUpdateAcknowledgedWebhook) {
+    const { item_id } = payload;
+    if (!item_id) throw new BadRequestException(`No item included in the payload to lookup: ${item_id}`);
+    const asset = await PlaidInstitutionAsset.findOne({ where: { itemId: item_id }, relations: { institution: { user: true } } });
+    if (!asset) throw new BadRequestException(`Failed to locate matching institution to update: ${item_id}`);
+    return asset;
   }
 
   /** Verifies the webhook came from plaid. */

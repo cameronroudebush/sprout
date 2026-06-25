@@ -32,6 +32,7 @@ import {
   Products,
   RemovedTransaction,
 } from "plaid";
+import { FindOptionsWhere } from "typeorm";
 import { ProviderBase } from "../base/core";
 import { ProviderRateLimit } from "../base/rate-limit";
 
@@ -78,13 +79,11 @@ export class PlaidProviderService extends ProviderBase {
     if (this.plaidClient == null) throw new InternalServerErrorException("Plaid is not properly configured.");
   }
 
-  override async get(user: User, accountsOnly: boolean) {
+  override async get(user: User, accountsOnly: boolean, institutionId: string) {
     this.checkPlaidClient();
-    const institutions = await PlaidInstitutionAsset.find({
-      where: { institution: { user: { id: user.id } } },
-      relations: { institution: true },
-    });
-
+    const where: FindOptionsWhere<PlaidInstitutionAsset> = { institution: { user: { id: user.id } } };
+    if (institutionId) where.id = institutionId;
+    const institutions = await PlaidInstitutionAsset.find({ where, relations: { institution: true } });
     // Run sequentially to prevent 429's
     const results: Awaited<ReturnType<PlaidProviderService["syncSingleInstitution"]>> = [];
     for (const asset of institutions) {
