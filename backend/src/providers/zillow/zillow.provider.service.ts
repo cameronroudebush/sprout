@@ -30,7 +30,7 @@ export class ZillowProviderService extends ProviderBase {
   /** Impit instance used for scraping */
   private readonly impit = new Impit({ browser: "chrome" });
 
-  override async get(user: User, _accountsOnly: boolean) {
+  override async get(user: User, _accountsOnly: boolean, _institutionId: string) {
     const accounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.zillow } });
     return await Promise.all(
       accounts.map(async (x) => {

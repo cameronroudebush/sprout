@@ -32,10 +32,12 @@ export abstract class ProviderBase {
    *
    * @param user The user we want accounts for.
    * @param accountsOnly If we only want accounts and not included holdings or transactions.
+   * @param institutionId A specific institution we only want data for.
    */
   abstract get(
     user: User,
     accountsOnly: boolean,
+    institutionId?: string,
   ): Promise<
     Array<{
       account: Account;

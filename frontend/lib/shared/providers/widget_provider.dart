@@ -33,29 +33,15 @@ class WidgetSync extends _$WidgetSync {
     // Listen for changes to the auth state
     ref.listen(authProvider, (previous, next) async {
       final authData = next.value;
-
       if (authData == null) {
         // User logged out or auth is null -> Clear native data
         await _saveToNative(null);
       } else {
-        // User logged in -> Setup and fetch
-        _setupListeners();
+        // User logged in -> fetch
         await updateData();
       }
     });
 
-    // Determine initial state on startup
-    final initialAuth = ref.read(authProvider).value;
-    if (initialAuth != null) {
-      _setupListeners();
-      await updateData();
-    } else {
-      await _saveToNative(null);
-    }
-  }
-
-  void _setupListeners() {
-    // Listen to data providers and trigger sync
     ref.listen(transactionsProvider, (_, __) => updateData());
     ref.listen(totalNetWorthProvider, (_, __) => updateData());
     ref.listen(userConfigProvider, (_, __) => updateData());
@@ -65,6 +51,14 @@ class WidgetSync extends _$WidgetSync {
         updateData();
       }
     });
+
+    // Determine initial state on startup
+    final initialAuth = ref.read(authProvider).value;
+    if (initialAuth != null) {
+      await updateData();
+    } else {
+      await _saveToNative(null);
+    }
   }
 
   /// Initializes the [Workmanager] and registers a periodic background task.

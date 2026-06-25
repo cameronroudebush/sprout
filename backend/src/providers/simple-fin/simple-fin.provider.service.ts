@@ -38,8 +38,9 @@ export class SimpleFINProviderService extends ProviderBase {
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.simpleFin, Configuration.providers.simpleFIN.rateLimit, user);
   override isAvailable = async (user: User) => !!user.config.simpleFinToken;
 
-  override async get(user: User, accountsOnly: boolean) {
-    return this.convertData(await this.fetchData(undefined, undefined, accountsOnly, user), user);
+  override async get(user: User, accountsOnly: boolean, _institutionId?: string) {
+    const rawData = await this.fetchData(undefined, undefined, accountsOnly, user);
+    return this.convertData(rawData, user);
   }
 
   /** SimpleFin doesn't provide account type metadata, so try and guess here. */

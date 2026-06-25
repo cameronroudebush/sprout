@@ -291,6 +291,9 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
       loading: () => const AsyncValue.loading(),
     );
 
+    String providerName = account.provider.toString().toTitleCase;
+    if (account.provider == ProviderTypeEnum.simpleFin) providerName = "SimpleFIN";
+
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
@@ -456,7 +459,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         FinanceProviderIcon(provider, size: 36),
                         Padding(
                             padding: EdgeInsetsGeometry.only(left: 8),
-                            child: Text(account.provider.toString().toTitleCase, style: theme.textTheme.bodyMedium)),
+                            child: Text(providerName, style: theme.textTheme.bodyMedium)),
                       ],
                     ),
                   ),

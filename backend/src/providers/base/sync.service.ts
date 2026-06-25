@@ -4,6 +4,7 @@ import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
+import { Institution } from "@backend/institution/model/institution.model";
 import { Sync } from "@backend/jobs/model/sync.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { Transaction } from "@backend/transaction/model/transaction.model";
@@ -25,14 +26,16 @@ export class ProviderSyncService {
    * Given a user and a provider, initiates a sync for them by grabbing their accounts and updating them in the database
    *
    * @param notify If we should send a notification that the user has new data. This will be batched and sent via the {@link SyncNotificationJob}.
+   * @param institutionId Optional ID of a specific institution to sync. If provided, skips syncing other institutions for this provider.
    */
-  async syncForProvider(user: User, provider: ProviderBase, notify = true) {
+  async syncForProvider(user: User, provider: ProviderBase, notify = true, institutionId?: string) {
     if (!(await provider.isAvailable(user))) {
       this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
       return;
     }
-
-    this.logger.log(`Processing sync for user: ${user.username} for provider: ${provider.config.dbType}`);
+    this.logger.log(
+      `Processing sync for user: ${user.username} for provider: ${provider.config.dbType}${institutionId ? ` [Institution: ${institutionId}]` : ""}`,
+    );
     const sync = await Sync.fromPlain({
       time: new Date(),
       status: "in-progress",
@@ -41,7 +44,7 @@ export class ProviderSyncService {
     }).insert();
     sync.user = user;
     try {
-      const result = await this.syncUserAccounts(user, provider);
+      const result = await this.syncUserAccounts(user, provider, institutionId);
       if (result.institutionErrors.size > 0) {
         const names = Array.from(result.institutionErrors);
         sync.status = "failed";
@@ -59,23 +62,32 @@ export class ProviderSyncService {
     return sync;
   }
 
+  /** Flags the given institution with any errors and warnings as seen fit. */
+  async flagInstitution(institution: Institution, hasError: boolean) {
+    institution.hasError = hasError;
+    await institution.update();
+  }
+
   /** Connects to the provider, updates accounts, transactions, and holdings */
-  private async syncUserAccounts(user: User, provider: ProviderBase) {
+  private async syncUserAccounts(user: User, provider: ProviderBase, institutionId?: string) {
     const institutionErrors = new Set<string>();
 
     // Fast-fail if the user has no accounts linked yet
     const userAccountsCount = await Account.count({ where: { user: { id: user.id } } });
     if (userAccountsCount === 0) return { institutionErrors, userHadSuccessfulUpdate: false };
 
-    // Grab the up to date transaction/account info from the provider
-    const accounts = await provider.get(user, false);
-    if (accounts.length === 0) this.logger.debug(`No accounts available for ${user.username} on provider ${provider.config.dbType}`);
+    // Grab the up to date transaction/account info from the provider, optionally filtered by institutionId
+    const accounts = await provider.get(user, false, institutionId);
+    if (accounts.length === 0)
+      this.logger.debug(
+        `No accounts available for ${user.username} on provider ${provider.config.dbType}${institutionId ? ` for institution ${institutionId}` : ""}`,
+      );
 
-    return this.handleAccountsUpdate(accounts, user);
+    return this.handleAccountsUpdate(accounts, user, institutionId);
   }
 
   /** This function handles the actual account updates for a user/account combo by writing the data to the DB as necessary. */
-  private async handleAccountsUpdate(accounts: Awaited<ReturnType<ProviderBase["get"]>>, user: User) {
+  private async handleAccountsUpdate(accounts: Awaited<ReturnType<ProviderBase["get"]>>, user: User, institutionId?: string) {
     const institutionErrors = new Set<string>();
     let userHadSuccessfulUpdate = false;
 
@@ -84,6 +96,8 @@ export class ProviderSyncService {
         const accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
         // Skip missing accounts. We will not insert them, that's the link job from the specific provider.
         if (!accountInDB) continue;
+        // If we're filtering by an institutionId, and this account isn't that institution, skip it
+        if (institutionId && accountInDB.institution.id !== institutionId) continue;
 
         // Save Account Balance History
         await AccountHistory.insertForAccount(accountInDB);
@@ -94,10 +108,7 @@ export class ProviderSyncService {
         await accountInDB.update();
 
         // Update Institution Error State
-        const institution = accountInDB.institution;
-        institution.hasError = data.account.institution.hasError;
-        institution.url = data.account.institution.url;
-        await institution.update();
+        await this.flagInstitution(accountInDB.institution, data.account.institution.hasError);
 
         if (data.account.institution.hasError) institutionErrors.add(data.account.institution.name);
 
