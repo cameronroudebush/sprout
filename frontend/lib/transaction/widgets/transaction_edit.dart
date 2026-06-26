@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
@@ -12,8 +10,8 @@ import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
+import 'package:sprout/transaction/widgets/transaction_map.dart';
 import 'package:sprout/transaction/widgets/transaction_rule_edit.dart';
-import 'package:sprout/user/user_config_provider.dart';
 
 /// A widget that displays the editing capabilities of a [Transaction]
 class TransactionEdit extends ConsumerStatefulWidget {
@@ -29,9 +27,6 @@ class TransactionEdit extends ConsumerStatefulWidget {
 }
 
 class _TransactionEditState extends ConsumerState<TransactionEdit> {
-  /// Dark filter used to apply to tile servers to invert their colors
-  final darkFilter = const ColorFilter.mode(Colors.white, BlendMode.difference);
-
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
@@ -146,17 +141,13 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
   Widget _getForm(BuildContext context, ThemeData theme) {
     final helpStyle = const TextStyle(fontSize: 12, color: Colors.grey);
 
-    // Watch for the tile server URL from your config
-    final tileServer = ref.watch(secureConfigProvider).value?.tileServer;
-    final isDarkMode = ref.watch(userConfigProvider.notifier).isDarkMode();
-
     // Extract location data if it exists
     final extra = widget.transaction.extra;
     final locationData = extra?.location;
     final double? lat = locationData?.lat?.toDouble();
     final double? lon = locationData?.lon?.toDouble();
     // Only show the map if we have coordinates AND a valid tile server
-    final bool hasLocation = lat != null && lon != null && tileServer != null && tileServer.isNotEmpty;
+    final bool hasLocation = lat != null && lon != null;
 
     return Form(
       key: _formKey,
@@ -325,7 +316,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
               ),
 
               // Location Map
-              if (hasLocation) _buildLocationSection(theme, isDarkMode, lat, lon, locationData, tileServer),
+              if (hasLocation) _buildLocationSection(theme, lat, lon, locationData, helpStyle),
             ],
           ),
         ),
@@ -333,19 +324,9 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
     );
   }
 
-  /// Builds a nice location map for where we're at
+  /// Builds a nice location map for where the transaction occurred, assuming we have that data.
   Widget _buildLocationSection(
-    ThemeData theme,
-    bool isDarkMode,
-    double lat,
-    double lon,
-    TransactionLocation? locationData,
-    String tileServer,
-  ) {
-    final helpStyle = const TextStyle(fontSize: 12, color: Colors.grey);
-
-    final tileLayer = TileLayer(urlTemplate: tileServer, userAgentPackageName: "sprout.croudebush.net");
-
+      ThemeData theme, double lat, double lon, TransactionLocation? locationData, TextStyle helpStyle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
@@ -365,31 +346,9 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
           child: SizedBox(
             height: 200,
             width: double.infinity,
-            child: FlutterMap(
-              options: MapOptions(
-                initialCenter: LatLng(lat, lon),
-                initialZoom: 15.0,
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.none,
-                ),
-              ),
-              children: [
-                isDarkMode ? ColorFiltered(colorFilter: darkFilter, child: tileLayer) : tileLayer,
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: LatLng(lat, lon),
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 40,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            child: TransactionMapWidget(
+              latitude: lat,
+              longitude: lon,
             ),
           ),
         ),

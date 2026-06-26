@@ -33,6 +33,11 @@ export class ServerConfig {
   @ConfigurationMetadata.assign({ comment: "The log levels we want to render content for.", restrictedValues: LOG_LEVELS })
   logLevels: LogLevel[] = ["log", "error", "warn"];
 
+  @ConfigurationMetadata.assign({ comment: "Where to pull our tiles from for light mode for map display.", externalControlDisabled: true })
+  lightModeTiles = "https://tiles.openfreemap.org/styles/positron";
+  @ConfigurationMetadata.assign({ comment: "Where to pull our tiles from for dark mode for map display.", externalControlDisabled: true })
+  darkModeTiles = "https://tiles.openfreemap.org/styles/dark";
+
   @ConfigurationMetadata.assign({ comment: "Configuration related to the exchange rates located in Sprout." })
   exchangeRate = new ExchangeRateConfig();
 
