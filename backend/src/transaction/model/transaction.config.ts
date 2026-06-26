@@ -19,9 +19,6 @@ class StuckTransactionConfig {
 
 /** Contains transaction configuration options */
 export class TransactionConfig {
-  @ConfigurationMetadata.assign({ comment: "A location for a tile server for displaying transaction location map. If not provided, the map won't show." })
-  tileServer?: string;
-
   @ConfigurationMetadata.assign({ comment: "Configuration for when and how to check for stuck transactions (pending)." })
   stuckTransactions = new StuckTransactionConfig();
 }

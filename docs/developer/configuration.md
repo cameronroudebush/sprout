@@ -7,7 +7,7 @@ hide:
 
 # Configuration
 
-Sprout is designed to be flexible. You can configure the application using either a `sprout.config.yml` file placed in the application directory **OR** by using Environment Variables (best for Docker).
+Sprout is designed to be flexible. You can configure the application using either a `sprout.config.yml` file (if enabled) placed in the application directory **OR** by using Environment Variables (best for Docker).
 
 !!! tip "Environment Variables"
 
@@ -29,6 +29,7 @@ These are the fundamental settings required for Sprout to secure your data and s
 | YAML Key                    | Environment Variable               | Default          | Description                                                                                                                                                    |
 | --------------------------- | ---------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `encryptionKey`             | `sprout_encryptionKey`             | **Required**     | A **64-character hex string** used to encrypt database fields and cookies.                                                                                     |
+| `writeConfigFile`           | `sprout_writeConfigFile`           | `false`          | If the application should write the config file (.yml) instead of just keeping it all in memory and using environment variables                                |
 | `server.port`               | `sprout_server_port`               | `8001`           | The HTTP port the backend server listens on.                                                                                                                   |
 | `server.publicUrl`          | `publicUrl`                        |                  | The public URL where Sprout is hosted (e.g., https://sprout.my-domain.com). Highly recommended in production to protect against Host Header Injection attacks. |
 | `server.logLevels`          | `sprout_server_logLevels`          | `log,error,warn` | A list of log levels to output. Valid options: `verbose`, `debug`, `log`, `warn`, `error`, `fatal`.                                                            |
@@ -119,12 +120,11 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## Transactions
 
-| YAML Key                                | Environment Variable                           | Default | Description                                                                              |
-| --------------------------------------- | ---------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
-| `transaction.tileServer`                | `sprout_transaction_tileServer`                |         | A tile server to use to visualize transaction locations for providers that support that. |
-| **Stuck Transactions**                  |                                                |         |                                                                                          |
-| `transaction.stuckTransactions.enabled` | `sprout_transaction_stuckTransactions_enabled` | `true`  | If we should check for stuck transactions.                                               |
-| `transaction.stuckTransactions.days`    | `sprout_transaction_stuckTransactions_days`    | `7`     | Days before a pending transaction is considered "stuck" and removed.                     |
+| YAML Key                                | Environment Variable                           | Default | Description                                                          |
+| --------------------------------------- | ---------------------------------------------- | ------- | -------------------------------------------------------------------- |
+| **Stuck Transactions**                  |                                                |         |                                                                      |
+| `transaction.stuckTransactions.enabled` | `sprout_transaction_stuckTransactions_enabled` | `true`  | If we should check for stuck transactions.                           |
+| `transaction.stuckTransactions.days`    | `sprout_transaction_stuckTransactions_days`    | `7`     | Days before a pending transaction is considered "stuck" and removed. |
 
 ## Holdings
 

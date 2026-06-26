@@ -45,7 +45,7 @@ dependencies:
   crypto: ^3.0.7
   google_fonts: ^8.1.0
   path_drawing: ^1.0.1
-  flutter_map: ^8.3.0
+  maplibre: ^0.3.5
 
 dev_dependencies:
   build_runner: ^2.13.0

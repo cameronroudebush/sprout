@@ -1,6 +1,6 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
-import { APIConfig } from "@backend/config/model/api/configuration.dto";
+import { APIConfig, TileConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { DemoDataService } from "@backend/demo/demo.data.service";
@@ -26,8 +26,8 @@ export class ConfigController {
     return new APIConfig(
       Configuration.server.prompt.hasChatKey,
       Configuration.server.email.enabled,
+      new TileConfig(Configuration.server.lightModeTiles, Configuration.server.darkModeTiles),
       Configuration.server.brandFetch.clientId,
-      Configuration.transaction.tileServer,
     );
   }
 

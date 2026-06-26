@@ -16,7 +16,7 @@ class APIConfig {
     required this.chatKeyProvidedInBackend,
     required this.emailEnabled,
     this.brandFetchClientId,
-    this.tileServer,
+    required this.tiles,
   });
 
   /// Determines if the chat key is already provided and users shouldn't be able to set theirs then.
@@ -34,21 +34,15 @@ class APIConfig {
   ///
   String? brandFetchClientId;
 
-  /// The tile server to use for frontend mapping display.
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? tileServer;
+  /// Tile config
+  TileConfig tiles;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
     other.chatKeyProvidedInBackend == chatKeyProvidedInBackend &&
     other.emailEnabled == emailEnabled &&
     other.brandFetchClientId == brandFetchClientId &&
-    other.tileServer == tileServer;
+    other.tiles == tiles;
 
   @override
   int get hashCode =>
@@ -56,10 +50,10 @@ class APIConfig {
     (chatKeyProvidedInBackend.hashCode) +
     (emailEnabled.hashCode) +
     (brandFetchClientId == null ? 0 : brandFetchClientId!.hashCode) +
-    (tileServer == null ? 0 : tileServer!.hashCode);
+    (tiles.hashCode);
 
   @override
-  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId, tileServer=$tileServer]';
+  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId, tiles=$tiles]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -70,11 +64,7 @@ class APIConfig {
     } else {
       json[r'brandFetchClientId'] = null;
     }
-    if (this.tileServer != null) {
-      json[r'tileServer'] = this.tileServer;
-    } else {
-      json[r'tileServer'] = null;
-    }
+      json[r'tiles'] = this.tiles;
     return json;
   }
 
@@ -93,6 +83,8 @@ class APIConfig {
         assert(json[r'chatKeyProvidedInBackend'] != null, 'Required key "APIConfig[chatKeyProvidedInBackend]" has a null value in JSON.');
         assert(json.containsKey(r'emailEnabled'), 'Required key "APIConfig[emailEnabled]" is missing from JSON.');
         assert(json[r'emailEnabled'] != null, 'Required key "APIConfig[emailEnabled]" has a null value in JSON.');
+        assert(json.containsKey(r'tiles'), 'Required key "APIConfig[tiles]" is missing from JSON.');
+        assert(json[r'tiles'] != null, 'Required key "APIConfig[tiles]" has a null value in JSON.');
         return true;
       }());
 
@@ -100,7 +92,7 @@ class APIConfig {
         chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
         emailEnabled: mapValueOfType<bool>(json, r'emailEnabled')!,
         brandFetchClientId: mapValueOfType<String>(json, r'brandFetchClientId'),
-        tileServer: mapValueOfType<String>(json, r'tileServer'),
+        tiles: TileConfig.fromJson(json[r'tiles'])!,
       );
     }
     return null;
@@ -150,6 +142,7 @@ class APIConfig {
   static const requiredKeys = <String>{
     'chatKeyProvidedInBackend',
     'emailEnabled',
+    'tiles',
   };
 }
 

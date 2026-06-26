@@ -145,6 +145,10 @@ export class ConfigurationService {
 
   /** Saves the configuration from {@link Configuration} to the file */
   save(path = this.configFileLocation, log = false) {
+    if (!Configuration.writeConfigFile) {
+      this.logger.log(`Config file writing is disabled.`);
+      return;
+    }
     if (log) this.logger.log(`Writing config file to ${path}`);
     const configObject = this.objectToYaml(Configuration);
     const output = this.configHeader + configObject + "\n";

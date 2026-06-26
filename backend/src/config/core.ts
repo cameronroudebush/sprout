@@ -20,6 +20,11 @@ export class Configuration {
   })
   static isDemoMode = false;
 
+  @ConfigurationMetadata.assign({
+    comment: "If the application should write the config file instead of just keeping it all in memory and using environment variables.",
+  })
+  static writeConfigFile = false;
+
   @ConfigurationMetadata.assign({ comment: "Configuration for the various providers" })
   static providers = new ProvidersConfig();
 

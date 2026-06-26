@@ -3031,6 +3031,20 @@
         },
         "required": ["categoryCount", "colorMapping"]
       },
+      "TileConfig": {
+        "type": "object",
+        "properties": {
+          "light": {
+            "type": "string",
+            "description": "Tiles to display on maps for dark mode. Should be vector tiles."
+          },
+          "dark": {
+            "type": "string",
+            "description": "Tiles to display on maps for light mode. Should be vector tiles."
+          }
+        },
+        "required": ["light", "dark"]
+      },
       "APIConfig": {
         "type": "object",
         "properties": {
@@ -3046,12 +3060,16 @@
             "type": "string",
             "description": "The brandfetch client ID used for displaying logos."
           },
-          "tileServer": {
-            "type": "string",
-            "description": "The tile server to use for frontend mapping display."
+          "tiles": {
+            "description": "Tile config",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TileConfig"
+              }
+            ]
           }
         },
-        "required": ["chatKeyProvidedInBackend", "emailEnabled"]
+        "required": ["chatKeyProvidedInBackend", "emailEnabled", "tiles"]
       },
       "DemoCredentials": {
         "type": "object",
