@@ -113,7 +113,7 @@ export class PlaidWebhookController {
             const asset = await this.getPlaidInstitutionAsset(payload);
             const user = asset.institution.user;
             this.logger.log(`Queueing Webhook based sync for: ${user.username} [${webhookType}]`);
-            await this.providerSyncService.syncForProvider(user, this.plaidProvider, false);
+            await this.providerSyncService.syncForProvider(user, this.plaidProvider, false, asset.institution.id);
           } else this.logger.warn(`Ignoring unknown TRANSACTIONS webhook: ${webhookCode}`);
           break;
 
