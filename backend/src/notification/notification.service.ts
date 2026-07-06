@@ -8,12 +8,14 @@ import { SSEService } from "@backend/sse/sse.service";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import admin from "firebase-admin";
+import { App, cert, initializeApp } from "firebase-admin/app";
+import { getMessaging, Message } from "firebase-admin/messaging";
 
 /** This service provides re-usable capability to notify users of specific interactions. */
 @Injectable()
 export class NotificationService implements OnModuleInit {
   private readonly logger = new Logger("service:notification");
+  private app?: App;
 
   constructor(private sseService: SSEService) {}
 
@@ -22,8 +24,8 @@ export class NotificationService implements OnModuleInit {
     if (Configuration.server.notification.firebase.enabled) {
       this.logger.log(`Firebase notifications are enabled. Validating config...`);
       Configuration.server.notification.firebase.validate();
-      admin.initializeApp({
-        credential: admin.credential.cert({
+      this.app = initializeApp({
+        credential: cert({
           projectId: Configuration.server.notification.firebase.projectId,
           clientEmail: Configuration.server.notification.firebase.clientEmail,
           privateKey: Configuration.server.notification.firebase.privateKey.replace(/\\n/g, "\n"),
@@ -66,7 +68,7 @@ export class NotificationService implements OnModuleInit {
 
     // Notify all of the users devices
     for (const device of devices) {
-      const message: admin.messaging.Message = {
+      const message: Message = {
         token: device.fcmToken,
         data: new FirebaseNotificationDTO({ notificationId: notification.id, importance: notification.importance }) as { [key: string]: any },
         android: { priority: notification.powerPriority },
@@ -74,7 +76,7 @@ export class NotificationService implements OnModuleInit {
       };
 
       try {
-        await admin.messaging().send(message);
+        await getMessaging(this.app).send(message);
       } catch (error) {
         // If the token is invalid (app uninstalled), clean it up immediately
         if ((error as any).code === "messaging/registration-token-not-registered") {
