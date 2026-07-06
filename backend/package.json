@@ -89,7 +89,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "overrides": {
-    "google-auth-library": "^9.14.2"
+    "google-auth-library": "^9.14.2",
+    "webpack": "5.100.2"
   },
   "scripts": {
     "start": "nest start --watch",
