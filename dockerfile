@@ -1,7 +1,7 @@
 # -------------------------------
 #       Build Frontend
 # -------------------------------
-FROM ghcr.io/adrianjagielak/flutter:3.44.2 AS frontend-build
+FROM ghcr.io/adrianjagielak/flutter:3.44.4 AS frontend-build
 WORKDIR /app
 COPY .git .git
 COPY ./frontend ./
