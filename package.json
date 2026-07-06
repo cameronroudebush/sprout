@@ -15,12 +15,12 @@
   },
   "devDependencies": {
     "@types/chrome-remote-interface": "^0.34.0",
-    "@types/node": "^25.6.0",
+    "@types/node": "^26.0.0",
     "auto-changelog": "^2.5.0",
     "chrome-remote-interface": "^0.34.0",
     "git-describe": "^4.1.1",
     "prettier": "^3.8.1",
-    "sharp": "^0.34.3",
+    "sharp": "^0.35.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.2"
