@@ -89,12 +89,12 @@ export class SyncNotificationJob extends DistributedQueueJob<SyncNotificationPay
     // Handle Notifications
     if (failures.length > 0) {
       // Aggregate errors and combine them by provider
-      const combinedErrorDetails = failures.map((f) => `${f.provider}: ${f.failureReason || "Unknown error"}`).join(" | ");
+      const combinedErrorDetails = failures.map((f) => `${f.failureReason || "Unknown error"}`).join(" | ");
 
       // Send the single aggregation
       await this.notificationService.notifyUser(
         user,
-        `Action Required: We had trouble syncing some accounts. Details: ${combinedErrorDetails}`,
+        `We had trouble syncing some accounts: ${combinedErrorDetails}`,
         "Connection Error",
         NotificationType.error,
       );
