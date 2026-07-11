@@ -436,11 +436,17 @@ export class PlaidProviderService extends ProviderBase {
   }
 
   /** Converts Plaid's transaction format to Sprout's local Transaction model */
-  private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, _user: User) {
+  private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, user: User) {
     const now = new Date();
 
     return await Promise.all(
       transactions.map(async (t) => {
+        // If this is a settled transaction replacing a pending one, find and remove the pending one
+        if (t.pending_transaction_id) {
+          const pendingTx = await Transaction.findOne({ where: { id: t.pending_transaction_id, account: { user: { id: user.id } } } });
+          if (pendingTx) await pendingTx.remove();
+        }
+
         // Parse Plaid's 'YYYY-MM-DD' safely as a local date profile
         const parsedDate = parseISO(t.date);
 
@@ -456,7 +462,7 @@ export class PlaidProviderService extends ProviderBase {
 
         const newTransaction = new Transaction(t.amount * -1, transactionDate, t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
         newTransaction.id = t.transaction_id;
-        newTransaction.extra = { code: t.transaction_code, location: t.location };
+        newTransaction.extra = { code: t.transaction_code, location: t.location, website: t.website };
         return newTransaction;
       }),
     );

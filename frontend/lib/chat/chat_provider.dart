@@ -54,7 +54,11 @@ class Chat extends _$Chat {
   Future<void> sendMessage(String message) async {
     final api = await ref.read(chatApiProvider.future);
 
-    await api.chatControllerNew(ChatRequestDTO(message: message));
+    try {
+      await api.chatControllerNew(ChatRequestDTO(message: message));
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Clears chat state

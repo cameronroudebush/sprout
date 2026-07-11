@@ -6,7 +6,7 @@ extension ChatHistoryExtensions on String {
     if (accounts.isEmpty) return this;
 
     String result = this;
-    final pattern = RegExp(r'@?\b([a-zA-Z0-9\-]{10,})\b');
+    final pattern = RegExp(r'`?@?\b([a-zA-Z0-9\-]{10,})\b`?');
 
     final idMap = {for (var acc in accounts) acc.id: acc.name};
 

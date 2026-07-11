@@ -164,10 +164,10 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   }
 
   /// Sends our message to the AI for processing
-  void _send() {
+  void _send() async {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
-      ref.read(chatProvider.notifier).sendMessage(text);
+      await ref.read(chatProvider.notifier).sendMessage(text);
       _controller.clear();
       _hideMentionPopup();
     }
