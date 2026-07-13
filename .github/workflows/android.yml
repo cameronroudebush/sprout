@@ -81,7 +81,7 @@ jobs:
           starting-version: ${{ steps.get_repo_info.outputs.version_string }}
 
       - name: Set up Environment (Java/Flutter)
-        uses: actions/setup-java@v5.3.0
+        uses: actions/setup-java@v5.4.0
         with:
           java-version: "17"
           distribution: "temurin"
@@ -183,7 +183,7 @@ jobs:
 
       - name: Upload APK to Draft Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v3.0.1
         with:
           files: flutter-apk/sprout.apk
           tag_name: ${{ needs.build.outputs.version_string }}
