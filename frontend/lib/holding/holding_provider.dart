@@ -184,10 +184,13 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
   final livePrice = liveData?.price ?? (holding.marketValue / holding.shares);
   final liveMarketValue = livePrice * holding.shares;
 
-  final dayChange = liveMarketValue - holding.marketValue;
-  final dayPercent = holding.marketValue != 0 ? (dayChange / holding.marketValue) * 100 : 0.0;
-  final frame = holdingHistory?.getValueByFrame(ChartRangeEnum.oneDay);
+  final priceChangePerShare = liveData?.change ?? 0.0;
+  final dayChange = priceChangePerShare * holding.shares;
+  final previousClosePrice = livePrice - priceChangePerShare;
+  final previousMarketValue = previousClosePrice * holding.shares;
+  final dayPercent = previousMarketValue > 0 ? (dayChange / previousMarketValue) * 100 : 0.0;
 
+  final frame = holdingHistory?.getValueByFrame(ChartRangeEnum.oneDay);
   final double currentValuation = holding.marketValue.toDouble();
   final double initialCost = holding.shares.toDouble() * holding.purchasePrice.toDouble();
   final double totalGain = currentValuation - initialCost;

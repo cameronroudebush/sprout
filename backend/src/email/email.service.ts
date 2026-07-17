@@ -56,7 +56,7 @@ export class EmailService implements OnModuleInit {
   async sendWeeklyUpdate(user?: User | null) {
     if (user == null) return; // Ignore undefined users
     if (!user.email) throw new BadRequestException("This user does not have an email specified");
-    const context = this.getWeeklyEmailContent(user);
+    const context = await this.getWeeklyEmailContent(user);
 
     await this.mailerService.sendMail({
       to: user.email,
