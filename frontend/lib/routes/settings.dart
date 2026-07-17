@@ -270,9 +270,9 @@ class SettingsPage extends ConsumerWidget {
           ),
           ActionSettingTile(
             title: "Connection Url",
-            subtitle: "The Url of the server we're connected to",
+            subtitle: "The server Url",
             icon: Icons.http,
-            trailing: Text(backendUrl ?? "", style: theme.textTheme.labelMedium),
+            trailing: Text(backendUrl?.replaceAll("/api", "") ?? "", style: theme.textTheme.labelMedium),
           ),
           ActionSettingTile(
             title: "Version",
