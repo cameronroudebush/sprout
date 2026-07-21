@@ -107,9 +107,9 @@ class SettingsPage extends ConsumerWidget {
             },
           ),
         ),
-        if (config.emailEnabled)
+        if (config.emailEnabled && userHasEmail)
           ActionSettingTile(
-            title: "Email Frequency",
+            title: "Status Update Frequency",
             subtitle: !userHasEmail
                 ? "You must configure an email to set this value"
                 : "How often to receive finance updates",

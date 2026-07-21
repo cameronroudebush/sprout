@@ -37,6 +37,7 @@ class SproutDesktopHeader extends ConsumerWidget {
 
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: SproutCard(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

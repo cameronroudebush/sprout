@@ -3,6 +3,8 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { NotificationType } from "@backend/notification/model/notification.type";
+import { NotificationService } from "@backend/notification/notification.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { TotalTransactions } from "@backend/transaction/model/api/total.transaction.dto";
@@ -25,6 +27,7 @@ export class TransactionController {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly sseService: SSEService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Patch(":id")
@@ -220,5 +223,85 @@ export class TransactionController {
     }
 
     return new TotalTransactions(map, total);
+  }
+
+  @Delete("duplicates/remove")
+  @ApiOperation({
+    summary: "Remove duplicate transactions.",
+    description: "Scans all transactions for the user (or specific account) and removes duplicates by comparing the amount and date (ignoring time).",
+  })
+  @ApiQuery({ name: "accountId", required: false, type: String, description: "Optional. Scopes the deduplication to a specific account." })
+  @ApiOkResponse({ description: "Returns the a status message on what action was taken for the removal." })
+  @EnabledGuard.attachDemoMode()
+  async removeDuplicates(@CurrentUser() user: User, @Query("accountId") accountId?: string) {
+    const where: FindOptionsWhere<Transaction> = { account: { user: { id: user.id } } };
+    let account: Account | undefined | null;
+    if (accountId) {
+      where.account = { id: accountId };
+      account = await Account.findOne({ where: { id: accountId, user: { id: user.id } } });
+    }
+
+    // Fetch transactions ordered by posted date so we keep the oldest record
+    const transactions = await Transaction.find({
+      where,
+      order: { posted: "ASC" },
+    });
+
+    const seen = new Map<string, Transaction>();
+    const duplicatesToRemove: Transaction[] = [];
+    const keptTransactionsToUpdate = new Set<Transaction>();
+
+    for (const transaction of transactions) {
+      // Normalize the date to midnight to completely ignore time variations
+      const dateWithoutTime = startOfDay(new Date(transaction.posted)).getTime();
+
+      // Create a composite key based on date and amount
+      const duplicateKey = `${dateWithoutTime}_${transaction.amount}`;
+
+      if (seen.has(duplicateKey)) {
+        const keptTransaction = seen.get(duplicateKey)!;
+        duplicatesToRemove.push(transaction);
+
+        let isKeptModified = false;
+
+        if (!keptTransaction.categoryId && transaction.categoryId) {
+          keptTransaction.category = transaction.category;
+          isKeptModified = true;
+        }
+
+        if (transaction.extra) {
+          if (!keptTransaction.extra) {
+            keptTransaction.extra = { ...transaction.extra };
+            isKeptModified = true;
+          } else {
+            const mergedExtra = { ...transaction.extra, ...keptTransaction.extra };
+            if (JSON.stringify(keptTransaction.extra) !== JSON.stringify(mergedExtra)) {
+              keptTransaction.extra = mergedExtra;
+              isKeptModified = true;
+            }
+          }
+        }
+
+        // If we merged data into the kept transaction, queue it for saving
+        if (isKeptModified) keptTransactionsToUpdate.add(keptTransaction);
+      } else seen.set(duplicateKey, transaction);
+    }
+
+    const fromMessage = `${!account ? "" : ` from ` + account.name}`;
+    if (duplicatesToRemove.length > 0) {
+      // Save any kept transactions that inherited data from their duplicates
+      if (keptTransactionsToUpdate.size > 0) await Transaction.upsertMany(Array.from(keptTransactionsToUpdate));
+      const removed = await Transaction.deleteMany(duplicatesToRemove.map((x) => x.id));
+      // Force a frontend refresh since balances and reports have changed
+      this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+      const removedCount = removed.affected ?? duplicatesToRemove.length;
+      const message = `Successfully removed ${removedCount} duplicate transaction${removedCount != 1 ? "s" : ""}${fromMessage}.`;
+      await this.notificationService.notifyUser(user, message, "Transaction Cleanup", NotificationType.info, false);
+      return message;
+    } else {
+      const message = `No duplicate transactions to remove${fromMessage}.`;
+      await this.notificationService.notifyUser(user, message, "Transaction Cleanup", NotificationType.info, false);
+      return message;
+    }
   }
 }

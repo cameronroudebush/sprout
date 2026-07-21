@@ -1264,6 +1264,38 @@
         "tags": ["Transaction"]
       }
     },
+    "/transaction/duplicates/remove": {
+      "delete": {
+        "description": "Scans all transactions for the user (or specific account) and removes duplicates by comparing the amount and date (ignoring time).",
+        "operationId": "TransactionController_removeDuplicates",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "Optional. Scopes the deduplication to a specific account.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the a status message on what action was taken for the removal."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove duplicate transactions.",
+        "tags": ["Transaction"]
+      }
+    },
     "/transaction-rule": {
       "get": {
         "description": "Retrieves all transaction rules for the authenticated user.",

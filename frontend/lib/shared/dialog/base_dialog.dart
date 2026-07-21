@@ -8,6 +8,9 @@ class SproutBaseDialogWidget extends StatelessWidget {
   final Widget? child;
   final String dialogTitleText;
 
+  /// Max width to apply to desktop dialogs. Default is 640.
+  final double maxDesktopWidth;
+
   // Buttons & Actions
   final bool showCloseDialogButton;
   final String closeButtonText;
@@ -35,7 +38,8 @@ class SproutBaseDialogWidget extends StatelessWidget {
       this.submitButtonStyle,
       this.onSubmitClick,
       this.extraButtons,
-      this.titleStyle});
+      this.titleStyle,
+      this.maxDesktopWidth = 640});
 
   @override
   Widget build(BuildContext context) {
@@ -136,8 +140,8 @@ class SproutBaseDialogWidget extends StatelessWidget {
   /// Builds a standard desktop dialog
   Widget _buildDesktopDialog(BuildContext context, ThemeData theme) {
     return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 640,
+      constraints: BoxConstraints(
+        maxWidth: maxDesktopWidth,
       ),
       decoration: BoxDecoration(
         color: theme.cardTheme.color,

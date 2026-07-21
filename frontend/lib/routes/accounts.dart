@@ -44,29 +44,29 @@ class AccountsPage extends ConsumerWidget {
     final accountsAsync = ref.watch(accountsProvider);
 
     return accountsAsync.whenDefault(
-      emptyCondition: (state) => state.accounts.isEmpty,
-      emptyWidget: const AccountsEmptyWidget(showRedirect: false),
       data: (state) {
         return Scaffold(
-          body: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: SproutRouteWrapper(
-              child: Padding(
-                  padding: EdgeInsetsGeometry.only(bottom: 80),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SproutCard(
-                          child: Padding(
-                              padding: EdgeInsetsGeometry.all(12), child: TotalSummary(accounts: state.accounts))),
-                      AccountSummaryView(
-                        accounts: state.accounts,
-                        collapsible: false,
-                      ),
-                    ],
-                  )),
-            ),
-          ),
+          body: state.accounts.isEmpty
+              ? const AccountsEmptyWidget(showRedirect: false)
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SproutRouteWrapper(
+                    child: Padding(
+                        padding: const EdgeInsets.only(bottom: 80),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SproutCard(
+                                child: Padding(
+                                    padding: const EdgeInsets.all(12), child: TotalSummary(accounts: state.accounts))),
+                            AccountSummaryView(
+                              accounts: state.accounts,
+                              collapsible: false,
+                            ),
+                          ],
+                        )),
+                  ),
+                ),
           floatingActionButton: SproutSpeedDial(
             actions: [
               FABAction(

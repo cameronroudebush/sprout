@@ -331,6 +331,60 @@ class TransactionApi {
     return null;
   }
 
+  /// Remove duplicate transactions.
+  ///
+  /// Scans all transactions for the user (or specific account) and removes duplicates by comparing the amount and date (ignoring time).
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId:
+  ///   Optional. Scopes the deduplication to a specific account.
+  Future<Response> transactionControllerRemoveDuplicatesWithHttpInfo({ String? accountId, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/transaction/duplicates/remove';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (accountId != null) {
+      queryParams.addAll(_queryParams('', 'accountId', accountId));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Remove duplicate transactions.
+  ///
+  /// Scans all transactions for the user (or specific account) and removes duplicates by comparing the amount and date (ignoring time).
+  ///
+  /// Parameters:
+  ///
+  /// * [String] accountId:
+  ///   Optional. Scopes the deduplication to a specific account.
+  Future<void> transactionControllerRemoveDuplicates({ String? accountId, }) async {
+    final response = await transactionControllerRemoveDuplicatesWithHttpInfo( accountId: accountId, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get's subscriptions.
   ///
   /// Retrieves subscriptions based on historical transactions by guessing if they are reoccurring or not.

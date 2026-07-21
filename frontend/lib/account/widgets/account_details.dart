@@ -24,6 +24,7 @@ import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A simple record type to hold the combined data for our generic widget
@@ -77,7 +78,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
         showSubmitButton: true,
         submitButtonText: "Sync",
         onSubmitClick: () async {
-          Navigator.of(context).pop();
+          Navigator.of(ctx).pop();
           await ref.read(accountsProvider.notifier).manualSync();
         },
         child: const Text(
@@ -487,6 +488,42 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         children: [Icon(Icons.merge), Text("Merge Accounts")],
                       ),
                     ),
+                    // Duplicate transaction cleanup
+                    FilledButton(
+                      onPressed: () {
+                        showSproutPopup(
+                          context: context,
+                          builder: (ctx) => SproutBaseDialogWidget(
+                            'Clean Duplicates',
+                            showCloseDialogButton: true,
+                            closeButtonStyle: ThemeHelpers.primaryButton,
+                            showSubmitButton: true,
+                            submitButtonText: "Remove Duplicates",
+                            submitButtonStyle: ThemeHelpers.errorButton,
+                            onSubmitClick: () async {
+                              Navigator.of(ctx).pop();
+                              await ref
+                                  .read(transactionApiProvider)
+                                  .value
+                                  ?.transactionControllerRemoveDuplicates(accountId: account.id);
+                            },
+                            child: Text(
+                              "This will scan ${account.name} for duplicate transactions (those sharing the exact same date and amount) and permanently delete the duplicates.\n\nThis action cannot be undone.",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ThemeHelpers.secondaryButton,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8,
+                        children: [
+                          Icon(Icons.delete_sweep), // Better conveys removing/sweeping away unnecessary items
+                          Text("Clean Duplicate Transactions")
+                        ],
+                      ),
+                    ),
                     if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
                       FilledButton(
                         onPressed: () async {
@@ -514,7 +551,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                             submitButtonText: "Delete",
                             submitButtonStyle: ThemeHelpers.errorButton,
                             onSubmitClick: () async {
-                              Navigator.of(context).pop();
+                              Navigator.of(ctx).pop();
                               await accountProvider.delete(account.id);
                               await NavigationProvider.redirect("/accounts");
                             },
