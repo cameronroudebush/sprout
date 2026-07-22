@@ -1,0 +1,530 @@
+<style>
+  .sprout-roadmap {
+    --priority-high: #ef5350;
+    --priority-med: #ffa726;
+    --priority-low: var(--md-accent-fg-color);
+
+    color: var(--md-typeset-color);
+    font-family: "Inter", sans-serif;
+    margin: 0 auto;
+    max-width: 1000px;
+    padding: 1rem 0;
+  }
+
+  .intro h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+
+  .sprout-roadmap h2 {
+    color: var(--light-color);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .sprout-roadmap .intro-text {
+    text-align: center;
+    color: var(--md-default-fg-color--light);
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* List Container */
+  .sprout-roadmap .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* The Row Card */
+  .sprout-roadmap .feature-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    background-color: var(--md-primary-fg-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .sprout-roadmap .feature-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Left Column: Meta (Title & Badge) */
+  .sprout-roadmap .feature-meta {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sprout-roadmap .feature-meta h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--light-color);
+  }
+
+  /* Right Column: Content */
+  .sprout-roadmap .feature-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .sprout-roadmap .feature-content p {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--md-typeset-color);
+  }
+
+  .sprout-roadmap .feature-content ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--md-default-fg-color--light);
+    font-size: 0.9rem;
+  }
+
+  .sprout-roadmap .feature-content li {
+    margin-bottom: 0.4rem;
+  }
+
+  .sprout-roadmap .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    font-weight: 800;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    width: fit-content;
+  }
+
+  /* High Priority Styling */
+  .sprout-roadmap .p-high {
+    border-left: 4px solid var(--priority-high);
+  }
+  .sprout-roadmap .p-high .priority-badge {
+    color: var(--priority-high);
+    background: rgba(239, 83, 80, 0.15);
+  }
+
+  /* Medium Priority Styling */
+  .sprout-roadmap .p-med {
+    border-left: 4px solid var(--priority-med);
+  }
+  .sprout-roadmap .p-med .priority-badge {
+    color: var(--priority-med);
+    background: rgba(255, 167, 38, 0.15);
+  }
+
+  /* Low Priority Styling */
+  .sprout-roadmap .p-low {
+    border-left: 4px solid var(--priority-low);
+  }
+  .sprout-roadmap .p-low .priority-badge {
+    color: var(--light-color);
+    background: rgba(160, 202, 253, 0.1);
+  }
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 768px) {
+    .sprout-roadmap .feature-row {
+      grid-template-columns: 1fr;
+    }
+
+    .sprout-roadmap .feature-meta {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      border-right: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+    }
+
+    .sprout-roadmap .feature-content {
+      padding: 1rem;
+    }
+  }
+
+  /* --- Start Integrated Pondering Section --- */
+
+  .pondering-container {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.03); /* Subtle backdrop */
+    border-radius: 0.8rem;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pondering-container .ponder-label-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--md-default-fg-color--light);
+    margin: 0 0 1rem 0;
+  }
+
+  .pondering-visual {
+    width: 200px; /* More compact */
+    height: 140px;
+    margin: 0 auto;
+    position: relative;
+    overflow: visible;
+  }
+
+  .idea-dot {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+  }
+
+  .idea-dot.p-high {
+    width: 7px;
+    height: 7px;
+    background: var(--priority-high);
+  }
+  .idea-dot.p-med {
+    width: 5px;
+    height: 5px;
+    background: var(--priority-med);
+  }
+  .idea-dot.p-low {
+    width: 4px;
+    height: 4px;
+    background: var(--priority-low);
+  }
+
+  .idea-dot.d-1 {
+    animation: swirl-main 4s infinite 0s ease-in-out;
+  }
+  .idea-dot.d-2 {
+    animation: swirl-alt 4s infinite 1s ease-in-out;
+  }
+  .idea-dot.d-3 {
+    animation: swirl-main 4s infinite 2s ease-in-out;
+  }
+  .idea-dot.d-4 {
+    animation: swirl-alt 4s infinite 3s ease-in-out;
+  }
+
+  .synapse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+  }
+
+  .synapse-path {
+    stroke: var(--light-color);
+    stroke-width: 0.8;
+    fill: none;
+    opacity: 0.08;
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    transition: opacity 0.5s ease;
+  }
+
+  .synapse-1 {
+    animation: trace-synapse-long 12s infinite 0s;
+  }
+  .synapse-2 {
+    animation: trace-synapse-long 14s infinite 2s;
+  }
+  .synapse-3 {
+    animation: trace-synapse-long 16s infinite 4s;
+  }
+  .synapse-4 {
+    animation: trace-synapse-long 18s infinite 6s;
+  }
+  .candidate-star {
+    fill: var(--light-color);
+    opacity: 0;
+    transform: scale(0);
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  @keyframes candidate-cycle-1 {
+    0%,
+    20%,
+    100% {
+      stroke: var(--light-color);
+      opacity: 0.08;
+      stroke-width: 0.8;
+    }
+    5%,
+    15% {
+      stroke: var(--priority-high);
+      opacity: 0.9;
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 4px var(--priority-high));
+    }
+  }
+  @keyframes icon-reveal-1 {
+    0%,
+    20%,
+    100% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    7%,
+    13% {
+      opacity: 1;
+      transform: scale(1);
+      filter: drop-shadow(0 0 3px var(--light-color));
+    }
+  }
+  .synapse-1 {
+    animation:
+      trace-synapse-long 12s infinite 0s,
+      candidate-cycle-1 20s infinite 0s;
+  }
+  #star-1 {
+    animation: icon-reveal-1 20s infinite 0s;
+  }
+
+  @keyframes candidate-cycle-2 {
+    0%,
+    20%,
+    100% {
+      stroke: var(--light-color);
+      opacity: 0.08;
+      stroke-width: 0.8;
+    }
+    5%,
+    15% {
+      stroke: var(--priority-med);
+      opacity: 0.9;
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 4px var(--priority-med));
+    }
+  }
+  @keyframes icon-reveal-2 {
+    0%,
+    20%,
+    100% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    7%,
+    13% {
+      opacity: 1;
+      transform: scale(1);
+      filter: drop-shadow(0 0 3px var(--light-color));
+    }
+  }
+  .synapse-2 {
+    animation:
+      trace-synapse-long 14s infinite 2s,
+      candidate-cycle-2 20s infinite 5s;
+  }
+  #star-2 {
+    animation: icon-reveal-2 20s infinite 5s;
+  }
+
+  @keyframes candidate-cycle-3 {
+    0%,
+    20%,
+    100% {
+      stroke: var(--light-color);
+      opacity: 0.08;
+      stroke-width: 0.8;
+    }
+    5%,
+    15% {
+      stroke: var(--priority-low);
+      opacity: 0.9;
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 4px var(--priority-low));
+    }
+  }
+  @keyframes icon-reveal-3 {
+    0%,
+    20%,
+    100% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    7%,
+    13% {
+      opacity: 1;
+      transform: scale(1);
+      filter: drop-shadow(0 0 3px var(--light-color));
+    }
+  }
+  .synapse-3 {
+    animation:
+      trace-synapse-long 16s infinite 4s,
+      candidate-cycle-3 20s infinite 10s;
+  }
+  #star-3 {
+    animation: icon-reveal-3 20s infinite 10s;
+  }
+
+  @keyframes candidate-cycle-4 {
+    0%,
+    20%,
+    100% {
+      stroke: var(--light-color);
+      opacity: 0.08;
+      stroke-width: 0.8;
+    }
+    5%,
+    15% {
+      stroke: var(--priority-med);
+      opacity: 0.9;
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 4px var(--priority-med));
+    }
+  }
+  @keyframes icon-reveal-4 {
+    0%,
+    20%,
+    100% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    7%,
+    13% {
+      opacity: 1;
+      transform: scale(1);
+      filter: drop-shadow(0 0 3px var(--light-color));
+    }
+  }
+  .synapse-4 {
+    animation:
+      trace-synapse-long 18s infinite 6s,
+      candidate-cycle-4 20s infinite 15s;
+  }
+  #star-4 {
+    animation: icon-reveal-4 20s infinite 15s;
+  }
+
+  @keyframes swirl-main {
+    0% {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.7;
+    }
+    60% {
+      transform: translate(calc(-50% + 30px), -60px) scale(0.9);
+      opacity: 0.4;
+    }
+    100% {
+      transform: translate(calc(-50% - 15px), -120px) scale(0.6);
+      opacity: 0;
+    }
+  }
+  @keyframes swirl-alt {
+    0% {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.6;
+    }
+    50% {
+      transform: translate(calc(-50% - 25px), -50px) scale(1.1);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(calc(-50% + 10px), -100px) scale(0.7);
+      opacity: 0;
+    }
+  }
+
+  @keyframes trace-synapse-long {
+    0% {
+      stroke-dashoffset: 200;
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.15;
+    }
+    50% {
+      stroke-dashoffset: 0;
+    }
+    80% {
+      opacity: 0.15;
+    }
+    100% {
+      stroke-dashoffset: -200;
+      opacity: 0;
+    }
+  }
+
+  /* --- End Pondering Animation Section --- */
+</style>
+
+<div class="sprout-roadmap">
+  <div class="intro center">
+    <h2>What's Next for Sprout?</h2>
+    <p class="intro-text">
+      I'm a busy guy but I try my best to get new features built in my free time.<br />
+      Here is the roadmap sorted by priority.
+    </p>
+  </div>
+
+  <div class="pondering-container">
+    <p class="ponder-label-text">Still thinking about what's next. Have suggestions? Open a ticket!</p>
+
+    <div class="pondering-visual">
+      <div class="idea-dot p-high d-1"></div>
+      <div class="idea-dot p-med d-2"></div>
+      <div class="idea-dot p-low d-3"></div>
+      <div class="idea-dot p-med d-4"></div>
+
+      <svg class="synapse" viewBox="0 0 100 80" preserveAspectRatio="none">
+        <path class="synapse-path synapse-1" d="M50,80 C50,60 70,40 70,20 C70,10 80,5 90,5" />
+        <path class="synapse-path synapse-2" d="M50,80 C50,60 30,50 30,30 C30,15 15,10 5,10" />
+        <path class="synapse-path synapse-3" d="M50,80 C50,65 60,55 75,55 C85,55 95,45 95,35" />
+        <path class="synapse-path synapse-4" d="M50,80 C50,60 40,40 20,40 C10,40 5,30 5,20" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- <div class="feature-list">
+    <div class="feature-row p-med">
+      <div class="feature-meta">
+        <h3>Reports</h3>
+        <span class="priority-badge">Planned</span>
+      </div>
+      <div class="feature-content">
+        <p>Enhanced charts and reporting features based on your finances.</p>
+        <ul>
+          <li>Improved Sankey</li>
+          <li>Improved Net Worth charts</li>
+          <li>Overhauled monthly spending</li>
+          <li>And some more...</li>
+        </ul>
+      </div>
+    </div>
+  </div> -->
+</div>

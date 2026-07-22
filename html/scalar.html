@@ -1,0 +1,44 @@
+<!-- This HTML file provides dynamic rendering to the API docs utilizing scalar and the openapi-spec that is already generated. -->
+
+<!doctype html>
+<html>
+  <head>
+    <title>Sprout API</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script>
+      const config = {
+        url: "https://raw.githubusercontent.com/cameronroudebush/sprout/refs/heads/master/docs/assets/openapi-spec.json",
+        documentDownloadType: "none",
+        hideClientButton: true,
+        authentication: {
+          preferredSecurityScheme: "bearer",
+        },
+        metaData: {
+          title: "Sprout API",
+        },
+        showDeveloperTools: "never",
+        favicon: "https://sprout.croudebush.net/assets/favicon-bg.svg",
+        agent: {
+          disabled: true,
+        },
+        mcp: {
+          disabled: true,
+        },
+        hideTestRequestButton: true,
+        servers: [
+          {
+            url: "http://localhost:8001/api/",
+            description: "Local Environment",
+          },
+        ],
+      };
+
+      Scalar.createApiReference(document.getElementById("app"), config);
+    </script>
+  </body>
+</html>
