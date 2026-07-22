@@ -51,11 +51,12 @@ class Chat extends _$Chat {
   }
 
   /// Sends a message to the backend
-  Future<void> sendMessage(String message) async {
+  Future<void> sendMessage(String message,
+      {ChatRequestDTOTimeframeEnum timeframe = ChatRequestDTOTimeframeEnum.threeMonths}) async {
     final api = await ref.read(chatApiProvider.future);
 
     try {
-      await api.chatControllerNew(ChatRequestDTO(message: message));
+      await api.chatControllerNew(ChatRequestDTO(message: message, timeframe: timeframe));
     } catch (e) {
       rethrow;
     }

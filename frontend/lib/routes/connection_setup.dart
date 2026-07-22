@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/shared/widgets/icon.dart';
+import 'package:sprout/shared/widgets/centered_layout.dart';
 
 /// This page allows a user to adjust their connection information for Sprout. Only available on mobile.
 class ConnectionSetupPage extends ConsumerStatefulWidget {
@@ -54,83 +54,49 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 450),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 12,
-                  children: [
-                    // Branding
-                    SproutIcon(128),
-                    Text(
-                      'Server Configuration',
-                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'As a self-hosted platform, Sprout needs to know where your private instance is located. '
-                      'Enter your server address below to sync your data. You can update this at any time.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // URL Input Field
-                    TextFormField(
-                      controller: _controller,
-                      enabled: !_isConnecting,
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.go,
-                      onFieldSubmitted: (_) => _handleConnect(),
-                      decoration: InputDecoration(
-                        labelText: 'Server Address',
-                        hintText: 'https://sprout.example.com',
-                        helperText: "Note: Do not include '/api' at the end.",
-                        prefixIcon: const Icon(Icons.link),
-                        errorText: _error,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        filled: true,
-                        fillColor: theme.colorScheme.surface,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'URL is required';
-                        if (!value.startsWith('http')) return 'Must start with http:// or https://';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Action Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _isConnecting ? null : _handleConnect,
-                        style: FilledButton.styleFrom(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: _isConnecting
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
-                              )
-                            : const Text('Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    return SproutCenteredLayout(
+      title: 'Server Configuration',
+      description: 'As a self-hosted platform, Sprout needs to know where your private instance is located. '
+          'Enter your server address below to sync your data. You can update this at any time.',
+      body: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          enabled: !_isConnecting,
+          keyboardType: TextInputType.url,
+          textInputAction: TextInputAction.go,
+          onFieldSubmitted: (_) => _handleConnect(),
+          decoration: InputDecoration(
+            labelText: 'Server Address',
+            hintText: 'https://sprout.example.com',
+            helperText: "Note: Do not include '/api' at the end.",
+            prefixIcon: const Icon(Icons.link),
+            errorText: _error,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            filled: true,
+            fillColor: theme.colorScheme.surface,
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'URL is required';
+            if (!value.startsWith('http')) return 'Must start with http:// or https://';
+            return null;
+          },
+        ),
+      ),
+      actions: SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          onPressed: _isConnecting ? null : _handleConnect,
+          style: FilledButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          child: _isConnecting
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
+                )
+              : const Text('Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ),
       ),
     );

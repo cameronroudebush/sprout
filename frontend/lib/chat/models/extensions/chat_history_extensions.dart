@@ -21,8 +21,8 @@ extension ChatHistoryExtensions on String {
           return "**${idMap[id]}**";
         }
         // If we don't have the account, but the original text started with '@'
-        else if (fullMatch.startsWith('@')) {
-          return "**UNKNOWN ACCOUNT**";
+        else if (fullMatch.contains('@')) {
+          return "**Deleted Account**";
         }
         // Otherwise, return the text exactly as it was
         else {

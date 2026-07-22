@@ -81,7 +81,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 8,
                     children: [
-                      if (!isDemoMode) _buildQuickActions(isLoading),
                       ChatInput(isLoading: isLoading),
                     ],
                   ),
@@ -148,33 +147,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  /// Builds quick actions to allow the user to get quick responses without typing
-  Widget _buildQuickActions(bool isLoading) {
-    final List<Map<String, String>> suggestions = [
-      {'title': "Spending", 'message': "Analyze my spending patterns."},
-      {'title': "Net Worth", 'message': "Analyze my net worth trend."},
-      {'title': "Suggestions", 'message': "Give me some ideas on how to further improve my financial health."},
-    ];
-
-    return SizedBox(
-      height: 40,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: suggestions
-            .map(
-              (s) => Padding(
-                padding: const EdgeInsets.only(left: 8, right: 8),
-                child: ActionChip(
-                  label: Text(s['title']!),
-                  onPressed: isLoading ? null : () => ref.read(chatProvider.notifier).sendMessage(s['message']!),
-                ),
-              ),
-            )
-            .toList(),
       ),
     );
   }

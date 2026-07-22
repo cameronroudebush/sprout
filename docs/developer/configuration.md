@@ -134,13 +134,13 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## AI
 
-| YAML Key                       | Environment Variable                  | Default                  | Description                                                                                                         |
-| ------------------------------ | ------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `server.prompt.maxChatHistory` | `sprout_server_prompt_maxChatHistory` | `10`                     | Number of previous chat messages to retain for context.                                                             |
-| `server.prompt.type`           | `sprout_server_prompt_type`           | `gemini`                 | The LLM provider to use. One of: [`gemini`].                                                                        |
-| **Gemini**                     |                                       |                          |                                                                                                                     |
-| `server.prompt.gemini.model`   | `sprout_server_prompt_gemini_model`   | `gemini-3-flash-preview` | The specific Google Gemini model string to use.                                                                     |
-| `server.prompt.gemini.key`     | `sprout_server_prompt_gemini_key`     |                          | **Optional.** A global key to use to authenticate to gemini. If given, users will not be able to provide their own. |
+| YAML Key                       | Environment Variable                  | Default               | Description                                                                                                         |
+| ------------------------------ | ------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `server.prompt.maxChatHistory` | `sprout_server_prompt_maxChatHistory` | `10`                  | Number of previous chat messages to retain for context.                                                             |
+| `server.prompt.type`           | `sprout_server_prompt_type`           | `gemini`              | The LLM provider to use. One of: [`gemini`].                                                                        |
+| **Gemini**                     |                                       |                       |                                                                                                                     |
+| `server.prompt.gemini.model`   | `sprout_server_prompt_gemini_model`   | `gemini-flash-latest` | The specific Google Gemini model string to use.                                                                     |
+| `server.prompt.gemini.key`     | `sprout_server_prompt_gemini_key`     |                       | **Optional.** A global key to use to authenticate to gemini. If given, users will not be able to provide their own. |
 
 ## Notifications
 

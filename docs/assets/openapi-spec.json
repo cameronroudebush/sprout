@@ -3934,9 +3934,15 @@
             "type": "string",
             "example": "How much did I spend on groceries in the last 30 days?",
             "description": "The message to send to the AI"
+          },
+          "timeframe": {
+            "enum": ["threeMonths", "sixMonths", "oneYear"],
+            "type": "string",
+            "description": "The historical timeframe to include in context.",
+            "default": "threeMonths"
           }
         },
-        "required": ["message"]
+        "required": ["message", "timeframe"]
       },
       "ChatHistory": {
         "type": "object",

@@ -7,7 +7,7 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, ConflictException, Controller, Get, InternalServerErrorException, Post } from "@nestjs/common";
+import { BadRequestException, Body, ConflictException, Controller, Get, InternalServerErrorException, Logger, Post } from "@nestjs/common";
 import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ThrottlerException } from "@nestjs/throttler";
 
@@ -16,6 +16,8 @@ import { ThrottlerException } from "@nestjs/throttler";
 @ApiTags("Chat")
 @AuthGuard.attach()
 export class ChatController {
+  private readonly logger = new Logger("controller:chat");
+
   constructor(
     private readonly chatService: ChatService,
     private readonly sseService: SSEService,
@@ -38,8 +40,10 @@ export class ChatController {
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
     try {
       const model = await this.chatService.getModel(user);
-      const { contents, idMap } = await this.chatService.buildPrompt(user);
+      const { contents, idMap } = await this.chatService.buildPrompt(user, data.timeframe);
+      const tokens = await model.countTokens(contents);
       try {
+        this.logger.debug(`Generating content using ${model.type} with ${tokens} token${tokens !== 1 ? "s" : ""} and timeframe ${data.timeframe}.`);
         const response = await model.generateContent(contents, chat, idMap);
         if (response.text === "") throw new InternalServerErrorException("Failed to parse request from the LLM. Try again later.");
         return response.text;
