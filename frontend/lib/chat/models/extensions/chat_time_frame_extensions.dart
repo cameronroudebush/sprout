@@ -5,6 +5,18 @@ extension ChatTimeframeUI on ChatRequestDTOTimeframeEnum {
   String get label {
     switch (this) {
       case ChatRequestDTOTimeframeEnum.sixMonths:
+        return '6M';
+      case ChatRequestDTOTimeframeEnum.oneYear:
+        return '1Y';
+      case ChatRequestDTOTimeframeEnum.threeMonths:
+      default:
+        return '3M';
+    }
+  }
+
+  String get longLabel {
+    switch (this) {
+      case ChatRequestDTOTimeframeEnum.sixMonths:
         return '6 Months';
       case ChatRequestDTOTimeframeEnum.oneYear:
         return '1 Year';

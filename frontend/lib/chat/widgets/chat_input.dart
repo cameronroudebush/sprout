@@ -277,7 +277,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  timeframe.label,
+                                  timeframe.longLabel,
                                   style: TextStyle(
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                     color: isSelected ? theme.colorScheme.primary : null,
