@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -25,13 +26,14 @@ class ChartRangeSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userConfig = ref.watch(userConfigProvider);
     final selectedRange = userConfig.value?.netWorthRange ?? ChartRangeEnum.oneMonth;
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
-    if (large) return _buildLargeVersion(context, ref, selectedRange);
-    return _buildCompactVersion(context, ref, selectedRange);
+    if (large) return _buildLargeVersion(context, ref, selectedRange, isDemoMode);
+    return _buildCompactVersion(context, ref, selectedRange, isDemoMode);
   }
 
   /// The compact popup menu version
-  Widget _buildCompactVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange) {
+  Widget _buildCompactVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -59,7 +61,10 @@ class ChartRangeSelector extends ConsumerWidget {
           ],
         ),
       ),
-      onSelected: (range) => _handleRangeChange(ref, range),
+      onSelected: (range) {
+        if (isDemoMode) return;
+        _handleRangeChange(ref, range);
+      },
       itemBuilder: (context) => ChartRangeEnum.values.map((range) {
         final isSelected = range == selectedRange;
         return PopupMenuItem(
@@ -82,7 +87,7 @@ class ChartRangeSelector extends ConsumerWidget {
   }
 
   /// Builds a large version of the selection range that acts as a row using SegmentedButton
-  Widget _buildLargeVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange) {
+  Widget _buildLargeVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode) {
     final theme = Theme.of(context);
 
     return SizedBox(
@@ -97,6 +102,7 @@ class ChartRangeSelector extends ConsumerWidget {
         }).toList(),
         selected: {selectedRange},
         onSelectionChanged: (Set<ChartRangeEnum> newSelection) {
+          if (isDemoMode) return;
           _handleRangeChange(ref, newSelection.first);
         },
         style: SegmentedButton.styleFrom(
