@@ -217,7 +217,7 @@ final class TransactionSubscriptionsProvider extends $AsyncNotifierProvider<
 }
 
 String _$transactionSubscriptionsHash() =>
-    r'2424ab003c59bd26cf8a27fd57f21a401f2ffb69';
+    r'5a2045e5615fc48cbb5c3bbb75124b34af00d990';
 
 /// Provider to track transaction subscriptions
 

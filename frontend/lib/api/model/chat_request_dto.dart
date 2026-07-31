@@ -130,12 +130,14 @@ class ChatRequestDTOTimeframeEnum {
 
   String toJson() => value;
 
+  static const oneDay = ChatRequestDTOTimeframeEnum._(r'oneDay');
   static const threeMonths = ChatRequestDTOTimeframeEnum._(r'threeMonths');
   static const sixMonths = ChatRequestDTOTimeframeEnum._(r'sixMonths');
   static const oneYear = ChatRequestDTOTimeframeEnum._(r'oneYear');
 
   /// List of all possible values in this [enum][ChatRequestDTOTimeframeEnum].
   static const values = <ChatRequestDTOTimeframeEnum>[
+    oneDay,
     threeMonths,
     sixMonths,
     oneYear,
@@ -177,6 +179,7 @@ class ChatRequestDTOTimeframeEnumTypeTransformer {
   ChatRequestDTOTimeframeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
+        case r'oneDay': return ChatRequestDTOTimeframeEnum.oneDay;
         case r'threeMonths': return ChatRequestDTOTimeframeEnum.threeMonths;
         case r'sixMonths': return ChatRequestDTOTimeframeEnum.sixMonths;
         case r'oneYear': return ChatRequestDTOTimeframeEnum.oneYear;

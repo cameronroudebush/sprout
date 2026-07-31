@@ -61,6 +61,8 @@ part 'model/category.dart';
 part 'model/category_stats.dart';
 part 'model/chart_range_enum.dart';
 part 'model/chat_history.dart';
+part 'model/chat_overview.dart';
+part 'model/chat_overview_type_enum.dart';
 part 'model/chat_request_dto.dart';
 part 'model/currency_options_enum.dart';
 part 'model/daily_spending_calendar_response_dto.dart';

@@ -24,7 +24,7 @@ export class ConfigController {
   @ApiOkResponse({ description: "The configuration that external services may want to know about.", type: APIConfig })
   async get(@CurrentUser() _user: User) {
     return new APIConfig(
-      Configuration.server.prompt.hasChatKey,
+      Configuration.server.prompt.enabled,
       Configuration.server.email.enabled,
       new TileConfig(Configuration.server.lightModeTiles, Configuration.server.darkModeTiles),
       Configuration.server.brandFetch.clientId,

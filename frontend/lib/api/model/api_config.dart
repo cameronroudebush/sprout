@@ -13,14 +13,14 @@ part of openapi.api;
 class APIConfig {
   /// Returns a new [APIConfig] instance.
   APIConfig({
-    required this.chatKeyProvidedInBackend,
+    required this.chatEnabled,
     required this.emailEnabled,
     this.brandFetchClientId,
     required this.tiles,
   });
 
-  /// Determines if the chat key is already provided and users shouldn't be able to set theirs then.
-  bool chatKeyProvidedInBackend;
+  /// Determines if the chat capability is enabled.
+  bool chatEnabled;
 
   /// Tracks if email is enabled and functional
   bool emailEnabled;
@@ -39,7 +39,7 @@ class APIConfig {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
-    other.chatKeyProvidedInBackend == chatKeyProvidedInBackend &&
+    other.chatEnabled == chatEnabled &&
     other.emailEnabled == emailEnabled &&
     other.brandFetchClientId == brandFetchClientId &&
     other.tiles == tiles;
@@ -47,17 +47,17 @@ class APIConfig {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (chatKeyProvidedInBackend.hashCode) +
+    (chatEnabled.hashCode) +
     (emailEnabled.hashCode) +
     (brandFetchClientId == null ? 0 : brandFetchClientId!.hashCode) +
     (tiles.hashCode);
 
   @override
-  String toString() => 'APIConfig[chatKeyProvidedInBackend=$chatKeyProvidedInBackend, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId, tiles=$tiles]';
+  String toString() => 'APIConfig[chatEnabled=$chatEnabled, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId, tiles=$tiles]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'chatKeyProvidedInBackend'] = this.chatKeyProvidedInBackend;
+      json[r'chatEnabled'] = this.chatEnabled;
       json[r'emailEnabled'] = this.emailEnabled;
     if (this.brandFetchClientId != null) {
       json[r'brandFetchClientId'] = this.brandFetchClientId;
@@ -79,8 +79,8 @@ class APIConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'chatKeyProvidedInBackend'), 'Required key "APIConfig[chatKeyProvidedInBackend]" is missing from JSON.');
-        assert(json[r'chatKeyProvidedInBackend'] != null, 'Required key "APIConfig[chatKeyProvidedInBackend]" has a null value in JSON.');
+        assert(json.containsKey(r'chatEnabled'), 'Required key "APIConfig[chatEnabled]" is missing from JSON.');
+        assert(json[r'chatEnabled'] != null, 'Required key "APIConfig[chatEnabled]" has a null value in JSON.');
         assert(json.containsKey(r'emailEnabled'), 'Required key "APIConfig[emailEnabled]" is missing from JSON.');
         assert(json[r'emailEnabled'] != null, 'Required key "APIConfig[emailEnabled]" has a null value in JSON.');
         assert(json.containsKey(r'tiles'), 'Required key "APIConfig[tiles]" is missing from JSON.');
@@ -89,7 +89,7 @@ class APIConfig {
       }());
 
       return APIConfig(
-        chatKeyProvidedInBackend: mapValueOfType<bool>(json, r'chatKeyProvidedInBackend')!,
+        chatEnabled: mapValueOfType<bool>(json, r'chatEnabled')!,
         emailEnabled: mapValueOfType<bool>(json, r'emailEnabled')!,
         brandFetchClientId: mapValueOfType<String>(json, r'brandFetchClientId'),
         tiles: TileConfig.fromJson(json[r'tiles'])!,
@@ -140,7 +140,7 @@ class APIConfig {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'chatKeyProvidedInBackend',
+    'chatEnabled',
     'emailEnabled',
     'tiles',
   };

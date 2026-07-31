@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/holding/widgets/account_holding_list.dart';
+import 'package:sprout/holding/widgets/holding_chart_card.dart';
 import 'package:sprout/holding/widgets/holding_dividends.dart';
 import 'package:sprout/holding/widgets/holding_mover.dart';
 import 'package:sprout/holding/widgets/holding_pie_chart.dart';
@@ -37,12 +39,13 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   /// The selected holding we're showing the performance of
   Holding? _selectedHolding;
   bool _hasInitialSelection = false;
-  MobileMarketTab _currentTab = MobileMarketTab.holdings;
+  MobileMarketTab _currentTab = MobileMarketTab.overview;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accountsAsync = ref.watch(accountsProvider);
+    final isChatEnabled = ref.watch(chatEnabledProvider);
 
     return accountsAsync.whenDefault(
       customErrorMessage: "Failed to load investment profile",
@@ -117,6 +120,11 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                         children: [
                           const MajorIndicesBarWidget(),
                           const Divider(),
+                          if (isChatEnabled)
+                            const SizedBox(
+                              height: 250,
+                              child: HoldingsChatCard(),
+                            ),
                           SizedBox(
                             height: 300,
                             child: Row(
@@ -171,8 +179,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
           return SproutRouteWrapper(
             child: Column(
               children: [
+                const MajorIndicesBarWidget(),
                 if (_currentTab == MobileMarketTab.holdings) ...[
-                  const MajorIndicesBarWidget(),
                   if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme, isDesktop),
                 ],
                 Expanded(
@@ -183,6 +191,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                         if (_currentTab == MobileMarketTab.holdings) ...[
                           _buildHoldingsPanel(theme, investmentAccounts),
                         ] else ...[
+                          if (isChatEnabled) const HoldingsChatCard(mobile: true),
+                          SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts)),
                           const SproutCard(
                             child: SizedBox(
                               height: 250,
@@ -199,7 +209,6 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                                 ),
                               ),
                             ),
-                          SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts)),
                           SproutCard(
                               child:
                                   HoldingDividendsWidget(investmentAccounts: investmentAccounts, isDesktop: isDesktop)),
@@ -218,12 +227,12 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                       ),
                       segments: const [
                         ButtonSegment(
-                          value: MobileMarketTab.holdings,
-                          label: Text('Holdings'),
-                        ),
-                        ButtonSegment(
                           value: MobileMarketTab.overview,
                           label: Text('Overview'),
+                        ),
+                        ButtonSegment(
+                          value: MobileMarketTab.holdings,
+                          label: Text('Holdings'),
                         ),
                       ],
                       selected: {_currentTab},

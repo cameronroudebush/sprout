@@ -14,6 +14,7 @@ class CategoryDropdown extends ConsumerWidget {
   final String? editingCategoryId;
   final Function(Category? newValue) onChanged;
   final bool displayAllCategoryButton;
+  final bool displayUnknownCategoryButton;
   final bool enabled;
   final String label;
 
@@ -21,6 +22,7 @@ class CategoryDropdown extends ConsumerWidget {
       {super.key,
       this.editingCategoryId,
       this.displayAllCategoryButton = false,
+      this.displayUnknownCategoryButton = true,
       this.enabled = true,
       this.label = "Category"});
 
@@ -88,7 +90,7 @@ class CategoryDropdown extends ConsumerWidget {
       error: (err, _) => const Text("Error loading categories"),
       data: (cats) {
         final categories = [...cats];
-        categories.insert(0, unknownCategory);
+        if (displayUnknownCategoryButton) categories.insert(0, unknownCategory);
         if (displayAllCategoryButton) categories.insert(0, fakeAllCategory);
         var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParentId);
         if (displayAllCategoryButton && selectedValue == null) selectedValue = CategoryDropdown.fakeAllCategory;
@@ -104,7 +106,7 @@ class CategoryDropdown extends ConsumerWidget {
             .toList()
           ..sort((a, b) => a.name.compareTo(b.name));
 
-        topLevel.insert(0, unknownCategory);
+        if (displayUnknownCategoryButton) topLevel.insert(0, unknownCategory);
         if (displayAllCategoryButton) topLevel.insert(0, fakeAllCategory);
 
         return DropdownButtonFormField<Category>(

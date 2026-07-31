@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/shared/widgets/logo.dart';
 import 'package:sprout/user/models/extensions/user_extensions.dart';
+import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/widgets/user_avatar.dart';
 
 /// A widget that is used to render the side navigation for Sprout. Only used on desktop displays.
@@ -40,8 +42,11 @@ class _InternalSideNavContent extends ConsumerWidget {
     final authUser = ref.watch(authProvider).value;
     final authNotifier = ref.read(authProvider.notifier);
     final currentPath = ref.watch(currentRouteProvider);
+    final apiConfig = ref.watch(secureConfigProvider).value;
+    final userConfig = ref.watch(userConfigProvider).value;
 
-    final navItems = authenticatedRoutes.where((page) => page.showInSidebar).toList();
+    final navItems = getFilteredRoutes(apiConfig, userConfig);
+
     final groupedItems = groupBy<SproutRoute, String?>(navItems, (route) => route.category);
     final navBackgroundColor = theme.cardTheme.color ?? theme.cardColor;
 

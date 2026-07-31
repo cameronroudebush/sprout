@@ -1,7 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 part 'chat_provider.g.dart';
 
@@ -64,4 +66,24 @@ class Chat extends _$Chat {
 
   /// Clears chat state
   void clear() => state = const AsyncData([]);
+}
+
+/// Fetches the daily financial overview status for the dashboard
+@riverpod
+Future<ChatOverview?> chatStatus(Ref ref, ChatOverviewTypeEnum type) async {
+  final api = await ref.watch(chatApiProvider.future);
+  return await api.chatControllerGetOverview(type: type.toString());
+}
+
+/// Provides whether AI Chat capabilities are enabled based on both
+/// secure server configuration and user settings.
+@riverpod
+bool chatEnabled(Ref ref) {
+  final secureConfig = ref.watch(secureConfigProvider).value;
+  final userConfig = ref.watch(userConfigProvider).value;
+
+  final isServerEnabled = secureConfig?.chatEnabled ?? false;
+  final isUserEnabled = userConfig?.includeAICapabilities ?? false;
+
+  return isServerEnabled && isUserEnabled;
 }

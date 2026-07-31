@@ -10,10 +10,10 @@ extension UserConfigExtensions on UserConfig {
       bool? privateMode,
       bool? secureMode,
       bool? allowWidgets,
+      bool? includeAICapabilities,
       CurrencyOptionsEnum? currency,
       EmailUpdateFrequencyEnum? emailUpdateFrequency,
-      String? simpleFinToken,
-      String? geminiKey}) {
+      String? simpleFinToken}) {
     return UserConfig(
         id: id ?? this.id,
         netWorthRange: netWorthRange ?? this.netWorthRange,
@@ -24,6 +24,6 @@ extension UserConfigExtensions on UserConfig {
         currency: currency ?? this.currency,
         emailUpdateFrequency: emailUpdateFrequency ?? this.emailUpdateFrequency,
         simpleFinToken: simpleFinToken ?? this.simpleFinToken,
-        geminiKey: geminiKey ?? this.geminiKey);
+        includeAICapabilities: includeAICapabilities ?? this.includeAICapabilities);
   }
 }

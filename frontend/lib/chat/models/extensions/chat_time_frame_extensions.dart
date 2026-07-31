@@ -34,7 +34,7 @@ extension ChatTimeframeUI on ChatRequestDTOTimeframeEnum {
         return 'Past year of financial history';
       case ChatRequestDTOTimeframeEnum.threeMonths:
       default:
-        return 'Past 3 months (Default balance window)';
+        return 'Past 3 months of financial history';
     }
   }
 }

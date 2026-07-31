@@ -4,6 +4,8 @@ import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_calendar.dart';
 import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
+import 'package:sprout/chat/chat_provider.dart';
+import 'package:sprout/chat/widgets/dashboard_daily_chat.dart';
 import 'package:sprout/net-worth/widgets/user_net_worth.dart';
 import 'package:sprout/notification/widgets/home_notifications.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
@@ -21,16 +23,17 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isChatEnabled = ref.watch(chatEnabledProvider);
     return SingleChildScrollView(
       child: SproutLayoutBuilder(
         (isDesktop, context, constraints) {
           if (isDesktop) {
             return SproutRouteWrapper(
               size: SproutRouteSize.large,
-              child: _buildDesktop(context, ref),
+              child: _buildDesktop(context, ref, isChatEnabled),
             );
           } else {
-            return SproutRouteWrapper(child: _buildMobile(ref));
+            return SproutRouteWrapper(child: _buildMobile(ref, isChatEnabled));
           }
         },
       ),
@@ -38,7 +41,7 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// Desktop gets a robust 2-column masonry display utilizing flex factors
-  Widget _buildDesktop(BuildContext context, WidgetRef ref) {
+  Widget _buildDesktop(BuildContext context, WidgetRef ref, bool chatEnabled) {
     final topCategoryCount = 10;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,20 +76,31 @@ class DashboardPage extends ConsumerWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 425),
           child: HeightMatchedRow(
-            leadFlex: 2,
+            leadFlex: chatEnabled ? 1 : 2,
             followingFlex: 1,
             leadChild: const DashboardAccountsCard(),
-            followingChild: SproutCard(
-              child: Center(
-                child: CategoryPieChart(
-                  DateTime.now(),
-                  legendPosition: SproutChartLegendPosition.bottom,
-                  topN: topCategoryCount,
-                  header: SproutChartHeader(
-                    title: "Top $topCategoryCount Purchase Categories",
+            followingChild: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (chatEnabled)
+                  const Expanded(
+                    child: DashboardDailyChatCard(),
+                  ),
+                Expanded(
+                  child: SproutCard(
+                    child: Center(
+                      child: CategoryPieChart(
+                        DateTime.now(),
+                        legendPosition: SproutChartLegendPosition.bottom,
+                        topN: topCategoryCount,
+                        header: SproutChartHeader(
+                          title: "Top $topCategoryCount Purchase Categories",
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -112,7 +126,7 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// Mobile just renders vertically
-  Widget _buildMobile(WidgetRef ref) {
+  Widget _buildMobile(WidgetRef ref, bool chatEnabled) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -123,6 +137,11 @@ class DashboardPage extends ConsumerWidget {
           height: 200,
           child: UserNetWorthWidget(mobile: true),
         ),
+        if (chatEnabled)
+          const SizedBox(
+            height: 200,
+            child: DashboardDailyChatCard(),
+          ),
         // Account overview
         const DashboardAccountsCard(),
         // Recent transactions

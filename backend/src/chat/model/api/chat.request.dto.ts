@@ -3,6 +3,8 @@ import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 
 /** How much data to include within the requests */
 export enum ChatTimeframe {
+  /** Actually passes two days because one day may exclude included data depending on time of day */
+  oneDay = "oneDay",
   threeMonths = "threeMonths",
   sixMonths = "sixMonths",
   oneYear = "oneYear",

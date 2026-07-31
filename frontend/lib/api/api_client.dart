@@ -210,6 +210,10 @@ class ApiClient {
           return ChartRangeEnumTypeTransformer().decode(value);
         case 'ChatHistory':
           return ChatHistory.fromJson(value);
+        case 'ChatOverview':
+          return ChatOverview.fromJson(value);
+        case 'ChatOverviewTypeEnum':
+          return ChatOverviewTypeEnumTypeTransformer().decode(value);
         case 'ChatRequestDTO':
           return ChatRequestDTO.fromJson(value);
         case 'CurrencyOptionsEnum':

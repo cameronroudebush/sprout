@@ -36,7 +36,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
     _selectedIcon = widget.category?.icon ?? "payment";
     _selectedParentId = widget.category?.parentCategoryId;
     _excludeFromCashFlow = widget.category?.excludeFromCashFlow ?? false;
-    _increasedSubVariance = widget.category?.increasedSubVariance ?? true;
+    _increasedSubVariance = widget.category?.increasedSubVariance ?? false;
   }
 
   @override
@@ -137,6 +137,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                 (newValue) => setState(() => _selectedParentId = newValue?.id),
                 editingCategoryId: widget.category?.id,
                 label: "Parent Category",
+                displayUnknownCategoryButton: widget.category != null,
               ),
 
               // Exclude from cash flow toggle

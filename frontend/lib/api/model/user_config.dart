@@ -20,9 +20,9 @@ class UserConfig {
     this.currency = CurrencyOptionsEnum.USD,
     required this.privateMode,
     this.simpleFinToken,
-    this.geminiKey,
     required this.secureMode,
     required this.allowWidgets,
+    required this.includeAICapabilities,
   });
 
   String id;
@@ -51,20 +51,14 @@ class UserConfig {
   ///
   String? simpleFinToken;
 
-  /// This property defines the Gemini API token for LLM use.
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? geminiKey;
-
   /// If we should require biometrics to view the app and if we should hide the app in the background
   bool secureMode;
 
   /// If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once.
   bool allowWidgets;
+
+  /// If the user wants to see AI powered stats and ideas.
+  bool includeAICapabilities;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
@@ -75,9 +69,9 @@ class UserConfig {
     other.currency == currency &&
     other.privateMode == privateMode &&
     other.simpleFinToken == simpleFinToken &&
-    other.geminiKey == geminiKey &&
     other.secureMode == secureMode &&
-    other.allowWidgets == allowWidgets;
+    other.allowWidgets == allowWidgets &&
+    other.includeAICapabilities == includeAICapabilities;
 
   @override
   int get hashCode =>
@@ -89,12 +83,12 @@ class UserConfig {
     (currency.hashCode) +
     (privateMode.hashCode) +
     (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
-    (geminiKey == null ? 0 : geminiKey!.hashCode) +
     (secureMode.hashCode) +
-    (allowWidgets.hashCode);
+    (allowWidgets.hashCode) +
+    (includeAICapabilities.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, simpleFinToken=$simpleFinToken, geminiKey=$geminiKey, secureMode=$secureMode, allowWidgets=$allowWidgets]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, simpleFinToken=$simpleFinToken, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -109,13 +103,9 @@ class UserConfig {
     } else {
       json[r'simpleFinToken'] = null;
     }
-    if (this.geminiKey != null) {
-      json[r'geminiKey'] = this.geminiKey;
-    } else {
-      json[r'geminiKey'] = null;
-    }
       json[r'secureMode'] = this.secureMode;
       json[r'allowWidgets'] = this.allowWidgets;
+      json[r'includeAICapabilities'] = this.includeAICapabilities;
     return json;
   }
 
@@ -146,6 +136,8 @@ class UserConfig {
         assert(json[r'secureMode'] != null, 'Required key "UserConfig[secureMode]" has a null value in JSON.');
         assert(json.containsKey(r'allowWidgets'), 'Required key "UserConfig[allowWidgets]" is missing from JSON.');
         assert(json[r'allowWidgets'] != null, 'Required key "UserConfig[allowWidgets]" has a null value in JSON.');
+        assert(json.containsKey(r'includeAICapabilities'), 'Required key "UserConfig[includeAICapabilities]" is missing from JSON.');
+        assert(json[r'includeAICapabilities'] != null, 'Required key "UserConfig[includeAICapabilities]" has a null value in JSON.');
         return true;
       }());
 
@@ -157,9 +149,9 @@ class UserConfig {
         currency: CurrencyOptionsEnum.fromJson(json[r'currency'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
-        geminiKey: mapValueOfType<String>(json, r'geminiKey'),
         secureMode: mapValueOfType<bool>(json, r'secureMode')!,
         allowWidgets: mapValueOfType<bool>(json, r'allowWidgets')!,
+        includeAICapabilities: mapValueOfType<bool>(json, r'includeAICapabilities')!,
       );
     }
     return null;
@@ -215,6 +207,7 @@ class UserConfig {
     'privateMode',
     'secureMode',
     'allowWidgets',
+    'includeAICapabilities',
   };
 }
 

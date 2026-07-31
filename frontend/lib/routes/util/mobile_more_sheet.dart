@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/auth_provider.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/theme/helpers.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// Used to display a grid in a sheet of additional routes on mobile that are not shown on develop
 class SproutMoreSheet extends ConsumerWidget {
@@ -22,9 +24,17 @@ class SproutMoreSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final user = ref.watch(authProvider).value;
+    final apiConfig = ref.watch(secureConfigProvider).value;
+    final userConfig = ref.watch(userConfigProvider).value;
 
-    // Filter routes: Sidebar enabled but NOT in the bottom bar
-    final moreRoutes = authenticatedRoutes.where((r) => r.showInSidebar && !r.showInBottomNav).toList();
+    final filteredRoutes = getFilteredRoutes(apiConfig, userConfig);
+    final candidateRoutes = filteredRoutes.where((r) => r.path != '/').toList()
+      ..sort((a, b) {
+        final aPrio = a.bottomNavPriority >= 0 ? a.bottomNavPriority : double.infinity;
+        final bPrio = b.bottomNavPriority >= 0 ? b.bottomNavPriority : double.infinity;
+        return aPrio.compareTo(bPrio);
+      });
+    final moreRoutes = candidateRoutes.skip(3).toList();
 
     return SproutBaseDialogWidget(
       "${getGreeting()} ${user?.username ?? 'User'}!",

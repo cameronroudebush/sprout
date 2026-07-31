@@ -15,7 +15,6 @@ Sprout allows you to interact with your financial data using Large Language Mode
 
 We take your financial privacy seriously:
 
-- **Encryption:** API keys are encrypted at rest.
 - **Minimal Exposure:** Sprout only sends the last 90 days of transaction history to minimize data exposure.
 - **Masked Data:** Sprout replaces numerous identifiers to generic ID's when passed to the LLM to prevent data leakage. This is then turned back into the real text when we receive the response. This data includes: account ID's, transaction descriptions.
 
@@ -37,7 +36,4 @@ To use Gemini, you must generate an API key from Google AI Studio.
 
 ### 2. Connect to Sprout
 
-1. Open Sprout and navigate to your **Settings** (Click your username in the sidebar).
-2. Paste your key into the **Gemini API Key** field and click **Save**.
-
-_Note: Once saved, your key is hidden for security. You can overwrite it at any time if you generate a new one._
+1. Configure [Sprout's runtime environment variable](../developer/configuration.md#ai) to include the key you've generated and restart sprout.

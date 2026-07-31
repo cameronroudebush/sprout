@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sprout/api/api.dart';
 
 /// Specifies a route in Sprout
 class SproutRoute {
@@ -8,8 +9,13 @@ class SproutRoute {
   final IconData icon;
   final Widget Function(BuildContext, GoRouterState) builder;
   final bool showInSidebar;
-  final bool showInBottomNav;
+
+  /// What priority that these get bottom navigation room. Lowest number is highest priority
+  final num bottomNavPriority;
   final String? category;
+
+  /// Allows you to customize enabled state of a route
+  final bool Function(APIConfig config, UserConfig? userConfig)? enabled;
 
   /// Nested child routes
   final List<SproutRoute>? routes;
@@ -20,7 +26,8 @@ class SproutRoute {
       required this.icon,
       required this.builder,
       this.showInSidebar = true,
-      this.showInBottomNav = false,
+      this.bottomNavPriority = -1,
       this.category,
-      this.routes});
+      this.routes,
+      this.enabled});
 }

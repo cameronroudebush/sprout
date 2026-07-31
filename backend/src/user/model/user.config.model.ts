@@ -56,12 +56,6 @@ export class UserConfig extends DatabaseBase {
   @IsString()
   simpleFinToken?: string;
 
-  /** This property defines the Gemini API token for LLM use. */
-  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
-  @EncryptionTransformer.decorateAPIProperty()
-  @IsString()
-  geminiKey?: string;
-
   /** If we should require biometrics to view the app and if we should hide the app in the background */
   @DatabaseDecorators.column({ nullable: false, default: false })
   @IsBoolean()
@@ -97,17 +91,23 @@ export class UserConfig extends DatabaseBase {
   @IsEnum(CurrencyOptions)
   currency: CurrencyOptions = CurrencyOptions.USD;
 
+  /** If the user wants to see AI powered stats and ideas. */
+  @DatabaseDecorators.column({ nullable: false, default: true })
+  @IsBoolean()
+  includeAICapabilities: boolean;
+
   @OneToOne(() => User, (user) => user.config, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   @ApiHideProperty()
   @Exclude()
   user!: User;
 
-  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean, allowWidgets: boolean) {
+  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean, allowWidgets: boolean, includeAICapabilities: boolean) {
     super();
     this.privateMode = privateMode;
     this.netWorthRange = netWorthRange;
     this.secureMode = secureMode;
     this.allowWidgets = allowWidgets;
+    this.includeAICapabilities = includeAICapabilities;
   }
 }

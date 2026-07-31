@@ -74,6 +74,8 @@ class CategoryIcon extends StatelessWidget {
     'books': Icons.menu_book,
     'news': Icons.newspaper,
     'gaming': Icons.sports_esports,
+    'gambling': Icons.casino,
+    'lottery': Icons.local_activity,
 
     // Financial & Income
     'income': Icons.attach_money,

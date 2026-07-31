@@ -5,7 +5,7 @@ export class GeminiConfig {
   @ConfigurationMetadata.assign({ comment: "The model gemini should use when performing prompt requests." })
   model: string = "gemini-flash-latest";
 
-  @ConfigurationMetadata.assign({ comment: "A global key to use to authenticate to gemini. If given, users will not be able to provide their own." })
+  @ConfigurationMetadata.assign({ comment: "A global key to use to authenticate to gemini." })
   key?: string;
 }
 
@@ -22,8 +22,8 @@ export class ChatConfig {
   @ConfigurationMetadata.assign({ comment: "Configuration for using Gemini." })
   gemini = new GeminiConfig();
 
-  /** Returns if an API key is globally configured. */
-  get hasChatKey() {
+  /** Returns if AI chat is enabled. */
+  get enabled() {
     const key = this[this.type].key;
     return key != null && key !== "";
   }

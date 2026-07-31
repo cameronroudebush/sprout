@@ -30,7 +30,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final chatAsync = ref.watch(chatProvider);
     final configAsync = ref.watch(secureConfigProvider);
     final userConfigAsync = ref.watch(userConfigProvider);
     final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
@@ -39,13 +38,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text("Error loading config: $err")),
       data: (userConfig) {
-        final bool llmConfigured =
-            (configAsync.value?.chatKeyProvidedInBackend ?? false) || (userConfig?.geminiKey?.isNotEmpty ?? false);
+        final bool llmConfigured = configAsync.value?.chatEnabled ?? false;
 
         if (!llmConfigured && !isDemoMode) {
           return SproutRouteWrapper(child: _buildNoConfigState(theme));
         }
 
+        final chatAsync = ref.watch(chatProvider);
         return chatAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text("Error loading chat: $err")),
@@ -112,7 +111,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  "To chat with Sprout and analyze your data, you'll need to provide an API key in your settings.",
+                  "To chat with Sprout and analyze your data, you'll need to configure an API key.",
                   style: theme.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),

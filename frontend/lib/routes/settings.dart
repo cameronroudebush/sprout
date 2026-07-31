@@ -134,6 +134,14 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
           ),
+        if (config.chatEnabled)
+          SwitchSettingTile(
+            title: "Enable AI Content",
+            subtitle: "If we should display cards/pages related to AI.",
+            icon: Icons.auto_awesome,
+            value: userConfig.includeAICapabilities,
+            onChanged: (val) => _update(ref, (c) => c.copyWith(includeAICapabilities: val)),
+          ),
       ],
       "Appearance": [
         ThemePicker(
@@ -217,22 +225,6 @@ class SettingsPage extends ConsumerWidget {
               obscureText: true,
               description: "Enter your new token below. This will be encrypted and stored securely.",
               onSave: (val) => _update(ref, (c) => c.copyWith(simpleFinToken: val)),
-            ),
-          ),
-        if (!config.chatKeyProvidedInBackend)
-          ActionSettingTile(
-            title: "Gemini AI Key",
-            subtitle: userConfig.geminiKey?.isNotEmpty == true ? "Token Set" : "Configure Token",
-            icon: Icons.auto_awesome,
-            onTap: () => showSproutEditDialog(
-              context: context,
-              title: "Update Gemini Token",
-              label: "Gemini API Token",
-              currentValue: userConfig.geminiKey,
-              icon: Icons.key,
-              obscureText: true,
-              description: "Enter your new token below. This will be encrypted and stored securely.",
-              onSave: (val) => _update(ref, (c) => c.copyWith(geminiKey: val)),
             ),
           ),
       ],

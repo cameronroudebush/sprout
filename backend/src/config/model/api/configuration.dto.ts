@@ -19,8 +19,8 @@ export class TileConfig {
  * This config is **secure** and can only be read by authenticated users.
  */
 export class APIConfig extends Base {
-  /** Determines if the chat key is already provided and users shouldn't be able to set theirs then. */
-  chatKeyProvidedInBackend: boolean;
+  /** Determines if the chat capability is enabled. */
+  chatEnabled: boolean;
 
   /** Tracks if email is enabled and functional */
   emailEnabled: boolean;
@@ -31,9 +31,9 @@ export class APIConfig extends Base {
   /** Tile config */
   tiles: TileConfig;
 
-  constructor(chatKeyProvidedInBackend: boolean, emailEnabled: boolean, tiles: TileConfig, brandFetchClientId?: string) {
+  constructor(chatEnabled: boolean, emailEnabled: boolean, tiles: TileConfig, brandFetchClientId?: string) {
     super();
-    this.chatKeyProvidedInBackend = chatKeyProvidedInBackend;
+    this.chatEnabled = chatEnabled;
     this.emailEnabled = emailEnabled;
     this.tiles = tiles;
     this.brandFetchClientId = brandFetchClientId;

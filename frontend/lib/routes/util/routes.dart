@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/routes/account_details.dart';
 import 'package:sprout/routes/accounts.dart';
 import 'package:sprout/routes/categories.dart';
@@ -18,7 +19,7 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/',
     label: 'Dashboard',
     icon: Icons.dashboard_rounded,
-    showInBottomNav: true,
+    bottomNavPriority: 0,
     builder: (context, state) => const DashboardPage(),
   ),
   SproutRoute(
@@ -34,7 +35,6 @@ final List<SproutRoute> authenticatedRoutes = [
           icon: Icons.account_balance_wallet,
           category: 'Banking',
           showInSidebar: false,
-          showInBottomNav: false,
           builder: (context, state) {
             final accountId = state.uri.queryParameters['id'] ?? state.uri.queryParameters['acc'];
             return AccountDetailsPage(accountId: accountId);
@@ -45,14 +45,15 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/chat',
     label: 'Chat',
     icon: Icons.auto_awesome,
-    showInBottomNav: true,
+    bottomNavPriority: 2,
     builder: (context, state) => const ChatPage(),
+    enabled: (config, userConfig) => config.chatEnabled && (userConfig?.includeAICapabilities ?? false),
   ),
   SproutRoute(
     path: '/transactions',
     label: 'Transactions',
     icon: Icons.receipt,
-    showInBottomNav: true,
+    bottomNavPriority: 3,
     category: 'Banking',
     builder: (context, state) => const TransactionsPage(),
   ),
@@ -60,6 +61,7 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/holdings',
     label: 'Holdings',
     icon: Icons.show_chart,
+    bottomNavPriority: 5,
     category: 'Investments',
     builder: (context, state) => const HoldingsPage(),
   ),
@@ -88,7 +90,7 @@ final List<SproutRoute> authenticatedRoutes = [
     path: '/reports',
     label: 'Reports',
     icon: Icons.bar_chart,
-    showInBottomNav: true,
+    bottomNavPriority: 4,
     builder: (context, state) => const ReportsPage(),
   ),
   SproutRoute(
@@ -99,3 +101,29 @@ final List<SproutRoute> authenticatedRoutes = [
     builder: (context, state) => const SettingsPage(),
   ),
 ];
+
+/// Returns the [authenticatedRoutes] but filtered considering the options
+/// [restrictToSidebar] If we should filter out routes that are only allowed in the sidebar.
+List<SproutRoute> getFilteredRoutes(APIConfig? apiConfig, UserConfig? userConfig,
+    {List<SproutRoute>? routes, bool restrictToSidebar = true}) {
+  return (routes ?? authenticatedRoutes).where((page) {
+    if (restrictToSidebar && !page.showInSidebar) return false;
+    if (apiConfig == null) return false;
+    return page.enabled?.call(apiConfig, userConfig) ?? true;
+  }).toList();
+}
+
+/// Helper function to check if a path exists within a route tree
+bool isPathInRoutes(String path, List<SproutRoute> routes, {String currentPrefix = ''}) {
+  for (final route in routes) {
+    final fullRoutePath =
+        route.path.startsWith('/') ? route.path : '${currentPrefix == '/' ? '' : currentPrefix}/${route.path}';
+    if (path == fullRoutePath) return true;
+    if (route.routes != null) {
+      if (isPathInRoutes(path, route.routes!, currentPrefix: fullRoutePath)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

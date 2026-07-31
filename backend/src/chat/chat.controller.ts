@@ -2,19 +2,24 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { ChatService } from "@backend/chat/chat.service";
 import { ChatRequestDTO } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
+import { ChatOverview } from "@backend/chat/model/chat.overview.model";
+import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
+import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, ConflictException, Controller, Get, InternalServerErrorException, Logger, Post } from "@nestjs/common";
-import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { ThrottlerException } from "@nestjs/throttler";
+import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Query } from "@nestjs/common";
+import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import cronParser from "cron-parser";
+import { startCase } from "lodash";
 
 /** This controller provides the endpoint for chatting with LLM's */
 @Controller("chat")
 @ApiTags("Chat")
 @AuthGuard.attach()
+@EnabledGuard.attach(Configuration.server.prompt.enabled)
 export class ChatController {
   private readonly logger = new Logger("controller:chat");
 
@@ -29,36 +34,16 @@ export class ChatController {
   @ApiConflictResponse({ description: "Thrown if the LLM is already running a request for the current user." })
   @EnabledGuard.attachDemoMode()
   async new(@CurrentUser() user: User, @Body() data: ChatRequestDTO) {
-    // Determine if we're still processing a previous response
     const isLoading = await ChatHistory.count({ where: { user: { id: user.id }, isThinking: true } });
     if (isLoading > 0) throw new ConflictException("A request is already running. Please try again later");
     if (data.message.trim() === "") throw new BadRequestException("No valid message given");
-    // Generate the prompt for the new message, insert it, and inform the app
+
     this.sseService.sendToUser(user, SSEEventType.CHAT, await new ChatHistory(user, data.message, "user").insert());
-    // Add history tracking for the model response immediately so the frontend knows about it
     const chat = await new ChatHistory(user, ChatHistory.DEFAULT_MODEL_TEXT, "model", undefined, true).insert();
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
-    try {
-      const model = await this.chatService.getModel(user);
-      const { contents, idMap } = await this.chatService.buildPrompt(user, data.timeframe);
-      const tokens = await model.countTokens(contents);
-      try {
-        this.logger.debug(`Generating content using ${model.type} with ${tokens} token${tokens !== 1 ? "s" : ""} and timeframe ${data.timeframe}.`);
-        const response = await model.generateContent(contents, chat, idMap);
-        if (response.text === "") throw new InternalServerErrorException("Failed to parse request from the LLM. Try again later.");
-        return response.text;
-      } catch (e) {
-        if ((e as Error)?.message.includes("You exceeded your current quota"))
-          throw new ThrottlerException("You have exceeded your request quota. Try again later.");
-        else throw e;
-      }
-    } catch (e) {
-      chat.isThinking = false;
-      chat.text = (e as Error).message;
-      await chat.update();
-      this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
-      throw e;
-    }
+
+    const model = await this.chatService.getModel(user);
+    return await model.generateChatContent(chat, data.timeframe);
   }
 
   @Get("history")
@@ -66,5 +51,45 @@ export class ChatController {
   @ApiOkResponse({ description: "Returns the chat history", type: [ChatHistory] })
   async history(@CurrentUser() user: User) {
     return await ChatHistory.find({ where: { user: { id: user.id } }, order: { time: "DESC" } });
+  }
+
+  @Get("overview")
+  @ApiOperation({ summary: "Returns the financial overview for the user based on the specified overview type." })
+  @ApiQuery({
+    name: "type",
+    enum: ChatOverviewType,
+    required: false,
+    description: "The type of overview to retrieve (defaults to 'accounts').",
+  })
+  @ApiOkResponse({ description: "Returns the requested chat overview.", type: ChatOverview })
+  async getOverview(@CurrentUser() user: User, @Query("type") type: ChatOverviewType = ChatOverviewType.accounts) {
+    let status = await ChatOverview.findOne({ where: { user: { id: user.id }, type } });
+
+    if (status) {
+      // Find the last scheduled sync time before NOW using the configured cron schedule
+      const cron = Configuration.providers.simpleFIN.syncFrequency;
+      const interval = cronParser.parse(cron, { currentDate: new Date() });
+      const lastScheduledSyncTime = interval.prev().toDate();
+
+      // If status was generated AFTER the last scheduled sync execution, it is still fresh
+      const isFresh = new Date(status.time).getTime() >= lastScheduledSyncTime.getTime();
+      if (isFresh) return status;
+    }
+
+    // Generate a fresh overview if status doesn't exist or is stale
+    this.logger.debug(`${startCase(type)} overview out of date, regenerating for user ${user.username}`);
+    const model = await this.chatService.getModel(user);
+
+    switch (type) {
+      case ChatOverviewType.holdings:
+        status = await model.generateHoldingsOverview();
+        break;
+      case ChatOverviewType.accounts:
+      default:
+        status = await model.generateDailyOverview();
+        break;
+    }
+
+    return status;
   }
 }

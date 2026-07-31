@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/mobile_more_sheet.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/routes/util/route.dart';
 import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// The bottom navigation used for mobile displays
 class SproutBottomNav extends ConsumerWidget {
@@ -21,17 +23,38 @@ class SproutBottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final apiConfig = ref.watch(secureConfigProvider).value;
+    final userConfig = ref.watch(userConfigProvider).value;
 
-    final otherPrimaryRoutes = authenticatedRoutes.where((r) => r.showInBottomNav && r.path != '/').toList();
-    final dashboardRoute = authenticatedRoutes.firstWhere((r) => r.path == '/');
+    final filteredRoutes = getFilteredRoutes(apiConfig, userConfig);
+    // Separate Dashboard from other candidate routes
+    final dashboardRoute = authenticatedRoutes.firstWhere(
+      (r) => r.path == '/',
+      orElse: () => filteredRoutes.firstWhere((r) => r.path == '/'),
+    );
 
-    // Reconstruct the list to force Dashboard into the center
+    //  Filter candidate routes that have bottom nav priority (bottomNavPriority >= 0)
+    //    and sort them by priority (lowest number = highest priority)
+    final candidateRoutes = filteredRoutes.where((r) => r.path != '/' && r.bottomNavPriority >= 0).toList()
+      ..sort((a, b) => a.bottomNavPriority.compareTo(b.bottomNavPriority));
+
+    // Take the top 4 candidate routes to fill the 4 non-dashboard bottom slots
+    final topRoutes = candidateRoutes.take(4).toList();
+
+    // Construct display items (Exactly 5 items)
+    // Slot 0, Slot 1 -> Left of Dashboard
+    // Center -> Dashboard
+    // Slot 2 -> Right of Dashboard
+    // Slot 3 -> Menu action
     final List<dynamic> displayItems = [
-      ...otherPrimaryRoutes.sublist(0, 2),
-      dashboardRoute, // The Centerpiece
-      ...otherPrimaryRoutes.sublist(2),
-      'MENU_ACTION',
+      if (topRoutes.isNotEmpty) topRoutes[0],
+      if (topRoutes.length > 1) topRoutes[1],
+      dashboardRoute, // Centerpiece
+      if (topRoutes.length > 2) topRoutes[2],
+      'MENU_ACTION', // Slot 4: Menu for overflow
     ];
+
+    final visibleRoutes = displayItems.whereType<SproutRoute>().toList();
 
     // Calculate selection logic based on our new custom order
     int effectiveIndex = 0;
@@ -48,8 +71,10 @@ class SproutBottomNav extends ConsumerWidget {
 
     // If no primary match, check if it's a "More" route to highlight the Menu (last index)
     if (!hasMatch) {
-      final isMoreRoute = authenticatedRoutes.any((r) => !r.showInBottomNav && isRouteMatch(r.path, currentPath));
-      if (isMoreRoute) {
+      final isOverflowRoute = filteredRoutes.any(
+        (r) => !visibleRoutes.contains(r) && isRouteMatch(r.path, currentPath),
+      );
+      if (isOverflowRoute) {
         effectiveIndex = displayItems.length - 1;
         hasMatch = true;
       }

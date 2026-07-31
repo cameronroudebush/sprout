@@ -23,7 +23,7 @@ To generate an `openapi-spec.json`, use the following command:
 npm run export:api:spec
 ```
 
-**Note**: You'll want to run this whenever you make changes to the backend client. This will allow us to update the dart client and any documentation required.
+**Note**: This is automatically generated when the backend is ran in development mode.
 
 # Generate Demo Data
 

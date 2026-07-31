@@ -1883,6 +1883,45 @@
         "tags": ["Chat"]
       }
     },
+    "/chat/overview": {
+      "get": {
+        "operationId": "ChatController_getOverview",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "The type of overview to retrieve (defaults to 'accounts').",
+            "schema": {
+              "enum": ["accounts", "holdings"],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the requested chat overview.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatOverview"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Returns the financial overview for the user based on the specified overview type.",
+        "tags": ["Chat"]
+      }
+    },
     "/holding": {
       "get": {
         "description": "Retrieves all holdings for the authenticated user within a specified account.",
@@ -3080,9 +3119,9 @@
       "APIConfig": {
         "type": "object",
         "properties": {
-          "chatKeyProvidedInBackend": {
+          "chatEnabled": {
             "type": "boolean",
-            "description": "Determines if the chat key is already provided and users shouldn't be able to set theirs then."
+            "description": "Determines if the chat capability is enabled."
           },
           "emailEnabled": {
             "type": "boolean",
@@ -3101,7 +3140,7 @@
             ]
           }
         },
-        "required": ["chatKeyProvidedInBackend", "emailEnabled", "tiles"]
+        "required": ["chatEnabled", "emailEnabled", "tiles"]
       },
       "DemoCredentials": {
         "type": "object",
@@ -3208,10 +3247,6 @@
             "type": "string",
             "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
           },
-          "geminiKey": {
-            "type": "string",
-            "description": "This property defines the Gemini API token for LLM use."
-          },
           "secureMode": {
             "type": "boolean",
             "description": "If we should require biometrics to view the app and if we should hide the app in the background"
@@ -3219,9 +3254,23 @@
           "allowWidgets": {
             "type": "boolean",
             "description": "If we should allow widgets to be rendered with real data from Sprout. You will have to open the app at least once."
+          },
+          "includeAICapabilities": {
+            "type": "boolean",
+            "description": "If the user wants to see AI powered stats and ideas."
           }
         },
-        "required": ["id", "netWorthRange", "emailUpdateFrequency", "themeStyle", "currency", "privateMode", "secureMode", "allowWidgets"]
+        "required": [
+          "id",
+          "netWorthRange",
+          "emailUpdateFrequency",
+          "themeStyle",
+          "currency",
+          "privateMode",
+          "secureMode",
+          "allowWidgets",
+          "includeAICapabilities"
+        ]
       },
       "User": {
         "type": "object",
@@ -3936,7 +3985,7 @@
             "description": "The message to send to the AI"
           },
           "timeframe": {
-            "enum": ["threeMonths", "sixMonths", "oneYear"],
+            "enum": ["oneDay", "threeMonths", "sixMonths", "oneYear"],
             "type": "string",
             "description": "The historical timeframe to include in context.",
             "default": "threeMonths"
@@ -3970,6 +4019,33 @@
           }
         },
         "required": ["id", "role", "time", "text", "isThinking"]
+      },
+      "ChatOverviewTypeEnum": {
+        "type": "string",
+        "enum": ["accounts", "holdings"]
+      },
+      "ChatOverview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChatOverviewTypeEnum"
+              }
+            ]
+          },
+          "time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "type", "time", "text"]
       },
       "Holding": {
         "type": "object",

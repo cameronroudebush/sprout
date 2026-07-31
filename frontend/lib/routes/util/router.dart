@@ -34,6 +34,8 @@ class RouterNotifier extends ChangeNotifier {
     _ref.listen(authProvider, (_, __) => notifyListeners());
     _ref.listen(unsecureConfigProvider, (_, __) => notifyListeners());
     _ref.listen(biometricsProvider, (_, __) => notifyListeners());
+    _ref.listen(secureConfigProvider, (_, __) => notifyListeners());
+    _ref.listen(userConfigProvider, (_, __) => notifyListeners());
   }
 }
 
@@ -134,23 +136,31 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 String? _authRedirect(Ref ref, GoRouterState state) {
-  final splashAsync = ref.read(sproutSplashManagerProvider);
   final currentPath = state.uri.path;
 
-  if (splashAsync.isLoading) {
-    if (_intendedPath == null && currentPath != '/loading') {
+  // Read all relevant states
+  final splashAsync = ref.read(sproutSplashManagerProvider);
+  final authState = ref.read(authProvider);
+  final connUrlState = ref.read(connectionUrlProvider);
+  final apiConfigState = ref.read(secureConfigProvider);
+  final userConfigState = ref.read(userConfigProvider);
+
+  // Determine if we are still waiting for core providers
+  final isCoreLoading = splashAsync.isLoading || authState.isLoading || connUrlState.isLoading;
+
+  // Determine if the user is logged in (so we know if user configs matter)
+  final isLoggedIn = authState.value != null;
+
+  // If logged in, we MUST wait for their configurations to finish loading
+  final isConfigLoading = isLoggedIn && (apiConfigState.isLoading || userConfigState.isLoading);
+
+  if (isCoreLoading || isConfigLoading) {
+    if (_intendedPath == null && currentPath != '/loading' && currentPath != '/login' && currentPath != '/locked') {
       _intendedPath = state.uri.toString();
     }
     return currentPath == '/loading' ? null : '/loading';
   }
 
-  final connUrlState = ref.read(connectionUrlProvider);
-  final authState = ref.read(authProvider);
-
-  if (authState.isLoading) return null; // Wait for auth/config
-
-  // Connection URL Check
-  if (connUrlState.isLoading) return null;
   if (connUrlState.value == null || connUrlState.value!.isEmpty) return '/connection/setup';
 
   // Server Connection Check
@@ -161,12 +171,19 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   if (ref.read(authProvider.notifier).isSetupMode) return '/setup';
 
   // Authentication Logic
-  final bioState = ref.read(biometricsProvider);
-  final isLoggedIn = authState.value != null;
+  final isGoingToLogin = currentPath == '/login';
+  if (!isLoggedIn) {
+    // If not logged in and not on login page, send to login
+    return isGoingToLogin ? null : '/login';
+  }
+
+  // We now safely know configurations are fully loaded
+  final apiConfig = apiConfigState.value;
+  final userConfig = userConfigState.value;
 
   // Check biometric lock state
-  final userConfigAsync = ref.read(userConfigProvider);
-  final secureModeEnabled = userConfigAsync.value?.secureMode ?? false;
+  final bioState = ref.read(biometricsProvider);
+  final secureModeEnabled = userConfig?.secureMode ?? false;
   final needsBioCheck = !kIsWeb && secureModeEnabled && isLoggedIn;
 
   if (needsBioCheck && bioState.isLocked) {
@@ -176,13 +193,25 @@ String? _authRedirect(Ref ref, GoRouterState state) {
     return currentPath == '/locked' ? null : '/locked';
   }
 
-  final isGoingToLogin = currentPath == '/login';
+  // Get the routes this specific user is allowed to see
+  final allowedRoutes = getFilteredRoutes(
+    apiConfig,
+    userConfig,
+    routes: authenticatedRoutes,
+    restrictToSidebar: false,
+  );
 
-  if (!isLoggedIn) {
-    // If not logged in and not on login page, send to login
-    return isGoingToLogin ? null : '/login';
+  // See if this path is an authenticated route, and if so, if they are allowed on it
+  final isKnownAuthRoute = isPathInRoutes(currentPath, authenticatedRoutes);
+  final isAllowedForUser = isPathInRoutes(currentPath, allowedRoutes);
+
+  // If they try to access a route they don't have access to, go back to root
+  if (isKnownAuthRoute && !isAllowedForUser) {
+    _intendedPath = null;
+    return '/';
   }
 
+  // Restore Intended Path
   if (_intendedPath != null) {
     final target = _intendedPath!;
     _intendedPath = null;
