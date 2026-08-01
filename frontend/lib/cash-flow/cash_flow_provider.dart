@@ -96,3 +96,11 @@ Future<Map<int, double>> dailySpending(Ref ref, {required int month, required in
   if (response == null || response.spending.isEmpty) return {};
   return {for (final item in response.spending) item.day.toInt(): item.amount.toDouble()};
 }
+
+/// Provides loan amortization for loan accounts
+@Riverpod(keepAlive: true)
+Future<List<LoanAmortizationSeries>?> loanAmortizationProjections(Ref ref) async {
+  ref.refreshOnForceUpdate();
+  final api = await ref.watch(cashFlowApiProvider.future);
+  return await api.cashFlowControllerGetAmortization();
+}

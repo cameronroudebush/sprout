@@ -715,3 +715,48 @@ final class DailySpendingFamily extends $Family
   @override
   String toString() => r'dailySpendingProvider';
 }
+
+/// Provides loan amortization for loan accounts
+
+@ProviderFor(loanAmortizationProjections)
+final loanAmortizationProjectionsProvider =
+    LoanAmortizationProjectionsProvider._();
+
+/// Provides loan amortization for loan accounts
+
+final class LoanAmortizationProjectionsProvider extends $FunctionalProvider<
+        AsyncValue<List<LoanAmortizationSeries>?>,
+        List<LoanAmortizationSeries>?,
+        FutureOr<List<LoanAmortizationSeries>?>>
+    with
+        $FutureModifier<List<LoanAmortizationSeries>?>,
+        $FutureProvider<List<LoanAmortizationSeries>?> {
+  /// Provides loan amortization for loan accounts
+  LoanAmortizationProjectionsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'loanAmortizationProjectionsProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$loanAmortizationProjectionsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LoanAmortizationSeries>?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LoanAmortizationSeries>?> create(Ref ref) {
+    return loanAmortizationProjections(ref);
+  }
+}
+
+String _$loanAmortizationProjectionsHash() =>
+    r'4a260f88afceb0b4166fbe354820484937d6f746';

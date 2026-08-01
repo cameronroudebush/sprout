@@ -242,6 +242,8 @@ class ApiClient {
           return Institution.fromJson(value);
         case 'InstitutionIconType':
           return InstitutionIconTypeTypeTransformer().decode(value);
+        case 'LoanAmortizationSeries':
+          return LoanAmortizationSeries.fromJson(value);
         case 'MajorIndexTimelineDto':
           return MajorIndexTimelineDto.fromJson(value);
         case 'MajorIndexTimelinePoint':

@@ -1,13 +1,15 @@
+import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { DailySpendingCalendarResponseDTO, DailySpendingItem } from "@backend/cash-flow/model/api/daily.spending.dto";
+import { LoanAmortizationSeries } from "@backend/cash-flow/model/api/loan.amortization";
 import { Category } from "@backend/category/model/category.model";
 import { HistoricalDataPoint } from "@backend/net-worth/model/api/entity.history.dto";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { endOfDay, endOfMonth, endOfYear, format, startOfDay, startOfMonth, startOfYear, subMonths } from "date-fns";
-import { Between, FindOperator, FindOptionsWhere, In } from "typeorm";
+import { Between, FindOperator, FindOptionsWhere, In, IsNull, MoreThan, Not } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
 import { Colors } from "./model/colors";
@@ -337,5 +339,88 @@ export class CashFlowService {
       if (netFlow !== 0) items.push(new DailySpendingItem(d, netFlow));
     }
     return new DailySpendingCalendarResponseDTO(items);
+  }
+
+  /**
+   * Projects future amortization charts for the user's active loan accounts.
+   */
+  async getLoanAmortizationProjections(user: User): Promise<LoanAmortizationSeries[]> {
+    const loanAccounts = await Account.find({
+      where: {
+        user: { id: user.id },
+        type: AccountType.loan,
+        interestRate: Not(IsNull()),
+      },
+    });
+
+    const results: LoanAmortizationSeries[] = [];
+    const now = new Date();
+
+    for (const account of loanAccounts) {
+      let balance = account.balance;
+      if (balance >= 0) continue;
+      const apr = account.interestRate!;
+      const monthlyRate = apr / 100 / 12;
+      // Fetch account history to determine true historical principal reduction
+      const twoMonthsAgo = subMonths(new Date(), 2);
+      const histories = await AccountHistory.find({
+        where: {
+          account: { id: account.id },
+          time: MoreThan(twoMonthsAgo),
+        },
+        order: { time: "DESC" },
+      });
+      let netMonthlyPayment = 0;
+      if (histories.length > 0) {
+        // Group by Year-Month and take the last recorded balance of each month
+        const monthlyBalances = new Map<string, number>();
+        for (const history of histories) {
+          const date = new Date(history.time);
+          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          if (!monthlyBalances.has(monthKey)) monthlyBalances.set(monthKey, history.balance);
+        }
+        // Sort chronologically (oldest to newest) to step through the balance changes
+        const sortedMonths = Array.from(monthlyBalances.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+        const calculatedPayments: number[] = [];
+
+        for (let i = 1; i < sortedMonths.length; i++) {
+          const prevBalance = sortedMonths[i - 1]![1];
+          const currBalance = sortedMonths[i]![1];
+          const monthlyInterest = prevBalance * monthlyRate;
+          const inferredPayment = currBalance - prevBalance - monthlyInterest;
+          // Only count positive payments
+          if (inferredPayment > 0) calculatedPayments.push(inferredPayment);
+        }
+
+        // Average the inferred true payments
+        if (calculatedPayments.length > 0) {
+          const totalCalculated = calculatedPayments.reduce((sum, amt) => sum + amt, 0);
+          netMonthlyPayment = totalCalculated / calculatedPayments.length;
+        }
+      }
+
+      // If we have no monthly payment, don't even include it
+      if (netMonthlyPayment <= 0) continue;
+
+      const dataPoints: HistoricalDataPoint[] = [];
+      dataPoints.push(new HistoricalDataPoint(new Date(now), balance));
+
+      let currentMonth = new Date(now);
+      let monthsToPayOff = 0;
+      const MAX_PROJECTION_MONTHS = 600; // Protect against infinite loops. Loans shouldn't last more than 50 years
+      // Project the amortization curve
+      while (balance < 0 && monthsToPayOff < MAX_PROJECTION_MONTHS) {
+        currentMonth = new Date(currentMonth.setMonth(currentMonth.getMonth() + 1));
+        const interestCharge = balance * monthlyRate;
+        balance = balance + interestCharge + netMonthlyPayment;
+        if (balance > 0) balance = 0;
+        dataPoints.push(new HistoricalDataPoint(new Date(currentMonth), balance));
+        monthsToPayOff++;
+      }
+      results.push(
+        new LoanAmortizationSeries(account.id, account.name, monthsToPayOff, netMonthlyPayment, Colors.getColorForFeature(account.name), dataPoints),
+      );
+    }
+    return results;
   }
 }

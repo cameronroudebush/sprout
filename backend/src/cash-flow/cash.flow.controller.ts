@@ -1,5 +1,6 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { DailySpendingCalendarResponseDTO } from "@backend/cash-flow/model/api/daily.spending.dto";
+import { LoanAmortizationSeries } from "@backend/cash-flow/model/api/loan.amortization";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Get, ParseIntPipe, Query } from "@nestjs/common";
@@ -157,5 +158,15 @@ export class CashFlowController {
   @ApiQuery({ name: "month", required: true, type: Number })
   async getDailyCalendarSpending(@CurrentUser() user: User, @Query("year", ParseIntPipe) year: number, @Query("month", ParseIntPipe) month: number) {
     return await this.cashFlowService.getDailySpendingMap(user, year, month);
+  }
+
+  @Get("amortization")
+  @ApiOperation({
+    summary: "Get loan amortization projections.",
+    description: "Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.",
+  })
+  @ApiOkResponse({ type: LoanAmortizationSeries, isArray: true })
+  async getAmortization(@CurrentUser() user: User) {
+    return await this.cashFlowService.getLoanAmortizationProjections(user);
   }
 }

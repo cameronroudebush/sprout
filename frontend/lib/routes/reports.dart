@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_amortization.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_sankey.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
@@ -13,7 +14,9 @@ import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 
-enum DetailChartType { sankey, pie, spending }
+enum MacroChartType { trend, debt }
+
+enum PeriodChartType { sankey, pie, spending }
 
 /// This page gives the user the ability to track habits over time and generate more useful data reports based on them
 class ReportsPage extends ConsumerStatefulWidget {
@@ -26,7 +29,9 @@ class ReportsPage extends ConsumerStatefulWidget {
 class _ReportsPageState extends ConsumerState<ReportsPage> {
   late DateTime _selectedDate;
   CashFlowView _currentView = CashFlowView.monthly;
-  DetailChartType _currentDetailChart = DetailChartType.sankey;
+
+  MacroChartType _currentMacroChart = MacroChartType.trend;
+  PeriodChartType _currentPeriodChart = PeriodChartType.sankey;
 
   @override
   void initState() {
@@ -56,30 +61,74 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     return SingleChildScrollView(
       child: SproutRouteWrapper(
         size: SproutRouteSize.large,
+        child: SproutLayoutBuilder(
+          (isDesktop, context, constraints) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 0,
+              children: [
+                _buildMacroSection(theme, isDesktop),
+                _buildPeriodSection(theme, isDesktop),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Long-term Workspace (No Date Selector)
+  Widget _buildMacroSection(ThemeData theme, bool isDesktop) {
+    return SproutCard(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SproutLayoutBuilder(
-              (isDesktop, context, constraints) {
-                return SproutCard(
-                  child: SizedBox(
-                    height: 250,
-                    child: CashFlowTrendChart(
-                      barCount: isDesktop ? 10 : 6,
-                    ),
-                  ),
-                );
+            SegmentedButton<MacroChartType>(
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
+              segments: const [
+                ButtonSegment(
+                  value: MacroChartType.trend,
+                  label: Text('Cash Flow Trend'),
+                  icon: Icon(Icons.bar_chart),
+                ),
+                ButtonSegment(
+                  value: MacroChartType.debt,
+                  label: Text('Loan Projections'),
+                  icon: Icon(Icons.account_balance_wallet),
+                ),
+              ],
+              selected: {_currentMacroChart},
+              onSelectionChanged: (Set<MacroChartType> newSelection) {
+                setState(() {
+                  _currentMacroChart = newSelection.first;
+                });
               },
             ),
-            _buildMicroDetailSection(theme),
+            // Render active macro chart
+            if (_currentMacroChart == MacroChartType.trend)
+              SizedBox(
+                height: 250,
+                child: CashFlowTrendChart(
+                  barCount: isDesktop ? 10 : 6,
+                ),
+              )
+            else
+              SizedBox(
+                height: 250,
+                child: const CashFlowLoanAmortizationChart(),
+              ),
           ],
         ),
       ),
     );
   }
 
-  /// Monthly Workspace with Switcher
-  Widget _buildMicroDetailSection(ThemeData theme) {
+  /// Monthly/Yearly Workspace with Switcher
+  Widget _buildPeriodSection(ThemeData theme, bool isDesktop) {
     return SproutCard(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -101,110 +150,74 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
               onMonthIncrementChanged: _changeMonth,
               onYearChanged: _changeYear,
             ),
-
             const Divider(),
 
-            // Three-option unified SegmentedButton selector tracker module mapping interface
-            SegmentedButton<DetailChartType>(
+            SegmentedButton<PeriodChartType>(
               style: SegmentedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
               ),
               segments: const [
                 ButtonSegment(
-                  value: DetailChartType.sankey,
+                  value: PeriodChartType.sankey,
                   label: Text('Sankey'),
                   icon: Icon(Icons.account_tree_outlined),
                 ),
                 ButtonSegment(
-                  value: DetailChartType.pie,
+                  value: PeriodChartType.pie,
                   label: Text('Pie'),
                   icon: Icon(Icons.pie_chart_outline),
                 ),
                 ButtonSegment(
-                  value: DetailChartType.spending,
+                  value: PeriodChartType.spending,
                   label: Text('Line'),
                   icon: Icon(Icons.trending_up),
                 ),
               ],
-              selected: {_currentDetailChart},
-              onSelectionChanged: (Set<DetailChartType> newSelection) {
+              selected: {_currentPeriodChart},
+              onSelectionChanged: (Set<PeriodChartType> newSelection) {
                 setState(() {
-                  _currentDetailChart = newSelection.first;
+                  _currentPeriodChart = newSelection.first;
                 });
               },
             ),
-
-            // Render the selected chart type
-            _buildActiveDetailChart(theme),
+            // Render the selected period chart
+            _buildActivePeriodChart(theme, isDesktop),
           ],
         ),
       ),
     );
   }
 
-  /// Renders only the chart the user has selected, respecting desktop side-by-side design constraints
-  Widget _buildActiveDetailChart(ThemeData theme) {
+  /// Renders only the period chart the user has selected
+  Widget _buildActivePeriodChart(ThemeData theme, bool isDesktop) {
     final month = _currentView == CashFlowView.monthly ? _selectedDate.month : null;
     final year = _selectedDate.year;
     final dateForCharts = DateTime(year, month ?? 1);
 
-    return SproutLayoutBuilder(
-      (isDesktop, context, constraints) {
-        switch (_currentDetailChart) {
-          case DetailChartType.sankey:
-            return CashFlowSankeyChart(
-              selectedDate: _selectedDate,
-              view: _currentView,
-            );
-          case DetailChartType.spending:
-            return SizedBox(
-              height: isDesktop ? 350 : 300,
-              child: SpendingCompareChart(
-                view: _currentView,
-                selectedDate: _selectedDate,
-              ),
-            );
-          case DetailChartType.pie:
-            if (isDesktop) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 300,
-                      child: CategoryPieChart(
-                        dateForCharts,
-                        view: _currentView,
-                        legendPosition: SproutChartLegendPosition.left,
-                        header: const SproutChartHeader(
-                          title: "Expense Categories",
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: SizedBox(
-                      height: 300,
-                      child: CashFlowPieChart(
-                        dateForCharts,
-                        view: _currentView,
-                        showSubheader: true,
-                        legendPosition: SproutChartLegendPosition.none,
-                        header: const SproutChartHeader(
-                          title: "Cash Flow",
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
+    switch (_currentPeriodChart) {
+      case PeriodChartType.sankey:
+        return CashFlowSankeyChart(
+          selectedDate: _selectedDate,
+          view: _currentView,
+        );
 
-            return Column(
-              spacing: 4,
-              children: [
-                SizedBox(
+      case PeriodChartType.spending:
+        return SizedBox(
+          height: isDesktop ? 350 : 300,
+          child: SpendingCompareChart(
+            view: _currentView,
+            selectedDate: _selectedDate,
+          ),
+        );
+
+      case PeriodChartType.pie:
+        if (isDesktop) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              Expanded(
+                child: SizedBox(
                   height: 300,
                   child: CategoryPieChart(
                     dateForCharts,
@@ -215,7 +228,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     ),
                   ),
                 ),
-                SizedBox(
+              ),
+              Expanded(
+                child: SizedBox(
                   height: 300,
                   child: CashFlowPieChart(
                     dateForCharts,
@@ -227,10 +242,39 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     ),
                   ),
                 ),
-              ],
-            );
+              ),
+            ],
+          );
         }
-      },
-    );
+
+        return Column(
+          spacing: 16,
+          children: [
+            SizedBox(
+              height: 300,
+              child: CategoryPieChart(
+                dateForCharts,
+                view: _currentView,
+                legendPosition: SproutChartLegendPosition.left,
+                header: const SproutChartHeader(
+                  title: "Expense Categories",
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 300,
+              child: CashFlowPieChart(
+                dateForCharts,
+                view: _currentView,
+                showSubheader: true,
+                legendPosition: SproutChartLegendPosition.none,
+                header: const SproutChartHeader(
+                  title: "Cash Flow",
+                ),
+              ),
+            ),
+          ],
+        );
+    }
   }
 }

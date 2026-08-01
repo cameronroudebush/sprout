@@ -418,7 +418,7 @@ class SproutLineChart extends StatelessWidget {
               final dateHeader = !showDateInTooltip
                   ? ""
                   : barSpot == sortedSpots.first
-                      ? '${DateFormat('MMM dd').format(date)}\n'
+                      ? '${DateFormat(ChartRangeUtility.getDateFormat(chartRange)).format(date)}\n'
                       : '';
 
               final seriesLabel = '${currentSeries.label}: ';

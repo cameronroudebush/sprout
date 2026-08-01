@@ -42,6 +42,8 @@ class ChartRangeUtility {
       case ChartRangeEnum.oneDay:
       case ChartRangeEnum.sevenDays:
         return 'EEE';
+      case ChartRangeEnum.allTime:
+        return "MMM yyyy";
       case ChartRangeEnum.oneMonth:
       case ChartRangeEnum.threeMonths:
       default:

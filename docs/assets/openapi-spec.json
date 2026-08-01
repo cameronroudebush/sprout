@@ -2667,6 +2667,38 @@
         "tags": ["Cash Flow"]
       }
     },
+    "/cash-flow/amortization": {
+      "get": {
+        "description": "Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.",
+        "operationId": "CashFlowController_getAmortization",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LoanAmortizationSeries"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get loan amortization projections.",
+        "tags": ["Cash Flow"]
+      }
+    },
     "/account/{id}": {
       "get": {
         "description": "Retrieves an account by the given ID.",
@@ -4483,6 +4515,39 @@
           }
         },
         "required": ["spending"]
+      },
+      "LoanAmortizationSeries": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "The ID of the loan account."
+          },
+          "accountName": {
+            "type": "string",
+            "description": "The name of the loan account."
+          },
+          "monthsToPayOff": {
+            "type": "number",
+            "description": "The projected months until the loan is fully paid off."
+          },
+          "monthlyPayment": {
+            "type": "number",
+            "description": "The estimated monthly payment based on the transactions."
+          },
+          "color": {
+            "type": "string",
+            "description": "Color to display with this line series"
+          },
+          "dataPoints": {
+            "description": "The monthly balance projection data points.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          }
+        },
+        "required": ["accountId", "accountName", "monthsToPayOff", "monthlyPayment", "color", "dataPoints"]
       },
       "AccountEditRequest": {
         "type": "object",

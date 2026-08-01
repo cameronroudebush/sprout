@@ -16,6 +16,57 @@ class CashFlowApi {
 
   final ApiClient apiClient;
 
+  /// Get loan amortization projections.
+  ///
+  /// Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> cashFlowControllerGetAmortizationWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/cash-flow/amortization';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get loan amortization projections.
+  ///
+  /// Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.
+  Future<List<LoanAmortizationSeries>?> cashFlowControllerGetAmortization() async {
+    final response = await cashFlowControllerGetAmortizationWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<LoanAmortizationSeries>') as List)
+        .cast<LoanAmortizationSeries>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
   /// Get spending progression over time for comparison.
   ///
   /// Note: This method returns the HTTP [Response].

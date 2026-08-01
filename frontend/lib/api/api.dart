@@ -77,6 +77,7 @@ part 'model/historical_data_point.dart';
 part 'model/holding.dart';
 part 'model/institution.dart';
 part 'model/institution_icon_type.dart';
+part 'model/loan_amortization_series.dart';
 part 'model/major_index_timeline_dto.dart';
 part 'model/major_index_timeline_point.dart';
 part 'model/market_index_dto.dart';
