@@ -23,7 +23,7 @@ To generate an `openapi-spec.json`, use the following command:
 npm run export:api:spec
 ```
 
-**Note**: This is automatically generated when the backend is ran in development mode.
+**Note**: This is automatically generated when the backend is ran in development mode. You can then use something like `npm run api:generate:dart`.
 
 # Generate Demo Data
 
