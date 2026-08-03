@@ -10,6 +10,7 @@ import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// The form used within the login page that separates the login inputs from the overall rendering
 class LoginForm extends ConsumerStatefulWidget {
@@ -74,13 +75,20 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           : await authNotifier.login(_usernameController.text.trim(), _passwordController.text.trim());
 
       if (user == null) {
-        setState(() => _errorMessage = failedLoginMessage);
+        setState(() {
+          _errorMessage = failedLoginMessage;
+          _isActionRunning = false;
+        });
+      } else {
+        ref.invalidate(secureConfigProvider);
+        ref.invalidate(userConfigProvider);
       }
     } catch (e) {
       final msg = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
-      setState(() => _errorMessage = msg);
-    } finally {
-      if (mounted) setState(() => _isActionRunning = false);
+      setState(() {
+        _errorMessage = msg;
+        _isActionRunning = false;
+      });
     }
   }
 
@@ -88,17 +96,23 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final configState = ref.watch(unsecureConfigProvider);
-    final authState = ref.watch(authProvider);
     final config = ref.watch(unsecureConfigProvider).value;
     final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
+
+    // Watch auth and post-login configurations to sync with the router's loading state
+    final authState = ref.watch(authProvider);
+    final secureConfigState = ref.watch(secureConfigProvider);
+    final userConfigState = ref.watch(userConfigProvider);
 
     if (isDemoMode) {
       _usernameController.text = config!.demoMode!.username;
       _passwordController.text = config.demoMode!.password;
     }
 
-    // If Auth is currently performing the initial background check
+    // Determine all our possible loading states
     final isInitializing = authState.isLoading && !authState.hasValue;
+    final isConfigLoading = authState.value != null && (secureConfigState.isLoading || userConfigState.isLoading);
+    final isBusy = _isActionRunning || isInitializing || isConfigLoading;
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       return SizedBox(
@@ -138,15 +152,17 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                               controller: _usernameController,
                               decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
                               autofillHints: const [AutofillHints.username],
-                              enabled: !isDemoMode,
+                              enabled: !isDemoMode && !isBusy, // Optional: disable inputs while loading
                             ),
                             TextField(
                               controller: _passwordController,
                               decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
                               obscureText: true,
                               autofillHints: const [AutofillHints.password],
-                              onSubmitted: (_) => _handleLogin(),
-                              enabled: !isDemoMode,
+                              onSubmitted: (_) {
+                                if (!isBusy) _handleLogin();
+                              },
+                              enabled: !isDemoMode && !isBusy,
                             ),
                           ],
                         ),
@@ -155,18 +171,18 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                       width: 240,
                       child: FilledButton(
                         style: ThemeHelpers.primaryButton,
-                        onPressed: (_isActionRunning || isInitializing) ? null : _handleLogin,
+                        onPressed: isBusy ? null : _handleLogin,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 12,
                           children: [
-                            if (_isActionRunning || isInitializing)
+                            if (isBusy)
                               const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
                             Text(
                               isInitializing
                                   ? "Checking Session..."
-                                  : isOIDC
-                                      ? "Login"
+                                  : isConfigLoading
+                                      ? "Loading Workspace..."
                                       : "Login",
                             ),
                           ],

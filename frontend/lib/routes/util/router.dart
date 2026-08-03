@@ -148,16 +148,29 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   // Determine if we are still waiting for core providers
   final isCoreLoading = splashAsync.isLoading || authState.isLoading || connUrlState.isLoading;
 
-  // Determine if the user is logged in (so we know if user configs matter)
+  // Determine if the user is logged in
   final isLoggedIn = authState.value != null;
 
-  // If logged in, we MUST wait for their configurations to finish loading
-  final isConfigLoading = isLoggedIn && (apiConfigState.isLoading || userConfigState.isLoading);
+  // If logged in, we MUST wait for their configurations to finish loading or refreshing
+  final isConfigLoading = isLoggedIn &&
+      (apiConfigState.isLoading ||
+          apiConfigState.isRefreshing ||
+          userConfigState.isLoading ||
+          userConfigState.isRefreshing ||
+          (!apiConfigState.hasValue && !apiConfigState.hasError) ||
+          (!userConfigState.hasValue && !userConfigState.hasError));
 
   if (isCoreLoading || isConfigLoading) {
     if (_intendedPath == null && currentPath != '/loading' && currentPath != '/login' && currentPath != '/locked') {
       _intendedPath = state.uri.toString();
     }
+
+    // If we are currently on the login page and the initial app boot (splash) is finished,
+    // stay on the login page so its own spinner can show while configs load.
+    if (currentPath == '/login' && !splashAsync.isLoading) {
+      return null;
+    }
+
     return currentPath == '/loading' ? null : '/loading';
   }
 
