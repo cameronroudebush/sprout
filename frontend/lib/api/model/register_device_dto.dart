@@ -13,12 +13,22 @@ part of openapi.api;
 class RegisterDeviceDto {
   /// Returns a new [RegisterDeviceDto] instance.
   RegisterDeviceDto({
-    required this.token,
+    required this.deviceId,
+    this.token,
     this.platform,
     this.deviceName,
   });
 
-  String token;
+  /// Unique device ID
+  String deviceId;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? token;
 
   RegisterDeviceDtoPlatformEnum? platform;
 
@@ -32,6 +42,7 @@ class RegisterDeviceDto {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RegisterDeviceDto &&
+    other.deviceId == deviceId &&
     other.token == token &&
     other.platform == platform &&
     other.deviceName == deviceName;
@@ -39,16 +50,22 @@ class RegisterDeviceDto {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (token.hashCode) +
+    (deviceId.hashCode) +
+    (token == null ? 0 : token!.hashCode) +
     (platform == null ? 0 : platform!.hashCode) +
     (deviceName == null ? 0 : deviceName!.hashCode);
 
   @override
-  String toString() => 'RegisterDeviceDto[token=$token, platform=$platform, deviceName=$deviceName]';
+  String toString() => 'RegisterDeviceDto[deviceId=$deviceId, token=$token, platform=$platform, deviceName=$deviceName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'deviceId'] = this.deviceId;
+    if (this.token != null) {
       json[r'token'] = this.token;
+    } else {
+      json[r'token'] = null;
+    }
     if (this.platform != null) {
       json[r'platform'] = this.platform;
     } else {
@@ -73,13 +90,14 @@ class RegisterDeviceDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'token'), 'Required key "RegisterDeviceDto[token]" is missing from JSON.');
-        assert(json[r'token'] != null, 'Required key "RegisterDeviceDto[token]" has a null value in JSON.');
+        assert(json.containsKey(r'deviceId'), 'Required key "RegisterDeviceDto[deviceId]" is missing from JSON.');
+        assert(json[r'deviceId'] != null, 'Required key "RegisterDeviceDto[deviceId]" has a null value in JSON.');
         return true;
       }());
 
       return RegisterDeviceDto(
-        token: mapValueOfType<String>(json, r'token')!,
+        deviceId: mapValueOfType<String>(json, r'deviceId')!,
+        token: mapValueOfType<String>(json, r'token'),
         platform: RegisterDeviceDtoPlatformEnum.fromJson(json[r'platform']),
         deviceName: mapValueOfType<String>(json, r'deviceName'),
       );
@@ -129,7 +147,7 @@ class RegisterDeviceDto {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'token',
+    'deviceId',
   };
 }
 

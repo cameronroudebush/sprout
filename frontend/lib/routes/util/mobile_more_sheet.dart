@@ -25,9 +25,10 @@ class SproutMoreSheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final user = ref.watch(authProvider).value;
     final apiConfig = ref.watch(secureConfigProvider).value;
+    final unsecureConfig = ref.watch(unsecureConfigProvider).value!;
     final userConfig = ref.watch(userConfigProvider).value;
 
-    final filteredRoutes = getFilteredRoutes(apiConfig, userConfig);
+    final filteredRoutes = getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
     final candidateRoutes = filteredRoutes.where((r) => r.path != '/').toList()
       ..sort((a, b) {
         final aPrio = a.bottomNavPriority >= 0 ? a.bottomNavPriority : double.infinity;

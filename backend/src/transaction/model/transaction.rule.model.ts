@@ -73,12 +73,13 @@ export class TransactionRule extends DatabaseBase {
   @IsOptional()
   accountId?: string;
 
-  constructor(user: User, type: TransactionRuleType, value: string, category?: Category, strict: boolean = false) {
+  constructor(user: User, type: TransactionRuleType, value: string, category?: Category, strict: boolean = false, order = 0) {
     super();
     this.user = user;
     this.type = type;
     this.value = value;
     this.category = category;
     this.strict = strict;
+    this.order = order;
   }
 }

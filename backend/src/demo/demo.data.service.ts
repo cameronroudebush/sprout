@@ -4,6 +4,8 @@ import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
 import { Category } from "@backend/category/model/category.model";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
+import { ChatOverview } from "@backend/chat/model/chat.overview.model";
+import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
 import { Configuration } from "@backend/config/core";
 import { DatabaseService } from "@backend/database/database.service";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
@@ -17,7 +19,7 @@ import { ChartRange } from "@backend/user/model/chart.range.model";
 import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
-import { eachDayOfInterval, subDays } from "date-fns";
+import { addYears, eachDayOfInterval, subDays } from "date-fns";
 import { startCase } from "lodash";
 
 /**
@@ -103,12 +105,13 @@ export class DemoDataService {
     /// Populate all of our data
     const user = await this.createUser();
     const accounts = await this.createAccounts(user);
-    await this.createAccountHistory(accounts, daysToGenerate);
+    const accountHistory = await this.createAccountHistory(accounts, daysToGenerate);
     await this.createTransactions(user, accounts, daysToGenerate);
     await this.populateTransactionRules(user);
     const holdings = await this.createHoldings(accounts);
     await this.createHoldingHistory(holdings, daysToGenerate);
     await this.populateChat(user);
+    await this.populateChatOverviews(user, accounts, accountHistory);
 
     this.logger.log("Demo data population complete!");
   }
@@ -478,14 +481,14 @@ export class DemoDataService {
     const categories = await Category.find({ where: { user: { id: user.id } } });
     const findCat = (name: string) => categories.find((x) => x.name === name);
     await TransactionRule.insertMany([
-      new TransactionRule(user, TransactionRuleType.description, "mcdonalds", findCat("Restaurants")),
-      new TransactionRule(user, TransactionRuleType.description, "shell", findCat("Gas")),
-      new TransactionRule(user, TransactionRuleType.description, "chevron", findCat("Gas")),
-      new TransactionRule(user, TransactionRuleType.description, "netflix", findCat("Subscriptions")),
-      new TransactionRule(user, TransactionRuleType.description, "spotify", findCat("Subscriptions")),
-      new TransactionRule(user, TransactionRuleType.description, "amazon", findCat("Shopping")),
-      new TransactionRule(user, TransactionRuleType.description, "whole foods", findCat("Groceries")),
-      new TransactionRule(user, TransactionRuleType.description, "uber", findCat("Public Transit")),
+      new TransactionRule(user, TransactionRuleType.description, "mcdonalds", findCat("Restaurants"), undefined, 1),
+      new TransactionRule(user, TransactionRuleType.description, "shell", findCat("Gas"), undefined, 2),
+      new TransactionRule(user, TransactionRuleType.description, "chevron", findCat("Gas"), undefined, 3),
+      new TransactionRule(user, TransactionRuleType.description, "netflix", findCat("Subscriptions"), undefined, 4),
+      new TransactionRule(user, TransactionRuleType.description, "spotify", findCat("Subscriptions"), undefined, 5),
+      new TransactionRule(user, TransactionRuleType.description, "amazon", findCat("Shopping"), undefined, 6),
+      new TransactionRule(user, TransactionRuleType.description, "whole foods", findCat("Groceries"), undefined, 7),
+      new TransactionRule(user, TransactionRuleType.description, "uber", findCat("Public Transit"), undefined, 8),
     ]);
   }
 
@@ -548,6 +551,70 @@ export class DemoDataService {
     ];
 
     for (const chat of chats) await chat.insert();
+  }
+
+  /** Populates the overview information for the chats using dynamic account data and passed account history diffs */
+  private async populateChatOverviews(user: User, accounts: Account[], accountHistories: AccountHistory[]) {
+    const logger = new Logger("demo:chat:overview");
+    logger.log(`Inserting sample AI overviews based on passed 1-day history changes.`);
+
+    // Set generation time to next year so background syncs won't overwrite demo overviews
+    const fakeDate = addYears(new Date(), 1);
+
+    // Identify target accounts
+    const investmentAccounts = accounts.filter((acc) => acc.type === AccountType.investment);
+    const checkingAccount = accounts.find((acc) => acc.subType === AccountSubType.checking) || accounts[0];
+
+    const acc1 = investmentAccounts[0] || checkingAccount;
+    const acc2 = investmentAccounts[1] || accounts[1];
+    const acc3 = investmentAccounts[2] || accounts[2];
+
+    // Helper function to calculate deltas and format strings cleanly with full type safety
+    const getDelta = (acc: Account) => {
+      const accHistories = accountHistories.filter((h) => h.account.id === acc.id).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+      const latest = accHistories[0]?.balance ?? acc.balance;
+      const previous = accHistories[1]?.balance ?? latest;
+      const change = latest - previous;
+      const percentChange = previous !== 0 ? (change / Math.abs(previous)) * 100 : 0;
+
+      return {
+        id: acc.id,
+        changeStr: `${change >= 0 ? "+" : "-"}$${Math.abs(change).toFixed(2)}`,
+        percentStr: `${percentChange >= 0 ? "+" : "-"}${Math.abs(percentChange).toFixed(2)}%`,
+      };
+    };
+
+    const d1 = getDelta(acc1!);
+    const d2 = getDelta(acc2!);
+    const d3 = getDelta(acc3!);
+    const dCheck = getDelta(checkingAccount!);
+
+    await ChatOverview.insertMany([
+      new ChatOverview(
+        user,
+        `Your portfolio experienced performance shifts over the last 24 hours across your connected accounts.
+
+          * @${d1.id} changed by ${d1.changeStr}
+          * @${d2.id} changed by ${d2.changeStr}
+
+These changes reflect daily account transactions alongside recent balance fluctuations.`,
+        ChatOverviewType.accounts,
+        fakeDate,
+      ),
+      new ChatOverview(
+        user,
+        `Here is a summary of notable 24-hour balance movements across your portfolio:
+
+        **Notable Holding & Account Shifts:**
+        - **@${d3.id}**: Net shift of ${d3.changeStr} (${d3.percentStr}).
+        - **@${d2.id}**: Net shift of ${d2.changeStr} (${d2.percentStr}).
+        - **@${d1.id}**: Net shift of ${d1.changeStr} (${d1.percentStr}).
+        - **@${dCheck.id}**: Net shift of ${dCheck.changeStr} (${dCheck.percentStr}).`,
+        ChatOverviewType.holdings,
+        fakeDate,
+      ),
+    ]);
   }
 
   /** Creates holdings for investment accounts picked from the given accounts */

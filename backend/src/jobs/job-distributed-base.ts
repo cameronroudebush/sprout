@@ -4,11 +4,14 @@ import { Logger } from "@nestjs/common";
 import { Job, Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 
+/** Each task must contain at least this content so we can track who the task belongs to. */
+export type DefaultTaskPayload = { userId: string };
+
 /**
  * A horizontally scalable background job base class. Automatically uses L2 cache for distributed task processing if enabled,
  * otherwise falls back to an event-driven local memory queue.
  */
-export abstract class DistributedQueueJob<TaskPayload> extends BackgroundJob<any> {
+export abstract class DistributedQueueJob<TaskPayload = DefaultTaskPayload> extends BackgroundJob<any> {
   // L2 properties if enabled from {@link cacheManager}
   private bullQueue?: Queue;
   private bullWorker?: Worker;

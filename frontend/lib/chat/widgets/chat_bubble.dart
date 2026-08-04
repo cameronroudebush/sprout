@@ -11,8 +11,9 @@ import 'package:sprout/user/widgets/user_avatar.dart';
 /// A widget that provides a chat bubble.
 class ChatBubble extends ConsumerWidget {
   final ChatHistory message;
+  final bool displayThinking;
 
-  const ChatBubble({super.key, required this.message});
+  const ChatBubble({super.key, required this.message, this.displayThinking = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,7 +63,9 @@ class ChatBubble extends ConsumerWidget {
                       ),
                     ),
                     child: message.isThinking
-                        ? const TypingIndicator()
+                        ? displayThinking
+                            ? const TypingIndicator()
+                            : const SizedBox.shrink()
                         : ChatMessageContent(
                             text: message.text,
                             isAi: isAi,

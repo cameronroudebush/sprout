@@ -143,6 +143,7 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final authState = ref.read(authProvider);
   final connUrlState = ref.read(connectionUrlProvider);
   final apiConfigState = ref.read(secureConfigProvider);
+  final unsecureConfigState = ref.read(unsecureConfigProvider);
   final userConfigState = ref.read(userConfigProvider);
 
   // Determine if we are still waiting for core providers
@@ -208,6 +209,7 @@ String? _authRedirect(Ref ref, GoRouterState state) {
 
   // Get the routes this specific user is allowed to see
   final allowedRoutes = getFilteredRoutes(
+    unsecureConfigState.value!,
     apiConfig,
     userConfig,
     routes: authenticatedRoutes,

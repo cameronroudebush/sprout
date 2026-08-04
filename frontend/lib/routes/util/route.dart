@@ -15,7 +15,7 @@ class SproutRoute {
   final String? category;
 
   /// Allows you to customize enabled state of a route
-  final bool Function(APIConfig config, UserConfig? userConfig)? enabled;
+  final bool Function(APIConfig secureConfig, UnsecureAppConfiguration unsecureConfig, UserConfig? userConfig)? enabled;
 
   /// Nested child routes
   final List<SproutRoute>? routes;

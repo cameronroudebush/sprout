@@ -9,17 +9,17 @@ export class SyncNotifications {
     externalControlDisabled: true,
   })
   enabled: boolean = true;
-
-  @ConfigurationMetadata.assign({
-    comment: "How often we want to check for to send updated notifications to users for new data.",
-    externalControlDisabled: true,
-  })
-  time: string = "*/15 * * * *";
 }
 
 export class ProvidersConfig {
   @ConfigurationMetadata.assign({ comment: " Controls sending sync notifications for users", externalControlDisabled: true })
   syncNotifications = new SyncNotifications();
+
+  @ConfigurationMetadata.assign({
+    comment: "How often we want to handle the post sync job so we can send notifications or generate data with the freshest finance data handled.",
+    externalControlDisabled: true,
+  })
+  postSyncTime: string = "*/15 * * * *";
 
   @ConfigurationMetadata.assign({ comment: "SimpleFIN configuration: https://www.simplefin.org/" })
   simpleFIN = new SimpleFINConfig();

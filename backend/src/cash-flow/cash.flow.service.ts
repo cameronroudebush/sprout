@@ -355,51 +355,60 @@ export class CashFlowService {
 
     const results: LoanAmortizationSeries[] = [];
     const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     for (const account of loanAccounts) {
       let balance = account.balance;
       if (balance >= 0) continue;
       const apr = account.interestRate!;
       const monthlyRate = apr / 100 / 12;
-      // Fetch account history to determine true historical principal reduction
-      const twoMonthsAgo = subMonths(new Date(), 2);
+      const monthsAgo = subMonths(new Date(), 2);
       const histories = await AccountHistory.find({
         where: {
           account: { id: account.id },
-          time: MoreThan(twoMonthsAgo),
+          time: MoreThan(monthsAgo),
         },
         order: { time: "DESC" },
       });
       let netMonthlyPayment = 0;
       if (histories.length > 0) {
-        // Group by Year-Month and take the last recorded balance of each month
+        // Group by Year-Month. Iterate backward over DESC results to store the latest snapshot per month
         const monthlyBalances = new Map<string, number>();
-        for (const history of histories) {
+        for (let i = histories.length - 1; i >= 0; i--) {
+          const history = histories[i]!;
           const date = new Date(history.time);
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-          if (!monthlyBalances.has(monthKey)) monthlyBalances.set(monthKey, history.balance);
+          monthlyBalances.set(monthKey, history.balance);
         }
-        // Sort chronologically (oldest to newest) to step through the balance changes
+
         const sortedMonths = Array.from(monthlyBalances.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+
+        if (sortedMonths.length > 1 && sortedMonths[sortedMonths.length - 1]![0] === currentMonthKey) {
+          const currentMonthBalance = sortedMonths[sortedMonths.length - 1]![1];
+          const lastMonthBalance = sortedMonths[sortedMonths.length - 2]![1];
+          if (currentMonthBalance <= lastMonthBalance) sortedMonths.pop();
+        }
+
         const calculatedPayments: number[] = [];
 
         for (let i = 1; i < sortedMonths.length; i++) {
           const prevBalance = sortedMonths[i - 1]![1];
           const currBalance = sortedMonths[i]![1];
-          const monthlyInterest = prevBalance * monthlyRate;
-          const inferredPayment = currBalance - prevBalance - monthlyInterest;
-          // Only count positive payments
+
+          // True Total Payment = Principal Paid + Monthly Interest Charge
+          const principalReduction = currBalance - prevBalance;
+          const monthlyInterest = Math.abs(prevBalance) * monthlyRate;
+          const inferredPayment = principalReduction + monthlyInterest;
+
           if (inferredPayment > 0) calculatedPayments.push(inferredPayment);
         }
 
-        // Average the inferred true payments
         if (calculatedPayments.length > 0) {
           const totalCalculated = calculatedPayments.reduce((sum, amt) => sum + amt, 0);
           netMonthlyPayment = totalCalculated / calculatedPayments.length;
         }
       }
 
-      // If we have no monthly payment, don't even include it
       if (netMonthlyPayment <= 0) continue;
 
       const dataPoints: HistoricalDataPoint[] = [];
@@ -407,8 +416,8 @@ export class CashFlowService {
 
       let currentMonth = new Date(now);
       let monthsToPayOff = 0;
-      const MAX_PROJECTION_MONTHS = 600; // Protect against infinite loops. Loans shouldn't last more than 50 years
-      // Project the amortization curve
+      const MAX_PROJECTION_MONTHS = 600;
+
       while (balance < 0 && monthsToPayOff < MAX_PROJECTION_MONTHS) {
         currentMonth = new Date(currentMonth.setMonth(currentMonth.getMonth() + 1));
         const interestCharge = balance * monthlyRate;

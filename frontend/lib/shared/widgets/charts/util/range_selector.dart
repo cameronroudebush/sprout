@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// A compact, reusable selector for chart ranges across the Sprout app.
@@ -28,12 +29,17 @@ class ChartRangeSelector extends ConsumerWidget {
     final selectedRange = userConfig.value?.netWorthRange ?? ChartRangeEnum.oneMonth;
     final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
-    if (large) return _buildLargeVersion(context, ref, selectedRange, isDemoMode);
-    return _buildCompactVersion(context, ref, selectedRange, isDemoMode);
+    return SproutLayoutBuilder(
+      (isDesktop, context, constraints) {
+        if (large) return _buildLargeVersion(context, ref, selectedRange, isDemoMode, isDesktop);
+        return _buildCompactVersion(context, ref, selectedRange, isDemoMode, isDesktop);
+      },
+    );
   }
 
   /// The compact popup menu version
-  Widget _buildCompactVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode) {
+  Widget _buildCompactVersion(
+      BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode, bool isDesktop) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -51,7 +57,7 @@ class ChartRangeSelector extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              ChartRangeUtility.asPretty(selectedRange),
+              ChartRangeUtility.asPretty(selectedRange, useExtendedPeriodString: isDesktop),
               style: theme.textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSecondaryContainer,
               ),
@@ -74,7 +80,7 @@ class ChartRangeSelector extends ConsumerWidget {
             children: [
               if (isSelected) Icon(Icons.check, size: 16, color: colorScheme.primary) else const SizedBox(width: 16),
               Text(
-                ChartRangeUtility.asPretty(range),
+                ChartRangeUtility.asPretty(range, useExtendedPeriodString: isDesktop),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: isSelected ? colorScheme.primary : colorScheme.onSurface,
                 ),
@@ -87,7 +93,8 @@ class ChartRangeSelector extends ConsumerWidget {
   }
 
   /// Builds a large version of the selection range that acts as a row using SegmentedButton
-  Widget _buildLargeVersion(BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode) {
+  Widget _buildLargeVersion(
+      BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode, bool isDesktop) {
     final theme = Theme.of(context);
 
     return SizedBox(
@@ -97,7 +104,8 @@ class ChartRangeSelector extends ConsumerWidget {
         segments: ChartRangeEnum.values.map((range) {
           return ButtonSegment<ChartRangeEnum>(
             value: range,
-            label: Text(ChartRangeUtility.asPretty(range), style: const TextStyle(fontSize: 12)),
+            label: Text(ChartRangeUtility.asPretty(range, useExtendedPeriodString: isDesktop),
+                style: const TextStyle(fontSize: 12)),
           );
         }).toList(),
         selected: {selectedRange},

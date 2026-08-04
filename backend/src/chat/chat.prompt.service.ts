@@ -37,7 +37,7 @@ export class ChatPromptService {
       `1. Start with a 1-sentence quick takeaway (e.g., "Your portfolio took a small dip today due to market shifts.").`,
       `2. Follow with short key bullet points highlighting accounts that shifted by 5 ${user.config.currency} or more.`,
       `3. End with a 1-sentence reassuring context note (e.g., "No transactions were logged—just normal market movement.").`,
-      `4. Keep account names brief and friendly (e.g., "401(k)" or "Roth IRA").`,
+      `4. Report ONLY the movement (e.g., "dipped by $441.70"), NEVER the current account balance or the difference in values (eg. $-400 to $-500).`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);

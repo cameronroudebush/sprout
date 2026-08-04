@@ -25,8 +25,9 @@ class SproutBottomNav extends ConsumerWidget {
     final theme = Theme.of(context);
     final apiConfig = ref.watch(secureConfigProvider).value;
     final userConfig = ref.watch(userConfigProvider).value;
+    final unsecureConfig = ref.watch(unsecureConfigProvider).value!;
 
-    final filteredRoutes = getFilteredRoutes(apiConfig, userConfig);
+    final filteredRoutes = getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
     // Separate Dashboard from other candidate routes
     final dashboardRoute = authenticatedRoutes.firstWhere(
       (r) => r.path == '/',

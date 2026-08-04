@@ -1,3 +1,4 @@
+import { ChatModule } from "@backend/chat/chat.module";
 import { ConfigurationModule } from "@backend/config/config.module";
 import { Configuration } from "@backend/config/core";
 import { DemoModule } from "@backend/demo/demo.module";
@@ -7,9 +8,9 @@ import { DemoDataResetJob } from "@backend/jobs/demo.reset";
 import { ExchangeRateJob } from "@backend/jobs/exchange-rate";
 import { BackgroundJob } from "@backend/jobs/job-base";
 import { PendingTransactionJob } from "@backend/jobs/pending.transaction";
+import { PostSyncProcessingJob } from "@backend/jobs/post-sync";
 import { StatusEmailJob } from "@backend/jobs/status-email";
 import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
-import { SyncNotificationJob } from "@backend/jobs/sync.notification";
 import { UserDeviceJob } from "@backend/jobs/user.device";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
@@ -19,7 +20,7 @@ import { Module, OnApplicationBootstrap } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 
 @Module({
-  imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule, ConfigurationModule, SSEModule, DemoModule],
+  imports: [ProviderModule, EmailModule, TransactionModule, NotificationModule, ConfigurationModule, SSEModule, DemoModule, ChatModule],
   controllers: [],
   providers: [
     ExchangeRateJob,
@@ -28,7 +29,7 @@ import { ModuleRef } from "@nestjs/core";
     UserDeviceJob,
     StatusEmailJob,
     ProviderSyncOrchestratorJob,
-    SyncNotificationJob,
+    PostSyncProcessingJob,
     DemoDataResetJob,
   ],
   exports: [ProviderSyncOrchestratorJob],

@@ -44,8 +44,9 @@ class _InternalSideNavContent extends ConsumerWidget {
     final currentPath = ref.watch(currentRouteProvider);
     final apiConfig = ref.watch(secureConfigProvider).value;
     final userConfig = ref.watch(userConfigProvider).value;
+    final unsecureConfig = ref.watch(unsecureConfigProvider).value!;
 
-    final navItems = getFilteredRoutes(apiConfig, userConfig);
+    final navItems = getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
 
     final groupedItems = groupBy<SproutRoute, String?>(navItems, (route) => route.category);
     final navBackgroundColor = theme.cardTheme.color ?? theme.cardColor;

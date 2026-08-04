@@ -242,8 +242,8 @@ class AccountApi {
   ///
   /// Parameters:
   ///
-  /// * [bool] force (required):
-  Future<Response> accountControllerManualSyncWithHttpInfo(bool force,) async {
+  /// * [bool] force:
+  Future<Response> accountControllerManualSyncWithHttpInfo({ bool? force, }) async {
     // ignore: prefer_const_declarations
     final path = r'/account/sync';
 
@@ -254,7 +254,9 @@ class AccountApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+    if (force != null) {
       queryParams.addAll(_queryParams('', 'force', force));
+    }
 
     const contentTypes = <String>[];
 
@@ -276,9 +278,9 @@ class AccountApi {
   ///
   /// Parameters:
   ///
-  /// * [bool] force (required):
-  Future<void> accountControllerManualSync(bool force,) async {
-    final response = await accountControllerManualSyncWithHttpInfo(force,);
+  /// * [bool] force:
+  Future<void> accountControllerManualSync({ bool? force, }) async {
+    final response = await accountControllerManualSyncWithHttpInfo( force: force, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

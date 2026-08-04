@@ -81,9 +81,10 @@ Future<ChatOverview?> chatStatus(Ref ref, ChatOverviewTypeEnum type) async {
 bool chatEnabled(Ref ref) {
   final secureConfig = ref.watch(secureConfigProvider).value;
   final userConfig = ref.watch(userConfigProvider).value;
+  final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
   final isServerEnabled = secureConfig?.chatEnabled ?? false;
   final isUserEnabled = userConfig?.includeAICapabilities ?? false;
 
-  return isServerEnabled && isUserEnabled;
+  return isDemoMode || (isServerEnabled && isUserEnabled);
 }

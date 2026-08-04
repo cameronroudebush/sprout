@@ -390,7 +390,7 @@
             }
           },
           "401": {
-            "description": "User is not authenticated."
+            "description": "Authentication is required.\n\nUser is not authenticated."
           }
         },
         "security": [
@@ -500,9 +500,6 @@
         "responses": {
           "200": {
             "description": "Device registered"
-          },
-          "201": {
-            "description": ""
           },
           "401": {
             "description": "Authentication is required."
@@ -1479,9 +1476,6 @@
           "200": {
             "description": "Rules were successfully processed and applied to transactions."
           },
-          "201": {
-            "description": ""
-          },
           "401": {
             "description": "Authentication is required."
           }
@@ -1825,16 +1819,6 @@
         "responses": {
           "200": {
             "description": "Returns the generated text from the prompt."
-          },
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
           },
           "401": {
             "description": "Authentication is required."
@@ -2481,7 +2465,7 @@
         "parameters": [
           {
             "name": "months",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "number"
@@ -2522,7 +2506,7 @@
         "parameters": [
           {
             "name": "months",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "number"
@@ -2530,7 +2514,7 @@
           },
           {
             "name": "categories",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "number"
@@ -2860,7 +2844,7 @@
         "parameters": [
           {
             "name": "force",
-            "required": true,
+            "required": false,
             "in": "query",
             "schema": {
               "type": "boolean"
@@ -2914,16 +2898,6 @@
         "responses": {
           "200": {
             "description": "Accounts merged successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "",
             "content": {
               "application/json": {
                 "schema": {
@@ -3119,17 +3093,17 @@
         "properties": {
           "categoryCount": {
             "type": "object",
-            "description": "The number of transactions matching to each category",
             "additionalProperties": {
               "type": "number"
-            }
+            },
+            "description": "The number of transactions matching to each category"
           },
           "colorMapping": {
             "type": "object",
-            "description": "Color information for each category, in hex codes",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Color information for each category, in hex codes"
           }
         },
         "required": ["categoryCount", "colorMapping"]
@@ -3190,8 +3164,8 @@
         "type": "object",
         "properties": {
           "authMode": {
-            "type": "string",
-            "enum": ["oidc", "local"]
+            "enum": ["oidc", "local"],
+            "type": "string"
           },
           "demoMode": {
             "description": "Present only when the application is running in an auto-authenticating demo environment",
@@ -3375,6 +3349,10 @@
       "RegisterDeviceDto": {
         "type": "object",
         "properties": {
+          "deviceId": {
+            "type": "string",
+            "description": "Unique device ID"
+          },
           "token": {
             "type": "string"
           },
@@ -3386,7 +3364,7 @@
             "type": "string"
           }
         },
-        "required": ["token"]
+        "required": ["deviceId"]
       },
       "ProviderTypeEnum": {
         "type": "string",
@@ -3747,6 +3725,7 @@
           },
           "location": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/TransactionLocation"
@@ -3849,11 +3828,17 @@
       "TotalTransactions": {
         "type": "object",
         "properties": {
+          "accounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
           "total": {
             "type": "number"
           }
         },
-        "required": ["total"]
+        "required": ["accounts", "total"]
       },
       "TransactionRule": {
         "type": "object",
@@ -3910,10 +3895,10 @@
             "default": "secure_message"
           },
           "importance": {
-            "type": "string",
             "description": "Notification importance level",
             "default": "low",
-            "enum": ["max", "high", "default", "low"]
+            "enum": ["max", "high", "default", "low"],
+            "type": "string"
           }
         },
         "required": ["notificationId", "type", "importance"]
@@ -4032,9 +4017,9 @@
             "type": "string"
           },
           "role": {
-            "type": "string",
             "description": "Who said the message, either the LLM (AI) or the user.",
-            "enum": ["user", "model"]
+            "enum": ["user", "model"],
+            "type": "string"
           },
           "time": {
             "format": "date-time",

@@ -32,7 +32,7 @@ export class Sync extends DatabaseBase {
   @Exclude({ toPlainOnly: true })
   declare user?: User;
 
-  /** Tracks if the user was notified of this sync information */
+  /** Tracks if this sync was already handled for post notification/sync handlers from the `PostSyncProcessingJob` */
   @DatabaseDecorators.column({ default: false })
   notified?: boolean;
 }

@@ -100,28 +100,23 @@ export class ChatService {
         return status;
       };
 
-      /** Generates a daily overview of accounts/cash flow. */
-      const generateDailyOverview = async () => {
-        const { contents, idMap } = await this.promptBuilder.buildDailyOverviewPrompt(user);
-        await logTokens(contents, "daily overview");
-        const text = await generateContent(contents, idMap);
-        return saveOverview(text, ChatOverviewType.accounts);
-      };
+      /** Single consolidated overview generator that routes prompt building by type. */
+      const generateOverview = async (overviewType: ChatOverviewType) => {
+        const promptResult =
+          overviewType === ChatOverviewType.holdings
+            ? await this.promptBuilder.buildHoldingsOverviewPrompt(user)
+            : await this.promptBuilder.buildDailyOverviewPrompt(user);
 
-      /** Generates an overview focusing on holdings and investment accounts. */
-      const generateHoldingsOverview = async () => {
-        const { contents, idMap } = await this.promptBuilder.buildHoldingsOverviewPrompt(user);
-        await logTokens(contents, "holdings overview");
-        const text = await generateContent(contents, idMap);
-        return saveOverview(text, ChatOverviewType.holdings);
+        await logTokens(promptResult.contents, `${overviewType} overview`);
+        const text = await generateContent(promptResult.contents, promptResult.idMap);
+        return saveOverview(text, overviewType);
       };
 
       return {
         type,
         countTokens,
         generateChatContent,
-        generateDailyOverview,
-        generateHoldingsOverview,
+        generateOverview,
       };
     } else {
       throw new InternalServerErrorException("Invalid LLM model configured");

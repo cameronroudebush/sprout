@@ -44,7 +44,7 @@ Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, in
 Future<List<CashFlowTrendStats>?> cashFlowTrend(Ref ref, int months) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
-  return await api.cashFlowControllerGetTrend(months);
+  return await api.cashFlowControllerGetTrend(months: months);
 }
 
 /// Monthly spending state
@@ -56,7 +56,7 @@ class MonthlySpending extends _$MonthlySpending {
     final categoryCount = categories ?? (kIsWeb ? 5 : 2);
 
     final api = await ref.watch(cashFlowApiProvider.future);
-    return await api.cashFlowControllerGetSpending(months, categoryCount);
+    return await api.cashFlowControllerGetSpending(months: months, categories: categoryCount);
   }
 
   /// Explicitly trigger a refresh if needed

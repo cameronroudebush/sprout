@@ -13,25 +13,31 @@ part of openapi.api;
 class TotalTransactions {
   /// Returns a new [TotalTransactions] instance.
   TotalTransactions({
+    this.accounts = const {},
     required this.total,
   });
+
+  Map<String, num> accounts;
 
   num total;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is TotalTransactions &&
+    _deepEquality.equals(other.accounts, accounts) &&
     other.total == total;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (accounts.hashCode) +
     (total.hashCode);
 
   @override
-  String toString() => 'TotalTransactions[total=$total]';
+  String toString() => 'TotalTransactions[accounts=$accounts, total=$total]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'accounts'] = this.accounts;
       json[r'total'] = this.total;
     return json;
   }
@@ -47,12 +53,15 @@ class TotalTransactions {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
+        assert(json.containsKey(r'accounts'), 'Required key "TotalTransactions[accounts]" is missing from JSON.');
+        assert(json[r'accounts'] != null, 'Required key "TotalTransactions[accounts]" has a null value in JSON.');
         assert(json.containsKey(r'total'), 'Required key "TotalTransactions[total]" is missing from JSON.');
         assert(json[r'total'] != null, 'Required key "TotalTransactions[total]" has a null value in JSON.');
         return true;
       }());
 
       return TotalTransactions(
+        accounts: mapCastOfType<String, num>(json, r'accounts')!,
         total: num.parse('${json[r'total']}'),
       );
     }
@@ -101,6 +110,7 @@ class TotalTransactions {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'accounts',
     'total',
   };
 }

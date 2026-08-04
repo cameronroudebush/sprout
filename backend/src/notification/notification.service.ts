@@ -68,6 +68,10 @@ export class NotificationService implements OnModuleInit {
 
     // Notify all of the users devices
     for (const device of devices) {
+      if (device.fcmToken == null) {
+        this.logger.debug(`Skipping device ${device.deviceName} because it doesn't have an FCM token registered.`);
+        continue;
+      }
       const message: Message = {
         token: device.fcmToken,
         data: new FirebaseNotificationDTO({ notificationId: notification.id, importance: notification.importance }) as { [key: string]: any },

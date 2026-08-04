@@ -177,13 +177,17 @@ export class PlaidProviderService extends ProviderBase {
         account.institution.hasError = false;
       }
     } catch (e) {
-      this.logger.error(e);
       const plaidError = (e as AxiosError).response?.data as PlaidError;
       if (plaidError && plaidError.error_type === "ITEM_ERROR") {
         this.logger.warn(`Plaid Item Error for ${asset.institution.name}: ${plaidError.error_code}`);
         // These specific codes mean the user MUST take action in the UI
-        const criticalErrors = ["ITEM_LOGIN_REQUIRED", "PENDING_EXPIRATION", "INVALID_ACCESS_TOKEN"];
-        if (criticalErrors.includes(plaidError.error_code)) asset.institution.hasError = true;
+        const criticalErrors = ["ITEM_LOGIN_REQUIRED", "PENDING_EXPIRATION", "INVALID_ACCESS_TOKEN", "ITEM_NOT_FOUND"];
+        if (criticalErrors.includes(plaidError.error_code)) {
+          asset.institution.hasError = true;
+          await asset.institution.update();
+        }
+      } else {
+        this.logger.error(e);
       }
     }
 

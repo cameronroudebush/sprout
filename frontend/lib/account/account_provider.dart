@@ -59,7 +59,7 @@ class Accounts extends _$Accounts {
       notificationId = notifications.openFrontendOnly("Account sync is running.", showSpinner: true);
 
       final api = await ref.read(accountApiProvider.future);
-      await api.accountControllerManualSync(false);
+      await api.accountControllerManualSync(force: false);
     } catch (e) {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
       if (notificationId != null) notifications.clearOverlay(notificationId);

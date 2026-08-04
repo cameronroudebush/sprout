@@ -120,7 +120,7 @@ export class UserController {
   @EnabledGuard.attachDemoMode()
   async registerDevice(@CurrentUser() user: User, @Body() data: RegisterDeviceDto) {
     // Check if this specific token is already registered
-    let device = await UserDevice.findOne({ where: { fcmToken: data.token } });
+    let device = await UserDevice.findOne({ where: { deviceId: data.deviceId } });
 
     if (device) {
       // Update existing device info
@@ -130,7 +130,7 @@ export class UserController {
       device = await device.update();
     } else {
       // Create a new device entry
-      device = await new UserDevice(user, data.token, data.platform ?? DevicePlatform.ANDROID, data.deviceName).insert();
+      device = await new UserDevice(user, data.deviceId, data.token, data.platform ?? DevicePlatform.ANDROID, data.deviceName).insert();
     }
 
     return { success: true, deviceId: device.id };

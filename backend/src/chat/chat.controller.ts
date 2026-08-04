@@ -19,7 +19,6 @@ import { startCase } from "lodash";
 @Controller("chat")
 @ApiTags("Chat")
 @AuthGuard.attach()
-@EnabledGuard.attach(Configuration.server.prompt.enabled)
 export class ChatController {
   private readonly logger = new Logger("controller:chat");
 
@@ -79,17 +78,6 @@ export class ChatController {
     // Generate a fresh overview if status doesn't exist or is stale
     this.logger.debug(`${startCase(type)} overview out of date, regenerating for user ${user.username}`);
     const model = await this.chatService.getModel(user);
-
-    switch (type) {
-      case ChatOverviewType.holdings:
-        status = await model.generateHoldingsOverview();
-        break;
-      case ChatOverviewType.accounts:
-      default:
-        status = await model.generateDailyOverview();
-        break;
-    }
-
-    return status;
+    return await model.generateOverview(type);
   }
 }

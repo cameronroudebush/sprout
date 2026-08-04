@@ -294,10 +294,10 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months (required):
+  /// * [num] months:
   ///
-  /// * [num] categories (required):
-  Future<Response> cashFlowControllerGetSpendingWithHttpInfo(num months, num categories,) async {
+  /// * [num] categories:
+  Future<Response> cashFlowControllerGetSpendingWithHttpInfo({ num? months, num? categories, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/spending';
 
@@ -308,8 +308,12 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+    if (months != null) {
       queryParams.addAll(_queryParams('', 'months', months));
+    }
+    if (categories != null) {
       queryParams.addAll(_queryParams('', 'categories', categories));
+    }
 
     const contentTypes = <String>[];
 
@@ -331,11 +335,11 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months (required):
+  /// * [num] months:
   ///
-  /// * [num] categories (required):
-  Future<CashFlowSpending?> cashFlowControllerGetSpending(num months, num categories,) async {
-    final response = await cashFlowControllerGetSpendingWithHttpInfo(months, categories,);
+  /// * [num] categories:
+  Future<CashFlowSpending?> cashFlowControllerGetSpending({ num? months, num? categories, }) async {
+    final response = await cashFlowControllerGetSpendingWithHttpInfo( months: months, categories: categories, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -444,8 +448,8 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months (required):
-  Future<Response> cashFlowControllerGetTrendWithHttpInfo(num months,) async {
+  /// * [num] months:
+  Future<Response> cashFlowControllerGetTrendWithHttpInfo({ num? months, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/trend';
 
@@ -456,7 +460,9 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
+    if (months != null) {
       queryParams.addAll(_queryParams('', 'months', months));
+    }
 
     const contentTypes = <String>[];
 
@@ -478,9 +484,9 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months (required):
-  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend(num months,) async {
-    final response = await cashFlowControllerGetTrendWithHttpInfo(months,);
+  /// * [num] months:
+  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend({ num? months, }) async {
+    final response = await cashFlowControllerGetTrendWithHttpInfo( months: months, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

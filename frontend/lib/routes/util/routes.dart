@@ -47,7 +47,8 @@ final List<SproutRoute> authenticatedRoutes = [
     icon: Icons.auto_awesome,
     bottomNavPriority: 2,
     builder: (context, state) => const ChatPage(),
-    enabled: (config, userConfig) => config.chatEnabled && (userConfig?.includeAICapabilities ?? false),
+    enabled: (secureConfig, unsecureConfig, userConfig) =>
+        unsecureConfig.demoMode != null || (secureConfig.chatEnabled && (userConfig?.includeAICapabilities ?? false)),
   ),
   SproutRoute(
     path: '/transactions',
@@ -104,12 +105,13 @@ final List<SproutRoute> authenticatedRoutes = [
 
 /// Returns the [authenticatedRoutes] but filtered considering the options
 /// [restrictToSidebar] If we should filter out routes that are only allowed in the sidebar.
-List<SproutRoute> getFilteredRoutes(APIConfig? apiConfig, UserConfig? userConfig,
+List<SproutRoute> getFilteredRoutes(
+    UnsecureAppConfiguration unsecureConfig, APIConfig? apiConfig, UserConfig? userConfig,
     {List<SproutRoute>? routes, bool restrictToSidebar = true}) {
   return (routes ?? authenticatedRoutes).where((page) {
     if (restrictToSidebar && !page.showInSidebar) return false;
     if (apiConfig == null) return false;
-    return page.enabled?.call(apiConfig, userConfig) ?? true;
+    return page.enabled?.call(apiConfig, unsecureConfig, userConfig) ?? true;
   }).toList();
 }
 
