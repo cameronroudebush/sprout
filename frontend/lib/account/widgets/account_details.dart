@@ -13,6 +13,7 @@ import 'package:sprout/institution/institution_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
+import 'package:sprout/provider/widgets/plaid/plaid_helper.dart';
 import 'package:sprout/provider/widgets/provider_icon.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
@@ -106,8 +107,22 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
             token: response!.linkToken,
           );
           await PlaidLink.create(configuration: configuration);
-          PlaidLink.onSuccess.first.then((_) {
-            _showReSyncPopup();
+          PlaidLink.onSuccess.first.then((success) async {
+            try {
+              final api = await ref.read(providerApiProvider.future);
+
+              // Handle public token exchange if a new link was created
+              await PlaidSyncHelper.exchangePublicTokenIfNeeded(
+                success,
+                api,
+                fallbackInstitutionName: widget.account.institution.name,
+              );
+
+              // Show sync popup whether it was a pure update or a full token exchange
+              if (mounted) _showReSyncPopup();
+            } catch (e) {
+              if (mounted) ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+            }
           });
           PlaidLink.open();
         }

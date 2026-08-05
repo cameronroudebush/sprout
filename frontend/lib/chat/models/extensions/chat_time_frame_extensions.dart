@@ -4,6 +4,8 @@ import 'package:sprout/api/api.dart';
 extension ChatTimeframeUI on ChatRequestDTOTimeframeEnum {
   String get label {
     switch (this) {
+      case ChatRequestDTOTimeframeEnum.oneDay:
+        return '1D';
       case ChatRequestDTOTimeframeEnum.sixMonths:
         return '6M';
       case ChatRequestDTOTimeframeEnum.oneYear:
@@ -16,6 +18,8 @@ extension ChatTimeframeUI on ChatRequestDTOTimeframeEnum {
 
   String get longLabel {
     switch (this) {
+      case ChatRequestDTOTimeframeEnum.oneDay:
+        return '1 Day';
       case ChatRequestDTOTimeframeEnum.sixMonths:
         return '6 Months';
       case ChatRequestDTOTimeframeEnum.oneYear:
@@ -28,13 +32,15 @@ extension ChatTimeframeUI on ChatRequestDTOTimeframeEnum {
 
   String get description {
     switch (this) {
+      case ChatRequestDTOTimeframeEnum.oneDay:
+        return 'Past day';
       case ChatRequestDTOTimeframeEnum.sixMonths:
-        return 'Past 6 months of financial history';
+        return 'Past 6 months';
       case ChatRequestDTOTimeframeEnum.oneYear:
-        return 'Past year of financial history';
+        return 'Past year';
       case ChatRequestDTOTimeframeEnum.threeMonths:
       default:
-        return 'Past 3 months of financial history';
+        return 'Past 3 months';
     }
   }
 }

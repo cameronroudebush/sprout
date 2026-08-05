@@ -34,10 +34,10 @@ export class ChatPromptService {
       ...this.getSharedSystemInstructions(user, false),
       `Write a warm, natural daily financial summary over the last 24 hours.`,
       `FORMAT REQUIREMENTS:`,
-      `1. Start with a 1-sentence quick takeaway (e.g., "Your portfolio took a small dip today due to market shifts.").`,
-      `2. Follow with short key bullet points highlighting accounts that shifted by 5 ${user.config.currency} or more.`,
-      `3. End with a 1-sentence reassuring context note (e.g., "No transactions were logged—just normal market movement.").`,
-      `4. Report ONLY the movement (e.g., "dipped by $441.70"), NEVER the current account balance or the difference in values (eg. $-400 to $-500).`,
+      `1. Start with a 1-sentence quick takeaway (e.g., "Your checking account saw some downward movement today primarily driven by weekend spending.").`,
+      `2. Follow with short key bullet points for accounts with notable activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
+      `3. End with a 1-sentence reassuring context note (e.g., "Overall, just normal day-to-day spending.").`,
+      `4. DO NOT include ANY specific numbers, dollar amounts, percentages, or balances in your response. Focus entirely on the narrative, the direction of the changes, and the spending categories.`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
@@ -47,12 +47,13 @@ export class ChatPromptService {
   async buildHoldingsOverviewPrompt(user: User) {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
-      `Write a focused market and portfolio update analyzing performance over the last few days.`,
+      `Write a sharp, analytical portfolio update focusing on *performance attribution* and *asset interaction* over the last few days.`,
       `FORMAT REQUIREMENTS:`,
-      `1. Start with a 1-sentence snapshot summarizing how the broader market performed recently and how the overall portfolio reacted.`,
-      `2. Detail notable individual holding shifts, calling out top gainers, losers, or holdings that moved significantly alongside or against market trends.`,
-      `3. State ONLY the change amount and percentage (e.g., "-$4,152.82 (-1.44%)"). NEVER output starting or ending balances (do not say "from X to Y").`,
-      `4. Maintain an objective, informative, and clear tone without giving direct trading or financial advice.`,
+      `1. Start with a 1-sentence bottom line identifying the single biggest driver of the portfolio's performance (e.g., "Despite a flat overall market, volatility in your crypto holdings dragged down your net performance today.").`,
+      `2. Focus on Disproportionate Impact: Point out if a smaller, volatile holding (like NVDA or Crypto) drove the majority of the portfolio's movement compared to larger, stable index funds.`,
+      `3. Highlight Correlations & Hedges: Explain how different parts of the portfolio interacted (e.g., "Gains in your tech-heavy FBGRX offset the minor losses in your international VXUS holdings.").`,
+      `4. DO NOT write generic descriptions of what the funds do (e.g., DO NOT say "VTI tracked the market").`,
+      `5. DO NOT list exact dollar balances or minor daily percentage changes. You MAY use proportions or relative terms to explain impact (e.g., "accounted for almost all of today's dip" or "dominated the portfolio's movement").`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);

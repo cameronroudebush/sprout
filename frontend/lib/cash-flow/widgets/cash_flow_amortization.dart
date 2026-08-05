@@ -61,18 +61,22 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Expanded(
-                child: SproutLineChart(
-              series: chartSeries,
-              chartRange: ChartRangeEnum.allTime,
-              header: header,
-              showYAxis: true,
-              showXAxis: true,
-              showGrid: true,
-              showLegend: false,
-              formatYAxis: (value) => formatter.format(value, compact: true),
-              formatValue: (value) => formatter.format(value),
-            )),
-            _PayoffSummary(seriesList: seriesList),
+              child: SproutLineChart(
+                series: chartSeries,
+                chartRange: ChartRangeEnum.allTime,
+                header: header,
+                showYAxis: true,
+                showXAxis: true,
+                showGrid: true,
+                showLegend: false,
+                formatYAxis: (value) => formatter.format(value, compact: true),
+                formatValue: (value) => formatter.format(value),
+              ),
+            ),
+            _PayoffSummary(
+              seriesList: seriesList,
+              renderPayment: true,
+            ),
           ],
         );
       },
@@ -80,96 +84,114 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
   }
 }
 
-/// Renders payoff date summary cards for each loan series
-class _PayoffSummary extends StatelessWidget {
+/// Renders payoff date and monthly payment summary cards for each loan series
+class _PayoffSummary extends ConsumerWidget {
   final List<LoanAmortizationSeries> seriesList;
+  final bool renderPayment;
 
-  const _PayoffSummary({required this.seriesList});
+  const _PayoffSummary({required this.seriesList, required this.renderPayment});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final dateFormat = DateFormat.yMMMMd();
+    final formatter = ref.watch(currencyFormatterProvider);
 
     return Padding(
-        padding: EdgeInsetsGeometry.only(top: 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 12,
-          children: [
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: (seriesList
-                    // Sort by date so soonest payoff is first
-                    ..sort((a, b) {
-                      final dateA =
-                          a.dataPoints.isNotEmpty ? a.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
-                      final dateB =
-                          b.dataPoints.isNotEmpty ? b.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
-                      return dateA.compareTo(dateB);
-                    }))
-                  .map((series) {
-                final color = series.color.toColor;
+      padding: const EdgeInsets.only(top: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 12,
+        children: [
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: (seriesList
+                  // Sort by date so soonest payoff is first
+                  ..sort((a, b) {
+                    final dateA =
+                        a.dataPoints.isNotEmpty ? a.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
+                    final dateB =
+                        b.dataPoints.isNotEmpty ? b.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
+                    return dateA.compareTo(dateB);
+                  }))
+                .map((series) {
+              final color = series.color.toColor;
 
-                // Get the last datapoint as the payoff date
-                final DateTime? payoffDate = series.dataPoints.isNotEmpty ? series.dataPoints.last.date : null;
+              // Get the last datapoint as the payoff date
+              final DateTime? payoffDate = series.dataPoints.isNotEmpty ? series.dataPoints.last.date : null;
+              final String formattedDate = payoffDate != null ? dateFormat.format(payoffDate) : 'N/A';
 
-                final String formattedDate = payoffDate != null ? dateFormat.format(payoffDate) : 'N/A';
+              // Access monthly payment from LoanAmortizationSeries
+              final String formattedPayment = formatter.format(series.monthlyPayment.abs());
 
-                return Container(
-                  constraints: const BoxConstraints(minWidth: 160),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+              return Container(
+                constraints: const BoxConstraints(minWidth: 160),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.4),
+                    width: 1.5,
                   ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: color.withValues(alpha: 0.4),
-                      width: 1.5,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          series.accountName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            series.accountName,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
+                        Row(
+                          spacing: 8,
+                          children: [
+                            Text(
+                              formattedDate,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
                             ),
-                          ),
-                          Text(
-                            formattedDate,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ));
+                            if (renderPayment)
+                              Text(
+                                '$formattedPayment/mo',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -370,8 +370,25 @@ export class CashFlowService {
         },
         order: { time: "DESC" },
       });
+
       let netMonthlyPayment = 0;
+      let estimatedPaymentDay = now.getDate();
+      let maxPaymentJump = 0;
+
       if (histories.length > 0) {
+        // Detect the most likely payment day by finding the largest balance increase
+        // (Since loan balances are negative, newer - older > 0 means a payment was made)
+        for (let i = 0; i < histories.length - 1; i++) {
+          const newer = histories[i]!;
+          const older = histories[i + 1]!;
+          const jump = newer.balance - older.balance;
+
+          if (jump > maxPaymentJump) {
+            maxPaymentJump = jump;
+            estimatedPaymentDay = new Date(newer.time).getDate();
+          }
+        }
+
         // Group by Year-Month. Iterate backward over DESC results to store the latest snapshot per month
         const monthlyBalances = new Map<string, number>();
         for (let i = histories.length - 1; i >= 0; i--) {
@@ -414,22 +431,39 @@ export class CashFlowService {
       const dataPoints: HistoricalDataPoint[] = [];
       dataPoints.push(new HistoricalDataPoint(new Date(now), balance));
 
-      let currentMonth = new Date(now);
+      // Calculate the baseline for the next upcoming payment
+      const targetYear = now.getFullYear();
+      let targetMonth = now.getMonth();
+      const maxDaysInCurrentMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const currentSafeDay = Math.min(estimatedPaymentDay, maxDaysInCurrentMonth);
+      const nextPaymentDate = new Date(targetYear, targetMonth, currentSafeDay);
+
+      // If the estimated payment date for this current month has already passed, project starting next month
+      if (nextPaymentDate <= now) targetMonth++;
+
       let monthsToPayOff = 0;
       const MAX_PROJECTION_MONTHS = 600;
 
       while (balance < 0 && monthsToPayOff < MAX_PROJECTION_MONTHS) {
-        currentMonth = new Date(currentMonth.setMonth(currentMonth.getMonth() + 1));
         const interestCharge = balance * monthlyRate;
         balance = balance + interestCharge + netMonthlyPayment;
         if (balance > 0) balance = 0;
-        dataPoints.push(new HistoricalDataPoint(new Date(currentMonth), balance));
+
+        // Safely calculate the future date preventing JS Date overflow (e.g., pushing Feb 31st into March)
+        const calcMonth = targetMonth + monthsToPayOff;
+        const maxDaysInTargetMonth = new Date(targetYear, calcMonth + 1, 0).getDate();
+        const safeDay = Math.min(estimatedPaymentDay, maxDaysInTargetMonth);
+        const projectionDate = new Date(targetYear, calcMonth, safeDay);
+
+        dataPoints.push(new HistoricalDataPoint(projectionDate, balance));
         monthsToPayOff++;
       }
+
       results.push(
         new LoanAmortizationSeries(account.id, account.name, monthsToPayOff, netMonthlyPayment, Colors.getColorForFeature(account.name), dataPoints),
       );
     }
+
     return results;
   }
 }

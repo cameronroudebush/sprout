@@ -265,38 +265,69 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    itemBuilder: (context) => ChatRequestDTOTimeframeEnum.values.map((timeframe) {
-                      final isSelected = timeframe == _selectedTimeframe;
-                      return PopupMenuItem<ChatRequestDTOTimeframeEnum>(
-                        value: timeframe,
+                    itemBuilder: (context) => [
+                      // Header description entry
+                      PopupMenuItem<ChatRequestDTOTimeframeEnum>(
+                        enabled: false,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  timeframe.longLabel,
-                                  style: TextStyle(
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                    color: isSelected ? theme.colorScheme.primary : null,
-                                  ),
-                                ),
-                                if (isSelected) Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
-                              ],
-                            ),
+                            const SizedBox(height: 8),
                             Text(
-                              timeframe.description,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.hintColor,
-                                fontSize: 11,
+                              "Historical Context",
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
                               ),
                             ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Controls how much data is provided to the AI model.",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.hintColor,
+                                fontSize: 10,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Divider(height: 1),
                           ],
                         ),
-                      );
-                    }).toList(),
+                      ),
+                      // Dynamic timeframe items
+                      ...ChatRequestDTOTimeframeEnum.values.map((timeframe) {
+                        final isSelected = timeframe == _selectedTimeframe;
+                        return PopupMenuItem<ChatRequestDTOTimeframeEnum>(
+                          value: timeframe,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    timeframe.longLabel,
+                                    style: TextStyle(
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected ? theme.colorScheme.primary : null,
+                                    ),
+                                  ),
+                                  if (isSelected) Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+                                ],
+                              ),
+                              Text(
+                                timeframe.description,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.hintColor,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       decoration: BoxDecoration(

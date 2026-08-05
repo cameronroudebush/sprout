@@ -6,6 +6,7 @@ import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
+import 'package:sprout/provider/widgets/plaid/plaid_helper.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
 
 /// This widget allows us to open plaid link to link an account for access within Sprout. This is just another
@@ -78,34 +79,8 @@ class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
 
     try {
       final api = ref.read(providerApiProvider).value;
-
-      // Create combined model
-      final inst = PlaidInstitutionDTO(
-        name: success.metadata.institution?.name ?? "Unknown",
-        institutionId: success.metadata.institution?.id ?? "",
-      );
-
-      final accounts = success.metadata.accounts
-          .map((acc) => PlaidAccountDTO(
-                id: acc.id,
-                name: acc.name,
-                type: acc.type.toString(),
-                subtype: acc.subtype.toString(),
-                mask: acc.mask,
-              ))
-          .toList();
-
-      final result = PlaidLinkDTO(
-        publicToken: success.publicToken,
-        metadata: PlaidMetadataDTO(
-          institution: inst,
-          accounts: accounts,
-          linkSessionId: success.metadata.linkSessionId,
-        ),
-      );
-
-      await api!.plaidProviderControllerExchangeAndLink(result);
-
+      if (api == null) throw Exception("API not ready");
+      await PlaidSyncHelper.exchangePublicTokenIfNeeded(success, api);
       if (widget.onSuccess != null) widget.onSuccess!();
     } catch (e) {
       if (mounted) {

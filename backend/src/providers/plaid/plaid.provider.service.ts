@@ -199,7 +199,7 @@ export class PlaidProviderService extends ProviderBase {
     this.checkPlaidClient();
     const webhookUrl = `${publicUrl}${Configuration.server.basePath}/webhooks/plaid`;
     this.logger.debug(`Plaid webhook configured to ${webhookUrl}`);
-    const config = {
+    const baseConfig = {
       user: { client_user_id: user.id },
       client_name: "Sprout",
       country_codes: [CountryCode.Us],
@@ -208,28 +208,54 @@ export class PlaidProviderService extends ProviderBase {
       // Allows us to specify theme. Might add feature for this in the future
       // link_customization_name: user.config.themeStyle.toString(),
     } as LinkTokenCreateRequest;
+
     try {
       await this.rateLimit(user).incrementOrError();
+      let accessToken: string | undefined;
       if (institutionId) {
         const instAsset = await PlaidInstitutionAsset.findOne({
           where: { institution: { id: institutionId, user: { id: user.id } } },
         });
-        if (!instAsset) throw new InternalServerErrorException("Existing Plaid connection not found.");
-        config.access_token = instAsset.accessToken;
-      } else {
-        config.products = [Products.Transactions];
+
+        if (instAsset?.accessToken) {
+          accessToken = instAsset.accessToken;
+        } else {
+          this.logger.warn(`Plaid connection not found for institution ${institutionId}. Falling back to new connection link token.`);
+        }
       }
-      const response = await this.plaidClient!.linkTokenCreate(config);
+
+      // If we found an access token, attempt update mode first
+      if (accessToken) {
+        try {
+          const response = await this.plaidClient!.linkTokenCreate({
+            ...baseConfig,
+            access_token: accessToken,
+          });
+          return new PlaidLinkTokenDTO(response.data.link_token);
+        } catch (error) {
+          const plaidError = this.parsePlaidError(error);
+          this.logger.warn(`Failed to create update-mode Plaid link token for institution ${institutionId}. Falling back to standard link token.`, plaidError);
+        }
+      }
+
+      // Fallback / New connection mode
+      const response = await this.plaidClient!.linkTokenCreate({
+        ...baseConfig,
+        products: [Products.Transactions],
+      });
+
       return new PlaidLinkTokenDTO(response.data.link_token);
     } catch (error) {
-      throw new InternalServerErrorException(`Could not initialize Plaid: ${error as AxiosError}`);
+      const plaidError = this.parsePlaidError(error);
+      this.logger.error(`Could not initialize Plaid: ${plaidError}`);
+      throw new InternalServerErrorException(`Could not initialize Plaid: ${plaidError}`);
     }
   }
 
   /**
    * Exchanges the public_token from the frontend for an access_token,
-   * then fetches and saves the chosen accounts as new accounts for Sprout. Only
-   * intended to be used during linking.
+   * then fetches and saves the chosen accounts as new accounts for Sprout.
+   * Handles both new linking and merging/re-linking existing accounts.
    */
   async exchangeAndCreateAccounts(user: User, dto: PlaidLinkDTO) {
     this.checkPlaidClient();
@@ -270,50 +296,94 @@ export class PlaidProviderService extends ProviderBase {
           options: { include_optional_metadata: true },
         });
         institution = await new Institution(instResponse.data.institution.url ?? this.config.url, instName, false, user).insert();
-      } else {
-        // Remove duplicate institutions if user bypassed frontend update UI
-        const existingAsset = await PlaidInstitutionAsset.findOne({ where: { institution: { id: institution.id } } });
-        if (existingAsset && existingAsset.itemId !== itemId) {
-          await this.plaidClient.itemRemove({ access_token: accessToken });
-          accessToken = undefined; // Clear so the catch block doesn't try to remove it again
-          throw new InternalServerErrorException("This bank is already linked. If you need to fix a connection, please use the update settings.");
-        }
       }
 
-      // Store the Plaid credential linked to this institution
+      // Handle the Plaid credential linked to this institution
       let plaidInstitutionAsset = await PlaidInstitutionAsset.findOne({ where: { institution: { id: institution.id } } });
+
       if (!plaidInstitutionAsset) {
+        // Brand new connection
         await new PlaidInstitutionAsset(institution, accessToken, itemId).insert();
-      } else {
-        // Update token in case it changed during a re-auth flow
+      } else if (plaidInstitutionAsset.itemId !== itemId) {
+        // The user re-linked an existing institution, generating a new item.
+        this.logger.log(`Merging new Plaid Item (ID: ${itemId}) into existing institution: ${instName}`);
+
+        // Attempt to remove the old item from Plaid to prevent duplicate connections/billing
+        try {
+          if (plaidInstitutionAsset.accessToken) {
+            await this.plaidClient!.itemRemove({ access_token: plaidInstitutionAsset.accessToken });
+          }
+        } catch (e) {
+          this.logger.debug(`Could not remove old Plaid item during merge (likely already invalid or disconnected).`);
+        }
+
+        // Update credentials and clear error state
         plaidInstitutionAsset.accessToken = accessToken;
         plaidInstitutionAsset.itemId = itemId;
         await plaidInstitutionAsset.update();
+
+        institution.hasError = false;
+        await institution.update();
+      } else {
+        // Standard re-auth update (same item_id, potentially updated access_token)
+        plaidInstitutionAsset.accessToken = accessToken;
+        await plaidInstitutionAsset.update();
+
+        institution.hasError = false;
+        await institution.update();
       }
 
-      // We don't both to get transactions here because they won't be ready. We'll catch them on the next sync
-
+      // We don't bother to get transactions here because they won't be ready. We'll catch them on the next sync
       return await Promise.all(
         accountsResponse.data.accounts.map(async (acc) => {
-          // Upsert logic to prevent duplicate checking/savings on update flow
+          // Check if we already have this specific Plaid account ID mapped
           let plaidAsset = await PlaidAsset.findOne({
             where: { plaidAccountId: acc.account_id, account: { user: { id: user.id } } },
             relations: { account: true },
           });
 
+          // If not found by Plaid ID (happens when a new Item is created for the same bank), try matching by name
           if (!plaidAsset) {
-            // This is a genuinely new account under this institution
-            const newAccount = this.convertPlaidAccount(acc, user, institution);
+            const possibleExistingAccount = await Account.findOne({
+              where: {
+                user: { id: user.id },
+                institution: { id: institution!.id },
+                name: acc.name,
+              },
+            });
+
+            if (possibleExistingAccount) {
+              this.logger.log(`Matched new Plaid Account ID to existing Sprout account: ${acc.name}`);
+
+              // See if it had an old PlaidAsset we need to update
+              plaidAsset = await PlaidAsset.findOne({
+                where: { account: { id: possibleExistingAccount.id } },
+                relations: { account: true },
+              });
+
+              if (plaidAsset) {
+                plaidAsset.plaidAccountId = acc.account_id;
+                await plaidAsset.update();
+              } else {
+                plaidAsset = await new PlaidAsset(possibleExistingAccount, acc.account_id).insert();
+                plaidAsset.account = possibleExistingAccount;
+              }
+            }
+          }
+
+          if (!plaidAsset) {
+            // This is a genuinely new account
+            const newAccount = this.convertPlaidAccount(acc, user, institution!);
             await newAccount.insert();
             await AccountHistory.insertForNewAccount(newAccount);
             await new PlaidAsset(newAccount, acc.account_id).insert();
             return newAccount;
           } else {
             // This account already exists. Update its balance/details instead of creating a duplicate
-            const accountToUpdate = this.convertPlaidAccount(acc, user, institution);
+            const accountToUpdate = this.convertPlaidAccount(acc, user, institution!);
             const mergedAccount = merge(plaidAsset.account, accountToUpdate);
             await mergedAccount.update();
-            await AccountHistory.insertForAccount(plaidAsset.account);
+            await AccountHistory.insertForAccount(mergedAccount);
             return mergedAccount;
           }
         }),
@@ -385,8 +455,7 @@ export class PlaidProviderService extends ProviderBase {
       });
       return true;
     } catch (error) {
-      const axiosError = error as AxiosError;
-      const plaidError = axiosError.response?.data as PlaidError;
+      const plaidError = this.parsePlaidError(error);
       this.logger.error(plaidError);
       return false;
     }
@@ -535,5 +604,12 @@ export class PlaidProviderService extends ProviderBase {
       default:
         return AccountSubType.other;
     }
+  }
+
+  /** Parses the given error object. If it's a plaid error, returns a better message. */
+  private parsePlaidError(error: any) {
+    const axiosError = error as AxiosError;
+    const plaidError = axiosError.response?.data as PlaidError;
+    return plaidError.display_message ?? plaidError.error_message;
   }
 }
