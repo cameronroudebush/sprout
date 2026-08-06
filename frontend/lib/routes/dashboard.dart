@@ -139,7 +139,7 @@ class DashboardPage extends ConsumerWidget {
         ),
         if (chatEnabled)
           const SizedBox(
-            height: 200,
+            height: 300,
             child: DashboardDailyChatCard(),
           ),
         // Account overview
