@@ -97,101 +97,104 @@ class _PayoffSummary extends ConsumerWidget {
     final dateFormat = DateFormat.yMMMMd();
     final formatter = ref.watch(currencyFormatterProvider);
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 12,
-        children: [
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: (seriesList
-                  // Sort by date so soonest payoff is first
-                  ..sort((a, b) {
-                    final dateA =
-                        a.dataPoints.isNotEmpty ? a.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
-                    final dateB =
-                        b.dataPoints.isNotEmpty ? b.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
-                    return dateA.compareTo(dateB);
-                  }))
-                .map((series) {
-              final color = series.color.toColor;
+    // Sort series by date so soonest payoff comes first
+    final sortedSeries = List<LoanAmortizationSeries>.from(seriesList)
+      ..sort((a, b) {
+        final dateA = a.dataPoints.isNotEmpty ? a.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = b.dataPoints.isNotEmpty ? b.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
+        return dateA.compareTo(dateB);
+      });
 
-              // Get the last datapoint as the payoff date
-              final DateTime? payoffDate = series.dataPoints.isNotEmpty ? series.dataPoints.last.date : null;
-              final String formattedDate = payoffDate != null ? dateFormat.format(payoffDate) : 'N/A';
+    // Build card list items
+    final cards = sortedSeries.map((series) {
+      final color = series.color.toColor;
+      final DateTime? payoffDate = series.dataPoints.isNotEmpty ? series.dataPoints.last.date : null;
+      final String formattedDate = payoffDate != null ? dateFormat.format(payoffDate) : 'N/A';
+      final String formattedPayment = formatter.format(series.monthlyPayment.abs());
 
-              // Access monthly payment from LoanAmortizationSeries
-              final String formattedPayment = formatter.format(series.monthlyPayment.abs());
-
-              return Container(
-                constraints: const BoxConstraints(minWidth: 160),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.4),
-                    width: 1.5,
+      return Container(
+        constraints: const BoxConstraints(minWidth: 160),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: color.withValues(alpha: 0.4),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  series.accountName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                Row(
+                  spacing: 8,
                   children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
+                    Text(
+                      formattedDate,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          series.accountName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    if (renderPayment)
+                      Text(
+                        '$formattedPayment/mo',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
                         ),
-                        Row(
-                          spacing: 8,
-                          children: [
-                            Text(
-                              formattedDate,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            if (renderPayment)
-                              Text(
-                                '$formattedPayment/mo',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                          ],
-                        )
-                      ],
-                    ),
+                      ),
                   ],
                 ),
-              );
-            }).toList(),
+              ],
+            ),
+          ],
+        ),
+      );
+    }).toList();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: constraints.maxWidth,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 12,
+                children: cards,
+              ),
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

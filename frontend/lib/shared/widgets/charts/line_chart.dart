@@ -296,6 +296,10 @@ class SproutLineChart extends StatelessWidget {
           reservedSize: 32,
           interval: xInterval,
           getTitlesWidget: (value, meta) {
+            // Prevent overlapping by hiding absolute max if it doesn't land on an interval stride
+            if (value == meta.max && value % xInterval != 0) {
+              return const SizedBox.shrink();
+            }
             final int index = value.toInt();
             if (index < 0 || index >= baseChartData.sortedEntries.length) {
               return const SizedBox.shrink();
