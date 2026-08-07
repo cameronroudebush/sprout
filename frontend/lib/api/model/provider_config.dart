@@ -17,7 +17,6 @@ class ProviderConfig {
     required this.subType,
     required this.name,
     required this.url,
-    required this.logoUrl,
     this.accountFixUrl,
     this.enabled = false,
   });
@@ -31,9 +30,6 @@ class ProviderConfig {
 
   /// Link to this provider
   String url;
-
-  /// An endpoint of where to get this logo
-  String logoUrl;
 
   /// The URL to be able to fix accounts
   ///
@@ -53,7 +49,6 @@ class ProviderConfig {
     other.subType == subType &&
     other.name == name &&
     other.url == url &&
-    other.logoUrl == logoUrl &&
     other.accountFixUrl == accountFixUrl &&
     other.enabled == enabled;
 
@@ -64,12 +59,11 @@ class ProviderConfig {
     (subType.hashCode) +
     (name.hashCode) +
     (url.hashCode) +
-    (logoUrl.hashCode) +
     (accountFixUrl == null ? 0 : accountFixUrl!.hashCode) +
     (enabled.hashCode);
 
   @override
-  String toString() => 'ProviderConfig[dbType=$dbType, subType=$subType, name=$name, url=$url, logoUrl=$logoUrl, accountFixUrl=$accountFixUrl, enabled=$enabled]';
+  String toString() => 'ProviderConfig[dbType=$dbType, subType=$subType, name=$name, url=$url, accountFixUrl=$accountFixUrl, enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -77,7 +71,6 @@ class ProviderConfig {
       json[r'subType'] = this.subType;
       json[r'name'] = this.name;
       json[r'url'] = this.url;
-      json[r'logoUrl'] = this.logoUrl;
     if (this.accountFixUrl != null) {
       json[r'accountFixUrl'] = this.accountFixUrl;
     } else {
@@ -106,8 +99,6 @@ class ProviderConfig {
         assert(json[r'name'] != null, 'Required key "ProviderConfig[name]" has a null value in JSON.');
         assert(json.containsKey(r'url'), 'Required key "ProviderConfig[url]" is missing from JSON.');
         assert(json[r'url'] != null, 'Required key "ProviderConfig[url]" has a null value in JSON.');
-        assert(json.containsKey(r'logoUrl'), 'Required key "ProviderConfig[logoUrl]" is missing from JSON.');
-        assert(json[r'logoUrl'] != null, 'Required key "ProviderConfig[logoUrl]" has a null value in JSON.');
         assert(json.containsKey(r'enabled'), 'Required key "ProviderConfig[enabled]" is missing from JSON.');
         assert(json[r'enabled'] != null, 'Required key "ProviderConfig[enabled]" has a null value in JSON.');
         return true;
@@ -118,7 +109,6 @@ class ProviderConfig {
         subType: ProviderSubTypeEnum.fromJson(json[r'subType'])!,
         name: mapValueOfType<String>(json, r'name')!,
         url: mapValueOfType<String>(json, r'url')!,
-        logoUrl: mapValueOfType<String>(json, r'logoUrl')!,
         accountFixUrl: mapValueOfType<String>(json, r'accountFixUrl'),
         enabled: mapValueOfType<bool>(json, r'enabled')!,
       );
@@ -172,7 +162,6 @@ class ProviderConfig {
     'subType',
     'name',
     'url',
-    'logoUrl',
     'enabled',
   };
 }

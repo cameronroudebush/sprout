@@ -950,6 +950,65 @@
         "tags": ["Webhook"]
       }
     },
+    "/provider/snap-trade/link": {
+      "post": {
+        "description": "Registers the user with SnapTrade if needed and generates a redirect URL to connect a brokerage.",
+        "operationId": "SnapTradeProviderController_generateLink",
+        "parameters": [
+          {
+            "name": "redirectUrl",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Link generated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate a connection link.",
+        "tags": ["Provider"]
+      }
+    },
+    "/provider/snap-trade/post-link": {
+      "post": {
+        "operationId": "SnapTradeProviderController_postLink",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fires actions to perform once a user has linked new accounts.",
+        "tags": ["Provider"]
+      }
+    },
     "/sse": {
       "get": {
         "operationId": "SSEController_sse",
@@ -3368,7 +3427,7 @@
       },
       "ProviderTypeEnum": {
         "type": "string",
-        "enum": ["simple-fin", "zillow", "plaid"]
+        "enum": ["simple-fin", "zillow", "plaid", "snapTrade"]
       },
       "ProviderSubTypeEnum": {
         "type": "string",
@@ -3399,10 +3458,6 @@
             "type": "string",
             "description": "Link to this provider"
           },
-          "logoUrl": {
-            "type": "string",
-            "description": "An endpoint of where to get this logo"
-          },
           "accountFixUrl": {
             "type": "string",
             "description": "The URL to be able to fix accounts"
@@ -3413,7 +3468,7 @@
             "default": false
           }
         },
-        "required": ["dbType", "subType", "name", "url", "logoUrl", "enabled"]
+        "required": ["dbType", "subType", "name", "url", "enabled"]
       },
       "AccountTypeEnum": {
         "type": "string",

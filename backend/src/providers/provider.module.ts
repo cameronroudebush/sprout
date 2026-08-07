@@ -7,6 +7,9 @@ import { PlaidWebhookController } from "@backend/providers/plaid/plaid.webhook.c
 import { BaseProviderController } from "@backend/providers/provider.controller";
 import { SimpleFinProviderController } from "@backend/providers/simple-fin/simple-fin.controller";
 import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
+import { SnapTradeProviderController } from "@backend/providers/snap-trade/snap-trade.controller";
+import { SnapTradeProviderService } from "@backend/providers/snap-trade/snap-trade.provider.service";
+import { SnapTradeWebHookController } from "@backend/providers/snap-trade/snap-trade.webhook.controller";
 import { ZillowProviderController } from "@backend/providers/zillow/zillow.controller";
 import { ZillowProviderService } from "@backend/providers/zillow/zillow.provider.service";
 import { SSEModule } from "@backend/sse/sse.module";
@@ -14,7 +17,7 @@ import { TransactionModule } from "@backend/transaction/transaction.module";
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 
-const ALL_PROVIDERS = [SimpleFINProviderService, PlaidProviderService, ZillowProviderService];
+const ALL_PROVIDERS = [SimpleFINProviderService, PlaidProviderService, ZillowProviderService, SnapTradeProviderService];
 
 @Module({
   imports: [HttpModule, SSEModule, TransactionModule, NotificationModule],
@@ -27,6 +30,9 @@ const ALL_PROVIDERS = [SimpleFINProviderService, PlaidProviderService, ZillowPro
     // Plaid
     PlaidProviderController,
     PlaidWebhookController,
+    // SnapTrade
+    SnapTradeProviderController,
+    SnapTradeWebHookController,
   ],
   providers: [
     ProviderSyncService,

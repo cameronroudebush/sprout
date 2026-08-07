@@ -62,5 +62,6 @@ Future<List<String>> providerIcon(Ref ref, ProviderConfig provider, double size)
 
   return [
     "https://cdn.brandfetch.io/domain/$domain/fallback/404/w/$d/icon?c=$clientId",
+    "https://cdn.brandfetch.io/domain/$domain/w/$d/logo?c=$clientId"
   ];
 }

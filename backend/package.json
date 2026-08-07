@@ -46,6 +46,7 @@
     "plaid": "^43.0.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.2",
+    "snaptrade-typescript-sdk": "^11.0.4",
     "source-map-support": "^0.5.21",
     "ts-mixer": "^6.0.4",
     "typeorm": "^1.0.0",
@@ -87,7 +88,8 @@
   },
   "overrides": {
     "google-auth-library": "^9.14.2",
-    "webpack": "5.100.2"
+    "webpack": "5.100.2",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "start": "nest start --watch",

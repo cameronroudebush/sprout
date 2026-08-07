@@ -1,5 +1,6 @@
 import { PlaidConfig } from "@backend/providers/plaid/config";
 import { SimpleFINConfig } from "@backend/providers/simple-fin/config";
+import { SnapTradeConfig } from "@backend/providers/snap-trade/model/config";
 import { ZillowConfig } from "@backend/providers/zillow/config";
 import { ConfigurationMetadata } from "../../config/model/configuration.metadata";
 
@@ -21,6 +22,12 @@ export class ProvidersConfig {
   })
   postSyncTime: string = "*/15 * * * *";
 
+  @ConfigurationMetadata.assign({
+    comment: "How many days to look back for transactional data. Not supported by every provider.",
+    externalControlDisabled: true,
+  })
+  lookBackDays: number = 14;
+
   @ConfigurationMetadata.assign({ comment: "SimpleFIN configuration: https://www.simplefin.org/" })
   simpleFIN = new SimpleFINConfig();
 
@@ -29,4 +36,7 @@ export class ProvidersConfig {
 
   @ConfigurationMetadata.assign({ comment: "Plaid configuration: https://plaid.com/" })
   plaid = new PlaidConfig();
+
+  @ConfigurationMetadata.assign({ comment: "SnapTrade configuration: https://snaptrade.com/" })
+  snapTrade = new SnapTradeConfig();
 }

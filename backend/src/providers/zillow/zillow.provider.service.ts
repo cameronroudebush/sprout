@@ -18,13 +18,7 @@ import { ProviderRateLimit } from "../base/rate-limit";
 export class ZillowProviderService extends ProviderBase {
   override getAppConfiguration = () => Configuration.providers.zillow;
   private readonly logger = new Logger("provider:service:zillow");
-  config = new ProviderConfig(
-    "Zillow",
-    ProviderType.zillow,
-    ProviderSubType.realEstate,
-    "https://www.zillow.com",
-    "https://www.zillow.com/apple-touch-icon.png",
-  );
+  config = new ProviderConfig("Zillow", ProviderType.zillow, ProviderSubType.realEstate, "https://www.zillow.com");
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.zillow, Configuration.providers.zillow.rateLimit, user);
   override isAvailable = async (_user: User) => true;
   /** Impit instance used for scraping */

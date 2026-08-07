@@ -32,7 +32,6 @@ export class SimpleFINProviderService extends ProviderBase {
     ProviderType.simpleFin,
     ProviderSubType.bankingInvestments,
     "https://www.simplefin.org/",
-    "https://beta-bridge.simplefin.org/static/logo.svg",
     "https://beta-bridge.simplefin.org/my-account",
   );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.simpleFin, Configuration.providers.simpleFIN.rateLimit, user);
@@ -132,7 +131,7 @@ export class SimpleFINProviderService extends ProviderBase {
     endpoint = "/accounts",
     params = {
       /** The start date to look for transactions of */
-      transactionStartDate: subDays(new Date(), Configuration.providers.simpleFIN.lookBackDays),
+      transactionStartDate: subDays(new Date(), Configuration.providers.lookBackDays),
       /** If we want pending transactions */
       pending: true,
     },

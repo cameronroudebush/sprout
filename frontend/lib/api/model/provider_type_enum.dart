@@ -26,12 +26,14 @@ class ProviderTypeEnum {
   static const simpleFin = ProviderTypeEnum._(r'simple-fin');
   static const zillow = ProviderTypeEnum._(r'zillow');
   static const plaid = ProviderTypeEnum._(r'plaid');
+  static const snapTrade = ProviderTypeEnum._(r'snapTrade');
 
   /// List of all possible values in this [enum][ProviderTypeEnum].
   static const values = <ProviderTypeEnum>[
     simpleFin,
     zillow,
     plaid,
+    snapTrade,
   ];
 
   static ProviderTypeEnum? fromJson(dynamic value) => ProviderTypeEnumTypeTransformer().decode(value);
@@ -73,6 +75,7 @@ class ProviderTypeEnumTypeTransformer {
         case r'simple-fin': return ProviderTypeEnum.simpleFin;
         case r'zillow': return ProviderTypeEnum.zillow;
         case r'plaid': return ProviderTypeEnum.plaid;
+        case r'snapTrade': return ProviderTypeEnum.snapTrade;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

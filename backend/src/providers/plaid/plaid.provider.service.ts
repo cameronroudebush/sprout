@@ -43,13 +43,7 @@ import { ProviderRateLimit } from "../base/rate-limit";
 export class PlaidProviderService extends ProviderBase {
   override getAppConfiguration = () => Configuration.providers.plaid;
   private readonly logger = new Logger("provider:plaid:service");
-  config = new ProviderConfig(
-    "Plaid",
-    ProviderType.plaid,
-    ProviderSubType.bankingInvestments,
-    "https://plaid.com/",
-    "https://plaid.com/assets/img/favicons/apple-touch-icon.png",
-  );
+  config = new ProviderConfig("Plaid", ProviderType.plaid, ProviderSubType.bankingInvestments, "https://plaid.com/");
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.plaid, Configuration.providers.plaid.rateLimit, user);
   override isAvailable = async (_user: User) => !!Configuration.providers.plaid.secret && !!Configuration.providers.plaid.clientId;
 

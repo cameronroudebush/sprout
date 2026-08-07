@@ -18,19 +18,16 @@ export class ProviderConfig extends Base {
   name: string;
   /** Link to this provider */
   url: string;
-  /** An endpoint of where to get this logo */
-  logoUrl: string;
   /** The URL to be able to fix accounts */
   accountFixUrl?: string;
   /** If this provider is available to this user. Only used during frontend communication */
   enabled: boolean = false;
 
-  constructor(name: string, dbType: ProviderType, subType: ProviderSubType, url: string, logoUrl: string, accountFixUrl?: string) {
+  constructor(name: string, dbType: ProviderType, subType: ProviderSubType, url: string, accountFixUrl?: string) {
     super();
     this.name = name;
     this.dbType = dbType;
     this.url = url;
-    this.logoUrl = logoUrl;
     this.accountFixUrl = accountFixUrl;
     this.subType = subType;
   }

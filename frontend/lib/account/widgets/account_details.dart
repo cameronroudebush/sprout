@@ -94,6 +94,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   Future<void> _fixInstitution() async {
     final provider = widget.account.provider;
 
+// TODO: SnapTrade fix
     if (provider == ProviderTypeEnum.plaid) {
       try {
         final api = await ref.read(providerApiProvider.future);
