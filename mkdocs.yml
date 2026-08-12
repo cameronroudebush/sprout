@@ -65,7 +65,6 @@ nav:
       - Configuration: developer/configuration.md
       - Known Issues: developer/known-issues.md
       - API Docs: developer/api.md
-      - Providers: developer/providers.md
   - What's Next?: planned-features.md
   - Privacy Policy: privacy-policy.md
 markdown_extensions:

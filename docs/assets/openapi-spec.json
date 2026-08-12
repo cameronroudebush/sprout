@@ -1009,6 +1009,20 @@
         "tags": ["Provider"]
       }
     },
+    "/webhooks/snap-trade": {
+      "post": {
+        "description": "Used to listen for responses from SnapTrade to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.",
+        "operationId": "SnapTradeWebHookController_handleSnapTradeWebhook",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Handle SnapTrade update webhook",
+        "tags": ["Webhook"]
+      }
+    },
     "/sse": {
       "get": {
         "operationId": "SSEController_sse",

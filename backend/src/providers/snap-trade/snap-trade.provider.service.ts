@@ -200,7 +200,7 @@ export class SnapTradeProviderService extends ProviderBase {
         immediateRedirect: true,
         customRedirect: redirectUrl,
       });
-      return (loginData.data as any).redirectURI;
+      return (loginData.data as any).redirectURI as string;
     } catch (error) {
       this.logger.error("Could not initialize SnapTrade Login:", error);
       throw new InternalServerErrorException("Could not initialize SnapTrade linking flow.");
@@ -209,7 +209,7 @@ export class SnapTradeProviderService extends ProviderBase {
 
   /**
    * Exchanges/fetches newly linked accounts after user completes the connection popup.
-   * Creates or merges Institutions, Accounts, and Assets, handling rollbacks on failure.
+   * Creates or merges Institutions, Accounts, Assets, and fetches Holdings handling rollbacks on failure.
    */
   async exchangeAndCreateAccounts(user: User) {
     this.checkClient();
@@ -227,7 +227,7 @@ export class SnapTradeProviderService extends ProviderBase {
       const accountsRes = await this.snaptrade.accountInformation.listUserAccounts({ userId, userSecret });
       const allAccounts = accountsRes.data;
 
-      const syncedAccounts: Account[] = [];
+      const results: { account: Account; holdings?: Holding[]; transactions: Transaction[]; removedTransactionIds: string[] }[] = [];
 
       for (const conn of connections) {
         newAuthIds.push(conn.id!);
@@ -289,23 +289,51 @@ export class SnapTradeProviderService extends ProviderBase {
             }
           }
 
+          let finalAccount: Account;
           if (!snapAsset) {
             const newAccount = this.convertSnapTradeAccount(rawAccount, balanceRes.data, user, institution);
-            await newAccount.insert();
-            await AccountHistory.insertForNewAccount(newAccount);
-            await new SnapTradeAsset(newAccount, rawAccount.id).insert();
-            syncedAccounts.push(newAccount);
+            finalAccount = await newAccount.insert();
+            await AccountHistory.insertForNewAccount(finalAccount);
+            await new SnapTradeAsset(finalAccount, rawAccount.id).insert();
           } else {
             const accountToUpdate = this.convertSnapTradeAccount(rawAccount, balanceRes.data, user, institution);
-            const mergedAccount = merge(snapAsset.account, accountToUpdate);
-            await mergedAccount.update();
-            await AccountHistory.insertForAccount(mergedAccount);
-            syncedAccounts.push(mergedAccount);
+            finalAccount = merge(snapAsset.account, accountToUpdate);
+            await finalAccount.update();
+            await AccountHistory.insertForAccount(finalAccount);
           }
+
+          // Fetch Holdings for the newly created or merged account
+          let positions: AccountPosition[] = [];
+          try {
+            await this.rateLimit(user).incrementOrError();
+            const positionsRes = await this.snaptrade.accountInformation.getAllAccountPositions({
+              userId,
+              userSecret,
+              accountId: rawAccount.id,
+            });
+            positions = positionsRes.data.results || [];
+          } catch (e) {
+            this.logger.warn(`Failed to fetch positions for account ${rawAccount.id}`);
+          }
+
+          const holdings = positions.length > 0 ? this.convertSnapTradeHoldings(positions, finalAccount) : undefined;
+
+          if (holdings && holdings.length > 0) {
+            // Remove old holdings before saving the new snapshot to avoid duplicates on re-link
+            await Holding.delete({ account: { id: finalAccount.id } });
+            await Promise.all(holdings.map((h) => h.insert()));
+          }
+
+          results.push({
+            account: finalAccount,
+            holdings,
+            transactions: [],
+            removedTransactionIds: [],
+          });
         }
       }
 
-      return syncedAccounts;
+      return results;
     } catch (error) {
       this.logger.error("Error creating SnapTrade accounts, rolling back newly created authorizations...", error);
       for (const authId of newAuthIds) {

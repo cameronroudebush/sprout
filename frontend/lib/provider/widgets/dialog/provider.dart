@@ -70,7 +70,22 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
       showSubmitButton: _selectedProvider != null,
       allowSubmitClick: (_selectedAccounts.isNotEmpty || _zillowPayload != null) && !_isSubmitting,
       onSubmitClick: _handleSubmit,
-      child: _isSubmitting ? const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())) : content,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Offstage(
+            offstage: _isSubmitting,
+            child: content,
+          ),
+
+          // Show the spinner on top when submitting
+          if (_isSubmitting)
+            const SizedBox(
+              height: 100,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
     );
   }
 
@@ -78,6 +93,7 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
   Future<void> _handleSubmit() async {
     setState(() => _isSubmitting = true);
     final notificationProvider = ref.read(notificationsProvider.notifier);
+    bool isClosing = false;
 
     try {
       switch (_selectedProvider!.dbType) {
@@ -102,11 +118,17 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
           break;
       }
 
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        isClosing = true;
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       notificationProvider.openWithAPIException(e);
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      // Only set to false if we are NOT closing the dialog
+      if (mounted && !isClosing) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 }

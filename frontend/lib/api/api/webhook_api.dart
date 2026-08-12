@@ -103,4 +103,44 @@ class WebhookApi {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
+
+  /// Handle SnapTrade update webhook
+  ///
+  /// Used to listen for responses from SnapTrade to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> snapTradeWebHookControllerHandleSnapTradeWebhookWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/webhooks/snap-trade';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Handle SnapTrade update webhook
+  ///
+  /// Used to listen for responses from SnapTrade to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.
+  Future<void> snapTradeWebHookControllerHandleSnapTradeWebhook() async {
+    final response = await snapTradeWebHookControllerHandleSnapTradeWebhookWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
 }

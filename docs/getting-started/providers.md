@@ -118,3 +118,54 @@ Follow these steps to get your credentials and connect your first account:
 
 - **Industry Standard**: Most major US banks have "OAuth" integrations with Plaid, meaning you often don't have to share your bank password with Plaid at all—you simply authorize Sprout through your bank's own website.
 - **Update Timing**: Plaid utilizes webhooks to help tell Sprout to request new data more often than other providers might.
+
+## SnapTrade
+
+<p align="center">
+    <img src="https://snaptrade.com/logo.png" width="15%">
+</p>
+
+**SnapTrade** is a powerful data aggregator specializing in investment, brokerage, and cryptocurrency accounts. It allows Sprout to automatically track your portfolios, asset holdings, and investment transactions with high accuracy.
+
+!!! note "Commercial Accounts Only"
+
+    Sprout's integration currently **only supports SnapTrade Commercial accounts**. Personal/Consumer SnapTrade API keys will not work with this integration. You must have a commercial agreement or commercial developer account with SnapTrade to use this provider.
+
+### Self-Hosting Configuration
+
+To use SnapTrade with your self-hosted instance of Sprout, you must provide your own **commercial** API credentials.
+
+!!! danger "Security Warning"
+
+    Never share your SnapTrade **Client ID** or **Consumer Key**. These keys grant access to your financial integrations. If you are using version control (like GitHub) to manage your Sprout deployment, ensure these variables are stored in a secure `.env` file or as encrypted secrets.
+
+| Variable                                 | Description                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------- |
+| `sprout_providers_snapTrade_clientId`    | Your unique SnapTrade Client ID found in your commercial dashboard. |
+| `sprout_providers_snapTrade_consumerKey` | Your SnapTrade Consumer Key used to authenticate your requests.     |
+
+### Setup Instructions
+
+Follow these steps to get your credentials, configure your webhooks, and connect your first account:
+
+1. **Create a SnapTrade Account**
+    - Go to the [SnapTrade Dashboard](https://dashboard.snaptrade.com/) and log in to your account.
+    - Make sure to create a **Commercial** project to access commercial keys instead of personal.
+2. **Get Your API Keys**
+    - Navigate to your API/Keys settings page.
+    - Copy your **Client ID** and **Consumer Key**.
+3. **Configure Your Webhook (Required for Auto-Sync)**
+    - Unlike some other providers, SnapTrade requires you to set your webhook URL globally in their dashboard.
+    - Navigate to the **Webhooks** tab in the SnapTrade Dashboard.
+    - Enter your Sprout server's public webhook endpoint: `https://[YOUR-SPROUT-DOMAIN]/api/webhooks/snap-trade`.
+    - Save the configuration. SnapTrade will now push updates to Sprout automatically whenever your portfolios change.
+4. **Configure Sprout**
+    - Add the copied keys to your environment variables: `sprout_providers_snapTrade_clientId` and `sprout_providers_snapTrade_consumerKey`.
+5. **Link Your Accounts**
+    - In the Sprout app, go to Add Account and select SnapTrade.
+    - Use the secure SnapTrade connection portal to log in to your brokerage or crypto exchange.
+
+### Why Choose SnapTrade?
+
+- **Investment Focused:** Unlike traditional bank aggregators, SnapTrade is built from the ground up to handle complex brokerage data, including granular position tracking and accurate purchase price histories.
+- **Real-Time Webhooks:** By setting up the global webhook, Sprout is instantly notified of transaction syncs or broken connections, keeping your net worth completely up to date in the background.

@@ -4,7 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
 
-import './link/snap_trade_helper.dart'; // Import your newly created factory file
+import 'snap_trade_helper.dart'; // Import your newly created factory file
 
 class SnapTradeAccountSelector extends ConsumerStatefulWidget {
   final ProviderConfig provider;

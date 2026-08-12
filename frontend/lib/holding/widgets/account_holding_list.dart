@@ -23,7 +23,13 @@ class AccountHoldingsList extends ConsumerWidget {
       error: (err, _) => Center(child: Text("Error loading holdings: $err")),
       data: (holdings) {
         final sortedHoldings = holdings..sort((a, b) => b.marketValue.compareTo(a.marketValue));
-        if (holdings.isEmpty) return const SizedBox.shrink();
+        if (holdings.isEmpty) {
+          return SproutCard(
+            child: Padding(
+                padding: EdgeInsetsGeometry.all(24),
+                child: Center(child: Text("This account does not contain any positions."))),
+          );
+        }
 
         return SproutCard(
           child: ListView.separated(

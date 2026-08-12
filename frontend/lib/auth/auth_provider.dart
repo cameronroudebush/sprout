@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/cookie_provider.dart';
-import 'package:sprout/auth/oidc_helper/oidc_helper.dart';
+import 'package:sprout/auth/oidc_helper.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/api/base_api.dart';

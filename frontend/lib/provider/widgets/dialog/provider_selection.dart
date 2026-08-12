@@ -57,8 +57,8 @@ class ProviderSelectionList extends StatelessWidget {
     );
 
     // Fixed, elegant layout sizing constants for the grid cards
-    const double cardWidth = 140.0;
-    const double cardHeight = 130.0;
+    const double cardWidth = 120.0;
+    const double cardHeight = 110.0;
 
     // Isolated inner builder helper for layout cards
     Widget buildGridItem(ProviderConfig provider) {
