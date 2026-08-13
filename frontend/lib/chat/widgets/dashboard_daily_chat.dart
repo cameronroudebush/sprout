@@ -25,7 +25,6 @@ class DashboardDailyChatCard extends ConsumerWidget {
       emptyCondition: (status) => status == null || status.text.trim().isEmpty,
       data: (status) {
         return SingleChildScrollView(
-          physics: mobile ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ChatMessageContent(

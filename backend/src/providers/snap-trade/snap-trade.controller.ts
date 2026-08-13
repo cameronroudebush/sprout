@@ -27,7 +27,7 @@ export class SnapTradeProviderController {
   @ApiOkResponse({ description: "Link generated successfully.", type: String })
   @EnabledGuard.attachDemoMode()
   async generateLink(@CurrentUser() user: User, @Query("redirectUrl") redirectUrl?: string) {
-    return await this.snapTradeProviderService.generateLinkToken(user, redirectUrl);
+    return await this.snapTradeProviderService.generateLinkToken(user, { redirectUrl });
   }
 
   @Post("post-link")

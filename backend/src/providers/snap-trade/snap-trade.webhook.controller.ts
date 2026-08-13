@@ -73,11 +73,12 @@ export class SnapTradeWebHookController {
           const asset = await this.getSnapTradeInstitutionAsset(authId);
           const user = asset.institution.user;
           this.logger.log(`Queueing Webhook based sync for: ${user.username} [${eventType}]`);
-          await this.providerSyncService.syncForProvider(user, this.snapTradeProvider, false, asset.institution.id);
+          await this.providerSyncService.syncForProvider<SnapTradeProviderService>(user, this.snapTradeProvider, false, asset.institution.id);
           break;
         }
 
-        case "CONNECTION_BROKEN": { //case "CONNECTION_DELETED":
+        case "CONNECTION_BROKEN": {
+          //case "CONNECTION_DELETED":
           const asset = await this.getSnapTradeInstitutionAsset(authId);
           this.logger.log(`Flagging institution as broken: [${eventType}]`);
           await this.providerSyncService.flagInstitution(asset.institution, true);
