@@ -3,6 +3,7 @@ export enum ProviderType {
   simpleFin = "simple-fin",
   zillow = "zillow",
   plaid = "plaid",
+  snapTrade = "snapTrade",
 }
 
 /** List of sub types that a provider would belong to */

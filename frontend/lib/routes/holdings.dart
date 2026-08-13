@@ -41,6 +41,25 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   bool _hasInitialSelection = false;
   MobileMarketTab _currentTab = MobileMarketTab.overview;
 
+  // Separate scroll controllers for mobile and desktop views
+  final ScrollController _mobileScrollController = ScrollController();
+  final ScrollController _desktopScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _mobileScrollController.dispose();
+    _desktopScrollController.dispose();
+    super.dispose();
+  }
+
+  void _resetScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_mobileScrollController.hasClients) {
+        _mobileScrollController.jumpTo(0);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -115,6 +134,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                   Expanded(
                     flex: 6,
                     child: SingleChildScrollView(
+                      controller: _desktopScrollController,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -185,6 +205,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                 ],
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _mobileScrollController,
+                    key: ValueKey(_currentTab),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -210,8 +232,11 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                               ),
                             ),
                           SproutCard(
-                              child:
-                                  HoldingDividendsWidget(investmentAccounts: investmentAccounts, isDesktop: isDesktop)),
+                            child: HoldingDividendsWidget(
+                              investmentAccounts: investmentAccounts,
+                              isDesktop: isDesktop,
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -240,6 +265,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                         setState(() {
                           _currentTab = newSelection.first;
                         });
+                        // Reset scroll post-render
+                        _resetScroll();
                       },
                     ),
                   ),

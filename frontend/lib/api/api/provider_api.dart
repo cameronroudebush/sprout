@@ -292,6 +292,102 @@ class ProviderApi {
     return null;
   }
 
+  /// Generate a connection link.
+  ///
+  /// Registers the user with SnapTrade if needed and generates a redirect URL to connect a brokerage.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] redirectUrl:
+  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo({ String? redirectUrl, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/snap-trade/link';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (redirectUrl != null) {
+      queryParams.addAll(_queryParams('', 'redirectUrl', redirectUrl));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Generate a connection link.
+  ///
+  /// Registers the user with SnapTrade if needed and generates a redirect URL to connect a brokerage.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] redirectUrl:
+  Future<String?> snapTradeProviderControllerGenerateLink({ String? redirectUrl, }) async {
+    final response = await snapTradeProviderControllerGenerateLinkWithHttpInfo( redirectUrl: redirectUrl, );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'String',) as String;
+    
+    }
+    return null;
+  }
+
+  /// Fires actions to perform once a user has linked new accounts.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> snapTradeProviderControllerPostLinkWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/snap-trade/post-link';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Fires actions to perform once a user has linked new accounts.
+  Future<void> snapTradeProviderControllerPostLink() async {
+    final response = await snapTradeProviderControllerPostLinkWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get property info from Zillow
   ///
   /// Grabs zillow asset data based on the account given.

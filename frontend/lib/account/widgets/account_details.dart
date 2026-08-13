@@ -15,6 +15,7 @@ import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/provider/widgets/plaid/plaid_helper.dart';
 import 'package:sprout/provider/widgets/provider_icon.dart';
+import 'package:sprout/provider/widgets/snap-trade/snap_trade_helper.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -94,48 +95,78 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   Future<void> _fixInstitution() async {
     final provider = widget.account.provider;
 
-    if (provider == ProviderTypeEnum.plaid) {
-      try {
-        final api = await ref.read(providerApiProvider.future);
-        final response = await api.plaidProviderControllerCreateLinkToken(
-          institutionId: widget.account.institution.id,
-        );
-
-        if (response?.linkToken != null) {
-          // Open Plaid SDK in update mode
-          LinkTokenConfiguration configuration = LinkTokenConfiguration(
-            token: response!.linkToken,
-          );
-          await PlaidLink.create(configuration: configuration);
-          PlaidLink.onSuccess.first.then((success) async {
-            try {
-              final api = await ref.read(providerApiProvider.future);
-
-              // Handle public token exchange if a new link was created
-              await PlaidSyncHelper.exchangePublicTokenIfNeeded(
-                success,
-                api,
-                fallbackInstitutionName: widget.account.institution.name,
-              );
-
-              // Show sync popup whether it was a pure update or a full token exchange
+    switch (provider) {
+      case ProviderTypeEnum.snapTrade:
+        try {
+          final helper = SnapTradeHelper();
+          await helper.linkAccount(
+            ref,
+            onSuccess: () async {
               if (mounted) _showReSyncPopup();
-            } catch (e) {
-              if (mounted) ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
-            }
-          });
-          PlaidLink.open();
+            },
+            onError: (errorMsg) {
+              if (mounted) {
+                ref.read(notificationsProvider.notifier).parseOpenAPIException(errorMsg);
+              }
+            },
+          );
+        } catch (e) {
+          if (mounted) {
+            ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+          }
         }
-      } catch (e) {
-        ref.read(notificationsProvider.notifier).parseOpenAPIException((e));
-      }
-    } else if (provider == ProviderTypeEnum.simpleFin) {
-      // Handle SimpleFin which is just a simple URL
-      final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
-      _expectingReturnFromFix = true;
-      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-        _expectingReturnFromFix = false;
-      }
+        break;
+
+      case ProviderTypeEnum.plaid:
+        try {
+          final api = await ref.read(providerApiProvider.future);
+          final response = await api.plaidProviderControllerCreateLinkToken(
+            institutionId: widget.account.institution.id,
+          );
+
+          if (response?.linkToken != null) {
+            // Open Plaid SDK in update mode
+            LinkTokenConfiguration configuration = LinkTokenConfiguration(
+              token: response!.linkToken,
+            );
+            await PlaidLink.create(configuration: configuration);
+            PlaidLink.onSuccess.first.then((success) async {
+              try {
+                final api = await ref.read(providerApiProvider.future);
+
+                // Handle public token exchange if a new link was created
+                await PlaidSyncHelper.exchangePublicTokenIfNeeded(
+                  success,
+                  api,
+                  fallbackInstitutionName: widget.account.institution.name,
+                );
+
+                // Show sync popup whether it was a pure update or a full token exchange
+                if (mounted) _showReSyncPopup();
+              } catch (e) {
+                if (mounted) ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+              }
+            });
+            PlaidLink.open();
+          }
+        } catch (e) {
+          ref.read(notificationsProvider.notifier).parseOpenAPIException((e));
+        }
+        break;
+
+      case ProviderTypeEnum.simpleFin:
+        // Handle SimpleFin which is just a simple URL
+        final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
+        _expectingReturnFromFix = true;
+        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+          _expectingReturnFromFix = false;
+        }
+        break;
+
+      case ProviderTypeEnum.zillow:
+      default:
+        // No external auth fix flow needed for Zillow or unhandled providers
+        break;
     }
   }
 

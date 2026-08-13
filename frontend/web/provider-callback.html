@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sprout Provider Authorizing...</title>
+  </head>
+  <body>
+    <script>
+      if (window.opener) {
+        // Notify the main Sprout tab that authorization completed
+        window.opener.postMessage("PROVIDER_SUCCESS", "*");
+      }
+      // Close the popup window
+      window.close();
+    </script>
+  </body>
+</html>

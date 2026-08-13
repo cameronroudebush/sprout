@@ -32,7 +32,7 @@ export class PlaidProviderController {
   @EnabledGuard.attachDemoMode()
   async createLinkToken(@CurrentUser() user: User, @PublicURL() publicUrl: string, @Query("institutionId") institutionId?: string) {
     try {
-      return await this.plaidProviderService.generateLinkToken(user, publicUrl, institutionId);
+      return await this.plaidProviderService.generateLinkToken(user, { publicUrl, institutionId });
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException("Failed to generate Plaid link token.");

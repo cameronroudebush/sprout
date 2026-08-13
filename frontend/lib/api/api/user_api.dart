@@ -72,6 +72,55 @@ class UserApi {
     return null;
   }
 
+  /// Delete user by ID.
+  ///
+  /// Permanently deletes a specific user and safely unlinks their remote financial connections. Requires admin privileges.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<Response> userControllerDeleteByIdWithHttpInfo(String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/user/{id}'
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete user by ID.
+  ///
+  /// Permanently deletes a specific user and safely unlinks their remote financial connections. Requires admin privileges.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] id (required):
+  Future<void> userControllerDeleteById(String id,) async {
+    final response = await userControllerDeleteByIdWithHttpInfo(id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Get user by ID.
   ///
   /// Retrieves a user's information by their Id. Only provides relevant information.

@@ -13,6 +13,7 @@ import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
+import 'package:sprout/transaction/models/extensions/transaction_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_map.dart';
 import 'package:sprout/transaction/widgets/transaction_rule_edit.dart';
@@ -168,14 +169,13 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
         showSubmitButton: !isDemoMode,
         allowSubmitClick: _valHasChanged() && (_formKey.currentState?.validate() ?? false),
         onSubmitClick: _submit,
-        extraButtons: FilledButton.icon(
+        extraButtons: IconButton.filled(
           style: FilledButton.styleFrom(
             backgroundColor: theme.colorScheme.error,
             foregroundColor: theme.colorScheme.onError,
           ),
           onPressed: isDemoMode ? null : () => _confirmDelete(context, theme),
           icon: const Icon(Icons.delete_outline),
-          label: const Text("Delete"),
         ),
         child: _getForm(context, theme, isDesktop),
       );
@@ -312,18 +312,54 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      DateFormat("MMM d, yyyy 'at' h:mm a").format(_postedDate),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: (widget.disableNonEditable || widget.transaction.pending) ? theme.disabledColor : null,
+                    Expanded(
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        children: [
+                          Text(
+                            DateFormat("MMM d, yyyy 'at' h:mm a").format(_postedDate),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: (widget.disableNonEditable || widget.transaction.pending)
+                                  ? theme.disabledColor
+                                  : null,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Icon(
-                      Icons.calendar_today,
-                      size: 20,
-                      color:
-                          (widget.disableNonEditable || widget.transaction.pending) ? theme.disabledColor : Colors.grey,
-                    ),
+                    Tooltip(
+                      message: widget.transaction.relativeTime,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            size: 20,
+                            color: (widget.disableNonEditable || widget.transaction.pending)
+                                ? theme.disabledColor
+                                : Colors.grey,
+                          ),
+                          Positioned(
+                            top: -4,
+                            right: -6,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 11,
+                                color: (widget.disableNonEditable || widget.transaction.pending)
+                                    ? theme.disabledColor
+                                    : theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),

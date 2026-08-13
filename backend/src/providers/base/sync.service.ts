@@ -28,7 +28,7 @@ export class ProviderSyncService {
    * @param notify If we should send a notification that the user has new data. This will be batched and sent via the {@link SyncNotificationJob}.
    * @param institutionId Optional ID of a specific institution to sync. If provided, skips syncing other institutions for this provider.
    */
-  async syncForProvider(user: User, provider: ProviderBase, notify = true, institutionId?: string) {
+  async syncForProvider<T extends ProviderBase>(user: User, provider: T, notify = true, institutionId?: string) {
     if (!(await provider.isAvailable(user))) {
       this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
       return;
