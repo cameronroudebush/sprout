@@ -403,6 +403,38 @@
       }
     },
     "/user/{id}": {
+      "delete": {
+        "description": "Permanently deletes a specific user and safely unlinks their remote financial connections. Requires admin privileges.",
+        "operationId": "UserController_deleteById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required.\n\nUser is not authenticated or lacks admin privileges."
+          },
+          "404": {
+            "description": "User with the specified Id not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete user by ID.",
+        "tags": ["User"]
+      },
       "get": {
         "description": "Retrieves a user's information by their Id. Only provides relevant information.",
         "operationId": "UserController_getById",

@@ -8,4 +8,9 @@ extension TransactionExtensions on Transaction {
   String get timeText {
     return DateTime.now().difference(posted).inDays > 3 ? posted.toShort : timeago.format(posted);
   }
+
+  /// Calculates a human-readable relative time string for when this transaction occurred
+  String get relativeTime {
+    return timeago.format(posted);
+  }
 }

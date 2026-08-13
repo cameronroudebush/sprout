@@ -12,7 +12,7 @@ import { DevicePlatform } from "@backend/user/model/user.device.type";
 import { User } from "@backend/user/model/user.model";
 import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { UserService } from "@backend/user/user.service";
-import { BadRequestException, Body, Controller, Get, Logger, NotFoundException, Param, Patch, Post, Req, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Logger, NotFoundException, Param, Patch, Post, Req, UnauthorizedException } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all User related content */
@@ -67,6 +67,25 @@ export class UserController {
 
     Object.assign(user, updateData);
     return await user.update();
+  }
+
+  @Delete(":id")
+  @ApiOperation({
+    summary: "Delete user by ID.",
+    description: "Permanently deletes a specific user and safely unlinks their remote financial connections. Requires admin privileges.",
+  })
+  @ApiOkResponse({ description: "User deleted successfully." })
+  @ApiUnauthorizedResponse({ description: "User is not authenticated or lacks admin privileges." })
+  @ApiNotFoundResponse({ description: "User with the specified Id not found." })
+  @AuthGuard.attach()
+  @EnabledGuard.attachDemoMode()
+  async deleteById(@CurrentUser() currentUser: User, @Param("id") id: string) {
+    if (!currentUser.admin) throw new UnauthorizedException("You must be an admin to perform this capability.");
+    if (currentUser.id === id) throw new BadRequestException("You cannot delete the admin user.");
+    const targetUser = await User.findOne({ where: { id: id } });
+    if (!targetUser) throw new NotFoundException(`User with ID ${id} not found.`);
+    await this.userService.deleteUser(targetUser);
+    return { success: true };
   }
 
   @Get(":id")
