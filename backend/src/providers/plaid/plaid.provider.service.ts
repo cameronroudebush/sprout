@@ -123,12 +123,26 @@ export class PlaidProviderService extends ProviderBase<
     const authContext = { accessToken: exchangeResponse.data.access_token, itemId: exchangeResponse.data.item_id };
 
     await this.rateLimit(user).incrementOrError();
+
+    // Fetch the actual bank URL from Plaid's metadata
+    let institutionUrl = this.config.url;
+    try {
+      await this.rateLimit(user).incrementOrError();
+      const instResponse = await this.plaidClient.institutionsGetById({
+        institution_id: payload.metadata.institution.institution_id,
+        country_codes: [CountryCode.Us],
+        options: { include_optional_metadata: true },
+      });
+      institutionUrl = instResponse.data.institution.url ?? this.config.url;
+    } catch (e) {
+      this.logger.warn(`Could not fetch institution URL metadata for ${payload.metadata.institution.name}`);
+    }
     const accountsResponse = await this.plaidClient.accountsGet({ access_token: authContext.accessToken });
 
     return [
       {
         institutionName: payload.metadata.institution.name,
-        institutionUrl: this.config.url,
+        institutionUrl: institutionUrl,
         authContext,
         rawAccounts: accountsResponse.data.accounts,
       },
@@ -203,8 +217,12 @@ export class PlaidProviderService extends ProviderBase<
     const plaidError = (error as AxiosError).response?.data as PlaidError;
     if (plaidError && plaidError.error_type === "ITEM_ERROR") {
       const criticalErrors = ["ITEM_LOGIN_REQUIRED", "PENDING_EXPIRATION", "INVALID_ACCESS_TOKEN", "ITEM_NOT_FOUND"];
-      if (criticalErrors.includes(plaidError.error_code)) await this.setInstitutionError(asset, true);
+      if (criticalErrors.includes(plaidError.error_code)) {
+        await this.setInstitutionError(asset, true);
+        return;
+      }
     }
+    this.logger.error(`Failed to sync Plaid for institution ${asset.institution.name}:`, error);
   }
 
   protected async setInstitutionError(asset: PlaidInstitutionAsset, hasError: boolean): Promise<void> {

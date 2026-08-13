@@ -138,11 +138,6 @@ export class SnapTradeProviderService extends ProviderBase<
         ? { holdings: [], transactions: [], removedTransactionIds: [] }
         : await this.fetchInitialSyncData(rawAccount, finalAccount, { authorizationId: asset.authorizationId, userSecret: snapTradeUser.userSecret }, user);
 
-      if (syncData.holdings && syncData.holdings.length > 0) {
-        await Holding.delete({ account: { id: finalAccount.id } });
-        await Promise.all(syncData.holdings.map((h) => h.insert()));
-      }
-
       results.push({
         account: finalAccount,
         holdings: syncData.holdings,
@@ -166,7 +161,11 @@ export class SnapTradeProviderService extends ProviderBase<
 
   protected async handleSyncError(asset: SnapTradeInstitutionAsset, error: unknown): Promise<void> {
     const err = error as AxiosError;
-    if (err.response?.status === 401 || err.response?.status === 403) await this.setInstitutionError(asset, true);
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      await this.setInstitutionError(asset, true);
+    } else {
+      this.logger.error(`Failed to sync SnapTrade for institution ${asset.institution.name}:`, error);
+    }
   }
 
   protected async setInstitutionError(asset: SnapTradeInstitutionAsset, hasError: boolean): Promise<void> {

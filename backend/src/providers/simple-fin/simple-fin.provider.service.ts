@@ -122,11 +122,6 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
       const finalAccount = await this.upsertAccount(user, institution, rawAccount, user.config.simpleFinToken);
       const syncData = await this.fetchInitialSyncData(rawAccount, finalAccount, user.config.simpleFinToken, user);
 
-      if (syncData.holdings && syncData.holdings.length > 0) {
-        await Holding.delete({ account: { id: finalAccount.id } });
-        await Promise.all(syncData.holdings.map((h) => h.insert()));
-      }
-
       results.push({ account: finalAccount, ...syncData });
     }
     return results;
@@ -167,6 +162,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     );
     // Explicitly set the ID to match SimpleFIN to prevent random UUID generation during insert
     acc.id = rawAccount.id;
+    acc.extra = rawAccount.extra;
     return acc;
   }
 
@@ -176,24 +172,25 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     _authContext: string,
     user: User,
   ): Promise<Omit<ProviderSyncResult, "account">> {
-    const holdings = rawAccount.holdings?.map(
-      (hold) =>
-        new Holding(
-          hold.currency,
-          parseFloat(hold.cost_basis),
-          hold.description,
-          parseFloat(hold.market_value),
-          parseFloat(hold.purchase_price),
-          parseFloat(hold.shares),
-          hold.symbol,
-          account,
-        ),
-    );
+    const holdings = rawAccount.holdings?.map((hold) => {
+      const h = new Holding(
+        hold.currency,
+        parseFloat(hold.cost_basis),
+        hold.description,
+        parseFloat(hold.market_value),
+        parseFloat(hold.purchase_price),
+        parseFloat(hold.shares),
+        hold.symbol,
+        account,
+      );
+      h.id = hold.id;
+      return h;
+    });
 
     const transactions = await Promise.all(
       (rawAccount.transactions || []).map(async (t) => {
         const category = await Category.getOrCreate(t.extra?.category, user);
-        const newTransaction = new Transaction(parseFloat(t.amount) * -1, new Date(t.posted * 1000), t.description, undefined, t.pending ?? false, account);
+        const newTransaction = new Transaction(parseFloat(t.amount), new Date(t.posted * 1000), t.description, undefined, t.pending ?? false, account);
         newTransaction.id = t.id;
         newTransaction.category = category;
         newTransaction.extra = t.extra;
