@@ -10,7 +10,7 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Query } from "@nestjs/common";
+import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Query, RequestTimeoutException } from "@nestjs/common";
 import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import cronParser from "cron-parser";
 import { startCase } from "lodash";
@@ -42,7 +42,25 @@ export class ChatController {
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
 
     const model = await this.chatService.getModel(user);
-    return await model.generateChatContent(chat, data.timeframe, data.allowCharts ?? true);
+
+    const timeoutMs = 60000; // 60 Seconds
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new RequestTimeoutException("The request to the LLM timed out.")), timeoutMs);
+    });
+
+    try {
+      // Race the generation against the timeout
+      return await Promise.race([model.generateChatContent(chat, data.timeframe, data.allowCharts ?? true), timeoutPromise]);
+    } catch (error: any) {
+      // If the timeout wins (or an unhandled error bubbles up), clean up the pending state
+      if (chat.isThinking) {
+        chat.isThinking = false;
+        chat.text = error?.message || "An unexpected timeout or error occurred.";
+        await chat.update();
+        this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
+      }
+      throw error;
+    }
   }
 
   @Get("history")

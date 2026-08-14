@@ -129,8 +129,12 @@ export abstract class ProviderBase<
 
           // Flush old holdings before snapshotting new ones to prevent duplication
           if (syncData.holdings && syncData.holdings.length > 0) {
-            await Holding.delete({ account: { id: finalAccount.id } });
             await Promise.all(syncData.holdings.map((h) => h.insert()));
+          }
+
+          if (syncData.transactions && syncData.transactions.length > 0) {
+            syncData.transactions.forEach((t) => (t.account = finalAccount));
+            await Transaction.insertMany(syncData.transactions);
           }
 
           results.push({
@@ -172,8 +176,10 @@ export abstract class ProviderBase<
 
   /**
    * Finds, creates, or merges a Sprout account using remote provider identifiers.
+   *
+   * The sync service will normally handle this on it's own. This is only intended to be used when exchanging and creating **NEW** accounts.
    */
-  protected async upsertAccount(user: User, institution: Institution, rawAccount: RawAccount, authContext?: AuthContext): Promise<Account> {
+  private async upsertAccount(user: User, institution: Institution, rawAccount: RawAccount, authContext?: AuthContext): Promise<Account> {
     const providerAccountId = this.extractProviderAccountId(rawAccount);
     let providerAsset = await this.getAccountAsset(providerAccountId, user.id);
 

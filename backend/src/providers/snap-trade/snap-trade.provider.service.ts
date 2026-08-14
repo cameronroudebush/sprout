@@ -130,10 +130,30 @@ export class SnapTradeProviderService extends ProviderBase<
 
     const results: ProviderSyncResult[] = [];
     for (const rawAccount of connAccounts) {
-      const finalAccount = await this.upsertAccount(user, asset.institution, rawAccount, {
-        authorizationId: asset.authorizationId,
-        userSecret: snapTradeUser.userSecret,
+      let finalAccount = await this.mapToSproutAccount(
+        rawAccount,
+        { authorizationId: asset.authorizationId, userSecret: snapTradeUser.userSecret },
+        user,
+        asset.institution,
+      );
+      let providerAsset = await SnapTradeAsset.findOne({
+        where: { snapTradeAccountId: rawAccount.id, account: { user: { id: user.id } } },
+        relations: { account: true },
       });
+
+      // SnapTrade auto-links new accounts, so we insert them if they appear on an existing connection
+      if (providerAsset == null) {
+        finalAccount = await finalAccount.insert();
+        await new SnapTradeAsset(finalAccount, rawAccount.id).insert();
+      } else {
+        const updatedBalance = finalAccount.balance;
+        const updatedAvail = finalAccount.availableBalance;
+
+        finalAccount = providerAsset.account;
+        finalAccount.balance = updatedBalance;
+        finalAccount.availableBalance = updatedAvail;
+      }
+
       const syncData = accountsOnly
         ? { holdings: [], transactions: [], removedTransactionIds: [] }
         : await this.fetchInitialSyncData(rawAccount, finalAccount, { authorizationId: asset.authorizationId, userSecret: snapTradeUser.userSecret }, user);

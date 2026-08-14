@@ -191,7 +191,24 @@ export class PlaidProviderService extends ProviderBase<
 
     const results: ProviderSyncResult[] = [];
     for (const rawAccount of accountsResponse.data.accounts) {
-      const finalAccount = await this.upsertAccount(user, asset.institution, rawAccount, { accessToken: asset.accessToken, itemId: asset.itemId });
+      let finalAccount = await this.mapToSproutAccount(rawAccount, { accessToken: asset.accessToken, itemId: asset.itemId }, user, asset.institution);
+      let providerAsset = await PlaidAsset.findOne({
+        where: { plaidAccountId: rawAccount.account_id, account: { user: { id: user.id } } },
+        relations: { account: true },
+      });
+
+      // Plaid auto-links new accounts, so we insert them if they appear on an existing connection
+      if (providerAsset == null) {
+        finalAccount = await finalAccount.insert();
+        await new PlaidAsset(finalAccount, rawAccount.account_id).insert();
+      } else {
+        const updatedBalance = finalAccount.balance;
+        const updatedAvail = finalAccount.availableBalance;
+
+        finalAccount = providerAsset.account;
+        finalAccount.balance = updatedBalance;
+        finalAccount.availableBalance = updatedAvail;
+      }
 
       const accountTransactions = added.concat(modified).filter((t) => t.account_id === rawAccount.account_id);
       const transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);

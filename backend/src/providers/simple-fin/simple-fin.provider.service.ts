@@ -119,8 +119,11 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
       let institution = await Institution.findOne({ where: { user: { id: user.id }, name: rawAccount.org.name } });
       if (!institution) institution = await new Institution(rawAccount.org.url, rawAccount.org.name, false, user).insert();
 
-      const finalAccount = await this.upsertAccount(user, institution, rawAccount, user.config.simpleFinToken);
-      const syncData = await this.fetchInitialSyncData(rawAccount, finalAccount, user.config.simpleFinToken, user);
+      const finalAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
+
+      const syncData = accountsOnly
+        ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
+        : await this.fetchInitialSyncData(rawAccount, finalAccount, user.config.simpleFinToken, user);
 
       results.push({ account: finalAccount, ...syncData });
     }

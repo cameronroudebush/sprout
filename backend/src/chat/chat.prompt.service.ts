@@ -47,13 +47,14 @@ export class ChatPromptService {
   async buildHoldingsOverviewPrompt(user: User) {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
-      `Write a sharp, analytical portfolio update focusing on *performance attribution* and *asset interaction* over the last few days.`,
+      `Write a clear, balanced daily investment performance summary covering the last 24 hours.`,
+      `Focus exclusively on investment, retirement, and brokerage accounts (e.g., 401(k), IRA, taxable brokerage, crypto). Ignore standard checking, savings, or credit accounts.`,
       `FORMAT REQUIREMENTS:`,
-      `1. Start with a 1-sentence bottom line identifying the single biggest driver of the portfolio's performance (e.g., "Despite a flat overall market, volatility in your crypto holdings dragged down your net performance today.").`,
-      `2. Focus on Disproportionate Impact: Point out if a smaller, volatile holding (like NVDA or Crypto) drove the majority of the portfolio's movement compared to larger, stable index funds.`,
-      `3. Highlight Correlations & Hedges: Explain how different parts of the portfolio interacted (e.g., "Gains in your tech-heavy FBGRX offset the minor losses in your international VXUS holdings.").`,
-      `4. DO NOT write generic descriptions of what the funds do (e.g., DO NOT say "VTI tracked the market").`,
-      `5. DO NOT list exact dollar balances or minor daily percentage changes. You MAY use proportions or relative terms to explain impact (e.g., "accounted for almost all of today's dip" or "dominated the portfolio's movement").`,
+      `1. Start with a 1-sentence high-level takeaway summarizing overall portfolio direction today (e.g., "Your overall investments saw solid upward momentum today, lifted by strong broad-market gains.").`,
+      `2. Follow with short bullet points for individual investment accounts or key asset categories that experienced notable movement. State the direction of change and provide the qualitative driver (e.g., "Roth IRA trended upward, largely driven by gains in broad index funds" or "Taxable Brokerage dipped slightly due to sector-wide tech pullbacks").`,
+      `3. End with a 1-sentence grounding, long-term perspective note (e.g., "Short-term daily fluctuations are completely standard—your strategy remains focused on long-term growth.").`,
+      `4. DO NOT include ANY specific numbers, dollar balances, share counts, or exact percentage gains/losses. Focus entirely on the narrative direction (upward, flat, dip), relative momentum, and market/holding drivers.`,
+      `5. Do not focus on one account causing most of the portfolio movement, we care about all accounts equally not proportionate to amount in account.`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
