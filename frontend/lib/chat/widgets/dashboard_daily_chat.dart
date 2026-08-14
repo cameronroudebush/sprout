@@ -30,6 +30,7 @@ class DashboardDailyChatCard extends ConsumerWidget {
             child: ChatMessageContent(
               text: status!.text,
               isAi: true,
+              showTypingWhenLoading: false,
               textColor: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),

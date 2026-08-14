@@ -1,3 +1,4 @@
+import { Colors } from "@backend/cash-flow/model/colors";
 import { ChatPromptService } from "@backend/chat/chat.prompt.service";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
@@ -53,6 +54,7 @@ export class ChatService {
           let aiText = response.text ?? "";
           const sortedEntries = Array.from(idMap.entries()).sort((a, b) => b[1].length - a[1].length);
           for (const [realName, genericId] of sortedEntries) aiText = aiText.replaceAll(genericId, realName);
+          aiText = this.injectChartColors(aiText);
           if (!aiText) throw new InternalServerErrorException("Failed to to process request to LLM.");
           return aiText;
         } catch (e: any) {
@@ -67,9 +69,9 @@ export class ChatService {
       };
 
       /** Generates chat responses for user requests. */
-      const generateChatContent = async (chat: ChatHistory, timeframe: ChatTimeframe) => {
+      const generateChatContent = async (chat: ChatHistory, timeframe: ChatTimeframe, allowCharts: boolean) => {
         try {
-          const { contents, idMap } = await this.promptBuilder.buildChatPrompt(user, timeframe);
+          const { contents, idMap } = await this.promptBuilder.buildChatPrompt(user, timeframe, allowCharts);
           await logTokens(contents, "chat response");
           const aiText = await generateContent(contents, idMap);
           chat.text = aiText;
@@ -121,5 +123,30 @@ export class ChatService {
     } else {
       throw new InternalServerErrorException("Invalid LLM model configured");
     }
+  }
+
+  /** Helper function that allows us to inject colors for charts based on our supported backend colors */
+  private injectChartColors(text: string): string {
+    const chartRegex = /```chart\s*([\s\S]*?)\s*```/g;
+    return text.replace(chartRegex, (match, jsonString) => {
+      try {
+        const chartData = JSON.parse(jsonString.trim());
+        if (chartData && chartData.type === "line" && Array.isArray(chartData.series)) {
+          chartData.series = chartData.series.map((series: any) => ({
+            ...series,
+            color: Colors.getColorForFeature(series.label || "Default"),
+          }));
+        } else if (chartData && chartData.type === "pie" && chartData.data) {
+          const colorMapping: Record<string, string> = {};
+          for (const key of Object.keys(chartData.data)) {
+            colorMapping[key] = Colors.getColorForFeature(key);
+          }
+          chartData.colors = colorMapping;
+        }
+        return `\`\`\`chart\n${JSON.stringify(chartData, null, 2)}\n\`\`\``;
+      } catch (e) {
+        return match;
+      }
+    });
   }
 }

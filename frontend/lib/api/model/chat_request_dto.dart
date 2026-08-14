@@ -15,6 +15,7 @@ class ChatRequestDTO {
   ChatRequestDTO({
     required this.message,
     this.timeframe = const ChatRequestDTOTimeframeEnum._('threeMonths'),
+    this.allowCharts = true,
   });
 
   /// The message to send to the AI
@@ -23,24 +24,30 @@ class ChatRequestDTO {
   /// The historical timeframe to include in context.
   ChatRequestDTOTimeframeEnum timeframe;
 
+  /// Whether the LLM is allowed to generate chart JSON blocks.
+  bool allowCharts;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is ChatRequestDTO &&
     other.message == message &&
-    other.timeframe == timeframe;
+    other.timeframe == timeframe &&
+    other.allowCharts == allowCharts;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (message.hashCode) +
-    (timeframe.hashCode);
+    (timeframe.hashCode) +
+    (allowCharts.hashCode);
 
   @override
-  String toString() => 'ChatRequestDTO[message=$message, timeframe=$timeframe]';
+  String toString() => 'ChatRequestDTO[message=$message, timeframe=$timeframe, allowCharts=$allowCharts]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'message'] = this.message;
       json[r'timeframe'] = this.timeframe;
+      json[r'allowCharts'] = this.allowCharts;
     return json;
   }
 
@@ -65,6 +72,7 @@ class ChatRequestDTO {
       return ChatRequestDTO(
         message: mapValueOfType<String>(json, r'message')!,
         timeframe: ChatRequestDTOTimeframeEnum.fromJson(json[r'timeframe'])!,
+        allowCharts: mapValueOfType<bool>(json, r'allowCharts') ?? true,
       );
     }
     return null;

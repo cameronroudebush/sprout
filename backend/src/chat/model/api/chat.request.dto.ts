@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 /** How much data to include within the requests */
 export enum ChatTimeframe {
@@ -25,6 +25,14 @@ export class ChatRequestDTO {
   })
   @IsEnum(ChatTimeframe)
   timeframe!: ChatTimeframe;
+
+  @ApiPropertyOptional({
+    description: "Whether the LLM is allowed to generate chart JSON blocks.",
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  allowCharts?: boolean;
 
   constructor(message: string) {
     this.message = message;

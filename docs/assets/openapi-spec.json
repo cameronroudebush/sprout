@@ -4107,6 +4107,11 @@
             "type": "string",
             "description": "The historical timeframe to include in context.",
             "default": "threeMonths"
+          },
+          "allowCharts": {
+            "type": "boolean",
+            "description": "Whether the LLM is allowed to generate chart JSON blocks.",
+            "default": true
           }
         },
         "required": ["message", "timeframe"]

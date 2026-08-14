@@ -1,4 +1,5 @@
 import "package:sprout/api/api.dart";
+import "package:sprout/shared/widgets/charts/models/line_chart_data.dart";
 
 /// Utility class for manipulating data with [ChartRangeEnum]
 class ChartRangeUtility {
@@ -77,6 +78,37 @@ class ChartRangeUtility {
         return useExtendedPeriodString ? "All time" : "All";
       default:
         return "";
+    }
+  }
+
+  /// Infers a chart range given a time series to best display all available data
+  static ChartRangeEnum inferChartRange(List<SproutChartSeries> seriesList) {
+    DateTime? earliest;
+    DateTime? latest;
+
+    for (final series in seriesList) {
+      for (final entry in series.data.sortedEntries) {
+        final date = entry.key;
+        if (earliest == null || date.isBefore(earliest)) earliest = date;
+        if (latest == null || date.isAfter(latest)) latest = date;
+      }
+    }
+
+// Fallback
+    if (earliest == null || latest == null) return ChartRangeEnum.threeMonths;
+
+    final differenceInDays = latest.difference(earliest).inDays;
+
+    if (differenceInDays <= 1) {
+      return ChartRangeEnum.oneDay;
+    } else if (differenceInDays <= 7) {
+      return ChartRangeEnum.sevenDays;
+    } else if (differenceInDays <= 31) {
+      return ChartRangeEnum.oneMonth;
+    } else if (differenceInDays <= 90) {
+      return ChartRangeEnum.threeMonths;
+    } else {
+      return ChartRangeEnum.allTime;
     }
   }
 }

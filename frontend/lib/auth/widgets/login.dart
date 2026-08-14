@@ -44,15 +44,15 @@ class LoginPage extends ConsumerWidget {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 48.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
                     child: Column(
                       children: [
-                        SproutLogo(400),
                         const Spacer(),
                         Column(
                           mainAxisSize: MainAxisSize.min,
-                          spacing: 24,
                           children: [
+                            SproutLogo(280),
+                            const SizedBox(height: 48),
                             Text(
                               'Welcome Back!',
                               style: theme.textTheme.headlineMedium?.copyWith(
@@ -60,6 +60,7 @@ class LoginPage extends ConsumerWidget {
                               ),
                               textAlign: TextAlign.center,
                             ),
+                            const SizedBox(height: 24),
                             const LoginForm(),
                           ],
                         ),
@@ -75,7 +76,7 @@ class LoginPage extends ConsumerWidget {
                   ),
                 ),
               ),
-              Expanded(
+              const Expanded(
                 child: LoginBackgroundWidget(),
               ),
             ],
@@ -103,22 +104,17 @@ class LoginPage extends ConsumerWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SproutLogo(300),
+                              SproutLogo(260),
                               const SizedBox(height: 32),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                spacing: 24,
-                                children: [
-                                  Text(
-                                    'Welcome Back!',
-                                    style: theme.textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const LoginForm(),
-                                ],
+                              Text(
+                                'Welcome Back!',
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
+                              const SizedBox(height: 24),
+                              const LoginForm(),
                               const SizedBox(height: 32),
                               Text(
                                 config?.version ?? "",

@@ -137,11 +137,7 @@ class DashboardPage extends ConsumerWidget {
           height: 200,
           child: UserNetWorthWidget(mobile: true),
         ),
-        if (chatEnabled)
-          const SizedBox(
-            height: 300,
-            child: DashboardDailyChatCard(),
-          ),
+        if (chatEnabled) const DashboardDailyChatCard(mobile: true),
         // Account overview
         const DashboardAccountsCard(),
         // Recent transactions

@@ -18,9 +18,9 @@ export class ChatPromptService {
   constructor(private readonly transactionService: TransactionService) {}
 
   /** Generates the system instruction and prompt content to pass to the LLM for standard chatting. */
-  async buildChatPrompt(user: User, timeframe: ChatTimeframe) {
+  async buildChatPrompt(user: User, timeframe: ChatTimeframe, allowCharts: boolean) {
     const instructions = [
-      ...this.getSharedSystemInstructions(user),
+      ...this.getSharedSystemInstructions(user, true, allowCharts),
       `ONLY answer the specific question asked by the user. Do not provide extra summaries or net worth trends unless requested. Keep responses always related to finances.`,
       `Consider smart finance habits. Reduce unnecessary spending, keep a rainy day fund, invest excess.`,
     ];
@@ -59,8 +59,13 @@ export class ChatPromptService {
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
   }
 
-  /** Provides foundational system instructions common to all financial prompts. */
-  private getSharedSystemInstructions(user: User, includeCYA: boolean = true): string[] {
+  /**
+   * Provides foundational system instructions common to all financial prompts.
+   *
+   * @param includeCYA Include "cover your ass" which is intended to include the statement recommending consulting a professional.
+   * @param allowCharts If we should allow the LLM to generate charts for rendering. False by default.
+   */
+  private getSharedSystemInstructions(user: User, includeCYA: boolean = true, allowCharts = false): string[] {
     const today = formatDate(new Date(), "MM/dd/yyyy");
     return [
       `You are a financial assistant for Sprout (https://sprout.croudebush.net/).`,
@@ -79,6 +84,23 @@ export class ChatPromptService {
         - Example Incorrect: "Analysis for Acc_0"
         - Do not guess names; only use the @ID provided in the mapping.`,
       `The users chosen currency is: ${user.config.currency}. All values will be in this currency already. Please make sure to use the proper currency symbol leading the numbers.`,
+      allowCharts
+        ? `CHART GENERATION:
+          - VISUALIZATION GUIDELINE: You may include a chart whenever visualizing trends, category breakdowns, or historical patterns adds useful context. Maximum ONE chart per response.
+          - Output charts in these exact formats when visualizing financial data:
+            1. Line (Trends/History over time):
+            \`\`\`chart
+            {"type":"line","title":"Account Balance Trends","series":[{"label":"@Acc_0","data":[{"date":"08/01/2026","value":1500.50}]}]}
+            \`\`\`
+            2. Pie (Breakdowns/Portions/Categories):
+            \`\`\`chart
+            {"type":"pie","title":"Spending Breakdown","data":{"Dining":150.25,"Groceries":420.00}}
+            \`\`\`
+          - Allowed types: "line", "pie".
+          - Date format for line charts: "MM/dd/yyyy".
+          - Plain text only for "title", "label", and data keys (no markdown or asterisks).
+          - Map line chart "data" directly from the provided "his" context array.`
+        : `If the user asks for a chart or visual breakdown, politely inform them that chart generation is currently disabled/unavailable and present the financial insights cleanly using Markdown text, bullet points, or tables instead.`,
       includeCYA ? `Always include: "Consult a financial advisor before making decisions."` : "",
     ];
   }

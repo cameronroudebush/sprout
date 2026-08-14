@@ -42,7 +42,7 @@ export class ChatController {
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
 
     const model = await this.chatService.getModel(user);
-    return await model.generateChatContent(chat, data.timeframe);
+    return await model.generateChatContent(chat, data.timeframe, data.allowCharts ?? true);
   }
 
   @Get("history")
