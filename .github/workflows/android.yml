@@ -81,7 +81,7 @@ jobs:
           starting-version: ${{ steps.get_repo_info.outputs.version_string }}
 
       - name: Set up Environment (Java/Flutter)
-        uses: actions/setup-java@v5.6.0
+        uses: actions/setup-java@v5.7.0
         with:
           java-version: "17"
           distribution: "temurin"
