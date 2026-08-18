@@ -43,7 +43,7 @@
     "nodemailer": "^9.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "plaid": "^43.0.0",
+    "plaid": "^45.0.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.2",
     "snaptrade-typescript-sdk": "^11.0.4",
