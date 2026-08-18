@@ -162,10 +162,16 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
 
       this.logger.debug(`Background generating fresh overviews for active user ${user.username}.`);
       const model = await this.chatService.getModel(user);
-
-      // Concurrently generate overviews for all registered ChatOverviewType enum values
       const overviewTypes = Object.values(ChatOverviewType) as ChatOverviewType[];
-      await Promise.all(overviewTypes.map((type) => model.generateOverview(type)));
+      // Sequentially generate overviews to avoid bursting the API
+      for (const type of overviewTypes) {
+        try {
+          await model.generateOverview(type);
+        } catch (e) {
+          // Log the individual failure but continue to the next overview type
+          this.logger.error(`Failed to generate ${type} overview for ${user.username}: ${(e as Error).message}`);
+        }
+      }
     } catch (e) {
       this.logger.error(`Failed to generate overviews for ${user.username}: ${(e as Error).message}`);
     }

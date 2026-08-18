@@ -48,24 +48,54 @@ export class ChatService {
       };
 
       /** Executes LLM generation and maps generic IDs back to real names. */
-      const generateContent = async (contents: ContentListUnion, idMap: Map<string, string>) => {
-        try {
-          const response = await aiModel.generateContent({ model: type, contents });
-          let aiText = response.text ?? "";
-          const sortedEntries = Array.from(idMap.entries()).sort((a, b) => b[1].length - a[1].length);
-          for (const [realName, genericId] of sortedEntries) aiText = aiText.replaceAll(genericId, realName);
-          aiText = this.injectChartColors(aiText);
-          if (!aiText) throw new InternalServerErrorException("Failed to to process request to LLM.");
-          return aiText;
-        } catch (e: any) {
-          if (e?.message?.includes("You exceeded your current quota") || e?.message?.includes("429"))
-            throw new ThrottlerException("You have exceeded your request quota. Try again later.");
+      const generateContent = async (contents: ContentListUnion, idMap: Map<string, string>, maxRetries = 3) => {
+        let attempt = 0;
 
-          if (e?.message) throw JSON.parse(e.message)?.error as ApiError;
-          const err = e?.error as ApiError | undefined;
-          if (err?.message) throw err.message;
-          throw e;
+        while (attempt < maxRetries) {
+          try {
+            const response = await aiModel.generateContent({ model: type, contents });
+            let aiText = response.text ?? "";
+
+            const sortedEntries = Array.from(idMap.entries()).sort((a, b) => b[1].length - a[1].length);
+            for (const [realName, genericId] of sortedEntries) aiText = aiText.replaceAll(genericId, realName);
+            aiText = this.injectChartColors(aiText);
+
+            if (!aiText) throw new InternalServerErrorException("Failed to to process request to LLM.");
+            return aiText;
+          } catch (e: any) {
+            attempt++;
+
+            // Check if the error is a temporary 503 / High Demand issue
+            const isOverloaded = e?.code === 503 || e?.status === "UNAVAILABLE" || e?.message?.includes("high demand");
+
+            if (isOverloaded && attempt < maxRetries) {
+              const delayMs = attempt * 2000; // Exponential backoff
+              this.logger.warn(`Model overloaded (503). Retrying attempt ${attempt}/${maxRetries} in ${delayMs}ms...`);
+              await new Promise((resolve) => setTimeout(resolve, delayMs));
+              continue; // Loop again
+            }
+
+            // If we exhaust retries or it's a different error, throw normally
+            if (e?.message?.includes("You exceeded your current quota") || e?.message?.includes("429"))
+              throw new ThrottlerException("You have exceeded your request quota. Try again later.");
+
+            // Safely attempt to parse JSON errors, otherwise fall through
+            try {
+              if (e?.message && e.message.trim().startsWith("{")) {
+                throw JSON.parse(e.message)?.error as ApiError;
+              }
+            } catch (parseError) {
+              /* ignore parse error */
+            }
+
+            const err = e?.error as ApiError | undefined;
+            if (err?.message) throw err.message;
+            throw e;
+          }
         }
+
+        // Fallback
+        throw new InternalServerErrorException("Failed to generate content: retry limit reached or invalid configuration.");
       };
 
       /** Generates chat responses for user requests. */

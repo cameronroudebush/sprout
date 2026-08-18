@@ -139,11 +139,21 @@ export class UserController {
   @EnabledGuard.attachDemoMode()
   async registerDevice(@CurrentUser() user: User, @Body() data: RegisterDeviceDto) {
     // Check if this specific token is already registered
-    let device = await UserDevice.findOne({ where: { deviceId: data.deviceId } });
+    let device = await UserDevice.findOne({
+      where: [
+        // Check for either a matching device id or a matching FCM token since device id's can change without changing FCM.
+        // Don't scope to user in the event it's a shared device.
+        { deviceId: data.deviceId },
+        { fcmToken: data.token },
+      ],
+    });
 
     if (device) {
       // Update existing device info
       device.deviceName = data.deviceName ?? device.deviceName;
+      device.deviceId = data.deviceId;
+      device.fcmToken = data.token;
+      if (data.platform) device.platform = data.platform;
       device.lastSeenAt = new Date();
       device.user = user; // Re-associate in case the user switched accounts
       device = await device.update();
