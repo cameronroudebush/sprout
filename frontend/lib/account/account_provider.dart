@@ -56,14 +56,15 @@ class Accounts extends _$Accounts {
 
     try {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: true));
-      notificationId = notifications.openFrontendOnly("Account sync is running.", showSpinner: true);
+      notificationId = notifications.openFrontendOnly("Account sync is running.", showSpinner: true, duration: 3600);
 
       final api = await ref.read(accountApiProvider.future);
       await api.accountControllerManualSync(force: false);
     } catch (e) {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
-      if (notificationId != null) notifications.clearOverlay(notificationId);
       notifications.openWithAPIException(e);
+    } finally {
+      if (notificationId != null) notifications.clearOverlay(notificationId);
     }
   }
 

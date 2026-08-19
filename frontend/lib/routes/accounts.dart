@@ -42,6 +42,8 @@ class AccountsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountsProvider);
+    final accountsState = ref.watch(accountsProvider);
+    final isSyncing = accountsState.value?.manualSyncIsRunning == true;
 
     return accountsAsync.whenDefault(
       data: (state) {
@@ -74,7 +76,11 @@ class AccountsPage extends ConsumerWidget {
                 label: 'Add Account',
                 onTap: (context) => showSproutPopup(context: context, builder: (_) => const ProviderDialog()),
               ),
-              FABAction(icon: Icons.refresh, label: 'Sync All', onTap: (context) => _showSyncPopup(context, ref)),
+              FABAction(
+                  icon: Icons.refresh,
+                  label: 'Sync All',
+                  isLoading: isSyncing,
+                  onTap: (context) => _showSyncPopup(context, ref)),
             ],
           ),
         );

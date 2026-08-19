@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
@@ -64,12 +63,9 @@ class SettingsPage extends ConsumerWidget {
     final sseConnected = ref.watch(sseProvider).isConnected;
     final unsecureConfig = ref.watch(unsecureConfigProvider).value;
     final packageInfo = ref.watch(packageInfoProvider).value;
-    final accountsState = ref.watch(accountsProvider);
     final providers = ref.watch(providerConfigProvider).value;
-    final isSyncing = accountsState.value?.manualSyncIsRunning == true;
     final backendUrl = ref.watch(secureConfigApiProvider).value?.apiClient.basePath;
     final simpleFinEnabled = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin) != null;
-    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
     if (userConfig == null || config == null) {
       return const Center(child: CircularProgressIndicator());
@@ -230,21 +226,6 @@ class SettingsPage extends ConsumerWidget {
       ],
       "System Details": [
         if (!onlyShowSetup) ...[
-          if (!isDemoMode)
-            ActionSettingTile(
-              title: "Background Sync",
-              subtitle: "Request a fresh sync of all providers",
-              icon: Icons.schedule,
-              trailing: isSyncing
-                  ? const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () => ref.read(accountsProvider.notifier).manualSync(),
-                    ),
-            ),
           ActionSettingTile(
             title: "Real-time Connection",
             subtitle: sseConnected ? "Connected" : "Disconnected",

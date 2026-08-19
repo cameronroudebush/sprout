@@ -7,8 +7,9 @@ class FABAction {
   final IconData icon;
   final String label;
   final void Function(BuildContext context) onTap;
+  final bool isLoading;
 
-  FABAction({required this.icon, required this.label, required this.onTap});
+  FABAction({required this.icon, required this.label, required this.onTap, this.isLoading = false});
 }
 
 /// This widget is a reusable component that is injected within the shell to provide floating action buttons based on the current route context.
@@ -81,11 +82,18 @@ class _SproutSpeedDialState extends ConsumerState<SproutSpeedDial> {
                     ),
                   FloatingActionButton.small(
                     heroTag: 'sub_$index',
-                    onPressed: () {
-                      action.onTap(context);
-                      setState(() => _isExpanded = false);
-                    },
-                    child: Icon(action.icon),
+                    onPressed: action.isLoading
+                        ? null
+                        : () {
+                            action.onTap(context);
+                            setState(() => _isExpanded = false);
+                          },
+                    child: action.isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                          )
+                        : Icon(action.icon),
                   ),
                 ],
               ),
