@@ -100,10 +100,7 @@ class UserConfigNotifier extends _$UserConfigNotifier {
     final current = state.value;
     if (current == null) return;
     final updatedClone = callback(current);
-    final success = await _sendUpdate(updatedClone);
-    if (success) {
-      state = AsyncValue.data(updatedClone);
-    }
+    await _sendUpdate(updatedClone);
   }
 
   /// Internal helper to push to API and update local state

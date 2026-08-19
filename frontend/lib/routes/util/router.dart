@@ -137,6 +137,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 
 String? _authRedirect(Ref ref, GoRouterState state) {
   final currentPath = state.uri.path;
+  // Paths we should not allow the user to go to automatically after login.
+  final corePaths = ["/loading", "/locked", "/login", "/setup", "/connection/setup", "/connection/failure"];
 
   // Read all relevant states
   final splashAsync = ref.read(sproutSplashManagerProvider);
@@ -145,6 +147,7 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final apiConfigState = ref.read(secureConfigProvider);
   final unsecureConfigState = ref.read(unsecureConfigProvider);
   final userConfigState = ref.read(userConfigProvider);
+  final isSetupMode = ref.read(authProvider.notifier).isSetupMode;
 
   // Determine if we are still waiting for core providers
   final isCoreLoading = splashAsync.isLoading || authState.isLoading || connUrlState.isLoading;
@@ -152,8 +155,10 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   // Determine if the user is logged in
   final isLoggedIn = authState.value != null;
 
-  // If logged in, we MUST wait for their configurations to finish loading or refreshing
+  // If we are in setup mode, bypass the config loading check completely.
+  // We don't want to redirect them to a loading screen while they are setting up their account.
   final isConfigLoading = isLoggedIn &&
+      !isSetupMode &&
       (apiConfigState.isLoading ||
           apiConfigState.isRefreshing ||
           userConfigState.isLoading ||
@@ -162,7 +167,7 @@ String? _authRedirect(Ref ref, GoRouterState state) {
           (!userConfigState.hasValue && !userConfigState.hasError));
 
   if (isCoreLoading || isConfigLoading) {
-    if (_intendedPath == null && currentPath != '/loading' && currentPath != '/login' && currentPath != '/locked') {
+    if (_intendedPath == null && !corePaths.contains(currentPath)) {
       _intendedPath = state.uri.toString();
     }
 
@@ -181,8 +186,8 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final configNotifier = ref.read(unsecureConfigProvider.notifier);
   if (configNotifier.failedToConnect) return '/connection/failure';
 
-  // Setup Mode Check
-  if (ref.read(authProvider.notifier).isSetupMode) return '/setup';
+  // Ensures that once in setup mode, the user STAYS in setup mode until completeSetup() is called.
+  if (isSetupMode) return currentPath == '/setup' ? null : '/setup';
 
   // Authentication Logic
   final isGoingToLogin = currentPath == '/login';

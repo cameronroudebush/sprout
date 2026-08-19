@@ -24,6 +24,7 @@ class CashFlowCalendarWidget extends ConsumerWidget {
 
     return dailySpendingAsync.whenDefault(
       customErrorMessage: "Error loading spending insights",
+      emptyCondition: (_) => false,
       data: (spendingMap) {
         final totalDays = DateTime(now.year, now.month + 1, 0).day;
         final listDaysInMonth = List.generate(totalDays, (i) => i + 1);

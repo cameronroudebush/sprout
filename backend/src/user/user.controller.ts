@@ -14,6 +14,7 @@ import { UserSetupContext } from "@backend/user/model/user.setup.context.model";
 import { UserService } from "@backend/user/user.service";
 import { BadRequestException, Body, Controller, Delete, Get, Logger, NotFoundException, Param, Patch, Post, Req, UnauthorizedException } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { FindOptionsWhere } from "typeorm";
 
 /** This controller provides the endpoint for all User related content */
 @Controller("user")
@@ -138,15 +139,15 @@ export class UserController {
   @AuthGuard.attach()
   @EnabledGuard.attachDemoMode()
   async registerDevice(@CurrentUser() user: User, @Body() data: RegisterDeviceDto) {
+    // Check for either a matching device id or a matching FCM token since device id's can change without changing FCM.
+    // Don't scope to user in the event it's a shared device.
+    const whereConditions: FindOptionsWhere<UserDevice>[] = [{ deviceId: data.deviceId }];
+
+    // Safety check just in case token is empty
+    if (data.token) whereConditions.push({ fcmToken: data.token });
+
     // Check if this specific token is already registered
-    let device = await UserDevice.findOne({
-      where: [
-        // Check for either a matching device id or a matching FCM token since device id's can change without changing FCM.
-        // Don't scope to user in the event it's a shared device.
-        { deviceId: data.deviceId },
-        { fcmToken: data.token },
-      ],
-    });
+    let device = await UserDevice.findOne({ where: whereConditions });
 
     if (device) {
       // Update existing device info

@@ -62,7 +62,7 @@ class WelcomeSetupPage extends StatelessWidget {
               children: [
                 _buildFeatureChip(context, Icons.lock_outline, "Private"),
                 _buildFeatureChip(context, Icons.analytics_outlined, "Insights"),
-                _buildFeatureChip(context, Icons.cloud_off_outlined, "Self-Hosted"),
+                _buildFeatureChip(context, Icons.cloud, "Self-Hosted"),
               ],
             ),
           ],
