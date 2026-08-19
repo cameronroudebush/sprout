@@ -207,9 +207,8 @@ export class SnapTradeProviderService extends ProviderBase<
       accountId: rawAccount.id,
     });
     const balanceObj = Array.isArray(balanceRes.data) ? balanceRes.data[0] : balanceRes.data;
-    const balance = parseFloat(`${balanceObj?.cash || 0}`);
-    const availableBalance = parseFloat(`${balanceObj?.buying_power ?? balance}`);
-
+    const availableBalance = parseFloat(`${balanceObj?.cash || 0}`);
+    const balance = rawAccount.balance.total.amount;
     const accType = AccountType.investment;
     const isLiability = AccountTypeIsLiability(accType);
 
@@ -256,17 +255,21 @@ export class SnapTradeProviderService extends ProviderBase<
 
     const holdings = positions.map((pos) => {
       const shares = parseFloat(`${pos.units}`) || 0;
-      const purchasePrice = pos["average_purchase_price"] || 0;
-      return new Holding(
-        (pos.currency as any)?.code || account.currency,
-        purchasePrice * shares,
-        pos["symbol"]?.description || "Holding",
-        (parseFloat(`${pos.price}`) || 0) * shares,
-        purchasePrice,
+      const price = parseFloat(`${pos.price}`) || 0;
+      const costBasis = parseFloat(`${pos.cost_basis}`) || 0;
+      const currency = pos.currency || account.currency;
+      const holding = new Holding(
+        currency,
+        price * shares,
+        pos.instrument.description,
+        price * shares,
+        costBasis * shares,
         shares,
-        pos["symbol"]?.symbol || "UNKNOWN",
+        pos.instrument.symbol,
         account,
       );
+      holding.description = pos.instrument.description;
+      return holding;
     });
 
     const now = new Date();
