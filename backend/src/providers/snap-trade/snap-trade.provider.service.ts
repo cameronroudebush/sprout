@@ -1,6 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
 import { AccountType, AccountTypeIsLiability } from "@backend/account/model/account.type";
-import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -258,16 +257,7 @@ export class SnapTradeProviderService extends ProviderBase<
       const price = parseFloat(`${pos.price}`) || 0;
       const costBasis = parseFloat(`${pos.cost_basis}`) || 0;
       const currency = pos.currency || account.currency;
-      const holding = new Holding(
-        currency,
-        price * shares,
-        pos.instrument.description,
-        price * shares,
-        costBasis * shares,
-        shares,
-        pos.instrument.symbol,
-        account,
-      );
+      const holding = new Holding(currency, costBasis * shares, pos.instrument.description, price * shares, costBasis, shares, pos.instrument.symbol, account);
       holding.description = pos.instrument.description;
       return holding;
     });
@@ -275,7 +265,6 @@ export class SnapTradeProviderService extends ProviderBase<
     const now = new Date();
     const transactions = await Promise.all(
       activities.map(async (t) => {
-        const category = await Category.getOrCreate(t.type || "Investment", user);
         const parsedDate = t.trade_date || t.settlement_date ? parseISO(t.trade_date! || t.settlement_date!) : new Date();
         const transactionDate = isToday(parsedDate)
           ? set(parsedDate, { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds(), milliseconds: now.getMilliseconds() })
@@ -289,8 +278,7 @@ export class SnapTradeProviderService extends ProviderBase<
           account,
         );
         newTransaction.id = t.id!;
-        newTransaction.category = category;
-        newTransaction.extra = t;
+        newTransaction.extra = { type: t.type, fee: t.fee };
         return newTransaction;
       }),
     );

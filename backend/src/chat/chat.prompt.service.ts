@@ -83,7 +83,9 @@ export class ChatPromptService {
         - CRITICAL: Never strip the '@' prefix. If you write the ID without the '@' prefix, the user's interface will break.
         - Example Correct: "Analysis for @Acc_0"
         - Example Incorrect: "Analysis for Acc_0"
-        - Do not guess names; only use the @ID provided in the mapping.`,
+        - Do not guess names; only use the @ID provided in the mapping.'
+        - Only provide the ID of the account, don't include * for boldness around account ID's.
+        - Don't include the account type when referencing the account by ID.`,
       `The users chosen currency is: ${user.config.currency}. All values will be in this currency already. Please make sure to use the proper currency symbol leading the numbers.`,
       allowCharts
         ? `CHART GENERATION:

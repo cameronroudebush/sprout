@@ -10,7 +10,7 @@ extension ChatHistoryExtensions on String {
 
     final idMap = {for (var acc in accounts) acc.id: acc.name};
 
-    return result.splitMapJoin(
+    final formatted = result.splitMapJoin(
       pattern,
       onMatch: (Match match) {
         final id = match.group(1);
@@ -31,5 +31,8 @@ extension ChatHistoryExtensions on String {
       },
       onNonMatch: (nonMatch) => nonMatch,
     );
+
+    // Collapses quadrupled asterisks (****) down to doubled asterisks (**)
+    return formatted.replaceAll('****', '**');
   }
 }

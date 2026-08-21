@@ -130,7 +130,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: isInPopup ? const EdgeInsetsGeometry.only(bottom: 12) : const EdgeInsets.symmetric(vertical: 12),
           child: Text(DateFormat.yMMMMd().format(_selectedDay), style: const TextStyle(fontSize: 16)),
         ),
         const Divider(height: 1),
@@ -195,13 +195,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
         'Subscription Details',
         showCloseDialogButton: true,
         showSubmitButton: false,
-        child: Column(
-          spacing: 8,
-          children: [
-            const Text("Display's the expected subscriptions for the date below"),
-            _buildSelectedDayCard(events, theme, isInPopup: true)
-          ],
-        ),
+        child: _buildSelectedDayCard(events, theme, isInPopup: true),
       ),
     );
   }

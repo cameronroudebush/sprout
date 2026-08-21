@@ -46,7 +46,6 @@ class NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Determine icon and color based on type
     final (icon, color) = switch (notification.type) {
       NotificationTypeEnum.success => (Icons.check_circle_outline, Colors.green),
       NotificationTypeEnum.warning => (Icons.warning_amber_rounded, Colors.orange),
@@ -54,78 +53,95 @@ class NotificationItem extends StatelessWidget {
       _ => (Icons.info_outline_rounded, theme.colorScheme.primary),
     };
 
-    return InkWell(
-      onTap: () => onTap(context),
-      borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    final borderRadius = isFloating ? BorderRadius.circular(12) : BorderRadius.zero;
+
+    return Material(
+      color: Colors.transparent,
+      child: Ink(
         decoration: BoxDecoration(
           color: notification.isRead ? null : color.withValues(alpha: 0.05),
-          borderRadius: isFloating ? BorderRadius.circular(12) : BorderRadius.circular(0),
+          borderRadius: borderRadius,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          spacing: 12,
-          children: [
-            // Type Icon
-            Stack(
-              alignment: Alignment.center,
+        child: InkWell(
+          onTap: () => onTap(context),
+          borderRadius: borderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 12,
               children: [
-                Icon(icon, color: color, size: 20),
-                if (showSpinner)
-                  SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: color)),
-              ],
-            ),
-
-            // Text Content
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 4,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: showUnreadIndicator && !notification.isRead ? MainAxisSize.max : MainAxisSize.min,
-                    children: [
-                      // Title
-                      Flexible(
-                        child: Text(
-                          notification.title,
-                          maxLines: 5,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(),
+                // Type Icon
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(icon, color: color, size: 20),
+                    if (showSpinner)
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: color,
                         ),
                       ),
-                      // Unread indicator
-                      if (showUnreadIndicator && !notification.isRead)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                  ],
+                ),
+
+                // Text Content
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 4,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: isFloating ? MainAxisSize.min : MainAxisSize.max,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              notification.title,
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelLarge,
+                            ),
+                          ),
+                          if (showUnreadIndicator && !notification.isRead)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                      if (notification.message.isNotEmpty)
+                        Text(
+                          notification.message,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      if (showDate)
+                        Text(
+                          DateFormat('MM-dd-yyyy').format(notification.createdAt),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
                         ),
                     ],
                   ),
-                  // Message
-                  if (notification.message != "")
-                    Text(
-                      notification.message,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    ),
-                  if (showDate)
-                    // Date
-                    Text(
-                      DateFormat('MM-dd-yyyy').format(notification.createdAt),
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                    ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
