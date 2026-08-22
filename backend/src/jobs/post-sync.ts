@@ -18,6 +18,11 @@ import { In, MoreThan } from "typeorm";
 /** A job that checks provider syncs on a schedule to handle informing users of new data and generating follow-up after providers are synced. */
 @Injectable()
 export class PostSyncProcessingJob extends DistributedQueueJob {
+  private readonly successMessages = [
+    { title: `Accounts Synced`, body: `Your accounts are up to date.` },
+    { title: "You're All Caught Up", body: "We've finished syncing your accounts." },
+  ];
+
   constructor(
     private readonly notificationService: NotificationService,
     private readonly sseService: SSEService,
@@ -133,9 +138,15 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
           NotificationType.error,
         );
       } else if (successes.length > 0) {
-        // All successful, only send one message.
-        const message = this.getSuccessMessage();
-        await this.notificationService.notifyUser(user, message.body, message.title, NotificationType.success);
+        const currentHour = new Date().getHours();
+
+        // Only send the success notification for the morning run
+        if (currentHour < 12) {
+          const message = this.getSuccessMessage();
+          await this.notificationService.notifyUser(user, message.body, message.title, NotificationType.success);
+        } else {
+          this.logger.debug(`Silent sync for ${user.username}. No notification sent.`);
+        }
       }
   }
 
@@ -179,9 +190,6 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
 
   /** Returns a random message for a success when this provider is updated. */
   private getSuccessMessage() {
-    return Utility.randomFromArray([
-      { title: `Accounts Synced`, body: `Your accounts are up to date.` },
-      { title: "You're All Caught Up", body: "We've finished syncing your accounts." },
-    ]);
+    return Utility.randomFromArray(this.successMessages);
   }
 }

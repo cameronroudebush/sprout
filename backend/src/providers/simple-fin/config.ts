@@ -7,7 +7,7 @@ export class SimpleFINConfig extends BaseProviderConfig {
   override enabled = true;
 
   @ConfigurationMetadata.assign({ comment: "How often to update this provider.", externalControlDisabled: true })
-  override syncFrequency: string = "0 10 * * *";
+  override syncFrequency: string = "0 6,18 * * *"; // Runs daily at 6:00 AM and 6:00 PM
 
   @ConfigurationMetadata.assign({ comment: "How many API calls we allow per day, per user, for this provider." })
   rateLimit: number = 24;
