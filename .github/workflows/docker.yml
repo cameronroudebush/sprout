@@ -36,6 +36,7 @@ jobs:
           files: |
             frontend/**
             backend/**
+            .github/workflows/docker.yml
             dockerfile
             .dockerignore
           files_ignore: |

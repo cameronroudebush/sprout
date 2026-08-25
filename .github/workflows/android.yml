@@ -35,6 +35,7 @@ jobs:
         with:
           files: |
             frontend/**
+            .github/workflows/android.yml
 
       - name: Decide whether to proceed
         id: decision
