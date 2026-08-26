@@ -116,8 +116,19 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     for (const rawAccount of data.accounts) {
       if (!existingIds.includes(rawAccount.id)) continue;
 
+      // Determine if this specific institution currently has an active error
+      const hasError = data.errors?.some((x) => x.includes(rawAccount.org.name)) ?? false;
       let institution = await Institution.findOne({ where: { user: { id: user.id }, name: rawAccount.org.name } });
-      if (!institution) institution = await new Institution(rawAccount.org.url, rawAccount.org.name, false, user).insert();
+      if (!institution) {
+        // New institution
+        institution = new Institution(rawAccount.org.url, rawAccount.org.name, false, user);
+        institution.hasError = hasError;
+        await institution.insert();
+      } else if (institution.hasError !== hasError) {
+        // Existing institution: Only execute DB update if the error state toggled
+        institution.hasError = hasError;
+        await institution.update();
+      }
 
       const finalAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
 
