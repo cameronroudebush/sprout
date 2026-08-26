@@ -16,14 +16,14 @@ pluginManagement {
     }
 
     plugins {
-        id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
+        id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     }
 }
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.13.2" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    id("com.android.application") version "9.3.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.10" apply false
 }
 
 include(":app")
