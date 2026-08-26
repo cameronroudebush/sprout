@@ -24,7 +24,19 @@ updates:
         patterns:
           - "*"
 
-  # Frontend
+  # Android / Gradle
+  - package-ecosystem: "gradle"
+    directory: "/frontend/android"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 14
+    groups:
+      android-dependencies:
+        patterns:
+          - "*"
+
+  # Frontend / Dart
   - package-ecosystem: "pub"
     directory: "/frontend"
     schedule:
