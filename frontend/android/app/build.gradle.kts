@@ -1,5 +1,8 @@
 import java.util.Properties
 import java.io.FileInputStream
+import com.android.build.api.dsl.ApplicationExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -13,19 +16,15 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
-android {
+configure<ApplicationExtension> {
     namespace = "net.croudebush.sprout"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     defaultConfig {
@@ -42,7 +41,6 @@ android {
         val keystorePath = System.getenv("ANDROID_SIGNING_KEYSTORE_PATH") 
             ?: keystoreProperties.getProperty("storeFile")
         
-        // Check if the file path is provided AND the file actually exists
         if (keystorePath != null && file(keystorePath).exists()) {
             create("release") {
                 keyAlias = System.getenv("ANDROID_SIGNING_KEY_ALIAS") ?: keystoreProperties.getProperty("keyAlias")
@@ -60,6 +58,12 @@ android {
     }
     buildFeatures {
         viewBinding = true
+    }
+}
+
+configure<KotlinAndroidProjectExtension> {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
