@@ -48,7 +48,7 @@ export class ChatService {
       };
 
       /** Executes LLM generation and maps generic IDs back to real names. */
-      const generateContent = async (contents: ContentListUnion, idMap: Map<string, string>, maxRetries = 5) => {
+      const generateContent = async (contents: ContentListUnion, idMap: Map<string, string>, maxRetries = 3) => {
         let attempt = 0;
 
         while (attempt < maxRetries) {

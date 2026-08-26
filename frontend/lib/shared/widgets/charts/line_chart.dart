@@ -16,7 +16,7 @@ import 'package:sprout/shared/widgets/charts/util/layout.dart';
 typedef _YAxisBounds = ({double minY, double maxY});
 
 /// A line chart that displays data using the unified SproutChartSeries structure
-class SproutLineChart extends StatelessWidget {
+class SproutLineChart extends StatefulWidget {
   final SproutChartHeader? header;
   final List<SproutChartSeries> series;
   final ChartRangeEnum chartRange;
@@ -52,6 +52,14 @@ class SproutLineChart extends StatelessWidget {
       EdgeInsets? padding})
       : padding = padding ?? EdgeInsets.symmetric(horizontal: showXAxis ? 12 : 8);
 
+  @override
+  State<SproutLineChart> createState() => _SproutLineChartState();
+}
+
+class _SproutLineChartState extends State<SproutLineChart> {
+  // Default to showing the tooltip on the right side of the dot
+  FLHorizontalAlignment _tooltipAlignment = FLHorizontalAlignment.right;
+
   Color _resolveSpotColor(double y, SproutChartSeries s, ThemeData theme) {
     if (!s.config.usePositiveNegativeColors) {
       return s.config.color ?? theme.colorScheme.primary;
@@ -62,55 +70,60 @@ class SproutLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (series.isEmpty || series.every((s) => s.data.spots.isEmpty)) {
+    if (widget.series.isEmpty || widget.series.every((s) => s.data.spots.isEmpty)) {
       return const SizedBox.shrink();
     }
 
     final theme = Theme.of(context);
 
     final Map<String, num> dummyData = {
-      for (final s in series) s.label: s.data.spots.isNotEmpty ? s.data.spots.first.y : 0
+      for (final s in widget.series) s.label: s.data.spots.isNotEmpty ? s.data.spots.first.y : 0
     };
 
     final Map<String, Color> dummyMapping = {
-      for (final s in series)
+      for (final s in widget.series)
         if (s.config.color != null) s.label: s.config.color!
     };
 
     return SproutChartLayoutFrame(
-      header: header,
+      header: widget.header,
       data: dummyData,
-      legendPosition:
-          showLegend && series.length > 1 ? SproutChartLegendPosition.bottom : SproutChartLegendPosition.none,
+      legendPosition: widget.showLegend && widget.series.length > 1
+          ? SproutChartLegendPosition.bottom
+          : SproutChartLegendPosition.none,
       colorResolver: SproutChartColorResolver(colorMapping: dummyMapping),
       chartArea: Padding(
-        padding: padding,
-        child: LineChart(
-          _buildLineChartData(theme),
-          duration: Duration.zero,
+        padding: widget.padding,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return LineChart(
+              _buildLineChartData(theme, constraints.maxWidth),
+              duration: Duration.zero,
+            );
+          },
         ),
       ),
     );
   }
 
   /// Builds the top-level LineChartData model configurations by passing individual series styles.
-  LineChartData _buildLineChartData(ThemeData theme) {
+  LineChartData _buildLineChartData(ThemeData theme, double chartWidth) {
     final colorScheme = theme.colorScheme;
-    final allSpots = series.expand((s) => s.data.spots).toList();
+    final allSpots = widget.series.expand((s) => s.data.spots).toList();
     final yAxisBounds = _calculateYAxisBounds(allSpots);
-    final maxPoints = series.fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
+    final maxPoints = widget.series.fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
 
     final double yRange = yAxisBounds.maxY - yAxisBounds.minY;
     final double safeYInterval = yRange > 0.001 ? math.max(0.01, yRange / 4) : 1.0;
     final double safeXInterval = math.max(1.0, (maxPoints / 5).floorToDouble());
 
-    final baseChartData = series.reduce((a, b) => a.data.spots.length > b.data.spots.length ? a : b).data;
+    final baseChartData = widget.series.reduce((a, b) => a.data.spots.length > b.data.spots.length ? a : b).data;
 
     final List<LineChartBarData> lines = [];
     final bool isAllPositive = yAxisBounds.minY >= 0;
     final bool isAllNegative = yAxisBounds.maxY < 0;
 
-    for (final s in series) {
+    for (final s in widget.series) {
       final bool isSplitColor = s.config.usePositiveNegativeColors;
       final double lineMaxY = s.data.spots.isEmpty ? 0 : s.data.spots.map((e) => e.y).reduce(math.max);
       final double lineMinY = s.data.spots.isEmpty ? 0 : s.data.spots.map((e) => e.y).reduce(math.min);
@@ -244,22 +257,22 @@ class SproutLineChart extends StatelessWidget {
     }
 
     return LineChartData(
-      lineTouchData: _buildTouchData(theme),
+      lineTouchData: _buildTouchData(theme, chartWidth),
       minY: yAxisBounds.minY,
       maxY: yAxisBounds.maxY,
       minX: 0,
       maxX: maxPoints > 1 ? (maxPoints - 1).toDouble() : 1.0,
       titlesData: _buildTitlesData(theme, safeYInterval, safeXInterval, baseChartData),
       borderData: FlBorderData(
-        show: showBorder,
+        show: widget.showBorder,
         border: Border.all(
           color: theme.colorScheme.outline.withOpacity(0.15),
           width: 1,
         ),
       ),
       gridData: FlGridData(
-        show: showGrid,
-        drawVerticalLine: drawVerticalGrid,
+        show: widget.showGrid,
+        drawVerticalLine: widget.drawVerticalGrid,
         horizontalInterval: safeYInterval,
         verticalInterval: safeXInterval,
         getDrawingHorizontalLine: (_) => FlLine(
@@ -269,7 +282,7 @@ class SproutLineChart extends StatelessWidget {
         ),
       ),
       lineBarsData: lines,
-      extraLinesData: !showZeroLine
+      extraLinesData: !widget.showZeroLine
           ? null
           : ExtraLinesData(
               horizontalLines: [
@@ -292,7 +305,7 @@ class SproutLineChart extends StatelessWidget {
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
-          showTitles: showXAxis,
+          showTitles: widget.showXAxis,
           reservedSize: 32,
           interval: xInterval,
           getTitlesWidget: (value, meta) {
@@ -306,7 +319,7 @@ class SproutLineChart extends StatelessWidget {
             }
 
             final date = baseChartData.sortedEntries[index].key;
-            String format = ChartRangeUtility.getDateFormat(chartRange);
+            String format = ChartRangeUtility.getDateFormat(widget.chartRange);
 
             return SideTitleWidget(
               meta: meta,
@@ -321,7 +334,7 @@ class SproutLineChart extends StatelessWidget {
       ),
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
-          showTitles: showYAxis,
+          showTitles: widget.showYAxis,
           reservedSize: 40,
           interval: yInterval,
           getTitlesWidget: (value, meta) {
@@ -333,10 +346,10 @@ class SproutLineChart extends StatelessWidget {
               meta: meta,
               space: 8,
               child: Text(
-                formatYAxis != null
-                    ? formatYAxis!(value)
-                    : formatValue != null
-                        ? formatValue!(value)
+                widget.formatYAxis != null
+                    ? widget.formatYAxis!(value)
+                    : widget.formatValue != null
+                        ? widget.formatValue!(value)
                         : value.toStringAsFixed(0),
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 10),
                 maxLines: 1,
@@ -350,13 +363,31 @@ class SproutLineChart extends StatelessWidget {
     );
   }
 
-  LineTouchData _buildTouchData(ThemeData theme) {
+  LineTouchData _buildTouchData(ThemeData theme, double chartWidth) {
     final colorScheme = theme.colorScheme;
+
     return LineTouchData(
       handleBuiltInTouches: true,
+      touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
+        if (!event.isInterestedForInteractions ||
+            response == null ||
+            response.lineBarSpots == null ||
+            response.lineBarSpots!.isEmpty) {
+          return;
+        }
+        final touchX = event.localPosition?.dx ?? 0;
+        const requiredSpace = 230.0;
+        final newAlignment =
+            (chartWidth - touchX < requiredSpace) ? FLHorizontalAlignment.left : FLHorizontalAlignment.right;
+        if (_tooltipAlignment != newAlignment) {
+          setState(() {
+            _tooltipAlignment = newAlignment;
+          });
+        }
+      },
       getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndices) {
-        final int seriesIndex = series.indexWhere((s) => s.data.spots == barData.spots);
-        final currentSeries = seriesIndex != -1 ? series[seriesIndex] : series.first;
+        final int seriesIndex = widget.series.indexWhere((s) => s.data.spots == barData.spots);
+        final currentSeries = seriesIndex != -1 ? widget.series[seriesIndex] : widget.series.first;
 
         final bool shouldShowBubble = currentSeries.config.showInTooltip;
 
@@ -384,9 +415,12 @@ class SproutLineChart extends StatelessWidget {
       touchTooltipData: LineTouchTooltipData(
         fitInsideHorizontally: true,
         fitInsideVertically: true,
+        tooltipHorizontalAlignment: _tooltipAlignment,
+        tooltipHorizontalOffset: _tooltipAlignment == FLHorizontalAlignment.left ? -20 : 20,
+        tooltipPadding: EdgeInsets.all(8),
         maxContentWidth: 200,
         getTooltipColor: (LineBarSpot touchedSpot) {
-          return theme.primaryColorDark;
+          return theme.primaryColorDark.withOpacity(0.9);
         },
         getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
           // Sort spots by barIndex to keep the tooltip layout rendering cleanly
@@ -396,7 +430,7 @@ class SproutLineChart extends StatelessWidget {
           final Set<String> seenLabels = {};
 
           return sortedSpots.map((barSpot) {
-            final currentSeries = series.firstWhereOrNull((s) {
+            final currentSeries = widget.series.firstWhereOrNull((s) {
                   if (s.config.usePositiveNegativeColors) {
                     // If it's a split line, the bar color will match either Green or the Error theme color
                     return barSpot.bar.color == Colors.green || barSpot.bar.color == theme.colorScheme.error;
@@ -404,7 +438,7 @@ class SproutLineChart extends StatelessWidget {
                   // For standard lines, match the explicit configuration color
                   return (s.config.color ?? theme.colorScheme.primary) == barSpot.bar.color;
                 }) ??
-                (barSpot.barIndex < series.length ? series[barSpot.barIndex] : series.first);
+                (barSpot.barIndex < widget.series.length ? widget.series[barSpot.barIndex] : widget.series.first);
 
             if (currentSeries.config.showInTooltip == false || seenLabels.contains(currentSeries.label)) {
               return const LineTooltipItem(
@@ -419,14 +453,18 @@ class SproutLineChart extends StatelessWidget {
             if (barSpot.x.toInt() < chartData.sortedEntries.length) {
               final date = chartData.sortedEntries[barSpot.x.toInt()].key;
               final Color lineColor = _resolveSpotColor(barSpot.y, currentSeries, theme);
-              final dateHeader = !showDateInTooltip
+              final dateHeader = !widget.showDateInTooltip
                   ? ""
                   : barSpot == sortedSpots.first
-                      ? '${DateFormat(ChartRangeUtility.getDateFormat(chartRange)).format(date)}\n'
+                      ? '${DateFormat(ChartRangeUtility.getDateFormat(widget.chartRange)).format(date)}\n'
                       : '';
 
-              final seriesLabel = '${currentSeries.label}: ';
-              final rawValue = formatValue != null ? formatValue!(barSpot.y) : barSpot.y.toString();
+              // Ensure long titles receive an ellipsis so they do not wrap vertically
+              final rawLabel = currentSeries.label;
+              final displayLabel = rawLabel.length > 15 ? '${rawLabel.substring(0, 12)}...' : rawLabel;
+              final seriesLabel = '$displayLabel: ';
+
+              final rawValue = widget.formatValue != null ? widget.formatValue!(barSpot.y) : barSpot.y.toString();
               final formattedValue = rawValue.replaceAll('-', '\u2011').replaceAll(' ', '\u00A0');
               final tooltipTextStyle = theme.textTheme.labelLarge?.copyWith(
                 color: Colors.white,

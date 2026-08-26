@@ -91,7 +91,7 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
           // Open the popup if details are hidden, popups are active, and there are actual events
           if (!wasAutomatic && !widget.showDetails && widget.detailsPopup && events.isNotEmpty) {
             final typedEvents = events.cast<TransactionSubscription>().toList();
-            _openDetailsPopup(typedEvents, theme);
+            _openDetailsPopup(typedEvents, day, theme);
           }
         },
         dayDisplay: (context, events) {
@@ -129,11 +129,12 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
     final cardContent = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: isInPopup ? const EdgeInsetsGeometry.only(bottom: 12) : const EdgeInsets.symmetric(vertical: 12),
-          child: Text(DateFormat.yMMMMd().format(_selectedDay), style: const TextStyle(fontSize: 16)),
-        ),
-        const Divider(height: 1),
+        if (!isInPopup)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(DateFormat.yMMMMd().format(_selectedDay), style: const TextStyle(fontSize: 16)),
+          ),
+        if (!isInPopup) const Divider(height: 1),
         if (events.isEmpty)
           const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Text("No subscriptions billed today"))
         else
@@ -188,11 +189,11 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
   }
 
   /// Used to show a popup of subscription details instead of rendering below the calendar.
-  void _openDetailsPopup(List<TransactionSubscription> events, ThemeData theme) {
+  void _openDetailsPopup(List<TransactionSubscription> events, DateTime date, ThemeData theme) {
     showSproutPopup(
       context: context,
       builder: (ctx) => SproutBaseDialogWidget(
-        'Subscription Details',
+        'Subscription for ${DateFormat.yMMMMd().format(date)}',
         showCloseDialogButton: true,
         showSubmitButton: false,
         child: _buildSelectedDayCard(events, theme, isInPopup: true),

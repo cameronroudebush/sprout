@@ -34,7 +34,7 @@ class ChatSproutLineChart extends ConsumerWidget {
     if (chartSeries.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 300,
+      height: 350,
       child: SproutLineChart(
         series: chartSeries,
         chartRange: ChartRangeUtility.inferChartRange(chartSeries),

@@ -3,7 +3,7 @@ import { ConfigurationMetadata } from "@backend/config/model/configuration.metad
 /** Config related to gemini */
 export class GeminiConfig {
   @ConfigurationMetadata.assign({ comment: "The model gemini should use when performing prompt requests." })
-  model: string = "gemini-flash-latest";
+  model: string = "gemini-flash-lite-latest";
 
   @ConfigurationMetadata.assign({ comment: "A global key to use to authenticate to gemini." })
   key?: string;

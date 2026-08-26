@@ -8,6 +8,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
@@ -433,30 +434,50 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
 
     if (account == null) return const SizedBox.shrink();
 
+    void goToAccount() {
+      Navigator.of(context).pop();
+      NavigationProvider.redirect('accounts/details', queryParameters: {'id': account.id});
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
       children: [
         Text("Account", style: theme.textTheme.titleMedium),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.dividerColor),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: goToAccount,
             borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            spacing: 12,
-            children: [
-              AccountIcon(account, size: 28),
-              Expanded(
-                child: Text(
-                  account.name,
-                  style: theme.textTheme.bodyMedium,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.dividerColor),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
+              child: Row(
+                spacing: 12,
+                children: [
+                  AccountIcon(account, size: 28),
+                  Expanded(
+                    child: Text(
+                      account.name,
+                      style: theme.textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Tooltip(
+                    message: "Go to account",
+                    child: Icon(
+                      Icons.open_in_new,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
