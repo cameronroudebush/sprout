@@ -113,16 +113,6 @@ describe("ProviderSyncService", () => {
   });
 
   describe("syncUserAccounts Evaluation Blocks", () => {
-    it("should log trace notifications and exit cleanly if the provider returns empty account listings", async () => {
-      jest.spyOn(Account, "count").mockResolvedValue(5);
-      mockProvider.get.mockResolvedValue([]);
-      const debugSpy = jest.spyOn((service as any).logger, "debug");
-
-      await service.syncForProvider(mockUser, mockProvider, false);
-
-      expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining("No accounts available"));
-    });
-
     it("should skip updating database storage targets if matching operational record entities are completely missing", async () => {
       jest.spyOn(Account, "count").mockResolvedValue(1);
       mockProvider.get.mockResolvedValue([{ account: TestEntities.account }]);

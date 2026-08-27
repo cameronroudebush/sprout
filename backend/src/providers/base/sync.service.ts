@@ -72,32 +72,65 @@ export class ProviderSyncService {
   private async syncUserAccounts(user: User, provider: ProviderBase, institutionId?: string) {
     const institutionErrors = new Set<string>();
 
-    // Fast-fail if the user has no accounts linked yet
+    // Fast-fail if the user has no accounts linked yet. They then wouldn't have used any providers.
     const userAccountsCount = await Account.count({ where: { user: { id: user.id } } });
     if (userAccountsCount === 0) return { institutionErrors, userHadSuccessfulUpdate: false };
 
-    // Grab the up to date transaction/account info from the provider, optionally filtered by institutionId
     const accounts = await provider.get(user, false, institutionId);
-    if (accounts.length === 0)
-      this.logger.debug(
-        `No accounts available for ${user.username} on provider ${provider.config.dbType}${institutionId ? ` for institution ${institutionId}` : ""}`,
-      );
+    if (accounts.length === 0) return { institutionErrors, userHadSuccessfulUpdate: false };
 
-    return this.handleAccountsUpdate(accounts, user, institutionId);
+    // Pass the provider instance into handleAccountsUpdate
+    return this.handleAccountsUpdate(provider, accounts, user, institutionId);
   }
 
   /** This function handles the actual account updates for a user/account combo by writing the data to the DB as necessary. */
-  private async handleAccountsUpdate(accounts: Awaited<ReturnType<ProviderBase["get"]>>, user: User, institutionId?: string) {
+  private async handleAccountsUpdate(provider: ProviderBase, accounts: Awaited<ReturnType<ProviderBase["get"]>>, user: User, institutionId?: string) {
     const institutionErrors = new Set<string>();
     let userHadSuccessfulUpdate = false;
+    let syncMetadataToCommit: any = null;
 
     for (const data of accounts) {
       try {
-        const accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
-        // Skip missing accounts. We will not insert them, that's the link job from the specific provider.
-        if (!accountInDB) continue;
+        let accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
+        // Determine if we should insert the missing account
+        if (!accountInDB) {
+          // If the provider returned a providerAccountId, it means this is a newly discovered account that we can auto-link
+          if (data.providerAccountId) {
+            accountInDB = await data.account.insert();
+            await AccountHistory.insertForNewAccount(accountInDB);
+            await provider.createAccountAsset(accountInDB, data.providerAccountId);
+
+            // Reload relation
+            accountInDB = await Account.findOne({
+              where: { id: accountInDB.id, user: { id: user.id } },
+              relations: { institution: true },
+            });
+          }
+
+          // If it still doesn't exist (e.g., missing providerAccountId or manual-only source), skip it
+          if (!accountInDB) continue;
+        }
         // If we're filtering by an institutionId, and this account isn't that institution, skip it
         if (institutionId && accountInDB.institution.id !== institutionId) continue;
+
+        let institution: Institution | null = accountInDB.institution;
+        const incomingInstitution = data.account.institution;
+        // Resolve the institution if it isn't attached to the account yet
+        if (!institution) {
+          institution = await Institution.findOne({ where: { user: { id: user.id }, name: incomingInstitution.name } });
+
+          if (!institution) {
+            // Brand new institution: configure and insert it
+            institution = incomingInstitution;
+            incomingInstitution.user = user;
+            await institution.insert();
+          }
+          // Ensure it gets attached to the account for any future DB updates
+          accountInDB.institution = institution;
+        }
+
+        // Sync the error state if it differs
+        if (institution.hasError !== incomingInstitution.hasError) await this.flagInstitution(institution, incomingInstitution.hasError);
 
         // Save Account Balance History
         await AccountHistory.insertForAccount(accountInDB);
@@ -106,9 +139,6 @@ export class ProviderSyncService {
         accountInDB.balance = data.account.balance;
         accountInDB.availableBalance = data.account.availableBalance;
         await accountInDB.update();
-
-        // Update Institution Error State
-        await this.flagInstitution(accountInDB.institution, data.account.institution.hasError);
 
         if (data.account.institution.hasError) institutionErrors.add(data.account.institution.name);
 
@@ -119,11 +149,14 @@ export class ProviderSyncService {
         if (data.holdings && accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
 
         userHadSuccessfulUpdate = true;
+        if (data.syncMetadata) syncMetadataToCommit = data.syncMetadata;
       } catch (e) {
         this.logger.error(`Account error for ${user.username}: ${(e as Error).message}`);
       }
     }
 
+    // Commit metadata ONLY AFTER DB writes were successfully transacted
+    if (userHadSuccessfulUpdate && syncMetadataToCommit) await provider.commitSyncMetadata?.(syncMetadataToCommit);
     // Apply rules to all new transactions if at least one account worked
     if (userHadSuccessfulUpdate) await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
 

@@ -42,6 +42,11 @@ export interface PlaidAuthContext {
   itemId: string;
 }
 
+export interface PlaidSyncMetadata {
+  institutionId: string;
+  nextCursor?: string;
+}
+
 @Injectable()
 export class PlaidProviderService extends ProviderBase<
   PlaidLinkOptions,
@@ -50,7 +55,8 @@ export class PlaidProviderService extends ProviderBase<
   PlaidAuthContext,
   PlaidAccount,
   PlaidInstitutionAsset,
-  PlaidAsset
+  PlaidAsset,
+  PlaidSyncMetadata
 > {
   protected readonly logger = new Logger("provider:plaid:service");
   override getAppConfiguration = () => Configuration.providers.plaid;
@@ -149,7 +155,7 @@ export class PlaidProviderService extends ProviderBase<
     ];
   }
 
-  protected async rollbackExchange(_user: User, _payload: PlaidLinkDTO, authContext: PlaidAuthContext): Promise<void> {
+  protected override async rollbackExchange(_user: User, _payload: PlaidLinkDTO, authContext: PlaidAuthContext): Promise<void> {
     if (authContext?.accessToken) {
       try {
         await this.plaidClient.itemRemove({ access_token: authContext.accessToken });
@@ -179,6 +185,7 @@ export class PlaidProviderService extends ProviderBase<
     let added: PlaidTransaction[] = [];
     let modified: PlaidTransaction[] = [];
     let removed: RemovedTransaction[] = [];
+    let nextCursor = asset.syncCursor;
 
     if (!accountsOnly) {
       const syncData = await this.fetchAllInstitutionTransactions(user, asset);
@@ -186,29 +193,17 @@ export class PlaidProviderService extends ProviderBase<
       modified = syncData.modified;
       removed = syncData.removed;
       asset.syncCursor = syncData.nextCursor;
-      await asset.update();
     }
 
     const results: ProviderSyncResult[] = [];
     for (const rawAccount of accountsResponse.data.accounts) {
-      let finalAccount = await this.mapToSproutAccount(rawAccount, { accessToken: asset.accessToken, itemId: asset.itemId }, user, asset.institution);
-      let providerAsset = await PlaidAsset.findOne({
+      const finalAccount = await this.mapToSproutAccount(rawAccount, { accessToken: asset.accessToken, itemId: asset.itemId }, user, asset.institution);
+
+      const providerAsset = await PlaidAsset.findOne({
         where: { plaidAccountId: rawAccount.account_id, account: { user: { id: user.id } } },
         relations: { account: true },
       });
-
-      // Plaid auto-links new accounts, so we insert them if they appear on an existing connection
-      if (providerAsset == null) {
-        finalAccount = await finalAccount.insert();
-        await new PlaidAsset(finalAccount, rawAccount.account_id).insert();
-      } else {
-        const updatedBalance = finalAccount.balance;
-        const updatedAvail = finalAccount.availableBalance;
-
-        finalAccount = providerAsset.account;
-        finalAccount.balance = updatedBalance;
-        finalAccount.availableBalance = updatedAvail;
-      }
+      if (providerAsset) finalAccount.id = providerAsset.account.id;
 
       const accountTransactions = added.concat(modified).filter((t) => t.account_id === rawAccount.account_id);
       const transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);
@@ -219,18 +214,35 @@ export class PlaidProviderService extends ProviderBase<
           ? allHoldings.filter((h) => h.account_id === rawAccount.account_id).map((h) => this.convertPlaidHolding(h, securities!, finalAccount))
           : undefined;
 
-      results.push({ account: finalAccount, holdings: accountHoldings, transactions, removedTransactionIds });
+      results.push({
+        account: finalAccount,
+        providerAccountId: rawAccount.account_id,
+        syncMetadata: { institutionId: asset.institution.id, nextCursor },
+        holdings: accountHoldings,
+        transactions,
+        removedTransactionIds,
+      });
     }
 
     return results;
   }
 
-  protected async performUnlink(user: User, asset: PlaidInstitutionAsset): Promise<void> {
+  override async commitSyncMetadata(metadata: PlaidSyncMetadata): Promise<void> {
+    if (metadata.nextCursor && metadata.institutionId) {
+      const asset = await PlaidInstitutionAsset.findOne({ where: { institution: { id: metadata.institutionId } } });
+      if (asset) {
+        asset.syncCursor = metadata.nextCursor;
+        await asset.update();
+      }
+    }
+  }
+
+  protected override async performUnlink(user: User, asset: PlaidInstitutionAsset): Promise<void> {
     await this.rateLimit(user).incrementOrError();
     await this.plaidClient.itemRemove({ access_token: asset.accessToken });
   }
 
-  protected async handleSyncError(asset: PlaidInstitutionAsset, error: unknown): Promise<void> {
+  protected override async handleSyncError(asset: PlaidInstitutionAsset, error: unknown): Promise<void> {
     const plaidError = (error as AxiosError).response?.data as PlaidError;
     if (plaidError && plaidError.error_type === "ITEM_ERROR") {
       const criticalErrors = ["ITEM_LOGIN_REQUIRED", "PENDING_EXPIRATION", "INVALID_ACCESS_TOKEN", "ITEM_NOT_FOUND"];
@@ -242,15 +254,15 @@ export class PlaidProviderService extends ProviderBase<
     this.logger.error(`Failed to sync Plaid for institution ${asset.institution.name}:`, error);
   }
 
-  protected async setInstitutionError(asset: PlaidInstitutionAsset, hasError: boolean): Promise<void> {
+  protected override async setInstitutionError(asset: PlaidInstitutionAsset, hasError: boolean): Promise<void> {
     asset.institution.hasError = hasError;
     await asset.institution.update();
   }
 
-  protected extractProviderAccountId(rawAccount: PlaidAccount): string {
+  protected override extractProviderAccountId(rawAccount: PlaidAccount): string {
     return rawAccount.account_id;
   }
-  protected extractAccountName(rawAccount: PlaidAccount): string {
+  protected override extractAccountName(rawAccount: PlaidAccount): string {
     return rawAccount.name;
   }
 
@@ -270,7 +282,7 @@ export class PlaidProviderService extends ProviderBase<
     );
   }
 
-  protected async fetchInitialSyncData(
+  protected override async fetchInitialSyncData(
     _rawAccount: PlaidAccount,
     _account: Account,
     _authContext: PlaidAuthContext,
@@ -285,7 +297,7 @@ export class PlaidProviderService extends ProviderBase<
     return await PlaidInstitutionAsset.find({ where, relations: { institution: true } });
   }
 
-  protected async upsertInstitutionAsset(institution: Institution, authContext: PlaidAuthContext): Promise<void> {
+  protected override async upsertInstitutionAsset(institution: Institution, authContext: PlaidAuthContext): Promise<void> {
     let asset = await PlaidInstitutionAsset.findOne({ where: { institution: { id: institution.id } } });
     if (!asset) {
       await new PlaidInstitutionAsset(institution, authContext.accessToken, authContext.itemId).insert();
@@ -301,19 +313,19 @@ export class PlaidProviderService extends ProviderBase<
     }
   }
 
-  protected async getAccountAsset(providerAccountId: string, userId: string): Promise<PlaidAsset | null> {
+  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<PlaidAsset | null> {
     return await PlaidAsset.findOne({ where: { plaidAccountId: providerAccountId, account: { user: { id: userId } } }, relations: { account: true } });
   }
 
-  protected async getAccountAssetByAccountId(accountId: string): Promise<PlaidAsset | null> {
+  protected override async getAccountAssetByAccountId(accountId: string): Promise<PlaidAsset | null> {
     return await PlaidAsset.findOne({ where: { account: { id: accountId } }, relations: { account: true } });
   }
 
-  protected async createAccountAsset(account: Account, providerAccountId: string): Promise<PlaidAsset> {
+  public async createAccountAsset(account: Account, providerAccountId: string): Promise<PlaidAsset> {
     return await new PlaidAsset(account, providerAccountId).insert();
   }
 
-  protected async updateAccountAsset(asset: PlaidAsset, providerAccountId: string): Promise<void> {
+  protected override async updateAccountAsset(asset: PlaidAsset, providerAccountId: string): Promise<void> {
     asset.plaidAccountId = providerAccountId;
     await asset.update();
   }

@@ -109,7 +109,7 @@ export class SnapTradeProviderService extends ProviderBase<
     }));
   }
 
-  protected async rollbackExchange(user: User, _payload: void, authContext: SnapTradeAuthContext): Promise<void> {
+  protected override async rollbackExchange(user: User, _payload: void, authContext: SnapTradeAuthContext): Promise<void> {
     try {
       await this.snaptrade.connections.removeBrokerageAuthorization({
         authorizationId: authContext.authorizationId,
@@ -129,29 +129,18 @@ export class SnapTradeProviderService extends ProviderBase<
 
     const results: ProviderSyncResult[] = [];
     for (const rawAccount of connAccounts) {
-      let finalAccount = await this.mapToSproutAccount(
+      const finalAccount = await this.mapToSproutAccount(
         rawAccount,
         { authorizationId: asset.authorizationId, userSecret: snapTradeUser.userSecret },
         user,
         asset.institution,
       );
-      let providerAsset = await SnapTradeAsset.findOne({
+
+      const providerAsset = await SnapTradeAsset.findOne({
         where: { snapTradeAccountId: rawAccount.id, account: { user: { id: user.id } } },
         relations: { account: true },
       });
-
-      // SnapTrade auto-links new accounts, so we insert them if they appear on an existing connection
-      if (providerAsset == null) {
-        finalAccount = await finalAccount.insert();
-        await new SnapTradeAsset(finalAccount, rawAccount.id).insert();
-      } else {
-        const updatedBalance = finalAccount.balance;
-        const updatedAvail = finalAccount.availableBalance;
-
-        finalAccount = providerAsset.account;
-        finalAccount.balance = updatedBalance;
-        finalAccount.availableBalance = updatedAvail;
-      }
+      if (providerAsset) finalAccount.id = providerAsset.account.id;
 
       const syncData = accountsOnly
         ? { holdings: [], transactions: [], removedTransactionIds: [] }
@@ -159,6 +148,7 @@ export class SnapTradeProviderService extends ProviderBase<
 
       results.push({
         account: finalAccount,
+        providerAccountId: rawAccount.id,
         holdings: syncData.holdings,
         transactions: syncData.transactions,
         removedTransactionIds: syncData.removedTransactionIds,
@@ -167,7 +157,7 @@ export class SnapTradeProviderService extends ProviderBase<
     return results;
   }
 
-  protected async performUnlink(user: User, asset: SnapTradeInstitutionAsset): Promise<void> {
+  protected override async performUnlink(user: User, asset: SnapTradeInstitutionAsset): Promise<void> {
     const snapTradeUser = await SnapTradeUser.findOne({ where: { user: { id: user.id } } });
     if (!snapTradeUser) return;
     await this.rateLimit(user).incrementOrError();
@@ -178,7 +168,7 @@ export class SnapTradeProviderService extends ProviderBase<
     });
   }
 
-  protected async handleSyncError(asset: SnapTradeInstitutionAsset, error: unknown): Promise<void> {
+  protected override async handleSyncError(asset: SnapTradeInstitutionAsset, error: unknown): Promise<void> {
     const err = error as AxiosError;
     if (err.response?.status === 401 || err.response?.status === 403) {
       await this.setInstitutionError(asset, true);
@@ -187,15 +177,15 @@ export class SnapTradeProviderService extends ProviderBase<
     }
   }
 
-  protected async setInstitutionError(asset: SnapTradeInstitutionAsset, hasError: boolean): Promise<void> {
+  protected override async setInstitutionError(asset: SnapTradeInstitutionAsset, hasError: boolean): Promise<void> {
     asset.institution.hasError = hasError;
     await asset.institution.update();
   }
 
-  protected extractProviderAccountId(rawAccount: any): string {
+  protected override extractProviderAccountId(rawAccount: any): string {
     return rawAccount.id;
   }
-  protected extractAccountName(rawAccount: any): string {
+  protected override extractAccountName(rawAccount: any): string {
     return rawAccount.name || rawAccount.number;
   }
 
@@ -224,7 +214,7 @@ export class SnapTradeProviderService extends ProviderBase<
     );
   }
 
-  protected async fetchInitialSyncData(
+  protected override async fetchInitialSyncData(
     rawAccount: any,
     account: Account,
     authContext: SnapTradeAuthContext,
@@ -292,7 +282,7 @@ export class SnapTradeProviderService extends ProviderBase<
     return await SnapTradeInstitutionAsset.find({ where, relations: { institution: true } });
   }
 
-  protected async upsertInstitutionAsset(institution: Institution, authContext: SnapTradeAuthContext): Promise<void> {
+  protected override async upsertInstitutionAsset(institution: Institution, authContext: SnapTradeAuthContext): Promise<void> {
     let instAsset = await SnapTradeInstitutionAsset.findOne({ where: { institution: { id: institution.id } } });
     if (!instAsset) {
       await new SnapTradeInstitutionAsset(institution, authContext.authorizationId).insert();
@@ -302,19 +292,19 @@ export class SnapTradeProviderService extends ProviderBase<
     }
   }
 
-  protected async getAccountAsset(providerAccountId: string, userId: string): Promise<SnapTradeAsset | null> {
+  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<SnapTradeAsset | null> {
     return await SnapTradeAsset.findOne({ where: { snapTradeAccountId: providerAccountId, account: { user: { id: userId } } }, relations: { account: true } });
   }
 
-  protected async getAccountAssetByAccountId(accountId: string): Promise<SnapTradeAsset | null> {
+  protected override async getAccountAssetByAccountId(accountId: string): Promise<SnapTradeAsset | null> {
     return await SnapTradeAsset.findOne({ where: { account: { id: accountId } }, relations: { account: true } });
   }
 
-  protected async createAccountAsset(account: Account, providerAccountId: string): Promise<SnapTradeAsset> {
+  public async createAccountAsset(account: Account, providerAccountId: string): Promise<SnapTradeAsset> {
     return await new SnapTradeAsset(account, providerAccountId).insert();
   }
 
-  protected async updateAccountAsset(asset: SnapTradeAsset, providerAccountId: string): Promise<void> {
+  protected override async updateAccountAsset(asset: SnapTradeAsset, providerAccountId: string): Promise<void> {
     asset.snapTradeAccountId = providerAccountId;
     await asset.update();
   }

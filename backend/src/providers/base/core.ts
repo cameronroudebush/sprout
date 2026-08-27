@@ -13,7 +13,7 @@ import { Inject, InternalServerErrorException, Logger } from "@nestjs/common";
 import { ProviderRateLimit } from "./rate-limit";
 
 /** Standardized response payload for all provider sync operations. */
-export interface ProviderSyncResult {
+export interface ProviderSyncResult<TSyncMetadata = unknown> {
   /** The fully merged and saved Sprout account */
   account: Account;
   /** Transactions found during this sync */
@@ -22,6 +22,10 @@ export interface ProviderSyncResult {
   removedTransactionIds?: string[];
   /** Holdings found during this sync */
   holdings?: Holding[];
+  /** Account Id as tracked by the provider. We use our own ID's internally but still track this content */
+  providerAccountId?: string;
+  /** Used to pass back cursors or tokens safely after sync completion */
+  syncMetadata?: TSyncMetadata;
 }
 
 /** Represents a single institution's connection data returning from a token exchange. */
@@ -56,6 +60,7 @@ export abstract class ProviderBase<
   RawAccount = unknown,
   InstAsset = unknown,
   AccAsset extends { account: Account } | undefined = { account: Account },
+  TSyncMetadata = unknown,
 > {
   protected readonly httpService = Inject(HttpService);
   protected abstract readonly logger: Logger;
@@ -276,45 +281,85 @@ export abstract class ProviderBase<
   }
 
   // ====================================================================
-  // Abstracts for providers
+  // Mandatory Abstracts (Must be implemented by providers that need them)
   // ====================================================================
 
   /** Executes the data pull loop for a single previously-authenticated institution */
   protected abstract performSync(user: User, asset: InstAsset, accountsOnly: boolean): Promise<ProviderSyncResult[]>;
   /** Trades temporary UI credentials for permanent ones and returns raw initial accounts */
   protected abstract performExchange(user: User, payload: ExchangePayload): Promise<ExchangeInstitution<AuthContext, RawAccount>[]>;
-  /** Reverts an exchange remotely if a database crash prevents us from saving it locally */
-  protected abstract rollbackExchange(user: User, payload: ExchangePayload, authContext: AuthContext): Promise<void>;
-  /** Requests the remote provider to stop tracking and billing for a specific connection */
-  protected abstract performUnlink(user: User, asset: InstAsset): Promise<void>;
-  /** Intercepts provider-specific sync crashes (e.g. 401s, ITEM_LOGIN_REQUIRED) */
-  protected abstract handleSyncError(asset: InstAsset, error: unknown): Promise<void>;
-  /** Toggles the internal database error state flag for an institution connection */
-  protected abstract setInstitutionError(asset: InstAsset, hasError: boolean): Promise<void>;
-  /** Plucks the immutable remote identifier from a raw provider account */
-  protected abstract extractProviderAccountId(rawAccount: RawAccount): string;
-  /** Plucks the raw provider account name to be used for local DB merging */
-  protected abstract extractAccountName(rawAccount: RawAccount): string;
   /** Maps remote parameters (balance, types, subtypes) to an in-memory Sprout Account entity */
   protected abstract mapToSproutAccount(rawAccount: RawAccount, authContext: AuthContext | undefined, user: User, institution: Institution): Promise<Account>;
-  /** Grabs all immediate transactions and holdings once a new account completes DB insertion */
-  protected abstract fetchInitialSyncData(
-    rawAccount: RawAccount,
-    account: Account,
-    authContext: AuthContext,
-    user: User,
-  ): Promise<Omit<ProviderSyncResult, "account">>;
-
   /** Finds all active connections to the provider */
   protected abstract getInstitutionAssetsForUser(userId: string, institutionId?: string): Promise<InstAsset[]>;
-  /** Upserts the connection credentials wrapper (e.g. InstitutionAsset) */
-  protected abstract upsertInstitutionAsset(institution: Institution, authContext: AuthContext): Promise<void>;
-  /** Fetches the account linkage wrapper via remote provider ID */
-  protected abstract getAccountAsset(providerAccountId: string, userId: string): Promise<AccAsset | null>;
-  /** Fetches the account linkage wrapper via local Sprout ID */
-  protected abstract getAccountAssetByAccountId(accountId: string): Promise<AccAsset | null>;
   /** Saves a brand new linkage wrapper tracking a remote provider ID */
-  protected abstract createAccountAsset(account: Account, providerAccountId: string): Promise<AccAsset>;
+  public abstract createAccountAsset(account: Account, providerAccountId: string): Promise<AccAsset>;
+
+  // ====================================================================
+  // Optional Methods with Safe Defaults (Implement only if needed)
+  // ====================================================================
+
+  /** Reverts an exchange remotely if a database crash prevents us from saving it locally */
+  protected async rollbackExchange(_user: User, _payload: ExchangePayload, _authContext: AuthContext): Promise<void> {}
+
+  /** Requests the remote provider to stop tracking and billing for a specific connection */
+  protected async performUnlink(_user: User, _asset: InstAsset): Promise<void> {}
+
+  /** Intercepts provider-specific sync crashes (e.g. 401s, ITEM_LOGIN_REQUIRED) */
+  protected async handleSyncError(_asset: InstAsset, error: unknown): Promise<void> {
+    this.logger.error(`Sync error for provider ${this.config.name}:`, error);
+  }
+
+  /** Toggles the internal database error state flag for an institution connection */
+  protected async setInstitutionError(asset: InstAsset, hasError: boolean): Promise<void> {
+    if (asset && typeof asset === "object" && "institution" in asset) {
+      const inst = (asset as any).institution;
+      if (inst && typeof inst.hasError === "boolean") {
+        inst.hasError = hasError;
+        await inst.update();
+      }
+    }
+  }
+
+  /** Plucks the immutable remote identifier from a raw provider account */
+  protected extractProviderAccountId(rawAccount: RawAccount): string {
+    return (rawAccount as any)?.id || (rawAccount as any)?.accountId;
+  }
+
+  /** Plucks the raw provider account name to be used for local DB merging */
+  protected extractAccountName(rawAccount: RawAccount): string {
+    return (rawAccount as any)?.name || (rawAccount as any)?.accountName || "Account";
+  }
+
+  /** Grabs all immediate transactions and holdings once a new account completes DB insertion */
+  protected async fetchInitialSyncData(
+    _rawAccount: RawAccount,
+    _account: Account,
+    _authContext: AuthContext,
+    _user: User,
+  ): Promise<Omit<ProviderSyncResult, "account">> {
+    return { transactions: [], removedTransactionIds: [], holdings: [] };
+  }
+
+  /** Upserts the connection credentials wrapper (e.g. InstitutionAsset) */
+  protected async upsertInstitutionAsset(_institution: Institution, _authContext: AuthContext): Promise<void> {}
+
+  /** Fetches the account linkage wrapper via remote provider ID */
+  protected async getAccountAsset(_providerAccountId: string, _userId: string): Promise<AccAsset | null> {
+    return null;
+  }
+
+  /** Fetches the account linkage wrapper via local Sprout ID */
+  protected async getAccountAssetByAccountId(_accountId: string): Promise<AccAsset | null> {
+    return null;
+  }
+
   /** Updates an existing linkage wrapper to point to a new remote provider ID */
-  protected abstract updateAccountAsset(asset: AccAsset, providerAccountId: string): Promise<void>;
+  protected async updateAccountAsset(_asset: AccAsset, _providerAccountId: string): Promise<void> {}
+
+  /**
+   * Optional hook called by the Sync Service AFTER all database writes succeed.
+   * Perfect for committing cursors so we don't lose data on crash.
+   */
+  public async commitSyncMetadata(_metadata: TSyncMetadata): Promise<void> {}
 }

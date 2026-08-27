@@ -12,7 +12,7 @@ import { SSEService } from "@backend/sse/sse.service";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
-import { subDays } from "date-fns";
+import { startOfDay, subDays } from "date-fns";
 import { In, MoreThan } from "typeorm";
 
 /** A job that checks provider syncs on a schedule to handle informing users of new data and generating follow-up after providers are synced. */
@@ -125,7 +125,22 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
     }
 
     // Handle Notifications, only if enabled
-    if (Configuration.providers.syncNotifications.enabled)
+    if (Configuration.providers.syncNotifications.enabled) {
+      // Check if the user has already received a notification today
+      const today = startOfDay(new Date());
+      const syncsProcessedToday = await Sync.count({
+        where: {
+          user: { id: user.id },
+          notified: true,
+          time: MoreThan(today),
+        },
+      });
+
+      if (syncsProcessedToday > 0) {
+        this.logger.debug(`Silent sync for ${user.username}. Notification already sent today.`);
+        return;
+      }
+
       if (failures.length > 0) {
         // Aggregate errors and combine them by provider
         const combinedErrorDetails = failures.map((f) => `${f.failureReason || "Unknown error"}`).join(" | ");
@@ -138,16 +153,10 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
           NotificationType.error,
         );
       } else if (successes.length > 0) {
-        const currentHour = new Date().getHours();
-
-        // Only send the success notification for the morning run
-        if (currentHour < 12) {
-          const message = this.getSuccessMessage();
-          await this.notificationService.notifyUser(user, message.body, message.title, NotificationType.success);
-        } else {
-          this.logger.debug(`Silent sync for ${user.username}. No notification sent.`);
-        }
+        const message = this.getSuccessMessage();
+        await this.notificationService.notifyUser(user, message.body, message.title, NotificationType.success);
       }
+    }
   }
 
   /**

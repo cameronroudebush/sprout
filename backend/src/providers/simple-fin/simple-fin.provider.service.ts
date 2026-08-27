@@ -102,8 +102,6 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     }));
   }
 
-  protected async rollbackExchange(): Promise<void> {}
-
   protected async performSync(user: User, _asset: undefined, accountsOnly: boolean): Promise<ProviderSyncResult[]> {
     if (!user.config.simpleFinToken) return [];
 
@@ -118,39 +116,26 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
 
       // Determine if this specific institution currently has an active error
       const hasError = data.errors?.some((x) => x.includes(rawAccount.org.name)) ?? false;
-      let institution = await Institution.findOne({ where: { user: { id: user.id }, name: rawAccount.org.name } });
-      if (!institution) {
-        // New institution
-        institution = new Institution(rawAccount.org.url, rawAccount.org.name, false, user);
-        institution.hasError = hasError;
-        await institution.insert();
-      } else if (institution.hasError !== hasError) {
-        // Existing institution: Only execute DB update if the error state toggled
-        institution.hasError = hasError;
-        await institution.update();
-      }
-
+      const institution = new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
       const finalAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
-
       const syncData = accountsOnly
         ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
         : await this.fetchInitialSyncData(rawAccount, finalAccount, user.config.simpleFinToken, user);
-
-      results.push({ account: finalAccount, ...syncData });
+      results.push({
+        account: finalAccount,
+        // DO NOT PROVIDE THIS. SimpleFIN doesn't always support selecting what you want to include (like from crypto) and this
+        //  will cause the sync service to auto insert accounts.
+        // providerAccountId: rawAccount.id,
+        ...syncData,
+      });
     }
     return results;
   }
 
-  protected async performUnlink(): Promise<void> {
-    /* SimpleFIN tokens are managed locally */
-  }
-  protected async handleSyncError(): Promise<void> {}
-  protected async setInstitutionError(): Promise<void> {}
-
-  protected extractProviderAccountId(rawAccount: SimpleFINReturn.Account): string {
+  protected override extractProviderAccountId(rawAccount: SimpleFINReturn.Account): string {
     return rawAccount.id;
   }
-  protected extractAccountName(rawAccount: SimpleFINReturn.Account): string {
+  protected override extractAccountName(rawAccount: SimpleFINReturn.Account): string {
     return rawAccount.name;
   }
 
@@ -180,7 +165,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     return acc;
   }
 
-  protected async fetchInitialSyncData(
+  protected override async fetchInitialSyncData(
     rawAccount: SimpleFINReturn.Account,
     account: Account,
     _authContext: string,
@@ -216,25 +201,22 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
   }
 
   protected async getInstitutionAssetsForUser(): Promise<undefined[]> {
-    return [undefined];
+    return [undefined]; // Return a blank to force the sync to fire. This is because the first iteration of the SimpleFIN provider doesn't track a separate asset for their Id's
   }
-  protected async upsertInstitutionAsset(): Promise<void> {}
 
-  protected async getAccountAsset(providerAccountId: string, userId: string): Promise<{ account: Account } | null> {
+  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<{ account: Account } | null> {
     const account = await Account.findOne({ where: { id: providerAccountId, user: { id: userId } } });
     return account ? { account } : null;
   }
 
-  protected async getAccountAssetByAccountId(accountId: string): Promise<{ account: Account } | null> {
+  protected override async getAccountAssetByAccountId(accountId: string): Promise<{ account: Account } | null> {
     const account = await Account.findOne({ where: { id: accountId } });
     return account ? { account } : null;
   }
 
-  protected async createAccountAsset(account: Account, _providerAccountId: string): Promise<{ account: Account }> {
+  public async createAccountAsset(account: Account, _providerAccountId: string): Promise<{ account: Account }> {
     return { account };
   }
-
-  protected async updateAccountAsset(): Promise<void> {}
 
   /**
    * Fetches data from SimpleFIN via rest requests

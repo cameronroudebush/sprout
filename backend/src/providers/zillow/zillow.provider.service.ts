@@ -47,8 +47,6 @@ export class ZillowProviderService extends ProviderBase<void, void, void, void, 
         const data = await this.getInfoByZpid(user, info.zpid);
         account.balance = data.zestimate;
         account.availableBalance = data.zestimate;
-        // The calling function or a generalized history snapshotter usually handles the DB save,
-        // so we return the updated entity in the sync result.
         results.push({ account });
       } catch (e) {
         this.logger.error(`Failed to update Zillow account ${account.id}`, e);
@@ -118,41 +116,20 @@ export class ZillowProviderService extends ProviderBase<void, void, void, void, 
     return this.resultFromContent(content);
   }
 
-  public async performExchange(): Promise<ExchangeInstitution<void, ZillowPropertyResultDto>[]> {
+  public override async performExchange(): Promise<ExchangeInstitution<void, ZillowPropertyResultDto>[]> {
     throw new NotImplementedException();
   }
-  protected async rollbackExchange(): Promise<void> {}
   protected async performSync(): Promise<ProviderSyncResult[]> {
     throw new NotImplementedException();
   }
-  protected async performUnlink(): Promise<void> {}
-  protected async handleSyncError(): Promise<void> {}
-  protected async setInstitutionError(): Promise<void> {}
-  protected extractProviderAccountId(): string {
-    throw new NotImplementedException();
-  }
-  protected extractAccountName(): string {
-    throw new NotImplementedException();
-  }
-  protected async mapToSproutAccount(): Promise<Account> {
-    throw new NotImplementedException();
-  }
-  protected async fetchInitialSyncData(): Promise<Omit<ProviderSyncResult, "account">> {
+  protected override async mapToSproutAccount(): Promise<Account> {
     throw new NotImplementedException();
   }
 
   protected async getInstitutionAssetsForUser(): Promise<undefined[]> {
     return [];
   }
-  protected async upsertInstitutionAsset(): Promise<void> {}
-  protected async getAccountAsset(): Promise<null> {
-    return null;
-  }
-  protected async getAccountAssetByAccountId(): Promise<null> {
-    return null;
-  }
-  protected async createAccountAsset(): Promise<ZillowAsset> {
+  public async createAccountAsset(): Promise<ZillowAsset> {
     throw new NotImplementedException();
   }
-  protected async updateAccountAsset(): Promise<void> {}
 }
