@@ -89,6 +89,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
 
+      - name: Install CocoaPods dependencies
+        working-directory: ./frontend/ios
+        run: pod install --repo-update
+
       - name: Build Unsigned iOS App (Sideloadable IPA)
         working-directory: ./frontend
         run: |
