@@ -1,0 +1,125 @@
+name: iOS CI/CD
+
+permissions:
+  contents: write
+  pull-requests: read
+
+on:
+  push:
+    branches: ["master"]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  # ------------------------------------------------------------------------------------
+  # Filter: Decides if any work needs to happen based on file changes
+  # ------------------------------------------------------------------------------------
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.decision.outputs.should_run }}
+    steps:
+      - name: Check if this is a tag push
+        id: check_tag
+        run: echo "is_tag=${{ startsWith(github.ref, 'refs/tags/') }}" >> $GITHUB_OUTPUT
+
+      - name: Checkout for path analysis
+        if: steps.check_tag.outputs.is_tag == 'false'
+        uses: actions/checkout@v7.0.1
+
+      - name: Get changed files in frontend
+        if: steps.check_tag.outputs.is_tag == 'false'
+        id: changed_files
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            frontend/**
+            .github/workflows/ios.yml
+
+      - name: Decide whether to proceed
+        id: decision
+        run: |
+          if [[ "${{ steps.check_tag.outputs.is_tag }}" == "true" || "${{ steps.changed_files.outputs.any_changed }}" == "true" ]]; then
+            echo "Proceeding: A tag was pushed or relevant files changed."
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "Skipping: Not a tag push and no changes in frontend/."
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ------------------------------------------------------------------------------------
+  # Build: Runs for PRs, Master, and Tags
+  # ------------------------------------------------------------------------------------
+  build:
+    needs: filter
+    if: needs.filter.outputs.should_run == 'true'
+    runs-on: macos-latest
+    outputs:
+      version_string: ${{ steps.get_repo_info.outputs.version_string }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          lfs: "true"
+
+      - name: Get Repo Info
+        id: get_repo_info
+        uses: ./.github/actions/get-repo-info
+        with:
+          fetch-depth: "0"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: flutter pub get
+
+      - name: Build Unsigned iOS App (Sideloadable IPA)
+        working-directory: ./frontend
+        run: |
+          # Build the iOS app without code signing
+          flutter build ios --release --no-codesign
+
+          # Package the Runner.app into an IPA
+          mkdir -p Payload
+          mv build/ios/iphoneos/Runner.app Payload/
+          zip -qr sprout.ipa Payload
+
+      - name: Upload iOS IPA Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-build-artifact
+          path: frontend/sprout.ipa
+          # Only keeps the artifact from the most recent run for a set time limit
+          retention-days: 14
+
+  # ------------------------------------------------------------------------------------
+  # Release: ONLY runs on Tags
+  # ------------------------------------------------------------------------------------
+  release:
+    needs: [filter, build]
+    # Explicitly restrict to Tags since we only want to attach to releases
+    if: |
+      needs.filter.outputs.should_run == 'true' && 
+      startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download IPA
+        uses: actions/download-artifact@v8
+        with:
+          name: ios-build-artifact
+          path: .
+
+      - name: Upload IPA to Draft Release
+        uses: softprops/action-gh-release@v3.0.2
+        with:
+          files: sprout.ipa
+          tag_name: ${{ needs.build.outputs.version_string }}
+          draft: true
