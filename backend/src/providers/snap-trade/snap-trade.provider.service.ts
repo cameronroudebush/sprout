@@ -3,8 +3,10 @@ import { AccountType, AccountTypeIsLiability } from "@backend/account/model/acco
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
+import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { SnapTradeAsset } from "@backend/providers/snap-trade/model/snap-trade.asset.model";
 import { SnapTradeInstitutionAsset } from "@backend/providers/snap-trade/model/snap-trade.institution.asset.model";
 import { SnapTradeUser } from "@backend/providers/snap-trade/model/snap-trade.user";
@@ -15,8 +17,6 @@ import { AxiosError } from "axios";
 import { format, isToday, parseISO, set, subDays } from "date-fns";
 import { AccountPosition, AccountUniversalActivity, CommercialApiKeyAuth, Snaptrade, SnaptradeAuth } from "snaptrade-typescript-sdk";
 import { FindOptionsWhere } from "typeorm";
-import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "../base/core";
-import { ProviderRateLimit } from "../base/rate-limit";
 
 export interface SnapTradeLinkOptions {
   redirectUrl?: string;

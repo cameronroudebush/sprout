@@ -4,8 +4,8 @@ import { BrandFetchConfig } from "@backend/config/model/brand.fetch.config";
 import { CacheConfig } from "@backend/config/model/cache.config";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { RateLimitConfig } from "@backend/config/model/rate.limit.config";
+import { JobsConfig } from "@backend/core/jobs/model/jobs.config";
 import { EmailConfig } from "@backend/email/model/email.config";
-import { JobsConfig } from "@backend/jobs/model/jobs.config";
 import { NotificationConfig } from "@backend/notification/model/notification.config";
 import { LOG_LEVELS, LogLevel } from "@nestjs/common";
 

@@ -3,7 +3,7 @@ setupTests();
 
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
-import { BackgroundJob } from "@backend/jobs/job-base";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
 import { Logger } from "@nestjs/common";
 import CronExpressionParser from "cron-parser";
 

@@ -2,8 +2,8 @@ import { setupTests } from "@backend/test/helpers";
 setupTests();
 
 import { Configuration } from "@backend/config/core";
-import { BackgroundJob } from "@backend/jobs/job-base";
-import { DistributedQueueJob } from "@backend/jobs/job-distributed-base";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
+import { DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-base";
 import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 

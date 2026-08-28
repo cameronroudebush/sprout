@@ -248,6 +248,8 @@ class ApiClient {
           return MajorIndexTimelineDto.fromJson(value);
         case 'MajorIndexTimelinePoint':
           return MajorIndexTimelinePoint.fromJson(value);
+        case 'ManualSyncDto':
+          return ManualSyncDto.fromJson(value);
         case 'MarketIndexDto':
           return MarketIndexDto.fromJson(value);
         case 'MobileTokenExchangeDto':

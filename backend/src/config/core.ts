@@ -1,10 +1,10 @@
 import { ServerConfig } from "@backend/config/model/server";
 import { DatabaseConfig } from "@backend/database/model/db.config";
 import { HoldingConfig } from "@backend/holding/model/holding.config";
+import { ProvidersConfig } from "@backend/providers/model/provider.config";
 import { TransactionConfig } from "@backend/transaction/model/transaction.config";
 import { UserConfig } from "@backend/user/model/user.config.backend.model";
 import { name } from "../../package.json";
-import { ProvidersConfig } from "../providers/model/provider.config";
 import { ConfigurationMetadata } from "./model/configuration.metadata";
 
 /**

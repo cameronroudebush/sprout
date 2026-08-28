@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/account/widgets/account_sync_dialog.dart';
 import 'package:sprout/account/widgets/account_total_summary_card.dart';
 import 'package:sprout/account/widgets/accounts_empty.dart';
 import 'package:sprout/account/widgets/accounts_summary.dart';
@@ -18,24 +19,7 @@ class AccountsPage extends ConsumerWidget {
   void _showSyncPopup(BuildContext context, WidgetRef ref) {
     showSproutPopup(
       context: context,
-      builder: (context) => SproutBaseDialogWidget(
-        "Confirm Sync",
-        showCloseDialogButton: true,
-        closeButtonText: "Cancel",
-        showSubmitButton: true,
-        submitButtonText: "Start Sync",
-        onSubmitClick: () {
-          ref.read(accountsProvider.notifier).manualSync();
-          Navigator.of(context).pop();
-        },
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Text(
-            "Are you sure you want to manually sync all accounts? This may take a moment depending on your providers.",
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
+      builder: (context) => const AccountSyncDialog(),
     );
   }
 

@@ -1,6 +1,7 @@
 import { CashFlowModule } from "@backend/cash-flow/cash.flow.module";
 import { Configuration } from "@backend/config/core";
 import { EmailController } from "@backend/email/email.controller";
+import { StatusEmailJob } from "@backend/email/jobs/status-email";
 import { NetWorthModule } from "@backend/net-worth/net-worth.module";
 import { MailerModule, MailerOptions } from "@nestjs-modules/mailer";
 import { EjsAdapter } from "@nestjs-modules/mailer/adapters/ejs.adapter";
@@ -32,7 +33,7 @@ import { EmailService } from "./email.service";
     } as MailerOptions),
   ],
   controllers: [EmailController],
-  providers: [EmailService],
+  providers: [EmailService, StatusEmailJob],
   exports: [EmailService],
 })
 export class EmailModule {}

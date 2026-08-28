@@ -48,7 +48,7 @@ class Accounts extends _$Accounts {
   }
 
   /// Runs a manual sync via the backend
-  Future<void> manualSync() async {
+  Future<void> manualSync({bool force = false, List<ProviderTypeEnum>? providers}) async {
     if (state.value == null) return;
 
     final notifications = ref.read(notificationsProvider.notifier);
@@ -58,8 +58,8 @@ class Accounts extends _$Accounts {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: true));
       notificationId = notifications.openFrontendOnly("Account sync is running.", showSpinner: true, duration: 3600);
 
-      final api = await ref.read(accountApiProvider.future);
-      await api.accountControllerManualSync(force: false);
+      final api = await ref.read(providerApiProvider.future);
+      await api.baseProviderControllerManualSync(ManualSyncDto(force: force, providers: providers));
     } catch (e) {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
       notifications.openWithAPIException(e);

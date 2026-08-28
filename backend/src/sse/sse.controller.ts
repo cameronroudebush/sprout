@@ -1,11 +1,11 @@
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
+import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEData } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
+import { User } from "@backend/user/model/user.model";
 import { Controller, Sse } from "@nestjs/common";
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from "@nestjs/swagger";
 import { Observable } from "rxjs";
-import { CurrentUser } from "../core/decorator/current-user.decorator";
-import { User } from "../user/model/user.model";
-import { SSEService } from "./sse.service";
 
 /** This controller is used for creating the endpoint for the clients to connect to the SSE client. */
 @Controller("sse")

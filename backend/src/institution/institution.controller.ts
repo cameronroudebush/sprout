@@ -4,10 +4,10 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { UpdateInstitutionRequest } from "@backend/institution/model/api/institution.update.dto";
 import { Institution } from "@backend/institution/model/institution.model";
 import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { Body, Controller, NotFoundException, Param, Patch } from "@nestjs/common";
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { SSEService } from "../sse/sse.service";
 
 /**
  * This controller provides the endpoint for all Institution related content

@@ -1,3 +1,4 @@
+import { Colors } from "@backend/cash-flow/model/colors";
 import { CategoryStats } from "@backend/category/model/api/category.stats.dto";
 import { Category } from "@backend/category/model/category.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
@@ -5,7 +6,6 @@ import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { Between } from "typeorm";
-import { Colors } from "../cash-flow/model/colors";
 
 /** This class contains re-usable functions for the {@link Category} model */
 @Injectable()

@@ -8,11 +8,10 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { DatabaseService } from "@backend/database/database.service";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
-import { Sync } from "@backend/jobs/model/sync.model";
-import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
-import { ProviderType } from "@backend/providers/base/provider.type";
-import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
+import { ProviderBase } from "@backend/providers/base/core";
+import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
 import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { User } from "@backend/user/model/user.model";
@@ -22,19 +21,15 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   InternalServerErrorException,
   Logger,
   NotFoundException,
   Param,
   Patch,
   Post,
-  Put,
-  Query,
 } from "@nestjs/common";
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { startOfDay } from "date-fns";
-import { MoreThanOrEqual } from "typeorm";
-import { SSEService } from "../sse/sse.service";
 
 /**
  * This controller provides the endpoint for all Account related content
@@ -48,8 +43,7 @@ export class AccountController {
   constructor(
     private readonly sseService: SSEService,
     private readonly databaseService: DatabaseService,
-    private readonly providerSyncOrchestrator: ProviderSyncOrchestratorJob,
-    private readonly plaidProvider: PlaidProviderService,
+    @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
   ) {}
 
   @Get(":id")
@@ -122,35 +116,6 @@ export class AccountController {
     return await Account.find({ where: { user: { id: user.id } } });
   }
 
-  @Put("sync")
-  @ApiOperation({
-    summary: "Run a manual sync.",
-    description: "Runs a manual sync to update all provider accounts.",
-  })
-  @ApiOkResponse({ description: "Manual sync completed successfully." })
-  @EnabledGuard.attachDemoMode()
-  @AuthGuard.attach()
-  async manualSync(@CurrentUser() user: User, @Query("force") force: boolean = false) {
-    const runningSync = await Sync.findOne({
-      where: {
-        status: "in-progress",
-        time: MoreThanOrEqual(startOfDay(new Date())),
-      },
-    });
-
-    if (runningSync && !force) {
-      throw new InternalServerErrorException("A sync is already in progress. Please wait for it to complete.");
-    }
-
-    // Update all providers for user
-    const syncs = (await this.providerSyncOrchestrator.syncUserAllProviders(user, false)).filter((x) => x) as Sync[];
-    // Inform of the completed sync
-    this.sseService.sendToUser(user, SSEEventType.SYNC);
-    // Tell to re-request data if we had any success
-    const hasSuccess = syncs.find((x) => x.status !== "failed");
-    if (hasSuccess) this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
-  }
-
   @Post(":id/merge")
   @ApiOperation({
     summary: "Merge two accounts.",
@@ -219,8 +184,8 @@ export class AccountController {
       return;
     }
     this.logger.log(`Institution ${institution.name} has 0 remaining accounts. Initiating full cleanup.`);
-    // Handle if some providers have specific handling
-    if (provider === ProviderType.plaid) await this.plaidProvider.unlinkInstitution(user, institution.id);
+    // Handle unlinks
+    for (const p of this.providers) if (provider === p.config.dbType) p.unlinkInstitution(user, institution.id);
     // Remove from DB to cleanup
     await Institution.delete({ id: institution.id });
   }

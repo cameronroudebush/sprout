@@ -1,11 +1,8 @@
-import { DistributedQueueJob } from "@backend/jobs/job-distributed-base";
-import { Sync } from "@backend/jobs/model/sync.model";
+import { DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-base";
 import { ProviderBase } from "@backend/providers/base/core";
-import { ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
-import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
+import { Sync } from "@backend/providers/model/sync.model";
 import { User } from "@backend/user/model/user.model";
-import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
 
@@ -16,39 +13,8 @@ type SyncTaskPayload = {
   notify?: boolean;
 };
 
-/** This job is the orchestrator that controls syncing all available providers */
-@Injectable()
-export class ProviderSyncOrchestratorJob implements OnApplicationBootstrap {
-  /** List of jobs for each provider that we have initialized */
-  jobs: Array<ProviderSyncJob> = [];
-
-  constructor(
-    private readonly providerSyncService: ProviderSyncService,
-    @Inject(PROVIDER_LIST_TOKEN) private readonly providers: ProviderBase[],
-  ) {}
-
-  async onApplicationBootstrap() {
-    this.jobs = await Promise.all(this.providers.map(async (x) => await new ProviderSyncJob(x, this.providerSyncService).start()));
-  }
-
-  /**
-   * Public API to trigger a manual sync for a specific user across all active providers.
-   * Pushes the tasks directly to the distributed/local queues.
-   */
-  async syncUserAllProviders(user: User, notify: boolean) {
-    return await Promise.all(this.jobs.map(async (job) => await job.processTask({ userId: user.id, notify })));
-  }
-
-  /** Targets and invokes a background sync task for a single specific provider type */
-  async syncUserSingleProvider(user: User, providerType: ProviderType, notify: boolean) {
-    const targetJob = this.jobs.find((job) => job.provider.config.dbType === providerType);
-    if (!targetJob) throw new Error(`Sync job runner for provider type '${providerType}' was not found or is disabled.`);
-    return await targetJob.processTask({ userId: user.id, notify });
-  }
-}
-
-/** The nested job for each specific actual provider */
-class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
+/** This sync job specifies a singular job for a specific provider. This is re-used for every provider and dynamically created based on provider count. */
+export class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
   constructor(
     public readonly provider: ProviderBase,
     private readonly providerSyncService: ProviderSyncService,

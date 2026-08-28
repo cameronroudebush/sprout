@@ -1,6 +1,6 @@
 import { ClassTransformerContext } from "@backend/core/context.serializer";
+import { ExchangeRateJob } from "@backend/core/jobs/exchange-rate";
 import { CustomTypes } from "@backend/core/model/utility/custom.types";
-import { ExchangeRateJob } from "@backend/jobs/exchange-rate";
 import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Logger } from "@nestjs/common";

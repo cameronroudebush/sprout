@@ -1,6 +1,6 @@
 import { Configuration } from "@backend/config/core";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
 import { DemoDataService } from "@backend/demo/demo.data.service";
-import { BackgroundJob } from "@backend/jobs/job-base";
 import { Injectable } from "@nestjs/common";
 
 /** A job that is only enabled during demo mode that will allow us to reset database data */

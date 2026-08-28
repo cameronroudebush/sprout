@@ -1,13 +1,12 @@
 import { AccountModule } from "@backend/account/account.module";
 import { AuthModule } from "@backend/auth/auth.module";
 import { CashFlowModule } from "@backend/cash-flow/cash.flow.module";
-import { CategoryController } from "@backend/category/category.controller";
-import { CategoryService } from "@backend/category/category.service";
+import { CategoryModule } from "@backend/category/category.module";
 import { ChatModule } from "@backend/chat/chat.module";
 import { ConfigurationModule } from "@backend/config/config.module";
 import { Configuration } from "@backend/config/core";
 import { ContextSerializerInterceptor } from "@backend/core/context.serializer";
-import { CoreController } from "@backend/core/core.controller";
+import { CoreModule } from "@backend/core/core.module";
 import { SproutLogger } from "@backend/core/logger";
 import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
 import { DatabaseModule } from "@backend/database/database.module";
@@ -15,7 +14,6 @@ import { DemoModule } from "@backend/demo/demo.module";
 import { EmailModule } from "@backend/email/email.module";
 import { HoldingModule } from "@backend/holding/holding.module";
 import { InstitutionModule } from "@backend/institution/institution.module";
-import { JobsModule } from "@backend/jobs/jobs.module";
 import { NetWorthModule } from "@backend/net-worth/net-worth.module";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderModule } from "@backend/providers/provider.module";
@@ -31,23 +29,6 @@ import { KeyvCacheableMemory } from "cacheable";
 
 @Module({
   imports: [
-    ConfigurationModule,
-    DatabaseModule,
-    AuthModule,
-    UserModule,
-    ProviderModule,
-    ChatModule,
-    HoldingModule,
-    SSEModule,
-    NotificationModule,
-    NetWorthModule,
-    ProviderModule,
-    TransactionModule,
-    EmailModule,
-    AccountModule,
-    CashFlowModule,
-    InstitutionModule,
-    DemoModule,
     ThrottlerModule.forRoot([
       {
         ttl: Configuration.server.rateLimit.ttl,
@@ -95,13 +76,29 @@ import { KeyvCacheableMemory } from "cacheable";
         };
       },
     }),
-    // Always initialize jobs last
-    JobsModule,
+    // Sprout specific modules. Initialize after core setup above
+    CoreModule,
+    ConfigurationModule,
+    DatabaseModule,
+    AuthModule,
+    UserModule,
+    ProviderModule,
+    ChatModule,
+    HoldingModule,
+    SSEModule,
+    NotificationModule,
+    NetWorthModule,
+    ProviderModule,
+    TransactionModule,
+    EmailModule,
+    AccountModule,
+    CashFlowModule,
+    InstitutionModule,
+    CategoryModule,
+    DemoModule,
   ],
-  controllers: [CoreController, CategoryController],
+  controllers: [],
   providers: [
-    CategoryService,
-    SproutLogger,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

@@ -3,7 +3,7 @@ setupTests();
 
 import { Configuration } from "@backend/config/core";
 import { EmailService } from "@backend/email/email.service";
-import { StatusEmailJob } from "@backend/jobs/status-email";
+import { StatusEmailJob } from "@backend/email/jobs/status-email";
 import { EmailUpdateFrequency } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { IsNull, Not } from "typeorm";

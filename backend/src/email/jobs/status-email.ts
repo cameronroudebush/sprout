@@ -1,6 +1,6 @@
 import { Configuration } from "@backend/config/core";
+import { DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-base";
 import { EmailService } from "@backend/email/email.service";
-import { DistributedQueueJob } from "@backend/jobs/job-distributed-base";
 import { EmailUpdateFrequency } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";

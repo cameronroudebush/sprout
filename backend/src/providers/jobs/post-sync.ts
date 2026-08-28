@@ -1,12 +1,12 @@
 import { ChatService } from "@backend/chat/chat.service";
 import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
 import { Configuration } from "@backend/config/core";
+import { DefaultTaskPayload, DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-base";
 import { Utility } from "@backend/core/model/utility/utility";
-import { DefaultTaskPayload, DistributedQueueJob } from "@backend/jobs/job-distributed-base";
-import { Sync } from "@backend/jobs/model/sync.model";
 import { NotificationType } from "@backend/notification/model/notification.type";
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderType } from "@backend/providers/base/provider.type";
+import { Sync } from "@backend/providers/model/sync.model";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { UserDevice } from "@backend/user/model/user.device.model";

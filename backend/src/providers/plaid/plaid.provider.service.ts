@@ -3,8 +3,10 @@ import { AccountType, AccountTypeIsLiability } from "@backend/account/model/acco
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
+import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
 import { PlaidAsset } from "@backend/providers/plaid/model/plaid.asset";
@@ -29,8 +31,6 @@ import {
   RemovedTransaction,
 } from "plaid";
 import { FindOptionsWhere } from "typeorm";
-import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "../base/core";
-import { ProviderRateLimit } from "../base/rate-limit";
 
 export interface PlaidLinkOptions {
   publicUrl: string;

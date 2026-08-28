@@ -67,6 +67,54 @@ class ProviderApi {
     return null;
   }
 
+  /// Run a manual sync.
+  ///
+  /// Runs a manual sync to update specified provider accounts or all connected providers.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [ManualSyncDto] manualSyncDto (required):
+  Future<Response> baseProviderControllerManualSyncWithHttpInfo(ManualSyncDto manualSyncDto,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/sync';
+
+    // ignore: prefer_final_locals
+    Object? postBody = manualSyncDto;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'PUT',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Run a manual sync.
+  ///
+  /// Runs a manual sync to update specified provider accounts or all connected providers.
+  ///
+  /// Parameters:
+  ///
+  /// * [ManualSyncDto] manualSyncDto (required):
+  Future<void> baseProviderControllerManualSync(ManualSyncDto manualSyncDto,) async {
+    final response = await baseProviderControllerManualSyncWithHttpInfo(manualSyncDto,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Create a Plaid link token
   ///
   /// Note: This method returns the HTTP [Response].

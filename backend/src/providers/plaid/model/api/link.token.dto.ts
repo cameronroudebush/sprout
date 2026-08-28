@@ -1,4 +1,4 @@
-import { Trim } from "@backend/core/decorator/trim";
+import { Trim } from "@backend/core/decorator/trim.decorator";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString } from "class-validator";
 

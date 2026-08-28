@@ -1,3 +1,5 @@
+import { AppModule } from "@backend/app.module";
+import { SproutLogger } from "@backend/core/logger";
 import { configureApiDocument } from "@backend/core/openapi";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
@@ -5,8 +7,6 @@ import { SwaggerModule } from "@nestjs/swagger";
 import * as fs from "fs";
 import path from "path";
 import prettier from "prettier";
-import { AppModule } from "../app.module";
-import { SproutLogger } from "../core/logger";
 
 /** A function that allows us to generate an openAPI spec file to the given path then exit. */
 export async function generateOpenApiSpec(givenPath = process.argv[2] || "./openapi-spec.json") {

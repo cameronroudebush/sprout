@@ -14,7 +14,8 @@ import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
 import 'package:sprout/provider/widgets/plaid/plaid_helper.dart';
-import 'package:sprout/provider/widgets/provider_icon.dart';
+import 'package:sprout/provider/widgets/provider_display.dart';
+import 'package:sprout/provider/widgets/resync_dialog.dart';
 import 'package:sprout/provider/widgets/snap-trade/snap_trade_helper.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
@@ -74,19 +75,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   void _showReSyncPopup() {
     showSproutPopup(
       context: context,
-      builder: (ctx) => SproutBaseDialogWidget(
-        'Re-Sync',
-        showCloseDialogButton: true,
-        showSubmitButton: true,
-        submitButtonText: "Sync",
-        onSubmitClick: () async {
-          Navigator.of(ctx).pop();
-          await ref.read(accountsProvider.notifier).manualSync();
-        },
-        child: const Text(
-          'Welcome back! Would you like to re-sync your accounts to get updated data from fixed accounts?',
-          textAlign: TextAlign.center,
-        ),
+      builder: (ctx) => ReSyncDialog(
+        providerType: widget.account.provider,
       ),
     );
   }
@@ -338,9 +328,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
       loading: () => const AsyncValue.loading(),
     );
 
-    String providerName = account.provider.toString().toTitleCase;
-    if (account.provider == ProviderTypeEnum.simpleFin) providerName = "SimpleFIN";
-
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
@@ -503,10 +490,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                       children: [
                         Text("Provider", style: theme.textTheme.bodyMedium),
                         const Spacer(),
-                        FinanceProviderIcon(provider, size: 36),
-                        Padding(
-                            padding: EdgeInsetsGeometry.only(left: 8),
-                            child: Text(providerName, style: theme.textTheme.bodyMedium)),
+                        ProviderDisplay(
+                          providerType: account.provider,
+                          iconSize: 24,
+                        ),
                       ],
                     ),
                   ),

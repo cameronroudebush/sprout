@@ -3,15 +3,15 @@ import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
+import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Injectable, Logger, NotImplementedException } from "@nestjs/common";
 import { subDays } from "date-fns";
-import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "../base/core";
-import { ProviderRateLimit } from "../base/rate-limit";
 
 @Injectable()
 export class SimpleFINProviderService extends ProviderBase<void, void, string[], string, SimpleFINReturn.Account, undefined, { account: Account }> {

@@ -1,14 +1,14 @@
 import { Account } from "@backend/account/model/account.model";
 import { Configuration } from "@backend/config/core";
+import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
+import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
 import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Injectable, Logger, NotImplementedException } from "@nestjs/common";
 import { Impit } from "impit";
-import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "../base/core";
-import { ProviderRateLimit } from "../base/rate-limit";
 
 /**
  * This provider adds automated property lookup via Zillow.

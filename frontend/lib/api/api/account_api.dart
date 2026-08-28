@@ -234,58 +234,6 @@ class AccountApi {
     return null;
   }
 
-  /// Run a manual sync.
-  ///
-  /// Runs a manual sync to update all provider accounts.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [bool] force:
-  Future<Response> accountControllerManualSyncWithHttpInfo({ bool? force, }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/account/sync';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (force != null) {
-      queryParams.addAll(_queryParams('', 'force', force));
-    }
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'PUT',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Run a manual sync.
-  ///
-  /// Runs a manual sync to update all provider accounts.
-  ///
-  /// Parameters:
-  ///
-  /// * [bool] force:
-  Future<void> accountControllerManualSync({ bool? force, }) async {
-    final response = await accountControllerManualSyncWithHttpInfo( force: force, );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-  }
-
   /// Merge two accounts.
   ///
   /// Merges a source account into the target account by Id, updating all related historical data and deleting the source. Intended purely to migrate from one account as your base to another, in the event the provider changes the structure. You should consider the Target Id (in the query) will be the remaining account. The source account will be provided by the body.

@@ -80,6 +80,7 @@ part 'model/institution_icon_type.dart';
 part 'model/loan_amortization_series.dart';
 part 'model/major_index_timeline_dto.dart';
 part 'model/major_index_timeline_point.dart';
+part 'model/manual_sync_dto.dart';
 part 'model/market_index_dto.dart';
 part 'model/mobile_token_exchange_dto.dart';
 part 'model/monthly_category_data.dart';

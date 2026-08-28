@@ -1,11 +1,11 @@
 import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { Inject, Injectable } from "@nestjs/common";
 import YahooFinance from "yahoo-finance2";
-import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job that runs in the background to automatically update exchange rates */
 @Injectable()

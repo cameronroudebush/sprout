@@ -1,9 +1,9 @@
 import { Configuration } from "@backend/config/core";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { Injectable } from "@nestjs/common";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
-import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job that executes to check things like stuck pending transactions */
 @Injectable()

@@ -1,5 +1,5 @@
 import { Configuration } from "@backend/config/core";
-import { BackgroundJob } from "@backend/jobs/job-base";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
 import { Logger } from "@nestjs/common";
 import { Job, Queue, Worker } from "bullmq";
 import Redis from "ioredis";

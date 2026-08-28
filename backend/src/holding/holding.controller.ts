@@ -6,11 +6,11 @@ import { HoldingService } from "@backend/holding/holding.service";
 import { MajorIndexTimelineDto } from "@backend/holding/model/api/major.index.timeline.dto";
 import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
+import { EntityHistory, HistoricalDataPoint } from "@backend/net-worth/model/api/entity.history.dto";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Controller, Get, NotFoundException, Param, ParseArrayPipe, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { EntityHistory, HistoricalDataPoint } from "../net-worth/model/api/entity.history.dto";
 
 /** This controller contains information about {@link Holding} models which is stock information. */
 @Controller("holding")

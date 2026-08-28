@@ -3,11 +3,11 @@
  *  through typeorm so typeorm can turn it into the proper file.
  */
 
+import { AppModule } from "@backend/app.module";
+import { SproutLogger } from "@backend/core/logger";
+import { DatabaseService } from "@backend/database/database.service";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "../app.module";
-import { SproutLogger } from "../core/logger";
-import { DatabaseService } from "../database/database.service";
 
 let database: DatabaseService;
 

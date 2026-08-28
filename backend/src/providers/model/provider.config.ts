@@ -1,8 +1,8 @@
+import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { PlaidConfig } from "@backend/providers/plaid/config";
 import { SimpleFINConfig } from "@backend/providers/simple-fin/config";
 import { SnapTradeConfig } from "@backend/providers/snap-trade/model/config";
 import { ZillowConfig } from "@backend/providers/zillow/config";
-import { ConfigurationMetadata } from "../../config/model/configuration.metadata";
 
 export class SyncNotifications {
   @ConfigurationMetadata.assign({

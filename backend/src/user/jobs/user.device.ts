@@ -1,8 +1,8 @@
 import { Configuration } from "@backend/config/core";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { Injectable } from "@nestjs/common";
 import { LessThan } from "typeorm";
-import { BackgroundJob } from "./job-base";
 
 /** This class defines a background job that executes to check user devices and clean them up if we haven't seen them in awhile */
 @Injectable()

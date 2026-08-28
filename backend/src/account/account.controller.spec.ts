@@ -6,21 +6,17 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { Institution } from "@backend/institution/model/institution.model";
-import { Sync } from "@backend/jobs/model/sync.model";
-import { ProviderSyncOrchestratorJob } from "@backend/jobs/sync";
 import { ProviderType } from "@backend/providers/base/provider.type";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import * as dateFns from "date-fns";
 
 describe("AccountController", () => {
   let controller: AccountController;
   let sseService: jest.Mocked<SSEService>;
   let databaseService: any;
-  let providerSyncOrchestrator: jest.Mocked<ProviderSyncOrchestratorJob>;
   let plaidProvider: jest.Mocked<PlaidProviderService>;
   let mockUser: User;
 
@@ -37,17 +33,14 @@ describe("AccountController", () => {
       },
     };
 
-    providerSyncOrchestrator = {
-      syncUserAllProviders: jest.fn(),
-    } as any;
-
     plaidProvider = {
+      config: { dbType: ProviderType.plaid },
       unlinkInstitution: jest.fn(),
     } as any;
 
     mockUser = User.fromPlain({ id: "user-123" });
 
-    controller = new AccountController(sseService, databaseService, providerSyncOrchestrator, plaidProvider);
+    controller = new AccountController(sseService, databaseService, [plaidProvider]);
   });
 
   describe("getById", () => {
@@ -218,48 +211,6 @@ describe("AccountController", () => {
 
       expect(findSpy).toHaveBeenCalledWith({ where: { user: { id: "user-123" } } });
       expect(result).toBe(mockCollection);
-    });
-  });
-
-  describe("manualSync", () => {
-    it("should throw InternalServerErrorException if an active daily sync exists and force parameter is omitted", async () => {
-      jest.useFakeTimers().setSystemTime(new Date("2026-06-02T10:00:00.000Z"));
-      jest.spyOn(Sync, "findOne").mockResolvedValue(Sync.fromPlain({ id: "sync-1" }));
-
-      await expect(controller.manualSync(mockUser)).rejects.toThrow(InternalServerErrorException);
-      expect(dateFns.startOfDay).toHaveBeenCalled();
-
-      jest.useRealTimers();
-    });
-
-    it("should proceed with synchronization regardless of active syncs if force flag is activated", async () => {
-      jest.spyOn(Sync, "findOne").mockResolvedValue(Sync.fromPlain({ id: "sync-1" }));
-      providerSyncOrchestrator.syncUserAllProviders.mockResolvedValue([]);
-
-      await controller.manualSync(mockUser, true);
-
-      expect(providerSyncOrchestrator.syncUserAllProviders).toHaveBeenCalledWith(mockUser, false);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
-    });
-
-    it("should bypass active sync warning if no synchronization process is marked in-progress", async () => {
-      jest.spyOn(Sync, "findOne").mockResolvedValue(null);
-      providerSyncOrchestrator.syncUserAllProviders.mockResolvedValue([Sync.fromPlain({ status: "completed" })]);
-
-      await controller.manualSync(mockUser, false);
-
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
-    });
-
-    it("should suppress FORCE_UPDATE event broadcast if every sync outcome reports as failed", async () => {
-      jest.spyOn(Sync, "findOne").mockResolvedValue(null);
-      providerSyncOrchestrator.syncUserAllProviders.mockResolvedValue([Sync.fromPlain({ status: "failed" })]);
-
-      await controller.manualSync(mockUser, false);
-
-      expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.SYNC);
-      expect(sseService.sendToUser).not.toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
     });
   });
 

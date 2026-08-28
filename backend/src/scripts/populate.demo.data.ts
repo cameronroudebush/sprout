@@ -2,8 +2,11 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
+import { AppModule } from "@backend/app.module";
 import { Category } from "@backend/category/model/category.model";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
+import { SproutLogger } from "@backend/core/logger";
+import { DatabaseService } from "@backend/database/database.service";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -19,9 +22,6 @@ import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { eachDayOfInterval, subDays } from "date-fns";
 import { startCase } from "lodash";
-import { AppModule } from "../app.module";
-import { SproutLogger } from "../core/logger";
-import { DatabaseService } from "../database/database.service";
 
 /**
  * A simple seeded pseudo-random number generator (PRNG) to produce consistent results.
