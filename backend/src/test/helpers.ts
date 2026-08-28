@@ -6,8 +6,11 @@ import { Logger } from "@nestjs/common";
 jest.mock("@backend/config/core", () => ({
   Configuration: {
     encryptionKey: "66c60231a85abcf9fa2c6c07fd0b075c50c4a313585afb447c95838ecc6170d8",
+    isDemoMode: false,
+    version: "1.0.0",
     server: {
       auth: {
+        type: "local",
         secretKey: "test-key",
         oidc: {
           issuer: "https://identity.provider.local",
@@ -18,15 +21,49 @@ jest.mock("@backend/config/core", () => ({
         type: "local",
       },
       email: {
+        enabled: true,
         sendTime: "0 12 * * 0",
         validate: jest.fn(),
       },
+      prompt: {
+        enabled: true,
+      },
+      lightModeTiles: [],
+      darkModeTiles: [],
+      brandFetch: { clientId: "bf-id" },
     },
     holding: {
       cleanupRemovedHoldings: true,
     },
+    transaction: {
+      stuckTransactions: {
+        time: "0 0 * * *",
+        enabled: true,
+        days: 7,
+      },
+    },
+    user: {
+      deviceCheck: {
+        time: "0 0 * * *",
+        enabled: true,
+        days: 30,
+      },
+    },
     providers: {
+      postSyncTime: "0 0 * * *",
+      syncNotifications: { enabled: true },
       plaid: {
+        enabled: true,
+      },
+      simpleFIN: {
+        enabled: true,
+        syncFrequency: "0 0 * * *",
+      },
+      snapTrade: {
+        enabled: true,
+        consumerKey: "test-key",
+      },
+      zillow: {
         enabled: true,
       },
     },
