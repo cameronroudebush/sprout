@@ -81,6 +81,14 @@ jobs:
         working-directory: ./frontend
         run: flutter pub get
 
+      - name: CocoaPods Cache
+        uses: actions/cache@v4
+        with:
+          path: frontend/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('frontend/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Build Unsigned iOS App (Sideloadable IPA)
         working-directory: ./frontend
         run: |
