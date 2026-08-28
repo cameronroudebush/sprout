@@ -54,9 +54,7 @@ describe("ChatController", () => {
       modelChat.insert = jest.fn().mockResolvedValue(modelChat);
       modelChat.update = jest.fn().mockResolvedValue(modelChat);
 
-      jest.spyOn(ChatHistory.prototype, "insert")
-        .mockResolvedValueOnce(userChat)
-        .mockResolvedValueOnce(modelChat);
+      jest.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
 
       const mockModel = {
         generateChatContent: jest.fn().mockResolvedValue("AI Response"),

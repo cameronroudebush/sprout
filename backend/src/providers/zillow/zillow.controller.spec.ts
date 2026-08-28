@@ -66,9 +66,9 @@ describe("ZillowProviderController", () => {
     it("should throw InternalServerErrorException on error", async () => {
       zillowService.getInfoByAddress.mockRejectedValue(new Error("Zillow error"));
 
-      await expect(
-        controller.lookupProperty(user, { address: "123 Main St", city: "City", state: "ST", zip: 12345 })
-      ).rejects.toThrow(InternalServerErrorException);
+      await expect(controller.lookupProperty(user, { address: "123 Main St", city: "City", state: "ST", zip: 12345 })).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -76,9 +76,7 @@ describe("ZillowProviderController", () => {
     it("should throw BadRequestException if zpid or zestimate missing", async () => {
       zillowService.getInfoByAddress.mockResolvedValue({ zpid: null, zestimate: null } as any);
 
-      await expect(
-        controller.link(user, { address: "123 Main St", city: "City", state: "ST", zip: 12345 })
-      ).rejects.toThrow(BadRequestException);
+      await expect(controller.link(user, { address: "123 Main St", city: "City", state: "ST", zip: 12345 })).rejects.toThrow(BadRequestException);
     });
 
     it("should create institution, account, asset, history and trigger force update", async () => {
