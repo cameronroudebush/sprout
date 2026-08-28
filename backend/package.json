@@ -46,7 +46,7 @@
     "plaid": "^45.0.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.2",
-    "snaptrade-typescript-sdk": "^11.0.4",
+    "snaptrade-typescript-sdk": "^12.1.1",
     "source-map-support": "^0.5.21",
     "ts-mixer": "^6.0.4",
     "typeorm": "^1.0.0",
