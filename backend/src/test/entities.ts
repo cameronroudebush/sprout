@@ -1,5 +1,6 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
+import { Category } from "@backend/category/model/category.model";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -7,6 +8,8 @@ import { Notification } from "@backend/notification/model/notification.model";
 import { Sync } from "@backend/providers/model/sync.model";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { Transaction } from "@backend/transaction/model/transaction.model";
+import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
+import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
 import { User } from "@backend/user/model/user.model";
 
 /** A map of re-usable entities already pre configured */
@@ -121,6 +124,17 @@ export const TestEntities = {
     });
   },
 
+  get category() {
+    return Category.fromPlain({
+      id: "category-default-id",
+      name: "Groceries",
+      icon: "groceries",
+      excludeFromCashFlow: false,
+      increasedSubVariance: false,
+      user: this.user,
+    });
+  },
+
   get transaction() {
     return Transaction.fromPlain({
       id: "transaction-default-id",
@@ -133,6 +147,22 @@ export const TestEntities = {
       extra: {},
       manuallyEdited: false,
       account: this.account,
+      category: this.category,
+    });
+  },
+
+  get transactionRule() {
+    return TransactionRule.fromPlain({
+      id: "rule-default-id",
+      type: TransactionRuleType.description,
+      value: "Grocery",
+      strict: false,
+      matches: 5,
+      order: 0,
+      enabled: true,
+      categoryId: "category-default-id",
+      category: this.category,
+      user: this.user,
     });
   },
 

@@ -111,8 +111,8 @@ export class SnapTradeProviderService extends ProviderBase<
 
   protected override async rollbackExchange(user: User, _payload: void, authContext: SnapTradeAuthContext): Promise<void> {
     try {
-      await this.snaptrade.connections.removeBrokerageAuthorization({
-        authorizationId: authContext.authorizationId,
+      await this.snaptrade.connections.deleteConnection({
+        connectionId: authContext.authorizationId,
         userId: user.id,
         userSecret: authContext.userSecret,
       });
@@ -161,8 +161,8 @@ export class SnapTradeProviderService extends ProviderBase<
     const snapTradeUser = await SnapTradeUser.findOne({ where: { user: { id: user.id } } });
     if (!snapTradeUser) return;
     await this.rateLimit(user).incrementOrError();
-    await this.snaptrade.connections.removeBrokerageAuthorization({
-      authorizationId: asset.authorizationId,
+    await this.snaptrade.connections.deleteConnection({
+      connectionId: asset.authorizationId,
       userId: user.id,
       userSecret: snapTradeUser.userSecret,
     });
