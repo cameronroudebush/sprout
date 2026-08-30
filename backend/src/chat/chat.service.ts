@@ -47,18 +47,22 @@ export class ChatService {
         }
       };
 
-      /** Executes LLM generation and maps generic IDs back to real names. */
+      /** Helper to apply dynamic string map replacement and chart color injection */
+      const transformText = (rawText: string, idMap: Map<string, string>): string => {
+        let transformed = rawText;
+        const sortedEntries = Array.from(idMap.entries()).sort((a, b) => b[1].length - a[1].length);
+        for (const [realName, genericId] of sortedEntries) transformed = transformed.replaceAll(genericId, realName);
+        return this.injectChartColors(transformed);
+      };
+
+      /** Executes LLM generation for standard non-streamed responses (e.g. overviews). */
       const generateContent = async (contents: ContentListUnion, idMap: Map<string, string>, maxRetries = 3) => {
         let attempt = 0;
 
         while (attempt < maxRetries) {
           try {
             const response = await aiModel.generateContent({ model: type, contents });
-            let aiText = response.text ?? "";
-
-            const sortedEntries = Array.from(idMap.entries()).sort((a, b) => b[1].length - a[1].length);
-            for (const [realName, genericId] of sortedEntries) aiText = aiText.replaceAll(genericId, realName);
-            aiText = this.injectChartColors(aiText);
+            const aiText = transformText(response.text ?? "", idMap);
 
             if (!aiText) throw new InternalServerErrorException("Failed to to process request to LLM.");
             return aiText;
@@ -98,14 +102,31 @@ export class ChatService {
         throw new InternalServerErrorException("Failed to generate content: retry limit reached or invalid configuration.");
       };
 
-      /** Generates chat responses for user requests. */
-      const generateChatContent = async (chat: ChatHistory, timeframe: ChatTimeframe, allowCharts: boolean) => {
+      /**
+       * Generates chat responses for user requests.
+       * @param stream If we should send the data over SSE to update the user on the fly instead of waiting for it to be done.
+       */
+      const generateChatContent = async (chat: ChatHistory, timeframe: ChatTimeframe, allowCharts: boolean, stream = true) => {
         try {
           const { contents, idMap } = await this.promptBuilder.buildChatPrompt(user, timeframe, allowCharts);
           await logTokens(contents, "chat response");
-          const aiText = await generateContent(contents, idMap);
-          chat.text = aiText;
-          return aiText;
+
+          const responseStream = await aiModel.generateContentStream({ model: type, contents });
+          let rawAccumulatedText = "";
+
+          for await (const chunk of responseStream) {
+            const chunkText = chunk.text;
+            if (chunkText) {
+              rawAccumulatedText += chunkText;
+              chat.text = transformText(rawAccumulatedText, idMap);
+              if (stream) {
+                chat.isThinking = false;
+                this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
+              }
+            }
+          }
+
+          return chat.text;
         } catch (e) {
           chat.isThinking = false;
           chat.text = (e as Error).message;

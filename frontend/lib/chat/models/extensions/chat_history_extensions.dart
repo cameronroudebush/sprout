@@ -13,15 +13,23 @@ extension ChatHistoryExtensions on String {
     final formatted = result.splitMapJoin(
       pattern,
       onMatch: (Match match) {
-        final id = match.group(1);
+        final id = match.group(1)!;
         final fullMatch = match.group(0)!;
 
         // If we have the account, replace it with the formatted name
         if (idMap.containsKey(id)) {
           return "**${idMap[id]}**";
         }
-        // If we don't have the account, but the original text started with '@'
+        // If it starts with '@', check if it's currently streaming in as a partial match of a real account ID
         else if (fullMatch.contains('@')) {
+          final isPartialMatch = idMap.keys.any((accId) => accId.startsWith(id));
+          final isAtEndOfString = match.end == result.length;
+
+          // If it matches the prefix of an existing account ID and is at the end of the stream, wait for more tokens
+          if (isPartialMatch && isAtEndOfString) {
+            return fullMatch;
+          }
+
           return "**Deleted Account**";
         }
         // Otherwise, return the text exactly as it was

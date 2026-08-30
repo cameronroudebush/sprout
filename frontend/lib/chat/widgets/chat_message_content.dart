@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Renders message text using GPT markdown with account and currency de-identification.
-class ChatMessageContent extends ConsumerWidget {
+class ChatMessageContent extends ConsumerStatefulWidget {
   final String text;
   final bool isAi;
   final Color? textColor;
@@ -22,22 +23,94 @@ class ChatMessageContent extends ConsumerWidget {
       {super.key, required this.text, this.isAi = true, this.textColor, this.showTypingWhenLoading = true});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatMessageContent> createState() => _ChatMessageContentState();
+}
+
+class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
+  Timer? _timer;
+  String _displayedText = '';
+  String _targetText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _targetText = widget.text;
+
+    // If it's not AI, or if text is already populated when mounted (historical messages), don't animate.
+    if (!widget.isAi || widget.text.isNotEmpty) {
+      _displayedText = widget.text;
+    } else {
+      _startTypingLoop();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatMessageContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != oldWidget.text) {
+      _targetText = widget.text;
+
+      if (!widget.isAi) {
+        _displayedText = widget.text;
+      } else {
+        _startTypingLoop();
+      }
+    }
+  }
+
+  void _startTypingLoop() {
+    if (_timer?.isActive ?? false) return;
+
+    _timer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
+      if (_displayedText.length < _targetText.length) {
+        setState(() {
+          // Detect any code block start early (as soon as ``` streams in)
+          final openFence = _targetText.indexOf('```', _displayedText.length);
+          if (openFence != -1 && openFence == _displayedText.length) {
+            final closeFence = _targetText.indexOf('```', openFence + 3);
+            if (closeFence != -1) {
+              _displayedText = _targetText.substring(0, closeFence + 3);
+              return;
+            } else {
+              _displayedText = _targetText;
+              return;
+            }
+          }
+
+          final diff = _targetText.length - _displayedText.length;
+          final step = diff > 80 ? 4 : (diff > 40 ? 2 : 1);
+          final nextLength = (_displayedText.length + step).clamp(0, _targetText.length);
+          _displayedText = _targetText.substring(0, nextLength);
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userConfigAsync = ref.watch(userConfigProvider);
     final accountsAsync = ref.watch(accountsProvider);
     final theme = Theme.of(context);
 
     // If accounts are still loading, don't render the text yet to avoid flashing raw IDs
     return accountsAsync.when(
-      loading: () => showTypingWhenLoading ? const TypingIndicator() : const SizedBox.shrink(),
+      loading: () => widget.showTypingWhenLoading ? const TypingIndicator() : const SizedBox.shrink(),
       error: (err, _) => Text("Error: $err", style: TextStyle(color: theme.colorScheme.error)),
       data: (accountState) {
         final isPrivate = userConfigAsync.value?.privateMode ?? false;
         final accounts = accountState.accounts;
 
-        String processedText = text.deIdentifyAccounts(accounts);
+        String processedText = _displayedText.deIdentifyAccounts(accounts);
         final finalText = isPrivate ? processedText.deIdentifyCurrency() : processedText;
-        final effectiveColor = textColor ?? theme.textTheme.bodyMedium?.color ?? Colors.white;
+        final effectiveColor = widget.textColor ?? theme.textTheme.bodyMedium?.color ?? Colors.white;
         final markdownStyle = TextStyle(color: effectiveColor, fontSize: 14);
 
         return Theme(
@@ -62,47 +135,71 @@ class ChatMessageContent extends ConsumerWidget {
   ///
   /// [parseCharts] If we should parse charts into their actual chart objects versus leaving them as JSON
   List<Widget> _buildContentNodes(String text, TextStyle style, {bool parseCharts = true}) {
-    final chartRegex = RegExp(r'```chart\s*([\s\S]*?)\s*```');
-    final matches = chartRegex.allMatches(text);
+    // Detects ``` blocks early, including incomplete or partially typed opening tags
+    final blockRegex = RegExp(r'```(?:chart)?\s*([\s\S]*?)(?:```|$)');
+    final matches = blockRegex.allMatches(text);
 
-    // No charts so just return markdown
+    // No code/chart blocks so just return markdown
     if (matches.isEmpty || !parseCharts) return [GptMarkdown(text, style: style)];
 
     List<Widget> nodes = [];
     int lastMatchEnd = 0;
 
     for (final match in matches) {
-      // Add standard text before the chart
+      // Add standard text before the block
       final preText = text.substring(lastMatchEnd, match.start).trim();
       if (preText.isNotEmpty) nodes.add(GptMarkdown(preText, style: style));
 
-      // Extract and parse the JSON chart data
-      final jsonString = match.group(1)?.trim() ?? "{}";
+      final fullMatchText = match.group(0) ?? "";
+      final jsonString = match.group(1)?.trim() ?? "";
+      final isClosed = fullMatchText.endsWith('```');
 
-      try {
-        final Map<String, dynamic> chartData = jsonDecode(jsonString);
-        final chartType = chartData['type'] as String?;
+      // If the triple-backtick block is unclosed or JSON is incomplete, immediately show a spinner
+      if (!isClosed) {
+        nodes.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.0),
+              ),
+            ),
+          ),
+        );
+      } else {
+        try {
+          final Map<String, dynamic> chartData = jsonDecode(jsonString);
+          final chartType = chartData['type'] as String?;
 
-        Widget chartWidget;
-        switch (chartType) {
-          case 'line':
-            chartWidget = ChatSproutLineChart(chartData: chartData);
-            break;
-          case 'pie':
-            chartWidget = ChatSproutPieChart(chartData: chartData);
-            break;
-          default:
-            chartWidget = Text("Unsupported chart type: $chartType", style: TextStyle(color: Colors.red));
+          Widget chartWidget;
+          switch (chartType) {
+            case 'line':
+              chartWidget = ChatSproutLineChart(chartData: chartData);
+              break;
+            case 'pie':
+              chartWidget = ChatSproutPieChart(chartData: chartData);
+              break;
+            default:
+              chartWidget = Text("Unsupported chart type: $chartType", style: TextStyle(color: Colors.red));
+          }
+
+          nodes.add(chartWidget);
+        } catch (e) {
+          // If JSON parsing fails on a closed block, check if it was intended as a chart
+          if (fullMatchText.startsWith('```chart')) {
+            nodes.add(Text("Failed to load chart.", style: TextStyle(color: Colors.red)));
+          } else {
+            // Standard non-chart markdown code block fallback
+            nodes.add(GptMarkdown(fullMatchText, style: style));
+          }
         }
-
-        nodes.add(chartWidget);
-      } catch (e) {
-        nodes.add(Text("Failed to load chart.", style: TextStyle(color: Colors.red)));
       }
       lastMatchEnd = match.end;
     }
 
-    // Add remaining text
+    // Add remaining text after the last match
     final postText = text.substring(lastMatchEnd).trim();
     if (postText.isNotEmpty) nodes.add(GptMarkdown(postText, style: style));
     return nodes;
