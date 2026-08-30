@@ -436,7 +436,7 @@ class _TransactionEditState extends ConsumerState<TransactionEdit> {
 
     void goToAccount() {
       Navigator.of(context).pop();
-      NavigationProvider.redirect('accounts/details', queryParameters: {'id': account.id});
+      NavigationProvider.redirectToAccount(account);
     }
 
     return Column(

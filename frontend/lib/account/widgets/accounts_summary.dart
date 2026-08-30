@@ -81,7 +81,7 @@ class AccountSummaryView extends ConsumerWidget {
         selectedRange: selectedRange,
         historyList: historyAsync.value,
         allowExpansion: collapsible,
-        onAccountClick: (acc) => NavigationProvider.redirect('accounts/details', queryParameters: {'id': acc.id}),
+        onAccountClick: (acc) => NavigationProvider.redirectToAccount(acc),
       );
     }).toList();
 

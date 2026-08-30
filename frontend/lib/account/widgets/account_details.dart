@@ -585,8 +585,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                             submitButtonStyle: ThemeHelpers.errorButton,
                             onSubmitClick: () async {
                               Navigator.of(ctx).pop();
-                              await accountProvider.delete(account.id);
+                              NavigationProvider.back(
+                                  context, ref); // Force pop the last route to not get us stuck in redirect land
                               await NavigationProvider.redirect("/accounts");
+                              await accountProvider.delete(account.id);
                             },
                             child: Text(
                               "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",

@@ -30,13 +30,13 @@ final List<SproutRoute> authenticatedRoutes = [
       builder: (context, state) => const AccountsPage(),
       routes: [
         SproutRoute(
-          path: '/details',
+          path: '/:id',
           label: 'Account Details',
           icon: Icons.account_balance_wallet,
           category: 'Banking',
           showInSidebar: false,
           builder: (context, state) {
-            final accountId = state.uri.queryParameters['id'] ?? state.uri.queryParameters['acc'];
+            final accountId = state.pathParameters['id'];
             return AccountDetailsPage(accountId: accountId);
           },
         ),

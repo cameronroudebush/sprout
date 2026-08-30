@@ -47,7 +47,7 @@ class NavigationProvider {
       return;
     }
     final uri = Uri(path: target, queryParameters: params).toString();
-
+    // This must be used so mobile can know how to navigate backwards using system gestures
     router.push(uri);
   }
 
@@ -78,6 +78,6 @@ class NavigationProvider {
 
   /// Redirects to a specific account detail page
   static Future<void> redirectToAccount(Account account) async {
-    await redirect("/account", queryParameters: {'acc': account.id});
+    await redirect("/accounts/${account.id}");
   }
 }

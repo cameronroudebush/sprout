@@ -17,33 +17,32 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
   bool _isAllSelected = false;
   final Set<ProviderTypeEnum> _selectedProviders = {};
 
-  void _toggleAll(bool selected) {
+  void _toggleAll(bool selected, List<ProviderTypeEnum> activeProviders) {
     setState(() {
       _isAllSelected = selected;
       if (selected) {
-        _selectedProviders.addAll(ProviderTypeEnum.values);
+        _selectedProviders.addAll(activeProviders);
       } else {
         _selectedProviders.clear();
       }
     });
   }
 
-  void _toggleProvider(ProviderTypeEnum provider, bool selected) {
+  void _toggleProvider(ProviderTypeEnum provider, bool selected, int totalActive) {
     setState(() {
       if (selected) {
         _selectedProviders.add(provider);
       } else {
         _selectedProviders.remove(provider);
       }
-      _isAllSelected = _selectedProviders.length == ProviderTypeEnum.values.length;
+      _isAllSelected = _selectedProviders.length == totalActive;
     });
   }
 
   void _onStartSync() {
-    // If all providers are selected, send null to let backend default to "all"
-    final providersPayload = _isAllSelected ? null : _selectedProviders.toList();
+    // Send the explicit list of selected providers, cannot use null to trigger "all" since a user might not use every provider
     ref.read(accountsProvider.notifier).manualSync(
-          providers: providersPayload,
+          providers: _selectedProviders.toList(),
         );
     Navigator.of(context).pop();
   }
@@ -51,6 +50,32 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
+
+    // Filter down to a unique list of providers currently in use
+    final activeProviders = accounts.map((account) => account.provider).toSet().toList();
+
+    // Handle case where user has no accounts to sync
+    if (activeProviders.isEmpty) {
+      return SproutBaseDialogWidget(
+        "Manual Sync",
+        showCloseDialogButton: true,
+        closeButtonText: "Close",
+        showSubmitButton: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 12.0),
+          child: Center(
+            child: Text(
+              "You have no connected accounts available to sync.",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
 
     return SproutBaseDialogWidget(
       "Manual Sync",
@@ -95,7 +120,7 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
 
             // Top-level "All Providers" selection
             InkWell(
-              onTap: () => _toggleAll(!_isAllSelected),
+              onTap: () => _toggleAll(!_isAllSelected, activeProviders),
               borderRadius: BorderRadius.circular(10),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
@@ -130,7 +155,7 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
               ),
             ),
 
-            // Provider grid
+            // Provider grid filtered by active accounts
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -140,13 +165,13 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
                 mainAxisSpacing: 8,
                 mainAxisExtent: 80,
               ),
-              itemCount: ProviderTypeEnum.values.length,
+              itemCount: activeProviders.length,
               itemBuilder: (context, index) {
-                final provider = ProviderTypeEnum.values[index];
+                final provider = activeProviders[index];
                 final isSelected = _selectedProviders.contains(provider);
 
                 return InkWell(
-                  onTap: () => _toggleProvider(provider, !isSelected),
+                  onTap: () => _toggleProvider(provider, !isSelected, activeProviders.length),
                   borderRadius: BorderRadius.circular(10),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),

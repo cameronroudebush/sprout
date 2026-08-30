@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/settings.dart';
@@ -18,22 +17,33 @@ class SproutDesktopHeader extends ConsumerWidget {
   String _getText(WidgetRef ref) {
     final currentPath = ref.watch(currentRouteProvider);
     final user = ref.watch(authProvider).value;
-    switch (currentPath) {
-      case "/":
-        final greeting = SproutMoreSheet.getGreeting();
-        return "$greeting ${user?.username}";
-      default:
-        String cleanedPath = currentPath.startsWith('/') ? currentPath.substring(1) : currentPath;
-        cleanedPath = cleanedPath.replaceAll("/", " ");
-        return cleanedPath.toTitleCase;
+
+    if (currentPath == "/") {
+      final greeting = SproutMoreSheet.getGreeting();
+      return "$greeting ${user?.username}";
     }
+
+    final pathSegments = Uri.parse(currentPath).pathSegments;
+    if (pathSegments.length == 2 && pathSegments[0] == 'accounts') {
+      return "Account";
+    }
+
+    // Default formatting for other paths
+    String cleanedPath = currentPath.startsWith('/') ? currentPath.substring(1) : currentPath;
+    cleanedPath = cleanedPath.replaceAll("/", " ");
+    return cleanedPath.toTitleCase;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPath = ref.watch(currentRouteProvider);
     final theme = Theme.of(context);
-    final canPop = GoRouter.of(context).canPop() && currentPath != "/";
+
+    // Check if we have a parent route to go back to
+    final pathSegments = Uri.parse(currentPath).pathSegments;
+    final hasParentRoute = pathSegments.length > 1;
+    final parentPath = hasParentRoute ? '/${pathSegments.take(pathSegments.length - 1).join('/')}' : null;
+    final canPop = hasParentRoute && currentPath != "/";
 
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
@@ -47,7 +57,7 @@ class SproutDesktopHeader extends ConsumerWidget {
                 if (canPop) ...[
                   // Back button
                   InkWell(
-                    onTap: () => NavigationProvider.back(context, ref),
+                    onTap: () => NavigationProvider.redirect(parentPath ?? ''),
                     customBorder: const LinearBorder(),
                     child: Tooltip(
                       message: "Go back",
