@@ -13,13 +13,7 @@ class TransactionLocationCard extends StatelessWidget {
     final locationData = transaction.extra?.location;
     final lat = locationData?.lat?.toDouble();
     final lon = locationData?.lon?.toDouble();
-    final hasAddress = [
-      locationData?.address,
-      locationData?.city,
-      locationData?.region,
-    ].any((part) => part != null && part.trim().isNotEmpty);
-
-    return (lat != null && lon != null) || hasAddress;
+    return (lat != null && lon != null);
   }
 
   @override

@@ -169,7 +169,18 @@ export class ProviderSyncService {
       transaction.account = accountInDb;
       // If the transaction description is empty, fill it with something
       if (transaction.description === "" || !transaction.description) transaction.description = accountInDb.name;
-      let transactionInDb = (await Transaction.find({ where: { id: transaction.id, account: { id: accountInDb.id } } }))[0];
+
+      const providerId = transaction.providerId;
+      let transactionInDb: Transaction | undefined;
+
+      // Match against providerId.
+      if (providerId) {
+        transactionInDb = (await Transaction.find({ where: { providerId, account: { id: accountInDb.id } } }))[0];
+      } else if (transaction.id) {
+        // Fallback just in case a manually created transaction somehow gets piped through here
+        transactionInDb = (await Transaction.find({ where: { id: transaction.id, account: { id: accountInDb.id } } }))[0];
+      }
+
       // If we aren't tracking this transaction yet, go ahead and add it
       if (transactionInDb == null) transactionInDb = await Transaction.fromPlain(transaction).insert(false);
       else {

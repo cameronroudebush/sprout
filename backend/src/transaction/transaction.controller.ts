@@ -272,22 +272,41 @@ export class TransactionController {
       const duplicateKey = `${dateWithoutTime}_${transaction.amount}`;
 
       if (seen.has(duplicateKey)) {
-        const keptTransaction = seen.get(duplicateKey)!;
-        duplicatesToRemove.push(transaction);
+        let keptTransaction = seen.get(duplicateKey)!;
+        let toRemoveTransaction = transaction;
+
+        // If the new transaction has a providerId but the currently kept one does NOT,
+        // swap them so the record with providerId is preserved.
+        if (!keptTransaction.providerId && toRemoveTransaction.providerId) {
+          duplicatesToRemove.push(keptTransaction);
+          keptTransactionsToUpdate.delete(keptTransaction);
+
+          keptTransaction = toRemoveTransaction;
+          toRemoveTransaction = seen.get(duplicateKey)!;
+          seen.set(duplicateKey, keptTransaction);
+        } else {
+          duplicatesToRemove.push(toRemoveTransaction);
+        }
 
         let isKeptModified = false;
 
-        if (!keptTransaction.categoryId && transaction.categoryId) {
-          keptTransaction.category = transaction.category;
+        if (!keptTransaction.categoryId && toRemoveTransaction.categoryId) {
+          keptTransaction.category = toRemoveTransaction.category;
           isKeptModified = true;
         }
 
-        if (transaction.extra) {
+        // Inherit providerId if the kept record didn't have one
+        if (!keptTransaction.providerId && toRemoveTransaction.providerId) {
+          keptTransaction.providerId = toRemoveTransaction.providerId;
+          isKeptModified = true;
+        }
+
+        if (toRemoveTransaction.extra) {
           if (!keptTransaction.extra) {
-            keptTransaction.extra = { ...transaction.extra };
+            keptTransaction.extra = { ...toRemoveTransaction.extra };
             isKeptModified = true;
           } else {
-            const mergedExtra = { ...transaction.extra, ...keptTransaction.extra };
+            const mergedExtra = { ...toRemoveTransaction.extra, ...keptTransaction.extra };
             if (JSON.stringify(keptTransaction.extra) !== JSON.stringify(mergedExtra)) {
               keptTransaction.extra = mergedExtra;
               isKeptModified = true;

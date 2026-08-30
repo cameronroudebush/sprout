@@ -64,6 +64,12 @@ export class Transaction extends DatabaseBase {
   @Optional()
   manuallyEdited?: boolean = false;
 
+  /** The Id of the transaction from the provider if given. */
+  @DatabaseDecorators.column({ nullable: true })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
+  providerId?: string;
+
   constructor(amount: number, posted: Date, description: string, category: Category | undefined, pending: boolean, account: Account) {
     super();
     this.amount = amount;

@@ -1,16 +1,16 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
+import { Account } from "@backend/account/model/account.model";
+import { Category } from "@backend/category/model/category.model";
+import { NotificationService } from "@backend/notification/notification.service";
+import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
+import { TestEntities } from "@backend/test/entities";
+import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionController } from "@backend/transaction/transaction.controller";
 import { TransactionService } from "@backend/transaction/transaction.service";
-import { SSEService } from "@backend/sse/sse.service";
-import { NotificationService } from "@backend/notification/notification.service";
-import { Transaction } from "@backend/transaction/model/transaction.model";
-import { Category } from "@backend/category/model/category.model";
-import { Account } from "@backend/account/model/account.model";
-import { TestEntities } from "@backend/test/entities";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { SSEEventType } from "@backend/sse/model/event.model";
 
 describe("TransactionController", () => {
   let controller: TransactionController;
@@ -104,7 +104,7 @@ describe("TransactionController", () => {
       const txList = [TestEntities.transaction];
       jest.spyOn(Transaction, "find").mockResolvedValue(txList);
 
-      const res = await controller.getByQuery(user, 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
+      const res = await controller.getByQuery(user, "", 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
 
       expect(Transaction.find).toHaveBeenCalled();
       expect(res).toBe(txList);
@@ -113,7 +113,7 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if category filter id is invalid", async () => {
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(controller.getByQuery(user, 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
+      await expect(controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
     });
   });
 

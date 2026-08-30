@@ -30,7 +30,7 @@ import {
   Products,
   RemovedTransaction,
 } from "plaid";
-import { FindOptionsWhere } from "typeorm";
+import { FindOptionsWhere, In } from "typeorm";
 
 export interface PlaidLinkOptions {
   publicUrl: string;
@@ -207,7 +207,21 @@ export class PlaidProviderService extends ProviderBase<
 
       const accountTransactions = added.concat(modified).filter((t) => t.account_id === rawAccount.account_id);
       const transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);
-      const removedTransactionIds = removed.filter((t) => t.account_id === rawAccount.account_id).map((t) => t.transaction_id);
+
+      // Translate Plaid removed IDs into our internally generated DB UUIDs
+      const removedPlaidIds = removed.filter((t) => t.account_id === rawAccount.account_id).map((t) => t.transaction_id);
+      let removedTransactionIds: string[] = [];
+
+      if (removedPlaidIds.length > 0) {
+        const removedTxs = await Transaction.find({
+          where: {
+            providerId: In(removedPlaidIds),
+            account: { id: finalAccount.id },
+          },
+          select: { id: true }, // We only need the internal DB ID to pass to ProviderSyncService
+        });
+        removedTransactionIds = removedTxs.map((t) => t.id);
+      }
 
       const accountHoldings =
         allHoldings && securities
@@ -359,7 +373,7 @@ export class PlaidProviderService extends ProviderBase<
     return await Promise.all(
       transactions.map(async (t) => {
         if (t.pending_transaction_id) {
-          const pendingTx = await Transaction.findOne({ where: { id: t.pending_transaction_id, account: { user: { id: user.id } } } });
+          const pendingTx = await Transaction.findOne({ where: { providerId: t.pending_transaction_id, account: { user: { id: user.id } } } });
           if (pendingTx) await pendingTx.remove();
         }
         const parsedDate = parseISO(t.date);
@@ -367,7 +381,7 @@ export class PlaidProviderService extends ProviderBase<
           ? set(parsedDate, { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds(), milliseconds: now.getMilliseconds() })
           : parsedDate;
         const newTx = new Transaction(t.amount * -1, transactionDate, t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
-        newTx.id = t.transaction_id;
+        newTx.providerId = t.transaction_id;
         newTx.extra = { code: t.transaction_code, location: t.location, website: t.website };
         return newTx;
       }),

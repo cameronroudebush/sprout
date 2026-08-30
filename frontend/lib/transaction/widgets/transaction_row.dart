@@ -8,6 +8,7 @@ import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
+import 'package:sprout/transaction/widgets/website_icon.dart';
 
 // Renders a singular transaction with all necessary information in a single row
 class TransactionRow extends ConsumerWidget {
@@ -45,6 +46,11 @@ class TransactionRow extends ConsumerWidget {
       }),
     );
 
+    final websiteUrl = transaction.extra?.website;
+    final Widget effectiveIcon = (websiteUrl != null && websiteUrl.isNotEmpty)
+        ? WebsiteIconWidget(websiteUrl: websiteUrl, size: 32)
+        : (icon ?? CategoryIcon(cat, avatarSize: 16));
+
     return InkWell(
       onTap: !allowDialog ? null : () => NavigationProvider.redirectToTransaction(transaction),
       child: Container(
@@ -56,8 +62,8 @@ class TransactionRow extends ConsumerWidget {
           child: Row(
             spacing: 16,
             children: [
-              // Category
-              icon ?? CategoryIcon(cat, avatarSize: 16),
+              // Icon (Website -> Override -> Category)
+              effectiveIcon,
               // Description
               Expanded(
                 child: Column(

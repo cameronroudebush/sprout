@@ -267,7 +267,7 @@ export class SnapTradeProviderService extends ProviderBase<
           false,
           account,
         );
-        newTransaction.id = t.id!;
+        newTransaction.providerId = t.id!;
         newTransaction.extra = { type: t.type, fee: t.fee };
         return newTransaction;
       }),
