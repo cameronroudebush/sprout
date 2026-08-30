@@ -81,7 +81,7 @@ final class UserNotifierProvider extends $NotifierProvider<UserNotifier, void> {
   }
 }
 
-String _$userNotifierHash() => r'f2d19a12bbdcdefae84f937aff6d5081ee768dfe';
+String _$userNotifierHash() => r'602ff57a651b45f6669c7e1c7dc9d165e58c25c8';
 
 /// Manages User-related actions like device registration.
 

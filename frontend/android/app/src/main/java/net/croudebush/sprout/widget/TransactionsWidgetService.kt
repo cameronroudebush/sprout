@@ -11,6 +11,7 @@ import android.graphics.Color
 import org.json.JSONArray
 import androidx.core.graphics.toColorInt
 import org.json.JSONObject
+import android.net.Uri
 
 class TransactionsWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
@@ -57,8 +58,10 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         }
         views.setTextColor(R.id.item_amount, amountColor)
 
-        val fillInIntent = Intent()
-        fillInIntent.putExtra("transaction_id", id)
+        val fillInIntent = Intent().apply {
+            data = Uri.parse("sprout:///transactions/$id")
+            putExtra("transaction_id", id)
+        }
         views.setOnClickFillInIntent(R.id.transaction_item_root, fillInIntent)
 
         views.setTextViewText(R.id.item_merchant_name, merchant)

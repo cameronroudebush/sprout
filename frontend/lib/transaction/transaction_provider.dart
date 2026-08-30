@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
@@ -5,6 +6,7 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/extensions/sse_auto_refresh.dart';
+import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 
@@ -43,6 +45,29 @@ class Transactions extends _$Transactions {
     final initial = await fetchFilteredPage(startIndex: 0);
 
     return TransactionState(transactions: initial, totalCount: total?.total ?? 0);
+  }
+
+  /// Fetches a specific transaction by it's Id
+  Future<Transaction?> fetchById(String id) async {
+    final current = state.value ?? TransactionState(transactions: [], totalCount: 0);
+    final existing = current.transactions.firstWhereOrNull((t) => t.id == id);
+    if (existing != null) return existing;
+    try {
+      final api = await ref.read(transactionApiProvider.future);
+      final results = await api.transactionControllerGetByQuery(id: id);
+
+      if (results != null && results.isNotEmpty) {
+        final item = results.first;
+        final updatedList = [...current.transactions, item]..sort((a, b) => b.posted.compareTo(a.posted));
+
+        state = AsyncData(current.copyWith(transactions: updatedList));
+        return item;
+      }
+    } catch (e) {
+      LoggerProvider.error("Failed to fetch transaction $id: $e");
+    }
+
+    return null;
   }
 
   /// Fetches data matching the given filter with the given index

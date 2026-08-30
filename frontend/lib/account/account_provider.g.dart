@@ -70,7 +70,7 @@ final class AccountsProvider
   Accounts create() => Accounts();
 }
 
-String _$accountsHash() => r'52b068b09e75e37fc46c3e230d1d241cfeec7e00';
+String _$accountsHash() => r'0309b868367b859d400024eda8e2198a71452426';
 
 abstract class _$Accounts extends $AsyncNotifier<AccountState> {
   FutureOr<AccountState> build();

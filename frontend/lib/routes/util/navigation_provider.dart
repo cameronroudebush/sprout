@@ -80,4 +80,9 @@ class NavigationProvider {
   static Future<void> redirectToAccount(Account account) async {
     await redirect("/accounts/${account.id}");
   }
+
+  /// Redirects to a specific transaction detail page
+  static Future<void> redirectToTransaction(Transaction t) async {
+    await redirect("/transactions/${t.id}");
+  }
 }

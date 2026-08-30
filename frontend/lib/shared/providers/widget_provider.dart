@@ -113,6 +113,7 @@ class WidgetSync extends _$WidgetSync {
               final categoryName = categories.firstWhereOrNull((c) => c.id == t.categoryId)?.name ?? "Unknown";
 
               return {
+                "id": t.id,
                 "merchant": t.description,
                 "category": categoryName,
                 "amount": formatter.format(t.amount, handlePrivateMode: false),

@@ -74,7 +74,7 @@ final class InstitutionIconProvider extends $FunctionalProvider<
   }
 }
 
-String _$institutionIconHash() => r'2969026f2bcf6c865bcd6a68900488e5484b8f45';
+String _$institutionIconHash() => r'9687f1186262e300c035523e53c3c182c8a5f3d1';
 
 /// Provides the institutions icon
 
@@ -176,7 +176,7 @@ final class InstitutionLogoProvider extends $FunctionalProvider<
   }
 }
 
-String _$institutionLogoHash() => r'03fd7de61c4c3c0ef3747839c9749d8fc191a9e5';
+String _$institutionLogoHash() => r'1750a97962b8ddb92726b72180f0222243a33330';
 
 /// Provides the institutions full logo
 
@@ -281,7 +281,7 @@ final class TickerIconProvider extends $FunctionalProvider<
   }
 }
 
-String _$tickerIconHash() => r'5e7d990161068ec6a69de937da86a43996ae8910';
+String _$tickerIconHash() => r'9f536b27b771a6a2fa55ae43fa99886f16eb7898';
 
 /// Provides the ticker icon
 
@@ -386,7 +386,7 @@ final class ProviderIconProvider extends $FunctionalProvider<
   }
 }
 
-String _$providerIconHash() => r'e7cf69e86be1f111f48acc8a09113d97997fd28e';
+String _$providerIconHash() => r'43f3f09e186465d5517209dd130b82d89002defc';
 
 /// Provides the account provider icon
 
@@ -420,4 +420,106 @@ final class ProviderIconFamily extends $Family
 
   @override
   String toString() => r'providerIconProvider';
+}
+
+/// Provides an icon for an arbitrary website URL
+
+@ProviderFor(websiteIcon)
+final websiteIconProvider = WebsiteIconFamily._();
+
+/// Provides an icon for an arbitrary website URL
+
+final class WebsiteIconProvider extends $FunctionalProvider<
+        AsyncValue<List<String>>, List<String>, FutureOr<List<String>>>
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  /// Provides an icon for an arbitrary website URL
+  WebsiteIconProvider._(
+      {required WebsiteIconFamily super.from,
+      required (
+        String,
+        double,
+      )
+          super.argument})
+      : super(
+          retry: null,
+          name: r'websiteIconProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$websiteIconHash();
+
+  @override
+  String toString() {
+    return r'websiteIconProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    final argument = this.argument as (
+      String,
+      double,
+    );
+    return websiteIcon(
+      ref,
+      argument.$1,
+      argument.$2,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WebsiteIconProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$websiteIconHash() => r'9ee68a26ea5b5c39078f6c747168035c032639f4';
+
+/// Provides an icon for an arbitrary website URL
+
+final class WebsiteIconFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            FutureOr<List<String>>,
+            (
+              String,
+              double,
+            )> {
+  WebsiteIconFamily._()
+      : super(
+          retry: null,
+          name: r'websiteIconProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  /// Provides an icon for an arbitrary website URL
+
+  WebsiteIconProvider call(
+    String websiteUrl,
+    double size,
+  ) =>
+      WebsiteIconProvider._(argument: (
+        websiteUrl,
+        size,
+      ), from: this);
+
+  @override
+  String toString() => r'websiteIconProvider';
 }

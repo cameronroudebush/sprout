@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/settings.dart';
@@ -24,8 +25,8 @@ class SproutDesktopHeader extends ConsumerWidget {
     }
 
     final pathSegments = Uri.parse(currentPath).pathSegments;
-    if (pathSegments.length == 2 && pathSegments[0] == 'accounts') {
-      return "Account";
+    if (pathSegments.length == 2) {
+      return pathSegments[0].toPrettyCase;
     }
 
     // Default formatting for other paths
@@ -39,11 +40,14 @@ class SproutDesktopHeader extends ConsumerWidget {
     final currentPath = ref.watch(currentRouteProvider);
     final theme = Theme.of(context);
 
-    // Check if we have a parent route to go back to
+    // Calculate parent route fallback in case deep links bypass navigation history
     final pathSegments = Uri.parse(currentPath).pathSegments;
     final hasParentRoute = pathSegments.length > 1;
     final parentPath = hasParentRoute ? '/${pathSegments.take(pathSegments.length - 1).join('/')}' : null;
-    final canPop = hasParentRoute && currentPath != "/";
+
+    // Show back button if GoRouter can pop history OR if we are on a nested sub-route
+    final canPopHistory = context.canPop();
+    final canShowBackButton = (canPopHistory || hasParentRoute) && currentPath != "/";
 
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
@@ -54,10 +58,16 @@ class SproutDesktopHeader extends ConsumerWidget {
           children: [
             Row(
               children: [
-                if (canPop) ...[
+                if (canShowBackButton) ...[
                   // Back button
                   InkWell(
-                    onTap: () => NavigationProvider.redirect(parentPath ?? ''),
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else if (parentPath != null) {
+                        NavigationProvider.redirect(parentPath);
+                      }
+                    },
                     customBorder: const LinearBorder(),
                     child: Tooltip(
                       message: "Go back",
@@ -73,7 +83,7 @@ class SproutDesktopHeader extends ConsumerWidget {
                   ),
                 ],
                 Padding(
-                  padding: EdgeInsets.only(left: canPop ? 8 : 16),
+                  padding: EdgeInsets.only(left: canShowBackButton ? 8 : 16),
                   child: Text(
                     _getText(ref),
                     style: theme.textTheme.headlineSmall,

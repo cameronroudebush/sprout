@@ -70,7 +70,7 @@ void showSproutEditDialog({
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(innerContext),
                   child: const Text("Cancel"),
                 ),
               ),

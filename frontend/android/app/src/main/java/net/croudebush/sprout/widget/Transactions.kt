@@ -56,7 +56,7 @@ class Transactions : AppWidgetProvider() {
             val clickIntent = Intent(context, MainActivity::class.java)
             val clickPendingIntent = PendingIntent.getActivity(
                 context, 0, clickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
             views.setPendingIntentTemplate(R.id.widget_transactions_list, clickPendingIntent)
             views.setOnClickPendingIntent(R.id.widget_root, clickPendingIntent)

@@ -940,6 +940,15 @@
         "operationId": "TransactionController_getByQuery",
         "parameters": [
           {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "description": "A specific transaction ID to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "startIndex",
             "required": false,
             "in": "query",
@@ -3784,6 +3793,10 @@
         "type": "object",
         "properties": {
           "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
             "type": "string",
             "nullable": true
           },

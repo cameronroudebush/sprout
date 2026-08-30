@@ -5,10 +5,9 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
-import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/transaction/widgets/transaction_edit.dart';
 
 // Renders a singular transaction with all necessary information in a single row
 class TransactionRow extends ConsumerWidget {
@@ -47,8 +46,7 @@ class TransactionRow extends ConsumerWidget {
     );
 
     return InkWell(
-      onTap:
-          !allowDialog ? null : () => showSproutPopup(context: context, builder: (_) => TransactionEdit(transaction)),
+      onTap: !allowDialog ? null : () => NavigationProvider.redirectToTransaction(transaction),
       child: Container(
         decoration: BoxDecoration(
           color: transaction.pending ? theme.colorScheme.primary.withValues(alpha: 0.15) : Colors.transparent,

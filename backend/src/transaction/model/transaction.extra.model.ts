@@ -6,6 +6,9 @@ export class TransactionExtraData {
   @ApiPropertyOptional({ type: String })
   code?: string | null;
 
+  @ApiPropertyOptional({ type: String })
+  website?: string | null;
+
   @ApiPropertyOptional({ type: () => TransactionLocation })
   location?: TransactionLocation | null;
 

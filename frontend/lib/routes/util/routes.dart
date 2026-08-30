@@ -9,6 +9,7 @@ import 'package:sprout/routes/holdings.dart';
 import 'package:sprout/routes/reports.dart';
 import 'package:sprout/routes/settings.dart';
 import 'package:sprout/routes/subscriptions.dart';
+import 'package:sprout/routes/transaction_details.dart';
 import 'package:sprout/routes/transaction_rules.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/route.dart';
@@ -51,13 +52,25 @@ final List<SproutRoute> authenticatedRoutes = [
         unsecureConfig.demoMode != null || (secureConfig.chatEnabled && (userConfig?.includeAICapabilities ?? false)),
   ),
   SproutRoute(
-    path: '/transactions',
-    label: 'Transactions',
-    icon: Icons.receipt,
-    bottomNavPriority: 3,
-    category: 'Banking',
-    builder: (context, state) => const TransactionsPage(),
-  ),
+      path: '/transactions',
+      label: 'Transactions',
+      icon: Icons.receipt,
+      bottomNavPriority: 3,
+      category: 'Banking',
+      builder: (context, state) => const TransactionsPage(),
+      routes: [
+        SproutRoute(
+          path: '/:id',
+          label: 'Transaction Details',
+          icon: Icons.receipt_long,
+          category: 'Banking',
+          showInSidebar: false,
+          builder: (context, state) {
+            final id = state.pathParameters['id'];
+            return TransactionDetailsPage(transactionId: id);
+          },
+        ),
+      ]),
   SproutRoute(
     path: '/holdings',
     label: 'Holdings',

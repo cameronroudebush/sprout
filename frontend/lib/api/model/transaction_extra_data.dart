@@ -14,26 +14,31 @@ class TransactionExtraData {
   /// Returns a new [TransactionExtraData] instance.
   TransactionExtraData({
     this.code,
+    this.website,
     this.location,
   });
 
   String? code;
+
+  String? website;
 
   TransactionLocation? location;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is TransactionExtraData &&
     other.code == code &&
+    other.website == website &&
     other.location == location;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (code == null ? 0 : code!.hashCode) +
+    (website == null ? 0 : website!.hashCode) +
     (location == null ? 0 : location!.hashCode);
 
   @override
-  String toString() => 'TransactionExtraData[code=$code, location=$location]';
+  String toString() => 'TransactionExtraData[code=$code, website=$website, location=$location]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -41,6 +46,11 @@ class TransactionExtraData {
       json[r'code'] = this.code;
     } else {
       json[r'code'] = null;
+    }
+    if (this.website != null) {
+      json[r'website'] = this.website;
+    } else {
+      json[r'website'] = null;
     }
     if (this.location != null) {
       json[r'location'] = this.location;
@@ -66,6 +76,7 @@ class TransactionExtraData {
 
       return TransactionExtraData(
         code: mapValueOfType<String>(json, r'code'),
+        website: mapValueOfType<String>(json, r'website'),
         location: TransactionLocation.fromJson(json[r'location']),
       );
     }

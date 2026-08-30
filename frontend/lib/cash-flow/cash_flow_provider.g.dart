@@ -335,7 +335,7 @@ final class CashFlowTrendProvider extends $FunctionalProvider<
   }
 }
 
-String _$cashFlowTrendHash() => r'4bcda03740348c8424aa1cc7fe1559b9f7f6180a';
+String _$cashFlowTrendHash() => r'9547e9b975af1d60c936a553f2909158144dfb4c';
 
 /// State for cash flow trends
 
@@ -410,7 +410,7 @@ final class MonthlySpendingProvider
   }
 }
 
-String _$monthlySpendingHash() => r'7c07c34194ef33ce7c896a702a8a9b929922605a';
+String _$monthlySpendingHash() => r'cff2a784406a1b20b2d3f5eca0439b4e7122e7c9';
 
 /// Monthly spending state
 

@@ -226,4 +226,4 @@ final class ChatEnabledProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$chatEnabledHash() => r'645f02e69706189d5054e9fdf9a6870f9eb54f5c';
+String _$chatEnabledHash() => r'960af24d05e96a8dd87ae3d8d9ebdb35d73275af';

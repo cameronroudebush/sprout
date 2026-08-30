@@ -88,6 +88,7 @@ export class TransactionController {
     description: "Retrieves transactions based on the provided query parameters.",
   })
   @ApiOkResponse({ description: "Transactions found successfully.", type: [Transaction] })
+  @ApiQuery({ name: "id", required: false, type: String, description: "A specific transaction ID to retrieve." })
   @ApiQuery({ name: "startIndex", required: false, type: Number, description: "The starting index for pagination." })
   @ApiQuery({ name: "endIndex", required: false, type: Number, description: "The ending index for pagination." })
   @ApiQuery({ name: "accountId", required: false, type: String, description: "The ID of the account to retrieve transactions from." })
@@ -105,6 +106,7 @@ export class TransactionController {
   @ApiQuery({ name: "pending", required: false, type: Boolean })
   async getByQuery(
     @CurrentUser() user: User,
+    @Query("id") id?: string,
     @Query("startIndex") startIndex?: number,
     @Query("endIndex") endIndex?: number,
     @Query("accountId") accountId?: string,
@@ -115,6 +117,17 @@ export class TransactionController {
     @Query("endDate") endDate?: string,
     @Query("pending") pending?: boolean,
   ) {
+    // Direct ID query lookup
+    if (id) {
+      return await Transaction.find({
+        where: {
+          id,
+          account: { user: { id: user.id } },
+        },
+        relations: { category: { parentCategory: true } },
+      });
+    }
+
     // Define category clause of this search
     let categoryQuery;
     if (category == null) {

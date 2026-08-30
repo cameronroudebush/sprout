@@ -63,7 +63,7 @@ class SproutBottomNav extends ConsumerWidget {
 
     for (int i = 0; i < displayItems.length; i++) {
       final item = displayItems[i];
-      if (item is SproutRoute && item.path == currentPath) {
+      if (item is SproutRoute && isRouteMatch(item.path, currentPath)) {
         effectiveIndex = i;
         hasMatch = true;
         break;
