@@ -1,5 +1,4 @@
 import { Account } from "@backend/account/model/account.model";
-import { Category } from "@backend/category/model/category.model";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -169,7 +168,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     rawAccount: SimpleFINReturn.Account,
     account: Account,
     _authContext: string,
-    user: User,
+    _user: User,
   ): Promise<Omit<ProviderSyncResult, "account">> {
     const holdings = rawAccount.holdings?.map((hold) => {
       const h = new Holding(
@@ -188,10 +187,8 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
 
     const transactions = await Promise.all(
       (rawAccount.transactions || []).map(async (t) => {
-        const category = await Category.getOrCreate(t.extra?.category, user);
         const newTransaction = new Transaction(parseFloat(t.amount), new Date(t.posted * 1000), t.description, undefined, t.pending ?? false, account);
         newTransaction.providerId = t.id;
-        newTransaction.category = category;
         newTransaction.extra = t.extra;
         return newTransaction;
       }),
