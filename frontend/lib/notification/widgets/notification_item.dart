@@ -65,82 +65,105 @@ class NotificationItem extends StatelessWidget {
         child: InkWell(
           onTap: () => onTap(context),
           borderRadius: borderRadius,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 12,
-              children: [
-                // Type Icon
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(icon, color: color, size: 20),
-                    if (showSpinner)
-                      SizedBox(
-                        width: 28,
-                        height: 28,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: color,
-                        ),
-                      ),
-                  ],
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 8,
+                  bottom: 8,
+                  left: 16,
+                  right: (isFloating && showUnreadIndicator && !notification.isRead) ? 28 : 16,
                 ),
-
-                // Text Content
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 4,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: isFloating ? MainAxisSize.min : MainAxisSize.max,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              notification.title,
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelLarge,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 12,
+                  children: [
+                    // Type Icon
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(icon, color: color, size: 20),
+                        if (showSpinner)
+                          SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: color,
                             ),
                           ),
-                          if (showUnreadIndicator && !notification.isRead)
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
+                      ],
+                    ),
+
+                    // Text Content
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 4,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: isFloating ? MainAxisSize.min : MainAxisSize.max,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  notification.title,
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelLarge,
+                                ),
+                              ),
+                              if (!isFloating && showUnreadIndicator && !notification.isRead)
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          if (notification.message.isNotEmpty)
+                            Text(
+                              notification.message,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          if (showDate)
+                            Text(
+                              DateFormat('MM-dd-yyyy').format(notification.createdAt),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.outline,
                               ),
                             ),
                         ],
                       ),
-                      if (notification.message.isNotEmpty)
-                        Text(
-                          notification.message,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      if (showDate)
-                        Text(
-                          DateFormat('MM-dd-yyyy').format(notification.createdAt),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              if (isFloating && showUnreadIndicator && !notification.isRead)
+                Positioned(
+                  top: 10,
+                  right: 12,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
