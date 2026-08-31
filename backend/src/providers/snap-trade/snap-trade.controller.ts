@@ -1,3 +1,4 @@
+import { Account } from "@backend/account/model/account.model";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
@@ -7,7 +8,7 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { Controller, Post, Query } from "@nestjs/common";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 @Controller("provider/snap-trade")
 @ApiTags("Provider")
@@ -32,9 +33,11 @@ export class SnapTradeProviderController {
 
   @Post("post-link")
   @ApiOperation({ summary: "Fires actions to perform once a user has linked new accounts." })
+  @ApiCreatedResponse({ description: "Accounts linked successfully.", type: [Account] })
   @EnabledGuard.attachDemoMode()
-  async postLink(@CurrentUser() user: User) {
-    await this.snapTradeProviderService.exchangeAndCreateAccounts(user);
+  async postLink(@CurrentUser() user: User): Promise<Account[]> {
+    const result = await this.snapTradeProviderService.exchangeAndCreateAccounts(user);
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
+    return result.map((x) => x.account);
   }
 }

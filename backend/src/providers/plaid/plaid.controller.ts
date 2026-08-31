@@ -51,12 +51,12 @@ export class PlaidProviderController {
   @ApiCreatedResponse({ description: "Accounts linked successfully.", type: [Account] })
   @ApiBody({ type: PlaidLinkDTO })
   @EnabledGuard.attachDemoMode()
-  async exchangeAndLink(@CurrentUser() user: User, @Body() dto: PlaidLinkDTO) {
+  async exchangeAndLink(@CurrentUser() user: User, @Body() dto: PlaidLinkDTO): Promise<Account[]> {
     try {
       const accounts = await this.plaidProviderService.exchangeAndCreateAccounts(user, dto);
       // Force an update
       this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
-      return accounts;
+      return accounts.map((x) => x.account);
     } catch (error) {
       this.logger.error(`Failed to link Plaid accounts for user ${user.id}:`, error);
       throw new InternalServerErrorException("An error occurred while linking your accounts.");

@@ -284,7 +284,7 @@ export class PlaidProviderService extends ProviderBase<
     const accType = this.mapType(acc.type);
     const isLiability = AccountTypeIsLiability(accType);
     return new Account(
-      acc.name,
+      acc.official_name ?? acc.name,
       ProviderType.plaid,
       user,
       institution,

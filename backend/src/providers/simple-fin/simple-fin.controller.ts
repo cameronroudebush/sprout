@@ -42,7 +42,7 @@ export class SimpleFinProviderController {
   @ApiCreatedResponse({ description: "Provider accounts linked successfully.", type: [Account] })
   @ApiBody({ type: [Account] })
   @EnabledGuard.attachDemoMode()
-  async linkAccounts(@Body() accountsToLink: Account[], @CurrentUser() user: User) {
+  async linkAccounts(@Body() accountsToLink: Account[], @CurrentUser() user: User): Promise<Account[]> {
     const accountIds = accountsToLink.map((a) => a.id);
 
     // Delegate to the ProviderBase template! This handles Institutions, Account History, Holdings, and Transactions automatically.

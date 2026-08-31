@@ -2,24 +2,24 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_drawing/path_drawing.dart';
+import 'package:sprout/shared/providers/splash_time_provider.dart';
 
 /// A loading indicator used for when Sprout is still setting up the app
-class SproutLoadingIndicator extends StatefulWidget {
+class SproutLoadingIndicator extends ConsumerStatefulWidget {
   final String? message;
-  final bool animate;
 
   const SproutLoadingIndicator({
     super.key,
     this.message,
-    this.animate = true,
   });
 
   @override
-  State<SproutLoadingIndicator> createState() => _SproutLoadingIndicatorState();
+  ConsumerState<SproutLoadingIndicator> createState() => _SproutLoadingIndicatorState();
 }
 
-class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with SingleTickerProviderStateMixin {
+class _SproutLoadingIndicatorState extends ConsumerState<SproutLoadingIndicator> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
   // Custom precise animations mapped to the CSS timeline
@@ -92,22 +92,13 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
       }
     });
 
-    if (widget.animate) {
+    // Read initial splash loading state once on init
+    final initialIsLoading = ref.read(sproutSplashManagerProvider).isLoading;
+    if (initialIsLoading) {
       _animationController.forward();
     } else {
       _animationController.value = 1.0;
       _isIntroComplete = true;
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant SproutLoadingIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!widget.animate && !_isIntroComplete) {
-      _animationController.stop();
-      setState(() {
-        _isIntroComplete = true;
-      });
     }
   }
 
@@ -119,6 +110,21 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
 
   @override
   Widget build(BuildContext context) {
+    final splashAsync = ref.watch(sproutSplashManagerProvider);
+    final animate = splashAsync.isLoading;
+
+    if (!animate && !_isIntroComplete) {
+      _animationController.stop();
+      _animationController.value = 1.0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _isIntroComplete = true;
+          });
+        }
+      });
+    }
+
     final size = MediaQuery.sizeOf(context);
     final logoWidth = (size.width * 0.65).clamp(240.0, 480.0);
     final currentTheme = Theme.of(context);
@@ -137,12 +143,12 @@ class _SproutLoadingIndicatorState extends State<SproutLoadingIndicator> with Si
                   height: logoWidth * (140 / 340),
                   child: CustomPaint(
                     painter: SproutAnimatedPainter(
-                      drawProgress: widget.animate ? _drawAnimation.value : 1.0,
-                      fillProgress: widget.animate ? _fillAnimation.value : 1.0,
-                      flowerTranslateX: widget.animate ? _flowerTranslateAnimation.value : 135.0,
-                      popScale: widget.animate ? _popAnimation.value : 1.0,
-                      textOpacity: widget.animate ? _textOpacityAnimation.value : 1.0,
-                      textTranslateY: widget.animate ? _textTranslateAnimation.value : 0.0,
+                      drawProgress: animate ? _drawAnimation.value : 1.0,
+                      fillProgress: animate ? _fillAnimation.value : 1.0,
+                      flowerTranslateX: animate ? _flowerTranslateAnimation.value : 135.0,
+                      popScale: animate ? _popAnimation.value : 1.0,
+                      textOpacity: animate ? _textOpacityAnimation.value : 1.0,
+                      textTranslateY: animate ? _textTranslateAnimation.value : 0.0,
                       flowerPath1: _flowerPath1,
                       flowerPath2: _flowerPath2,
                       textPath: _textPath,

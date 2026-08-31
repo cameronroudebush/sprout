@@ -185,7 +185,11 @@ export class AccountController {
     }
     this.logger.log(`Institution ${institution.name} has 0 remaining accounts. Initiating full cleanup.`);
     // Handle unlinks
-    for (const p of this.providers) if (provider === p.config.dbType) p.unlinkInstitution(user, institution.id);
+    for (const p of this.providers)
+      if (provider === p.config.dbType) {
+        await p.unlinkInstitution(user, institution.id);
+        this.logger.log(`Cleaned up from ${p.config.name} successfully`);
+      }
     // Remove from DB to cleanup
     await Institution.delete({ id: institution.id });
   }
