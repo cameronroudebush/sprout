@@ -68,7 +68,7 @@ describe("ProviderSyncJob", () => {
       const result = await job.processTask({ userId: "user-abc", notify: true });
 
       expect(findOneSpy).toHaveBeenCalledWith({ where: { id: "user-abc" } });
-      expect(providerSyncService.syncForProvider).toHaveBeenCalledWith(mockUser, mockProvider, true);
+      expect(providerSyncService.syncForProvider).toHaveBeenCalledWith(mockUser, mockProvider, true, undefined, undefined);
       expect(result).toEqual({ status: "synced" });
     });
 

@@ -65,7 +65,7 @@ describe("BaseProviderController", () => {
 
       await controller.manualSync(user, { force: true });
 
-      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false);
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, undefined, true);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
     });
 
@@ -76,7 +76,7 @@ describe("BaseProviderController", () => {
 
       await controller.manualSync(user, {});
 
-      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false);
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, undefined, true);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
     });
@@ -88,7 +88,7 @@ describe("BaseProviderController", () => {
 
       await controller.manualSync(user, { providers: ["plaid" as any] });
 
-      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, "plaid");
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, "plaid", true);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
     });
   });
