@@ -19,10 +19,12 @@ class UserConfig {
     required this.themeStyle,
     this.currency = CurrencyOptionsEnum.USD,
     required this.privateMode,
-    this.simpleFinToken,
     required this.secureMode,
     required this.allowWidgets,
     required this.includeAICapabilities,
+    this.simpleFinToken,
+    this.coinbaseApiKey,
+    this.coinbaseApiKeyName,
   });
 
   String id;
@@ -42,15 +44,6 @@ class UserConfig {
   /// If we should hide balances on the users display
   bool privateMode;
 
-  /// This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database.
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? simpleFinToken;
-
   /// If we should require biometrics to view the app and if we should hide the app in the background
   bool secureMode;
 
@@ -60,6 +53,32 @@ class UserConfig {
   /// If the user wants to see AI powered stats and ideas.
   bool includeAICapabilities;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? simpleFinToken;
+
+  /// This property defines the Coinbase API key utilized to pull wallet information. This will be encrypted in the database.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? coinbaseApiKey;
+
+  /// The key name as given to us by Coinbase to go along with the API key.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? coinbaseApiKeyName;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
     other.id == id &&
@@ -68,10 +87,12 @@ class UserConfig {
     other.themeStyle == themeStyle &&
     other.currency == currency &&
     other.privateMode == privateMode &&
-    other.simpleFinToken == simpleFinToken &&
     other.secureMode == secureMode &&
     other.allowWidgets == allowWidgets &&
-    other.includeAICapabilities == includeAICapabilities;
+    other.includeAICapabilities == includeAICapabilities &&
+    other.simpleFinToken == simpleFinToken &&
+    other.coinbaseApiKey == coinbaseApiKey &&
+    other.coinbaseApiKeyName == coinbaseApiKeyName;
 
   @override
   int get hashCode =>
@@ -82,13 +103,15 @@ class UserConfig {
     (themeStyle.hashCode) +
     (currency.hashCode) +
     (privateMode.hashCode) +
-    (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
     (secureMode.hashCode) +
     (allowWidgets.hashCode) +
-    (includeAICapabilities.hashCode);
+    (includeAICapabilities.hashCode) +
+    (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
+    (coinbaseApiKey == null ? 0 : coinbaseApiKey!.hashCode) +
+    (coinbaseApiKeyName == null ? 0 : coinbaseApiKeyName!.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, simpleFinToken=$simpleFinToken, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -98,14 +121,24 @@ class UserConfig {
       json[r'themeStyle'] = this.themeStyle;
       json[r'currency'] = this.currency;
       json[r'privateMode'] = this.privateMode;
+      json[r'secureMode'] = this.secureMode;
+      json[r'allowWidgets'] = this.allowWidgets;
+      json[r'includeAICapabilities'] = this.includeAICapabilities;
     if (this.simpleFinToken != null) {
       json[r'simpleFinToken'] = this.simpleFinToken;
     } else {
       json[r'simpleFinToken'] = null;
     }
-      json[r'secureMode'] = this.secureMode;
-      json[r'allowWidgets'] = this.allowWidgets;
-      json[r'includeAICapabilities'] = this.includeAICapabilities;
+    if (this.coinbaseApiKey != null) {
+      json[r'coinbaseApiKey'] = this.coinbaseApiKey;
+    } else {
+      json[r'coinbaseApiKey'] = null;
+    }
+    if (this.coinbaseApiKeyName != null) {
+      json[r'coinbaseApiKeyName'] = this.coinbaseApiKeyName;
+    } else {
+      json[r'coinbaseApiKeyName'] = null;
+    }
     return json;
   }
 
@@ -148,10 +181,12 @@ class UserConfig {
         themeStyle: ThemeStyleEnum.fromJson(json[r'themeStyle'])!,
         currency: CurrencyOptionsEnum.fromJson(json[r'currency'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
-        simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         secureMode: mapValueOfType<bool>(json, r'secureMode')!,
         allowWidgets: mapValueOfType<bool>(json, r'allowWidgets')!,
         includeAICapabilities: mapValueOfType<bool>(json, r'includeAICapabilities')!,
+        simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
+        coinbaseApiKey: mapValueOfType<String>(json, r'coinbaseApiKey'),
+        coinbaseApiKeyName: mapValueOfType<String>(json, r'coinbaseApiKeyName'),
       );
     }
     return null;

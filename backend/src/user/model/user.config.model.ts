@@ -50,12 +50,6 @@ export class UserConfig extends DatabaseBase {
   @IsEnum(ChartRange)
   netWorthRange: ChartRange;
 
-  /** This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database. */
-  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
-  @EncryptionTransformer.decorateAPIProperty()
-  @IsString()
-  simpleFinToken?: string;
-
   /** If we should require biometrics to view the app and if we should hide the app in the background */
   @DatabaseDecorators.column({ nullable: false, default: false })
   @IsBoolean()
@@ -101,6 +95,26 @@ export class UserConfig extends DatabaseBase {
   @ApiHideProperty()
   @Exclude()
   user!: User;
+
+  /// Provider API keys. These are all secured and encrypted within the database
+
+  /** This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  simpleFinToken?: string;
+
+  /** This property defines the Coinbase API key utilized to pull wallet information. This will be encrypted in the database. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  coinbaseApiKey?: string;
+
+  /** The key name as given to us by Coinbase to go along with the API key. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  coinbaseApiKeyName?: string;
 
   constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean, allowWidgets: boolean, includeAICapabilities: boolean) {
     super();

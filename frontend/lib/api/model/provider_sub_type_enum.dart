@@ -25,11 +25,13 @@ class ProviderSubTypeEnum {
 
   static const bankInvestments = ProviderSubTypeEnum._(r'Bank Investments');
   static const realEstate = ProviderSubTypeEnum._(r'Real Estate');
+  static const crypto = ProviderSubTypeEnum._(r'Crypto');
 
   /// List of all possible values in this [enum][ProviderSubTypeEnum].
   static const values = <ProviderSubTypeEnum>[
     bankInvestments,
     realEstate,
+    crypto,
   ];
 
   static ProviderSubTypeEnum? fromJson(dynamic value) => ProviderSubTypeEnumTypeTransformer().decode(value);
@@ -70,6 +72,7 @@ class ProviderSubTypeEnumTypeTransformer {
       switch (data) {
         case r'Bank Investments': return ProviderSubTypeEnum.bankInvestments;
         case r'Real Estate': return ProviderSubTypeEnum.realEstate;
+        case r'Crypto': return ProviderSubTypeEnum.crypto;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

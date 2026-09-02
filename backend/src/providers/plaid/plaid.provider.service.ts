@@ -9,7 +9,6 @@ import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
-import { PlaidAsset } from "@backend/providers/plaid/model/plaid.asset";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
@@ -55,7 +54,6 @@ export class PlaidProviderService extends ProviderBase<
   PlaidAuthContext,
   PlaidAccount,
   PlaidInstitutionAsset,
-  PlaidAsset,
   PlaidSyncMetadata
 > {
   protected readonly logger = new Logger("provider:plaid:service");
@@ -117,7 +115,7 @@ export class PlaidProviderService extends ProviderBase<
     }
 
     await this.rateLimit(user).incrementOrError();
-    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions] });
+    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions], optional_products: [Products.Investments] });
     return new PlaidLinkTokenDTO(response.data.link_token);
   }
 
@@ -178,7 +176,8 @@ export class PlaidProviderService extends ProviderBase<
         securities = holdingsRes.data.securities;
         allHoldings = holdingsRes.data.holdings;
       } catch (e) {
-        this.logger.warn(`Failed to fetch holdings for ${asset.institution.name}`);
+        const plaidError = (e as AxiosError).response?.data as PlaidError;
+        this.logger.warn(`Failed to fetch holdings for ${asset.institution.name}: ${plaidError.error_message}`);
       }
     }
 
@@ -199,11 +198,10 @@ export class PlaidProviderService extends ProviderBase<
     for (const rawAccount of accountsResponse.data.accounts) {
       const finalAccount = await this.mapToSproutAccount(rawAccount, { accessToken: asset.accessToken, itemId: asset.itemId }, user, asset.institution);
 
-      const providerAsset = await PlaidAsset.findOne({
-        where: { plaidAccountId: rawAccount.account_id, account: { user: { id: user.id } } },
-        relations: { account: true },
+      const existingAccount = await Account.findOne({
+        where: { providerAccountId: rawAccount.account_id, user: { id: user.id } },
       });
-      if (providerAsset) finalAccount.id = providerAsset.account.id;
+      if (existingAccount) finalAccount.id = existingAccount.id;
 
       const accountTransactions = added.concat(modified).filter((t) => t.account_id === rawAccount.account_id);
       const transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);
@@ -286,6 +284,7 @@ export class PlaidProviderService extends ProviderBase<
     return new Account(
       acc.name,
       ProviderType.plaid,
+      acc.account_id,
       user,
       institution,
       (acc.balances.current || 0) * (isLiability ? -1 : 1),
@@ -327,23 +326,6 @@ export class PlaidProviderService extends ProviderBase<
     }
   }
 
-  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<PlaidAsset | null> {
-    return await PlaidAsset.findOne({ where: { plaidAccountId: providerAccountId, account: { user: { id: userId } } }, relations: { account: true } });
-  }
-
-  protected override async getAccountAssetByAccountId(accountId: string): Promise<PlaidAsset | null> {
-    return await PlaidAsset.findOne({ where: { account: { id: accountId } }, relations: { account: true } });
-  }
-
-  public async createAccountAsset(account: Account, providerAccountId: string): Promise<PlaidAsset> {
-    return await new PlaidAsset(account, providerAccountId).insert();
-  }
-
-  protected override async updateAccountAsset(asset: PlaidAsset, providerAccountId: string): Promise<void> {
-    asset.plaidAccountId = providerAccountId;
-    await asset.update();
-  }
-
   private async fetchAllInstitutionTransactions(user: User, instAsset: PlaidInstitutionAsset) {
     let added: PlaidTransaction[] = [];
     let modified: PlaidTransaction[] = [];
@@ -376,13 +358,13 @@ export class PlaidProviderService extends ProviderBase<
           const pendingTx = await Transaction.findOne({ where: { providerId: t.pending_transaction_id, account: { user: { id: user.id } } } });
           if (pendingTx) await pendingTx.remove();
         }
-        const parsedDate = parseISO(t.date);
+        const parsedDate = parseISO(t.authorized_date ?? t.date);
         const transactionDate = isToday(parsedDate)
           ? set(parsedDate, { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds(), milliseconds: now.getMilliseconds() })
           : parsedDate;
         const newTx = new Transaction(t.amount * -1, transactionDate, t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
         newTx.providerId = t.transaction_id;
-        newTx.extra = { code: t.transaction_code, location: t.location, website: t.website };
+        newTx.extra = { code: t.transaction_code, location: t.location, website: t.website, authorizedDate: t.authorized_date, date: t.date };
         return newTx;
       }),
     );

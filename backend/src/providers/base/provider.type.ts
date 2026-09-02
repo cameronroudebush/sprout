@@ -4,11 +4,12 @@ export enum ProviderType {
   zillow = "zillow",
   plaid = "plaid",
   snapTrade = "snapTrade",
+  coinbase = "coinbase",
 }
 
 /** List of sub types that a provider would belong to */
 export enum ProviderSubType {
   bankingInvestments = "Bank Investments",
   realEstate = "Real Estate",
-  // vehicles,
+  crypto = "Crypto",
 }

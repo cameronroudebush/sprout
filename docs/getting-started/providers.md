@@ -49,6 +49,45 @@ Connecting Sprout to SimpleFIN is easy and only needs to be done once.
 
 For more details on their service and pricing, visit the official [SimpleFIN Website](https://www.simplefin.org/).
 
+## Coinbase
+
+<p align="center">
+    <img src="https://www.coinbase.com/img/favicon/favicon-228.png" width="15%">
+</p>
+
+**Coinbase** allows Sprout to directly import your cryptocurrency wallet balances and current USD market values straight from your Coinbase account.
+
+### How to Connect
+
+Connecting Sprout to Coinbase is performed by entering your API Key credentials into your personal user settings.
+
+!!! warning "ECDSA Key Requirement"
+
+    Coinbase API keys **MUST** be created using the **ECDSA** algorithm. Keys generated with Ed25519 or RSA are not supported by the authentication protocol and will fail to connect.
+
+#### **Get a Coinbase API Key:**
+
+- Log in to your [Coinbase Account Settings](https://www.coinbase.com/settings/api). Note that you need a standard user account API key, not a CDP (Coinbase Developer Platform) project key.
+- Click **Create API Key**.
+- Ensure the key signature algorithm is set to **ECDSA**.
+- Assign read-only permissions to your accounts (e.g. `wallet:accounts:read`).
+- Copy both your **API Key Name** (Key ID) and your **API Key Secret** (Private Key).
+
+#### **Paste into Sprout:**
+
+- Open your **User Settings** in Sprout.
+- Find the **Integrations** section.
+- Select **Coinbase API Key** and enter both your **Key Name** and **Key Secret**.
+
+#### **Done!**
+
+- Once saved, open **Add Accounts** and select **Coinbase** to choose which cryptocurrency wallets to track in Sprout.
+
+### Why Choose Coinbase?
+
+- **Direct Integration:** Fetch cryptocurrency wallet values directly from Coinbase without third-party aggregator middleman fees or delay.
+- **Automatic USD Spot Rates:** Sprout automatically converts crypto balances to live USD spot rates so your total portfolio balance remains up to date.
+
 ## Zillow
 
 <p align="center">

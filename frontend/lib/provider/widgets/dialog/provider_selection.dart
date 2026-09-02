@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/provider/widgets/provider_icon.dart';
+import 'package:sprout/shared/widgets/info_card.dart';
 
 /// A widget that provides the ability to select from a list of providers to add accounts
 class ProviderSelectionList extends StatelessWidget {
@@ -21,6 +22,8 @@ class ProviderSelectionList extends StatelessWidget {
         return 'Bank Investments';
       case ProviderSubTypeEnum.realEstate:
         return 'Real Estate';
+      case ProviderSubTypeEnum.crypto:
+        return 'Cryptocurrency';
       default:
         return 'Other Integrations';
     }
@@ -33,6 +36,8 @@ class ProviderSelectionList extends StatelessWidget {
         return 'Link your checking, savings, credit cards, and investment brokerage accounts.';
       case ProviderSubTypeEnum.realEstate:
         return 'Track home equity, asset values, and real estate market evaluations.';
+      case ProviderSubTypeEnum.crypto:
+        return 'Track rapid fluctuations in cryptocurrency accounts.';
       default:
         return 'Additional third-party service connections configured for Sprout.';
     }
@@ -81,7 +86,7 @@ class ProviderSelectionList extends StatelessWidget {
               children: [
                 Expanded(
                   child: Center(
-                    child: FinanceProviderIcon(provider),
+                    child: FinanceProviderIcon(provider, size: 40),
                   ),
                 ),
                 Text(
@@ -114,14 +119,12 @@ class ProviderSelectionList extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 0, bottom: 16),
-            child: Text(
-              "Select a Provider",
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          const Padding(
+              padding: EdgeInsetsGeometry.only(bottom: 8),
+              child: InfoCard(
+                text:
+                    "Select an integration provider below to securely link your accounts, track balances, and import transaction histories automatically.",
+              )),
 
           // Flexible lets the list dynamically expand or shrink depending on card count
           Flexible(

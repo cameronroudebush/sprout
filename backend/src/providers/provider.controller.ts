@@ -66,11 +66,11 @@ export class BaseProviderController {
     let syncs: Sync[] = [];
     // If providers is omitted (undefined) or empty, sync everything
     if (!providers || providers.length === 0) {
-      const syncResults = await this.providerService.syncUserProviders(user, false);
+      const syncResults = await this.providerService.syncUserProviders(user, false, undefined, true);
       syncs = syncResults.filter((x): x is Sync => Boolean(x));
     } else {
       // Otherwise, iterate through the specific requested providers
-      const syncResults = await Promise.all(providers.map((providerType) => this.providerService.syncUserProviders(user, false, providerType)));
+      const syncResults = await Promise.all(providers.map((providerType) => this.providerService.syncUserProviders(user, false, providerType, true)));
       syncs = syncResults.filter((x): x is Sync => Boolean(x));
     }
     // Inform of the completed sync

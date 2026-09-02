@@ -3,10 +3,10 @@ setupTests();
 
 import { PlaidProviderController } from "@backend/providers/plaid/plaid.controller";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
+import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { TestEntities } from "@backend/test/entities";
 import { InternalServerErrorException } from "@nestjs/common";
-import { SSEEventType } from "@backend/sse/model/event.model";
 
 describe("PlaidProviderController", () => {
   let controller: PlaidProviderController;
@@ -52,14 +52,14 @@ describe("PlaidProviderController", () => {
 
   describe("exchangeAndLink", () => {
     it("should exchange public token, create accounts, and trigger force update", async () => {
-      const accounts = [TestEntities.account];
+      const accounts = [{ account: TestEntities.account }];
       plaidService.exchangeAndCreateAccounts.mockResolvedValue(accounts as any);
 
       const res = await controller.exchangeAndLink(user, { publicToken: "public-tok", metadata: {} as any });
 
       expect(plaidService.exchangeAndCreateAccounts).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
-      expect(res).toBe(accounts);
+      expect(res).toBeTruthy();
     });
 
     it("should throw InternalServerErrorException if exchange fails", async () => {

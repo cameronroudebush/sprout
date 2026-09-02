@@ -503,7 +503,7 @@
     },
     "/provider/zillow/{accountId}": {
       "get": {
-        "description": "Grabs zillow asset data based on the account given.",
+        "description": "Grabs zillow zpid for the given account Id.",
         "operationId": "ZillowProviderController_getByAccount",
         "parameters": [
           {
@@ -518,11 +518,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Property data retrieved successfully.",
+            "description": "Property Id retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ZillowAsset"
+                  "type": "string"
                 }
               }
             }
@@ -794,7 +794,17 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
+            "description": "Accounts linked successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Authentication is required."
@@ -821,6 +831,35 @@
         },
         "summary": "Handle SnapTrade update webhook",
         "tags": ["Webhook"]
+      }
+    },
+    "/provider/coinbase/link": {
+      "post": {
+        "description": "Fetches active balances from Coinbase API credentials and links the unified Coinbase Wallet.",
+        "operationId": "CoinbaseProviderController_linkAccount",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Provider account linked successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link Coinbase account.",
+        "tags": ["Provider"]
       }
     },
     "/sse": {
@@ -3307,10 +3346,6 @@
             "type": "boolean",
             "description": "If we should hide balances on the users display"
           },
-          "simpleFinToken": {
-            "type": "string",
-            "description": "This property defines the SimpleFIN URL for obtaining data from the necessary endpoint. This will be encrypted in the database."
-          },
           "secureMode": {
             "type": "boolean",
             "description": "If we should require biometrics to view the app and if we should hide the app in the background"
@@ -3322,6 +3357,17 @@
           "includeAICapabilities": {
             "type": "boolean",
             "description": "If the user wants to see AI powered stats and ideas."
+          },
+          "simpleFinToken": {
+            "type": "string"
+          },
+          "coinbaseApiKey": {
+            "type": "string",
+            "description": "This property defines the Coinbase API key utilized to pull wallet information. This will be encrypted in the database."
+          },
+          "coinbaseApiKeyName": {
+            "type": "string",
+            "description": "The key name as given to us by Coinbase to go along with the API key."
           }
         },
         "required": [
@@ -3426,11 +3472,11 @@
       },
       "ProviderTypeEnum": {
         "type": "string",
-        "enum": ["simple-fin", "zillow", "plaid", "snapTrade"]
+        "enum": ["simple-fin", "zillow", "plaid", "snapTrade", "coinbase"]
       },
       "ProviderSubTypeEnum": {
         "type": "string",
-        "enum": ["Bank Investments", "Real Estate"]
+        "enum": ["Bank Investments", "Real Estate", "Crypto"]
       },
       "ProviderConfig": {
         "type": "object",
@@ -3606,19 +3652,6 @@
           }
         },
         "required": ["id", "provider", "type", "balance", "name", "institution"]
-      },
-      "ZillowAsset": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "zpid": {
-            "type": "string",
-            "description": "The zillow property ID"
-          }
-        },
-        "required": ["id", "zpid"]
       },
       "ZillowPropertyDTO": {
         "type": "object",

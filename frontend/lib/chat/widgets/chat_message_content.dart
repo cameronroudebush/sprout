@@ -61,7 +61,8 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
   void _startTypingLoop() {
     if (_timer?.isActive ?? false) return;
 
-    _timer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
+    // Increased timer interval slightly for smoother progression (20ms ≈ 50 fps)
+    _timer = Timer.periodic(const Duration(milliseconds: 20), (timer) {
       if (_displayedText.length < _targetText.length) {
         setState(() {
           // Detect any code block start early (as soon as ``` streams in)
@@ -69,16 +70,19 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
           if (openFence != -1 && openFence == _displayedText.length) {
             final closeFence = _targetText.indexOf('```', openFence + 3);
             if (closeFence != -1) {
-              _displayedText = _targetText.substring(0, closeFence + 3);
+              // Smoothly step through code blocks instead of jumping instantly
+              _displayedText = _targetText.substring(0, (_displayedText.length + 5).clamp(0, closeFence + 3));
               return;
             } else {
-              _displayedText = _targetText;
+              // Smoothly step towards end while fence remains unclosed
+              _displayedText = _targetText.substring(0, (_displayedText.length + 5).clamp(0, _targetText.length));
               return;
             }
           }
 
           final diff = _targetText.length - _displayedText.length;
-          final step = diff > 80 ? 4 : (diff > 40 ? 2 : 1);
+          // Capped maximum step size to prevent sudden text jumps
+          final step = diff > 100 ? 2 : 1;
           final nextLength = (_displayedText.length + step).clamp(0, _targetText.length);
           _displayedText = _targetText.substring(0, nextLength);
         });

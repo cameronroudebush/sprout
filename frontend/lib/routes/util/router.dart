@@ -21,15 +21,12 @@ import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/shared/widgets/lock.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
-/// Intended initial redirect path
-String? _intendedPath;
-
 /// Defines a notifier that allows us to subscribe to necessary configuration
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
-    // Listens to the providers and notifies GoRouter to re-run the redirect
+    _ref.listen(sproutSplashManagerProvider, (_, __) => notifyListeners());
     _ref.listen(connectionUrlProvider, (_, __) => notifyListeners());
     _ref.listen(authProvider, (_, __) => notifyListeners());
     _ref.listen(unsecureConfigProvider, (_, __) => notifyListeners());
@@ -79,14 +76,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loading',
         pageBuilder: (context, state) {
-          final splashAsync = ref.watch(sproutSplashManagerProvider);
           final randomPhrase = loadingPhrases[Random().nextInt(loadingPhrases.length)];
           return NoTransitionPage(
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: SproutLoadingIndicator(
                 message: randomPhrase,
-                animate: splashAsync.isLoading,
               ),
             ),
           );
@@ -138,7 +133,42 @@ final routerProvider = Provider<GoRouter>((ref) {
 String? _authRedirect(Ref ref, GoRouterState state) {
   final currentPath = state.uri.path;
   // Paths we should not allow the user to go to automatically after login.
-  final corePaths = ["/loading", "/locked", "/login", "/setup", "/connection/setup", "/connection/failure"];
+  final corePaths = [
+    "/loading",
+    "/locked",
+    "/login",
+    "/setup",
+    "/connection/setup",
+    "/connection/failure",
+  ];
+
+  // Read existing redirect parameter if present
+  final existingRedirect = state.uri.queryParameters['redirect'];
+
+  // Helper to append/preserve the redirect parameter
+  String withRedirect(String path) {
+    String? target;
+
+    // Preserve existing redirect if it's a valid non-core target
+    if (existingRedirect != null && existingRedirect.isNotEmpty && existingRedirect != '/') {
+      final existingPath = Uri.tryParse(existingRedirect)?.path;
+      if (existingPath != null && !corePaths.contains(existingPath)) {
+        target = existingRedirect;
+      }
+    }
+
+    // Otherwise capture current path if it's a valid non-core target
+    if (target == null && currentPath != '/' && !corePaths.contains(currentPath)) {
+      target = state.uri.toString();
+    }
+
+    if (target != null) {
+      // Safely encode the query parameter using Dart's Uri class
+      return Uri(path: path, queryParameters: {'redirect': target}).toString();
+    }
+
+    return path;
+  }
 
   // Read all relevant states
   final splashAsync = ref.read(sproutSplashManagerProvider);
@@ -156,7 +186,6 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final isLoggedIn = authState.value != null;
 
   // If we are in setup mode, bypass the config loading check completely.
-  // We don't want to redirect them to a loading screen while they are setting up their account.
   final isConfigLoading = isLoggedIn &&
       !isSetupMode &&
       (apiConfigState.isLoading ||
@@ -167,33 +196,32 @@ String? _authRedirect(Ref ref, GoRouterState state) {
           (!userConfigState.hasValue && !userConfigState.hasError));
 
   if (isCoreLoading || isConfigLoading) {
-    if (_intendedPath == null && !corePaths.contains(currentPath)) {
-      _intendedPath = state.uri.toString();
-    }
-
-    // If we are currently on the login page and the initial app boot (splash) is finished,
-    // stay on the login page so its own spinner can show while configs load.
     if (currentPath == '/login' && !splashAsync.isLoading) {
       return null;
     }
 
-    return currentPath == '/loading' ? null : '/loading';
+    return currentPath == '/loading' ? null : withRedirect('/loading');
   }
 
-  if (connUrlState.value == null || connUrlState.value!.isEmpty) return '/connection/setup';
+  if (connUrlState.value == null || connUrlState.value!.isEmpty) {
+    return currentPath == '/connection/setup' ? null : withRedirect('/connection/setup');
+  }
 
   // Server Connection Check
   final configNotifier = ref.read(unsecureConfigProvider.notifier);
-  if (configNotifier.failedToConnect) return '/connection/failure';
+  if (configNotifier.failedToConnect) {
+    return currentPath == '/connection/failure' ? null : withRedirect('/connection/failure');
+  }
 
   // Ensures that once in setup mode, the user STAYS in setup mode until completeSetup() is called.
-  if (isSetupMode) return currentPath == '/setup' ? null : '/setup';
+  if (isSetupMode) {
+    return currentPath == '/setup' ? null : withRedirect('/setup');
+  }
 
   // Authentication Logic
   final isGoingToLogin = currentPath == '/login';
   if (!isLoggedIn) {
-    // If not logged in and not on login page, send to login
-    return isGoingToLogin ? null : '/login';
+    return isGoingToLogin ? null : withRedirect('/login');
   }
 
   // We now safely know configurations are fully loaded
@@ -206,10 +234,7 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final needsBioCheck = !kIsWeb && secureModeEnabled && isLoggedIn;
 
   if (needsBioCheck && bioState.isLocked) {
-    if (_intendedPath == null && currentPath != '/locked' && currentPath != '/loading') {
-      _intendedPath = state.uri.toString();
-    }
-    return currentPath == '/locked' ? null : '/locked';
+    return currentPath == '/locked' ? null : withRedirect('/locked');
   }
 
   // Get the routes this specific user is allowed to see
@@ -227,21 +252,27 @@ String? _authRedirect(Ref ref, GoRouterState state) {
 
   // If they try to access a route they don't have access to, go back to root
   if (isKnownAuthRoute && !isAllowedForUser) {
-    _intendedPath = null;
     return '/';
   }
 
-  // Restore Intended Path
-  if (_intendedPath != null) {
-    final target = _intendedPath!;
-    _intendedPath = null;
-    if (target != '/loading' && target != '/login' && target != '/locked') {
-      return target;
+  // Resolve redirect parameter once all checks pass
+  if (existingRedirect != null && existingRedirect.isNotEmpty && existingRedirect != '/') {
+    final targetUri = Uri.parse(existingRedirect);
+    final targetPath = targetUri.path;
+
+    // Stop redirecting if already on the target URL/path
+    if (state.uri.toString() == existingRedirect || currentPath == targetPath) {
+      return null;
+    }
+
+    // Perform final bounce to the originally requested URI
+    if (!corePaths.contains(targetPath)) {
+      return existingRedirect;
     }
   }
 
-  // If they are logged in but somehow stuck on /login or /loading without an intended path, push to home
-  if (isGoingToLogin || currentPath == '/loading' || currentPath == '/locked') {
+  // If logged in but stuck on core/intermediate pages without an intended path, push to home
+  if (corePaths.contains(currentPath)) {
     return '/';
   }
 

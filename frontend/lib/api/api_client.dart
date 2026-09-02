@@ -324,8 +324,6 @@ class ApiClient {
           return UserGetDTO.fromJson(value);
         case 'UsernamePasswordLoginRequest':
           return UsernamePasswordLoginRequest.fromJson(value);
-        case 'ZillowAsset':
-          return ZillowAsset.fromJson(value);
         case 'ZillowPropertyDTO':
           return ZillowPropertyDTO.fromJson(value);
         case 'ZillowPropertyResultDto':

@@ -1,16 +1,11 @@
-import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountSubType } from "@backend/account/model/account.sub.type";
-import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
-import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderType } from "@backend/providers/base/provider.type";
 import { ZillowPropertyDTO } from "@backend/providers/zillow/model/api/zillow.lookup.dto";
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
-import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { ZillowProviderService } from "@backend/providers/zillow/zillow.provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -33,12 +28,16 @@ export class ZillowProviderController {
   @Get(":accountId")
   @ApiOperation({
     summary: "Get property info from Zillow",
-    description: "Grabs zillow asset data based on the account given.",
+    description: "Grabs zillow zpid for the given account Id.",
   })
-  @ApiOkResponse({ description: "Property data retrieved successfully.", type: ZillowAsset })
+  @ApiOkResponse({ description: "Property Id retrieved successfully.", type: String })
   @ApiParam({ name: "accountId", description: "The ID of the account to lookup", type: String })
   async getByAccount(@CurrentUser() user: User, @Param("accountId") accountId: string) {
-    return await ZillowAsset.findOne({ where: { account: { id: accountId, user: { id: user.id } } } });
+    const acc = await Account.findOne({ where: { id: accountId, user: { id: user.id } } });
+    if (!acc || !acc.providerAccountId || acc.provider !== ProviderType.zillow) {
+      throw new BadRequestException("Account given is not a valid Zillow account.");
+    }
+    return acc.providerAccountId;
   }
 
   @Post("lookup")
@@ -50,15 +49,13 @@ export class ZillowProviderController {
   @ApiBody({ type: ZillowPropertyDTO })
   @EnabledGuard.attachDemoMode()
   async lookupProperty(@CurrentUser() user: User, @Body() lookupDto: ZillowPropertyDTO) {
-    let data: Awaited<ReturnType<ZillowProviderService["getInfoByAddress"]>> | undefined;
     try {
       const { address, city, state, zip } = lookupDto;
-      data = await this.zillowProviderService.getInfoByAddress(user, address, city, state, zip);
+      return await this.zillowProviderService.getInfoByAddress(user, address, city, state, zip);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException("Failed to fetch property data from Zillow.");
     }
-    return data;
   }
 
   @Post("link")
@@ -71,36 +68,13 @@ export class ZillowProviderController {
   @EnabledGuard.attachDemoMode()
   async link(@CurrentUser() user: User, @Body() linkDto: ZillowPropertyDTO): Promise<Account> {
     const { address, city, state, zip } = linkDto;
-
     // Re-call getPropertyInfo to ensure data integrity
     const propertyInfo = await this.zillowProviderService.getInfoByAddress(user, address, city, state, zip);
-
-    if (!propertyInfo.zpid || propertyInfo.zestimate === null) {
-      throw new BadRequestException("Could not verify property information with Zillow.");
-    }
-
-    // Create or find the institution which we just track as zillow
-    const defaultInstitution = new Institution(this.zillowProviderService.config.url, "Zillow", false, user);
-    let institution = await Institution.findOne({ where: { user: { id: user.id }, name: defaultInstitution.name } });
-    if (!institution) institution = defaultInstitution;
-
-    // Create the Account
-    const newAccount = await new Account(
-      address,
-      ProviderType.zillow,
-      user,
-      institution,
-      propertyInfo.zestimate,
-      0,
-      AccountType.asset,
-      "USD",
-      AccountSubType.house,
-    ).insert();
-    // Link Zillow Metadata to the account
-    await new ZillowAsset(newAccount, propertyInfo.zpid).insert();
-    // Insert one day old history
-    AccountHistory.insertForNewAccount(newAccount);
+    if (!propertyInfo.zpid || propertyInfo.zestimate === null) throw new BadRequestException("Could not verify property information with Zillow.");
+    const results = await this.zillowProviderService.exchangeAndCreateAccounts(user, linkDto);
+    const createdAccount = results[0]?.account;
+    if (!createdAccount) throw new InternalServerErrorException("Failed to link Zillow property.");
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
-    return newAccount;
+    return createdAccount;
   }
 }

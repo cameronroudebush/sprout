@@ -17,23 +17,24 @@ export class ProviderService {
 
   constructor(private readonly discoveryService: DiscoveryService) {}
 
-  async syncUserProviders(user: User, notify: boolean, providerType: ProviderType): Promise<Sync | undefined>;
-  async syncUserProviders(user: User, notify: boolean): Promise<(Sync | undefined)[]>;
+  async syncUserProviders(user: User, notify: boolean, providerType: ProviderType, isManual?: boolean): Promise<Sync | undefined>;
+  async syncUserProviders(user: User, notify: boolean, providerType?: undefined, isManual?: boolean): Promise<(Sync | undefined)[]>;
   /**
    * Triggers background sync tasks for a user across all providers, or a specific target provider.
    *
    * @param user The target user to sync
    * @param notify Whether to issue notifications
    * @param providerType Optional specific provider to target. If omitted, syncs all providers.
+   * @param isManual Whether this sync was triggered manually by the user. Defaults to false.
    */
-  async syncUserProviders(user: User, notify: boolean, providerType?: ProviderType): Promise<Sync | (Sync | undefined)[] | undefined> {
+  async syncUserProviders(user: User, notify: boolean, providerType?: ProviderType, isManual = false): Promise<Sync | (Sync | undefined)[] | undefined> {
     const jobs = this.getActiveSyncJobs();
     if (providerType) {
       const targetJob = jobs.find((j) => j.provider.config.dbType === providerType);
       if (!targetJob) throw new NotFoundException(`Sync job runner for provider '${providerType}' was not found or is disabled.`);
 
-      return await targetJob.processTask({ userId: user.id, notify });
+      return await targetJob.processTask({ userId: user.id, notify, isManual });
     }
-    return await Promise.all(jobs.map((job) => job.processTask({ userId: user.id, notify })));
+    return await Promise.all(jobs.map((job) => job.processTask({ userId: user.id, notify, isManual })));
   }
 }

@@ -25,6 +25,7 @@ describe("Account", () => {
       const account = new Account(
         "Checking Account",
         ProviderType.plaid,
+        crypto.randomUUID(),
         mockUser,
         mockInstitution,
         1500.5,
@@ -46,7 +47,7 @@ describe("Account", () => {
     });
 
     it("should instantiate an Account with undefined optional fields", () => {
-      const account = new Account("Credit Card", ProviderType.simpleFin, mockUser, mockInstitution, -500, -500, AccountType.credit, "EUR");
+      const account = new Account("Credit Card", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, -500, -500, AccountType.credit, "EUR");
 
       expect(account.subType).toBeUndefined();
       expect(account.interestRate).toBeUndefined();
@@ -68,7 +69,7 @@ describe("Account", () => {
 
   describe("toAccountHistory", () => {
     it("should generate an AccountHistory instance from the account metrics using the provided date", () => {
-      const account = new Account("Savings", ProviderType.plaid, mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
+      const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
       const testDate = new Date("2026-06-02T00:00:00.000Z");
       const fromPlainSpy = jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
 
@@ -83,7 +84,7 @@ describe("Account", () => {
     });
 
     it("should generate an AccountHistory instance using a default current date if none is supplied", () => {
-      const account = new Account("Savings", ProviderType.plaid, mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
+      const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
       const fromPlainSpy = jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
 
       account.toAccountHistory();
@@ -99,17 +100,17 @@ describe("Account", () => {
 
   describe("isNegativeNetWorth", () => {
     it("should evaluate to true if the account type is credit", () => {
-      const account = new Account("Card", ProviderType.plaid, mockUser, mockInstitution, 0, 0, AccountType.credit, "USD");
+      const account = new Account("Card", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.credit, "USD");
       expect(account.isNegativeNetWorth).toBe(true);
     });
 
     it("should evaluate to true if the account type is loan", () => {
-      const account = new Account("Student Loan", ProviderType.plaid, mockUser, mockInstitution, 0, 0, AccountType.loan, "USD");
+      const account = new Account("Student Loan", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.loan, "USD");
       expect(account.isNegativeNetWorth).toBe(true);
     });
 
     it("should evaluate to false if the account type is depository", () => {
-      const account = new Account("Checking", ProviderType.plaid, mockUser, mockInstitution, 0, 0, AccountType.depository, "USD");
+      const account = new Account("Checking", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.depository, "USD");
       expect(account.isNegativeNetWorth).toBe(false);
     });
   });
@@ -126,8 +127,8 @@ describe("Account", () => {
 
   describe("convertListToTargetCurrency", () => {
     it("should trigger CurrencyHelper conversion utility and pass back the modified array instance", () => {
-      const account1 = new Account("A1", ProviderType.simpleFin, mockUser, mockInstitution, 10, 10, AccountType.depository, "EUR");
-      const account2 = new Account("A2", ProviderType.simpleFin, mockUser, mockInstitution, 20, 20, AccountType.depository, "GBP");
+      const account1 = new Account("A1", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, 10, 10, AccountType.depository, "EUR");
+      const account2 = new Account("A2", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, 20, 20, AccountType.depository, "GBP");
       const list = [account1, account2];
       const convertListSpy = jest.spyOn(CurrencyHelper, "convertList").mockImplementation(() => {});
 

@@ -75,7 +75,10 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
       ),
       data: (state) {
         final accounts = state.accounts;
-        final investmentAccounts = accounts.where((a) => a.type == AccountTypeEnum.investment).toList();
+        final investmentAccounts = [
+          ...accounts.where((a) => a.type == AccountTypeEnum.investment),
+          ...accounts.where((a) => a.type == AccountTypeEnum.crypto),
+        ];
 
         bool allLoaded = true;
         bool hasHoldings = false;
@@ -281,6 +284,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
 
   /// Displays a list of holdings the current user has across their accounts
   Widget _buildHoldingsPanel(ThemeData theme, List<Account> investmentAccounts) {
+    final formatter = ref.read(currencyFormatterProvider);
     return SproutRouteWrapper(
       child: Column(
         spacing: 8,
@@ -293,7 +297,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8),
+                  padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
                   child: Row(
                     spacing: 12,
                     children: [
@@ -304,6 +308,12 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                           style: theme.textTheme.titleMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        formatter.format(account.balance),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],

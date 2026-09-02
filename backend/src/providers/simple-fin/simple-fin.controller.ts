@@ -30,8 +30,9 @@ export class SimpleFinProviderController {
   @ApiOkResponse({ description: "Provider accounts found successfully.", type: [Account] })
   @ApiNotFoundResponse({ description: "Provider with the specified name not found." })
   async getAccounts(@CurrentUser() user: User) {
-    // Moved the logic into the service so we don't accidentally insert accounts during a preview
-    return await this.simpleFinProviderService.getUnlinkedAccounts(user);
+    const accounts = await this.simpleFinProviderService.getUnlinkedAccounts(user);
+    accounts.map((x) => (x.id = x.providerAccountId));
+    return accounts;
   }
 
   @Post("link")
@@ -42,7 +43,7 @@ export class SimpleFinProviderController {
   @ApiCreatedResponse({ description: "Provider accounts linked successfully.", type: [Account] })
   @ApiBody({ type: [Account] })
   @EnabledGuard.attachDemoMode()
-  async linkAccounts(@Body() accountsToLink: Account[], @CurrentUser() user: User) {
+  async linkAccounts(@Body() accountsToLink: Account[], @CurrentUser() user: User): Promise<Account[]> {
     const accountIds = accountsToLink.map((a) => a.id);
 
     // Delegate to the ProviderBase template! This handles Institutions, Account History, Holdings, and Transactions automatically.

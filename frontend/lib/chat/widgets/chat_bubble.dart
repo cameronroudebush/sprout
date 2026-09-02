@@ -67,6 +67,7 @@ class ChatBubble extends ConsumerWidget {
                             ? const TypingIndicator()
                             : const SizedBox.shrink()
                         : ChatMessageContent(
+                            key: ValueKey(message.id),
                             text: message.text,
                             isAi: isAi,
                             textColor: Colors.white,

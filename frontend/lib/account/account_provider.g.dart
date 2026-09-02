@@ -94,9 +94,9 @@ final zillowInfoProvider = ZillowInfoFamily._();
 
 /// Riverpod to provide zillow info based on an account ID
 
-final class ZillowInfoProvider extends $FunctionalProvider<
-        AsyncValue<ZillowAsset?>, ZillowAsset?, FutureOr<ZillowAsset?>>
-    with $FutureModifier<ZillowAsset?>, $FutureProvider<ZillowAsset?> {
+final class ZillowInfoProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
   /// Riverpod to provide zillow info based on an account ID
   ZillowInfoProvider._(
       {required ZillowInfoFamily super.from, required String super.argument})
@@ -120,12 +120,11 @@ final class ZillowInfoProvider extends $FunctionalProvider<
 
   @$internal
   @override
-  $FutureProviderElement<ZillowAsset?> $createElement(
-          $ProviderPointer pointer) =>
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
       $FutureProviderElement(pointer);
 
   @override
-  FutureOr<ZillowAsset?> create(Ref ref) {
+  FutureOr<String?> create(Ref ref) {
     final argument = this.argument as String;
     return zillowInfo(
       ref,
@@ -144,12 +143,12 @@ final class ZillowInfoProvider extends $FunctionalProvider<
   }
 }
 
-String _$zillowInfoHash() => r'8f25b60932667024a617d1aa7a5a0824eab8ff68';
+String _$zillowInfoHash() => r'26446f89d813ad7889259b70125b9af7a4bbb37d';
 
 /// Riverpod to provide zillow info based on an account ID
 
 final class ZillowInfoFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<ZillowAsset?>, String> {
+    with $FunctionalFamilyOverride<FutureOr<String?>, String> {
   ZillowInfoFamily._()
       : super(
           retry: null,

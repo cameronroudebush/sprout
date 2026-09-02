@@ -93,7 +93,7 @@ export class AccountController {
   async edit(@Param("id") id: string, @CurrentUser() user: User, @Body() updatedAccount: AccountEditRequest) {
     const matchingAccount = await Account.findOne({ where: { id: id, user: { id: user.id } } });
     if (matchingAccount == null) throw new NotFoundException(`Account with ID ${id} not found or does not belong to the user.`);
-    if (updatedAccount.name != null && updatedAccount.name.length < 5) throw new BadRequestException("Account names must be at least 5 characters.");
+    if (updatedAccount.name != null && updatedAccount.name.length < 2) throw new BadRequestException("Account names must be at least 2 characters.");
 
     // Update only the allowed fields
     matchingAccount.name = updatedAccount.name?.trim() ?? matchingAccount.name;
@@ -185,7 +185,11 @@ export class AccountController {
     }
     this.logger.log(`Institution ${institution.name} has 0 remaining accounts. Initiating full cleanup.`);
     // Handle unlinks
-    for (const p of this.providers) if (provider === p.config.dbType) p.unlinkInstitution(user, institution.id);
+    for (const p of this.providers)
+      if (provider === p.config.dbType) {
+        await p.unlinkInstitution(user, institution.id);
+        this.logger.log(`Cleaned up from ${p.config.name} successfully`);
+      }
     // Remove from DB to cleanup
     await Institution.delete({ id: institution.id });
   }

@@ -39,6 +39,7 @@ class SettingsPage extends ConsumerWidget {
   Future<void> _update(WidgetRef ref, UserConfig Function(UserConfig) callback) async {
     try {
       await ref.read(userConfigProvider.notifier).updateConfig(callback);
+      ref.invalidate(providerConfigProvider);
       onConfigChanged?.call();
     } catch (e) {
       if (onConfigFailure == null) {
@@ -66,6 +67,7 @@ class SettingsPage extends ConsumerWidget {
     final providers = ref.watch(providerConfigProvider).value;
     final backendUrl = ref.watch(secureConfigApiProvider).value?.apiClient.basePath;
     final simpleFinEnabled = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin) != null;
+    final coinbaseEnabled = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.coinbase) != null;
 
     if (userConfig == null || config == null) {
       return const Center(child: CircularProgressIndicator());
@@ -93,9 +95,9 @@ class SettingsPage extends ConsumerWidget {
             label: "Email Address",
             currentValue: user?.email,
             icon: Icons.email,
-            onSave: (newEmail) async {
+            onSave: (values) async {
               try {
-                await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: newEmail));
+                await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: values.first));
               } catch (e) {
                 ref.read(notificationsProvider.notifier).openWithAPIException(e);
                 onConfigFailure?.call(e);
@@ -220,7 +222,41 @@ class SettingsPage extends ConsumerWidget {
               icon: Icons.key,
               obscureText: true,
               description: "Enter your new token below. This will be encrypted and stored securely.",
-              onSave: (val) => _update(ref, (c) => c.copyWith(simpleFinToken: val)),
+              onSave: (values) => _update(ref, (c) => c.copyWith(simpleFinToken: values.first)),
+            ),
+          ),
+        if (coinbaseEnabled)
+          ActionSettingTile(
+            title: "Coinbase API Key",
+            subtitle:
+                (userConfig.coinbaseApiKey?.isNotEmpty == true && userConfig.coinbaseApiKeyName?.isNotEmpty == true)
+                    ? "Key Configured"
+                    : "Configure Key",
+            icon: Icons.api,
+            onTap: () => showSproutEditDialog(
+              context: context,
+              title: "Update Coinbase API Credentials",
+              description: "Enter your Coinbase API Key Name and Secret below.",
+              fields: [
+                EditDialogField(
+                  label: "Key Name",
+                  currentValue: userConfig.coinbaseApiKeyName,
+                  icon: Icons.badge_outlined,
+                ),
+                EditDialogField(
+                  label: "Key Secret",
+                  currentValue: userConfig.coinbaseApiKey,
+                  icon: Icons.key,
+                  obscureText: true,
+                ),
+              ],
+              onSave: (values) => _update(
+                ref,
+                (c) => c.copyWith(
+                  coinbaseApiKeyName: values[0],
+                  coinbaseApiKey: values[1],
+                ),
+              ),
             ),
           ),
       ],

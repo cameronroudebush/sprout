@@ -1,14 +1,23 @@
 import { Account } from "@backend/account/model/account.model";
+import { AccountSubType } from "@backend/account/model/account.sub.type";
+import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
+import { Institution } from "@backend/institution/model/institution.model";
 import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
+import { ZillowPropertyDTO } from "@backend/providers/zillow/model/api/zillow.lookup.dto";
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
-import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Injectable, Logger, NotImplementedException } from "@nestjs/common";
 import { Impit } from "impit";
+
+/** Extended type carrying address string down to mapToSproutAccount */
+export interface ZillowRawPropertyPayload {
+  result: ZillowPropertyResultDto;
+  address: string;
+}
 
 /**
  * This provider adds automated property lookup via Zillow.
@@ -18,7 +27,7 @@ import { Impit } from "impit";
  * the exchange/linking hooks.
  */
 @Injectable()
-export class ZillowProviderService extends ProviderBase<void, void, void, void, ZillowPropertyResultDto, undefined, ZillowAsset> {
+export class ZillowProviderService extends ProviderBase<void, void, ZillowPropertyDTO, void, ZillowRawPropertyPayload, undefined> {
   protected readonly logger = new Logger("provider:service:zillow");
   override getAppConfiguration = () => Configuration.providers.zillow;
   config = new ProviderConfig("Zillow", ProviderType.zillow, ProviderSubType.realEstate, "https://www.zillow.com");
@@ -30,24 +39,24 @@ export class ZillowProviderService extends ProviderBase<void, void, void, void, 
 
   /**
    * Overrides the template method get() because Zillow properties are tracked
-   * individually via ZillowAsset, not grouped under an Institution connection.
+   * individually via providerAccountId (ZPID), not grouped under an Institution connection.
    */
   override async get(user: User, _accountsOnly: boolean, _institutionId?: string): Promise<ProviderSyncResult[]> {
     const accounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.zillow } });
     const results: ProviderSyncResult[] = [];
 
     for (const account of accounts) {
-      const info = await ZillowAsset.findOne({ where: { account: { id: account.id } } });
-      if (!info || !info.zpid) {
-        this.logger.warn(`No zpid info found for account ${account.id}`);
+      const zpid = account.providerAccountId;
+      if (!zpid) {
+        this.logger.warn(`No zpid found for account ${account.id}`);
         continue;
       }
 
       try {
-        const data = await this.getInfoByZpid(user, info.zpid);
+        const data = await this.getInfoByZpid(user, zpid);
         account.balance = data.zestimate;
         account.availableBalance = data.zestimate;
-        results.push({ account });
+        results.push({ account, providerAccountId: zpid });
       } catch (e) {
         this.logger.error(`Failed to update Zillow account ${account.id}`, e);
       }
@@ -116,20 +125,57 @@ export class ZillowProviderService extends ProviderBase<void, void, void, void, 
     return this.resultFromContent(content);
   }
 
-  public override async performExchange(): Promise<ExchangeInstitution<void, ZillowPropertyResultDto>[]> {
-    throw new NotImplementedException();
+  public override async performExchange(user: User, payload: ZillowPropertyDTO): Promise<ExchangeInstitution<void, ZillowRawPropertyPayload>[]> {
+    const { address, city, state, zip } = payload;
+    const propertyInfo = await this.getInfoByAddress(user, address, city, state, zip);
+
+    if (!propertyInfo.zpid || propertyInfo.zestimate === null) {
+      throw new BadRequestException("Could not verify property information with Zillow.");
+    }
+
+    return [
+      {
+        institutionName: "Zillow",
+        institutionUrl: this.config.url,
+        authContext: undefined,
+        rawAccounts: [{ result: propertyInfo, address }],
+      },
+    ];
   }
+
+  protected override extractProviderAccountId(rawAccount: ZillowRawPropertyPayload): string {
+    return rawAccount.result.zpid;
+  }
+
+  protected override extractAccountName(rawAccount: ZillowRawPropertyPayload): string {
+    return rawAccount.address;
+  }
+
+  protected override async mapToSproutAccount(
+    rawAccount: ZillowRawPropertyPayload,
+    _authContext: void,
+    user: User,
+    institution: Institution,
+  ): Promise<Account> {
+    return new Account(
+      rawAccount.address,
+      ProviderType.zillow,
+      rawAccount.result.zpid,
+      user,
+      institution,
+      rawAccount.result.zestimate,
+      0,
+      AccountType.asset,
+      rawAccount.result.currency || "USD",
+      AccountSubType.house,
+    );
+  }
+
   protected async performSync(): Promise<ProviderSyncResult[]> {
-    throw new NotImplementedException();
-  }
-  protected override async mapToSproutAccount(): Promise<Account> {
     throw new NotImplementedException();
   }
 
   protected async getInstitutionAssetsForUser(): Promise<undefined[]> {
     return [];
-  }
-  public async createAccountAsset(): Promise<ZillowAsset> {
-    throw new NotImplementedException();
   }
 }

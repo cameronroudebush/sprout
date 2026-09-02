@@ -7,7 +7,6 @@ import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
-import { SnapTradeAsset } from "@backend/providers/snap-trade/model/snap-trade.asset.model";
 import { SnapTradeInstitutionAsset } from "@backend/providers/snap-trade/model/snap-trade.institution.asset.model";
 import { SnapTradeUser } from "@backend/providers/snap-trade/model/snap-trade.user";
 import { Transaction } from "@backend/transaction/model/transaction.model";
@@ -28,15 +27,7 @@ export interface SnapTradeAuthContext {
 }
 
 @Injectable()
-export class SnapTradeProviderService extends ProviderBase<
-  SnapTradeLinkOptions,
-  string,
-  void,
-  SnapTradeAuthContext,
-  any,
-  SnapTradeInstitutionAsset,
-  SnapTradeAsset
-> {
+export class SnapTradeProviderService extends ProviderBase<SnapTradeLinkOptions, string, void, SnapTradeAuthContext, any, SnapTradeInstitutionAsset> {
   protected readonly logger = new Logger("provider:snapTrade:service");
   public readonly snaptrade!: Snaptrade<CommercialApiKeyAuth>;
 
@@ -136,11 +127,10 @@ export class SnapTradeProviderService extends ProviderBase<
         asset.institution,
       );
 
-      const providerAsset = await SnapTradeAsset.findOne({
-        where: { snapTradeAccountId: rawAccount.id, account: { user: { id: user.id } } },
-        relations: { account: true },
+      const existingAccount = await Account.findOne({
+        where: { providerAccountId: rawAccount.id, user: { id: user.id } },
       });
-      if (providerAsset) finalAccount.id = providerAsset.account.id;
+      if (existingAccount) finalAccount.id = existingAccount.id;
 
       const syncData = accountsOnly
         ? { holdings: [], transactions: [], removedTransactionIds: [] }
@@ -204,6 +194,7 @@ export class SnapTradeProviderService extends ProviderBase<
     return new Account(
       rawAccount.name || rawAccount.number || "Brokerage Account",
       ProviderType.snapTrade,
+      rawAccount.id,
       user,
       institution,
       balance * (isLiability ? -1 : 1),
@@ -290,22 +281,5 @@ export class SnapTradeProviderService extends ProviderBase<
       instAsset.authorizationId = authContext.authorizationId;
       await instAsset.update();
     }
-  }
-
-  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<SnapTradeAsset | null> {
-    return await SnapTradeAsset.findOne({ where: { snapTradeAccountId: providerAccountId, account: { user: { id: userId } } }, relations: { account: true } });
-  }
-
-  protected override async getAccountAssetByAccountId(accountId: string): Promise<SnapTradeAsset | null> {
-    return await SnapTradeAsset.findOne({ where: { account: { id: accountId } }, relations: { account: true } });
-  }
-
-  public async createAccountAsset(account: Account, providerAccountId: string): Promise<SnapTradeAsset> {
-    return await new SnapTradeAsset(account, providerAccountId).insert();
-  }
-
-  protected override async updateAccountAsset(asset: SnapTradeAsset, providerAccountId: string): Promise<void> {
-    asset.snapTradeAccountId = providerAccountId;
-    await asset.update();
   }
 }

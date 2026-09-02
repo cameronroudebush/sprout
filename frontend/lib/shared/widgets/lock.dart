@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
-import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/centered_layout.dart';
 
 /// This widget is intended to display when the app is locked by biometrics
@@ -23,10 +22,7 @@ class _SproutLockWidgetState extends ConsumerState<SproutLockWidget> {
   Future<void> _handleUnlock() async {
     final bioState = ref.read(biometricsProvider);
     if (bioState.isUnlocking) return;
-    final success = await ref.read(biometricsProvider.notifier).tryManualUnlock();
-    if (success && mounted) {
-      NavigationProvider.redirect("/");
-    }
+    await ref.read(biometricsProvider.notifier).tryManualUnlock();
   }
 
   @override
@@ -46,8 +42,7 @@ class _SproutLockWidgetState extends ConsumerState<SproutLockWidget> {
               onPressed: bioState.isUnlocking
                   ? null
                   : () async {
-                      final success = await ref.read(biometricsProvider.notifier).tryManualUnlock();
-                      if (success) NavigationProvider.redirect("/");
+                      await ref.read(biometricsProvider.notifier).tryManualUnlock();
                     },
               icon: bioState.isUnlocking
                   ? const SizedBox(

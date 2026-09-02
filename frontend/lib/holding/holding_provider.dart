@@ -170,19 +170,24 @@ class MajorIndicesTimeline extends _$MajorIndicesTimeline {
 /// Provider that allows us to track the expanded holding values based on current live prices
 @riverpod
 ExpandedHolding expandedHolding(Ref ref, Holding holding) {
-  ref.listen(batchedLivePricesProvider, (_, __) {}, fireImmediately: false);
-  ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
-
-  final livePrices = ref.watch(batchedLivePricesProvider);
-  final holdingHistory = ref.watch(accountHoldingHistoryProvider(holding.id)).value;
-
   final account = ref.watch(accountsProvider).value?.accounts.firstWhereOrNull(
         (a) => a.id == holding.accountId,
       );
 
-  final liveData = livePrices[holding.symbol];
-  final livePrice = liveData?.price ?? (holding.marketValue / holding.shares);
-  final liveMarketValue = livePrice * holding.shares;
+  final isCrypto = account?.type == AccountTypeEnum.crypto;
+
+  MarketIndexDto? liveData;
+  if (!isCrypto) {
+    ref.listen(batchedLivePricesProvider, (_, __) {}, fireImmediately: false);
+    ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
+    final livePrices = ref.watch(batchedLivePricesProvider);
+    liveData = livePrices[holding.symbol];
+  }
+
+  final holdingHistory = ref.watch(accountHoldingHistoryProvider(holding.id)).value;
+
+  final livePrice = liveData?.price ?? (holding.shares > 0 ? holding.marketValue / holding.shares : 0.0);
+  final liveMarketValue = isCrypto ? holding.marketValue.toDouble() : livePrice * holding.shares;
 
   final priceChangePerShare = liveData?.change ?? 0.0;
   final dayChange = priceChangePerShare * holding.shares;
@@ -204,7 +209,7 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
       dayChange: dayChange,
       dayPercent: dayPercent,
       historicalFrame: frame,
-      isLive: liveData != null && liveData.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
+      isLive: !isCrypto && liveData != null && liveData.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
       previousClose: liveData?.previousClose,
       dayLow: liveData?.dayLow,
       dayHigh: liveData?.dayHigh,

@@ -20,6 +20,11 @@ class MainActivity : FlutterFragmentActivity() {
         setupSecurityMethodChannel(flutterEngine)
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
     /**
      * Setups the method channel so the flutter app can communicate to allow us to set FLAG_SECURE to hide the app when in the background.
      */
