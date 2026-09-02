@@ -144,11 +144,11 @@ describe("AccountController", () => {
       await expect(controller.edit("acc-1", mockUser, { name: "Valid Name" })).rejects.toThrow(NotFoundException);
     });
 
-    it("should throw BadRequestException if target name modification is shorter than 5 characters", async () => {
+    it("should throw BadRequestException if target name modification is shorter than 2 characters", async () => {
       const mockAccount = Account.fromPlain({ id: "acc-1" });
       jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
-      await expect(controller.edit("acc-1", mockUser, { name: "shor" })).rejects.toThrow(BadRequestException);
+      await expect(controller.edit("acc-1", mockUser, { name: "s" })).rejects.toThrow(BadRequestException);
     });
 
     it("should apply updates, save, and notify user when all fields are supplied perfectly", async () => {
