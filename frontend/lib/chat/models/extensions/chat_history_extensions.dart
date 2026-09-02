@@ -1,46 +1,45 @@
 import 'package:sprout/api/api.dart';
 
 extension ChatHistoryExtensions on String {
-  /// Replaces @ID patterns with the corresponding Account Name
+  /// Replaces @ID patterns, standalone IDs, and streaming ID prefixes with Account Names
   String deIdentifyAccounts(List<Account> accounts) {
     if (accounts.isEmpty) return this;
 
-    String result = this;
-    final pattern = RegExp(r'`?@?\b([a-zA-Z0-9\-]{10,})\b`?');
-
     final idMap = {for (var acc in accounts) acc.id: acc.name};
 
-    final formatted = result.splitMapJoin(
+    // Matches `@` mentions or word tokens containing alphanumeric chars and dashes
+    final pattern = RegExp(r'`?(@[a-zA-Z0-9\-]+|\b[a-zA-Z0-9\-]+\b)`?');
+
+    final formatted = splitMapJoin(
       pattern,
       onMatch: (Match match) {
-        final id = match.group(1)!;
         final fullMatch = match.group(0)!;
-
-        // If we have the account, replace it with the formatted name
-        if (idMap.containsKey(id)) {
-          return "**${idMap[id]}**";
+        final rawToken = fullMatch.replaceAll(RegExp(r'[`@]'), '');
+        if (idMap.containsKey(rawToken)) {
+          return "**${idMap[rawToken]}**";
         }
-        // If it starts with '@', check if it's currently streaming in as a partial match of a real account ID
-        else if (fullMatch.contains('@')) {
-          final isPartialMatch = idMap.keys.any((accId) => accId.startsWith(id));
-          final isAtEndOfString = match.end == result.length;
-
-          // If it matches the prefix of an existing account ID and is at the end of the stream, wait for more tokens
-          if (isPartialMatch && isAtEndOfString) {
-            return fullMatch;
+        // Check if rawToken is a partial prefix of ANY active account ID in memory
+        final matchingAccId = idMap.keys.firstWhere(
+          (accId) => accId.startsWith(rawToken) && rawToken.isNotEmpty,
+          orElse: () => '',
+        );
+        if (matchingAccId.isNotEmpty) {
+          // If the token matches the prefix of a known ID, mask it immediately with
+          // a soft placeholder so raw ID characters (ACT-..., GUIDs) never bleed into the UI.
+          return "**...**";
+        }
+        if (fullMatch.contains('@')) {
+          // Hold placeholder if still actively streaming at end of string
+          if (match.end == length) {
+            return "**...**";
           }
-
           return "**Deleted Account**";
         }
-        // Otherwise, return the text exactly as it was
-        else {
-          return fullMatch;
-        }
+        // Return plain text unaltered (normal words like "balance", "total", etc.)
+        return fullMatch;
       },
       onNonMatch: (nonMatch) => nonMatch,
     );
-
-    // Collapses quadrupled asterisks (****) down to doubled asterisks (**)
     return formatted.replaceAll('****', '**');
   }
 }

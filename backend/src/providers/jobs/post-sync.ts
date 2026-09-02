@@ -132,6 +132,7 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
         where: {
           user: { id: user.id },
           notified: true,
+          isManual: false,
           time: MoreThan(today),
         },
       });

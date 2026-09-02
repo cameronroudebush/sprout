@@ -11,6 +11,8 @@ type SyncTaskPayload = {
   userId: string;
   /** If we should notify the user of these results */
   notify?: boolean;
+  /** If this was manually run */
+  isManual?: boolean;
 };
 
 /** This sync job specifies a singular job for a specific provider. This is re-used for every provider and dynamically created based on provider count. */
@@ -36,7 +38,7 @@ export class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
   async processTask(task: SyncTaskPayload) {
     const user = await User.findOne({ where: { id: task.userId } });
     if (!user) return;
-    return await this.providerSyncService.syncForProvider(user, this.provider, task.notify);
+    return await this.providerSyncService.syncForProvider(user, this.provider, task.notify, undefined, task.isManual);
   }
 
   /** Cleans up old sync history to prevent table bloat */

@@ -28,7 +28,7 @@ export class ProviderSyncService {
    * @param notify If we should send a notification that the user has new data. This will be batched and sent via the {@link SyncNotificationJob}.
    * @param institutionId Optional ID of a specific institution to sync. If provided, skips syncing other institutions for this provider.
    */
-  async syncForProvider<T extends ProviderBase>(user: User, provider: T, notify = true, institutionId?: string) {
+  async syncForProvider<T extends ProviderBase>(user: User, provider: T, notify = true, institutionId?: string, isManual?: boolean) {
     if (!(await provider.isAvailable(user))) {
       this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
       return;
@@ -41,8 +41,9 @@ export class ProviderSyncService {
       status: "in-progress",
       provider: provider.config.dbType,
       notified: !notify, // Invert notify case. If we don't want notified, this makes us think we already told the user and vice versa.
+      isManual: isManual ?? false,
+      user: user,
     }).insert();
-    sync.user = user;
     try {
       const result = await this.syncUserAccounts(user, provider, institutionId);
       if (result.institutionErrors.size > 0) {

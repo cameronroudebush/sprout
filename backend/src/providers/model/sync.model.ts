@@ -35,4 +35,10 @@ export class Sync extends DatabaseBase {
   /** Tracks if this sync was already handled for post notification/sync handlers from the `PostSyncProcessingJob` */
   @DatabaseDecorators.column({ default: false })
   notified?: boolean;
+
+  @DatabaseDecorators.column({ type: "boolean", default: false })
+  @ApiProperty({
+    description: "Defines if this sync was completed manually from a user and not the automated system.",
+  })
+  isManual!: boolean;
 }

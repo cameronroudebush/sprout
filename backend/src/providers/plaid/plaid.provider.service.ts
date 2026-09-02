@@ -358,13 +358,13 @@ export class PlaidProviderService extends ProviderBase<
           const pendingTx = await Transaction.findOne({ where: { providerId: t.pending_transaction_id, account: { user: { id: user.id } } } });
           if (pendingTx) await pendingTx.remove();
         }
-        const parsedDate = parseISO(t.date);
+        const parsedDate = parseISO(t.authorized_date ?? t.date);
         const transactionDate = isToday(parsedDate)
           ? set(parsedDate, { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds(), milliseconds: now.getMilliseconds() })
           : parsedDate;
         const newTx = new Transaction(t.amount * -1, transactionDate, t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
         newTx.providerId = t.transaction_id;
-        newTx.extra = { code: t.transaction_code, location: t.location, website: t.website };
+        newTx.extra = { code: t.transaction_code, location: t.location, website: t.website, authorizedDate: t.authorized_date, date: t.date };
         return newTx;
       }),
     );
