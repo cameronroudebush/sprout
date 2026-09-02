@@ -115,7 +115,7 @@ export class PlaidProviderService extends ProviderBase<
     }
 
     await this.rateLimit(user).incrementOrError();
-    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions, Products.Investments] });
+    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions], optional_products: [Products.Investments] });
     return new PlaidLinkTokenDTO(response.data.link_token);
   }
 
@@ -282,7 +282,7 @@ export class PlaidProviderService extends ProviderBase<
     const accType = this.mapType(acc.type);
     const isLiability = AccountTypeIsLiability(accType);
     return new Account(
-      acc.official_name ?? acc.name,
+      acc.name,
       ProviderType.plaid,
       acc.account_id,
       user,

@@ -833,72 +833,21 @@
         "tags": ["Webhook"]
       }
     },
-    "/provider/coinbase": {
-      "get": {
-        "description": "Retrieves accounts that the user has not yet linked.",
-        "operationId": "CoinbaseProviderController_getAccounts",
+    "/provider/coinbase/link": {
+      "post": {
+        "description": "Fetches active balances from Coinbase API credentials and links the unified Coinbase Wallet.",
+        "operationId": "CoinbaseProviderController_linkAccount",
         "parameters": [],
         "responses": {
-          "200": {
-            "description": "Provider accounts found successfully.",
+          "201": {
+            "description": "Provider account linked successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Account"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          },
-          "404": {
-            "description": "Provider with the specified name not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get accounts from the coinbase provider that are not yet synced.",
-        "tags": ["Provider"]
-      }
-    },
-    "/provider/coinbase/link": {
-      "post": {
-        "description": "Given some accounts, links the new accounts to the current user.",
-        "operationId": "CoinbaseProviderController_linkAccounts",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
                   "$ref": "#/components/schemas/Account"
                 }
               }
             }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Provider accounts linked successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Account"
-                  }
-                }
-              }
-            }
           },
           "401": {
             "description": "Authentication is required."
@@ -909,7 +858,7 @@
             "bearer": []
           }
         ],
-        "summary": "Link the new given accounts from coinbase.",
+        "summary": "Link Coinbase account.",
         "tags": ["Provider"]
       }
     },

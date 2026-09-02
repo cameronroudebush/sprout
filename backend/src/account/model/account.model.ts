@@ -71,6 +71,7 @@ export class Account extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   @ApiHideProperty()
   @IsString()
+  @Exclude({ toPlainOnly: true })
   providerAccountId!: string;
 
   /** Any extra data that we want to store as JSON */

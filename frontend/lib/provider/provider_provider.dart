@@ -22,15 +22,6 @@ Future<List<Account>?> simpleFinAccounts(Ref ref) async {
 }
 
 @Riverpod(retry: riverpodRetry)
-Future<List<Account>?> coinbaseAccounts(Ref ref) async {
-  final api = ref.watch(providerApiProvider).value;
-  if (api == null) {
-    return [];
-  }
-  return await api.coinbaseProviderControllerGetAccounts();
-}
-
-@Riverpod(retry: riverpodRetry)
 Future<List<ProviderConfig>?> providerConfig(Ref ref) async {
   final api = ref.watch(providerApiProvider).value;
   if (api == null) {

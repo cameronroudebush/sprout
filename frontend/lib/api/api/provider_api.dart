@@ -115,14 +115,14 @@ class ProviderApi {
     }
   }
 
-  /// Get accounts from the coinbase provider that are not yet synced.
+  /// Link Coinbase account.
   ///
-  /// Retrieves accounts that the user has not yet linked.
+  /// Fetches active balances from Coinbase API credentials and links the unified Coinbase Wallet.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> coinbaseProviderControllerGetAccountsWithHttpInfo() async {
+  Future<Response> coinbaseProviderControllerLinkAccountWithHttpInfo() async {
     // ignore: prefer_const_declarations
-    final path = r'/provider/coinbase';
+    final path = r'/provider/coinbase/link';
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -136,61 +136,6 @@ class ProviderApi {
 
     return apiClient.invokeAPI(
       path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Get accounts from the coinbase provider that are not yet synced.
-  ///
-  /// Retrieves accounts that the user has not yet linked.
-  Future<List<Account>?> coinbaseProviderControllerGetAccounts() async {
-    final response = await coinbaseProviderControllerGetAccountsWithHttpInfo();
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
-    }
-    return null;
-  }
-
-  /// Link the new given accounts from coinbase.
-  ///
-  /// Given some accounts, links the new accounts to the current user.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [List<Account>] account (required):
-  Future<Response> coinbaseProviderControllerLinkAccountsWithHttpInfo(List<Account> account,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/provider/coinbase/link';
-
-    // ignore: prefer_final_locals
-    Object? postBody = account;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-
-    return apiClient.invokeAPI(
-      path,
       'POST',
       queryParams,
       postBody,
@@ -200,15 +145,11 @@ class ProviderApi {
     );
   }
 
-  /// Link the new given accounts from coinbase.
+  /// Link Coinbase account.
   ///
-  /// Given some accounts, links the new accounts to the current user.
-  ///
-  /// Parameters:
-  ///
-  /// * [List<Account>] account (required):
-  Future<List<Account>?> coinbaseProviderControllerLinkAccounts(List<Account> account,) async {
-    final response = await coinbaseProviderControllerLinkAccountsWithHttpInfo(account,);
+  /// Fetches active balances from Coinbase API credentials and links the unified Coinbase Wallet.
+  Future<Account?> coinbaseProviderControllerLinkAccount() async {
+    final response = await coinbaseProviderControllerLinkAccountWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -216,11 +157,8 @@ class ProviderApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
+    
     }
     return null;
   }

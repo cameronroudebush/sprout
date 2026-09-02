@@ -4,7 +4,7 @@ import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
-import { ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
+import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
@@ -15,7 +15,7 @@ import { User } from "@backend/user/model/user.model";
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { BadRequestException, Inject, Injectable, Logger, NotImplementedException } from "@nestjs/common";
 import axios from "axios";
-import * as crypto from "crypto";
+import crypto from "crypto";
 import { sign } from "jsonwebtoken";
 
 interface CoinbaseAuthContext {
@@ -23,8 +23,14 @@ interface CoinbaseAuthContext {
   apiKeyName: string;
 }
 
+export interface CoinbaseWalletPayload {
+  id: string;
+  name: string;
+  accounts: CoinbaseAccount[];
+}
+
 @Injectable()
-export class CoinbaseProviderService extends ProviderBase<void, void, string[], CoinbaseAuthContext, CoinbaseAccount, undefined> {
+export class CoinbaseProviderService extends ProviderBase<void, void, void, CoinbaseAuthContext, CoinbaseWalletPayload, undefined> {
   /** Cache key used for the store so we can track wallet values so we don't query too often */
   static readonly CACHE_KEY = "coinbase-exchange-rates";
   protected readonly logger = new Logger("provider:coinbase:service");
@@ -46,130 +52,125 @@ export class CoinbaseProviderService extends ProviderBase<void, void, string[], 
     return { apiKey: user.config.coinbaseApiKey!, apiKeyName: user.config.coinbaseApiKeyName! };
   }
 
-  override async getUnlinkedAccounts(user: User): Promise<Account[]> {
-    if (!(await this.isAvailable(user))) return [];
-    const existingAccounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.coinbase } });
-    const existingProviderAccountIds = existingAccounts.map((a) => a.providerAccountId).filter(Boolean);
-    const accounts = await this.fetchCoinbaseData(user, "accounts");
-    const unlinked = accounts.filter((acc) => {
-      const cryptoAmount = parseFloat(acc.balance?.amount || "0");
-      return acc.id && !existingProviderAccountIds.includes(acc.id) && cryptoAmount > 0;
-    });
-    const unlinkedAccounts: Account[] = [];
-    for (const rawAccount of unlinked) {
-      const institution = new Institution("https://www.coinbase.com", "Coinbase", false, user);
-      institution.id = crypto.randomUUID();
-      const acc = await this.mapToSproutAccount(rawAccount, this.getAuthContext(user), user, institution);
-      acc.id = acc.providerAccountId;
-      unlinkedAccounts.push(acc);
-    }
-    return unlinkedAccounts;
-  }
-
-  protected async performExchange(user: User, accountIdsToLink: string[]) {
+  protected async performExchange(user: User, _payload: void): Promise<ExchangeInstitution<CoinbaseAuthContext, CoinbaseWalletPayload>[]> {
     if (!(await this.isAvailable(user))) throw new BadRequestException("Coinbase API credentials are not properly configured");
-    const accounts = await this.fetchCoinbaseData(user, "accounts");
-    const selectedAccounts = accounts.filter((acc) => acc.id && accountIdsToLink.includes(acc.id));
+
+    const rawAccounts = await this.fetchCoinbaseData(user, "accounts");
+    const activeAccounts = rawAccounts.filter((acc) => parseFloat(acc.balance?.amount || "0") > 0);
+
+    const payload: CoinbaseWalletPayload = {
+      id: "coinbase-primary-wallet",
+      name: "Coinbase Wallet",
+      accounts: activeAccounts,
+    };
 
     return [
       {
         institutionName: "Coinbase",
         institutionUrl: this.config.url,
         authContext: this.getAuthContext(user),
-        rawAccounts: selectedAccounts,
+        rawAccounts: [payload],
       },
     ];
   }
 
   protected async performSync(user: User, _asset: undefined, accountsOnly: boolean): Promise<ProviderSyncResult[]> {
     if (!(await this.isAvailable(user))) return [];
-    const accounts = await this.fetchCoinbaseData(user, "accounts");
     const existingAccounts = await Account.find({
       where: { user: { id: user.id }, provider: ProviderType.coinbase },
     });
-    const existingMap = new Map(existingAccounts.map((a) => [a.providerAccountId, a]));
-    const results: ProviderSyncResult[] = [];
+    if (existingAccounts.length === 0) return [];
+
+    const existingAccount = existingAccounts[0]!;
+    const rawAccounts = await this.fetchCoinbaseData(user, "accounts");
+    const activeAccounts = rawAccounts.filter((acc) => parseFloat(acc.balance?.amount || "0") > 0);
+
+    const payload: CoinbaseWalletPayload = {
+      id: existingAccount.providerAccountId,
+      name: existingAccount.name,
+      accounts: activeAccounts,
+    };
+
     const authContext = this.getAuthContext(user);
+    const institution = existingAccount.institution || new Institution("https://www.coinbase.com", "Coinbase", false, user);
+    const updatedAccount = await this.mapToSproutAccount(payload, authContext, user, institution);
 
-    for (const rawAccount of accounts) {
-      if (!rawAccount.id || !existingMap.has(rawAccount.id)) continue;
+    existingAccount.balance = updatedAccount.balance;
+    existingAccount.availableBalance = updatedAccount.availableBalance;
+    existingAccount.currency = "USD";
 
-      const existingAccount = existingMap.get(rawAccount.id)!;
-      const institution = existingAccount.institution || new Institution("https://www.coinbase.com", "Coinbase", false, user);
-      const updatedAccount = await this.mapToSproutAccount(rawAccount, authContext, user, institution);
+    const syncData = accountsOnly
+      ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
+      : await this.fetchInitialSyncData(payload, existingAccount, authContext, user);
 
-      // Retain existing entity ID for updates and save converted USD balance
-      existingAccount.balance = updatedAccount.balance;
-      existingAccount.availableBalance = updatedAccount.availableBalance;
-      existingAccount.currency = "USD";
-
-      const syncData = accountsOnly
-        ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
-        : await this.fetchInitialSyncData(rawAccount, existingAccount, authContext, user);
-
-      results.push({
+    return [
+      {
         account: existingAccount,
-        providerAccountId: rawAccount.id,
+        providerAccountId: existingAccount.providerAccountId,
         ...syncData,
-      });
-    }
-
-    return results;
+      },
+    ];
   }
 
-  protected override extractProviderAccountId(rawAccount: CoinbaseAccount): string {
-    return rawAccount.id || "";
+  protected override extractProviderAccountId(rawAccount: CoinbaseWalletPayload): string {
+    return rawAccount.id;
   }
 
-  protected override extractAccountName(rawAccount: CoinbaseAccount): string {
-    return `${rawAccount.name || rawAccount.currency?.code} Wallet`;
+  protected override extractAccountName(rawAccount: CoinbaseWalletPayload): string {
+    return rawAccount.name;
   }
 
-  protected async mapToSproutAccount(rawAccount: CoinbaseAccount, _authContext: CoinbaseAuthContext, user: User, institution: Institution): Promise<Account> {
-    const rawCurrency = (rawAccount.balance?.currency || rawAccount.currency?.code || "USD").toUpperCase();
-    const cryptoAmount = parseFloat(rawAccount.balance?.amount || "0");
+  protected async mapToSproutAccount(
+    rawAccount: CoinbaseWalletPayload,
+    _authContext: CoinbaseAuthContext,
+    user: User,
+    institution: Institution,
+  ): Promise<Account> {
     const rates = await this.getUsdExchangeRates();
+    let totalUsdBalance = 0;
 
-    // Convert crypto quantity to USD value using current exchange rates
-    let usdValue = cryptoAmount;
-    if (rawCurrency !== "USD") {
-      const unitPriceUsd = rates?.[rawCurrency] ?? 0;
-      usdValue = cryptoAmount * unitPriceUsd;
+    for (const acc of rawAccount.accounts) {
+      const currency = (acc.balance?.currency || acc.currency?.code || "USD").toUpperCase();
+      const cryptoAmount = parseFloat(acc.balance?.amount || "0");
+      const unitPriceUsd = currency === "USD" ? 1 : (rates[currency] ?? 0);
+      totalUsdBalance += cryptoAmount * unitPriceUsd;
     }
 
     return new Account(
-      `${rawAccount.name || rawCurrency}`,
+      rawAccount.name || "Coinbase Wallet",
       ProviderType.coinbase,
       rawAccount.id,
       user,
       institution,
-      usdValue,
-      usdValue,
+      totalUsdBalance,
+      totalUsdBalance,
       AccountType.crypto,
       "USD",
-      rawAccount.name.toLowerCase().includes("staked") ? AccountSubType.staking : AccountSubType.wallet,
+      AccountSubType.wallet,
     );
   }
 
   protected override async fetchInitialSyncData(
-    rawAccount: CoinbaseAccount,
+    rawAccount: CoinbaseWalletPayload,
     account: Account,
     _authContext: CoinbaseAuthContext,
     _user: User,
   ): Promise<Omit<ProviderSyncResult, "account">> {
     const holdings: Holding[] = [];
-    const cryptoAmount = parseFloat(rawAccount.balance?.amount || "0");
     const rates = await this.getUsdExchangeRates();
 
-    if (cryptoAmount > 0) {
-      const assetCode = (rawAccount.balance?.currency || "USD").toUpperCase();
-      const unitPriceUsd = assetCode === "USD" ? 1 : (rates?.[assetCode] ?? 0);
+    for (const acc of rawAccount.accounts) {
+      const cryptoAmount = parseFloat(acc.balance?.amount || "0");
+      if (cryptoAmount <= 0) continue;
+
+      const assetCode = (acc.balance?.currency || acc.currency?.code || "USD").toUpperCase();
+      const unitPriceUsd = assetCode === "USD" ? 1 : (rates[assetCode] ?? 0);
       const totalMarketValueUsd = cryptoAmount * unitPriceUsd;
 
       const holding = new Holding(
         "USD",
         0, // costBasis
-        `${assetCode} Asset`,
+        `${acc.name || assetCode} Asset`,
         totalMarketValueUsd, // institutionValue (in USD)
         unitPriceUsd, // institutionPrice (price per crypto unit in USD)
         cryptoAmount, // quantity (crypto units)
