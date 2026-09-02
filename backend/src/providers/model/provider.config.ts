@@ -1,4 +1,5 @@
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
+import { CoinbaseConfig } from "@backend/providers/coinbase/model/config";
 import { PlaidConfig } from "@backend/providers/plaid/config";
 import { SimpleFINConfig } from "@backend/providers/simple-fin/config";
 import { SnapTradeConfig } from "@backend/providers/snap-trade/model/config";
@@ -39,4 +40,7 @@ export class ProvidersConfig {
 
   @ConfigurationMetadata.assign({ comment: "SnapTrade configuration: https://snaptrade.com/" })
   snapTrade = new SnapTradeConfig();
+
+  @ConfigurationMetadata.assign({ comment: "SnapTrade configuration: https://coinbase.com/" })
+  coinbase = new CoinbaseConfig();
 }

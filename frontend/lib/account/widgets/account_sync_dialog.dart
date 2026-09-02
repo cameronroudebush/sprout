@@ -4,6 +4,7 @@ import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/provider/widgets/provider_display.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/widgets/info_card.dart';
 
 /// A dialog that allows for manual account syncing. Allows selection of what providers to sync.
 class AccountSyncDialog extends ConsumerStatefulWidget {
@@ -85,38 +86,18 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
       submitButtonText: "Start Sync",
       onSubmitClick: _selectedProviders.isEmpty ? null : _onStartSync,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        padding: const EdgeInsets.symmetric(vertical: 6.0),
         child: Column(
           spacing: 12,
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Informational header card
-            Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Row(
-                spacing: 10,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: theme.colorScheme.primary,
-                    size: 20,
-                  ),
-                  Expanded(
-                    child: Text(
+            const Padding(
+                padding: EdgeInsetsGeometry.only(bottom: 8),
+                child: InfoCard(
+                  text:
                       "This requests the latest transaction and balance updates directly from your connected financial institutions right now, instead of waiting for the next sync cycle. Select what providers you would like to sync below.",
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                )),
 
             // Top-level "All Providers" selection
             InkWell(

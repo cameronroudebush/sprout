@@ -98,7 +98,6 @@ export class ProviderSyncService {
           if (data.providerAccountId) {
             accountInDB = await data.account.insert();
             await AccountHistory.insertForNewAccount(accountInDB);
-            await provider.createAccountAsset(accountInDB, data.providerAccountId);
 
             // Reload relation
             accountInDB = await Account.findOne({

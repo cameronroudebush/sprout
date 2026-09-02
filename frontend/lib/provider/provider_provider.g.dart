@@ -81,6 +81,40 @@ final class SimpleFinAccountsProvider extends $FunctionalProvider<
 
 String _$simpleFinAccountsHash() => r'92df5f92bee28fb0f62714d1041d24a7ba280549';
 
+@ProviderFor(coinbaseAccounts)
+final coinbaseAccountsProvider = CoinbaseAccountsProvider._();
+
+final class CoinbaseAccountsProvider extends $FunctionalProvider<
+        AsyncValue<List<Account>?>, List<Account>?, FutureOr<List<Account>?>>
+    with $FutureModifier<List<Account>?>, $FutureProvider<List<Account>?> {
+  CoinbaseAccountsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: riverpodRetry,
+          name: r'coinbaseAccountsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$coinbaseAccountsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Account>?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Account>?> create(Ref ref) {
+    return coinbaseAccounts(ref);
+  }
+}
+
+String _$coinbaseAccountsHash() => r'633b8f0d65a127e6e0ddd92f3426b88f02fbfc27';
+
 @ProviderFor(providerConfig)
 final providerConfigProvider = ProviderConfigProvider._();
 

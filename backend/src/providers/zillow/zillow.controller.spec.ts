@@ -1,16 +1,15 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
+import { AccountHistory } from "@backend/account/model/account.history.model";
+import { Account } from "@backend/account/model/account.model";
+import { Institution } from "@backend/institution/model/institution.model";
 import { ZillowProviderController } from "@backend/providers/zillow/zillow.controller";
 import { ZillowProviderService } from "@backend/providers/zillow/zillow.provider.service";
+import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { TestEntities } from "@backend/test/entities";
-import { ZillowAsset } from "@backend/providers/zillow/model/zillow.asset";
-import { Institution } from "@backend/institution/model/institution.model";
-import { Account } from "@backend/account/model/account.model";
-import { AccountHistory } from "@backend/account/model/account.history.model";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
-import { SSEEventType } from "@backend/sse/model/event.model";
 
 describe("ZillowProviderController", () => {
   let controller: ZillowProviderController;
@@ -31,20 +30,6 @@ describe("ZillowProviderController", () => {
     } as any;
 
     controller = new ZillowProviderController(sseService, zillowService);
-  });
-
-  describe("getByAccount", () => {
-    it("should return ZillowAsset for account", async () => {
-      const mockAsset = { id: "asset-1", zpid: 12345 };
-      jest.spyOn(ZillowAsset, "findOne").mockResolvedValue(mockAsset as any);
-
-      const res = await controller.getByAccount(user, "acc-1");
-
-      expect(ZillowAsset.findOne).toHaveBeenCalledWith({
-        where: { account: { id: "acc-1", user: { id: user.id } } },
-      });
-      expect(res).toBe(mockAsset);
-    });
   });
 
   describe("lookupProperty", () => {
@@ -87,8 +72,7 @@ describe("ZillowProviderController", () => {
       newAcc.insert = jest.fn().mockResolvedValue(newAcc);
       jest.spyOn(Account.prototype, "insert").mockResolvedValue(newAcc);
 
-      const mockAsset = { insert: jest.fn().mockResolvedValue({}) };
-      jest.spyOn(ZillowAsset.prototype, "insert").mockResolvedValue(mockAsset as any);
+      zillowService.exchangeAndCreateAccounts = jest.fn().mockResolvedValue([{ account: TestEntities.account }]);
       jest.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
 
       const res = await controller.link(user, { address: "123 Main St", city: "City", state: "ST", zip: 12345 });

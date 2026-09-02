@@ -73,103 +73,105 @@ class AccountGroupSection extends ConsumerWidget {
     final innerContent = Padding(
       padding: EdgeInsets.zero,
       child: Theme(
-        data: theme.copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: initiallyExpanded,
-          enabled: allowExpansion,
-          visualDensity: VisualDensity.compact,
-          tilePadding: EdgeInsets.symmetric(horizontal: renderAsCard ? 12 : 0),
-          childrenPadding: EdgeInsets.zero,
-          leading: Icon(Icons.circle, color: accentColor, size: 12),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 8,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              // Error indicator for the group
-              if (showErrors) SproutErrorIcon(hasError: groupHasError, size: 14),
-            ],
-          ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                formatter.format(total),
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: total.toBalanceColor(theme),
-                ),
-              ),
-              if (percentChange != null)
-                SproutChangeWidget(
-                  totalChange: totalChange,
-                  percentageChange: percentChange,
-                  period: selectedRange,
-                  fontSize: 12,
-                  useExtendedPeriodString: false,
-                ),
-            ],
-          ),
-          children: [
-            const Divider(height: 1, indent: 16, endIndent: 16),
-            ...(accounts
-                  ..sort((a, b) {
-                    return isNegative ? a.balance.compareTo(b.balance) : b.balance.compareTo(a.balance);
-                  }))
-                .map((acc) {
-              // Find history for this specific account
-              final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
-              final dataPoint = history?.getValueByFrame(selectedRange);
-              final isSelected = selectedAccounts?.contains(acc) ?? false;
-              final hasError = acc.institution.hasError;
-
-              // Main row content
-              Widget row = Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    AccountItemRow(
-                      acc,
-                      percentChange: dataPoint?.percentChange?.toDouble(),
-                      valueChange: dataPoint?.valueChange.toDouble(),
-                      period: selectedRange,
-                      onAccountClick: onAccountClick != null ? () => onAccountClick!(acc) : null,
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: Material(
+            color: Colors.transparent,
+            child: ExpansionTile(
+              initiallyExpanded: initiallyExpanded,
+              enabled: allowExpansion,
+              visualDensity: VisualDensity.compact,
+              tilePadding: EdgeInsets.symmetric(horizontal: renderAsCard ? 12 : 0),
+              childrenPadding: EdgeInsets.zero,
+              leading: Icon(Icons.circle, color: accentColor, size: 12),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: 8,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    if (showErrors)
-                      // Display the error badge if the institution has an error
-                      Positioned(left: -4, top: 2, child: SproutErrorIcon(hasError: hasError, size: 14)),
-                  ],
-                ),
-              );
-
-              if (selectedAccounts != null) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      if (isSelected)
-                        SizedBox(
-                          width: 24,
-                          child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
-                        ),
-                      Expanded(child: row),
-                    ],
                   ),
-                );
-              }
+                  // Error indicator for the group
+                  if (showErrors) SproutErrorIcon(hasError: groupHasError, size: 14),
+                ],
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatter.format(total),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: total.toBalanceColor(theme),
+                    ),
+                  ),
+                  if (percentChange != null)
+                    SproutChangeWidget(
+                      totalChange: totalChange,
+                      percentageChange: percentChange,
+                      period: selectedRange,
+                      fontSize: 12,
+                      useExtendedPeriodString: false,
+                    ),
+                ],
+              ),
+              children: [
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                ...(accounts
+                      ..sort((a, b) {
+                        return isNegative ? a.balance.compareTo(b.balance) : b.balance.compareTo(a.balance);
+                      }))
+                    .map((acc) {
+                  // Find history for this specific account
+                  final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
+                  final dataPoint = history?.getValueByFrame(selectedRange);
+                  final isSelected = selectedAccounts?.contains(acc) ?? false;
+                  final hasError = acc.institution.hasError;
 
-              return row;
-            }),
-          ],
-        ),
-      ),
+                  // Main row content
+                  Widget row = Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        AccountItemRow(
+                          acc,
+                          percentChange: dataPoint?.percentChange?.toDouble(),
+                          valueChange: dataPoint?.valueChange.toDouble(),
+                          period: selectedRange,
+                          onAccountClick: onAccountClick != null ? () => onAccountClick!(acc) : null,
+                        ),
+                        if (showErrors)
+                          // Display the error badge if the institution has an error
+                          Positioned(left: -4, top: 2, child: SproutErrorIcon(hasError: hasError, size: 14)),
+                      ],
+                    ),
+                  );
+
+                  if (selectedAccounts != null) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: [
+                          if (isSelected)
+                            SizedBox(
+                              width: 24,
+                              child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+                            ),
+                          Expanded(child: row),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return row;
+                }),
+              ],
+            ),
+          )),
     );
 
     if (renderAsCard) {

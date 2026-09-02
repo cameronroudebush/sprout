@@ -9,7 +9,6 @@ import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
-import { PlaidAsset } from "@backend/providers/plaid/model/plaid.asset";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
@@ -55,7 +54,6 @@ export class PlaidProviderService extends ProviderBase<
   PlaidAuthContext,
   PlaidAccount,
   PlaidInstitutionAsset,
-  PlaidAsset,
   PlaidSyncMetadata
 > {
   protected readonly logger = new Logger("provider:plaid:service");
@@ -199,11 +197,10 @@ export class PlaidProviderService extends ProviderBase<
     for (const rawAccount of accountsResponse.data.accounts) {
       const finalAccount = await this.mapToSproutAccount(rawAccount, { accessToken: asset.accessToken, itemId: asset.itemId }, user, asset.institution);
 
-      const providerAsset = await PlaidAsset.findOne({
-        where: { plaidAccountId: rawAccount.account_id, account: { user: { id: user.id } } },
-        relations: { account: true },
+      const existingAccount = await Account.findOne({
+        where: { providerAccountId: rawAccount.account_id, user: { id: user.id } },
       });
-      if (providerAsset) finalAccount.id = providerAsset.account.id;
+      if (existingAccount) finalAccount.id = existingAccount.id;
 
       const accountTransactions = added.concat(modified).filter((t) => t.account_id === rawAccount.account_id);
       const transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);
@@ -286,6 +283,7 @@ export class PlaidProviderService extends ProviderBase<
     return new Account(
       acc.official_name ?? acc.name,
       ProviderType.plaid,
+      acc.account_id,
       user,
       institution,
       (acc.balances.current || 0) * (isLiability ? -1 : 1),
@@ -325,23 +323,6 @@ export class PlaidProviderService extends ProviderBase<
       asset.accessToken = authContext.accessToken;
       await asset.update();
     }
-  }
-
-  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<PlaidAsset | null> {
-    return await PlaidAsset.findOne({ where: { plaidAccountId: providerAccountId, account: { user: { id: userId } } }, relations: { account: true } });
-  }
-
-  protected override async getAccountAssetByAccountId(accountId: string): Promise<PlaidAsset | null> {
-    return await PlaidAsset.findOne({ where: { account: { id: accountId } }, relations: { account: true } });
-  }
-
-  public async createAccountAsset(account: Account, providerAccountId: string): Promise<PlaidAsset> {
-    return await new PlaidAsset(account, providerAccountId).insert();
-  }
-
-  protected override async updateAccountAsset(asset: PlaidAsset, providerAccountId: string): Promise<void> {
-    asset.plaidAccountId = providerAccountId;
-    await asset.update();
   }
 
   private async fetchAllInstitutionTransactions(user: User, instAsset: PlaidInstitutionAsset) {

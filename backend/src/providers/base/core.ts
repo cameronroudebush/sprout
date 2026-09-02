@@ -9,7 +9,7 @@ import { ProviderConfig } from "@backend/providers/base/model/provider.config.mo
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
-import { Inject, InternalServerErrorException, Logger } from "@nestjs/common";
+import { Inject, InternalServerErrorException, Logger, NotImplementedException } from "@nestjs/common";
 import { ProviderRateLimit } from "./rate-limit";
 
 /** Standardized response payload for all provider sync operations. */
@@ -50,7 +50,7 @@ export interface ExchangeInstitution<AuthContext, RawAccount> {
  * @template AuthContext Internal connection metadata used across hooks (e.g. access_token).
  * @template RawAccount The raw account schema from the remote provider's API.
  * @template InstAsset The local TypeORM entity mapping institutions to the provider.
- * @template AccAsset The local TypeORM entity mapping accounts to the provider.
+ * @template TSyncMetadata Payload passed back for post-sync state (e.g. sync cursors).
  */
 export abstract class ProviderBase<
   LinkOptions = unknown,
@@ -59,7 +59,6 @@ export abstract class ProviderBase<
   AuthContext = unknown,
   RawAccount = unknown,
   InstAsset = unknown,
-  AccAsset extends { account: Account } | undefined = { account: Account },
   TSyncMetadata = unknown,
 > {
   protected readonly httpService = Inject(HttpService);
@@ -182,43 +181,34 @@ export abstract class ProviderBase<
   /**
    * Finds, creates, or merges a Sprout account using remote provider identifiers.
    *
-   * The sync service will normally handle this on it's own. This is only intended to be used when exchanging and creating **NEW** accounts.
+   * The sync service will normally handle this on its own. This is only intended to be used when exchanging and creating **NEW** accounts.
    */
   private async upsertAccount(user: User, institution: Institution, rawAccount: RawAccount, authContext?: AuthContext): Promise<Account> {
     const providerAccountId = this.extractProviderAccountId(rawAccount);
-    let providerAsset = await this.getAccountAsset(providerAccountId, user.id);
-
-    // If we didn't find it by direct ID, attempt to fallback to string-name matching for institution migrations
-    if (!providerAsset) {
+    // Look up existing account directly by providerAccountId
+    let existingAccount = await Account.findOne({
+      where: { providerAccountId, user: { id: user.id } },
+    });
+    // If not found by direct providerAccountId, fallback to name-matching for institution migrations
+    if (!existingAccount) {
       const accountName = this.extractAccountName(rawAccount);
-      const possibleExisting = await Account.findOne({
+      existingAccount = await Account.findOne({
         where: { user: { id: user.id }, institution: { id: institution.id }, name: accountName },
       });
-
-      if (possibleExisting) {
-        providerAsset = await this.getAccountAssetByAccountId(possibleExisting.id);
-        if (providerAsset) {
-          await this.updateAccountAsset(providerAsset, providerAccountId); // Point existing connection to new remote ID
-        } else {
-          providerAsset = await this.createAccountAsset(possibleExisting, providerAccountId); // Bind standard account to new connection
-        }
-      }
     }
-
     const incomingAccount = await this.mapToSproutAccount(rawAccount, authContext, user, institution);
     let finalAccount: Account;
-
-    if (!providerAsset) {
-      // Brand new account: Save everything
+    if (!existingAccount) {
+      // Brand new account: Save everything and assign providerAccountId
+      incomingAccount.providerAccountId = providerAccountId;
       finalAccount = await incomingAccount.insert();
       await AccountHistory.insertForNewAccount(finalAccount);
-      await this.createAccountAsset(finalAccount, providerAccountId);
     } else {
-      // Existing account: Only update balances so we don't overwrite user-modified names/types
-      finalAccount = providerAsset.account;
+      // Existing account: Update balance and ensure providerAccountId is up to date
+      finalAccount = existingAccount;
+      finalAccount.providerAccountId = providerAccountId;
       finalAccount.balance = incomingAccount.balance;
       finalAccount.availableBalance = incomingAccount.availableBalance;
-
       await finalAccount.update();
       await AccountHistory.insertForAccount(finalAccount);
     }
@@ -292,12 +282,18 @@ export abstract class ProviderBase<
   protected abstract mapToSproutAccount(rawAccount: RawAccount, authContext: AuthContext | undefined, user: User, institution: Institution): Promise<Account>;
   /** Finds all active connections to the provider */
   protected abstract getInstitutionAssetsForUser(userId: string, institutionId?: string): Promise<InstAsset[]>;
-  /** Saves a brand new linkage wrapper tracking a remote provider ID */
-  public abstract createAccountAsset(account: Account, providerAccountId: string): Promise<AccAsset>;
 
   // ====================================================================
   // Optional Methods with Safe Defaults (Implement only if needed)
   // ====================================================================
+
+  /**
+   * Previews accounts available from the provider that have not been linked to Sprout yet.
+   * Override in individual provider services that support unlinked account selection (e.g. SimpleFIN, Coinbase).
+   */
+  async getUnlinkedAccounts(_user: User): Promise<Account[]> {
+    throw new NotImplementedException("This provider doesn't support obtaining unlinked accounts. You should use their linking process.");
+  }
 
   /** Reverts an exchange remotely if a database crash prevents us from saving it locally */
   protected async rollbackExchange(_user: User, _payload: ExchangePayload, _authContext: AuthContext): Promise<void> {}
@@ -343,19 +339,6 @@ export abstract class ProviderBase<
 
   /** Upserts the connection credentials wrapper (e.g. InstitutionAsset) */
   protected async upsertInstitutionAsset(_institution: Institution, _authContext: AuthContext): Promise<void> {}
-
-  /** Fetches the account linkage wrapper via remote provider ID */
-  protected async getAccountAsset(_providerAccountId: string, _userId: string): Promise<AccAsset | null> {
-    return null;
-  }
-
-  /** Fetches the account linkage wrapper via local Sprout ID */
-  protected async getAccountAssetByAccountId(_accountId: string): Promise<AccAsset | null> {
-    return null;
-  }
-
-  /** Updates an existing linkage wrapper to point to a new remote provider ID */
-  protected async updateAccountAsset(_asset: AccAsset, _providerAccountId: string): Promise<void> {}
 
   /**
    * Optional hook called by the Sync Service AFTER all database writes succeed.

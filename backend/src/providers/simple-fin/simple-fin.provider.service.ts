@@ -13,7 +13,7 @@ import { BadRequestException, Injectable, Logger, NotImplementedException } from
 import { subDays } from "date-fns";
 
 @Injectable()
-export class SimpleFINProviderService extends ProviderBase<void, void, string[], string, SimpleFINReturn.Account, undefined, { account: Account }> {
+export class SimpleFINProviderService extends ProviderBase<void, void, string[], string, SimpleFINReturn.Account, undefined> {
   protected readonly logger = new Logger("provider:simpleFin:service");
 
   override getAppConfiguration = () => Configuration.providers.simpleFIN;
@@ -49,35 +49,21 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     return await claimResponse.text();
   }
 
-  /**
-   * Previews accounts available on the user's token that have not been linked to Sprout yet.
-   */
-  async getUnlinkedAccounts(user: User): Promise<Account[]> {
+  override async getUnlinkedAccounts(user: User): Promise<Account[]> {
     if (!user.config.simpleFinToken) return [];
-
     const existingAccounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.simpleFin } });
-    const existingIds = existingAccounts.map((a) => a.id);
-
+    const existingProviderAccountIds = existingAccounts.map((a) => a.providerAccountId).filter(Boolean);
     const data = await this.fetchData(user.config.simpleFinToken, true, user);
-    const unlinked = data.accounts.filter((raw) => !existingIds.includes(raw.id));
-
-    return unlinked.map((raw) => {
-      const balance = parseFloat(raw.balance);
-      const institution = new Institution(raw.org.url, raw.org.name, false, user);
-      institution.id = crypto.randomUUID(); // Temp ID for frontend rendering
-
-      return Account.fromPlain({
-        id: raw.id,
-        name: raw.name,
-        type: this.determineAccountType(raw.name, balance, raw.holdings?.length > 0),
-        subType: this.determineAccountSubType(raw.name),
-        currency: raw.currency,
-        provider: ProviderType.simpleFin,
-        balance,
-        availableBalance: parseFloat(raw["available-balance"]),
-        institution,
-      });
-    });
+    const unlinked = data.accounts.filter((raw) => !existingProviderAccountIds.includes(raw.id));
+    return await Promise.all(
+      unlinked.map(async (raw) => {
+        const institution = new Institution(raw.org.url, raw.org.name, false, user);
+        institution.id = crypto.randomUUID();
+        const account = await this.mapToSproutAccount(raw, user.config.simpleFinToken, user, institution);
+        account.id = raw.id;
+        return account;
+      }),
+    );
   }
 
   protected async performExchange(user: User, accountIdsToLink: string[]): Promise<ExchangeInstitution<string, SimpleFINReturn.Account>[]> {
@@ -106,25 +92,29 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
 
     const data = await this.fetchData(user.config.simpleFinToken, accountsOnly, user);
     const existingAccounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.simpleFin } });
-    const existingIds = existingAccounts.map((a) => a.id);
+    const existingMap = new Map(existingAccounts.map((a) => [a.providerAccountId, a]));
 
     const results: ProviderSyncResult[] = [];
 
     for (const rawAccount of data.accounts) {
-      if (!existingIds.includes(rawAccount.id)) continue;
+      if (!existingMap.has(rawAccount.id)) continue;
 
-      // Determine if this specific institution currently has an active error
+      const existingAccount = existingMap.get(rawAccount.id)!;
       const hasError = data.errors?.some((x) => x.includes(rawAccount.org.name)) ?? false;
-      const institution = new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
-      const finalAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
+      const institution = existingAccount.institution || new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
+
+      const updatedAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
+
+      existingAccount.balance = updatedAccount.balance;
+      existingAccount.availableBalance = updatedAccount.availableBalance;
+      existingAccount.extra = updatedAccount.extra;
+
       const syncData = accountsOnly
         ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
-        : await this.fetchInitialSyncData(rawAccount, finalAccount, user.config.simpleFinToken, user);
+        : await this.fetchInitialSyncData(rawAccount, existingAccount, user.config.simpleFinToken, user);
+
       results.push({
-        account: finalAccount,
-        // DO NOT PROVIDE THIS. SimpleFIN doesn't always support selecting what you want to include (like from crypto) and this
-        //  will cause the sync service to auto insert accounts.
-        // providerAccountId: rawAccount.id,
+        account: existingAccount,
         ...syncData,
       });
     }
@@ -150,6 +140,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     const acc = new Account(
       rawAccount.name,
       ProviderType.simpleFin,
+      rawAccount.id,
       user,
       institution,
       balance,
@@ -158,8 +149,6 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
       rawAccount.currency,
       this.determineAccountSubType(rawAccount.name),
     );
-    // Explicitly set the ID to match SimpleFIN to prevent random UUID generation during insert
-    acc.id = rawAccount.id;
     acc.extra = rawAccount.extra;
     return acc;
   }
@@ -171,7 +160,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     _user: User,
   ): Promise<Omit<ProviderSyncResult, "account">> {
     const holdings = rawAccount.holdings?.map((hold) => {
-      const h = new Holding(
+      return new Holding(
         hold.currency,
         parseFloat(hold.cost_basis),
         hold.description,
@@ -181,8 +170,6 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
         hold.symbol,
         account,
       );
-      h.id = hold.id;
-      return h;
     });
 
     const transactions = await Promise.all(
@@ -198,21 +185,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
   }
 
   protected async getInstitutionAssetsForUser(): Promise<undefined[]> {
-    return [undefined]; // Return a blank to force the sync to fire. This is because the first iteration of the SimpleFIN provider doesn't track a separate asset for their Id's
-  }
-
-  protected override async getAccountAsset(providerAccountId: string, userId: string): Promise<{ account: Account } | null> {
-    const account = await Account.findOne({ where: { id: providerAccountId, user: { id: userId } } });
-    return account ? { account } : null;
-  }
-
-  protected override async getAccountAssetByAccountId(accountId: string): Promise<{ account: Account } | null> {
-    const account = await Account.findOne({ where: { id: accountId } });
-    return account ? { account } : null;
-  }
-
-  public async createAccountAsset(account: Account, _providerAccountId: string): Promise<{ account: Account }> {
-    return { account };
+    return [undefined]; // Force the sync loop to fire
   }
 
   /**

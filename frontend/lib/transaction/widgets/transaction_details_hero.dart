@@ -65,8 +65,8 @@ class TransactionHeroCard extends ConsumerWidget {
                                   label: "Description",
                                   currentValue: description,
                                   icon: Icons.edit_note,
-                                  onSave: (newDesc) async {
-                                    onDescriptionChanged(newDesc);
+                                  onSave: (values) async {
+                                    onDescriptionChanged(values.first);
                                   },
                                 ),
                       ),

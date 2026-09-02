@@ -261,10 +261,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                                     label: "Account Name",
                                     currentValue: widget.account.name,
                                     icon: Icons.account_balance_wallet,
-                                    onSave: (newName) async {
+                                    onSave: (values) async {
                                       final oldName = widget.account.name;
                                       try {
-                                        setState(() => widget.account.name = newName);
+                                        setState(() => widget.account.name = values.first);
                                         await ref.read(accountsProvider.notifier).edit(widget.account);
                                       } catch (e) {
                                         setState(() => widget.account.name = oldName);
@@ -307,8 +307,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
     final accountProvider = ref.read(accountsProvider.notifier);
     final providers = ref.watch(providerConfigProvider).value;
     final provider = providers?.firstWhereOrNull((x) => x.dbType == account.provider);
-    final zillowAsset =
-        account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
+    final zpid = account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
 
     final allHistoryAsync = ref.watch(historicalAccountDataProvider);
     final timelineAsync = ref.watch(accountTimelineProvider(widget.account.id));
@@ -557,10 +556,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         ],
                       ),
                     ),
-                    if (account.provider == ProviderTypeEnum.zillow && zillowAsset != null)
+                    if (account.provider == ProviderTypeEnum.zillow && zpid != null)
                       FilledButton(
                         onPressed: () async {
-                          final Uri url = Uri.parse('https://www.zillow.com/homes/${zillowAsset.zpid}_zpid/');
+                          final Uri url = Uri.parse('https://www.zillow.com/homes/${zpid}_zpid/');
                           await launchUrl(url, mode: LaunchMode.externalApplication);
                         },
                         style: ThemeHelpers.primaryButton,

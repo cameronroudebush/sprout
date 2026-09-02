@@ -106,7 +106,7 @@ class Accounts extends _$Accounts {
 
 /// Riverpod to provide zillow info based on an account ID
 @riverpod
-Future<ZillowAsset?> zillowInfo(Ref ref, String accountId) async {
+Future<String?> zillowInfo(Ref ref, String accountId) async {
   final api = await ref.watch(providerApiProvider.future);
   return await api.zillowProviderControllerGetByAccount(accountId);
 }

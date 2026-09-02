@@ -2,6 +2,8 @@ import { ChatModule } from "@backend/chat/chat.module";
 import { NotificationModule } from "@backend/notification/notification.module";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
+import { CoinbaseProviderController } from "@backend/providers/coinbase/coinbase.controller";
+import { CoinbaseProviderService } from "@backend/providers/coinbase/coinbase.provider.service";
 import { PostSyncProcessingJob } from "@backend/providers/jobs/post-sync";
 import { ProviderSyncJob } from "@backend/providers/jobs/sync";
 import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
@@ -23,7 +25,7 @@ import { HttpModule } from "@nestjs/axios";
 import { FactoryProvider, Module } from "@nestjs/common";
 import { DiscoveryModule } from "@nestjs/core";
 
-const ALL_PROVIDERS = [SimpleFINProviderService, PlaidProviderService, ZillowProviderService, SnapTradeProviderService];
+const ALL_PROVIDERS = [SimpleFINProviderService, PlaidProviderService, ZillowProviderService, SnapTradeProviderService, CoinbaseProviderService];
 
 // Factory that creates a ProviderSyncJob for each active provider
 export const ProviderSyncJobsProvider: FactoryProvider = {
@@ -48,6 +50,8 @@ export const ProviderSyncJobsProvider: FactoryProvider = {
     // SnapTrade
     SnapTradeProviderController,
     SnapTradeWebHookController,
+    // Coinbase
+    CoinbaseProviderController,
   ],
   providers: [
     ProviderService,

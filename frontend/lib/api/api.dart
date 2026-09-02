@@ -118,7 +118,6 @@ part 'model/user_creation_request.dart';
 part 'model/user_creation_response.dart';
 part 'model/user_get_dto.dart';
 part 'model/username_password_login_request.dart';
-part 'model/zillow_asset.dart';
 part 'model/zillow_property_dto.dart';
 part 'model/zillow_property_result_dto.dart';
 
