@@ -62,7 +62,7 @@ class AccountsPage extends ConsumerWidget {
               ),
               FABAction(
                   icon: Icons.refresh,
-                  label: 'Sync All',
+                  label: 'Manual Sync',
                   isLoading: isSyncing,
                   onTap: (context) => _showSyncPopup(context, ref)),
             ],

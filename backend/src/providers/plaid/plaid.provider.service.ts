@@ -115,7 +115,7 @@ export class PlaidProviderService extends ProviderBase<
     }
 
     await this.rateLimit(user).incrementOrError();
-    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions] });
+    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions, Products.Investments] });
     return new PlaidLinkTokenDTO(response.data.link_token);
   }
 
@@ -176,7 +176,8 @@ export class PlaidProviderService extends ProviderBase<
         securities = holdingsRes.data.securities;
         allHoldings = holdingsRes.data.holdings;
       } catch (e) {
-        this.logger.warn(`Failed to fetch holdings for ${asset.institution.name}`);
+        const plaidError = (e as AxiosError).response?.data as PlaidError;
+        this.logger.warn(`Failed to fetch holdings for ${asset.institution.name}: ${plaidError.error_message}`);
       }
     }
 
