@@ -302,7 +302,7 @@ describe("AccountController", () => {
 
       await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
 
-      expect(mockManager.save).not.toHaveBeenCalled();
+      expect(mockManager.save).toHaveBeenCalled();
       expect(mockTarget.subType).toBe("savings");
     });
   });
