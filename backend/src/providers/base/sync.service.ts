@@ -1,6 +1,5 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -146,7 +145,7 @@ export class ProviderSyncService {
         if (data.transactions && data.transactions.length > 0) await this.updateTransactionDataBulk(accountInDB, data.transactions);
         if (data.removedTransactionIds && data.removedTransactionIds.length > 0) await Transaction.delete({ id: In(data.removedTransactionIds) });
         // Sync Holdings
-        if (data.holdings && accountInDB.type === AccountType.investment) await this.updateHoldingData(accountInDB, data.holdings);
+        if (data.holdings && accountInDB.isInvestment) await this.updateHoldingData(accountInDB, data.holdings);
 
         userHadSuccessfulUpdate = true;
         if (data.syncMetadata) syncMetadataToCommit = data.syncMetadata;

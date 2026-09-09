@@ -14,7 +14,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { AxiosError } from "axios";
-import { isToday, parseISO, set } from "date-fns";
+import { format, isToday, parseISO, set, subDays } from "date-fns";
 import {
   CountryCode,
   LinkTokenCreateRequest,
@@ -24,6 +24,7 @@ import {
   Configuration as PlaidConfig,
   PlaidError,
   Holding as PlaidHolding,
+  InvestmentTransaction as PlaidInvestmentTransaction,
   Security as PlaidSecurity,
   Transaction as PlaidTransaction,
   Products,
@@ -168,6 +169,7 @@ export class PlaidProviderService extends ProviderBase<
 
     let securities: PlaidSecurity[] | undefined;
     let allHoldings: PlaidHolding[] | undefined;
+    let investmentTransactions: PlaidInvestmentTransaction[] = [];
 
     if (hasInvestment && !accountsOnly) {
       try {
@@ -179,6 +181,7 @@ export class PlaidProviderService extends ProviderBase<
         const plaidError = (e as AxiosError).response?.data as PlaidError;
         this.logger.warn(`Failed to fetch holdings for ${asset.institution.name}: ${plaidError.error_message}`);
       }
+      investmentTransactions = await this.fetchInvestmentTransactions(user, asset);
     }
 
     let added: PlaidTransaction[] = [];
@@ -204,7 +207,13 @@ export class PlaidProviderService extends ProviderBase<
       if (existingAccount) finalAccount.id = existingAccount.id;
 
       const accountTransactions = added.concat(modified).filter((t) => t.account_id === rawAccount.account_id);
-      const transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);
+      let transactions = await this.convertPlaidTransactions(accountTransactions, finalAccount, user);
+
+      if (this.mapType(rawAccount.type) === AccountType.investment) {
+        const accountInvTransactions = investmentTransactions.filter((t) => t.account_id === rawAccount.account_id);
+        const convertedInvTransactions = await this.convertPlaidInvestmentTransactions(accountInvTransactions, finalAccount, user);
+        transactions = transactions.concat(convertedInvTransactions);
+      }
 
       // Translate Plaid removed IDs into our internally generated DB UUIDs
       const removedPlaidIds = removed.filter((t) => t.account_id === rawAccount.account_id).map((t) => t.transaction_id);
@@ -350,6 +359,25 @@ export class PlaidProviderService extends ProviderBase<
     return { added, modified, removed, nextCursor: cursor };
   }
 
+  private async fetchInvestmentTransactions(user: User, instAsset: PlaidInstitutionAsset): Promise<PlaidInvestmentTransaction[]> {
+    try {
+      await this.rateLimit(user).incrementOrError();
+      const startDate = format(subDays(new Date(), Configuration.providers.lookBackDays), "yyyy-MM-dd");
+      const endDate = format(new Date(), "yyyy-MM-dd");
+      const response = await this.plaidClient.investmentsTransactionsGet({
+        access_token: instAsset.accessToken,
+        start_date: startDate,
+        end_date: endDate,
+      });
+
+      return response.data.investment_transactions;
+    } catch (e) {
+      const plaidError = (e as AxiosError).response?.data as PlaidError;
+      this.logger.warn(`Failed to fetch investment transactions for ${instAsset.institution.name}: ${plaidError?.error_message}`);
+      return [];
+    }
+  }
+
   private async convertPlaidTransactions(transactions: PlaidTransaction[], account: Account, user: User) {
     const now = new Date();
     return await Promise.all(
@@ -365,6 +393,22 @@ export class PlaidProviderService extends ProviderBase<
         const newTx = new Transaction(t.amount * -1, transactionDate, t.name ?? t.merchant_name, undefined, t.pending ?? false, account);
         newTx.providerId = t.transaction_id;
         newTx.extra = { code: t.transaction_code, location: t.location, website: t.website, authorizedDate: t.authorized_date, date: t.date };
+        return newTx;
+      }),
+    );
+  }
+
+  private async convertPlaidInvestmentTransactions(transactions: PlaidInvestmentTransaction[], account: Account, _user: User) {
+    const now = new Date();
+    return await Promise.all(
+      transactions.map(async (t) => {
+        const parsedDate = parseISO(t.date);
+        const transactionDate = isToday(parsedDate)
+          ? set(parsedDate, { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds(), milliseconds: now.getMilliseconds() })
+          : parsedDate;
+        const newTx = new Transaction(t.amount * -1, transactionDate, t.name, undefined, false, account);
+        newTx.providerId = t.investment_transaction_id;
+        newTx.extra = { type: t.type, subtype: t.subtype, quantity: t.quantity, price: t.price, fees: t.fees, securityId: t.security_id };
         return newTx;
       }),
     );

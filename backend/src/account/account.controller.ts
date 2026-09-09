@@ -139,10 +139,11 @@ export class AccountController {
 
     // Place the complex update into a transaction in case we fail
     const finalTargetAccount = await this.databaseService.source.transaction(async (manager) => {
-      if (targetAccount.subType == null && sourceAccount.subType != null) {
-        targetAccount.subType = sourceAccount.subType;
-        await manager.save(targetAccount);
-      }
+      // Merge necessary properties
+      if (targetAccount.subType == null && sourceAccount.subType != null) targetAccount.subType = sourceAccount.subType;
+      if (targetAccount.interestRate == null && sourceAccount.interestRate != null) targetAccount.interestRate = sourceAccount.interestRate;
+      if (targetAccount.extra == null && sourceAccount.extra != null) targetAccount.extra = sourceAccount.extra;
+      await manager.save(targetAccount);
       // Migrate transactions
       await manager.createQueryBuilder().update(Transaction).set({ accountId: targetId }).where("accountId = :sourceId", { sourceId }).execute();
       // Migrate transaction rules
@@ -158,10 +159,8 @@ export class AccountController {
 
       return targetAccount;
     });
-
-    // Check if the source account's institution is now empty for cleanup
-    await this.handleInstitutionCleanup(user, sourceAccount.institution, sourceAccount.provider);
-
+    // Check if the source account's institution is now empty for cleanup. Don't await as this may take time.
+    this.handleInstitutionCleanup(user, sourceAccount.institution, sourceAccount.provider);
     // Notify Client
     this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
     return finalTargetAccount;

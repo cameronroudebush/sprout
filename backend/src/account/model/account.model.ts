@@ -123,6 +123,11 @@ export class Account extends DatabaseBase {
     return this.type === AccountType.credit || this.type === AccountType.loan;
   }
 
+  /** Returns if this is an investment account */
+  get isInvestment() {
+    return this.type === AccountType.investment || this.type === AccountType.crypto;
+  }
+
   /** Validates that the given sub-type exists in an enum. Throws an error if it doesn't. */
   static validateSubType(subType: string) {
     const allSubTypes = Object.values(AccountSubType);

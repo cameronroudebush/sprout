@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
+import 'package:sprout/routes/util/router.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -36,7 +37,7 @@ class TransactionsPage extends ConsumerStatefulWidget {
   ConsumerState<TransactionsPage> createState() => _TransactionsPageState();
 }
 
-class _TransactionsPageState extends ConsumerState<TransactionsPage> {
+class _TransactionsPageState extends ConsumerState<TransactionsPage> with RouteAware {
   final ScrollController _scrollController = ScrollController();
   int _filteredOffset = 0;
 
@@ -44,25 +45,52 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didPush() {
+    _initializeFilterAndFetch();
+  }
+
+  @override
+  void didPopNext() {
+    _initializeFilterAndFetch();
+  }
+
+  void _initializeFilterAndFetch() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       final state = GoRouterState.of(context);
       final catId = state.uri.queryParameters['categoryId'];
 
       ref.read(transactionFilterStateProvider.notifier).update(
             TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
           );
-      _fetchPage();
+      _fetchPage(reset: true);
     });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   /// Fetches the content that needs based on our current filter
   Future<void> _fetchPage({bool reset = false}) async {
+    if (reset) {
+      _filteredOffset = 0;
+    }
     final filters = ref.read(transactionFilterStateProvider);
     await ref.read(transactionsProvider.notifier).fetchFilteredPage(
           startIndex: reset ? 0 : _filteredOffset,

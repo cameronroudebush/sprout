@@ -21,6 +21,9 @@ import 'package:sprout/shared/widgets/loading.dart';
 import 'package:sprout/shared/widgets/lock.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
+/// Global RouteObserver instance.
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 /// Defines a notifier that allows us to subscribe to necessary configuration
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -70,6 +73,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   final router = GoRouter(
     navigatorKey: NavigationProvider.key,
+    observers: [routeObserver],
     refreshListenable: notifier,
     redirect: (context, state) => _authRedirect(ref, state),
     routes: [

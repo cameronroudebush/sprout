@@ -18,17 +18,20 @@ extension ChatHistoryExtensions on String {
         if (idMap.containsKey(rawToken)) {
           return "**${idMap[rawToken]}**";
         }
-        // Check if rawToken is a partial prefix of ANY active account ID in memory
-        final matchingAccId = idMap.keys.firstWhere(
-          (accId) => accId.startsWith(rawToken) && rawToken.isNotEmpty,
-          orElse: () => '',
-        );
+        // Check if rawToken is a partial prefix ONLY if it originated from an `@` token
+        final isAtMention = fullMatch.contains('@');
+        final matchingAccId = isAtMention
+            ? idMap.keys.firstWhere(
+                (accId) => accId.startsWith(rawToken) && rawToken.isNotEmpty,
+                orElse: () => '',
+              )
+            : '';
         if (matchingAccId.isNotEmpty) {
           // If the token matches the prefix of a known ID, mask it immediately with
           // a soft placeholder so raw ID characters (ACT-..., GUIDs) never bleed into the UI.
           return "**...**";
         }
-        if (fullMatch.contains('@')) {
+        if (isAtMention) {
           // Hold placeholder if still actively streaming at end of string
           if (match.end == length) {
             return "**...**";
