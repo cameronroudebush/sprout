@@ -134,10 +134,9 @@ To use Plaid with your self-hosted instance of Sprout, you must provide your own
 
 Follow these steps to get your credentials and connect your first account:
 
-1. Create a **Plaid Developer Account**
+1. Create a **Plaid Account**
     - Go to the Plaid Dashboard and create an account.
-    - Complete the initial onboarding profile to gain access to the Sandbox environment.
-    - Elevate your account by acquiring production access. This will be required for you to use real data, as often as you want.
+    - Once on the dashboard, opt into the **Trial Plan** to get **10 free live account connections**. This allows you to connect real bank accounts without commitment, including OAUTH institutions, with the option to move to full Production later if you choose to.
 2. Add support for apps
     - If you intend on using the Sprout app, go to Developers -> API.
     - Select **Allowed Android package names**, select **configure**.
@@ -145,7 +144,7 @@ Follow these steps to get your credentials and connect your first account:
 3. Get Your API Keys
     - Navigate to Team Settings > Keys.
     - Copy your Client ID.
-    - Under Secrets, reveal and copy the secret that matches your intended environment. You'll probably want production.
+    - Under Secrets, reveal and copy the secret for the production environment.
 4. Configure Sprout
     - Add the copied keys to your environment variables `sprout_providers_plaid_clientId` and `sprout_providers_plaid_secret`.
     - Restart your Sprout server to apply the changes.
