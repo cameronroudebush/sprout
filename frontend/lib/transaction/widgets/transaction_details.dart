@@ -8,6 +8,7 @@ import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/theme/helpers.dart';
+import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_details_config.dart';
 import 'package:sprout/transaction/widgets/transaction_details_hero.dart';
@@ -85,7 +86,12 @@ class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView>
       final newTransaction = _getNewTransaction();
 
       if (_valHasChanged()) {
-        await ref.read(transactionsProvider.notifier).editTransaction(newTransaction);
+        // Edit transaction via the default list provider instance
+        await ref.read(transactionsProvider(TransactionFilter.defaultFilter).notifier).editTransaction(newTransaction);
+
+        // Invalidate all family instances of transactionsProvider to force fresh data everywhere
+        ref.invalidate(transactionsProvider);
+        ref.invalidate(transactionByIdProvider(widget.transaction.id));
       }
 
       if (mounted) Navigator.of(context).pop();
@@ -107,7 +113,12 @@ class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView>
           if (context.mounted) {
             Navigator.of(context).pop();
           }
-          await ref.read(transactionApiProvider).value?.transactionControllerDelete(widget.transaction.id);
+          final api = await ref.read(transactionApiProvider.future);
+          await api.transactionControllerDelete(widget.transaction.id);
+
+          // Invalidate all family instances of transactionsProvider to purge deleted item
+          ref.invalidate(transactionsProvider);
+          ref.invalidate(transactionByIdProvider(widget.transaction.id));
         },
         child: Text(
           "Are you sure you want to permanently delete '${widget.transaction.description}'?\n\nThis action cannot be undone.",

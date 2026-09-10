@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
-import 'package:sprout/routes/util/router.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -15,14 +12,10 @@ import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 import 'package:sprout/transaction/widgets/transactions_filter_bar.dart';
 
-/// A page that allows displaying all transactions, or ones given by a specific account
 class TransactionsPage extends ConsumerStatefulWidget {
-  /// Allows filtering transactions to a specific account
   final String? accountId;
   final bool allowFiltering;
   final bool separateByDate;
-
-  /// Padding to apply around this page
   final EdgeInsetsGeometry padding;
 
   const TransactionsPage({
@@ -37,9 +30,10 @@ class TransactionsPage extends ConsumerStatefulWidget {
   ConsumerState<TransactionsPage> createState() => _TransactionsPageState();
 }
 
-class _TransactionsPageState extends ConsumerState<TransactionsPage> with RouteAware {
+class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final ScrollController _scrollController = ScrollController();
-  int _filteredOffset = 0;
+  TransactionFilter? _localFilter;
+  bool _isFetching = false;
 
   @override
   void initState() {
@@ -48,73 +42,92 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> with RouteA
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final route = ModalRoute.of(context);
-    if (route is PageRoute) {
-      routeObserver.subscribe(this, route);
-    }
-  }
-
-  @override
   void dispose() {
-    routeObserver.unsubscribe(this);
     _scrollController.dispose();
     super.dispose();
   }
 
-  @override
-  void didPush() {
-    _initializeFilterAndFetch();
-  }
+  /// Gets the current filter based on the route params
+  TransactionFilter _getFilterFromRoute(BuildContext context) {
+    final routeState = GoRouterState.of(context);
+    final params = routeState.uri.queryParameters;
 
-  @override
-  void didPopNext() {
-    _initializeFilterAndFetch();
-  }
+    final search = params['search'] ?? '';
+    final categoryId = params['categoryId'] ?? CategoryDropdown.fakeAllCategory.id;
+    final accountId = params['accountId'] ?? widget.accountId;
+    final pendingParam = params['pending'];
+    final bool? pending = pendingParam == null ? null : (pendingParam == 'true');
 
-  void _initializeFilterAndFetch() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      final state = GoRouterState.of(context);
-      final catId = state.uri.queryParameters['categoryId'];
-
-      ref.read(transactionFilterStateProvider.notifier).update(
-            TransactionFilter(accountId: widget.accountId, categoryId: catId ?? CategoryDropdown.fakeAllCategory.id),
-          );
-      _fetchPage(reset: true);
-    });
-  }
-
-  /// Fetches the content that needs based on our current filter
-  Future<void> _fetchPage({bool reset = false}) async {
-    if (reset) {
-      _filteredOffset = 0;
+    DateTimeRange? dateRange;
+    if (params['startDate'] != null && params['endDate'] != null) {
+      final start = DateTime.tryParse(params['startDate']!);
+      final end = DateTime.tryParse(params['endDate']!);
+      if (start != null && end != null) {
+        dateRange = DateTimeRange(start: start, end: end);
+      }
     }
-    final filters = ref.read(transactionFilterStateProvider);
-    await ref.read(transactionsProvider.notifier).fetchFilteredPage(
-          startIndex: reset ? 0 : _filteredOffset,
-          filter: filters,
-          reset: reset,
-        );
+
+    return TransactionFilter(
+      search: search,
+      accountId: accountId,
+      categoryId: categoryId,
+      pending: pending,
+      dateRange: dateRange,
+    );
   }
 
-  /// What to do as we scroll down the page
+  TransactionFilter _effectiveFilter(BuildContext context) {
+    return _localFilter ?? _getFilterFromRoute(context);
+  }
+
+  /// What to do when the filter values change, related to the query params
+  void _onFilterChanged(TransactionFilter newFilter, bool updateUrlParams) {
+    if (updateUrlParams) {
+      final queryParams = <String, String>{};
+      if (newFilter.search.isNotEmpty) queryParams['search'] = newFilter.search;
+      if (newFilter.accountId != null) queryParams['accountId'] = newFilter.accountId!;
+      if (newFilter.categoryId != null && newFilter.categoryId != CategoryDropdown.fakeAllCategory.id) {
+        queryParams['categoryId'] = newFilter.categoryId!;
+      }
+      if (newFilter.pending != null) queryParams['pending'] = newFilter.pending.toString();
+      if (newFilter.dateRange != null) {
+        queryParams['startDate'] = newFilter.dateRange!.start.toIso8601String();
+        queryParams['endDate'] = newFilter.dateRange!.end.toIso8601String();
+      }
+
+      final currentUri = GoRouterState.of(context).uri;
+      final newUri = currentUri.replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+      context.go(newUri.toString());
+    } else {
+      setState(() {
+        _localFilter = newFilter;
+      });
+    }
+  }
+
   void _onScroll() {
-    final state = ref.read(transactionsProvider).value;
+    if (_isFetching || !_scrollController.hasClients) return;
+
+    final filter = _effectiveFilter(context);
+    final state = ref.read(transactionsProvider(filter)).value;
     if (state == null || state.isLoadingMore || state.hasReachedMax) return;
 
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      _filteredOffset += Transactions.pageSize;
-      _fetchPage(); // Append next page
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+
+    if (maxScroll - currentScroll <= 150) {
+      _isFetching = true;
+      ref.read(transactionsProvider(filter).notifier).fetchNextPage().whenComplete(() {
+        _isFetching = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final masterAsync = ref.watch(transactionsProvider);
-    final filteredTransactions = ref.watch(filteredTransactionsProvider);
+    final filter = _effectiveFilter(context);
+    final masterAsync = ref.watch(transactionsProvider(filter));
 
     return SproutLayoutBuilder(
       (isDesktop, context, constraints) {
@@ -127,99 +140,124 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> with RouteA
                 child: SproutRouteWrapper(
                   padding: EdgeInsets.fromLTRB(16, isDesktop ? 0 : 12, 16, 0),
                   child: TransactionFilterBar(
-                    accountId: widget.accountId,
-                    onFilterChanged: () => _fetchPage(),
+                    filter: filter,
+                    onFilterChanged: _onFilterChanged,
+                    // Only use URL params if this is a main display of this
+                    updateUrlParams: widget.accountId == null,
                   ),
                 ),
               ),
             Expanded(
-                child: masterAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text("Error: $err")),
-              data: (masterState) {
-                if (filteredTransactions.isEmpty && !masterState.isLoadingMore) {
-                  return const Center(child: Text("No transactions found"));
-                }
+              child: masterAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Center(child: Text("Error: $err")),
+                data: (masterState) {
+                  if (masterState.transactions.isEmpty && !masterState.isLoadingMore) {
+                    return const Center(child: Text("No transactions found"));
+                  }
 
-                return RefreshIndicator(
-                  onRefresh: () async => await _fetchPage(reset: true),
-                  child: widget.separateByDate
-                      ? _buildGroupedList(filteredTransactions, masterState.isLoadingMore, theme)
-                      : _buildSingleList(filteredTransactions, masterState.isLoadingMore),
-                );
-              },
-            )),
+                  return Stack(
+                    children: [
+                      RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(transactionsProvider(filter));
+                        },
+                        child: widget.separateByDate
+                            ? _buildGroupedList(masterState.transactions, theme)
+                            : _buildSingleList(masterState.transactions),
+                      ),
+                      // Non-disruptive footer loader pinned at bottom overlay
+                      if (masterState.isLoadingMore)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 12,
+                          child: Center(
+                            child: Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(20),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text("Loading transactions...", style: TextStyle(fontSize: 12)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  /// Builds the grouped lists based on the date of a transaction
-  Widget _buildGroupedList(List<dynamic> transactions, bool isLoadingMore, ThemeData theme) {
+  /// Builds the grouped list using Slivers to maintain grouped card styling while fixing the scrollbar
+  Widget _buildGroupedList(List<dynamic> transactions, ThemeData theme) {
     final grouped = transactions.groupListsBy((t) => DateTime(t.posted.year, t.posted.month, t.posted.day));
 
-    return ListView.builder(
-      shrinkWrap: true,
+    return CustomScrollView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: grouped.length + (isLoadingMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == grouped.length) {
-          return const SproutRouteWrapper(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
-
-        final date = grouped.keys.elementAt(index);
-        final dayTransactions = grouped.values.elementAt(index);
-
-        return SproutRouteWrapper(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 8, bottom: 4, top: 12),
-                child: Text(date.toShortMonth, style: theme.textTheme.titleSmall),
+      slivers: [
+        for (final entry in grouped.entries)
+          SliverMainAxisGroup(
+            slivers: [
+              // Date Header Sliver
+              SliverToBoxAdapter(
+                child: SproutRouteWrapper(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, bottom: 4, top: 12),
+                    child: Text(entry.key.toShortMonth, style: theme.textTheme.titleSmall),
+                  ),
+                ),
               ),
-              SproutCard(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: dayTransactions.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (context, tIndex) => TransactionRow(dayTransactions[tIndex]),
+              // Day Group Card Sliver
+              SliverToBoxAdapter(
+                child: SproutRouteWrapper(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: SproutCard(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (int i = 0; i < entry.value.length; i++) ...[
+                          TransactionRow(entry.value[i]),
+                          if (i < entry.value.length - 1) const Divider(height: 1),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-        );
-      },
+      ],
     );
   }
 
   /// Builds a single list of transactions if we don't wish to separate by date
-  Widget _buildSingleList(List<dynamic> transactions, bool isLoadingMore) {
+  Widget _buildSingleList(List<dynamic> transactions) {
     return SproutCard(
       child: ListView.separated(
-        shrinkWrap: true,
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: transactions.length + (isLoadingMore ? 1 : 0),
+        itemCount: transactions.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          if (index == transactions.length) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return TransactionRow(transactions[index]);
-        },
+        itemBuilder: (context, index) => TransactionRow(transactions[index]),
       ),
     );
   }

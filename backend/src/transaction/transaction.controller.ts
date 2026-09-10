@@ -175,9 +175,23 @@ export class TransactionController {
     if (description) where.description = Like(`%${description}%`);
     if (categoryQuery) where.category = categoryQuery;
 
+    const parsedStart = startIndex !== undefined ? parseInt(String(startIndex)) : undefined;
+    const parsedEnd = endIndex !== undefined ? parseInt(String(endIndex)) : undefined;
+
+    let skip: number | undefined;
+    let take: number | undefined;
+
+    if (parsedStart !== undefined && parsedEnd !== undefined) {
+      skip = parsedStart;
+      take = parsedEnd - parsedStart;
+    } else {
+      skip = parsedStart;
+      take = parsedEnd;
+    }
+
     return await Transaction.find({
-      skip: startIndex,
-      take: endIndex,
+      skip,
+      take,
       where,
       order: { posted: "DESC", pending: "DESC", description: "ASC" },
       relations: { category: { parentCategory: true } },

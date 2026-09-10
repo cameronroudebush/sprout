@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
-import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/api/base_api.dart';
 import 'package:sprout/shared/providers/extensions/sse_auto_refresh.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
@@ -24,95 +23,87 @@ class Transactions extends _$Transactions {
   static const int pageSize = 25;
 
   @override
-  Future<TransactionState> build() async {
+  Future<TransactionState> build(TransactionFilter filter) async {
     // Listen for SSE data
-    ref.listen(sseProvider, (prev, next) async {
+    ref.listen(sseProvider, (prev, next) {
       final data = next.latestData;
-      final currentFilter = ref.read(transactionFilterStateProvider);
       if (data?.event == SSEDataEventEnum.forceUpdate) {
-        // Fetch the filter
-        await fetchFilteredPage(startIndex: 0, filter: currentFilter, reset: true);
-        // Re-fetch the first page
-        await fetchFilteredPage(
-          startIndex: 0,
-          // Do not include additional filters so we grab all initial data for the dashboard
-        );
+        ref.invalidateSelf();
       }
     });
 
     final api = await ref.watch(transactionApiProvider.future);
     final total = await api.transactionControllerGetTotal();
-    final initial = await fetchFilteredPage(startIndex: 0);
 
-    return TransactionState(transactions: initial, totalCount: total?.total ?? 0);
+    String? apiCategory = filter.categoryId == "all" ? null : filter.categoryId;
+
+    final initial = await api.transactionControllerGetByQuery(
+      startIndex: 0,
+      endIndex: pageSize,
+      accountId: filter.accountId,
+      category: apiCategory,
+      description: filter.search,
+      startDate: filter.dateRange?.start,
+      endDate: filter.dateRange?.end,
+      pending: filter.pending,
+    );
+
+    final transactions = initial ?? [];
+    transactions.sort((a, b) => b.posted.compareTo(a.posted));
+
+    return TransactionState(
+      transactions: transactions,
+      totalCount: total?.total ?? 0,
+      hasReachedMax: transactions.length < pageSize,
+    );
   }
 
-  /// Fetches a specific transaction by it's Id
-  Future<Transaction?> fetchById(String id) async {
-    final current = state.value ?? TransactionState(transactions: [], totalCount: 0);
-    final existing = current.transactions.firstWhereOrNull((t) => t.id == id);
-    if (existing != null) return existing;
-    try {
-      final api = await ref.read(transactionApiProvider.future);
-      final results = await api.transactionControllerGetByQuery(id: id);
+  /// Fetches the next page of data matching the filter
+  Future<void> fetchNextPage() async {
+    final current = state.value;
+    if (current == null || current.isLoadingMore || current.hasReachedMax) return;
 
-      if (results != null && results.isNotEmpty) {
-        final item = results.first;
-        final updatedList = [...current.transactions, item]..sort((a, b) => b.posted.compareTo(a.posted));
-
-        state = AsyncData(current.copyWith(transactions: updatedList));
-        return item;
-      }
-    } catch (e) {
-      LoggerProvider.error("Failed to fetch transaction $id: $e");
-    }
-
-    return null;
-  }
-
-  /// Fetches data matching the given filter with the given index
-  /// [reset] If we should reset the entire list. Warning, this
-  ///   could cause issues where data might disappear more than you expect.
-  Future<List<Transaction>> fetchFilteredPage({
-    required int startIndex,
-    TransactionFilter? filter,
-    bool reset = false,
-  }) async {
-    final current = state.value ?? TransactionState(transactions: [], totalCount: 0);
     state = AsyncData(current.copyWith(isLoadingMore: true));
+
     try {
       final api = await ref.read(transactionApiProvider.future);
 
-      String? apiCategory = filter?.categoryId == "all" ? null : filter?.categoryId;
+      // Explicitly compute the next page boundary
+      final int currentCount = current.transactions.length;
+      final int startIndex = currentCount;
+      final int endIndex = currentCount + pageSize;
+
+      String? apiCategory = filter.categoryId == "all" ? null : filter.categoryId;
 
       final nextItems = await api.transactionControllerGetByQuery(
         startIndex: startIndex,
-        endIndex: startIndex + pageSize,
-        accountId: filter?.accountId,
+        endIndex: endIndex,
+        accountId: filter.accountId,
         category: apiCategory,
-        description: filter?.search,
-        startDate: filter?.dateRange?.start,
-        endDate: filter?.dateRange?.end,
-        pending: filter?.pending,
+        description: filter.search,
+        startDate: filter.dateRange?.start,
+        endDate: filter.dateRange?.end,
+        pending: filter.pending,
       );
 
-      if (nextItems != null) {
-        final updatedList = reset
-            ? nextItems
-            : [...current.transactions, ...nextItems.where((t) => !current.transactions.any((e) => e.id == t.id))];
-
-        state = AsyncData(
-          current.copyWith(
-            transactions: updatedList..sort((a, b) => b.posted.compareTo(a.posted)),
-            isLoadingMore: false,
-            hasReachedMax: nextItems.length < pageSize,
-          ),
-        );
+      if (nextItems == null || nextItems.isEmpty) {
+        state = AsyncData(current.copyWith(isLoadingMore: false, hasReachedMax: true));
+        return;
       }
-      return state.value?.transactions ?? [];
+
+      // Append without re-sorting to avoid shifting scroll offsets
+      final existingIds = current.transactions.map((t) => t.id).toSet();
+      final newUnique = nextItems.where((t) => !existingIds.contains(t.id)).toList();
+
+      state = AsyncData(
+        current.copyWith(
+          transactions: [...current.transactions, ...newUnique],
+          isLoadingMore: false,
+          hasReachedMax: nextItems.length < pageSize,
+        ),
+      );
     } catch (e) {
       state = AsyncData(current.copyWith(isLoadingMore: false));
-      return [];
     }
   }
 
@@ -131,56 +122,6 @@ class Transactions extends _$Transactions {
     }
     return updated;
   }
-}
-
-// Global filter state
-@riverpod
-class TransactionFilterState extends _$TransactionFilterState {
-  @override
-  TransactionFilter build() => TransactionFilter();
-
-  void update(TransactionFilter filter) => state = filter;
-}
-
-/// List of filtered transactions based on our state
-@riverpod
-List<Transaction> filteredTransactions(Ref ref) {
-  final filter = ref.watch(transactionFilterStateProvider);
-  final masterState = ref.watch(transactionsProvider).value;
-  if (masterState == null) return [];
-
-  return masterState.transactions.where((t) {
-    // Filter by Account
-    if (filter.accountId != null && t.accountId != filter.accountId) return false;
-
-    // Filter by Search String
-    if (filter.search.isNotEmpty) {
-      if (!t.description.toLowerCase().contains(filter.search.toLowerCase())) return false;
-    }
-
-    // Filter by Category
-    if (filter.categoryId != null && filter.categoryId != CategoryDropdown.fakeAllCategory.id) {
-      if (filter.categoryId == "unknown") {
-        if (t.categoryId != null) return false;
-      } else if (t.categoryId != filter.categoryId) {
-        return false;
-      }
-    }
-
-    // Filter by Pending Status
-    if (filter.pending != null && t.pending != filter.pending) {
-      return false;
-    }
-
-    // Filter by Time Frame (Local check)
-    if (filter.dateRange != null) {
-      if (t.posted.isBefore(filter.dateRange!.start) || t.posted.isAfter(filter.dateRange!.end)) {
-        return false;
-      }
-    }
-
-    return true;
-  }).toList();
 }
 
 /// Provider to track transaction subscriptions
@@ -213,3 +154,34 @@ Future<List<Transaction>> transactionsForDay(Ref ref, DateTime day) async {
 
 // Keep track of the active targeted calendar snapshot frame
 final selectedCalendarMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());
+
+/// Fetches a single transaction by ID, checking existing default provider state first.
+@riverpod
+Future<Transaction?> transactionById(Ref ref, String id) async {
+  if (id.isEmpty) return null;
+
+  // Listen for SSE auto-refresh updates
+  ref.listen(sseProvider, (prev, next) {
+    if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
+      ref.invalidateSelf();
+    }
+  });
+
+  // Check if we already have it loaded in the default filter state
+  final masterState = ref.read(transactionsProvider(TransactionFilter.defaultFilter)).value;
+  final localMatch = masterState?.transactions.firstWhereOrNull((t) => t.id == id);
+  if (localMatch != null) return localMatch;
+
+  // Otherwise, fetch directly from API
+  try {
+    final api = await ref.watch(transactionApiProvider.future);
+    final results = await api.transactionControllerGetByQuery(id: id);
+    if (results != null && results.isNotEmpty) {
+      return results.first;
+    }
+  } catch (e) {
+    LoggerProvider.error("Failed to fetch transaction $id: $e");
+  }
+
+  return null;
+}

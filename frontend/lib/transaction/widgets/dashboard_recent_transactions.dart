@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/transaction/widgets/transaction_row.dart';
 
@@ -18,7 +19,8 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactionsAsync = ref.watch(transactionsProvider);
+    // Queries the baseline/unfiltered transaction stream specifically for the dashboard
+    final transactionsAsync = ref.watch(transactionsProvider(TransactionFilter.defaultFilter));
 
     Widget content = transactionsAsync.whenDefault(
       expanded: false,

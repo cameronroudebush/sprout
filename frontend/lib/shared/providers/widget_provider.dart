@@ -18,6 +18,7 @@ import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/transaction/models/extensions/transaction_extensions.dart';
+import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:workmanager/workmanager.dart';
@@ -42,7 +43,7 @@ class WidgetSync extends _$WidgetSync {
       }
     });
 
-    ref.listen(transactionsProvider, (_, __) => updateData());
+    ref.listen(transactionsProvider(TransactionFilter.defaultFilter), (_, __) => updateData());
     ref.listen(totalNetWorthProvider, (_, __) => updateData());
     ref.listen(userConfigProvider, (_, __) => updateData());
 
@@ -98,7 +99,7 @@ class WidgetSync extends _$WidgetSync {
     if (userConfig != null && userConfig.allowWidgets) {
       try {
         final netWorth = ref.read(totalNetWorthProvider).value;
-        final transactions = ref.read(transactionsProvider).value?.transactions ?? [];
+        final transactions = ref.read(transactionsProvider(TransactionFilter.defaultFilter)).value?.transactions ?? [];
         if (netWorth == null) {
           data = null;
         } else {
@@ -189,7 +190,7 @@ void callbackDispatcher() {
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
-      await container.read(transactionsProvider.future);
+      await container.read(transactionsProvider(TransactionFilter.defaultFilter).future);
       await container.read(categoriesProvider.future);
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).updateData();

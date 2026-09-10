@@ -9,17 +9,20 @@ import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
-import 'package:sprout/transaction/transaction_provider.dart';
 
 /// The filter bar placed at the top of the transactions page to allow you to be more intentional on
-///   what data you want to see.
+/// what data you want to see.
 class TransactionFilterBar extends ConsumerStatefulWidget {
-  final String? accountId;
-  final VoidCallback onFilterChanged;
+  final TransactionFilter filter;
+
+  /// If we should utilize the URL params for tracking what is shown
+  final bool updateUrlParams;
+  final void Function(TransactionFilter filter, bool updateUrlParams) onFilterChanged;
 
   const TransactionFilterBar({
     super.key,
-    this.accountId,
+    required this.filter,
+    this.updateUrlParams = false,
     required this.onFilterChanged,
   });
 
@@ -28,14 +31,21 @@ class TransactionFilterBar extends ConsumerStatefulWidget {
 }
 
 class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
-  final TextEditingController _searchController = TextEditingController();
+  late final TextEditingController _searchController;
   Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    final currentSearch = ref.read(transactionFilterStateProvider).search;
-    _searchController.text = currentSearch;
+    _searchController = TextEditingController(text: widget.filter.search);
+  }
+
+  @override
+  void didUpdateWidget(covariant TransactionFilterBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.filter.search != widget.filter.search && _searchController.text != widget.filter.search) {
+      _searchController.text = widget.filter.search;
+    }
   }
 
   @override
@@ -45,26 +55,16 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
     super.dispose();
   }
 
-  /// Updates the filter provider
-  void _updateFilter(TransactionFilter newFilter) {
-    ref.read(transactionFilterStateProvider.notifier).update(newFilter);
-    widget.onFilterChanged();
-  }
-
-  /// What to do when the search input changes
   void _onSearchChanged(String val) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      final filters = ref.read(transactionFilterStateProvider);
-      _updateFilter(filters.copyWith(search: val));
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      widget.onFilterChanged(widget.filter.copyWith(search: val), widget.updateUrlParams);
     });
   }
 
-  /// Applies a date preset from the dropdown
-  void _applyDatePreset(String preset) async {
+  void _applyDatePreset(String preset) {
     final now = DateTime.now();
     DateTimeRange? range;
-    final filters = ref.read(transactionFilterStateProvider);
 
     switch (preset) {
       case 'This Month':
@@ -82,16 +82,16 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
       default:
         range = null;
     }
-    filters.dateRange = range;
-    _updateFilter(filters);
+    widget.onFilterChanged(widget.filter.copyWith(dateRange: range), widget.updateUrlParams);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final filters = ref.watch(transactionFilterStateProvider);
+    final filters = widget.filter;
     final categoriesAsync = ref.watch(categoriesProvider);
     final radius = BorderRadius.circular(4);
+
     return categoriesAsync.whenDefault(
       data: (cats) {
         final allAvailableCategories = [...cats];
@@ -103,7 +103,6 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
             ) ??
             CategoryDropdown.fakeAllCategory;
 
-        // Search Component
         final searchField = TextField(
           controller: _searchController,
           decoration: InputDecoration(
@@ -115,7 +114,6 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
           onChanged: _onSearchChanged,
         );
 
-        // Date Menu Component
         final dateMenu = PopupMenuButton<String>(
           padding: EdgeInsets.zero,
           menuPadding: EdgeInsets.zero,
@@ -147,31 +145,42 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
             filters.search.isNotEmpty;
 
         final resetButton = IconButton(
-            onPressed: () {
-              _searchController.clear();
-              _updateFilter(TransactionFilter(accountId: widget.accountId));
-            },
-            icon: const Icon(Icons.refresh_rounded));
+          onPressed: () {
+            _searchController.clear();
+            widget.onFilterChanged(
+              TransactionFilter(accountId: widget.filter.accountId, pending: false),
+              widget.updateUrlParams,
+            );
+          },
+          icon: const Icon(Icons.refresh_rounded),
+        );
 
         return SproutLayoutBuilder((isDesktop, context, constraints) {
           final categoryDropdown = CategoryDropdown(
-              initialCategory.id, (cat) => _updateFilter(filters.copyWith(categoryId: cat?.id)),
-              displayAllCategoryButton: true);
+            initialCategory.id,
+            (cat) => widget.onFilterChanged(
+              filters.copyWith(categoryId: cat?.id),
+              widget.updateUrlParams,
+            ),
+            displayAllCategoryButton: true,
+          );
 
           final isFiltered = filters.pending == true;
           final pendingChip = FilledButton(
             style: FilledButton.styleFrom(
-                backgroundColor: !isFiltered ? theme.scaffoldBackgroundColor : theme.colorScheme.primary,
-                foregroundColor: !isFiltered ? theme.colorScheme.onBackground : theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: theme.colorScheme.onBackground, width: 1),
-                  borderRadius: radius,
-                )),
+              backgroundColor: !isFiltered ? theme.scaffoldBackgroundColor : theme.colorScheme.primary,
+              foregroundColor: !isFiltered ? theme.colorScheme.onBackground : theme.colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(color: theme.colorScheme.onBackground, width: 1),
+                borderRadius: radius,
+              ),
+            ),
             onPressed: () {
-              final val = filters.pending == null ? true : false;
-              filters.pending = val ? true : null;
-              _updateFilter(filters);
+              widget.onFilterChanged(
+                filters.copyWith(pending: !(filters.pending ?? false)),
+                widget.updateUrlParams,
+              );
             },
             child: Row(
               spacing: 8,
@@ -198,14 +207,14 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
             );
           }
 
-          // Mobile Layout
           return Column(
             spacing: 8,
             children: [
               Row(spacing: 8, children: [Expanded(child: searchField), Expanded(child: categoryDropdown)]),
               Row(
-                  spacing: 8,
-                  children: [Expanded(child: dateMenu), Expanded(child: pendingChip), if (resetVisible) resetButton]),
+                spacing: 8,
+                children: [Expanded(child: dateMenu), Expanded(child: pendingChip), if (resetVisible) resetButton],
+              ),
             ],
           );
         });

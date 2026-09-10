@@ -48,14 +48,14 @@ final class TransactionApiProvider extends $FunctionalProvider<
 String _$transactionApiHash() => r'd7537afeaaf1c267fadfc572064951e09529b86c';
 
 @ProviderFor(Transactions)
-final transactionsProvider = TransactionsProvider._();
+final transactionsProvider = TransactionsFamily._();
 
 final class TransactionsProvider
     extends $AsyncNotifierProvider<Transactions, TransactionState> {
-  TransactionsProvider._()
+  TransactionsProvider._(
+      {required TransactionsFamily super.from,
+      required TransactionFilter super.argument})
       : super(
-          from: null,
-          argument: null,
           retry: null,
           name: r'transactionsProvider',
           isAutoDispose: false,
@@ -66,15 +66,59 @@ final class TransactionsProvider
   @override
   String debugGetCreateSourceHash() => _$transactionsHash();
 
+  @override
+  String toString() {
+    return r'transactionsProvider'
+        ''
+        '($argument)';
+  }
+
   @$internal
   @override
   Transactions create() => Transactions();
+
+  @override
+  bool operator ==(Object other) {
+    return other is TransactionsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$transactionsHash() => r'42f00ff3f877455fe5556c3997163bb29ad8f10b';
+String _$transactionsHash() => r'4cb25b9facc8cac506df482966033adbadec985b';
+
+final class TransactionsFamily extends $Family
+    with
+        $ClassFamilyOverride<Transactions, AsyncValue<TransactionState>,
+            TransactionState, FutureOr<TransactionState>, TransactionFilter> {
+  TransactionsFamily._()
+      : super(
+          retry: null,
+          name: r'transactionsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  TransactionsProvider call(
+    TransactionFilter filter,
+  ) =>
+      TransactionsProvider._(argument: filter, from: this);
+
+  @override
+  String toString() => r'transactionsProvider';
+}
 
 abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
-  FutureOr<TransactionState> build();
+  late final _$args = ref.$arg as TransactionFilter;
+  TransactionFilter get filter => _$args;
+
+  FutureOr<TransactionState> build(
+    TransactionFilter filter,
+  );
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -85,108 +129,13 @@ abstract class _$Transactions extends $AsyncNotifier<TransactionState> {
         AsyncValue<TransactionState>,
         Object?,
         Object?>;
-    return element.handleCreate(ref, build);
+    return element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
-
-@ProviderFor(TransactionFilterState)
-final transactionFilterStateProvider = TransactionFilterStateProvider._();
-
-final class TransactionFilterStateProvider
-    extends $NotifierProvider<TransactionFilterState, TransactionFilter> {
-  TransactionFilterStateProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'transactionFilterStateProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$transactionFilterStateHash();
-
-  @$internal
-  @override
-  TransactionFilterState create() => TransactionFilterState();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TransactionFilter value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<TransactionFilter>(value),
-    );
-  }
-}
-
-String _$transactionFilterStateHash() =>
-    r'7df8ac1a9710089fc2dc3361c0730a16bc213c93';
-
-abstract class _$TransactionFilterState extends $Notifier<TransactionFilter> {
-  TransactionFilter build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<TransactionFilter, TransactionFilter>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<TransactionFilter, TransactionFilter>,
-        TransactionFilter,
-        Object?,
-        Object?>;
-    return element.handleCreate(ref, build);
-  }
-}
-
-/// List of filtered transactions based on our state
-
-@ProviderFor(filteredTransactions)
-final filteredTransactionsProvider = FilteredTransactionsProvider._();
-
-/// List of filtered transactions based on our state
-
-final class FilteredTransactionsProvider extends $FunctionalProvider<
-    List<Transaction>,
-    List<Transaction>,
-    List<Transaction>> with $Provider<List<Transaction>> {
-  /// List of filtered transactions based on our state
-  FilteredTransactionsProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'filteredTransactionsProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$filteredTransactionsHash();
-
-  @$internal
-  @override
-  $ProviderElement<List<Transaction>> $createElement(
-          $ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  List<Transaction> create(Ref ref) {
-    return filteredTransactions(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<Transaction> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<Transaction>>(value),
-    );
-  }
-}
-
-String _$filteredTransactionsHash() =>
-    r'e2469d7faa4451667db1ffea70641526aabaf42d';
 
 /// Provider to track transaction subscriptions
 
@@ -326,4 +275,88 @@ final class TransactionsForDayFamily extends $Family
 
   @override
   String toString() => r'transactionsForDayProvider';
+}
+
+/// Fetches a single transaction by ID, checking existing default provider state first.
+
+@ProviderFor(transactionById)
+final transactionByIdProvider = TransactionByIdFamily._();
+
+/// Fetches a single transaction by ID, checking existing default provider state first.
+
+final class TransactionByIdProvider extends $FunctionalProvider<
+        AsyncValue<Transaction?>, Transaction?, FutureOr<Transaction?>>
+    with $FutureModifier<Transaction?>, $FutureProvider<Transaction?> {
+  /// Fetches a single transaction by ID, checking existing default provider state first.
+  TransactionByIdProvider._(
+      {required TransactionByIdFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'transactionByIdProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionByIdHash();
+
+  @override
+  String toString() {
+    return r'transactionByIdProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Transaction?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Transaction?> create(Ref ref) {
+    final argument = this.argument as String;
+    return transactionById(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TransactionByIdProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$transactionByIdHash() => r'41fb8044a5d78dda922d9fbff6fb205066e76c04';
+
+/// Fetches a single transaction by ID, checking existing default provider state first.
+
+final class TransactionByIdFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Transaction?>, String> {
+  TransactionByIdFamily._()
+      : super(
+          retry: null,
+          name: r'transactionByIdProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Fetches a single transaction by ID, checking existing default provider state first.
+
+  TransactionByIdProvider call(
+    String id,
+  ) =>
+      TransactionByIdProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'transactionByIdProvider';
 }

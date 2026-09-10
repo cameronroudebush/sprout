@@ -26,20 +26,24 @@ class TransactionState {
 }
 
 /// A state utilized by the transaction provider
+@immutable
 class TransactionFilter {
-  String? accountId;
-  String? categoryId;
-  String search;
-  DateTimeRange? dateRange;
-  bool? pending;
+  final String? accountId;
+  final String? categoryId;
+  final String search;
+  final DateTimeRange? dateRange;
+  final bool? pending;
 
-  TransactionFilter({
+  const TransactionFilter({
     this.accountId,
     this.categoryId,
     this.search = '',
     this.dateRange,
     this.pending,
   });
+
+  /// Default static key for baseline/unfiltered lookups
+  static const defaultFilter = TransactionFilter();
 
   TransactionFilter copyWith({
     String? accountId,
@@ -56,4 +60,27 @@ class TransactionFilter {
       pending: pending ?? this.pending,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is TransactionFilter &&
+        other.accountId == accountId &&
+        other.categoryId == categoryId &&
+        other.search == search &&
+        other.pending == pending &&
+        other.dateRange?.start == dateRange?.start &&
+        other.dateRange?.end == dateRange?.end;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        accountId,
+        categoryId,
+        search,
+        pending,
+        dateRange?.start,
+        dateRange?.end,
+      );
 }
