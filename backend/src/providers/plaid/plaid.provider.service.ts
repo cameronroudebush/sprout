@@ -329,6 +329,7 @@ export class PlaidProviderService extends ProviderBase<
           await this.plaidClient.itemRemove({ access_token: asset.accessToken });
         } catch (e) {}
         asset.itemId = authContext.itemId;
+        asset.syncCursor = undefined; // Reset cursor for the new item_id
       }
       asset.accessToken = authContext.accessToken;
       await asset.update();

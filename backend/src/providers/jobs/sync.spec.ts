@@ -6,6 +6,7 @@ import { ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { ProviderSyncJob } from "@backend/providers/jobs/sync";
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { User } from "@backend/user/model/user.model";
 
 describe("ProviderSyncJob", () => {
@@ -65,10 +66,10 @@ describe("ProviderSyncJob", () => {
       const findOneSpy = jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
       providerSyncService.syncForProvider.mockResolvedValue({ status: "synced" } as any);
 
-      const result = await job.processTask({ userId: "user-abc", notify: true });
+      const result = await job.processTask({ userId: "user-abc" });
 
       expect(findOneSpy).toHaveBeenCalledWith({ where: { id: "user-abc" } });
-      expect(providerSyncService.syncForProvider).toHaveBeenCalledWith(mockUser, mockProvider, true, undefined, undefined);
+      expect(providerSyncService.syncForProvider).toHaveBeenCalledWith(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
       expect(result).toEqual({ status: "synced" });
     });
 

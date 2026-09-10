@@ -97,7 +97,7 @@ final class ProviderConfigProvider extends $FunctionalProvider<
           argument: null,
           retry: riverpodRetry,
           name: r'providerConfigProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -117,4 +117,4 @@ final class ProviderConfigProvider extends $FunctionalProvider<
   }
 }
 
-String _$providerConfigHash() => r'2c26bf69c9ffb743755996716b1903818857596c';
+String _$providerConfigHash() => r'eaf42a91681082664e99ce8e0cb8de67cb025554';

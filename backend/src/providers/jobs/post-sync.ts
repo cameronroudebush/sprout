@@ -7,6 +7,7 @@ import { NotificationType } from "@backend/notification/model/notification.type"
 import { NotificationService } from "@backend/notification/notification.service";
 import { ProviderType } from "@backend/providers/base/provider.type";
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { UserDevice } from "@backend/user/model/user.device.model";
@@ -35,7 +36,7 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
     const pendingUsers = await Sync.getRepository()
       .createQueryBuilder("sync")
       .select("sync.userId", "userId")
-      .where("sync.notified = :notified", { notified: false })
+      .where("sync.processed = :processed", { processed: false })
       .andWhere("sync.status IN (:...statuses)", { statuses: ["complete", "failed"] })
       .andWhere((qb) => {
         const subQuery = qb
@@ -71,11 +72,11 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
       return;
     }
 
-    // Fetch un-notified syncs specifically for this user
+    // Fetch un-processed syncs specifically for this user
     const syncs = await Sync.find({
       where: {
         user: { id: user.id },
-        notified: false,
+        processed: false,
         status: In(["complete", "failed"]),
       },
     });
@@ -88,9 +89,9 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
     try {
       this.logger.debug(`Sending aggregation for ${user.username}.`);
       await this.sendDigest(user, latestSyncs);
-      // Mark all as notified
+      // Mark all as processed
       const ids = syncs.map((s) => s.id);
-      await Sync.updateWhere({ id: In(ids) }, { notified: true });
+      await Sync.updateWhere({ id: In(ids) }, { processed: true });
     } catch (e) {
       this.logger.error(`Failed to send digest for user ${user.id}: ${(e as Error).message}`);
       throw e;
@@ -124,20 +125,23 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
       this.regenerateOverviewsIfActive(user);
     }
 
-    // Handle Notifications, only if enabled
-    if (Configuration.providers.syncNotifications.enabled) {
-      // Check if the user has already received a notification today
+    // Check if any of these syncs were from a scheduled run
+    const hasScheduledSync = recentSyncs.some((s) => s.triggerType === SyncTriggerType.SCHEDULED);
+
+    // Handle Notifications, only if enabled and triggered by a scheduled batch
+    if (Configuration.providers.syncNotifications.enabled && hasScheduledSync) {
+      // Check if the user has already received a scheduled notification today
       const today = startOfDay(new Date());
-      const syncsProcessedToday = await Sync.count({
+      const scheduledNotifiesToday = await Sync.count({
         where: {
           user: { id: user.id },
-          notified: true,
-          isManual: false,
+          processed: true,
+          triggerType: SyncTriggerType.SCHEDULED,
           time: MoreThan(today),
         },
       });
 
-      if (syncsProcessedToday > 0) {
+      if (scheduledNotifiesToday > 0) {
         this.logger.debug(`Silent sync for ${user.username}. Notification already sent today.`);
         return;
       }

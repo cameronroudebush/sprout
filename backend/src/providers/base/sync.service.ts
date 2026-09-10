@@ -6,6 +6,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { User } from "@backend/user/model/user.model";
@@ -24,10 +25,9 @@ export class ProviderSyncService {
   /**
    * Given a user and a provider, initiates a sync for them by grabbing their accounts and updating them in the database
    *
-   * @param notify If we should send a notification that the user has new data. This will be batched and sent via the {@link SyncNotificationJob}.
    * @param institutionId Optional ID of a specific institution to sync. If provided, skips syncing other institutions for this provider.
    */
-  async syncForProvider<T extends ProviderBase>(user: User, provider: T, notify = true, institutionId?: string, isManual?: boolean) {
+  async syncForProvider<T extends ProviderBase>(user: User, provider: T, triggerType = SyncTriggerType.SCHEDULED, institutionId?: string) {
     if (!(await provider.isAvailable(user))) {
       this.logger.debug(`Provider is not enabled for ${user.username}, skipping update.`);
       return;
@@ -39,8 +39,8 @@ export class ProviderSyncService {
       time: new Date(),
       status: "in-progress",
       provider: provider.config.dbType,
-      notified: !notify, // Invert notify case. If we don't want notified, this makes us think we already told the user and vice versa.
-      isManual: isManual ?? false,
+      processed: false,
+      triggerType: triggerType,
       user: user,
     }).insert();
     try {

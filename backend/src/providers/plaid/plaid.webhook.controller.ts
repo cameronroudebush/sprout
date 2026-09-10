@@ -3,6 +3,7 @@ import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { User } from "@backend/user/model/user.model";
@@ -113,7 +114,7 @@ export class PlaidWebhookController {
             const asset = await this.getPlaidInstitutionAsset(payload);
             const user = asset.institution.user;
             this.logger.log(`Queueing Webhook based sync for: ${user.username} [${webhookType}]`);
-            await this.providerSyncService.syncForProvider(user, this.plaidProvider, false, asset.institution.id);
+            await this.providerSyncService.syncForProvider(user, this.plaidProvider, SyncTriggerType.WEBHOOK, asset.institution.id);
           } else this.logger.warn(`Ignoring unknown TRANSACTIONS webhook: ${webhookCode}`);
           break;
 

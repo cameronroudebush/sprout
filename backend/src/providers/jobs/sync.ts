@@ -2,6 +2,7 @@ import { DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-ba
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { User } from "@backend/user/model/user.model";
 import { subDays } from "date-fns";
 import { LessThan } from "typeorm";
@@ -9,10 +10,8 @@ import { LessThan } from "typeorm";
 /** Represents the type for the distributed jobs */
 type SyncTaskPayload = {
   userId: string;
-  /** If we should notify the user of these results */
-  notify?: boolean;
-  /** If this was manually run */
-  isManual?: boolean;
+  /** What triggered this sync run */
+  triggerType?: SyncTriggerType;
 };
 
 /** This sync job specifies a singular job for a specific provider. This is re-used for every provider and dynamically created based on provider count. */
@@ -38,7 +37,8 @@ export class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
   async processTask(task: SyncTaskPayload) {
     const user = await User.findOne({ where: { id: task.userId } });
     if (!user) return;
-    return await this.providerSyncService.syncForProvider(user, this.provider, task.notify, undefined, task.isManual);
+    const triggerType = task.triggerType ?? SyncTriggerType.SCHEDULED;
+    return await this.providerSyncService.syncForProvider(user, this.provider, triggerType);
   }
 
   /** Cleans up old sync history to prevent table bloat */

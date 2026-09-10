@@ -10,6 +10,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { TestEntities } from "@backend/test/entities";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
@@ -65,7 +66,7 @@ describe("ProviderSyncService", () => {
     it("should process standard sync operations smoothly and commit completion metadata to the ledger", async () => {
       jest.spyOn(Account, "count").mockResolvedValue(1);
 
-      const result = await service.syncForProvider(mockUser, mockProvider, true);
+      const result = await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
       expect(mockSyncInstance.status).toBe("complete");
       expect(mockSyncInstance.update).toHaveBeenCalled();
@@ -91,7 +92,7 @@ describe("ProviderSyncService", () => {
 
       jest.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
 
-      await service.syncForProvider(mockUser, mockProvider, true);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
       expect(mockSyncInstance.status).toBe("failed");
       expect(mockSyncInstance.failureReason).toBe("Connection lost with Chase");
@@ -100,7 +101,7 @@ describe("ProviderSyncService", () => {
     it("should catch top-level exceptions, record error tracking states, and transmit notification structures", async () => {
       jest.spyOn(Account, "count").mockRejectedValue(new Error("Database breakdown"));
 
-      await service.syncForProvider(mockUser, mockProvider, true);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
       expect(mockSyncInstance.status).toBe("failed");
     });
@@ -108,7 +109,7 @@ describe("ProviderSyncService", () => {
     it("should bypass client message pushes entirely if optional notification flags evaluate to false parameters", async () => {
       jest.spyOn(Account, "count").mockRejectedValue(new Error("Silent crash"));
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
     });
   });
 
@@ -118,7 +119,7 @@ describe("ProviderSyncService", () => {
       mockProvider.get.mockResolvedValue([{ account: TestEntities.account }]);
       jest.spyOn(Account, "findOne").mockResolvedValue(null);
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
       expect(AccountHistory.prototype.insert).not.toHaveBeenCalled();
     });
@@ -147,7 +148,7 @@ describe("ProviderSyncService", () => {
       ]);
       jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
       expect(AccountHistory.prototype.insert).toHaveBeenCalled();
       expect(mockAccountInDb.balance).toBe(1000);
@@ -164,7 +165,7 @@ describe("ProviderSyncService", () => {
 
       jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
       expect(Holding.prototype.insert).toHaveBeenCalledWith(false);
     });
@@ -181,7 +182,7 @@ describe("ProviderSyncService", () => {
       mockHoldingInDb.update = jest.fn();
       jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb]);
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
       expect(HoldingHistory.prototype.insert).toHaveBeenCalled();
       expect(mockHoldingInDb.shares).toBe(10);
@@ -195,7 +196,7 @@ describe("ProviderSyncService", () => {
       mockStaleHolding.remove = jest.fn();
       jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
       expect(mockStaleHolding.remove).toHaveBeenCalled();
     });
@@ -208,7 +209,7 @@ describe("ProviderSyncService", () => {
       mockStaleHolding.update = jest.fn();
       jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
 
-      await service.syncForProvider(mockUser, mockProvider, false);
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
       expect(mockStaleHolding.marketValue).toBe(0);
       expect(mockStaleHolding.update).toHaveBeenCalled();

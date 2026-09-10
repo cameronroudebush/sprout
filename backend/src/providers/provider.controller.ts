@@ -6,6 +6,7 @@ import { ProviderConfig } from "@backend/providers/base/model/provider.config.mo
 import { PROVIDER_LIST_TOKEN } from "@backend/providers/model/constants";
 import { ManualSyncDto } from "@backend/providers/model/manual.sync.dto";
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { ProviderService } from "@backend/providers/provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -66,12 +67,16 @@ export class BaseProviderController {
     let syncs: Sync[] = [];
     // If providers is omitted (undefined) or empty, sync everything
     if (!providers || providers.length === 0) {
-      const syncResults = await this.providerService.syncUserProviders(user, false, undefined, true);
-      syncs = syncResults.filter((x): x is Sync => Boolean(x));
+      const syncResults = await this.providerService.syncUserProviders(user, SyncTriggerType.MANUAL);
+      const rawList = Array.isArray(syncResults) ? syncResults : [syncResults];
+      syncs = rawList.filter((x): x is Sync => Boolean(x));
     } else {
       // Otherwise, iterate through the specific requested providers
-      const syncResults = await Promise.all(providers.map((providerType) => this.providerService.syncUserProviders(user, false, providerType, true)));
-      syncs = syncResults.filter((x): x is Sync => Boolean(x));
+      const syncResults = await Promise.all(
+        providers.map((providerType) => this.providerService.syncUserProviders(user, SyncTriggerType.MANUAL, providerType)),
+      );
+      const rawList = syncResults.flat();
+      syncs = rawList.filter((x): x is Sync => Boolean(x));
     }
     // Inform of the completed sync
     this.sseService.sendToUser(user, SSEEventType.SYNC);

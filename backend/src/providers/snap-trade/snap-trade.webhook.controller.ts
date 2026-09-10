@@ -1,6 +1,7 @@
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { SnapTradeInstitutionAsset } from "@backend/providers/snap-trade/model/snap-trade.institution.asset.model";
 import { SnapTradeProviderService } from "@backend/providers/snap-trade/snap-trade.provider.service";
 import { BadRequestException, Body, Controller, Headers, Logger, Post, RawBodyRequest, Req, UnauthorizedException } from "@nestjs/common";
@@ -73,7 +74,7 @@ export class SnapTradeWebHookController {
           const asset = await this.getSnapTradeInstitutionAsset(authId);
           const user = asset.institution.user;
           this.logger.log(`Queueing Webhook based sync for: ${user.username} [${eventType}]`);
-          await this.providerSyncService.syncForProvider<SnapTradeProviderService>(user, this.snapTradeProvider, false, asset.institution.id);
+          await this.providerSyncService.syncForProvider<SnapTradeProviderService>(user, this.snapTradeProvider, SyncTriggerType.WEBHOOK, asset.institution.id);
           break;
         }
 

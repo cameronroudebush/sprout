@@ -129,7 +129,7 @@ class HoldingRow extends ConsumerWidget {
                     ),
 
                   // Total Value Change (All-Time)
-                  if (rowState.totalGainPercent != 0)
+                  if (rowState.totalGainPercent.round() != 0)
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                       Row(
                         spacing: 4,

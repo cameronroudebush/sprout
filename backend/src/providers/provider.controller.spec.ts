@@ -2,6 +2,7 @@ import { setupTests } from "@backend/test/helpers";
 setupTests();
 
 import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { BaseProviderController } from "@backend/providers/provider.controller";
 import { ProviderService } from "@backend/providers/provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
@@ -65,7 +66,7 @@ describe("BaseProviderController", () => {
 
       await controller.manualSync(user, { force: true });
 
-      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, undefined, true);
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
     });
 
@@ -76,7 +77,7 @@ describe("BaseProviderController", () => {
 
       await controller.manualSync(user, {});
 
-      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, undefined, true);
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
     });
@@ -88,7 +89,7 @@ describe("BaseProviderController", () => {
 
       await controller.manualSync(user, { providers: ["plaid" as any] });
 
-      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, false, "plaid", true);
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL, "plaid");
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
     });
   });
