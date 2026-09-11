@@ -114,11 +114,14 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];
-                      return ListTile(
-                        dense: true,
-                        leading: AccountIcon(item),
-                        title: Text(item.name),
-                        onTap: () => _applyMention(item),
+                      return Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                          dense: true,
+                          leading: AccountIcon(item),
+                          title: Text(item.name),
+                          onTap: () => _applyMention(item),
+                        ),
                       );
                     },
                   );
