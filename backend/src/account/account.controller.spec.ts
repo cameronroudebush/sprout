@@ -258,6 +258,7 @@ describe("AccountController", () => {
         save: jest.fn().mockResolvedValue({}),
         createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
         remove: jest.fn().mockResolvedValue({}),
+        find: jest.fn().mockResolvedValue([]),
       };
 
       jest.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
@@ -269,7 +270,7 @@ describe("AccountController", () => {
 
       expect(mockManager.save).toHaveBeenCalledWith(mockTarget);
       expect(mockTarget.subType).toBe("checking");
-      expect(mockQueryBuilder.update).toHaveBeenCalledTimes(4);
+      expect(mockQueryBuilder.update).toHaveBeenCalledTimes(3);
       expect(AccountHistory.insertForNewAccount).toHaveBeenCalledWith(mockTarget, true);
       expect(mockManager.remove).toHaveBeenCalledWith(mockSource);
       expect(Institution.delete).toHaveBeenCalledWith({ id: "inst-src" });
@@ -294,6 +295,7 @@ describe("AccountController", () => {
         save: jest.fn(),
         createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
         remove: jest.fn(),
+        find: jest.fn().mockResolvedValue([]),
       };
 
       jest.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));

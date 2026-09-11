@@ -21,6 +21,7 @@ import 'package:sprout/shared/widgets/charts/line_chart.dart';
 import 'package:sprout/shared/widgets/charts/models/line_chart_data.dart';
 import 'package:sprout/shared/widgets/charts/processors/line_chart_processor.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/shared/widgets/charts/util/range_selector.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -398,7 +399,8 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               header: SproutChartHeader(
                 title: selectedHoldingAccount?.name ?? "Unknown account",
                 subheader: _selectedHolding!.symbol,
-                right: Tooltip(
+                right: const ChartRangeSelector(),
+                left: Tooltip(
                   constraints: const BoxConstraints(maxWidth: 280),
                   message:
                       "This is the most recent change reported by ${selectedHoldingAccount?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",

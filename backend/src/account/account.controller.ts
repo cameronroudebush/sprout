@@ -6,6 +6,7 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { DatabaseService } from "@backend/database/database.service";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderBase } from "@backend/providers/base/core";
@@ -148,8 +149,27 @@ export class AccountController {
       await manager.createQueryBuilder().update(Transaction).set({ accountId: targetId }).where("accountId = :sourceId", { sourceId }).execute();
       // Migrate transaction rules
       await manager.createQueryBuilder().update(TransactionRule).set({ accountId: targetId }).where("accountId = :sourceId", { sourceId }).execute();
-      // Migrate Holdings
-      await manager.createQueryBuilder().update(Holding).set({ accountId: targetId }).where("accountId = :sourceId", { sourceId }).execute();
+      // Migrate Holdings History only for matching symbols. Other holdings will be removed
+      const sourceHoldings = await manager.find(Holding, { where: { accountId: sourceId } });
+      const targetHoldings = await manager.find(Holding, { where: { accountId: targetId } });
+      // Create a map of target holdings by their symbol for quick lookup
+      const targetSymbolMap = new Map(targetHoldings.map((h) => [h.symbol, h.id]));
+      const sourceHoldingsToDelete: string[] = [];
+      // Iterate through source holdings to update matching history or mark for deletion
+      for (const sourceHolding of sourceHoldings) {
+        const matchingTargetHoldingId = targetSymbolMap.get(sourceHolding.symbol);
+        // A matching symbol exists! Move the history to the target holding
+        if (matchingTargetHoldingId)
+          await manager
+            .createQueryBuilder()
+            .update(HoldingHistory)
+            .set({ holding: { id: matchingTargetHoldingId } })
+            .where("holdingId = :sourceHoldingId", { sourceHoldingId: sourceHolding.id })
+            .execute();
+        sourceHoldingsToDelete.push(sourceHolding.id);
+      }
+      if (sourceHoldingsToDelete.length > 0)
+        await manager.createQueryBuilder().delete().from(Holding).where("id IN (:...ids)", { ids: sourceHoldingsToDelete }).execute();
       // Migrate Account History
       await manager.createQueryBuilder().update(AccountHistory).set({ account: targetAccount }).where("accountId = :sourceId", { sourceId }).execute();
       // Set yesterdays history equal to the source account, no matter what.
