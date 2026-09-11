@@ -48,6 +48,18 @@ updates:
         patterns:
           - "*"
 
+  # iOS / Swift Package Manager
+  - package-ecosystem: "swift"
+    directory: "/frontend/ios"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 14
+    groups:
+      ios-dependencies:
+        patterns:
+          - "*"
+
   # Docker
   - package-ecosystem: "docker"
     directory: "/"
