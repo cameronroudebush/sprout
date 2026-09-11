@@ -51,13 +51,14 @@ class TransactionFilter {
     String? search,
     DateTimeRange? dateRange,
     bool? pending,
+    bool clearPending = false,
   }) {
     return TransactionFilter(
       accountId: accountId ?? this.accountId,
       categoryId: categoryId ?? this.categoryId,
       search: search ?? this.search,
       dateRange: dateRange ?? this.dateRange,
-      pending: pending ?? this.pending,
+      pending: clearPending ? null : (pending ?? this.pending),
     );
   }
 

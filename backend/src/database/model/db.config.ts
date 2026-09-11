@@ -10,19 +10,37 @@ export class SQLiteConfig {
   database: string = "sprout.sqlite";
 }
 
+/** Configuration options for Grandfather-Father-Son (GFS) backup retention */
+export class GfsBackupConfig {
+  @ConfigurationMetadata.assign({ comment: "Number of daily backups (Son) to retain." })
+  dailyCount: number = 7;
+
+  @ConfigurationMetadata.assign({ comment: "Number of weekly backups (Father) to retain." })
+  weeklyCount: number = 4;
+
+  @ConfigurationMetadata.assign({ comment: "Number of monthly backups (Grandfather) to retain." })
+  monthlyCount: number = 12;
+
+  @ConfigurationMetadata.assign({ comment: "Number of quarterly backups to retain." })
+  quarterlyCount: number = 4;
+
+  @ConfigurationMetadata.assign({ comment: "Number of yearly backups to retain." })
+  yearlyCount: number = 5;
+}
+
 /** Backup configuration for the database */
 export class BackupConfig {
   @ConfigurationMetadata.assign({ comment: "If backups should occur" })
   enabled: boolean = true;
 
-  @ConfigurationMetadata.assign({ comment: "How many backups we should keep" })
-  count: number = 30;
-
-  @ConfigurationMetadata.assign({ comment: "When to backup the database. Default is once a day at 4am.", externalControlDisabled: true })
-  time: string = "0 4 * * *";
+  @ConfigurationMetadata.assign({ comment: "When to backup the database. Default is once a day at 7:00am.", externalControlDisabled: true })
+  time: string = "0 7 * * *";
 
   @ConfigurationMetadata.assign({ comment: "Where to place the backup files." })
   directory: string = path.resolve("backups", "database");
+
+  @ConfigurationMetadata.assign({ comment: "Grandfather-Father-Son retention configuration." })
+  gfs: GfsBackupConfig = new GfsBackupConfig();
 }
 
 /** Database specific backend configuration */

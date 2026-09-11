@@ -26,7 +26,10 @@ class HomeNotificationsWidget extends ConsumerWidget {
             theme.colorScheme.primary,
             theme.colorScheme.onPrimary,
             icon: Icons.category,
-            onClick: () => NavigationProvider.redirect("/transactions", queryParameters: {'categoryId': "unknown"}),
+            onClick: () => NavigationProvider.redirect("/transactions", queryParameters: {
+              'categoryId': "unknown",
+              'pending': "false",
+            }),
           ),
         ),
       );

@@ -55,8 +55,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final search = params['search'] ?? '';
     final categoryId = params['categoryId'] ?? CategoryDropdown.fakeAllCategory.id;
     final accountId = params['accountId'] ?? widget.accountId;
-    final pendingParam = params['pending'];
-    final bool? pending = pendingParam == null ? null : (pendingParam == 'true');
+
+    bool? pending;
+    if (params['pending'] != null) {
+      pending = params['pending'] == 'true';
+    }
 
     DateTimeRange? dateRange;
     if (params['startDate'] != null && params['endDate'] != null) {
@@ -89,14 +92,22 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       if (newFilter.categoryId != null && newFilter.categoryId != CategoryDropdown.fakeAllCategory.id) {
         queryParams['categoryId'] = newFilter.categoryId!;
       }
-      if (newFilter.pending != null) queryParams['pending'] = newFilter.pending.toString();
+      if (newFilter.pending != null) {
+        queryParams['pending'] = newFilter.pending.toString();
+      }
       if (newFilter.dateRange != null) {
         queryParams['startDate'] = newFilter.dateRange!.start.toIso8601String();
         queryParams['endDate'] = newFilter.dateRange!.end.toIso8601String();
       }
 
       final currentUri = GoRouterState.of(context).uri;
-      final newUri = currentUri.replace(queryParameters: queryParams.isEmpty ? null : queryParams);
+
+      // Rebuild Uri cleanly from path to guarantee omitted query keys (like pending) are destroyed
+      final newUri = Uri(
+        path: currentUri.path,
+        queryParameters: queryParams.isEmpty ? null : queryParams,
+      );
+
       context.go(newUri.toString());
     } else {
       setState(() {

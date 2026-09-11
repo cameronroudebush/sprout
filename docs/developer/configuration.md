@@ -87,17 +87,22 @@ Adds support to share cached info (holdings, auth lookup, etc.) across Sprout in
 
 ## Database & Backups
 
-Sprout uses SQLite by default and includes a built-in backup engine.
+Sprout uses SQLite by default and includes a built-in backup engine using a Grandfather-Father-Son (GFS) retention policy.
 
-| YAML Key                    | Environment Variable               | Default             | Description                               |
-| --------------------------- | ---------------------------------- | ------------------- | ----------------------------------------- |
-| `database.type`             | `sprout_database_type`             | `better-sqlite3`    | The database driver to use.               |
-| **Sqlite**                  |                                    |                     |                                           |
-| `database.sqlite.database`  | `sprout_database_sqlite_database`  | `sprout.sqlite`     | The filename of the SQLite database.      |
-| **Backups**                 |                                    |                     |                                           |
-| `database.backup.enabled`   | `sprout_database_backup_enabled`   | `true`              | Turn built-in backups on or off.          |
-| `database.backup.count`     | `sprout_database_backup_count`     | `30`                | Number of rotating backups to keep.       |
-| `database.backup.directory` | `sprout_database_backup_directory` | `/backups/database` | Internal container path to store backups. |
+| YAML Key                             | Environment Variable                        | Default             | Description                               |
+| ------------------------------------ | ------------------------------------------- | ------------------- | ----------------------------------------- |
+| `database.type`                      | `sprout_database_type`                      | `better-sqlite3`    | The database driver to use.               |
+| **Sqlite**                           |                                             |                     |                                           |
+| `database.sqlite.database`           | `sprout_database_sqlite_database`           | `sprout.sqlite`     | The filename of the SQLite database.      |
+| **Backups**                          |                                             |                     |                                           |
+| `database.backup.enabled`            | `sprout_database_backup_enabled`            | `true`              | Turn built-in backups on or off.          |
+| `database.backup.directory`          | `sprout_database_backup_directory`          | `/backups/database` | Internal container path to store backups. |
+| **GFS Retention**                    |                                             |                     |                                           |
+| `database.backup.gfs.dailyCount`     | `sprout_database_backup_gfs_dailyCount`     | `7`                 | Number of daily backups to retain.        |
+| `database.backup.gfs.weeklyCount`    | `sprout_database_backup_gfs_weeklyCount`    | `4`                 | Number of weekly backups to retain.       |
+| `database.backup.gfs.monthlyCount`   | `sprout_database_backup_gfs_monthlyCount`   | `12`                | Number of monthly backups to retain.      |
+| `database.backup.gfs.quarterlyCount` | `sprout_database_backup_gfs_quarterlyCount` | `4`                 | Number of quarterly backups to retain.    |
+| `database.backup.gfs.yearlyCount`    | `sprout_database_backup_gfs_yearlyCount`    | `3`                 | Number of yearly backups to retain.       |
 
 ## Providers (Bank Sync)
 

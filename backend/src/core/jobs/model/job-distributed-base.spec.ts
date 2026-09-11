@@ -77,11 +77,8 @@ describe("DistributedQueueJob", () => {
 
   describe("start and Initialization", () => {
     it("should initialize with local memory parameters when cache type is memory", async () => {
-      const warnSpy = jest.spyOn((testJob as any).logger, "warn");
-
       await testJob.start();
 
-      expect(warnSpy).toHaveBeenCalledWith("L2 cache not configured. Will use L1 Local In-Memory Queue.");
       expect(superStartSpy).toHaveBeenCalled();
       expect(Queue).not.toHaveBeenCalled();
       expect(Worker).not.toHaveBeenCalled();
@@ -89,11 +86,11 @@ describe("DistributedQueueJob", () => {
 
     it("should initialize BullMQ components when cache type is configured to redis", async () => {
       Configuration.server.cache.type = "redis";
-      const logSpy = jest.spyOn((testJob as any).logger, "log");
+      const debugSpy = jest.spyOn((testJob as any).logger, "debug");
 
       await testJob.start();
 
-      expect(logSpy).toHaveBeenCalledWith("Initializing Queue infrastructure...");
+      expect(debugSpy).toHaveBeenCalledWith("Initializing Queue infrastructure...");
       expect(Redis).toHaveBeenCalledWith({
         host: "localhost",
         port: 6379,

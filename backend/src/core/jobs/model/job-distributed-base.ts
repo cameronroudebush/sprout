@@ -21,21 +21,24 @@ export abstract class DistributedQueueJob<TaskPayload = DefaultTaskPayload> exte
   private localQueue: TaskPayload[] = [];
   private isLocalConsuming = false;
 
+  get isCacheEnabled() {
+    return Configuration.server.cache.type === "redis";
+  }
+
   constructor(jobName: string, cronTime: string, enabled: boolean) {
     // Pass 'false' for shouldExecuteImmediately so we can set up the queues first
     super(jobName, cronTime, enabled, false);
-    this.logger = new Logger(`job:distributed:${jobName}`);
+    let loggerName = `job:distributed:${jobName}`;
+    if (this.isCacheEnabled) loggerName = `L2:${loggerName}`;
+    this.logger = new Logger(loggerName);
   }
 
   /** Intercept the start sequence to initialize queues before the cron runs */
   public override async start() {
     if (!this.enabled) return super.start();
-    this.logger.log(`Initializing Queue infrastructure...`);
+    this.logger.debug(`Initializing Queue infrastructure...`);
 
-    const isRedisEnabled = Configuration.server.cache.type === "redis";
-
-    if (isRedisEnabled) this.setupBullMQ();
-    else this.logger.warn(`L2 cache not configured. Will use L1 Local In-Memory Queue.`);
+    if (this.isCacheEnabled) this.setupBullMQ();
 
     // Call the parent start to initialize the cron schedules
     return await super.start();

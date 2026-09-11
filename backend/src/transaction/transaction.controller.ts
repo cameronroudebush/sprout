@@ -170,7 +170,7 @@ export class TransactionController {
     const where: FindOptionsWhere<Transaction> = {
       account,
     };
-    if (pending) where.pending = pending;
+    if (pending !== undefined) where.pending = pending;
     if (dateFilter) where.posted = dateFilter;
     if (description) where.description = Like(`%${description}%`);
     if (categoryQuery) where.category = categoryQuery;

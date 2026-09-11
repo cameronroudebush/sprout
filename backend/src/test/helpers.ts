@@ -8,6 +8,20 @@ jest.mock("@backend/config/core", () => ({
     encryptionKey: "66c60231a85abcf9fa2c6c07fd0b075c50c4a313585afb447c95838ecc6170d8",
     isDemoMode: false,
     version: "1.0.0",
+    database: {
+      backup: {
+        enabled: true,
+        time: "0 7 * * *",
+        directory: "/backups/database",
+        gfs: {
+          dailyCount: 7,
+          weeklyCount: 4,
+          monthlyCount: 12,
+          quarterlyCount: 4,
+          yearlyCount: 3,
+        },
+      },
+    },
     server: {
       auth: {
         type: "local",

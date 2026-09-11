@@ -22,6 +22,31 @@
         "tags": ["Core"]
       }
     },
+    "/core/backups": {
+      "get": {
+        "description": "Returns a list of all current database backups along with size and GFS tier metadata.",
+        "operationId": "CoreController_getBackups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Backup metadata retrieved successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "403": {
+            "description": "Admin privileges required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get database backup details.",
+        "tags": ["Core"]
+      }
+    },
     "/config": {
       "get": {
         "description": "Returns the app configuration for the frontend to be able to reference.",

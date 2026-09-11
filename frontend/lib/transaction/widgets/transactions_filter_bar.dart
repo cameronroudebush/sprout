@@ -148,7 +148,7 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
           onPressed: () {
             _searchController.clear();
             widget.onFilterChanged(
-              TransactionFilter(accountId: widget.filter.accountId, pending: false),
+              TransactionFilter(accountId: widget.filter.accountId),
               widget.updateUrlParams,
             );
           },
@@ -165,28 +165,47 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
             displayAllCategoryButton: true,
           );
 
-          final isFiltered = filters.pending == true;
-          final pendingChip = FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: !isFiltered ? theme.scaffoldBackgroundColor : theme.colorScheme.primary,
-              foregroundColor: !isFiltered ? theme.colorScheme.onBackground : theme.colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: theme.colorScheme.onBackground, width: 1),
-                borderRadius: radius,
-              ),
-            ),
+          final pendingState = filters.pending;
+          String chipLabel = "Pending: All";
+          Color? chipBgColor;
+          IconData chipIcon = Icons.access_time;
+
+          if (pendingState == true) {
+            chipLabel = "Pending Only";
+            chipBgColor = theme.colorScheme.primary;
+            chipIcon = Icons.check;
+          } else if (pendingState == false) {
+            chipLabel = "Posted Only";
+            chipBgColor = theme.colorScheme.primary;
+            chipIcon = Icons.block;
+          }
+
+          final pendingChip = OutlinedButton.icon(
             onPressed: () {
+              bool? nextPending;
+              bool clearFlag = false;
+
+              if (pendingState == null) {
+                nextPending = true;
+              } else if (pendingState == true) {
+                nextPending = false;
+              } else {
+                nextPending = null;
+                clearFlag = true;
+              }
+
               widget.onFilterChanged(
-                filters.copyWith(pending: !(filters.pending ?? false)),
+                filters.copyWith(pending: nextPending, clearPending: clearFlag),
                 widget.updateUrlParams,
               );
             },
-            child: Row(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [if (filters.pending == true) const Icon(Icons.check), const Text("Pending")],
+            style: OutlinedButton.styleFrom(
+              backgroundColor: chipBgColor,
+              shape: RoundedRectangleBorder(borderRadius: radius),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
+            icon: Icon(chipIcon, size: 18),
+            label: Text(chipLabel),
           );
 
           if (isDesktop) {

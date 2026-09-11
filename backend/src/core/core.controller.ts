@@ -1,3 +1,7 @@
+import { AdminGuard } from "@backend/auth/guard/admin.guard";
+import { Configuration } from "@backend/config/core";
+import { EnabledGuard } from "@backend/config/guard/enabled.guard";
+import { DatabaseBackupJob } from "@backend/core/jobs/backup";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { startCase } from "lodash";
@@ -7,6 +11,8 @@ import { name } from "../../package.json";
 @Controller("core")
 @ApiTags("Core")
 export class CoreController {
+  constructor(private readonly databaseBackupJob: DatabaseBackupJob) {}
+
   @Get("heartbeat")
   @ApiOperation({
     summary: "Check application status.",
@@ -15,5 +21,17 @@ export class CoreController {
   @ApiOkResponse({ description: "Application status retrieved successfully.", type: String })
   async heartbeat() {
     return `${startCase(name)} is alive!`;
+  }
+
+  @Get("backups")
+  @ApiOperation({
+    summary: "Get database backup details.",
+    description: "Returns a list of all current database backups along with size and GFS tier metadata.",
+  })
+  @ApiOkResponse({ description: "Backup metadata retrieved successfully." })
+  @AdminGuard.attach()
+  @EnabledGuard.attach(Configuration.database.backup.enabled)
+  async getBackups() {
+    return this.databaseBackupJob.getBackupSummary();
   }
 }
