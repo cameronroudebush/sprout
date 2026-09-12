@@ -41,7 +41,7 @@ export class ChatController {
     const chat = await new ChatHistory(user, ChatHistory.DEFAULT_MODEL_TEXT, "model", undefined, true).insert();
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
 
-    const model = await this.chatService.getModel(user);
+    const model = await this.chatService.getModel(user, "chat");
 
     const timeoutMs = 60000; // 60 Seconds
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -95,7 +95,7 @@ export class ChatController {
 
     // Generate a fresh overview if status doesn't exist or is stale
     this.logger.debug(`${startCase(type)} overview out of date, regenerating for user ${user.username}`);
-    const model = await this.chatService.getModel(user);
+    const model = await this.chatService.getModel(user, "overview");
     return await model.generateOverview(type);
   }
 }

@@ -616,22 +616,36 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   /// Builds notifications to display for the account content
   Widget _buildNotifications(ThemeData theme) {
     final List<Widget> notifications = [];
+    final hasAnError = widget.account.institution.hasError || widget.account.isArchived;
 
-    // Institution Error Notification
-    if (widget.account.institution.hasError) {
+    if (hasAnError) {
+      final String message;
+      final VoidCallback? onTap;
+
+      if (widget.account.institution.hasError) {
+        message =
+            "Connection issue: ${widget.account.institution.name} requires re-authentication to continue syncing.";
+        onTap = _fixInstitution;
+      } else {
+        message =
+            "This account was missing from the latest provider sync and has been archived. You'll need to re-add this account for it to show back up.";
+        onTap = null;
+      }
+
       notifications.add(
         SproutNotificationWidget(
           SproutNotification(
-            "Connection Issue: ${widget.account.institution.name} requires attention.",
+            message,
             theme.colorScheme.error,
             theme.colorScheme.onError,
-            icon: Icons.warning_amber_rounded,
-            onClick: _fixInstitution,
+            icon: widget.account.institution.hasError ? Icons.warning_amber_rounded : Icons.archive_outlined,
+            onClick: onTap,
           ),
           allowMultiLine: true,
         ),
       );
     }
+
     return Column(spacing: 0, children: notifications);
   }
 

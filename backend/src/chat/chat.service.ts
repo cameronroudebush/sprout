@@ -22,14 +22,18 @@ export class ChatService {
     private readonly promptBuilder: ChatPromptService,
   ) {}
 
-  /** Gets the model for the given user's LLM configuration */
-  async getModel(user: User) {
+  /**
+   * Gets the model for the given user's LLM configuration
+   * @param modelType The type of model we want to use based on the configuration. Allows more complex
+   *  models to be used for chat while overviews can use more basic ones, if configured so. By default, they use the same.
+   */
+  async getModel(user: User, modelType: "chat" | "overview" = "chat") {
     if (Configuration.server.prompt.type === "gemini") {
       const apiKey = Configuration.server.prompt.gemini.key;
       if (!apiKey) throw new BadRequestException("No API key configured. Please set an API key in settings");
 
       const aiModel = new GoogleGenAI({ apiKey }).models;
-      const type = Configuration.server.prompt.gemini.model;
+      const type = modelType === "overview" ? Configuration.server.prompt.gemini.overviewModel : Configuration.server.prompt.gemini.chatModel;
 
       /** Logs how many tokens a content set is going to use */
       const logTokens = async (contents: ContentListUnion, messageType: string) => {

@@ -129,7 +129,7 @@ class AccountGroupSection extends ConsumerWidget {
                   final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
                   final dataPoint = history?.getValueByFrame(selectedRange);
                   final isSelected = selectedAccounts?.contains(acc) ?? false;
-                  final hasError = acc.institution.hasError;
+                  final hasError = acc.institution.hasError || acc.isArchived;
 
                   // Main row content
                   Widget row = Padding(

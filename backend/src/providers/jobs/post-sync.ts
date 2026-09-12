@@ -37,6 +37,7 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
       .createQueryBuilder("sync")
       .select("sync.userId", "userId")
       .where("sync.processed = :processed", { processed: false })
+      .andWhere("sync.triggerType = :triggerType", { triggerType: SyncTriggerType.SCHEDULED })
       .andWhere("sync.status IN (:...statuses)", { statuses: ["complete", "failed"] })
       .andWhere((qb) => {
         const subQuery = qb
@@ -186,7 +187,7 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
       }
 
       this.logger.debug(`Background generating fresh overviews for active user ${user.username}.`);
-      const model = await this.chatService.getModel(user);
+      const model = await this.chatService.getModel(user, "overview");
       const overviewTypes = Object.values(ChatOverviewType) as ChatOverviewType[];
       // Sequentially generate overviews to avoid bursting the API
       for (const type of overviewTypes) {

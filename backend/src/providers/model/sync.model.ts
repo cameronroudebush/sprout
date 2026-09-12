@@ -42,6 +42,7 @@ export class Sync extends DatabaseBase {
   @DatabaseDecorators.column({ type: "varchar", default: SyncTriggerType.SCHEDULED })
   @ApiHideProperty()
   @IsEnum(SyncTriggerType)
+  @Exclude({ toPlainOnly: true })
   triggerType: SyncTriggerType = SyncTriggerType.SCHEDULED;
 
   /**
@@ -50,5 +51,6 @@ export class Sync extends DatabaseBase {
    */
   @DatabaseDecorators.column({ default: false })
   @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   processed: boolean = false;
 }

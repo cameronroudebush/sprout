@@ -285,7 +285,6 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
 
   /// Displays a list of holdings the current user has across their accounts
   Widget _buildHoldingsPanel(ThemeData theme, List<Account> investmentAccounts) {
-    final formatter = ref.read(currencyFormatterProvider);
     return SproutRouteWrapper(
       child: Column(
         spacing: 8,
@@ -309,12 +308,6 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                           style: theme.textTheme.titleMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        formatter.format(account.balance),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],

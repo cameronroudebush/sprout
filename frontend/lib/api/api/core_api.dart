@@ -16,6 +16,46 @@ class CoreApi {
 
   final ApiClient apiClient;
 
+  /// Get database backup details.
+  ///
+  /// Returns a list of all current database backups along with size and GFS tier metadata.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> coreControllerGetBackupsWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/core/backups';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get database backup details.
+  ///
+  /// Returns a list of all current database backups along with size and GFS tier metadata.
+  Future<void> coreControllerGetBackups() async {
+    final response = await coreControllerGetBackupsWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Check application status.
   ///
   /// Provides a return message if the app is running.

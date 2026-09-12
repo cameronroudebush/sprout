@@ -3655,6 +3655,11 @@
             "description": "An interest rate if this is a loan type account.",
             "nullable": true
           },
+          "isArchived": {
+            "type": "boolean",
+            "description": "Indicates if this account is archived / no longer present upstream",
+            "default": false
+          },
           "balance": {
             "type": "number",
             "description": "The numeric value converted to the user's preferred currency format. This overrides the original balance property.",

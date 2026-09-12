@@ -18,6 +18,7 @@ class Account {
     required this.type,
     this.subType,
     this.interestRate,
+    this.isArchived = false,
     required this.balance,
     required this.name,
     required this.institution,
@@ -43,6 +44,9 @@ class Account {
   /// An interest rate if this is a loan type account.
   num? interestRate;
 
+  /// Indicates if this account is archived / no longer present upstream
+  bool isArchived;
+
   /// The numeric value converted to the user's preferred currency format. This overrides the original balance property.
   num balance;
 
@@ -67,6 +71,7 @@ class Account {
     other.type == type &&
     other.subType == subType &&
     other.interestRate == interestRate &&
+    other.isArchived == isArchived &&
     other.balance == balance &&
     other.name == name &&
     other.institution == institution &&
@@ -80,13 +85,14 @@ class Account {
     (type.hashCode) +
     (subType == null ? 0 : subType!.hashCode) +
     (interestRate == null ? 0 : interestRate!.hashCode) +
+    (isArchived.hashCode) +
     (balance.hashCode) +
     (name.hashCode) +
     (institution.hashCode) +
     (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, provider=$provider, type=$type, subType=$subType, interestRate=$interestRate, balance=$balance, name=$name, institution=$institution, extra=$extra]';
+  String toString() => 'Account[id=$id, provider=$provider, type=$type, subType=$subType, interestRate=$interestRate, isArchived=$isArchived, balance=$balance, name=$name, institution=$institution, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -103,6 +109,7 @@ class Account {
     } else {
       json[r'interestRate'] = null;
     }
+      json[r'isArchived'] = this.isArchived;
       json[r'balance'] = this.balance;
       json[r'name'] = this.name;
       json[r'institution'] = this.institution;
@@ -148,6 +155,7 @@ class Account {
         interestRate: json[r'interestRate'] == null
             ? null
             : num.parse('${json[r'interestRate']}'),
+        isArchived: mapValueOfType<bool>(json, r'isArchived') ?? false,
         balance: num.parse('${json[r'balance']}'),
         name: mapValueOfType<String>(json, r'name')!,
         institution: Institution.fromJson(json[r'institution'])!,

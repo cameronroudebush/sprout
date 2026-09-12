@@ -56,7 +56,7 @@ export class ZillowProviderService extends ProviderBase<void, void, ZillowProper
         const data = await this.getInfoByZpid(user, zpid);
         account.balance = data.zestimate;
         account.availableBalance = data.zestimate;
-        results.push({ account, providerAccountId: zpid });
+        results.push({ account, providerAccountId: zpid, preventAutoCreation: true });
       } catch (e) {
         this.logger.error(`Failed to update Zillow account ${account.id}`, e);
       }

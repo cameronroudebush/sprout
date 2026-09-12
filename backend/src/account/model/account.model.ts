@@ -74,6 +74,11 @@ export class Account extends DatabaseBase {
   @Exclude({ toPlainOnly: true })
   providerAccountId!: string;
 
+  /** Indicates if this account is archived / no longer present upstream */
+  @DatabaseDecorators.column({ nullable: false, default: false })
+  @ApiProperty({ required: false, default: false })
+  isArchived: boolean = false;
+
   /** Any extra data that we want to store as JSON */
   @DatabaseDecorators.jsonColumn({ nullable: true })
   extra?: object;

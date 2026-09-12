@@ -10,6 +10,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
 import { Inject, InternalServerErrorException, Logger, NotImplementedException } from "@nestjs/common";
+import { FindOptionsWhere } from "typeorm";
 import { ProviderRateLimit } from "./rate-limit";
 
 /** Standardized response payload for all provider sync operations. */
@@ -26,6 +27,8 @@ export interface ProviderSyncResult<TSyncMetadata = unknown> {
   providerAccountId?: string;
   /** Used to pass back cursors or tokens safely after sync completion */
   syncMetadata?: TSyncMetadata;
+  /** If true, the sync service should not auto-insert this account if it doesn't exist in DB */
+  preventAutoCreation?: boolean;
 }
 
 /** Represents a single institution's connection data returning from a token exchange. */
@@ -97,7 +100,40 @@ export abstract class ProviderBase<
         await this.handleSyncError(asset, error);
       }
     }
+
+    // Reconcile missing/archived accounts per user without relying on InstAsset
+    await this.reconcileMissingAccounts(user, results, institutionId);
+
     return results;
+  }
+
+  /**
+   * Compares the database accounts for this provider against the accounts
+   * actively returned in sync results. Archives missing accounts and un-archives restored ones.
+   */
+  private async reconcileMissingAccounts(user: User, syncResults: ProviderSyncResult[], institutionId?: string): Promise<void> {
+    // Safely collect providerAccountIds from both explicit results and attached Account models
+    const activeProviderAccountIds = new Set(
+      syncResults.map((r) => r.providerAccountId || r.account?.providerAccountId).filter((id): id is string => Boolean(id)),
+    );
+    const whereCondition: FindOptionsWhere<Account> = {
+      user: { id: user.id },
+      provider: this.config.dbType,
+    };
+    if (institutionId) whereCondition.institution = { id: institutionId };
+    const existingDbAccounts = await Account.find({ where: whereCondition });
+    for (const dbAccount of existingDbAccounts) {
+      const isPresentInSync = activeProviderAccountIds.has(dbAccount.providerAccountId);
+      if (!isPresentInSync && !dbAccount.isArchived) {
+        this.logger.warn(`Account '${dbAccount.name}' (${dbAccount.providerAccountId}) missing from provider ${this.config.name}. Marking as archived.`);
+        dbAccount.isArchived = true;
+        await dbAccount.update();
+      } else if (isPresentInSync && dbAccount.isArchived) {
+        this.logger.log(`Account '${dbAccount.name}' (${dbAccount.providerAccountId}) reappeared from provider ${this.config.name}. Restoring account.`);
+        dbAccount.isArchived = false;
+        await dbAccount.update();
+      }
+    }
   }
 
   /**

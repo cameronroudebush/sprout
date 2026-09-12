@@ -7,7 +7,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/models/expanded_holding.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/shared/api/base_api.dart';
-import 'package:sprout/shared/providers/sse_provider.dart';
+import 'package:sprout/shared/providers/extensions/sse_auto_refresh.dart';
 
 part "holding_provider.g.dart";
 
@@ -23,14 +23,7 @@ Future<HoldingApi> holdingApi(Ref ref) async {
 class AccountHoldings extends _$AccountHoldings {
   @override
   Future<List<Holding>> build(String accountId) async {
-    // Auto-refresh when an SSE update for this account arrives
-    ref.listen(sseProvider, (prev, next) {
-      final event = next.latestData?.event;
-      if (event == SSEDataEventEnum.forceUpdate) {
-        ref.invalidateSelf();
-      }
-    });
-
+    ref.refreshOnForceUpdate();
     final api = await ref.watch(holdingApiProvider.future);
     return await api.holdingControllerGetHoldings(accountId) ?? [];
   }
@@ -41,6 +34,7 @@ class AccountHoldings extends _$AccountHoldings {
 class AccountHoldingHistory extends _$AccountHoldingHistory {
   @override
   Future<EntityHistory?> build(String holdingId) async {
+    ref.refreshOnForceUpdate();
     final api = await ref.watch(holdingApiProvider.future);
     return await api.holdingControllerGetSpecificHoldingHistory(holdingId);
   }
@@ -51,6 +45,7 @@ class AccountHoldingHistory extends _$AccountHoldingHistory {
 class HoldingTimeline extends _$HoldingTimeline {
   @override
   Future<List<HistoricalDataPoint>> build(String holdingId) async {
+    ref.refreshOnForceUpdate();
     final api = await ref.watch(holdingApiProvider.future);
     return await api.holdingControllerGetHoldingTimeline(holdingId) ?? [];
   }

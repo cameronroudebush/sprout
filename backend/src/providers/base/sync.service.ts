@@ -94,8 +94,8 @@ export class ProviderSyncService {
         let accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
         // Determine if we should insert the missing account
         if (!accountInDB) {
-          // If the provider returned a providerAccountId, it means this is a newly discovered account that we can auto-link
-          if (data.providerAccountId) {
+          // Only auto-link newly discovered accounts if auto-creation isn't explicitly disabled
+          if (data.providerAccountId && !data.preventAutoCreation) {
             accountInDB = await data.account.insert();
             await AccountHistory.insertForNewAccount(accountInDB);
 

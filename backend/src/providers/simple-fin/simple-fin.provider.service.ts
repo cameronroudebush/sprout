@@ -115,6 +115,8 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
 
       results.push({
         account: existingAccount,
+        providerAccountId: rawAccount.id,
+        preventAutoCreation: true,
         ...syncData,
       });
     }
