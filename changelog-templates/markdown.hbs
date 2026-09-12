@@ -1,0 +1,55 @@
+{{! Reference https://raw.githubusercontent.com/cookpete/auto-changelog/refs/heads/master/templates/conventional.hbs}}
+
+<p align="center">
+  <img width="50%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png">
+  <br>
+</p>
+
+{{#each releases}}
+  {{#if href}}
+    #{{#unless major}}#{{/unless}} [{{title}}]({{href}}) {{#if tag}} {{niceDate}} {{/if}}
+  {{else}}
+    ### {{title}}
+  {{/if}}
+  {{#if summary}}
+    {{summary}}
+  {{/if}}
+  {{#each merges}}
+    - {{#if commit.breaking}}**Breaking change:** {{/if}}{{message}}
+  {{/each}}
+  {{#each fixes}}
+    - {{#if commit.breaking}}**Breaking change:** {{/if}}{{commit.subject}}{{#each fixes}}{{/each}}
+  {{/each}}
+  {{! List commits with 'breaking:' or 'Breaking change:' anywhere in the message under a heading}}
+  {{#commit-list commits heading='#### Breaking Changes :warning:' message='[bB]reaking [cC]hange:|[bB]reaking:' }}
+    - {{subject}}  [`{{shorthash}}`]({{href}})
+  {{/commit-list}}
+  {{! List commits organised under a heading, but not those already listed in the breaking section }}
+      {{#commit-list commits heading='#### New Features' message='^[fF]eat:|[fF]eat\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Fixes' message='^[fF]ix:|^[fF]ix\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Chores And Housekeeping' message='^[cC]hore:|^[cC]hore\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Documentation Changes' message='^[dD]ocs:|^[dD]ocs\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Refactoring and Updates' message='^[rR]efactor:|^[rR]efactor\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Changes to Test Assests' message='^[tT]est:|^[tT]est\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Tidying of Code eg Whitespace' message='^[sS]tyle:|^[sS]tyle\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### Performance Improvments' message='^[pP]erf:|^[pP]erf\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+      {{#commit-list commits heading='#### General Changes' exclude='[bB]reaking [cC]hange:|[bB]reaking:|^[fF]eat:|^[fF]eat\(|^[fF]ix:|^[fF]ix\(|^[cC]hore:|^[cC]hore\(|^[dD]ocs:|^[dD]ocs\(|^[rR]efactor:|^[rR]efactor\(|^[tT]est:|^[tT]est\(|^[sS]tyle:|^[sS]tyle\(|^[pP]erf:|^[pP]erf\('}}
+        - {{subject}} [`{{shorthash}}`]({{href}})
+      {{/commit-list}}
+{{/each}}
