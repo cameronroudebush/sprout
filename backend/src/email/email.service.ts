@@ -42,14 +42,7 @@ export class EmailService implements OnModuleInit {
 
     const netWorth = await this.netWorthService.getTotalSummary(user);
 
-    return new WeeklyEmailContent(
-      user,
-      netWorth,
-      totalExpense,
-      totalIncome,
-      filteredTransactions.length,
-      filteredTransactions.map((x) => ({ description: x.description, category: x.category?.name ?? "", amount: x.amount })),
-    );
+    return new WeeklyEmailContent(user, netWorth, totalExpense, totalIncome, filteredTransactions.length, filteredTransactions);
   }
 
   /** Sends the weekly update to the users email, if configured */

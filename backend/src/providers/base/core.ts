@@ -6,6 +6,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { BaseProviderConfig } from "@backend/providers/base/config";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
@@ -85,9 +86,10 @@ export abstract class ProviderBase<
    *
    * @param user The user initiating the sync
    * @param accountsOnly If we should skip fetching holdings/transactions
+   * @param triggerType The context initiating this sync
    * @param institutionId Specific institution ID to restrict the sync
    */
-  async get(user: User, accountsOnly: boolean, institutionId?: string): Promise<ProviderSyncResult[]> {
+  async get(user: User, accountsOnly: boolean, triggerType: SyncTriggerType, institutionId?: string): Promise<ProviderSyncResult[]> {
     const assets = await this.getInstitutionAssetsForUser(user.id, institutionId);
     const results: ProviderSyncResult[] = [];
 
@@ -101,8 +103,8 @@ export abstract class ProviderBase<
       }
     }
 
-    // Reconcile missing/archived accounts per user without relying on InstAsset
-    await this.reconcileMissingAccounts(user, results, institutionId);
+    // Only reconcile missing accounts on scheduled background syncs where a full payload is guaranteed
+    if (triggerType === SyncTriggerType.SCHEDULED) await this.reconcileMissingAccounts(user, results, institutionId);
 
     return results;
   }

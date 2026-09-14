@@ -126,6 +126,17 @@ export class PlaidWebhookController {
           } else this.logger.warn(`Ignoring unknown ERROR webhook: ${webhookCode}`);
           break;
 
+        case "HOLDINGS":
+        case "INVESTMENTS_TRANSACTIONS":
+          if (webhookCode === "DEFAULT_UPDATE" || webhookCode === "HISTORICAL_UPDATE") {
+            const asset = await this.getPlaidInstitutionAsset(payload);
+            const user = asset.institution.user;
+            this.logger.log(`Queueing Sync for user ${user.username} [${webhookType}:${webhookCode}]`);
+
+            await this.providerSyncService.syncForProvider(user, this.plaidProvider, SyncTriggerType.WEBHOOK, asset.institution.id);
+          } else this.logger.warn(`Ignoring unknown ${webhookType} webhook: ${webhookCode}`);
+          break;
+
         default:
           this.logger.log(`Ignoring webhook type ${webhookType} / ${webhookCode}`);
       }

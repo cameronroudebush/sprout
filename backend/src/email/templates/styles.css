@@ -1,13 +1,15 @@
 body {
   font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0;
-  padding: 20px;
+  padding: 20px 10px;
   color: #cfd8dc;
   text-align: center;
+  background-color: #111418;
 }
 
 .container {
   width: 100%;
+  max-width: 600px;
   margin: 0 auto;
   background: #1d2127;
   border-radius: 12px;
@@ -42,44 +44,12 @@ body {
 }
 
 .hero {
-  padding: 1.5rem;
-}
-
-.cards {
-  text-align: center;
-}
-
-.summary-card {
-  background: #111418;
-  border-radius: 1rem;
-  padding: 1.5rem 2rem;
-  border-left: 0.25rem solid transparent;
-  display: inline-block;
-  vertical-align: top;
-  text-align: center;
-  margin: 0 0.5rem;
-  margin-bottom: 1rem;
-  width: 12.5rem;
-}
-
-.summary-card .label {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  color: #8a9297;
-  font-weight: bold;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
-}
-
-.summary-card .value {
-  display: block;
-  font-size: 26px;
-  color: #a0cafd;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  color: #cfd8dc;
 }
 
 .section {
-  padding: 0 0.5rem;
+  padding: 0 1rem;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
@@ -87,7 +57,7 @@ body {
 
 .section-title {
   font-size: 18px;
-  width: 80%;
+  width: 90%;
   padding-bottom: 0.25rem;
   font-weight: bold;
   border-bottom: 0.15rem solid #116383;
@@ -96,12 +66,128 @@ body {
   text-align: center;
 }
 
+/* Unified Hero Stat Card */
+.hero-stat-card {
+  background: #111418;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  width: 90%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.hero-stat-primary .label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #8a9297;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.hero-stat-primary .value {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 4px;
+  color: #a0cafd;
+}
+
+.hero-stat-divider {
+  border-top: 1px solid #1d2127;
+  margin: 1rem 0 0.75rem 0;
+}
+
+.hero-stat-subtable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hero-stat-subcell {
+  width: 50%;
+  text-align: center;
+}
+
+.hero-stat-subcell .label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #8a9297;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.hero-stat-subcell .value {
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .income {
   color: lightgreen !important;
 }
 
 .expense {
   color: #ffabaf !important;
+}
+
+/* Daily Bar Chart styling for Email Clients */
+.chart-container {
+  width: 90%;
+  margin: 0 auto;
+  background: #111418;
+  border-radius: 1rem;
+  padding: 1.25rem 1rem 0.75rem 1rem;
+  box-sizing: border-box;
+}
+
+.chart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.chart-amount-cell {
+  text-align: center;
+  height: 18px;
+  vertical-align: bottom;
+  padding-bottom: 2px;
+}
+
+.chart-amount-cell span {
+  font-size: 9px;
+  color: #ffabaf;
+  font-weight: 500;
+  display: block;
+}
+
+.chart-bar-cell {
+  vertical-align: bottom;
+  text-align: center;
+  padding: 0 4px;
+  height: 80px;
+}
+
+.chart-bar {
+  background-color: #ffabaf;
+  border-radius: 4px 4px 0 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 24px;
+}
+
+.chart-label {
+  font-size: 11px;
+  color: #8a9297;
+  padding-top: 6px;
+  text-align: center;
+}
+
+.quote-hero {
+  padding: 0.5rem 1rem;
+  font-size: 12px;
+  color: gray;
 }
 
 .footer {
@@ -126,8 +212,8 @@ a {
   color: gray;
 }
 
-/* Table styling */
-table {
+/* Transaction Table Styling */
+.tx-table {
   width: 90%;
   border-collapse: separate;
   border-spacing: 0;
@@ -135,42 +221,43 @@ table {
   background-color: #111418;
   border-radius: 1rem;
   overflow: hidden;
-  table-layout: fixed;
 }
 
-thead {
-  background-color: #111418;
-}
-
-th {
+.tx-table th {
   font-size: 11px;
   color: #8a9297;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 0.5rem;
   letter-spacing: 1px;
   border-bottom: 2px solid #116383;
 }
 
-td,
-td span {
-  padding: 1rem 1.5rem;
+.tx-table td {
+  padding: 0.75rem 0.5rem;
   border-bottom: 1px solid #1d2127;
-  font-size: 14px;
+  font-size: 13px;
   color: #cfd8dc;
-  /* white-space: nowrap; */
-  overflow: hidden;
-  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
-tr:last-of-type td {
+.tx-table tr:last-of-type td {
   border-bottom: none;
 }
 
-td span {
-  padding: 0;
-  border-bottom: none;
+.table-description {
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
-.table-description span {
+.table-description .title {
   display: block;
-  width: 100%;
+  color: #cfd8dc;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.table-description .category {
+  display: block;
+  font-size: 11px;
+  color: #8a9297;
+  margin-top: 2px;
 }

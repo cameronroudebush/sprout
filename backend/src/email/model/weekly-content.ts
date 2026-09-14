@@ -2,8 +2,9 @@ import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Utility } from "@backend/core/model/utility/utility";
+import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
-import { subDays } from "date-fns";
+import { format, isSameDay, subDays } from "date-fns";
 
 /** The content we provide to the weekly email update */
 export class WeeklyEmailContent {
@@ -43,16 +44,13 @@ export class WeeklyEmailContent {
   weeklyIncome: number;
   weeklyIncomeText: string;
   transactionCount: number;
-  transactions: Array<{ description: string; category: string; amount: number; amountText: string }>;
 
-  constructor(
-    user: User,
-    totalNetWorth: number,
-    weeklyExpenses: number,
-    weeklyIncome: number,
-    transactionCount: number,
-    transactions: Array<Omit<WeeklyEmailContent["transactions"][number], "amountText">>,
-  ) {
+  /** Daily spending chart metrics */
+  dailySpendingBars: Array<{ label: string; amount: number; amountText: string; heightPercent: number }>;
+
+  transactions: Array<{ description: string; category: string; amount: number; amountText: string; iconUrl?: string | null }>;
+
+  constructor(user: User, totalNetWorth: number, weeklyExpenses: number, weeklyIncome: number, transactionCount: number, transactions: Array<Transaction>) {
     this.user = user.username;
     this.totalNetWorth = totalNetWorth;
     this.totalNetWorthText = CurrencyHelper.format(totalNetWorth, user);
@@ -60,15 +58,51 @@ export class WeeklyEmailContent {
     this.weeklyIncomeText = CurrencyHelper.format(weeklyIncome, user);
     this.weeklyIncome = weeklyIncome;
     this.transactionCount = transactionCount;
+
+    // Calculate daily expenses over the past 7 days
+    const now = new Date();
+    const days: Array<{ date: Date; total: number; label: string }> = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = subDays(now, i);
+      days.push({
+        date: d,
+        total: 0,
+        label: format(d, "EEE"),
+      });
+    }
+
+    transactions.forEach((tx) => {
+      if (tx.amount < 0 && tx.posted) {
+        const txDate = new Date(tx.posted);
+        const dayMatch = days.find((d) => isSameDay(d.date, txDate));
+        if (dayMatch) {
+          dayMatch.total += Math.abs(tx.amount);
+        }
+      }
+    });
+
+    const maxExpense = Math.max(...days.map((d) => d.total), 1);
+    this.dailySpendingBars = days.map((d) => ({
+      label: d.label,
+      amount: d.total,
+      amountText: d.total > 0 ? CurrencyHelper.format(d.total, user) : "",
+      // Days with 0 spending yield 0% height (no bar)
+      heightPercent: d.total > 0 ? Math.max(Math.round((d.total / maxExpense) * 100), 8) : 0,
+    }));
+
+    // Map our transaction content
     this.transactions = transactions.map((x) => {
-      // Truncate the description so it's not so insanely long
       const max = Configuration.server.email.maxDescriptionLength;
-      const description = x.description.length > max ? x.description.substring(0, max) + "..." : x.description;
+      const rawDescription = x.description ?? "";
+      const description = rawDescription.length > max ? rawDescription.substring(0, max) + "..." : rawDescription;
 
       return {
         ...x,
         description,
+        category: x.category?.name ?? "",
+        amount: x.amount,
         amountText: CurrencyHelper.format(x.amount, user),
+        iconUrl: Configuration.server.brandFetch.getWebsiteIconUrl(x.extra?.website),
       };
     });
   }

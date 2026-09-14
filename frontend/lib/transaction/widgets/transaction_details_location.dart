@@ -26,7 +26,12 @@ class TransactionLocationCard extends StatelessWidget {
     final lon = locationData?.lon?.toDouble();
     final hasCoordinates = lat != null && lon != null;
 
-    final address = "${locationData?.address ?? ''} ${locationData?.city ?? ''}".trim();
+    final addressParts = [
+      locationData?.address,
+      locationData?.city,
+      locationData?.region,
+    ].where((part) => part != null && part.isNotEmpty);
+    final address = addressParts.join(' ').trim();
 
     return SproutCard(
       child: Padding(

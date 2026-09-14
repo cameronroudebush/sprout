@@ -44,7 +44,7 @@ export class ProviderSyncService {
       user: user,
     }).insert();
     try {
-      const result = await this.syncUserAccounts(user, provider, institutionId);
+      const result = await this.syncUserAccounts(user, provider, triggerType, institutionId);
       if (result.institutionErrors.size > 0) {
         const names = Array.from(result.institutionErrors);
         sync.status = "failed";
@@ -69,14 +69,14 @@ export class ProviderSyncService {
   }
 
   /** Connects to the provider, updates accounts, transactions, and holdings */
-  private async syncUserAccounts(user: User, provider: ProviderBase, institutionId?: string) {
+  private async syncUserAccounts(user: User, provider: ProviderBase, triggerType: SyncTriggerType, institutionId?: string) {
     const institutionErrors = new Set<string>();
 
     // Fast-fail if the user has no accounts linked yet. They then wouldn't have used any providers.
     const userAccountsCount = await Account.count({ where: { user: { id: user.id } } });
     if (userAccountsCount === 0) return { institutionErrors, userHadSuccessfulUpdate: false };
 
-    const accounts = await provider.get(user, false, institutionId);
+    const accounts = await provider.get(user, false, triggerType, institutionId);
     if (accounts.length === 0) return { institutionErrors, userHadSuccessfulUpdate: false };
 
     // Pass the provider instance into handleAccountsUpdate

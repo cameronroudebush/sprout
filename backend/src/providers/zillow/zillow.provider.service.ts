@@ -7,6 +7,7 @@ import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { ZillowPropertyDTO } from "@backend/providers/zillow/model/api/zillow.lookup.dto";
 import { ZillowPropertyResultDto } from "@backend/providers/zillow/model/api/zillow.result.dto";
 import { User } from "@backend/user/model/user.model";
@@ -41,7 +42,7 @@ export class ZillowProviderService extends ProviderBase<void, void, ZillowProper
    * Overrides the template method get() because Zillow properties are tracked
    * individually via providerAccountId (ZPID), not grouped under an Institution connection.
    */
-  override async get(user: User, _accountsOnly: boolean, _institutionId?: string): Promise<ProviderSyncResult[]> {
+  override async get(user: User, _accountsOnly: boolean, _triggerType: SyncTriggerType, _institutionId?: string): Promise<ProviderSyncResult[]> {
     const accounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.zillow } });
     const results: ProviderSyncResult[] = [];
 
