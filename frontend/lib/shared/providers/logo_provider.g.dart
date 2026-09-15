@@ -437,8 +437,9 @@ final class WebsiteIconProvider extends $FunctionalProvider<
       {required WebsiteIconFamily super.from,
       required (
         String,
-        double,
-      )
+        double, {
+        String type,
+      })
           super.argument})
       : super(
           retry: null,
@@ -468,12 +469,14 @@ final class WebsiteIconProvider extends $FunctionalProvider<
   FutureOr<List<String>> create(Ref ref) {
     final argument = this.argument as (
       String,
-      double,
-    );
+      double, {
+      String type,
+    });
     return websiteIcon(
       ref,
       argument.$1,
       argument.$2,
+      type: argument.type,
     );
   }
 
@@ -488,7 +491,7 @@ final class WebsiteIconProvider extends $FunctionalProvider<
   }
 }
 
-String _$websiteIconHash() => r'9ee68a26ea5b5c39078f6c747168035c032639f4';
+String _$websiteIconHash() => r'7b60171c6e6f9d82dd482b2b639f4c30c2b0d9a1';
 
 /// Provides an icon for an arbitrary website URL
 
@@ -498,8 +501,9 @@ final class WebsiteIconFamily extends $Family
             FutureOr<List<String>>,
             (
               String,
-              double,
-            )> {
+              double, {
+              String type,
+            })> {
   WebsiteIconFamily._()
       : super(
           retry: null,
@@ -513,11 +517,13 @@ final class WebsiteIconFamily extends $Family
 
   WebsiteIconProvider call(
     String websiteUrl,
-    double size,
-  ) =>
+    double size, {
+    String type = 'svg',
+  }) =>
       WebsiteIconProvider._(argument: (
         websiteUrl,
         size,
+        type: type,
       ), from: this);
 
   @override

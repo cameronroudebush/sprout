@@ -10,6 +10,7 @@ class SproutCard extends StatelessWidget {
   final Color? bgColor;
   final double? elevation;
   final bool clip;
+  final ShapeBorder? shape;
 
   const SproutCard({
     super.key,
@@ -20,6 +21,7 @@ class SproutCard extends StatelessWidget {
     this.bgColor,
     this.elevation,
     this.clip = true,
+    this.shape,
   });
 
   @override
@@ -30,9 +32,10 @@ class SproutCard extends StatelessWidget {
       elevation: elevation,
       clipBehavior: clip ? Clip.antiAlias : Clip.none,
       color: bgColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      shape: shape ??
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
       child: child,
     );
 

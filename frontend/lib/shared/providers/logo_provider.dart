@@ -77,14 +77,19 @@ Future<List<String>> providerIcon(Ref ref, ProviderConfig provider, double size)
 
 /// Provides an icon for an arbitrary website URL
 @Riverpod(keepAlive: true)
-Future<List<String>> websiteIcon(Ref ref, String websiteUrl, double size) async {
+Future<List<String>> websiteIcon(
+  Ref ref,
+  String websiteUrl,
+  double size, {
+  String type = 'svg',
+}) async {
   final clientId = ref.watch(secureConfigProvider).value?.brandFetchClientId;
   if (clientId == null || websiteUrl.isEmpty) return [];
 
   final domain = _cleanDomain(websiteUrl);
-  final d = size * 2;
+  final d = (size * 2).toInt();
 
   return [
-    "https://cdn.brandfetch.io/domain/$domain/fallback/404/h/$d/w/$d/icon?c=$clientId",
+    "https://cdn.brandfetch.io/domain/$domain/fallback/404/h/$d/w/$d/icon.$type?c=$clientId",
   ];
 }

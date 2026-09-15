@@ -91,7 +91,7 @@ final class AccountHoldingsProvider
   }
 }
 
-String _$accountHoldingsHash() => r'1d4a77dd177db03c78e457886fd8eb550c7e05e9';
+String _$accountHoldingsHash() => r'82a5d91ef57e5b1150d289f00879866dc240e172';
 
 /// Provides state to the account holdings info
 
@@ -191,7 +191,7 @@ final class AccountHoldingHistoryProvider
 }
 
 String _$accountHoldingHistoryHash() =>
-    r'3a6acfa792c9fcc70f85f965b8f75b494bcaa5e3';
+    r'b60e3c76404a394fb8f92734e5df7354a752d2f1';
 
 /// Provides state to the holding history per holding id
 
@@ -290,7 +290,7 @@ final class HoldingTimelineProvider
   }
 }
 
-String _$holdingTimelineHash() => r'7bffb548699a1a7d44f3a23d349957a46e3f7962';
+String _$holdingTimelineHash() => r'd4f2ac00ce2a48d7e5bce53c79d6e61fa303d307';
 
 /// Provides state to the account holding timelines
 

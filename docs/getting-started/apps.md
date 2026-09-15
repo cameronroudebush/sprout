@@ -33,6 +33,10 @@ If you prefer to avoid app stores entirely or want to test independent builds, y
 
 The Android app includes native home screen widgets designed to keep you updated on your financial status at a glance.
 
+<p align="center">
+    <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/widgets.png" alt="Widgets">
+</p>
+
 - **Overview Widget:** Displays a quick snapshot of your current net worth, including recent numerical and percentage changes.
 - **Transactions Widget:** Shows a scrolling list of your most recent transactions, displaying the merchant, category, amount, and pending status.
 

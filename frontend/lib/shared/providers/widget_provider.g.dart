@@ -33,7 +33,7 @@ final class WidgetSyncProvider
   WidgetSync create() => WidgetSync();
 }
 
-String _$widgetSyncHash() => r'09618350291316c3c43e254a715c3c25d26a21ee';
+String _$widgetSyncHash() => r'84ac35da2fb14a8798569fca2dd11bbe727acf01';
 
 abstract class _$WidgetSync extends $AsyncNotifier<void> {
   FutureOr<void> build();
