@@ -1,5 +1,6 @@
 import { AccountModule } from "@backend/account/account.module";
 import { AuthModule } from "@backend/auth/auth.module";
+import { BudgetModule } from "@backend/budget/budget.module";
 import { CashFlowModule } from "@backend/cash-flow/cash.flow.module";
 import { CategoryModule } from "@backend/category/category.module";
 import { ChatModule } from "@backend/chat/chat.module";
@@ -95,6 +96,7 @@ import { KeyvCacheableMemory } from "cacheable";
     CashFlowModule,
     InstitutionModule,
     CategoryModule,
+    BudgetModule,
     DemoModule,
   ],
   controllers: [],

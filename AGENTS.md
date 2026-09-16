@@ -115,6 +115,7 @@ The backend follows modular NestJS architecture patterns across features:
 
 - Encapsulate business logic, database queries via TypeORM models/repositories, external API calls, and calculations.
 - Declared as `@Injectable()` providers and injected into controllers or job processors.
+- **User Scoping in Database Queries**: Always specify `user: { id: user.id }` or `userId: user.id` in database queries (`findOne`, `find`, QueryBuilder) wherever possible to ensure data is strictly scoped and retrieved only for the associated user.
 
 ### 3. Background Jobs & Queues (`/jobs/`)
 
@@ -125,6 +126,9 @@ The backend follows modular NestJS architecture patterns across features:
 
 ### 4. Models & DTOs (`/model/`)
 
+- **Organization & Conventions**:
+    - Domain models and database entities are named `*.model.ts` and placed directly inside `model/` (e.g., `model/budget.model.ts`).
+    - API request and response payload DTOs are named `*.dto.ts` and placed inside `model/api/` in each module (e.g., `model/api/budget.overview.dto.ts`).
 - **API DTOs** (`model/api/*.dto.ts`): Request/response payload contracts annotated with `class-validator` (`@IsString()`, `@IsOptional()`, `@ValidateNested()`) and `class-transformer` (`@Type()`).
 - **Domain Models & Entities**: Database models subclassing TypeORM `BaseEntity` or custom entities located in `database/model/`.
 
@@ -213,6 +217,17 @@ To re-generate the Dart API client for the frontend after changing backend contr
     ```bash
     npm run api:generate:dart
     ```
+
+### Database Migrations
+
+To generate a database migration:
+
+```bash
+npm run migrate --prefix backend -- --name=MY-NAME-HERE
+```
+
+- **Note**: For PRs, you may only have one migration and it must be named relevantly.
+- **Note**: Due to Webpack compilation, you need to restart the backend after running the migration command so it recognizes the newly generated migration file.
 
 ### Code Formatting & Quality
 
