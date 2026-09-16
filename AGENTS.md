@@ -11,6 +11,7 @@ When generating or extending unit tests in the `/backend` package:
 
 2. **Coverage Goal:**
     - Target 100% line, statement, function, and branch coverage for any new or updated unit test suites in `/backend`.
+    - Run coverage summaries using: `npm run test:cov --prefix backend -- --coverageReporters="json-summary" "text"`
 
 3. **Centralized Test Entities:**
     - Always use centralized test entities from `@backend/test/entities` (`TestEntities`) whenever creating model or entity mock data in test files (`TestEntities.user`, `TestEntities.adminUser`, `TestEntities.userConfig`, `TestEntities.account`, `TestEntities.institution`, etc.) so model definitions are unified in a single location and easy to maintain.

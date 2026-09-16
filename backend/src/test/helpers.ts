@@ -39,12 +39,31 @@ jest.mock("@backend/config/core", () => ({
         sendTime: "0 12 * * 0",
         validate: jest.fn(),
       },
+      notification: {
+        maxNotificationsPerUser: 50,
+        firebase: {
+          enabled: false,
+          apiKey: "test-api-key",
+          appId: "test-app-id",
+          projectNumber: 12345,
+          projectId: "test-project-id",
+          clientEmail: "test@project.iam.gserviceaccount.com",
+          privateKey: "test-private-key",
+          validate: jest.fn(),
+        },
+      },
       prompt: {
+        type: "gemini",
         enabled: true,
+        gemini: {
+          key: "test-gemini-key",
+          chatModel: "gemini-2.5-flash",
+          overviewModel: "gemini-2.5-flash",
+        },
       },
       lightModeTiles: [],
       darkModeTiles: [],
-      brandFetch: { clientId: "bf-id" },
+      brandFetch: { clientId: "bf-id", getWebsiteIconUrl: jest.fn().mockReturnValue("https://icon.local") },
     },
     holding: {
       cleanupRemovedHoldings: true,
