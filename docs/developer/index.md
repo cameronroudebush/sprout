@@ -1,6 +1,6 @@
 ---
 title: Developer Overview
-description: Learn about the inter-workings of Sprout.
+description: Learn about the inner workings of Sprout.
 hide:
     - footer
 ---
