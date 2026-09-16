@@ -64,6 +64,9 @@ jest.mock("@backend/config/core", () => ({
       lightModeTiles: [],
       darkModeTiles: [],
       brandFetch: { clientId: "bf-id", getWebsiteIconUrl: jest.fn().mockReturnValue("https://icon.local") },
+      exchangeRate: {
+        time: "0 0 * * *",
+      },
     },
     holding: {
       cleanupRemovedHoldings: true,
