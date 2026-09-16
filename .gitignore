@@ -84,3 +84,4 @@ backups
 .cache
 site
 coverage
+junit.xml

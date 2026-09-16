@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Tests & Generate Coverage
         working-directory: backend
-        run: npm test -- --coverage
+        run: npm test -- --ci --coverage
 
       # Upload the generated report directly to Codecov
       - name: Upload coverage reports to Codecov
@@ -40,3 +40,12 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./backend/coverage/
           fail_ci_if_error: true
+
+      # Upload test results for Test Analytics
+      - name: Upload test results to Codecov
+        uses: codecov/codecov-action@v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./backend/coverage/
+          fail_ci_if_error: true
+          report_type: test_results
