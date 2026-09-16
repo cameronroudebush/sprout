@@ -1,0 +1,84 @@
+import { setupTests } from "@backend/test/helpers";
+setupTests();
+
+import { ConfigurationService } from "@backend/config/config.service";
+import { Configuration } from "@backend/config/core";
+import { SproutLogger } from "@backend/core/logger";
+import fs from "fs";
+
+describe("ConfigurationService", () => {
+  let service: ConfigurationService;
+  let logger: jest.Mocked<SproutLogger>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    logger = {
+      setContext: jest.fn(),
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as any;
+    service = new ConfigurationService(logger);
+  });
+
+  describe("configFileLocation", () => {
+    it("should return expected path containing appName", () => {
+      const location = service.configFileLocation;
+      expect(location).toContain(".config.yml");
+    });
+  });
+
+  describe("load & save", () => {
+    it("should log and return early when save is called with writeConfigFile disabled", () => {
+      const originalWrite = Configuration.writeConfigFile;
+      Configuration.writeConfigFile = false;
+
+      service.save("test-path.yml", true);
+      expect(logger.log).toHaveBeenCalledWith("Config file writing is disabled.");
+
+      Configuration.writeConfigFile = originalWrite;
+    });
+
+    it("should write config file when writeConfigFile is enabled", () => {
+      const originalWrite = Configuration.writeConfigFile;
+      Configuration.writeConfigFile = true;
+
+      jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
+
+      service.save("test-path.yml", true);
+
+      expect(logger.log).toHaveBeenCalledWith("Writing config file to test-path.yml");
+      expect(fs.writeFileSync).toHaveBeenCalled();
+
+      Configuration.writeConfigFile = originalWrite;
+    });
+
+    it("should load config, environment variables, and save when load is called", () => {
+      jest.spyOn(fs, "existsSync").mockReturnValue(true);
+      jest.spyOn(fs, "readFileSync").mockReturnValue(Buffer.from("server:\n  port: 9000\n"));
+      jest.spyOn(service, "save").mockImplementation(() => service);
+
+      const res = service.load("test-path.yml", true);
+
+      expect(logger.log).toHaveBeenCalledWith("Loading config file from test-path.yml");
+      expect(res).toBe(service);
+    });
+
+    it("should skip file reading if config file does not exist", () => {
+      jest.spyOn(fs, "existsSync").mockReturnValue(false);
+      jest.spyOn(service, "save").mockImplementation(() => service);
+
+      const res = service.load("test-path.yml", false);
+
+      expect(res).toBe(service);
+    });
+  });
+
+  describe("convertCronToMilliseconds", () => {
+    it("should calculate delay in ms until next cron run", async () => {
+      const delay = await service.convertCronToMilliseconds("* * * * *", 100);
+      expect(typeof delay).toBe("number");
+      expect(delay).toBeGreaterThan(0);
+    });
+  });
+});

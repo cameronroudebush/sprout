@@ -10,10 +10,26 @@ import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.inst
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleType } from "@backend/transaction/model/transaction.rule.type";
+import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 
 /** A map of re-usable entities already pre configured */
 export const TestEntities = {
+  get userConfig() {
+    return UserConfig.fromPlain({
+      id: "config-default-id",
+      netWorthRange: "oneMonth",
+      emailUpdateFrequency: "none",
+      themeStyle: "bliss",
+      currency: "USD",
+      privateMode: false,
+      secureMode: false,
+      allowWidgets: true,
+      simpleFinToken: "encrypted-token",
+      geminiKey: "encrypted-key",
+    });
+  },
+
   get user() {
     return User.fromPlain({
       id: "user-default-id",
@@ -34,6 +50,13 @@ export const TestEntities = {
         simpleFinToken: "encrypted-token",
         geminiKey: "encrypted-key",
       },
+    });
+  },
+
+  get adminUser() {
+    return User.fromPlain({
+      ...this.user,
+      admin: true,
     });
   },
 

@@ -41,6 +41,7 @@ jobs:
             .dockerignore
           files_ignore: |
             **/*.spec.ts
+            backend/src/test/**
             test/**
             frontend/android/**
             frontend/ios/**
