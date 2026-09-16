@@ -165,7 +165,7 @@ export class PlaidProviderService extends ProviderBase<
   protected async performSync(user: User, asset: PlaidInstitutionAsset, accountsOnly: boolean): Promise<ProviderSyncResult[]> {
     await this.rateLimit(user).incrementOrError();
     const accountsResponse = await this.plaidClient.accountsGet({ access_token: asset.accessToken });
-    const hasInvestment = accountsResponse.data.accounts.some((acc) => this.mapType(acc.type) === AccountType.investment);
+    const hasInvestment = accountsResponse.data.accounts.some((acc: { type: PlaidAccountType }) => this.mapType(acc.type) === AccountType.investment);
 
     let securities: PlaidSecurity[] | undefined;
     let allHoldings: PlaidHolding[] | undefined;

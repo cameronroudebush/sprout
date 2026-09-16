@@ -31,11 +31,12 @@ jobs:
 
       - name: Run Tests & Generate Coverage
         working-directory: backend
-        run: npm test -- --coverage --reporters=jest-junit
+        run: npm test -- --ci --coverage --reporters=jest-junit
 
       # Upload the generated report directly to Codecov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./backend/coverage/
           fail_ci_if_error: true
