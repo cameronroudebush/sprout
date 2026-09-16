@@ -3,7 +3,6 @@ setupTests();
 
 import { AdminGuard } from "@backend/auth/guard/admin.guard";
 import { TestEntities } from "@backend/test/entities";
-import { User } from "@backend/user/model/user.model";
 import { ExecutionContext, ForbiddenException } from "@nestjs/common";
 
 describe("AdminGuard", () => {
@@ -31,7 +30,7 @@ describe("AdminGuard", () => {
     }
 
     it("should return true when user is an instance of User and admin is true", () => {
-      const adminUser = Object.assign(Object.create(User.prototype), TestEntities.user, { admin: true });
+      const adminUser = TestEntities.adminUser;
       const context = createMockContext(adminUser);
 
       expect(guard.canActivate(context)).toBe(true);
@@ -48,7 +47,7 @@ describe("AdminGuard", () => {
     });
 
     it("should throw ForbiddenException when user is an instance of User but admin is false", () => {
-      const regularUser = Object.assign(Object.create(User.prototype), TestEntities.user, { admin: false });
+      const regularUser = TestEntities.user;
       const context = createMockContext(regularUser);
 
       expect(() => guard.canActivate(context)).toThrow(ForbiddenException);

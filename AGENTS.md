@@ -12,7 +12,10 @@ When generating or extending unit tests in the `/backend` package:
 2. **Coverage Goal:**
     - Target 100% line, statement, function, and branch coverage for any new or updated unit test suites in `/backend`.
 
-3. **Writing Unit Tests:**
+3. **Centralized Test Entities:**
+    - Always use centralized test entities from `@backend/test/entities` (`TestEntities`) whenever creating model or entity mock data in test files (`TestEntities.user`, `TestEntities.adminUser`, `TestEntities.userConfig`, `TestEntities.account`, `TestEntities.institution`, etc.) so model definitions are unified in a single location and easy to maintain.
+
+4. **Writing Unit Tests:**
     - Always invoke `setupTests()` from `@backend/test/helpers` at the top of each test file before importing NestJS modules or application entities:
         ```typescript
         import { setupTests } from "@backend/test/helpers";
@@ -24,5 +27,5 @@ When generating or extending unit tests in the `/backend` package:
     - Use `jest.spyOn()` for static model/entity methods (e.g. `User.count()`, `Institution.find()`).
     - Use `.rejects.toThrow()` for asynchronous error assertions.
 
-4. **Code Style & Formatting:**
+5. **Code Style & Formatting:**
     - Always run `npm run prettier:write` after creating or modifying code or test files.

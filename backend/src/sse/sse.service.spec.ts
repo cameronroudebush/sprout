@@ -9,7 +9,7 @@ import { User } from "@backend/user/model/user.model";
 describe("SSEService", () => {
   let service: SSEService;
   const user1 = TestEntities.user;
-  const user2 = { ...user1, id: "user-2" } as User;
+  const user2 = User.fromPlain({ ...TestEntities.user, id: "user-2" });
 
   beforeEach(() => {
     jest.clearAllMocks();

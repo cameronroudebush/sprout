@@ -6,8 +6,8 @@ import { EncryptionTransformer } from "@backend/core/decorator/encryption.decora
 import { Institution } from "@backend/institution/model/institution.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
-import { ChartRange } from "@backend/user/model/chart.range.model";
-import { CurrencyOptions, UserConfig } from "@backend/user/model/user.config.model";
+import { TestEntities } from "@backend/test/entities";
+import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { UserService } from "@backend/user/user.service";
 import { InternalServerErrorException } from "@nestjs/common";
@@ -81,10 +81,10 @@ describe("UserService", () => {
 
   describe("syncEncryptedFields", () => {
     it("should replace hidden values with existing values for encrypted properties", async () => {
-      const existing = new UserConfig(false, ChartRange.oneDay, false, false, true);
+      const existing = TestEntities.userConfig;
       existing.simpleFinToken = "encrypted_existing_token";
 
-      const incoming = new UserConfig(false, ChartRange.oneDay, false, false, true);
+      const incoming = TestEntities.userConfig;
       incoming.simpleFinToken = EncryptionTransformer.HIDDEN_VALUE;
 
       jest.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
@@ -96,10 +96,10 @@ describe("UserService", () => {
     });
 
     it("should convert setup token for simpleFinToken if dynamic value is provided", async () => {
-      const existing = new UserConfig(false, ChartRange.oneDay, false, false, true);
+      const existing = TestEntities.userConfig;
       existing.simpleFinToken = "old_token";
 
-      const incoming = new UserConfig(false, ChartRange.oneDay, false, false, true);
+      const incoming = TestEntities.userConfig;
       incoming.simpleFinToken = "new_setup_token";
 
       jest.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
@@ -112,10 +112,10 @@ describe("UserService", () => {
     });
 
     it("should do nothing for non-encrypted properties or unhandled conditions", async () => {
-      const existing = new UserConfig(false, ChartRange.oneDay, false, false, true);
+      const existing = TestEntities.userConfig;
       existing.currency = CurrencyOptions.USD;
 
-      const incoming = new UserConfig(false, ChartRange.oneDay, false, false, true);
+      const incoming = TestEntities.userConfig;
       incoming.currency = CurrencyOptions.EUR;
 
       jest.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockReturnValue(false);
@@ -131,25 +131,23 @@ describe("UserService", () => {
     let mockUser: User;
 
     beforeEach(() => {
-      mockUser = {
-        id: "user-1",
-        remove: jest.fn().mockResolvedValue(undefined),
-      } as any;
+      mockUser = TestEntities.user;
+      mockUser.remove = jest.fn().mockResolvedValue(undefined);
     });
 
     it("should successfully unlink institutions and delete user", async () => {
-      const mockInstitution = { id: "inst-1" } as Institution;
+      const mockInstitution = TestEntities.institution;
       jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockResolvedValue(true);
 
       await service.deleteUser(mockUser);
 
-      expect(mockProvider.unlinkInstitution).toHaveBeenCalledWith(mockUser, "inst-1");
+      expect(mockProvider.unlinkInstitution).toHaveBeenCalledWith(mockUser, mockInstitution.id);
       expect(mockUser.remove).toHaveBeenCalled();
     });
 
     it("should abort deletion if provider unlink returns false and forceDelete is false", async () => {
-      const mockInstitution = { id: "inst-1" } as Institution;
+      const mockInstitution = TestEntities.institution;
       jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockResolvedValue(false);
 
@@ -158,7 +156,7 @@ describe("UserService", () => {
     });
 
     it("should proceed with deletion if provider unlink returns false but forceDelete is true", async () => {
-      const mockInstitution = { id: "inst-1" } as Institution;
+      const mockInstitution = TestEntities.institution;
       jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockResolvedValue(false);
 
@@ -168,7 +166,7 @@ describe("UserService", () => {
     });
 
     it("should rethrow InternalServerErrorException if thrown during unlink when forceDelete is false", async () => {
-      const mockInstitution = { id: "inst-1" } as Institution;
+      const mockInstitution = TestEntities.institution;
       jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockRejectedValue(new InternalServerErrorException("API error"));
 
@@ -177,7 +175,7 @@ describe("UserService", () => {
     });
 
     it("should handle generic exception, log error, and abort deletion when forceDelete is false", async () => {
-      const mockInstitution = { id: "inst-1" } as Institution;
+      const mockInstitution = TestEntities.institution;
       jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockRejectedValue(new Error("Network crash"));
 
@@ -186,7 +184,7 @@ describe("UserService", () => {
     });
 
     it("should handle generic exception and proceed with deletion when forceDelete is true", async () => {
-      const mockInstitution = { id: "inst-1" } as Institution;
+      const mockInstitution = TestEntities.institution;
       jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockRejectedValue(new Error("Network crash"));
 
