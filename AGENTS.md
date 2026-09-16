@@ -217,8 +217,6 @@ To re-generate the Dart API client for the frontend after changing backend contr
     npm run prettier:check
     ```
 
----
-
 ## Documentation Structure & Formatting Guidelines
 
 When writing, updating, or reorganizing documentation under `/docs`:
