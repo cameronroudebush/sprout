@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Tests & Generate Coverage
         working-directory: backend
-        run: npm test -- --coverage
+        run: npm test -- --coverage --reporters=jest-junit
 
       # Upload the generated report directly to Codecov
       - name: Upload coverage reports to Codecov
