@@ -31,6 +31,10 @@ jest.mock("@backend/config/core", () => ({
           clientId: "app-client-id",
         },
       },
+      rateLimit: {
+        ttl: 60,
+        limit: 100,
+      },
       cache: {
         type: "local",
       },
@@ -100,6 +104,9 @@ jest.mock("@backend/config/core", () => ({
         consumerKey: "test-key",
       },
       zillow: {
+        enabled: true,
+      },
+      coinbase: {
         enabled: true,
       },
     },
