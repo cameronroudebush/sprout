@@ -18,7 +18,7 @@
     "@nestjs/passport": "^12.0.0",
     "@nestjs/platform-express": "^12.0.1",
     "@nestjs/swagger": "^12.0.1",
-    "@nestjs/throttler": "^6.4.0",
+    "@nestjs/throttler": "^6.6.0",
     "@scalar/nestjs-api-reference": "^1.1.7",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -73,24 +73,25 @@
     "copy-webpack-plugin": "^14.0.0",
     "cross-env": "^10.1.0",
     "cross-var": "^1.1.0",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
     "git-describe": "^4.1.1",
     "jest": "^30.4.2",
     "node-loader": "^2.1.0",
     "nodemon": "^3.1.0",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.9",
-    "ts-loader": "^9.5.4",
+    "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
     "tsconfig-paths": "^4.2.0",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
     "tslib": "^2.6.2",
     "typescript": "^6.0.2",
+    "webpack": "^5.111.0",
     "webpack-node-externals": "^3.0.0"
   },
   "overrides": {
-    "google-auth-library": "^9.14.2",
-    "webpack": "5.100.2",
-    "typescript": "^6.0.2"
+    "google-auth-library": "^9.14.2"
   },
   "scripts": {
     "start": "nest start --watch",
