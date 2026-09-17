@@ -72,7 +72,7 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         // Apply Pending Highlight vs Default Row background
         if (isPending) {
             views.setViewVisibility(R.id.item_pending, View.VISIBLE)
-            
+
             // Subtle 10% white overlay background
             val highlightOverlay = Color.argb(0x1A, 0xFF, 0xFF, 0xFF) // ~10% white overlay
             views.setInt(R.id.transaction_item_root, "setBackgroundColor", highlightOverlay)
