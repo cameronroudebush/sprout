@@ -41,7 +41,9 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if transaction to edit does not exist", async () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should throw BadRequestException if transaction is pending", async () => {
@@ -58,7 +60,9 @@ describe("TransactionController", () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any)).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it("should update description and category, save, and force update SSE", async () => {
@@ -69,7 +73,10 @@ describe("TransactionController", () => {
       const cat = TestEntities.category;
       jest.spyOn(Category, "findOne").mockResolvedValue(cat);
 
-      const res = await controller.edit(tx.id, user, { categoryId: cat.id, description: "New Desc" } as any);
+      const res = await controller.edit(tx.id, user, {
+        categoryId: cat.id,
+        description: "New Desc",
+      } as any);
 
       expect(tx.description).toBe("New Desc");
       expect(tx.category).toBe(cat);
@@ -100,11 +107,58 @@ describe("TransactionController", () => {
   });
 
   describe("getByQuery", () => {
+    it("should return transactions directly by ID", async () => {
+      const txList = [TestEntities.transaction];
+      jest.spyOn(Transaction, "find").mockResolvedValue(txList);
+
+      const res = await controller.getByQuery(user, "tx-123");
+
+      expect(Transaction.find).toHaveBeenCalledWith({
+        where: { id: "tx-123", account: { user: { id: user.id } } },
+        relations: { category: { parentCategory: true } },
+      });
+      expect(res).toBe(txList);
+    });
+
+    it("should return transactions filtered by category ID with children categories", async () => {
+      const parentCat = Category.fromPlain({ id: "cat-parent" });
+      const childCat = Category.fromPlain({ id: "cat-child" });
+
+      jest.spyOn(Category, "findOne").mockResolvedValue(parentCat);
+      jest.spyOn(Category, "find").mockResolvedValueOnce([childCat]).mockResolvedValueOnce([]);
+      jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
+
+      const res = await controller.getByQuery(
+        user,
+        undefined,
+        0,
+        10,
+        "acc-1",
+        "cat-parent",
+        "grocery",
+        undefined,
+        "2026-01-01",
+        "2026-01-31",
+        true,
+      );
+
+      expect(res).toBeDefined();
+    });
+
     it("should return transactions based on category, date, description filters", async () => {
       const txList = [TestEntities.transaction];
       jest.spyOn(Transaction, "find").mockResolvedValue(txList);
 
-      const res = await controller.getByQuery(user, "", 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
+      const res = await controller.getByQuery(
+        user,
+        "",
+        0,
+        10,
+        "acc-1",
+        "unknown",
+        "grocery",
+        "2026-06-02",
+      );
 
       expect(Transaction.find).toHaveBeenCalled();
       expect(res).toBe(txList);
@@ -113,7 +167,9 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if category filter id is invalid", async () => {
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid"),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -138,6 +194,16 @@ describe("TransactionController", () => {
       expect(res.total).toBe(15);
       expect(res.accounts[TestEntities.account.id]).toBe(15);
     });
+
+    it("should count total transactions with accountId, category, and description filters", async () => {
+      jest.spyOn(Transaction, "count").mockResolvedValue(5);
+
+      const res1 = await controller.getTotal(user, "acc-1", "unknown", "grocery");
+      expect(res1.total).toBe(5);
+
+      const res2 = await controller.getTotal(user, undefined, "cat-1");
+      expect(res2.total).toBe(5);
+    });
   });
 
   describe("removeDuplicates", () => {
@@ -150,25 +216,39 @@ describe("TransactionController", () => {
       expect(notificationService.notifyUser).toHaveBeenCalled();
     });
 
-    it("should remove duplicate transactions and merge category/extra if present", async () => {
-      const tx1 = TestEntities.transaction;
+    it("should remove duplicate transactions and merge category/extra if present, swapping providerId when needed", async () => {
+      const account = TestEntities.account;
+      jest.spyOn(Account, "findOne").mockResolvedValue(account);
 
-      const tx2 = Transaction.fromPlain({
-        id: "tx-2",
-        amount: tx1.amount,
-        posted: tx1.posted,
-        account: tx1.account,
-        categoryId: "cat-2",
-        category: TestEntities.category,
+      const txKeptNoProvider = Transaction.fromPlain({
+        id: "tx-kept",
+        amount: 50.0,
+        posted: new Date("2026-01-01T10:00:00Z"),
+        providerId: undefined,
+        account,
+        extra: { logoUrl: "http://logo.png" },
       });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([tx1, tx2]);
+      const txRemoveWithProvider = Transaction.fromPlain({
+        id: "tx-remove",
+        amount: 50.0,
+        posted: new Date("2026-01-01T12:00:00Z"),
+        providerId: "prov-123",
+        account,
+        categoryId: "cat-1",
+        category: TestEntities.category,
+        extra: { merchantName: "Coffee Shop" },
+      });
+
+      jest
+        .spyOn(Transaction, "find")
+        .mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
       jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
       jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
-      const res = await controller.removeDuplicates(user);
+      const res = await controller.removeDuplicates(user, account.id);
 
-      expect(Transaction.deleteMany).toHaveBeenCalledWith(["tx-2"]);
+      expect(Transaction.deleteMany).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
       expect(res).toContain("removed 1 duplicate");
     });
