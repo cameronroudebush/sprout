@@ -18,7 +18,7 @@ jest.mock("@backend/config/config.service", () => {
 });
 
 import { Configuration } from "@backend/config/core";
-import { checkScript } from "@backend/main";
+import { checkScript, main } from "@backend/main";
 
 describe("main.ts", () => {
   let originalArgv: string[];
@@ -55,6 +55,41 @@ describe("main.ts", () => {
       await checkScript();
 
       expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe("main", () => {
+    it("should start server in production mode (non-dev build)", async () => {
+      Configuration.isDevBuild = false;
+      process.argv = ["node", "main.js"];
+      const serverModule = require("@backend/server");
+
+      await main();
+
+      expect(serverModule.startupServer).toHaveBeenCalled();
+    });
+
+    it("should generate openapi spec and start server in dev build mode when no script provided", async () => {
+      Configuration.isDevBuild = true;
+      process.argv = ["node", "main.js"];
+      const generateApiSpec = require("@backend/scripts/generate.api-spec");
+      const serverModule = require("@backend/server");
+
+      await main();
+
+      expect(generateApiSpec.generateOpenApiSpec).toHaveBeenCalledWith("../docs/assets/openapi-spec.json");
+      expect(serverModule.startupServer).toHaveBeenCalled();
+    });
+
+    it("should execute checkScript when running script in dev build mode", async () => {
+      Configuration.isDevBuild = true;
+      process.argv = ["node", "main.js", "generate.api-spec", "out.json"];
+      const generateApiSpec = require("@backend/scripts/generate.api-spec");
+
+      await main();
+
+      expect(generateApiSpec.generateOpenApiSpec).toHaveBeenCalledWith("out.json");
+      expect(exitSpy).toHaveBeenCalledWith(0);
     });
   });
 });
