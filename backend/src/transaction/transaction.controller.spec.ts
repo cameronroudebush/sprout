@@ -41,9 +41,7 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if transaction to edit does not exist", async () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException if transaction is pending", async () => {
@@ -60,9 +58,7 @@ describe("TransactionController", () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(
-        controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any)).rejects.toThrow(NotFoundException);
     });
 
     it("should update description and category, save, and force update SSE", async () => {
@@ -82,6 +78,19 @@ describe("TransactionController", () => {
       expect(tx.category).toBe(cat);
       expect(tx.manuallyEdited).toBe(true);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+      expect(res).toBe(tx);
+    });
+
+    it("should preserve description when description is omitted from update body", async () => {
+      const tx = TestEntities.transaction;
+      tx.description = "Original Description";
+      tx.pending = false;
+      tx.update = jest.fn().mockResolvedValue(tx);
+      jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+
+      const res = await controller.edit(tx.id, user, {} as any);
+
+      expect(tx.description).toBe("Original Description");
       expect(res).toBe(tx);
     });
   });
@@ -128,19 +137,7 @@ describe("TransactionController", () => {
       jest.spyOn(Category, "find").mockResolvedValueOnce([childCat]).mockResolvedValueOnce([]);
       jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
 
-      const res = await controller.getByQuery(
-        user,
-        undefined,
-        0,
-        10,
-        "acc-1",
-        "cat-parent",
-        "grocery",
-        undefined,
-        "2026-01-01",
-        "2026-01-31",
-        true,
-      );
+      const res = await controller.getByQuery(user, undefined, 0, 10, "acc-1", "cat-parent", "grocery", undefined, "2026-01-01", "2026-01-31", true);
 
       expect(res).toBeDefined();
     });
@@ -149,27 +146,26 @@ describe("TransactionController", () => {
       const txList = [TestEntities.transaction];
       jest.spyOn(Transaction, "find").mockResolvedValue(txList);
 
-      const res = await controller.getByQuery(
-        user,
-        "",
-        0,
-        10,
-        "acc-1",
-        "unknown",
-        "grocery",
-        "2026-06-02",
-      );
+      const res = await controller.getByQuery(user, "", 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
 
       expect(Transaction.find).toHaveBeenCalled();
       expect(res).toBe(txList);
     });
 
+    it("should handle single pagination index params (startIndex only or endIndex only)", async () => {
+      jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
+
+      const res1 = await controller.getByQuery(user, undefined, 5, undefined);
+      expect(res1).toBeDefined();
+
+      const res2 = await controller.getByQuery(user, undefined, undefined, 10);
+      expect(res2).toBeDefined();
+    });
+
     it("should throw NotFoundException if category filter id is invalid", async () => {
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(
-        controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid"),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -201,7 +197,7 @@ describe("TransactionController", () => {
       const res1 = await controller.getTotal(user, "acc-1", "unknown", "grocery");
       expect(res1.total).toBe(5);
 
-      const res2 = await controller.getTotal(user, undefined, "cat-1");
+      const res2 = await controller.getTotal(user, undefined, "cat-1", "grocery");
       expect(res2.total).toBe(5);
     });
   });
@@ -237,12 +233,10 @@ describe("TransactionController", () => {
         account,
         categoryId: "cat-1",
         category: TestEntities.category,
-        extra: { merchantName: "Coffee Shop" },
+        extra: { merchantName: "Coffee Shop", logoUrl: "http://other-logo.png" },
       });
 
-      jest
-        .spyOn(Transaction, "find")
-        .mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
+      jest.spyOn(Transaction, "find").mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
       jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
       jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
@@ -251,6 +245,47 @@ describe("TransactionController", () => {
       expect(Transaction.deleteMany).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
       expect(res).toContain("removed 1 duplicate");
+    });
+
+    it("should handle duplicate removal when removed.affected is undefined and when extra is identical", async () => {
+      const account = TestEntities.account;
+      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+
+      const txKept = Transaction.fromPlain({
+        id: "tx-kept-2",
+        amount: 30.0,
+        posted: new Date("2026-01-01T10:00:00Z"),
+        providerId: "prov-1",
+        account,
+        categoryId: "cat-1",
+        extra: { merchantName: "Grocery Store" },
+      });
+
+      const txDup1 = Transaction.fromPlain({
+        id: "tx-dup-1",
+        amount: 30.0,
+        posted: new Date("2026-01-01T11:00:00Z"),
+        providerId: "prov-1",
+        account,
+        extra: { merchantName: "Grocery Store" },
+      });
+
+      const txDup2 = Transaction.fromPlain({
+        id: "tx-dup-2",
+        amount: 30.0,
+        posted: new Date("2026-01-01T12:00:00Z"),
+        providerId: "prov-2",
+        account,
+        extra: { logoUrl: "http://logo.png" },
+      });
+
+      jest.spyOn(Transaction, "find").mockResolvedValue([txKept, txDup1, txDup2]);
+      jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: undefined } as any);
+
+      const res = await controller.removeDuplicates(user, account.id);
+
+      expect(res).toContain("Successfully removed 2 duplicate transactions");
     });
   });
 });

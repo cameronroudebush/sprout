@@ -73,9 +73,7 @@ describe("TransactionRuleController", () => {
     it("should throw NotFoundException if matching rule not found", async () => {
       jest.spyOn(TransactionRule, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit("rule-invalid", user, {} as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(controller.edit("rule-invalid", user, {} as any)).rejects.toThrow(NotFoundException);
     });
 
     it("should throw NotFoundException if categoryId provided does not exist", async () => {
@@ -89,9 +87,7 @@ describe("TransactionRuleController", () => {
         value: "val",
       });
 
-      await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException if rule type is invalid", async () => {
@@ -103,18 +99,13 @@ describe("TransactionRuleController", () => {
         value: "val",
       });
 
-      await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(BadRequestException);
     });
 
     it("should update rule, reorder if order changed, apply rules, and force update", async () => {
       const rule = TestEntities.transactionRule;
       rule.order = 1;
-      jest
-        .spyOn(TransactionRule, "findOne")
-        .mockResolvedValueOnce(rule)
-        .mockResolvedValueOnce(rule);
+      jest.spyOn(TransactionRule, "findOne").mockResolvedValueOnce(rule).mockResolvedValueOnce(rule);
 
       const cat = TestEntities.category;
       jest.spyOn(Category, "findOne").mockResolvedValue(cat);
@@ -194,13 +185,7 @@ describe("TransactionRuleController", () => {
     it("should call transactionRuleService.applyRulesToTransactions and force update", async () => {
       await controller.applyRules(user, true, false);
 
-      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(
-        user,
-        undefined,
-        undefined,
-        true,
-        false,
-      );
+      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user, undefined, undefined, true, false);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
     });
   });
