@@ -21,7 +21,7 @@ By default, Sprout retrieves notifications from the server API whenever you open
 
 !!! note "Authentication"
 
-    Sprout has to be logged in at least once to obtain the necessary Firebase configuration. Additionally, if your session token ever expires (for either `OIDC` or `Local`), push notifications will not be received until you log in again.
+    Sprout has to be logged in at-least once to obtain the necessary firebase configuration. Additionally, if your token ever expires (for either `OIDC` or `Local`), notifications will not be gathered.
 
 ## Prerequisite: Firebase Project
 
@@ -139,7 +139,7 @@ sprout_server_notification_firebase_clientEmail=firebase-adminsdk-xxxxx@sprout-s
 sprout_server_notification_firebase_privateKey="-----BEGIN PRIVATE KEY-----\nMIIEvQIBA...\n-----END PRIVATE KEY-----\n"
 ```
 
-For more configuration information, [see the configuration page](./configuration.md).
+Fore more configuration information, [see the configuration page](./configuration.md).
 
 ## Troubleshooting
 

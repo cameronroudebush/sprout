@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' hide Category;
@@ -13,7 +15,6 @@ import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dar
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/color_extensions.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';
-import 'package:sprout/shared/models/widget_image_utility.dart';
 import 'package:sprout/shared/providers/bg_job_provider.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
@@ -87,12 +88,69 @@ class WidgetSync extends _$WidgetSync {
     await _saveToNative(data);
   }
 
+  /// Downloads the remote image and converts it into a Base64 string for Android RemoteViews.
+  /// Inspects raw magic bytes to guarantee valid PNG payloads.
+  Future<String?> _getBase64Icon(String? iconUrl) async {
+    if (iconUrl == null || iconUrl.isEmpty) return null;
+    try {
+      final httpClient = HttpClient();
+      final request = await httpClient.getUrl(Uri.parse(iconUrl));
+      request.followRedirects = true;
+      request.maxRedirects = 5;
+      final response = await request.close();
+      if (response.statusCode == 200) {
+        final bytes = await consolidateHttpClientResponseBytes(response);
+        final isPngBitmap =
+            bytes.length >= 4 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47;
+        if (isPngBitmap) {
+          return base64Encode(bytes).replaceAll('\n', '').replaceAll('\r', '').trim();
+        } else {
+          LoggerProvider.warning("Icon payload is not a PNG (Magic bytes mismatch) from $iconUrl");
+        }
+      } else {
+        LoggerProvider.warning("Failed to fetch icon. Status code: ${response.statusCode} for $iconUrl");
+      }
+    } catch (e) {
+      LoggerProvider.error("Failed to fetch widget PNG icon base64: $e");
+    }
+    return null;
+  }
+
+  /// Directly paints the CategoryIcon look onto a canvas without relying on an element tree layout.
+  Future<String> _generateCategoryFallbackBase64(Category? category) async {
+    const double canvasSize = 48.0;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, canvasSize, canvasSize));
+    final bgPaint = Paint()..color = const Color(0xFF2C353D);
+    canvas.drawCircle(const Offset(canvasSize / 2, canvasSize / 2), canvasSize / 2, bgPaint);
+    final iconData = CategoryIcon.iconLibrary[category?.icon] ?? Icons.question_mark_rounded;
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    textPainter.text = TextSpan(
+      text: String.fromCharCode(iconData.codePoint),
+      style: TextStyle(
+        fontSize: 24,
+        fontFamily: iconData.fontFamily,
+        package: iconData.fontPackage,
+        color: Colors.white,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset((canvasSize - textPainter.width) / 2, (canvasSize - textPainter.height) / 2),
+    );
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(canvasSize.toInt(), canvasSize.toInt());
+    final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+    return base64Encode(pngBytes!.buffer.asUint8List());
+  }
+
   /// Aggregates data from [NetWorth] and [Transactions] providers.
   Future<Map<String, dynamic>> _prepareData() async {
     final userConfig = ref.read(userConfigProvider).value;
     final userConfigAsync = ref.read(userConfigProvider.notifier);
     final theme = userConfigAsync.activeTheme(userConfig);
-    final formatter = ref.read(currencyFormatterProvider);
+    final formatter = ref.watch(currencyFormatterProvider);
     final categories = ref.read(categoriesProvider).value ?? [];
     Map<String, Object>? data;
     String failureMessage = "No data available. Check settings.";
@@ -116,24 +174,14 @@ class WidgetSync extends _$WidgetSync {
             final category = categories.firstWhereOrNull((c) => c.id == t.categoryId);
             final categoryName = category?.name ?? "Unknown";
             final websiteUrl = t.extra?.website;
-            String? resolvedIconUrl;
-            // Resolve the network URL if available
+            // Determine the icon to display
+            String? iconBase64;
             if (websiteUrl != null && websiteUrl.isNotEmpty) {
-              try {
-                // Use ref.read instead of ref.watch in asynchronous loops
-                final icon = await ref.read(websiteIconProvider(websiteUrl, 48, type: "png").future);
-                if (icon.isNotEmpty) resolvedIconUrl = icon.first;
-              } catch (e) {
-                LoggerProvider.warning("Failed to fetch website icon for $websiteUrl: $e");
-              }
+              final icon = (await ref.watch(websiteIconProvider(websiteUrl, 24, type: "png").future));
+              if (icon.isNotEmpty) iconBase64 = await _getBase64Icon(icon.first);
             }
-            final fallbackIconData = CategoryIcon.iconLibrary[category?.icon] ?? Icons.question_mark_rounded;
-            final iconBase64 = await WidgetImageUtility.getSquircleBase64(
-              imageUrl: resolvedIconUrl,
-              fallbackIcon: fallbackIconData,
-              fallbackBgColor: theme.colorScheme.primaryContainer,
-              iconColor: theme.colorScheme.onPrimaryContainer,
-            );
+            iconBase64 ??= await _generateCategoryFallbackBase64(category);
+
             return {
               "id": t.id,
               "merchant": t.description,

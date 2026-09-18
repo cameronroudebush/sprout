@@ -14,6 +14,7 @@ describe("server.ts", () => {
   let originalDevBuild: boolean;
   let originalDemoMode: boolean;
   let originalAuthType: string;
+  let originalBuildDate: string | undefined;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -21,6 +22,8 @@ describe("server.ts", () => {
     originalDevBuild = Configuration.isDevBuild;
     originalDemoMode = Configuration.isDemoMode;
     originalAuthType = Configuration.server.auth.type;
+    originalBuildDate = process.env["BUILD_DATE"];
+    process.env["BUILD_DATE"] = "2026-01-01T00:00:00.000Z";
 
     mockApp = {
       setGlobalPrefix: jest.fn(),
@@ -50,6 +53,11 @@ describe("server.ts", () => {
     Configuration.isDevBuild = originalDevBuild;
     Configuration.isDemoMode = originalDemoMode;
     Configuration.server.auth.type = originalAuthType as any;
+    if (originalBuildDate !== undefined) {
+      process.env["BUILD_DATE"] = originalBuildDate;
+    } else {
+      delete process.env["BUILD_DATE"];
+    }
   });
 
   it("should initialize and start Nest application in development mode", async () => {

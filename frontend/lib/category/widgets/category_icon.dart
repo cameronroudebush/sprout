@@ -5,14 +5,7 @@ import 'package:sprout/api/api.dart';
 class CategoryIcon extends StatelessWidget {
   final Category? category;
   final double avatarSize;
-  final double borderRadius;
-
-  const CategoryIcon(
-    this.category, {
-    super.key,
-    this.avatarSize = 20,
-    this.borderRadius = 4,
-  });
+  const CategoryIcon(this.category, {super.key, this.avatarSize = 20});
 
   /// Icons that we support for our category display
   static const Map<String, IconData> iconLibrary = {
@@ -171,23 +164,9 @@ class CategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = avatarSize * 2;
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: Center(
-        child: Icon(
-          _getIconForCategory(category),
-          size: avatarSize,
-          color: theme.colorScheme.onPrimaryContainer,
-        ),
-      ),
+    return CircleAvatar(
+      radius: avatarSize,
+      child: Icon(_getIconForCategory(category), size: avatarSize),
     );
   }
 }

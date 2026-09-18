@@ -1,6 +1,6 @@
 ---
 title: AI integration
-description: Learn how AI can be used with Sprout.
+description: Learn how to AI can be used with Sprout.
 ---
 
 # AI Integration
@@ -16,7 +16,7 @@ Sprout allows you to interact with your financial data using Large Language Mode
 We take your financial privacy seriously:
 
 - **Minimal Exposure:** Sprout only sends the last 90 days of transaction history to minimize data exposure.
-- **Masked Data:** Sprout replaces numerous identifiers with generic IDs when passed to the LLM to prevent data leakage. This is then mapped back to the real text when we receive the response. This data includes: account IDs, transaction descriptions.
+- **Masked Data:** Sprout replaces numerous identifiers to generic ID's when passed to the LLM to prevent data leakage. This is then turned back into the real text when we receive the response. This data includes: account ID's, transaction descriptions.
 
 ## Supported Models
 

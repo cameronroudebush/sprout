@@ -12,20 +12,19 @@ Sprout supports two methods of authentication to ensure your data remains secure
     You will not be able to switch between authentication strategies very easily. We highly recommend picking what you intend to use first.
 
     - **Local** auth requires the password creation during first time setup which you won't be able to change if you make your account with OIDC at first.
-    - **OIDC** requires the user ID to be defined by the OIDC provider, and no password is set. So trying to switch to OIDC from a local account will fail unless you update the userId to be that of your subject (`sub`). You can do this with a database query:
-
-        ```sql
-        PRAGMA foreign_keys = OFF;
-        UPDATE user SET id = 'myOIDCGUID' WHERE username = 'myUsername';
-        UPDATE account SET userId = 'myOIDCGUID' WHERE userId = 'myOldGUID';
-        -- Repeat for every table that uses a userId...
-        PRAGMA foreign_keys = ON;
-        ```
+    - **OIDC** requires the user Id to be defined by the OIDC provider, and no password is set. So trying to switch to OIDC from a local account will fail unless you update the userId to be that of your sub. You can do this with a complex query:
+            ```sql
+                PRAGMA foreign_keys = OFF;
+                UPDATE user SET id = 'myOIDCGUID' WHERE username = 'myUsername';
+                UPDATE account SET userId = 'myOIDCGUID' WHERE userId = 'myOldGUID';
+                -- Repeat for every table that uses a userId...
+                PRAGMA foreign_keys = ON;
+            ```
 
 ## Local Authentication (local)
 
 - The Local strategy is the **default** and simplest method. It is designed for **single-user** instances (typically the administrator).
-    - It is intended for quick setups and local evaluation. We highly recommend using [OIDC](#oidc-authentication-oidc) which offloads authentication to a dedicated identity provider.
+    - When I say simple, I mean simple. It's really intended just for first time setup. We highly recommend using [OIDC](#oidc-authentication-oidc) which offloads most auth implementation to a project who's only job is authentication.
 - How it works: Sprout issues and signs its own JSON Web Tokens (JWTs) internally.
 - Access: This mode only allows for a single user account and utilizes the API endpoints for login.
 
