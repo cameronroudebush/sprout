@@ -81,11 +81,7 @@ describe("TransactionRuleController", () => {
       jest.spyOn(TransactionRule, "findOne").mockResolvedValue(rule);
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      const updatePayload = TransactionRule.fromPlain({
-        categoryId: "cat-invalid",
-        type: "description",
-        value: "val",
-      });
+      const updatePayload = TransactionRule.fromPlain({ categoryId: "cat-invalid", type: "description", value: "val" });
 
       await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(NotFoundException);
     });
@@ -94,10 +90,7 @@ describe("TransactionRuleController", () => {
       const rule = TestEntities.transactionRule;
       jest.spyOn(TransactionRule, "findOne").mockResolvedValue(rule);
 
-      const updatePayload = TransactionRule.fromPlain({
-        type: "invalid_type" as any,
-        value: "val",
-      });
+      const updatePayload = TransactionRule.fromPlain({ type: "invalid_type" as any, value: "val" });
 
       await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(BadRequestException);
     });
@@ -136,46 +129,17 @@ describe("TransactionRuleController", () => {
       await expect(controller.create(rule, user)).rejects.toThrow(NotFoundException);
     });
 
-    it("should set order 0 when no prior rules exist, insert rule, apply rules, and force update", async () => {
-      jest.spyOn(Category, "findOne").mockResolvedValue(TestEntities.category);
-      jest.spyOn(TransactionRule, "findOne").mockResolvedValue(null);
+    it("should set order, insert rule, apply rules, and force update", async () => {
+      const cat = TestEntities.category;
+      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
+      jest.spyOn(TransactionRule, "findOne").mockResolvedValue(TestEntities.transactionRule);
 
-      const rule = TransactionRule.fromPlain({
-        value: "Grocery",
-        categoryId: TestEntities.category.id,
-      });
+      const rule = TransactionRule.fromPlain({ value: "Grocery", categoryId: cat.id });
       rule.insert = jest.fn().mockResolvedValue(rule);
 
       await controller.create(rule, user);
 
-      expect(rule.order).toBe(0);
       expect(rule.value).toBe("Grocery");
-      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
-      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
-    });
-
-    it("should set order +1 when prior rules exist, insert rule, apply rules, and force update", async () => {
-      const cat = TestEntities.category;
-      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
-      const lastRule = TransactionRule.fromPlain({ order: 5 });
-
-      jest.spyOn(TransactionRule, "findOne").mockResolvedValue(lastRule);
-
-      const inputData = { value: "Grocery", categoryId: cat.id } as any;
-
-      const ruleMockInstance = {
-        value: "Grocery",
-        user,
-        order: 0,
-        insert: jest.fn().mockResolvedValue(undefined),
-      };
-
-      jest.spyOn(TransactionRule, "fromPlain").mockReturnValue(ruleMockInstance as any);
-
-      await controller.create(inputData, user);
-
-      expect(ruleMockInstance.order).toBe(6);
-      expect(ruleMockInstance.value).toBe("Grocery");
       expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
     });

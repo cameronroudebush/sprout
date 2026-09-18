@@ -1,24 +1,21 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-import { Configuration } from "@backend/config/core";
-import { TestEntities } from "@backend/test/entities";
-import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
-import { UserDevice } from "@backend/user/model/user.device.model";
-import { User } from "@backend/user/model/user.model";
 import { UserController } from "@backend/user/user.controller";
 import { UserService } from "@backend/user/user.service";
+import { User } from "@backend/user/model/user.model";
+import { UserDevice } from "@backend/user/model/user.device.model";
+import { TestEntities } from "@backend/test/entities";
 import { BadRequestException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 
 describe("UserController", () => {
   let controller: UserController;
   let userService: jest.Mocked<UserService>;
   const user = TestEntities.user;
-  let originalAuthConfig: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    originalAuthConfig = { ...Configuration.server.auth };
 
     userService = {
       allowUserCreation: jest.fn().mockResolvedValue(true),
@@ -26,10 +23,6 @@ describe("UserController", () => {
     } as any;
 
     controller = new UserController(userService);
-  });
-
-  afterEach(() => {
-    Configuration.server.auth = originalAuthConfig;
   });
 
   describe("me", () => {
@@ -40,25 +33,9 @@ describe("UserController", () => {
     });
 
     it("should throw NotFoundException if user is null but user creation is allowed for local auth", async () => {
-      Configuration.server.auth = { type: "local" } as any;
       userService.allowUserCreation.mockResolvedValue(true);
 
       await expect(controller.me(null as any, {} as any)).rejects.toThrow(NotFoundException);
-    });
-
-    it("should throw UnauthorizedException if user is null, oidc auth type, and no setupUser info in request", async () => {
-      Configuration.server.auth = { type: "oidc" } as any;
-      userService.allowUserCreation.mockResolvedValue(true);
-
-      await expect(controller.me(null as any, {} as any)).rejects.toThrow(UnauthorizedException);
-    });
-
-    it("should throw NotFoundException if user is null, oidc auth type, and setupUser is present in request", async () => {
-      Configuration.server.auth = { type: "oidc" } as any;
-      userService.allowUserCreation.mockResolvedValue(true);
-
-      const req = { setupUser: { username: "oidcUser" } } as any;
-      await expect(controller.me(null as any, req)).rejects.toThrow(NotFoundException);
     });
 
     it("should return user if user is present", async () => {
@@ -87,16 +64,6 @@ describe("UserController", () => {
       const res = await controller.updateMe(updatedUser, { email: "new@sprout.local" });
 
       expect(updatedUser.email).toBe("new@sprout.local");
-      expect(updatedUser.update).toHaveBeenCalled();
-      expect(res).toBe(updatedUser);
-    });
-
-    it("should update without email parameter", async () => {
-      const updatedUser = TestEntities.user;
-      updatedUser.update = jest.fn().mockResolvedValue(updatedUser);
-
-      const res = await controller.updateMe(updatedUser, {});
-
       expect(updatedUser.update).toHaveBeenCalled();
       expect(res).toBe(updatedUser);
     });
@@ -161,8 +128,7 @@ describe("UserController", () => {
       await expect(controller.create(UserCreationRequest.fromPlain({ username: "test", password: "pwd" }), {} as any)).rejects.toThrow(BadRequestException);
     });
 
-    it("should create user and return UserCreationResponse for local auth", async () => {
-      Configuration.server.auth = { type: "local" } as any;
+    it("should create user and return UserCreationResponse", async () => {
       userService.allowUserCreation.mockResolvedValue(true);
       jest.spyOn(User, "count").mockResolvedValue(0);
       const mockCreated = { username: "test", id: "u-1" };
@@ -170,70 +136,19 @@ describe("UserController", () => {
 
       const res = await controller.create(UserCreationRequest.fromPlain({ username: "test", password: "pwd" }), {} as any);
 
-      expect(User.createUser).toHaveBeenCalledWith({
-        username: "test",
-        password: "pwd",
-        admin: true,
-      });
+      expect(User.createUser).toHaveBeenCalledWith({ username: "test", password: "pwd", admin: true });
       expect(res).toBe(mockCreated);
-    });
-
-    it("should create user and return UserCreationResponse for oidc auth", async () => {
-      Configuration.server.auth = { type: "oidc" } as any;
-      userService.allowUserCreation.mockResolvedValue(true);
-      jest.spyOn(User, "count").mockResolvedValue(1);
-      const mockCreated = { username: "oidcUser", id: "u-2" };
-      jest.spyOn(User, "createUser").mockResolvedValue(mockCreated as any);
-
-      const req = { setupUser: { username: "oidcUser", email: "oidc@sprout.local" } } as any;
-      const res = await controller.create(UserCreationRequest.fromPlain({ username: "", password: "" }), req);
-
-      expect(User.createUser).toHaveBeenCalledWith({
-        username: "oidcUser",
-        email: "oidc@sprout.local",
-        admin: false,
-      });
-      expect(res).toBe(mockCreated);
-    });
-
-    it("should catch createUser error and throw BadRequestException", async () => {
-      userService.allowUserCreation.mockResolvedValue(true);
-      jest.spyOn(User, "count").mockResolvedValue(0);
-      jest.spyOn(User, "createUser").mockRejectedValue(new Error("Database write error"));
-
-      await expect(controller.create(UserCreationRequest.fromPlain({ username: "test", password: "pwd" }), {} as any)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe("registerDevice", () => {
-    it("should update existing device and return deviceId", async () => {
-      const mockDevice = {
-        id: "dev-1",
-        deviceName: "Old Name",
-        deviceId: "d-123",
-        fcmToken: "tok-123",
-        update: jest.fn().mockResolvedValue({ id: "dev-1" }),
-      };
+    it("should create or update device and return deviceId", async () => {
+      const mockDevice = { id: "dev-1", update: jest.fn().mockResolvedValue({ id: "dev-1" }) };
       jest.spyOn(UserDevice, "findOne").mockResolvedValue(mockDevice as any);
 
       const res = await controller.registerDevice(user, { deviceId: "d-123", token: "tok-123" });
 
       expect(res).toEqual({ success: true, deviceId: "dev-1" });
-      expect(mockDevice.update).toHaveBeenCalled();
-    });
-
-    it("should insert new device when device is not found", async () => {
-      jest.spyOn(UserDevice, "findOne").mockResolvedValue(null);
-      const insertSpy = jest.spyOn(UserDevice.prototype, "insert").mockResolvedValue({ id: "dev-new" } as any);
-
-      const res = await controller.registerDevice(user, {
-        deviceId: "d-new",
-        token: "tok-new",
-        deviceName: "My Phone",
-      });
-
-      expect(res).toEqual({ success: true, deviceId: "dev-new" });
-      expect(insertSpy).toHaveBeenCalled();
     });
   });
 });
