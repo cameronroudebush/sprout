@@ -41,7 +41,9 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if transaction to edit does not exist", async () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should throw BadRequestException if transaction is pending", async () => {
@@ -58,7 +60,9 @@ describe("TransactionController", () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any)).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it("should update description and category, save, and force update SSE", async () => {
@@ -137,7 +141,19 @@ describe("TransactionController", () => {
       jest.spyOn(Category, "find").mockResolvedValueOnce([childCat]).mockResolvedValueOnce([]);
       jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
 
-      const res = await controller.getByQuery(user, undefined, 0, 10, "acc-1", "cat-parent", "grocery", undefined, "2026-01-01", "2026-01-31", true);
+      const res = await controller.getByQuery(
+        user,
+        undefined,
+        0,
+        10,
+        "acc-1",
+        "cat-parent",
+        "grocery",
+        undefined,
+        "2026-01-01",
+        "2026-01-31",
+        true,
+      );
 
       expect(res).toBeDefined();
     });
@@ -146,7 +162,16 @@ describe("TransactionController", () => {
       const txList = [TestEntities.transaction];
       jest.spyOn(Transaction, "find").mockResolvedValue(txList);
 
-      const res = await controller.getByQuery(user, "", 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
+      const res = await controller.getByQuery(
+        user,
+        "",
+        0,
+        10,
+        "acc-1",
+        "unknown",
+        "grocery",
+        "2026-06-02",
+      );
 
       expect(Transaction.find).toHaveBeenCalled();
       expect(res).toBe(txList);
@@ -165,7 +190,9 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if category filter id is invalid", async () => {
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid"),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -236,7 +263,9 @@ describe("TransactionController", () => {
         extra: { merchantName: "Coffee Shop", logoUrl: "http://other-logo.png" },
       });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
+      jest
+        .spyOn(Transaction, "find")
+        .mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
       jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
       jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
@@ -244,7 +273,44 @@ describe("TransactionController", () => {
 
       expect(Transaction.deleteMany).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
-      expect(res).toContain("removed 1 duplicate");
+      expect(res).toContain("Successfully removed 1 duplicate transaction from");
+    });
+
+    it("should inherit categoryId, providerId, and extra when kept transaction lacks them and is not swapped", async () => {
+      const account = TestEntities.account;
+      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+
+      const txKept = Transaction.fromPlain({
+        id: "tx-kept-noswap",
+        amount: 75.0,
+        posted: new Date("2026-01-01T10:00:00Z"),
+        providerId: "prov-existing",
+        account,
+        categoryId: undefined,
+        category: undefined,
+        extra: undefined,
+      });
+
+      const txRemove = Transaction.fromPlain({
+        id: "tx-remove-noswap",
+        amount: 75.0,
+        posted: new Date("2026-01-01T11:00:00Z"),
+        providerId: undefined,
+        account,
+        categoryId: "cat-inherited",
+        category: TestEntities.category,
+        extra: { merchantName: "Inherited Merchant" },
+      });
+
+      jest.spyOn(Transaction, "find").mockResolvedValue([txKept, txRemove]);
+      jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
+
+      const res = await controller.removeDuplicates(user, account.id);
+
+      expect(txKept.category).toStrictEqual(TestEntities.category);
+      expect(txKept.extra).toEqual({ merchantName: "Inherited Merchant" });
+      expect(res).toContain("Successfully removed 1 duplicate transaction from");
     });
 
     it("should handle duplicate removal when removed.affected is undefined and when extra is identical", async () => {
