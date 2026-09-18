@@ -58,12 +58,8 @@ describe("AppModule", () => {
 
     beforeAll(() => {
       const imports = Reflect.getMetadata(MODULE_METADATA.IMPORTS, AppModule) || [];
-      const cacheDynamicModule = imports.find(
-        (item: any) => item && item.module && item.module.name === "CacheModule",
-      );
-      const cacheAsyncProvider = cacheDynamicModule?.providers?.find(
-        (p: any) => p && p.provide === "CACHE_MODULE_OPTIONS",
-      );
+      const cacheDynamicModule = imports.find((item: any) => item && item.module && item.module.name === "CacheModule");
+      const cacheAsyncProvider = cacheDynamicModule?.providers?.find((p: any) => p && p.provide === "CACHE_MODULE_OPTIONS");
       cacheFactory = cacheAsyncProvider?.useFactory;
     });
 
