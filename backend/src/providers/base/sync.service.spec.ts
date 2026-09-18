@@ -18,36 +18,36 @@ import { User } from "@backend/user/model/user.model";
 
 describe("ProviderSyncService", () => {
   let service: ProviderSyncService;
-  let transactionRuleService: jest.Mocked<TransactionRuleService>;
+  let transactionRuleService: Mocked<TransactionRuleService>;
   let mockUser: User;
-  let mockProvider: jest.Mocked<ProviderBase>;
+  let mockProvider: Mocked<ProviderBase>;
   let mockSyncInstance: Sync;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    transactionRuleService = { applyRulesToTransactions: jest.fn() } as unknown as jest.Mocked<TransactionRuleService>;
+    transactionRuleService = { applyRulesToTransactions: vi.fn() } as unknown as Mocked<TransactionRuleService>;
 
     mockUser = TestEntities.user;
 
     mockProvider = {
       config: { dbType: "plaid" },
-      isAvailable: jest.fn().mockResolvedValue(true),
-      get: jest.fn().mockResolvedValue([]),
-    } as unknown as jest.Mocked<ProviderBase>;
+      isAvailable: vi.fn().mockResolvedValue(true),
+      get: vi.fn().mockResolvedValue([]),
+    } as unknown as Mocked<ProviderBase>;
 
     mockSyncInstance = TestEntities.sync;
-    mockSyncInstance.insert = jest.fn().mockResolvedValue(mockSyncInstance);
-    mockSyncInstance.update = jest.fn().mockResolvedValue({});
-    jest.spyOn(Sync, "fromPlain").mockReturnValue(mockSyncInstance);
+    mockSyncInstance.insert = vi.fn().mockResolvedValue(mockSyncInstance);
+    mockSyncInstance.update = vi.fn().mockResolvedValue({});
+    vi.spyOn(Sync, "fromPlain").mockReturnValue(mockSyncInstance);
 
     Configuration.holding.cleanupRemovedHoldings = true;
 
-    jest.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
-    jest.spyOn(Holding.prototype, "insert").mockResolvedValue({} as any);
-    jest.spyOn(HoldingHistory.prototype, "insert").mockResolvedValue({} as any);
-    jest.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
-    jest.spyOn(Transaction, "delete").mockResolvedValue({} as any);
+    vi.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
+    vi.spyOn(Holding.prototype, "insert").mockResolvedValue({} as any);
+    vi.spyOn(HoldingHistory.prototype, "insert").mockResolvedValue({} as any);
+    vi.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
+    vi.spyOn(Transaction, "delete").mockResolvedValue({} as any);
 
     service = new ProviderSyncService(transactionRuleService);
   });
@@ -55,7 +55,7 @@ describe("ProviderSyncService", () => {
   describe("syncForProvider", () => {
     it("should exit execution early if the provider infrastructure reports as unavailable for the profile", async () => {
       mockProvider.isAvailable.mockResolvedValue(false);
-      const debugSpy = jest.spyOn((service as any).logger, "debug");
+      const debugSpy = vi.spyOn((service as any).logger, "debug");
 
       await service.syncForProvider(mockUser, mockProvider);
 
@@ -64,7 +64,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should process standard sync operations smoothly and commit completion metadata to the ledger", async () => {
-      jest.spyOn(Account, "count").mockResolvedValue(1);
+      vi.spyOn(Account, "count").mockResolvedValue(1);
 
       const result = await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -74,7 +74,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should mark the sync task failed if structural responses accumulate institution connection context errors", async () => {
-      jest.spyOn(Account, "count").mockResolvedValue(1);
+      vi.spyOn(Account, "count").mockResolvedValue(1);
 
       const providerAccountWithError = TestEntities.account;
       providerAccountWithError.institution.hasError = true;
@@ -87,10 +87,10 @@ describe("ProviderSyncService", () => {
       ]);
 
       const mockAccountInDb = TestEntities.account;
-      mockAccountInDb.institution.update = jest.fn().mockResolvedValue({});
-      mockAccountInDb.update = jest.fn().mockResolvedValue({});
+      mockAccountInDb.institution.update = vi.fn().mockResolvedValue({});
+      mockAccountInDb.update = vi.fn().mockResolvedValue({});
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -99,7 +99,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should catch top-level exceptions, record error tracking states, and transmit notification structures", async () => {
-      jest.spyOn(Account, "count").mockRejectedValue(new Error("Database breakdown"));
+      vi.spyOn(Account, "count").mockRejectedValue(new Error("Database breakdown"));
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -107,7 +107,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should bypass client message pushes entirely if optional notification flags evaluate to false parameters", async () => {
-      jest.spyOn(Account, "count").mockRejectedValue(new Error("Silent crash"));
+      vi.spyOn(Account, "count").mockRejectedValue(new Error("Silent crash"));
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
     });
@@ -115,9 +115,9 @@ describe("ProviderSyncService", () => {
 
   describe("syncUserAccounts Evaluation Blocks", () => {
     it("should skip updating database storage targets if matching operational record entities are completely missing", async () => {
-      jest.spyOn(Account, "count").mockResolvedValue(1);
+      vi.spyOn(Account, "count").mockResolvedValue(1);
       mockProvider.get.mockResolvedValue([{ account: TestEntities.account }]);
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -131,11 +131,11 @@ describe("ProviderSyncService", () => {
     beforeEach(() => {
       mockAccountInDb = TestEntities.account;
       mockAccountInDb.type = AccountType.investment;
-      mockAccountInDb.institution.update = jest.fn();
-      mockAccountInDb.update = jest.fn();
+      mockAccountInDb.institution.update = vi.fn();
+      mockAccountInDb.update = vi.fn();
 
-      jest.spyOn(Account, "count").mockResolvedValue(1);
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
+      vi.spyOn(Account, "count").mockResolvedValue(1);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
     });
 
     it("should parse financial transaction lists, handle dynamic category linkages, and issue multi-record deletions", async () => {
@@ -146,7 +146,7 @@ describe("ProviderSyncService", () => {
           removedTransactionIds: ["tx-old-1"],
         },
       ]);
-      jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -163,7 +163,7 @@ describe("ProviderSyncService", () => {
         },
       ]);
 
-      jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -179,8 +179,8 @@ describe("ProviderSyncService", () => {
       ]);
 
       const mockHoldingInDb = TestEntities.holding;
-      mockHoldingInDb.update = jest.fn();
-      jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb]);
+      mockHoldingInDb.update = vi.fn();
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -193,8 +193,8 @@ describe("ProviderSyncService", () => {
       mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
 
       const mockStaleHolding = TestEntities.holding;
-      mockStaleHolding.remove = jest.fn();
-      jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
+      mockStaleHolding.remove = vi.fn();
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -206,8 +206,8 @@ describe("ProviderSyncService", () => {
       mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
 
       const mockStaleHolding = TestEntities.holding;
-      mockStaleHolding.update = jest.fn();
-      jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
+      mockStaleHolding.update = vi.fn();
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 

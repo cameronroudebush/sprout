@@ -4,7 +4,8 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
 import { Request, Response } from "express";
 import { startCase } from "lodash";
-import { name } from "../../package.json";
+import pkg from "../../package.json" with { type: "json" };
+const { name } = pkg;
 
 const projName = startCase(name);
 const title = `${projName} API`;

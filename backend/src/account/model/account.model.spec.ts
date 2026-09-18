@@ -15,7 +15,7 @@ describe("Account", () => {
   let mockInstitution: Institution;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUser = { id: "user-123" } as User;
     mockInstitution = { id: "inst-123" } as Institution;
   });
@@ -57,7 +57,7 @@ describe("Account", () => {
 
   describe("getForUser", () => {
     it("should invoke the static DatabaseBase find method with the correct query structure", async () => {
-      const findSpy = jest.spyOn(Account, "find").mockResolvedValue([]);
+      const findSpy = vi.spyOn(Account, "find").mockResolvedValue([]);
 
       await Account.getForUser(mockUser);
 
@@ -71,7 +71,7 @@ describe("Account", () => {
     it("should generate an AccountHistory instance from the account metrics using the provided date", () => {
       const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
       const testDate = new Date("2026-06-02T00:00:00.000Z");
-      const fromPlainSpy = jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
+      const fromPlainSpy = vi.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
 
       account.toAccountHistory(testDate);
 
@@ -85,7 +85,7 @@ describe("Account", () => {
 
     it("should generate an AccountHistory instance using a default current date if none is supplied", () => {
       const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
-      const fromPlainSpy = jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
+      const fromPlainSpy = vi.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
 
       account.toAccountHistory();
 
@@ -130,7 +130,7 @@ describe("Account", () => {
       const account1 = new Account("A1", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, 10, 10, AccountType.depository, "EUR");
       const account2 = new Account("A2", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, 20, 20, AccountType.depository, "GBP");
       const list = [account1, account2];
-      const convertListSpy = jest.spyOn(CurrencyHelper, "convertList").mockImplementation(() => {});
+      const convertListSpy = vi.spyOn(CurrencyHelper, "convertList").mockImplementation(() => {});
 
       const result = Account.convertListToTargetCurrency(list, mockUser);
 

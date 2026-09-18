@@ -6,7 +6,7 @@ import fs from "fs";
 import { set } from "lodash";
 import path from "path";
 import * as YAML from "yaml";
-import { Configuration } from "./core";
+import { Configuration } from "./core.js";
 import { ConfigurationMetadata } from "./model/configuration.metadata";
 
 /** This class controls loading configuration options from the config file and handles some other functionality associated to it. */

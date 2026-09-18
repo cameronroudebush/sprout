@@ -12,25 +12,25 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 
 describe("SimpleFinProviderController", () => {
   let controller: SimpleFinProviderController;
-  let simpleFinService: jest.Mocked<SimpleFINProviderService>;
-  let sseService: jest.Mocked<SSEService>;
-  let transactionRuleService: jest.Mocked<TransactionRuleService>;
+  let simpleFinService: Mocked<SimpleFINProviderService>;
+  let sseService: Mocked<SSEService>;
+  let transactionRuleService: Mocked<TransactionRuleService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     simpleFinService = {
-      getUnlinkedAccounts: jest.fn(),
-      exchangeAndCreateAccounts: jest.fn(),
+      getUnlinkedAccounts: vi.fn(),
+      exchangeAndCreateAccounts: vi.fn(),
     } as any;
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     transactionRuleService = {
-      applyRulesToTransactions: jest.fn().mockResolvedValue(undefined),
+      applyRulesToTransactions: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     controller = new SimpleFinProviderController(simpleFinService, sseService, transactionRuleService);
@@ -56,7 +56,7 @@ describe("SimpleFinProviderController", () => {
       const mockSyncResult = {
         account: Account.fromPlain({ id: accountToLink.id, name: "Test" }),
       };
-      mockSyncResult.account.update = jest.fn().mockResolvedValue(mockSyncResult.account);
+      mockSyncResult.account.update = vi.fn().mockResolvedValue(mockSyncResult.account);
 
       simpleFinService.exchangeAndCreateAccounts.mockResolvedValue([mockSyncResult] as any);
 

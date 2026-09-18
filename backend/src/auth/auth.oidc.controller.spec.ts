@@ -11,7 +11,7 @@ import { Request, Response } from "express";
 import { of, throwError } from "rxjs";
 import { AuthService } from "./auth.service";
 
-jest.mock("@backend/config/core", () => ({
+vi.mock("@backend/config/core", () => ({
   Configuration: {
     isDevBuild: false,
     server: {
@@ -31,15 +31,15 @@ jest.mock("@backend/config/core", () => ({
 
 describe("OIDCController", () => {
   let controller: OIDCController;
-  let authService: jest.Mocked<AuthService>;
-  let httpService: jest.Mocked<HttpService>;
-  let cacheManager: jest.Mocked<Cache>;
+  let authService: Mocked<AuthService>;
+  let httpService: Mocked<HttpService>;
+  let cacheManager: Mocked<Cache>;
 
   const mockResponse = () => {
     const res = {} as Partial<Response>;
-    res.cookie = jest.fn().mockReturnThis();
-    res.clearCookie = jest.fn().mockReturnThis();
-    res.redirect = jest.fn().mockReturnThis();
+    res.cookie = vi.fn().mockReturnThis();
+    res.clearCookie = vi.fn().mockReturnThis();
+    res.redirect = vi.fn().mockReturnThis();
     return res as Response;
   };
 
@@ -47,19 +47,19 @@ describe("OIDCController", () => {
 
   beforeAll(() => {
     // Suppress log outputs during unit tests
-    jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, "error").mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
   });
 
   beforeEach(async () => {
     const mockAuthService = {
-      isValidRedirectUrl: jest.fn(),
-      setCookieTokens: jest.fn(),
+      isValidRedirectUrl: vi.fn(),
+      setCookieTokens: vi.fn(),
     };
-    const mockHttpService = { post: jest.fn() };
-    const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
+    const mockHttpService = { post: vi.fn() };
+    const mockCacheManager = { set: vi.fn(), get: vi.fn(), del: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OIDCController],

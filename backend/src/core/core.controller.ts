@@ -5,7 +5,8 @@ import { DatabaseBackupJob } from "@backend/core/jobs/backup";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { startCase } from "lodash";
-import { name } from "../../package.json";
+import pkg from "../../package.json" with { type: "json" };
+const { name } = pkg;
 
 /** This controller contains core functionality that is not placed better anywhere else. */
 @Controller("core")

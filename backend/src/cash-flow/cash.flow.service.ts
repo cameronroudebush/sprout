@@ -12,7 +12,7 @@ import { endOfDay, endOfMonth, endOfYear, format, startOfDay, startOfMonth, star
 import { Between, FindOperator, FindOptionsWhere, In, IsNull, MoreThan, Not } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
-import { Colors } from "./model/colors";
+import { Colors } from "./model/colors.js";
 
 @Injectable()
 export class CashFlowService {

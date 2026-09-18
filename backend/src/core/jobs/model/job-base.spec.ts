@@ -25,8 +25,8 @@ describe("BackgroundJob", () => {
   let mockCronExpression: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     Configuration.isRunningScript = false;
     Configuration.server = {
@@ -36,16 +36,16 @@ describe("BackgroundJob", () => {
     } as any;
 
     mockCronExpression = {
-      next: jest.fn().mockReturnValue({
-        toDate: jest.fn().mockReturnValue(new Date(Date.now() + 60000)),
+      next: vi.fn().mockReturnValue({
+        toDate: vi.fn().mockReturnValue(new Date(Date.now() + 60000)),
       }),
     };
-    jest.spyOn(CronExpressionParser, "parse").mockReturnValue(mockCronExpression);
-    jest.spyOn(TimeZone, "formatDate").mockReturnValue("2026-06-02 12:00:00");
+    vi.spyOn(CronExpressionParser, "parse").mockReturnValue(mockCronExpression);
+    vi.spyOn(TimeZone, "formatDate").mockReturnValue("2026-06-02 12:00:00");
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("Constructor and Initial Alignment", () => {
@@ -61,7 +61,7 @@ describe("BackgroundJob", () => {
     it("should exit execution path early returning self instance directly if runtime environments indicate a script execution run", async () => {
       Configuration.isRunningScript = true;
       job = new TestBackgroundJob("ScriptJob", "0 0 * * *", true);
-      const logSpy = jest.spyOn((job as any).logger, "log");
+      const logSpy = vi.spyOn((job as any).logger, "log");
 
       const result = await job.start();
 
@@ -71,37 +71,37 @@ describe("BackgroundJob", () => {
 
     it("should log warning messages without setting up internal setTimeout scheduling structures if enabled flag reflects false parameters", async () => {
       job = new TestBackgroundJob("DisabledJob", "0 0 * * *", false);
-      const warnSpy = jest.spyOn((job as any).logger, "warn");
-      const logSpy = jest.spyOn((job as any).logger, "log");
+      const warnSpy = vi.spyOn((job as any).logger, "warn");
+      const logSpy = vi.spyOn((job as any).logger, "log");
 
       await job.start();
 
       expect(warnSpy).toHaveBeenCalledWith("Job is disabled. This job will only run as manually requested.");
       expect(logSpy).not.toHaveBeenCalled();
-      expect(jest.getTimerCount()).toBe(0);
+      expect(vi.getTimerCount()).toBe(0);
     });
 
     it("should immediately invoke update actions prior to establishing cyclic interval timers if parameter overrides demand instant processing", async () => {
       job = new TestBackgroundJob("InstantJob", "0 0 * * *", true, true);
-      const logSpy = jest.spyOn((job as any).logger, "log");
+      const logSpy = vi.spyOn((job as any).logger, "log");
 
       await job.start();
 
       expect(logSpy).toHaveBeenCalledWith("Job is requesting to run immediately. Executing...");
       expect(job.updateCount).toBe(1);
       expect(logSpy).toHaveBeenCalledWith("Initializing background job of: 0 0 * * *");
-      expect(jest.getTimerCount()).toBe(1);
+      expect(vi.getTimerCount()).toBe(1);
     });
 
     it("should skip explicit execution and transition cleanly into timeline timer registration paths if immediate triggers are false", async () => {
       job = new TestBackgroundJob("StandardJob", "0 0 * * *", true, false);
-      const logSpy = jest.spyOn((job as any).logger, "log");
+      const logSpy = vi.spyOn((job as any).logger, "log");
 
       await job.start();
 
       expect(job.updateCount).toBe(0);
       expect(logSpy).toHaveBeenCalledWith("Initializing background job of: 0 0 * * *");
-      expect(jest.getTimerCount()).toBe(1);
+      expect(vi.getTimerCount()).toBe(1);
     });
   });
 
@@ -112,23 +112,23 @@ describe("BackgroundJob", () => {
 
       expect(job.updateCount).toBe(0);
 
-      await jest.advanceTimersByTimeAsync(60000);
+      await vi.advanceTimersByTimeAsync(60000);
 
       expect(job.updateCount).toBe(1);
       expect(mockCronExpression.next).toHaveBeenCalledTimes(2);
-      expect(jest.getTimerCount()).toBe(1);
+      expect(vi.getTimerCount()).toBe(1);
     });
 
     it("should capture workflow exceptions, log tracking entries, and recover cleanly on the next cycle", async () => {
-      const globalErrorSpy = jest.spyOn(Logger, "error").mockImplementation(() => {});
+      const globalErrorSpy = vi.spyOn(Logger, "error").mockImplementation(() => {});
       job = new TestBackgroundJob("FaultyJob", "0 * * * *", true);
       job.shouldFail = true;
       await job.start();
-      await jest.advanceTimersByTimeAsync(60000);
+      await vi.advanceTimersByTimeAsync(60000);
       expect(globalErrorSpy).toHaveBeenCalledWith(expect.any(Error));
       expect(job.updateCount).toBe(1);
       job.shouldFail = false;
-      await jest.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(100);
       expect(job.updateCount).toBeGreaterThan(1);
     });
   });

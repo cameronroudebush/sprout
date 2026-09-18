@@ -7,30 +7,37 @@ import { DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-ba
 import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 
-jest.mock("bullmq", () => {
+vi.mock("bullmq", () => {
+  const QueueMock = vi.fn().mockImplementation(function (this: any) {
+    this.addBulk = vi.fn().mockResolvedValue([]);
+    return this;
+  });
+  const WorkerMock = vi.fn().mockImplementation(function (this: any) {
+    const listeners: Record<string, Function> = {};
+    this.on = vi.fn().mockImplementation((event: string, cb: Function) => {
+      listeners[event] = cb;
+      return this;
+    });
+    this.emitFailed = (job: any, err: any) => {
+      if (listeners["failed"]) listeners["failed"](job, err);
+    };
+    return this;
+  });
+
   return {
-    Queue: jest.fn().mockImplementation(() => ({
-      addBulk: jest.fn().mockResolvedValue([]),
-    })),
-    Worker: jest.fn().mockImplementation((_name, _processor, _opts) => {
-      const listeners: Record<string, Function> = {};
-      return {
-        on: jest.fn().mockImplementation((event, cb) => {
-          listeners[event] = cb;
-          return this;
-        }),
-        emitFailed: (job: any, err: any) => {
-          if (listeners["failed"]) listeners["failed"](job, err);
-        },
-      };
-    }),
+    Queue: QueueMock,
+    Worker: WorkerMock,
   };
 });
 
-jest.mock("ioredis", () => {
-  return jest.fn().mockImplementation(() => ({
-    set: jest.fn(),
-  }));
+vi.mock("ioredis", () => {
+  const RedisMock = vi.fn().mockImplementation(function (this: any) {
+    this.set = vi.fn();
+    return this;
+  });
+  return {
+    default: RedisMock,
+  };
 });
 
 class TestDistributedQueueJob extends DistributedQueueJob<string> {
@@ -64,14 +71,14 @@ class TestDistributedQueueJob extends DistributedQueueJob<string> {
 
 describe("DistributedQueueJob", () => {
   let testJob: TestDistributedQueueJob;
-  let superStartSpy: jest.SpyInstance;
+  let superStartSpy: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     Configuration.server.cache.type = "local";
     Configuration.server.cache.redis = { host: "localhost", port: 6379, password: "pass" } as any;
 
-    superStartSpy = jest.spyOn(BackgroundJob.prototype, "start").mockResolvedValue(undefined as any);
+    superStartSpy = vi.spyOn(BackgroundJob.prototype, "start").mockResolvedValue(undefined as any);
     testJob = new TestDistributedQueueJob("test-job", "* * * * *", true);
   });
 
@@ -86,7 +93,7 @@ describe("DistributedQueueJob", () => {
 
     it("should initialize BullMQ components when cache type is configured to redis", async () => {
       Configuration.server.cache.type = "redis";
-      const debugSpy = jest.spyOn((testJob as any).logger, "debug");
+      const debugSpy = vi.spyOn((testJob as any).logger, "debug");
 
       await testJob.start();
 
@@ -104,11 +111,11 @@ describe("DistributedQueueJob", () => {
 
     it("should correctly handle and log failures triggered from BullMQ worker listeners", async () => {
       Configuration.server.cache.type = "redis";
-      const errorSpy = jest.spyOn((testJob as any).logger, "error");
+      const errorSpy = vi.spyOn((testJob as any).logger, "error");
 
       await testJob.start();
 
-      const mockWorkerInstance = (Worker as unknown as jest.Mock).mock.results[0]!.value;
+      const mockWorkerInstance = (Worker as unknown as Mock).mock.results[0]!.value;
       mockWorkerInstance.emitFailed({ id: "job-101" }, { message: "Connection lost" });
 
       expect(errorSpy).toHaveBeenCalledWith("Task job-101 failed: Connection lost");
@@ -120,10 +127,10 @@ describe("DistributedQueueJob", () => {
       Configuration.server.cache.type = "redis";
       await testJob.start();
 
-      const mockRedisInstance = (Redis as unknown as jest.Mock).mock.results[0]!.value;
+      const mockRedisInstance = (Redis as unknown as Mock).mock.results[0]!.value;
       mockRedisInstance.set.mockResolvedValue("OK");
 
-      const mockQueueInstance = (Queue as unknown as jest.Mock).mock.results[0]!.value;
+      const mockQueueInstance = (Queue as unknown as Mock).mock.results[0]!.value;
       testJob.mockTasks = ["task-alpha", "task-beta"];
 
       await testJob.triggerUpdate();
@@ -139,22 +146,22 @@ describe("DistributedQueueJob", () => {
       Configuration.server.cache.type = "redis";
       await testJob.start();
 
-      const mockRedisInstance = (Redis as unknown as jest.Mock).mock.results[0]!.value;
+      const mockRedisInstance = (Redis as unknown as Mock).mock.results[0]!.value;
       mockRedisInstance.set.mockResolvedValue(null);
 
-      const debugSpy = jest.spyOn((testJob as any).logger, "debug");
+      const debugSpy = vi.spyOn((testJob as any).logger, "debug");
       testJob.mockTasks = ["task-gamma"];
 
       await testJob.triggerUpdate();
 
       expect(debugSpy).toHaveBeenCalledWith("Another instance is producing tasks. Running as consumer only.");
-      const mockQueueInstance = (Queue as unknown as jest.Mock).mock.results[0]!.value;
+      const mockQueueInstance = (Queue as unknown as Mock).mock.results[0]!.value;
       expect(mockQueueInstance.addBulk).not.toHaveBeenCalled();
     });
 
     it("should route generated entities straight into fallback local structures when local execution loops operate", async () => {
       testJob.mockTasks = ["local-1", "local-2"];
-      const logSpy = jest.spyOn((testJob as any).logger, "log");
+      const logSpy = vi.spyOn((testJob as any).logger, "log");
 
       await testJob.triggerUpdate();
 
@@ -165,7 +172,7 @@ describe("DistributedQueueJob", () => {
 
     it("should skip pushing operations and bypass messaging logging paths if task generation maps out zero records", async () => {
       testJob.mockTasks = [];
-      const logSpy = jest.spyOn((testJob as any).logger, "log");
+      const logSpy = vi.spyOn((testJob as any).logger, "log");
 
       await testJob.triggerUpdate();
 
@@ -186,18 +193,18 @@ describe("DistributedQueueJob", () => {
     });
 
     it("should capture local consumer exceptions and process sequential entries smoothly after momentary recovery delays", async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       testJob.mockTasks = ["fail-task", "success-task"];
       testJob.processFailOn = "fail-task";
 
-      const errorSpy = jest.spyOn((testJob as any).logger, "error");
+      const errorSpy = vi.spyOn((testJob as any).logger, "error");
 
       const updatePromise = testJob.triggerUpdate();
 
       await Promise.resolve();
 
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
 
       await updatePromise;
 
@@ -205,7 +212,7 @@ describe("DistributedQueueJob", () => {
       expect(testJob.processedTasks).toEqual(["fail-task", "success-task"]);
       expect(testJob.getLocalQueue().length).toBe(0);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

@@ -12,37 +12,40 @@ import { StrategyGuard } from "./strategy.guard";
 };
 
 // Main trackers for factory invocation arguments
-const mockSetMetadataSpy = jest.fn().mockImplementation(() => jest.fn());
-const mockUseGuardsSpy = jest.fn().mockImplementation(() => jest.fn());
-const mockApiExcludeEndpointSpy = jest.fn().mockImplementation(() => jest.fn());
-const mockApiExcludeControllerSpy = jest.fn().mockImplementation(() => jest.fn());
+const mockSetMetadataSpy = vi.fn().mockImplementation(() => vi.fn());
+const mockUseGuardsSpy = vi.fn().mockImplementation(() => vi.fn());
+const mockApiExcludeEndpointSpy = vi.fn().mockImplementation(() => vi.fn());
+const mockApiExcludeControllerSpy = vi.fn().mockImplementation(() => vi.fn());
 
-jest.mock("@backend/config/core", () => ({
+vi.mock("@backend/config/core", () => ({
   get Configuration() {
     return (global as any).__mockConfigState;
   },
 }));
 
-jest.mock("@nestjs/swagger", () => ({
+vi.mock("@nestjs/swagger", () => ({
   ApiExcludeEndpoint: () => mockApiExcludeEndpointSpy(),
   ApiExcludeController: () => mockApiExcludeControllerSpy(),
 }));
 
-jest.mock("@nestjs/common", () => ({
-  ...jest.requireActual("@nestjs/common"),
-  UseGuards: (...args: any[]) => mockUseGuardsSpy(...args),
-  SetMetadata: (...args: any[]) => mockSetMetadataSpy(...args),
-}));
+vi.mock("@nestjs/common", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@nestjs/common")>();
+  return {
+    ...actual,
+    UseGuards: (...args: any[]) => mockUseGuardsSpy(...args),
+    SetMetadata: (...args: any[]) => mockSetMetadataSpy(...args),
+  };
+});
 
 describe("StrategyGuard", () => {
   let guard: StrategyGuard;
-  let reflector: jest.Mocked<Reflector>;
-  let mockContext: jest.Mocked<ExecutionContext>;
+  let reflector: Mocked<Reflector>;
+  let mockContext: Mocked<ExecutionContext>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    reflector = { getAllAndOverride: jest.fn() } as any;
-    mockContext = { getHandler: jest.fn(), getClass: jest.fn() } as any;
+    vi.clearAllMocks();
+    reflector = { getAllAndOverride: vi.fn() } as any;
+    mockContext = { getHandler: vi.fn(), getClass: vi.fn() } as any;
     guard = new StrategyGuard(reflector);
   });
 
