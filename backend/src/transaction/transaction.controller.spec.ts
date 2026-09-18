@@ -41,9 +41,7 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if transaction to edit does not exist", async () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(null);
 
-      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException if transaction is pending", async () => {
@@ -60,9 +58,7 @@ describe("TransactionController", () => {
       jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(
-        controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any)).rejects.toThrow(NotFoundException);
     });
 
     it("should update description and category, save, and force update SSE", async () => {
@@ -141,19 +137,7 @@ describe("TransactionController", () => {
       jest.spyOn(Category, "find").mockResolvedValueOnce([childCat]).mockResolvedValueOnce([]);
       jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
 
-      const res = await controller.getByQuery(
-        user,
-        undefined,
-        0,
-        10,
-        "acc-1",
-        "cat-parent",
-        "grocery",
-        undefined,
-        "2026-01-01",
-        "2026-01-31",
-        true,
-      );
+      const res = await controller.getByQuery(user, undefined, 0, 10, "acc-1", "cat-parent", "grocery", undefined, "2026-01-01", "2026-01-31", true);
 
       expect(res).toBeDefined();
     });
@@ -162,16 +146,7 @@ describe("TransactionController", () => {
       const txList = [TestEntities.transaction];
       jest.spyOn(Transaction, "find").mockResolvedValue(txList);
 
-      const res = await controller.getByQuery(
-        user,
-        "",
-        0,
-        10,
-        "acc-1",
-        "unknown",
-        "grocery",
-        "2026-06-02",
-      );
+      const res = await controller.getByQuery(user, "", 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
 
       expect(Transaction.find).toHaveBeenCalled();
       expect(res).toBe(txList);
@@ -190,9 +165,7 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if category filter id is invalid", async () => {
       jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      await expect(
-        controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid"),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -263,9 +236,7 @@ describe("TransactionController", () => {
         extra: { merchantName: "Coffee Shop", logoUrl: "http://other-logo.png" },
       });
 
-      jest
-        .spyOn(Transaction, "find")
-        .mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
+      jest.spyOn(Transaction, "find").mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
       jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
       jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
