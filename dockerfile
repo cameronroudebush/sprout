@@ -16,7 +16,7 @@ RUN apk add --no-cache git python3 make g++
 WORKDIR /app
 
 COPY ./backend/package.json ./
-RUN npm ci
+RUN npm i
 
 COPY .git .git
 COPY ./backend .
