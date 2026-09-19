@@ -15,7 +15,7 @@ FROM node:24-alpine3.23 AS backend-build
 RUN apk add --no-cache git python3 make g++
 WORKDIR /app
 
-COPY ./backend/package.json ./backend/package-lock.json ./
+COPY ./backend/package.json ./
 RUN npm ci
 
 COPY .git .git

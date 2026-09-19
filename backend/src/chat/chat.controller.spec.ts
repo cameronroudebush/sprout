@@ -3,13 +3,14 @@ setupTests();
 
 import { ChatController } from "@backend/chat/chat.controller";
 import { ChatService } from "@backend/chat/chat.service";
-import { SSEService } from "@backend/sse/sse.service";
+import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model";
 import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
+import { SSEService } from "@backend/sse/sse.service";
 import { TestEntities } from "@backend/test/entities";
 import { BadRequestException, ConflictException } from "@nestjs/common";
-import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
+import { Mocked } from "vitest";
 
 describe("ChatController", () => {
   let controller: ChatController;

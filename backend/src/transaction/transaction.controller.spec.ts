@@ -11,6 +11,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionController } from "@backend/transaction/transaction.controller";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { Mocked } from "vitest";
 
 describe("TransactionController", () => {
   let controller: TransactionController;

@@ -5,7 +5,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { addDays, differenceInDays } from "date-fns";
-import subscriptionQuery from "./sql/subscription.sql";
+import subscriptionQuery from "./sql/subscription.sql?raw";
 
 /**
  * This service provides injectable capabilities for handling data involving Transactions.

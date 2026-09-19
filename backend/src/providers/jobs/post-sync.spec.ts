@@ -13,6 +13,7 @@ import { SSEService } from "@backend/sse/sse.service";
 import { TestEntities } from "@backend/test/entities";
 import { UserDevice } from "@backend/user/model/user.device.model";
 import { User } from "@backend/user/model/user.model";
+import { Mocked } from "vitest";
 
 describe("PostSyncProcessingJob", () => {
   let job: PostSyncProcessingJob;
