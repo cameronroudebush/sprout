@@ -9,9 +9,19 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["src/**/*.spec.ts"],
+
+    // Test execution report outputs
+    reporters: ["default", "junit"],
+    outputFile: {
+      junit: "./coverage/junit.xml",
+      json: "./coverage/report.json",
+    },
+
     coverage: {
       provider: "v8",
-      reporter: ["text", "json-summary", "html"],
+      reporter: ["text", "json-summary", "html", "clover", "cobertura"],
+      // Set output directory for all coverage reports (defaults to './coverage')
+      reportsDirectory: "./coverage",
     },
   },
   plugins: [
