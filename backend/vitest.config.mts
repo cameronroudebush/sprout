@@ -9,6 +9,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["src/**/*.spec.ts"],
+    fileParallelism: false,
 
     // Test execution report outputs
     reporters: ["default", "junit"],

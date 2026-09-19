@@ -1,13 +1,14 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { CashFlowService } from "@backend/cash-flow/cash.flow.service";
-import { Transaction } from "@backend/transaction/model/transaction.model";
-import { Category } from "@backend/category/model/category.model";
-import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
-import { AccountHistory } from "@backend/account/model/account.history.model";
-import { TestEntities } from "@backend/test/entities";
+import { CashFlowService } from "@backend/cash-flow/cash.flow.service.js";
+import { Transaction } from "@backend/transaction/model/transaction.model.js";
+import { Category } from "@backend/category/model/category.model.js";
+import { Account } from "@backend/account/model/account.model.js";
+import { AccountType } from "@backend/account/model/account.type.js";
+import { AccountHistory } from "@backend/account/model/account.history.model.js";
+import { TestEntities } from "@backend/test/entities.js";
+import { Between } from "typeorm";
 
 describe("CashFlowService", () => {
   let service: CashFlowService;
@@ -37,6 +38,16 @@ describe("CashFlowService", () => {
       expect(res.totalExpense).toBe(1500);
       expect(res.largestExpense).toBe(txExpense);
       expect(res.filteredTransactions).toHaveLength(2);
+    });
+
+    it("should calculate cash flows with customRange FindOperator", async () => {
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
+
+      const customRange = Between(new Date(2026, 0, 1), new Date(2026, 11, 31));
+      const res = await service.calculateFlows(user, undefined, undefined, undefined, undefined, customRange);
+
+      expect(res.totalIncome).toBe(0);
     });
 
     it("should calculate cash flows for a full year when month is omitted", async () => {
@@ -144,7 +155,7 @@ describe("CashFlowService", () => {
   });
 
   describe("getLoanAmortizationProjections", () => {
-    it("should project loan amortization schedules for active loan accounts", async () => {
+    it("should project loan amortization schedules for active loan accounts and skip positive balance loan", async () => {
       const loanAcc = Account.fromPlain({
         id: "loan-1",
         name: "Auto Loan",
@@ -153,10 +164,18 @@ describe("CashFlowService", () => {
         balance: -15000,
       });
 
+      const positiveLoanAcc = Account.fromPlain({
+        id: "loan-2",
+        name: "Paid Loan",
+        type: AccountType.loan,
+        interestRate: 5.0,
+        balance: 100,
+      });
+
       const history1 = AccountHistory.fromPlain({ id: "h1", balance: -15500, time: new Date(2026, 4, 1) });
       const history2 = AccountHistory.fromPlain({ id: "h2", balance: -15000, time: new Date(2026, 5, 1) });
 
-      vi.spyOn(Account, "find").mockResolvedValue([loanAcc]);
+      vi.spyOn(Account, "find").mockResolvedValue([loanAcc, positiveLoanAcc]);
       vi.spyOn(AccountHistory, "find").mockResolvedValue([history2, history1]);
 
       const projections = await service.getLoanAmortizationProjections(user);
