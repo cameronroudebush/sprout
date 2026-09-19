@@ -12,7 +12,7 @@ import { TransactionRuleService } from "@backend/transaction/transaction.rule.se
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
 import { subDays } from "date-fns";
-import { merge } from "lodash";
+import { merge } from "lodash-es";
 import { In } from "typeorm";
 
 /** Generic sync service to sync provider account info for users. Dynamically used across background jobs and manual calls. */

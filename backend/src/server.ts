@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { setupOpenApiHelp } from "@backend/core/openapi";

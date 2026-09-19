@@ -1,4 +1,4 @@
-import { Account } from "@backend/account/model/account.model";
+import type { Account } from "@backend/account/model/account.model";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
@@ -12,7 +12,7 @@ import { ManyToOne } from "typeorm";
 @DatabaseDecorators.entity()
 @CurrencyHelper.ExposeCurrencyFields<AccountHistory>("balance", "account.currency")
 export class AccountHistory extends DatabaseBase {
-  @ManyToOne(() => Account, (i) => i.id, { eager: true, onDelete: "CASCADE" })
+  @ManyToOne("Account", (i: Account) => i.id, { eager: true, onDelete: "CASCADE" })
   declare account: Account;
 
   @DatabaseDecorators.column({ nullable: false })
@@ -30,6 +30,16 @@ export class AccountHistory extends DatabaseBase {
     this.time = time;
     this.balance = balance;
     this.availableBalance = availableBalance;
+  }
+
+  /** Turns this given account to act like account history for today */
+  static fromAccount(acc: Account, date = new Date()) {
+    return AccountHistory.fromPlain({
+      balance: acc.balance,
+      account: acc,
+      availableBalance: acc.availableBalance,
+      time: date,
+    });
   }
 
   /** Inserts the given account as one day old history */

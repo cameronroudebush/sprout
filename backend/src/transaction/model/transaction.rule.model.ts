@@ -12,7 +12,7 @@ import { JoinColumn, ManyToOne } from "typeorm";
 /** This class defines a rule that allows us to organize transactions based on a rule  */
 @DatabaseDecorators.entity()
 export class TransactionRule extends DatabaseBase {
-  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
+  @ManyToOne("User", (u: User) => u.id, { onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude({ toPlainOnly: true })
   user: User;

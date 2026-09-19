@@ -6,7 +6,6 @@ import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { JoinColumn, ManyToOne, Not } from "typeorm";
-import { HoldingHistory } from "./holding.history.model";
 
 /** This class provides information for a current stock that is associated to an account. */
 @DatabaseDecorators.entity()
@@ -76,18 +75,6 @@ export class Holding extends DatabaseBase {
   /** Given an account, returns all holdings in the database for that account. */
   static getForAccount(account: Account) {
     return Holding.find({ where: { account: { id: account.id }, shares: Not(0) } });
-  }
-
-  /** Turns this holding to act like a holding history for today */
-  toAccountHistory(date = new Date()) {
-    return HoldingHistory.fromPlain({
-      costBasis: this.costBasis,
-      marketValue: this.marketValue,
-      purchasePrice: this.purchasePrice,
-      shares: this.shares,
-      holding: this,
-      time: date,
-    });
   }
 
   /** Given a list of these holdings, updates them to the target currency of the user config. This will edit in place. */

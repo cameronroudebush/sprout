@@ -1,12 +1,12 @@
+import { Configuration } from "@backend/config/core";
 import { CONFIGURATION_REQUIREMENTS } from "@backend/config/model/config.requirement";
 import { SproutLogger } from "@backend/core/logger";
 import { Injectable } from "@nestjs/common";
-import cronParser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 import fs from "fs";
-import { set } from "lodash";
+import { set } from "lodash-es";
 import path from "path";
 import * as YAML from "yaml";
-import { Configuration } from "./core.js";
 import { ConfigurationMetadata } from "./model/configuration.metadata";
 
 /** This class controls loading configuration options from the config file and handles some other functionality associated to it. */
@@ -192,7 +192,7 @@ export class ConfigurationService {
 
   /** Given a cron time, determines how many milliseconds it is until the next run. */
   async convertCronToMilliseconds(cron: string, buffer = 0) {
-    const interval = cronParser.parse(cron);
+    const interval = CronExpressionParser.parse(cron);
     const nextRun = interval.next().toDate();
     const now = new Date();
     return nextRun.getTime() - now.getTime() + buffer;

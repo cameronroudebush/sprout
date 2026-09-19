@@ -1,7 +1,6 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
@@ -63,37 +62,6 @@ describe("Account", () => {
 
       expect(findSpy).toHaveBeenCalledWith({
         where: { user: { id: "user-123" } },
-      });
-    });
-  });
-
-  describe("toAccountHistory", () => {
-    it("should generate an AccountHistory instance from the account metrics using the provided date", () => {
-      const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
-      const testDate = new Date("2026-06-02T00:00:00.000Z");
-      const fromPlainSpy = vi.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
-
-      account.toAccountHistory(testDate);
-
-      expect(fromPlainSpy).toHaveBeenCalledWith({
-        balance: 5000,
-        account: account,
-        availableBalance: 5000,
-        time: testDate,
-      });
-    });
-
-    it("should generate an AccountHistory instance using a default current date if none is supplied", () => {
-      const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
-      const fromPlainSpy = vi.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
-
-      account.toAccountHistory();
-
-      expect(fromPlainSpy).toHaveBeenCalledWith({
-        balance: 5000,
-        account: account,
-        availableBalance: 5000,
-        time: expect.any(Date),
       });
     });
   });

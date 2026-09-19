@@ -2,7 +2,7 @@ import { EncryptionTransformer } from "@backend/core/decorator/encryption.decora
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { ChartRange } from "@backend/user/model/chart.range.model";
-import { User } from "@backend/user/model/user.model";
+import type { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { IsBoolean, IsEnum, IsString } from "class-validator";
@@ -90,7 +90,7 @@ export class UserConfig extends DatabaseBase {
   @IsBoolean()
   includeAICapabilities: boolean;
 
-  @OneToOne(() => User, (user) => user.config, { onDelete: "CASCADE" })
+  @OneToOne("User", (user: User) => user.config, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   @ApiHideProperty()
   @Exclude()

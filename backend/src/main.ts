@@ -1,11 +1,10 @@
+import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
+import { SproutLogger } from "@backend/core/logger";
 import { Logger } from "@nestjs/common";
-import { startCase } from "lodash";
-import "source-map-support/register";
+import { startCase } from "lodash-es";
 import pkg from "../package.json" with { type: "json" };
 const { name } = pkg;
-import { ConfigurationService } from "./config/config.service.js";
-import { SproutLogger } from "./core/logger.js";
 
 /**
  * This allows us to run this app and then execute a specific script
@@ -48,8 +47,8 @@ async function main() {
 
   // Execute the server startup.
   const { startupServer } = await import("./server.js");
-  await startupServer();
+  await startupServer(name);
 }
 
 // Execute main so long as this file is not being imported
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (import.meta.main) main();
