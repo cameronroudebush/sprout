@@ -8,7 +8,7 @@ describe("PendingTransactionJob", () => {
   let job: PendingTransactionJob;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     job = new PendingTransactionJob();
   });
 

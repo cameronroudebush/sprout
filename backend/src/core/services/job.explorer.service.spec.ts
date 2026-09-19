@@ -8,10 +8,10 @@ describe("JobExplorerService", () => {
   let discoveryService: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     discoveryService = {
-      getProviders: jest.fn().mockReturnValue([]),
+      getProviders: vi.fn().mockReturnValue([]),
     };
 
     service = new JobExplorerService(discoveryService);

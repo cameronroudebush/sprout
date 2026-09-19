@@ -8,7 +8,7 @@ describe("UserDeviceJob", () => {
   let job: UserDeviceJob;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     job = new UserDeviceJob();
   });
 
@@ -23,7 +23,7 @@ describe("UserDeviceJob", () => {
   });
 
   it("should log info when affected is 0 or null", async () => {
-    vi.spyOn(UserDevice, "delete").mockResolvedValue({ affected: 0 } as any);
+    const deleteSpy = vi.spyOn(UserDevice, "delete").mockResolvedValue({ affected: 0 } as any);
 
     await (job as any).update();
 

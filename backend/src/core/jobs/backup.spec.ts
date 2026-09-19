@@ -7,7 +7,7 @@ describe("DatabaseBackupJob", () => {
   let runner: DatabaseBackupJob;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     runner = new DatabaseBackupJob();
   });
 

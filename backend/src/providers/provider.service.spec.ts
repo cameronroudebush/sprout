@@ -14,10 +14,10 @@ describe("ProviderService", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     discoveryService = {
-      getProviders: jest.fn(),
+      getProviders: vi.fn(),
     };
 
     service = new ProviderService(discoveryService);
@@ -33,7 +33,7 @@ describe("ProviderService", () => {
     it("should execute specific target provider sync task when requested", async () => {
       const mockJob = Object.create(ProviderSyncJob.prototype);
       mockJob.provider = { config: { dbType: ProviderType.plaid } };
-      mockJob.processTask = jest.fn().mockResolvedValue(TestEntities.sync);
+      mockJob.processTask = vi.fn().mockResolvedValue(TestEntities.sync);
 
       discoveryService.getProviders.mockReturnValue([{ instance: mockJob }]);
 
@@ -46,7 +46,7 @@ describe("ProviderService", () => {
     it("should execute all active sync jobs if providerType is omitted", async () => {
       const mockJob1 = Object.create(ProviderSyncJob.prototype);
       mockJob1.provider = { config: { dbType: ProviderType.plaid } };
-      mockJob1.processTask = jest.fn().mockResolvedValue(TestEntities.sync);
+      mockJob1.processTask = vi.fn().mockResolvedValue(TestEntities.sync);
 
       discoveryService.getProviders.mockReturnValue([{ instance: mockJob1 }]);
 

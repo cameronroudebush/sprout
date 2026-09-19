@@ -10,29 +10,29 @@ describe("CategoryService", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new CategoryService();
   });
 
   describe("getStats", () => {
     it("should query stats with year and month filter", async () => {
       const mockQueryBuilder: any = {
-        innerJoin: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        groupBy: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([
           { category_name: "Groceries", total: 5 },
           { category_name: "Utilities", total: 2 },
         ]),
       };
 
-      jest.spyOn(Transaction, "getRepository").mockReturnValue({
-        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+      vi.spyOn(Transaction, "getRepository").mockReturnValue({
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
       } as any);
 
       const stats = await service.getStats(user, 2026, 6, undefined, "acc-1");
@@ -45,19 +45,19 @@ describe("CategoryService", () => {
 
     it("should query stats with year only filter", async () => {
       const mockQueryBuilder: any = {
-        innerJoin: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        groupBy: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([{ category_name: "Rent", total: 12 }]),
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([{ category_name: "Rent", total: 12 }]),
       };
 
-      jest.spyOn(Transaction, "getRepository").mockReturnValue({
-        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+      vi.spyOn(Transaction, "getRepository").mockReturnValue({
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
       } as any);
 
       const stats = await service.getStats(user, 2026);
@@ -67,19 +67,19 @@ describe("CategoryService", () => {
 
     it("should query stats with day, month, and year filter", async () => {
       const mockQueryBuilder: any = {
-        innerJoin: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        groupBy: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([]),
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([]),
       };
 
-      jest.spyOn(Transaction, "getRepository").mockReturnValue({
-        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+      vi.spyOn(Transaction, "getRepository").mockReturnValue({
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
       } as any);
 
       const stats = await service.getStats(user, 2026, 6, 15);

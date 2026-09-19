@@ -2,6 +2,7 @@ import { setupTests } from "@backend/test/helpers";
 setupTests();
 
 import { TestEntities } from "@backend/test/entities";
+import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 
@@ -10,7 +11,7 @@ describe("TransactionRuleService", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new TransactionRuleService();
   });
 
@@ -29,11 +30,11 @@ describe("TransactionRuleService", () => {
 
       const tx = TestEntities.transaction;
       tx.description = "Morning Starbucks";
-      tx.update = jest.fn().mockResolvedValue(tx);
-      rule.update = jest.fn().mockResolvedValue(rule);
+      tx.update = vi.fn().mockResolvedValue(tx);
+      rule.update = vi.fn().mockResolvedValue(rule);
 
-      jest.spyOn(TransactionRule, "find").mockResolvedValue([rule]);
-      jest.spyOn(require("@backend/transaction/model/transaction.model").Transaction, "find").mockResolvedValue([tx]);
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([rule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx]);
 
       await service.applyRulesToTransactions(user);
 
@@ -66,26 +67,26 @@ describe("TransactionRuleService", () => {
       const tx1 = TestEntities.transaction;
       tx1.id = "tx-1";
       tx1.description = "Exact Match";
-      tx1.update = jest.fn().mockResolvedValue(tx1);
+      tx1.update = vi.fn().mockResolvedValue(tx1);
 
       const tx2 = TestEntities.transaction;
       tx2.id = "tx-2";
       tx2.description = "No Match";
       tx2.amount = 25.5;
-      tx2.update = jest.fn().mockResolvedValue(tx2);
+      tx2.update = vi.fn().mockResolvedValue(tx2);
 
       const txUnmatched = TestEntities.transaction;
       txUnmatched.id = "tx-3";
       txUnmatched.description = "Unmatched";
       txUnmatched.amount = 100;
       txUnmatched.category = TestEntities.category;
-      txUnmatched.update = jest.fn().mockResolvedValue(txUnmatched);
+      txUnmatched.update = vi.fn().mockResolvedValue(txUnmatched);
 
-      strictRule.update = jest.fn().mockResolvedValue(strictRule);
-      amountRule.update = jest.fn().mockResolvedValue(amountRule);
+      strictRule.update = vi.fn().mockResolvedValue(strictRule);
+      amountRule.update = vi.fn().mockResolvedValue(amountRule);
 
-      jest.spyOn(TransactionRule, "find").mockResolvedValue([strictRule, amountRule]);
-      jest.spyOn(require("@backend/transaction/model/transaction.model").Transaction, "find").mockResolvedValue([tx1, tx2, txUnmatched]);
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([strictRule, amountRule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx1, tx2, txUnmatched]);
 
       await service.applyRulesToTransactions(user, undefined, false, false, true);
 
@@ -96,10 +97,10 @@ describe("TransactionRuleService", () => {
 
   describe("reorderRules", () => {
     it("should slide overlapping rules and return updated list", async () => {
-      const rule1 = TransactionRule.fromPlain({ id: "r-10", order: 1, user, update: jest.fn() });
-      const rule2 = TransactionRule.fromPlain({ id: "r-20", order: 2, user, update: jest.fn() });
+      const rule1 = TransactionRule.fromPlain({ id: "r-10", order: 1, user, update: vi.fn() });
+      const rule2 = TransactionRule.fromPlain({ id: "r-20", order: 2, user, update: vi.fn() });
 
-      jest.spyOn(TransactionRule, "find").mockImplementation(async (opts: any) => {
+      vi.spyOn(TransactionRule, "find").mockImplementation(async (opts: any) => {
         if (opts.where && opts.where.order) return [rule2];
         return [rule1, rule2];
       });

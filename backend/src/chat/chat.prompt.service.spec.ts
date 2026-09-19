@@ -14,14 +14,14 @@ import { TestEntities } from "@backend/test/entities";
 
 describe("ChatPromptService", () => {
   let service: ChatPromptService;
-  let transactionService: jest.Mocked<TransactionService>;
+  let transactionService: vi.Mocked<TransactionService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     transactionService = {
-      findSubscriptions: jest.fn().mockResolvedValue([]),
+      findSubscriptions: vi.fn().mockResolvedValue([]),
     } as any;
 
     service = new ChatPromptService(transactionService);
@@ -29,11 +29,11 @@ describe("ChatPromptService", () => {
 
   describe("buildChatPrompt", () => {
     it("should assemble instructions, contextual data, and clean history", async () => {
-      jest.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
-      jest.spyOn(Holding, "find").mockResolvedValue([]);
-      jest.spyOn(AccountHistory, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
-      jest.spyOn(ChatHistory, "find").mockResolvedValue([]);
+      vi.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
+      vi.spyOn(Holding, "find").mockResolvedValue([]);
+      vi.spyOn(AccountHistory, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(ChatHistory, "find").mockResolvedValue([]);
 
       const result = await service.buildChatPrompt(user, ChatTimeframe.threeMonths, true);
 
@@ -44,10 +44,10 @@ describe("ChatPromptService", () => {
 
   describe("buildDailyOverviewPrompt", () => {
     it("should build prompt payload for daily overview", async () => {
-      jest.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
-      jest.spyOn(Holding, "find").mockResolvedValue([]);
-      jest.spyOn(AccountHistory, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
+      vi.spyOn(Holding, "find").mockResolvedValue([]);
+      vi.spyOn(AccountHistory, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
 
       const result = await service.buildDailyOverviewPrompt(user);
 
@@ -57,10 +57,10 @@ describe("ChatPromptService", () => {
 
   describe("buildHoldingsOverviewPrompt", () => {
     it("should build prompt payload for holdings overview", async () => {
-      jest.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
-      jest.spyOn(Holding, "find").mockResolvedValue([]);
-      jest.spyOn(AccountHistory, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
+      vi.spyOn(Holding, "find").mockResolvedValue([]);
+      vi.spyOn(AccountHistory, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
 
       const result = await service.buildHoldingsOverviewPrompt(user);
 
@@ -72,8 +72,8 @@ describe("ChatPromptService", () => {
     it("should delete old chat messages exceeding threshold", async () => {
       const history = [ChatHistory.fromPlain({ id: "ch1" }), ChatHistory.fromPlain({ id: "ch2" }), ChatHistory.fromPlain({ id: "ch3" })];
 
-      jest.spyOn(ChatHistory, "find").mockResolvedValue(history as any);
-      const deleteManySpy = jest.spyOn(ChatHistory, "deleteMany").mockResolvedValue({} as any);
+      vi.spyOn(ChatHistory, "find").mockResolvedValue(history as any);
+      const deleteManySpy = vi.spyOn(ChatHistory, "deleteMany").mockResolvedValue({} as any);
 
       const originalMax = Configuration.server.prompt.maxChatHistory;
       Configuration.server.prompt.maxChatHistory = 1;

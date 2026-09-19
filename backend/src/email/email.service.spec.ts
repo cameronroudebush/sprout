@@ -11,25 +11,25 @@ import { BadRequestException } from "@nestjs/common";
 
 describe("EmailService", () => {
   let service: EmailService;
-  let mailerService: jest.Mocked<MailerService>;
-  let netWorthService: jest.Mocked<NetWorthService>;
-  let cashFlowService: jest.Mocked<CashFlowService>;
+  let mailerService: vi.Mocked<MailerService>;
+  let netWorthService: vi.Mocked<NetWorthService>;
+  let cashFlowService: vi.Mocked<CashFlowService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mailerService = {
-      verifyAllTransporters: jest.fn().mockResolvedValue(undefined),
-      sendMail: jest.fn().mockResolvedValue(undefined),
+      verifyAllTransporters: vi.fn().mockResolvedValue(undefined),
+      sendMail: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     netWorthService = {
-      getTotalSummary: jest.fn().mockResolvedValue(10000),
+      getTotalSummary: vi.fn().mockResolvedValue(10000),
     } as any;
 
     cashFlowService = {
-      calculateFlows: jest.fn().mockResolvedValue({
+      calculateFlows: vi.fn().mockResolvedValue({
         totalIncome: 1000,
         totalExpense: 500,
         filteredTransactions: [TestEntities.transaction],

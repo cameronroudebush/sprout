@@ -8,10 +8,10 @@ describe("CoinbaseProviderService", () => {
   let cacheManager: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cacheManager = {
-      get: jest.fn(),
-      set: jest.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
     };
     service = new CoinbaseProviderService(cacheManager);
   });

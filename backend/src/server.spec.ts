@@ -1,8 +1,8 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-jest.mock("@backend/core/openapi", () => ({
-  setupOpenApiHelp: jest.fn(),
+vi.mock("@backend/core/openapi", () => ({
+  setupOpenApiHelp: vi.fn(),
 }));
 
 import { Configuration } from "@backend/config/core";
@@ -17,7 +17,7 @@ describe("server.ts", () => {
   let originalBuildDate: string | undefined;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     originalDevBuild = Configuration.isDevBuild;
     originalDemoMode = Configuration.isDemoMode;
@@ -26,27 +26,27 @@ describe("server.ts", () => {
     process.env["BUILD_DATE"] = "2026-01-01T00:00:00.000Z";
 
     mockApp = {
-      setGlobalPrefix: jest.fn(),
-      useGlobalPipes: jest.fn(),
-      use: jest.fn(),
-      set: jest.fn(),
-      enableCors: jest.fn(),
-      get: jest.fn().mockImplementation((key) => {
+      setGlobalPrefix: vi.fn(),
+      useGlobalPipes: vi.fn(),
+      use: vi.fn(),
+      set: vi.fn(),
+      enableCors: vi.fn(),
+      get: vi.fn().mockImplementation((key) => {
         if (key && key.name === "ConfigurationService") {
           return { configFileLocation: "/tmp/config.json" };
         }
         if (key && key.name === "DatabaseService") {
-          return { init: jest.fn().mockResolvedValue(undefined) };
+          return { init: vi.fn().mockResolvedValue(undefined) };
         }
         if (key && key.name === "DemoDataService") {
-          return { populateDemoData: jest.fn().mockResolvedValue(undefined) };
+          return { populateDemoData: vi.fn().mockResolvedValue(undefined) };
         }
         return {};
       }),
-      listen: jest.fn().mockResolvedValue(undefined),
+      listen: vi.fn().mockResolvedValue(undefined),
     };
 
-    jest.spyOn(NestFactory, "create").mockResolvedValue(mockApp as any);
+    vi.spyOn(NestFactory, "create").mockResolvedValue(mockApp as any);
   });
 
   afterEach(() => {
@@ -79,7 +79,7 @@ describe("server.ts", () => {
     Configuration.isDemoMode = true;
     Configuration.server.auth.type = "oidc";
     Configuration.server.auth.oidc = {
-      validate: jest.fn(),
+      validate: vi.fn(),
     } as any;
 
     await startupServer("SproutTest");
@@ -90,8 +90,8 @@ describe("server.ts", () => {
   });
 
   it("should handle error during startup and exit process gracefully", async () => {
-    const exitSpy = jest.spyOn(process, "exit").mockImplementation((() => undefined) as never);
-    jest.spyOn(NestFactory, "create").mockRejectedValueOnce(new Error("Startup error test"));
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
+    vi.spyOn(NestFactory, "create").mockRejectedValueOnce(new Error("Startup error test"));
 
     await startupServer("SproutTest");
 

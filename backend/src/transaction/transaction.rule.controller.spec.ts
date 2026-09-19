@@ -155,10 +155,10 @@ describe("TransactionRuleController", () => {
 
     it("should set order +1 when prior rules exist, insert rule, apply rules, and force update", async () => {
       const cat = TestEntities.category;
-      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
+      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
       const lastRule = TransactionRule.fromPlain({ order: 5 });
 
-      jest.spyOn(TransactionRule, "findOne").mockResolvedValue(lastRule);
+      vi.spyOn(TransactionRule, "findOne").mockResolvedValue(lastRule);
 
       const inputData = { value: "Grocery", categoryId: cat.id } as any;
 
@@ -166,10 +166,10 @@ describe("TransactionRuleController", () => {
         value: "Grocery",
         user,
         order: 0,
-        insert: jest.fn().mockResolvedValue(undefined),
+        insert: vi.fn().mockResolvedValue(undefined),
       };
 
-      jest.spyOn(TransactionRule, "fromPlain").mockReturnValue(ruleMockInstance as any);
+      vi.spyOn(TransactionRule, "fromPlain").mockReturnValue(ruleMockInstance as any);
 
       await controller.create(inputData, user);
 

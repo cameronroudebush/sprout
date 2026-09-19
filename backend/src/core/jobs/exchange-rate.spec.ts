@@ -9,13 +9,13 @@ describe("ExchangeRateJob", () => {
   let configService: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cacheManager = {
-      get: jest.fn(),
-      set: jest.fn().mockResolvedValue(undefined),
+      get: vi.fn(),
+      set: vi.fn().mockResolvedValue(undefined),
     };
     configService = {
-      convertCronToMilliseconds: jest.fn().mockResolvedValue(3600000),
+      convertCronToMilliseconds: vi.fn().mockResolvedValue(3600000),
     };
     job = new ExchangeRateJob(configService, cacheManager);
   });
@@ -33,7 +33,7 @@ describe("ExchangeRateJob", () => {
 
     it("should refresh rates from Yahoo Finance if cache is empty", async () => {
       cacheManager.get.mockResolvedValue(null);
-      const refreshSpy = jest.spyOn(job, "refreshExchangeRates").mockResolvedValue(undefined);
+      const refreshSpy = vi.spyOn(job, "refreshExchangeRates").mockResolvedValue(undefined);
 
       await (job as any).update();
 

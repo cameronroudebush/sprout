@@ -7,7 +7,7 @@ describe("SnapTradeProviderService", () => {
   let service: SnapTradeProviderService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new SnapTradeProviderService();
   });
 

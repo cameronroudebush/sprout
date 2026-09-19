@@ -56,13 +56,13 @@ describe("User model", () => {
     });
 
     it("should throw error if username is already in use", async () => {
-      jest.spyOn(User, "find").mockResolvedValue([TestEntities.user]);
+      vi.spyOn(User, "find").mockResolvedValue([TestEntities.user]);
 
       await expect(User.checkIfUsernameIsInUser("existingUser")).rejects.toThrow("Username is in use");
     });
 
     it("should resolve when username is available", async () => {
-      jest.spyOn(User, "find").mockResolvedValue([]);
+      vi.spyOn(User, "find").mockResolvedValue([]);
 
       await expect(User.checkIfUsernameIsInUser("newUser")).resolves.toBeUndefined();
     });
@@ -70,15 +70,15 @@ describe("User model", () => {
 
   describe("createUser", () => {
     it("should create user without password", async () => {
-      jest.spyOn(User, "checkIfUsernameIsInUser").mockResolvedValue(undefined);
-      jest.spyOn(UserConfig, "fromPlain").mockReturnValue({
-        insert: jest.fn().mockResolvedValue(TestEntities.userConfig),
+      vi.spyOn(User, "checkIfUsernameIsInUser").mockResolvedValue(undefined);
+      vi.spyOn(UserConfig, "fromPlain").mockReturnValue({
+        insert: vi.fn().mockResolvedValue(TestEntities.userConfig),
       } as any);
-      jest.spyOn(Category, "insertMany").mockResolvedValue([] as any);
+      vi.spyOn(Category, "insertMany").mockResolvedValue([] as any);
 
-      jest.spyOn(User, "fromPlain").mockImplementation((u: any) => {
+      vi.spyOn(User, "fromPlain").mockImplementation((u: any) => {
         const instance = new User(u.username, u.email, u.firstName, u.lastName, u.admin, u.config);
-        instance.insert = jest.fn().mockResolvedValue(instance);
+        instance.insert = vi.fn().mockResolvedValue(instance);
         return instance;
       });
 
@@ -88,15 +88,15 @@ describe("User model", () => {
     });
 
     it("should create user with valid password", async () => {
-      jest.spyOn(User, "checkIfUsernameIsInUser").mockResolvedValue(undefined);
-      jest.spyOn(UserConfig, "fromPlain").mockReturnValue({
-        insert: jest.fn().mockResolvedValue(TestEntities.userConfig),
+      vi.spyOn(User, "checkIfUsernameIsInUser").mockResolvedValue(undefined);
+      vi.spyOn(UserConfig, "fromPlain").mockReturnValue({
+        insert: vi.fn().mockResolvedValue(TestEntities.userConfig),
       } as any);
-      jest.spyOn(Category, "insertMany").mockResolvedValue([] as any);
+      vi.spyOn(Category, "insertMany").mockResolvedValue([] as any);
 
-      jest.spyOn(User, "fromPlain").mockImplementation((u: any) => {
+      vi.spyOn(User, "fromPlain").mockImplementation((u: any) => {
         const instance = new User(u.username, u.email, u.firstName, u.lastName, u.admin, u.config);
-        instance.insert = jest.fn().mockResolvedValue(instance);
+        instance.insert = vi.fn().mockResolvedValue(instance);
         return instance;
       });
 

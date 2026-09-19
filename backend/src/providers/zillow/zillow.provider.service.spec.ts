@@ -7,7 +7,7 @@ describe("ZillowProviderService", () => {
   let service: ZillowProviderService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new ZillowProviderService();
   });
 

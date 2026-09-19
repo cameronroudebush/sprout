@@ -7,11 +7,11 @@ describe("DatabaseService", () => {
   let service: DatabaseService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = Object.create(DatabaseService.prototype);
     (service as any).dataSource = {
       isInitialized: true,
-      initialize: jest.fn(),
+      initialize: vi.fn(),
     };
   });
 

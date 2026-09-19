@@ -7,7 +7,7 @@ describe("PlaidProviderService", () => {
   let service: PlaidProviderService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new PlaidProviderService();
   });
 

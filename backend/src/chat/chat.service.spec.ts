@@ -10,21 +10,21 @@ import { BadRequestException } from "@nestjs/common";
 
 describe("ChatService", () => {
   let service: ChatService;
-  let sseService: jest.Mocked<SSEService>;
-  let promptBuilder: jest.Mocked<ChatPromptService>;
+  let sseService: vi.Mocked<SSEService>;
+  let promptBuilder: vi.Mocked<ChatPromptService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     promptBuilder = {
-      buildChatPrompt: jest.fn().mockResolvedValue({ contents: "chat prompt", idMap: new Map() }),
-      buildDailyOverviewPrompt: jest.fn().mockResolvedValue({ contents: "daily overview prompt", idMap: new Map() }),
-      buildHoldingsOverviewPrompt: jest.fn().mockResolvedValue({ contents: "holdings overview prompt", idMap: new Map() }),
+      buildChatPrompt: vi.fn().mockResolvedValue({ contents: "chat prompt", idMap: new Map() }),
+      buildDailyOverviewPrompt: vi.fn().mockResolvedValue({ contents: "daily overview prompt", idMap: new Map() }),
+      buildHoldingsOverviewPrompt: vi.fn().mockResolvedValue({ contents: "holdings overview prompt", idMap: new Map() }),
     } as any;
 
     service = new ChatService(sseService, promptBuilder);

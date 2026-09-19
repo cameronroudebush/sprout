@@ -20,16 +20,16 @@ import { AccountSubType } from "@backend/account/model/account.sub.type";
 
 describe("DemoDataService", () => {
   let service: DemoDataService;
-  let databaseService: jest.Mocked<DatabaseService>;
+  let databaseService: vi.Mocked<DatabaseService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     databaseService = {
       source: {
-        dropDatabase: jest.fn().mockResolvedValue(undefined),
+        dropDatabase: vi.fn().mockResolvedValue(undefined),
       },
-      executeMigrations: jest.fn().mockResolvedValue(undefined),
+      executeMigrations: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     service = new DemoDataService(databaseService);
@@ -58,33 +58,33 @@ describe("DemoDataService", () => {
       const originalIsDemo = Configuration.isDemoMode;
       Configuration.isDemoMode = true;
 
-      jest.spyOn(User, "findOne").mockResolvedValue(TestEntities.user);
-      jest.spyOn(User, "createUser").mockResolvedValue({} as any);
+      vi.spyOn(User, "findOne").mockResolvedValue(TestEntities.user);
+      vi.spyOn(User, "createUser").mockResolvedValue({} as any);
       const mockAccounts = [
         Account.fromPlain({ id: "acc-1", subType: AccountSubType.checking, type: AccountType.depository }),
         Account.fromPlain({ id: "acc-2", subType: AccountSubType.savings, type: AccountType.depository }),
         Account.fromPlain({ id: "acc-3", subType: AccountSubType.brokerage, type: AccountType.investment }),
       ];
-      jest.spyOn(Account, "insertMany").mockResolvedValue(mockAccounts as any);
-      jest.spyOn(AccountHistory, "insertMany").mockImplementation(async (histories: any) => {
+      vi.spyOn(Account, "insertMany").mockResolvedValue(mockAccounts as any);
+      vi.spyOn(AccountHistory, "insertMany").mockImplementation(async (histories: any) => {
         histories.forEach((h: any, idx: number) => {
           h.account = h.account || mockAccounts[idx % mockAccounts.length];
         });
         return histories;
       });
-      jest.spyOn(Category.prototype, "update").mockImplementation(async function (this: any) {
+      vi.spyOn(Category.prototype, "update").mockImplementation(async function (this: any) {
         this.id = this.id || "cat-mock-id";
         return this;
       });
       const catWithId = Category.fromPlain({ id: "cat-1", name: "Expense", user: TestEntities.user });
-      jest.spyOn(Category, "find").mockResolvedValue([catWithId]);
-      jest.spyOn(Category, "insertMany").mockResolvedValue([]);
-      jest.spyOn(Transaction, "insertMany").mockResolvedValue([]);
-      jest.spyOn(TransactionRule, "insertMany").mockResolvedValue([]);
-      jest.spyOn(Holding, "insertMany").mockResolvedValue([TestEntities.holding] as any);
-      jest.spyOn(HoldingHistory, "insertMany").mockResolvedValue([]);
-      jest.spyOn(ChatHistory.prototype, "insert").mockResolvedValue({} as any);
-      jest.spyOn(ChatOverview, "insertMany").mockResolvedValue([]);
+      vi.spyOn(Category, "find").mockResolvedValue([catWithId]);
+      vi.spyOn(Category, "insertMany").mockResolvedValue([]);
+      vi.spyOn(Transaction, "insertMany").mockResolvedValue([]);
+      vi.spyOn(TransactionRule, "insertMany").mockResolvedValue([]);
+      vi.spyOn(Holding, "insertMany").mockResolvedValue([TestEntities.holding] as any);
+      vi.spyOn(HoldingHistory, "insertMany").mockResolvedValue([]);
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValue({} as any);
+      vi.spyOn(ChatOverview, "insertMany").mockResolvedValue([]);
 
       await service.populateDemoData(30);
 

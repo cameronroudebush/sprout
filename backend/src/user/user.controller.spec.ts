@@ -92,7 +92,7 @@ describe("UserController", () => {
 
     it("should update without email parameter", async () => {
       const updatedUser = TestEntities.user;
-      updatedUser.update = jest.fn().mockResolvedValue(updatedUser);
+      updatedUser.update = vi.fn().mockResolvedValue(updatedUser);
 
       const res = await controller.updateMe(updatedUser, {});
 
@@ -180,9 +180,9 @@ describe("UserController", () => {
     it("should create user and return UserCreationResponse for oidc auth", async () => {
       Configuration.server.auth = { type: "oidc" } as any;
       userService.allowUserCreation.mockResolvedValue(true);
-      jest.spyOn(User, "count").mockResolvedValue(1);
+      vi.spyOn(User, "count").mockResolvedValue(1);
       const mockCreated = { username: "oidcUser", id: "u-2" };
-      jest.spyOn(User, "createUser").mockResolvedValue(mockCreated as any);
+      vi.spyOn(User, "createUser").mockResolvedValue(mockCreated as any);
 
       const req = { setupUser: { username: "oidcUser", email: "oidc@sprout.local" } } as any;
       const res = await controller.create(UserCreationRequest.fromPlain({ username: "", password: "" }), req);
@@ -197,8 +197,8 @@ describe("UserController", () => {
 
     it("should catch createUser error and throw BadRequestException", async () => {
       userService.allowUserCreation.mockResolvedValue(true);
-      jest.spyOn(User, "count").mockResolvedValue(0);
-      jest.spyOn(User, "createUser").mockRejectedValue(new Error("Database write error"));
+      vi.spyOn(User, "count").mockResolvedValue(0);
+      vi.spyOn(User, "createUser").mockRejectedValue(new Error("Database write error"));
 
       await expect(controller.create(UserCreationRequest.fromPlain({ username: "test", password: "pwd" }), {} as any)).rejects.toThrow(BadRequestException);
     });
@@ -216,8 +216,8 @@ describe("UserController", () => {
     });
 
     it("should insert new device when device is not found", async () => {
-      jest.spyOn(UserDevice, "findOne").mockResolvedValue(null);
-      const insertSpy = jest.spyOn(UserDevice.prototype, "insert").mockResolvedValue({ id: "dev-new" } as any);
+      vi.spyOn(UserDevice, "findOne").mockResolvedValue(null);
+      const insertSpy = vi.spyOn(UserDevice.prototype, "insert").mockResolvedValue({ id: "dev-new" } as any);
 
       const res = await controller.registerDevice(user, {
         deviceId: "d-new",

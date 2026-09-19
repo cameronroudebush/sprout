@@ -13,24 +13,24 @@ import { BadRequestException, InternalServerErrorException } from "@nestjs/commo
 
 describe("CoinbaseProviderController", () => {
   let controller: CoinbaseProviderController;
-  let coinbaseProviderService: jest.Mocked<CoinbaseProviderService>;
-  let sseService: jest.Mocked<SSEService>;
-  let transactionRuleService: jest.Mocked<TransactionRuleService>;
+  let coinbaseProviderService: vi.Mocked<CoinbaseProviderService>;
+  let sseService: vi.Mocked<SSEService>;
+  let transactionRuleService: vi.Mocked<TransactionRuleService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     coinbaseProviderService = {
-      exchangeAndCreateAccounts: jest.fn(),
+      exchangeAndCreateAccounts: vi.fn(),
     } as any;
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     transactionRuleService = {
-      applyRulesToTransactions: jest.fn().mockResolvedValue(undefined),
+      applyRulesToTransactions: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     controller = new CoinbaseProviderController(coinbaseProviderService, sseService, transactionRuleService);
@@ -38,7 +38,7 @@ describe("CoinbaseProviderController", () => {
 
   describe("linkAccount", () => {
     it("throws BadRequestException if account is already linked", async () => {
-      jest.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
+      vi.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
 
       await expect(controller.linkAccount(user)).rejects.toThrow(BadRequestException);
       expect(Account.find).toHaveBeenCalledWith({
@@ -47,14 +47,14 @@ describe("CoinbaseProviderController", () => {
     });
 
     it("throws InternalServerErrorException if account linking fails to produce an account", async () => {
-      jest.spyOn(Account, "find").mockResolvedValue([]);
+      vi.spyOn(Account, "find").mockResolvedValue([]);
       coinbaseProviderService.exchangeAndCreateAccounts.mockResolvedValue([]);
 
       await expect(controller.linkAccount(user)).rejects.toThrow(InternalServerErrorException);
     });
 
     it("successfully links account, applies rules, and triggers SSE force update", async () => {
-      jest.spyOn(Account, "find").mockResolvedValue([]);
+      vi.spyOn(Account, "find").mockResolvedValue([]);
       const mockAccount = TestEntities.account;
       coinbaseProviderService.exchangeAndCreateAccounts.mockResolvedValue([{ account: mockAccount }] as any);
 

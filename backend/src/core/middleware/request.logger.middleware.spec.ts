@@ -13,8 +13,8 @@ describe("RequestLoggerMiddleware", () => {
   describe("use", () => {
     it("should log request and invoke next function", () => {
       const req = { method: "GET", originalUrl: "/api/test", ip: "127.0.0.1", socket: { bytesWritten: 500 } };
-      const res = { statusCode: 200, get: jest.fn().mockReturnValue("100"), on: jest.fn((_event, cb) => cb()) };
-      const next = jest.fn();
+      const res = { statusCode: 200, get: vi.fn().mockReturnValue("100"), on: vi.fn((_event, cb) => cb()) };
+      const next = vi.fn();
 
       middleware.use(req as any, res as any, next);
 

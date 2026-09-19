@@ -86,8 +86,8 @@ describe("TransactionController", () => {
       const tx = TestEntities.transaction;
       tx.description = "Original Description";
       tx.pending = false;
-      tx.update = jest.fn().mockResolvedValue(tx);
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+      tx.update = vi.fn().mockResolvedValue(tx);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(tx);
 
       const res = await controller.edit(tx.id, user, {} as any);
 
@@ -119,7 +119,7 @@ describe("TransactionController", () => {
   describe("getByQuery", () => {
     it("should return transactions directly by ID", async () => {
       const txList = [TestEntities.transaction];
-      jest.spyOn(Transaction, "find").mockResolvedValue(txList);
+      vi.spyOn(Transaction, "find").mockResolvedValue(txList);
 
       const res = await controller.getByQuery(user, "tx-123");
 
@@ -134,9 +134,9 @@ describe("TransactionController", () => {
       const parentCat = Category.fromPlain({ id: "cat-parent" });
       const childCat = Category.fromPlain({ id: "cat-child" });
 
-      jest.spyOn(Category, "findOne").mockResolvedValue(parentCat);
-      jest.spyOn(Category, "find").mockResolvedValueOnce([childCat]).mockResolvedValueOnce([]);
-      jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
+      vi.spyOn(Category, "findOne").mockResolvedValue(parentCat);
+      vi.spyOn(Category, "find").mockResolvedValueOnce([childCat]).mockResolvedValueOnce([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
 
       const res = await controller.getByQuery(user, undefined, 0, 10, "acc-1", "cat-parent", "grocery", undefined, "2026-01-01", "2026-01-31", true);
 
@@ -154,7 +154,7 @@ describe("TransactionController", () => {
     });
 
     it("should handle single pagination index params (startIndex only or endIndex only)", async () => {
-      jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
 
       const res1 = await controller.getByQuery(user, undefined, 5, undefined);
       expect(res1).toBeDefined();
@@ -193,7 +193,7 @@ describe("TransactionController", () => {
     });
 
     it("should count total transactions with accountId, category, and description filters", async () => {
-      jest.spyOn(Transaction, "count").mockResolvedValue(5);
+      vi.spyOn(Transaction, "count").mockResolvedValue(5);
 
       const res1 = await controller.getTotal(user, "acc-1", "unknown", "grocery");
       expect(res1.total).toBe(5);
@@ -215,7 +215,7 @@ describe("TransactionController", () => {
 
     it("should remove duplicate transactions and merge category/extra if present, swapping providerId when needed", async () => {
       const account = TestEntities.account;
-      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
       const txKeptNoProvider = Transaction.fromPlain({
         id: "tx-kept",
@@ -237,7 +237,7 @@ describe("TransactionController", () => {
         extra: { merchantName: "Coffee Shop", logoUrl: "http://other-logo.png" },
       });
 
-      vi.spyOn(Transaction, "find").mockResolvedValue([tx1, tx2]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
       vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
       vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
@@ -250,7 +250,7 @@ describe("TransactionController", () => {
 
     it("should inherit categoryId, providerId, and extra when kept transaction lacks them and is not swapped", async () => {
       const account = TestEntities.account;
-      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
       const txKept = Transaction.fromPlain({
         id: "tx-kept-noswap",
@@ -274,9 +274,9 @@ describe("TransactionController", () => {
         extra: { merchantName: "Inherited Merchant" },
       });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txKept, txRemove]);
-      jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
-      jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txRemove]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
       const res = await controller.removeDuplicates(user, account.id);
 
@@ -287,7 +287,7 @@ describe("TransactionController", () => {
 
     it("should handle duplicate removal when removed.affected is undefined and when extra is identical", async () => {
       const account = TestEntities.account;
-      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
       const txKept = Transaction.fromPlain({
         id: "tx-kept-2",
@@ -317,9 +317,9 @@ describe("TransactionController", () => {
         extra: { logoUrl: "http://logo.png" },
       });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txKept, txDup1, txDup2]);
-      jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
-      jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: undefined } as any);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txDup1, txDup2]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: undefined } as any);
 
       const res = await controller.removeDuplicates(user, account.id);
 

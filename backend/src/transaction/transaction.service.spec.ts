@@ -1,8 +1,8 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-jest.mock("fs/promises", () => ({
-  readFile: jest.fn().mockResolvedValue("SELECT 1;"),
+vi.mock("fs/promises", () => ({
+  readFile: vi.fn().mockResolvedValue("SELECT 1;"),
 }));
 
 import { TestEntities } from "@backend/test/entities";
@@ -15,11 +15,11 @@ describe("TransactionService", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockDatabaseService = {
       source: {
-        query: jest.fn(),
+        query: vi.fn(),
       },
     };
 
@@ -43,7 +43,7 @@ describe("TransactionService", () => {
       };
 
       mockDatabaseService.source.query.mockResolvedValue([mockRow]);
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(TestEntities.transaction);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(TestEntities.transaction);
 
       const results = await service.findSubscriptions(user);
 

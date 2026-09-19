@@ -14,7 +14,7 @@ describe("CashFlowService", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new CashFlowService();
   });
 
@@ -28,8 +28,8 @@ describe("CashFlowService", () => {
       const txExpense = Transaction.fromPlain({ id: "t2", amount: -1500, category: categoryOut, account: TestEntities.account, pending: false });
       const txExcluded = Transaction.fromPlain({ id: "t3", amount: -300, category: categoryExcluded, account: TestEntities.account, pending: false });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txIncome, txExpense, txExcluded]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([txIncome, txExpense, txExcluded]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txIncome, txExpense, txExcluded]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([txIncome, txExpense, txExcluded]);
 
       const res = await service.calculateFlows(user, 2026, 6);
 
@@ -40,8 +40,8 @@ describe("CashFlowService", () => {
     });
 
     it("should calculate cash flows for a full year when month is omitted", async () => {
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
 
       const res = await service.calculateFlows(user, 2026);
 
@@ -50,8 +50,8 @@ describe("CashFlowService", () => {
     });
 
     it("should calculate cash flows for a specific day when day is provided", async () => {
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
 
       const res = await service.calculateFlows(user, 2026, 6, 15, "acc-123");
 
@@ -69,9 +69,9 @@ describe("CashFlowService", () => {
       const txIn = Transaction.fromPlain({ id: "t1", amount: 3000, category: catIn, account: TestEntities.account });
       const txOut = Transaction.fromPlain({ id: "t2", amount: -1000, category: catOut, account: TestEntities.account });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txIn, txOut]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([txIn, txOut]);
-      jest.spyOn(Category, "find").mockResolvedValue([catIn, catOut, catParent]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txIn, txOut]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([txIn, txOut]);
+      vi.spyOn(Category, "find").mockResolvedValue([catIn, catOut, catParent]);
 
       const sankey = await service.buildSankey(user, 2026, 6);
 
@@ -84,9 +84,9 @@ describe("CashFlowService", () => {
       const catOut = Category.fromPlain({ id: "c2", name: "Shopping", excludeFromCashFlow: false });
       const txOut = Transaction.fromPlain({ id: "t2", amount: -2000, category: catOut, account: TestEntities.account });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txOut]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([txOut]);
-      jest.spyOn(Category, "find").mockResolvedValue([catOut]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txOut]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([txOut]);
+      vi.spyOn(Category, "find").mockResolvedValue([catOut]);
 
       const sankey = await service.buildSankey(user, 2026, 6);
 
@@ -99,8 +99,8 @@ describe("CashFlowService", () => {
       const cat = Category.fromPlain({ id: "c1", name: "Dining", excludeFromCashFlow: false });
       const tx = Transaction.fromPlain({ id: "t1", amount: -100, category: cat, account: TestEntities.account });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([tx]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([tx]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([tx]);
 
       const spending = await service.calculateMonthlySpending(user, 3, 2);
 
@@ -111,8 +111,8 @@ describe("CashFlowService", () => {
 
   describe("getSpendingTimeline", () => {
     it("should compute daily accumulated spending timeline for a month", async () => {
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
 
       const timeline = await service.getSpendingTimeline(user, 2026, 6);
 
@@ -120,8 +120,8 @@ describe("CashFlowService", () => {
     });
 
     it("should compute monthly accumulated spending timeline for a year", async () => {
-      jest.spyOn(Transaction, "find").mockResolvedValue([]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([]);
 
       const timeline = await service.getSpendingTimeline(user, 2026);
 
@@ -134,8 +134,8 @@ describe("CashFlowService", () => {
       const cat = Category.fromPlain({ id: "c1", name: "Food", excludeFromCashFlow: false });
       const tx = Transaction.fromPlain({ id: "t1", amount: -50, category: cat, account: TestEntities.account });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([tx]);
-      jest.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([tx]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx]);
+      vi.spyOn(Transaction, "convertListToTargetCurrency").mockReturnValue([tx]);
 
       const result = await service.getDailySpendingMap(user, 2026, 6);
 
@@ -156,8 +156,8 @@ describe("CashFlowService", () => {
       const history1 = AccountHistory.fromPlain({ id: "h1", balance: -15500, time: new Date(2026, 4, 1) });
       const history2 = AccountHistory.fromPlain({ id: "h2", balance: -15000, time: new Date(2026, 5, 1) });
 
-      jest.spyOn(Account, "find").mockResolvedValue([loanAcc]);
-      jest.spyOn(AccountHistory, "find").mockResolvedValue([history2, history1]);
+      vi.spyOn(Account, "find").mockResolvedValue([loanAcc]);
+      vi.spyOn(AccountHistory, "find").mockResolvedValue([history2, history1]);
 
       const projections = await service.getLoanAmortizationProjections(user);
 

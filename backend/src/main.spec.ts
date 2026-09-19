@@ -1,19 +1,21 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-jest.mock("@backend/scripts/generate.api-spec", () => ({
-  generateOpenApiSpec: jest.fn().mockResolvedValue(undefined),
+vi.mock("@backend/scripts/generate.api-spec.js", () => ({
+  generateOpenApiSpec: vi.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("@backend/server", () => ({
-  startupServer: jest.fn().mockResolvedValue(undefined),
+vi.mock("@backend/server.js", () => ({
+  startupServer: vi.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("@backend/config/config.service", () => {
+vi.mock("@backend/config/config.service", () => {
   return {
-    ConfigurationService: jest.fn().mockImplementation(() => ({
-      load: jest.fn(),
-    })),
+    ConfigurationService: vi.fn().mockImplementation(function () {
+      return {
+        load: vi.fn(),
+      };
+    }),
   };
 });
 
@@ -22,14 +24,14 @@ import { checkScript, main } from "@backend/main";
 
 describe("main.ts", () => {
   let originalArgv: string[];
-  let exitSpy: jest.SpyInstance;
+  let exitSpy: vi.SpyInstance;
   let originalDevBuild: boolean;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     originalArgv = [...process.argv];
     originalDevBuild = Configuration.isDevBuild;
-    exitSpy = jest.spyOn(process, "exit").mockImplementation((() => undefined) as never);
+    exitSpy = vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
   });
 
   afterEach(() => {
@@ -41,7 +43,7 @@ describe("main.ts", () => {
   describe("checkScript", () => {
     it("should execute generate.api-spec script and exit 0", async () => {
       process.argv = ["node", "main.js", "generate.api-spec", "out.json"];
-      const generateApiSpec = require("@backend/scripts/generate.api-spec");
+      const generateApiSpec = await import("./scripts/generate.api-spec.js");
 
       await checkScript();
 
@@ -62,7 +64,7 @@ describe("main.ts", () => {
     it("should start server in production mode (non-dev build)", async () => {
       Configuration.isDevBuild = false;
       process.argv = ["node", "main.js"];
-      const serverModule = require("@backend/server");
+      const serverModule = await import("./server.js");
 
       await main();
 
@@ -72,8 +74,8 @@ describe("main.ts", () => {
     it("should generate openapi spec and start server in dev build mode when no script provided", async () => {
       Configuration.isDevBuild = true;
       process.argv = ["node", "main.js"];
-      const generateApiSpec = require("@backend/scripts/generate.api-spec");
-      const serverModule = require("@backend/server");
+      const generateApiSpec = await import("./scripts/generate.api-spec.js");
+      const serverModule = await import("./server.js");
 
       await main();
 
@@ -84,7 +86,7 @@ describe("main.ts", () => {
     it("should execute checkScript when running script in dev build mode", async () => {
       Configuration.isDevBuild = true;
       process.argv = ["node", "main.js", "generate.api-spec", "out.json"];
-      const generateApiSpec = require("@backend/scripts/generate.api-spec");
+      const generateApiSpec = await import("./scripts/generate.api-spec.js");
 
       await main();
 

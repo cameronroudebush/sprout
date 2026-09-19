@@ -11,14 +11,14 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 
 describe("NotificationService", () => {
   let service: NotificationService;
-  let sseService: jest.Mocked<SSEService>;
+  let sseService: vi.Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     service = new NotificationService(sseService);
@@ -38,12 +38,12 @@ describe("NotificationService", () => {
 
   describe("notifyUser", () => {
     it("should insert notification, cleanup max limit, send SSE, and notify app", async () => {
-      const insertSpy = jest.fn().mockImplementation(async function (this: any) {
+      const insertSpy = vi.fn().mockImplementation(async function (this: any) {
         this.id = "n-123";
         return this;
       });
-      jest.spyOn(Notification.prototype, "insert").mockImplementation(insertSpy);
-      jest.spyOn(Notification, "find").mockResolvedValue([]);
+      vi.spyOn(Notification.prototype, "insert").mockImplementation(insertSpy);
+      vi.spyOn(Notification, "find").mockResolvedValue([]);
 
       const result = await service.notifyUser(user, "Test Message", "Test Title", NotificationType.info, false);
 

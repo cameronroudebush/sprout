@@ -1,15 +1,19 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-jest.mock("@keyv/redis", () => {
-  const mockKeyvRedis = jest.fn().mockImplementation(() => ({
-    client: {
-      isOpen: false,
-      connect: jest.fn().mockResolvedValue(undefined),
-      ping: jest.fn().mockResolvedValue("PONG"),
-    },
-  }));
-  const mockKeyv = jest.fn().mockImplementation(() => ({}));
+vi.mock("@keyv/redis", () => {
+  const mockKeyvRedis = vi.fn().mockImplementation(function () {
+    return {
+      client: {
+        isOpen: false,
+        connect: vi.fn().mockResolvedValue(undefined),
+        ping: vi.fn().mockResolvedValue("PONG"),
+      },
+    };
+  });
+  const mockKeyv = vi.fn().mockImplementation(function () {
+    return {};
+  });
   return {
     __esModule: true,
     default: mockKeyvRedis,
@@ -26,7 +30,7 @@ describe("AppModule", () => {
   let originalCacheConfig: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     originalCacheConfig = { ...Configuration.server.cache };
   });
 
@@ -42,8 +46,8 @@ describe("AppModule", () => {
     it("should configure middleware consumer", () => {
       const appModule = new AppModule();
       const consumer = {
-        apply: jest.fn().mockReturnThis(),
-        forRoutes: jest.fn().mockReturnThis(),
+        apply: vi.fn().mockReturnThis(),
+        forRoutes: vi.fn().mockReturnThis(),
       };
 
       appModule.configure(consumer as any);
@@ -76,7 +80,7 @@ describe("AppModule", () => {
       Configuration.server.cache = {
         type: "redis",
         redis: {
-          validate: jest.fn(),
+          validate: vi.fn(),
           host: "localhost",
           port: 6379,
           password: "secretpassword",
@@ -92,21 +96,23 @@ describe("AppModule", () => {
       Configuration.server.cache = {
         type: "redis",
         redis: {
-          validate: jest.fn(),
+          validate: vi.fn(),
           host: "invalidhost",
           port: 6379,
           password: "",
         },
       } as any;
 
-      const KeyvRedis = require("@keyv/redis").default;
-      KeyvRedis.mockImplementationOnce(() => ({
-        client: {
-          isOpen: false,
-          connect: jest.fn().mockRejectedValue(new Error("Redis connection error")),
-          ping: jest.fn(),
-        },
-      }));
+      const { default: KeyvRedis } = await import("@keyv/redis");
+      KeyvRedis.mockImplementationOnce(function () {
+        return {
+          client: {
+            isOpen: false,
+            connect: vi.fn().mockRejectedValue(new Error("Redis connection error")),
+            ping: vi.fn(),
+          },
+        };
+      });
 
       const result = await cacheFactory();
       expect(result.stores).toHaveLength(1);

@@ -10,8 +10,8 @@ describe("ContextSerializerInterceptor", () => {
 
   beforeEach(() => {
     reflector = {
-      get: jest.fn(),
-      getAllAndOverride: jest.fn(),
+      get: vi.fn(),
+      getAllAndOverride: vi.fn(),
     };
     interceptor = new ContextSerializerInterceptor(reflector);
   });
@@ -21,8 +21,8 @@ describe("ContextSerializerInterceptor", () => {
       const mockUser = { id: "u-1" };
       const mockRequest = { user: mockUser };
       const executionContext: Partial<ExecutionContext> = {
-        getHandler: jest.fn(),
-        getClass: jest.fn(),
+        getHandler: vi.fn(),
+        getClass: vi.fn(),
         switchToHttp: () =>
           ({
             getRequest: () => mockRequest,
