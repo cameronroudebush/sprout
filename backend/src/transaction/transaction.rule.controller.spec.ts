@@ -10,6 +10,7 @@ import { TransactionRuleType } from "@backend/transaction/model/transaction.rule
 import { TransactionRuleController } from "@backend/transaction/transaction.rule.controller";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { Mocked } from "vitest";
 
 describe("TransactionRuleController", () => {
   let controller: TransactionRuleController;
@@ -81,7 +82,11 @@ describe("TransactionRuleController", () => {
       vi.spyOn(TransactionRule, "findOne").mockResolvedValue(rule);
       vi.spyOn(Category, "findOne").mockResolvedValue(null);
 
-      const updatePayload = TransactionRule.fromPlain({ categoryId: "cat-invalid", type: "description", value: "val" });
+      const updatePayload = TransactionRule.fromPlain({
+        categoryId: "cat-invalid",
+        type: "description",
+        value: "val",
+      });
 
       await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(NotFoundException);
     });
@@ -90,7 +95,10 @@ describe("TransactionRuleController", () => {
       const rule = TestEntities.transactionRule;
       vi.spyOn(TransactionRule, "findOne").mockResolvedValue(rule);
 
-      const updatePayload = TransactionRule.fromPlain({ type: "invalid_type" as any, value: "val" });
+      const updatePayload = TransactionRule.fromPlain({
+        type: "invalid_type" as any,
+        value: "val",
+      });
 
       await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(BadRequestException);
     });
@@ -139,7 +147,34 @@ describe("TransactionRuleController", () => {
 
       await controller.create(rule, user);
 
+      expect(rule.order).toBe(0);
       expect(rule.value).toBe("Grocery");
+      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+    });
+
+    it("should set order +1 when prior rules exist, insert rule, apply rules, and force update", async () => {
+      const cat = TestEntities.category;
+      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
+      const lastRule = TransactionRule.fromPlain({ order: 5 });
+
+      vi.spyOn(TransactionRule, "findOne").mockResolvedValue(lastRule);
+
+      const inputData = { value: "Grocery", categoryId: cat.id } as any;
+
+      const ruleMockInstance = {
+        value: "Grocery",
+        user,
+        order: 0,
+        insert: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.spyOn(TransactionRule, "fromPlain").mockReturnValue(ruleMockInstance as any);
+
+      await controller.create(inputData, user);
+
+      expect(ruleMockInstance.order).toBe(6);
+      expect(ruleMockInstance.value).toBe("Grocery");
       expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
     });

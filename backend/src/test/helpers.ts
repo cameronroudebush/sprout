@@ -1,6 +1,7 @@
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { SproutLogger } from "@backend/core/logger";
 import { Logger } from "@nestjs/common";
 
 vi.mock("@backend/config/core", () => ({
@@ -31,6 +32,10 @@ vi.mock("@backend/config/core", () => ({
           clientId: "app-client-id",
         },
       },
+      rateLimit: {
+        ttl: 60,
+        limit: 100,
+      },
       cache: {
         type: "local",
       },
@@ -39,12 +44,34 @@ vi.mock("@backend/config/core", () => ({
         sendTime: "0 12 * * 0",
         validate: vi.fn(),
       },
+      notification: {
+        maxNotificationsPerUser: 50,
+        firebase: {
+          enabled: false,
+          apiKey: "test-api-key",
+          appId: "test-app-id",
+          projectNumber: 12345,
+          projectId: "test-project-id",
+          clientEmail: "test@project.iam.gserviceaccount.com",
+          privateKey: "test-private-key",
+          validate: vi.fn(),
+        },
+      },
       prompt: {
+        type: "gemini",
         enabled: true,
+        gemini: {
+          key: "test-gemini-key",
+          chatModel: "gemini-2.5-flash",
+          overviewModel: "gemini-2.5-flash",
+        },
       },
       lightModeTiles: [],
       darkModeTiles: [],
-      brandFetch: { clientId: "bf-id" },
+      brandFetch: { clientId: "bf-id", getWebsiteIconUrl: vi.fn().mockReturnValue("https://icon.local") },
+      exchangeRate: {
+        time: "0 0 * * *",
+      },
     },
     holding: {
       cleanupRemovedHoldings: true,
@@ -80,6 +107,9 @@ vi.mock("@backend/config/core", () => ({
       zillow: {
         enabled: true,
       },
+      coinbase: {
+        enabled: true,
+      },
     },
   },
 }));
@@ -94,11 +124,21 @@ export function setupTests() {
 
 /** Mocks the logger to not actually output and litter the log for testing */
 function mockLogger() {
+  vi.spyOn(Logger, "log").mockImplementation(() => {});
+  vi.spyOn(Logger, "error").mockImplementation(() => {});
+  vi.spyOn(Logger, "warn").mockImplementation(() => {});
+  vi.spyOn(Logger, "debug").mockImplementation(() => {});
+  vi.spyOn(Logger, "verbose").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "verbose").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "log").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "error").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "warn").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "debug").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "verbose").mockImplementation(() => {});
 }
 
 /** Mocks the database so DatabaseBase will be set */

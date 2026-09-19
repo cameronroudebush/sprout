@@ -29,7 +29,7 @@ export async function checkScript() {
 }
 
 /** This function is the main execution of the app. It sets up the configuration then configures the Nest server */
-async function main() {
+export async function main() {
   const projName = startCase(name);
   new ConfigurationService(new SproutLogger(projName, { logLevels: ["verbose"] })).load();
   Configuration.isRunningScript = Configuration.isDevBuild && process.argv[2] != null;
