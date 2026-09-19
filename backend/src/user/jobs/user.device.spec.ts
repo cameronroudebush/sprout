@@ -12,8 +12,8 @@ describe("UserDeviceJob", () => {
     job = new UserDeviceJob();
   });
 
-  it("should delete user devices last seen before cutoff date and log warning when affected > 0", async () => {
-    const deleteSpy = jest.spyOn(UserDevice, "delete").mockResolvedValue({ affected: 2, raw: [] });
+  it("should delete devices older than cutoff date and log warning if affected > 0", async () => {
+    const deleteSpy = vi.spyOn(UserDevice, "delete").mockResolvedValue({ affected: 3 } as any);
 
     await (job as any).update();
 
@@ -22,8 +22,8 @@ describe("UserDeviceJob", () => {
     });
   });
 
-  it("should log info message when zero user devices are affected", async () => {
-    const deleteSpy = jest.spyOn(UserDevice, "delete").mockResolvedValue({ affected: 0, raw: [] });
+  it("should log info when affected is 0 or null", async () => {
+    vi.spyOn(UserDevice, "delete").mockResolvedValue({ affected: 0 } as any);
 
     await (job as any).update();
 

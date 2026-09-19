@@ -166,6 +166,14 @@ To install all dependencies across root and backend projects:
 npm run install:all
 ```
 
+### Production Build
+
+To compile the backend production build and binary executable:
+
+```bash
+npm run build --prefix backend
+```
+
 ### Backend Testing & Coverage Guidelines
 
 When working with backend unit tests:
@@ -184,13 +192,13 @@ When working with backend unit tests:
 4. **Writing Backend Unit Tests**:
     - Always invoke `setupTests()` from `@backend/test/helpers` at the top of each test file before importing NestJS modules or application entities:
         ```typescript
-        import { setupTests } from "@backend/test/helpers";
+        import { setupTests } from "@backend/test/helpers.js";
         setupTests();
         ```
     - Use NestJS absolute path aliases starting with `@backend/`.
-    - Use `jest.clearAllMocks()` in `beforeEach()` to ensure strict test isolation.
+    - Use `vi.clearAllMocks()` in `beforeEach()` to ensure strict test isolation.
     - For static properties or global state modified in tests (e.g. `Configuration.server.auth`), capture original values and restore them in `afterEach()`.
-    - Use `jest.spyOn()` for static model methods.
+    - Use `vi.spyOn()` for static model methods.
     - Use `.rejects.toThrow()` for asynchronous error assertions.
 
 ### OpenAPI Client Generation

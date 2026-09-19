@@ -16,7 +16,7 @@ export class ProviderRateLimit extends DatabaseBase {
   readonly MAX_CALLS_PER_DAY: number;
 
   /** The unique name of this provider */
-  @DatabaseDecorators.column({ nullable: false, unique: true })
+  @DatabaseDecorators.column({ nullable: false, enum: ProviderType, unique: true })
   @ApiProperty({
     enum: ProviderType,
     enumName: "ProviderTypeEnum",

@@ -12,17 +12,16 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from "@
 
 describe("UserController", () => {
   let controller: UserController;
-  let userService: jest.Mocked<UserService>;
+  let userService: Mocked<UserService>;
   const user = TestEntities.user;
   let originalAuthConfig: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    originalAuthConfig = { ...Configuration.server.auth };
+    vi.clearAllMocks();
 
     userService = {
-      allowUserCreation: jest.fn().mockResolvedValue(true),
-      deleteUser: jest.fn().mockResolvedValue(undefined),
+      allowUserCreation: vi.fn().mockResolvedValue(true),
+      deleteUser: vi.fn().mockResolvedValue(undefined),
     } as any;
 
     controller = new UserController(userService);
@@ -62,7 +61,7 @@ describe("UserController", () => {
     });
 
     it("should return user if user is present", async () => {
-      jest.spyOn(User, "findOne").mockResolvedValue(user);
+      vi.spyOn(User, "findOne").mockResolvedValue(user);
 
       const res = await controller.me(user, {} as any);
 
@@ -74,15 +73,15 @@ describe("UserController", () => {
   describe("updateMe", () => {
     it("should throw BadRequestException if new email is already used by another user", async () => {
       const otherUser = User.fromPlain({ id: "user-other", email: "taken@sprout.local" });
-      jest.spyOn(User, "findOne").mockResolvedValue(otherUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(otherUser);
 
       await expect(controller.updateMe(user, { email: "taken@sprout.local" })).rejects.toThrow(BadRequestException);
     });
 
     it("should update email and call user.update()", async () => {
-      jest.spyOn(User, "findOne").mockResolvedValue(null);
+      vi.spyOn(User, "findOne").mockResolvedValue(null);
       const updatedUser = TestEntities.user;
-      updatedUser.update = jest.fn().mockResolvedValue(updatedUser);
+      updatedUser.update = vi.fn().mockResolvedValue(updatedUser);
 
       const res = await controller.updateMe(updatedUser, { email: "new@sprout.local" });
 
@@ -119,7 +118,7 @@ describe("UserController", () => {
     it("should throw NotFoundException if target user does not exist", async () => {
       const adminUser = TestEntities.user;
       adminUser.admin = true;
-      jest.spyOn(User, "findOne").mockResolvedValue(null);
+      vi.spyOn(User, "findOne").mockResolvedValue(null);
 
       await expect(controller.deleteById(adminUser, "invalid-user")).rejects.toThrow(NotFoundException);
     });
@@ -128,7 +127,7 @@ describe("UserController", () => {
       const adminUser = TestEntities.user;
       adminUser.admin = true;
       const targetUser = User.fromPlain({ id: "user-target" });
-      jest.spyOn(User, "findOne").mockResolvedValue(targetUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(targetUser);
 
       const res = await controller.deleteById(adminUser, "user-target");
 
@@ -139,13 +138,13 @@ describe("UserController", () => {
 
   describe("getById", () => {
     it("should throw NotFoundException if user not found", async () => {
-      jest.spyOn(User, "findOne").mockResolvedValue(null);
+      vi.spyOn(User, "findOne").mockResolvedValue(null);
 
       await expect(controller.getById("invalid-id")).rejects.toThrow(NotFoundException);
     });
 
     it("should return UserGetDTO for user", async () => {
-      jest.spyOn(User, "findOne").mockResolvedValue(user);
+      vi.spyOn(User, "findOne").mockResolvedValue(user);
 
       const res = await controller.getById(user.id);
 
@@ -164,9 +163,9 @@ describe("UserController", () => {
     it("should create user and return UserCreationResponse for local auth", async () => {
       Configuration.server.auth = { type: "local" } as any;
       userService.allowUserCreation.mockResolvedValue(true);
-      jest.spyOn(User, "count").mockResolvedValue(0);
+      vi.spyOn(User, "count").mockResolvedValue(0);
       const mockCreated = { username: "test", id: "u-1" };
-      jest.spyOn(User, "createUser").mockResolvedValue(mockCreated as any);
+      vi.spyOn(User, "createUser").mockResolvedValue(mockCreated as any);
 
       const res = await controller.create(UserCreationRequest.fromPlain({ username: "test", password: "pwd" }), {} as any);
 
@@ -206,15 +205,9 @@ describe("UserController", () => {
   });
 
   describe("registerDevice", () => {
-    it("should update existing device and return deviceId", async () => {
-      const mockDevice = {
-        id: "dev-1",
-        deviceName: "Old Name",
-        deviceId: "d-123",
-        fcmToken: "tok-123",
-        update: jest.fn().mockResolvedValue({ id: "dev-1" }),
-      };
-      jest.spyOn(UserDevice, "findOne").mockResolvedValue(mockDevice as any);
+    it("should create or update device and return deviceId", async () => {
+      const mockDevice = { id: "dev-1", update: vi.fn().mockResolvedValue({ id: "dev-1" }) };
+      vi.spyOn(UserDevice, "findOne").mockResolvedValue(mockDevice as any);
 
       const res = await controller.registerDevice(user, { deviceId: "d-123", token: "tok-123" });
 

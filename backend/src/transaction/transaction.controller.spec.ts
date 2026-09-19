@@ -11,27 +11,28 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionController } from "@backend/transaction/transaction.controller";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { Mocked } from "vitest";
 
 describe("TransactionController", () => {
   let controller: TransactionController;
-  let transactionService: jest.Mocked<TransactionService>;
-  let sseService: jest.Mocked<SSEService>;
-  let notificationService: jest.Mocked<NotificationService>;
+  let transactionService: Mocked<TransactionService>;
+  let sseService: Mocked<SSEService>;
+  let notificationService: Mocked<NotificationService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     transactionService = {
-      findSubscriptions: jest.fn(),
+      findSubscriptions: vi.fn(),
     } as any;
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     notificationService = {
-      notifyUser: jest.fn().mockResolvedValue({}),
+      notifyUser: vi.fn().mockResolvedValue({}),
     } as any;
 
     controller = new TransactionController(transactionService, sseService, notificationService);
@@ -39,7 +40,7 @@ describe("TransactionController", () => {
 
   describe("edit", () => {
     it("should throw NotFoundException if transaction to edit does not exist", async () => {
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(null);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(null);
 
       await expect(controller.edit("tx-invalid", user, {} as any)).rejects.toThrow(NotFoundException);
     });
@@ -47,7 +48,7 @@ describe("TransactionController", () => {
     it("should throw BadRequestException if transaction is pending", async () => {
       const tx = TestEntities.transaction;
       tx.pending = true;
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(tx);
 
       await expect(controller.edit(tx.id, user, {} as any)).rejects.toThrow(BadRequestException);
     });
@@ -55,8 +56,8 @@ describe("TransactionController", () => {
     it("should throw NotFoundException if categoryId does not exist for user", async () => {
       const tx = TestEntities.transaction;
       tx.pending = false;
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
-      jest.spyOn(Category, "findOne").mockResolvedValue(null);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+      vi.spyOn(Category, "findOne").mockResolvedValue(null);
 
       await expect(controller.edit(tx.id, user, { categoryId: "cat-invalid" } as any)).rejects.toThrow(NotFoundException);
     });
@@ -64,10 +65,10 @@ describe("TransactionController", () => {
     it("should update description and category, save, and force update SSE", async () => {
       const tx = TestEntities.transaction;
       tx.pending = false;
-      tx.update = jest.fn().mockResolvedValue(tx);
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+      tx.update = vi.fn().mockResolvedValue(tx);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(tx);
       const cat = TestEntities.category;
-      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
+      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
 
       const res = await controller.edit(tx.id, user, {
         categoryId: cat.id,
@@ -97,15 +98,15 @@ describe("TransactionController", () => {
 
   describe("delete", () => {
     it("should throw NotFoundException if transaction not found", async () => {
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(null);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(null);
 
       await expect(controller.delete("tx-invalid", user)).rejects.toThrow(NotFoundException);
     });
 
     it("should remove transaction and force update SSE", async () => {
       const tx = TestEntities.transaction;
-      tx.remove = jest.fn().mockResolvedValue(tx);
-      jest.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+      tx.remove = vi.fn().mockResolvedValue(tx);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(tx);
 
       const msg = await controller.delete(tx.id, user);
 
@@ -144,7 +145,7 @@ describe("TransactionController", () => {
 
     it("should return transactions based on category, date, description filters", async () => {
       const txList = [TestEntities.transaction];
-      jest.spyOn(Transaction, "find").mockResolvedValue(txList);
+      vi.spyOn(Transaction, "find").mockResolvedValue(txList);
 
       const res = await controller.getByQuery(user, "", 0, 10, "acc-1", "unknown", "grocery", "2026-06-02");
 
@@ -163,7 +164,7 @@ describe("TransactionController", () => {
     });
 
     it("should throw NotFoundException if category filter id is invalid", async () => {
-      jest.spyOn(Category, "findOne").mockResolvedValue(null);
+      vi.spyOn(Category, "findOne").mockResolvedValue(null);
 
       await expect(controller.getByQuery(user, "", 0, 10, undefined, "cat-invalid")).rejects.toThrow(NotFoundException);
     });
@@ -182,8 +183,8 @@ describe("TransactionController", () => {
 
   describe("getTotal", () => {
     it("should count total transactions and breakdown by accounts if no filter given", async () => {
-      jest.spyOn(Transaction, "count").mockResolvedValue(15);
-      jest.spyOn(Account, "getForUser").mockResolvedValue([TestEntities.account]);
+      vi.spyOn(Transaction, "count").mockResolvedValue(15);
+      vi.spyOn(Account, "getForUser").mockResolvedValue([TestEntities.account]);
 
       const res = await controller.getTotal(user);
 
@@ -204,7 +205,7 @@ describe("TransactionController", () => {
 
   describe("removeDuplicates", () => {
     it("should return message if no duplicates found", async () => {
-      jest.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
 
       const res = await controller.removeDuplicates(user);
 
@@ -236,9 +237,9 @@ describe("TransactionController", () => {
         extra: { merchantName: "Coffee Shop", logoUrl: "http://other-logo.png" },
       });
 
-      jest.spyOn(Transaction, "find").mockResolvedValue([txKeptNoProvider, txRemoveWithProvider]);
-      jest.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
-      jest.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx1, tx2]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
       const res = await controller.removeDuplicates(user, account.id);
 

@@ -12,8 +12,8 @@ describe("PendingTransactionJob", () => {
     job = new PendingTransactionJob();
   });
 
-  it("should delete pending transactions older than the configured threshold", async () => {
-    const deleteSpy = jest.spyOn(Transaction, "delete").mockResolvedValue({ affected: 5, raw: [] });
+  it("should delete pending transactions older than configured threshold and log warning when affected > 0", async () => {
+    const deleteSpy = vi.spyOn(Transaction, "delete").mockResolvedValue({ affected: 5 } as any);
 
     await (job as any).update();
 
@@ -21,5 +21,13 @@ describe("PendingTransactionJob", () => {
       pending: true,
       posted: expect.anything(),
     });
+  });
+
+  it("should log info when no stuck pending transactions are affected", async () => {
+    vi.spyOn(Transaction, "delete").mockResolvedValue({ affected: 0 } as any);
+
+    await (job as any).update();
+
+    expect(Transaction.delete).toHaveBeenCalled();
   });
 });

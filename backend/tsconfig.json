@@ -6,7 +6,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "sourceMap": true,
-    "types": ["node", "jest"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest/globals"],
     "paths": { "@backend/*": ["./src/*"] }
   },
   "include": ["./src/**/*"]
