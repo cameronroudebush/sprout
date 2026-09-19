@@ -75,7 +75,7 @@ class HoldingRow extends ConsumerWidget {
                             ),
                             Tooltip(
                               message:
-                                  "Calculated using real-time market prices. This reflects the estimated change in your holding's value since the last market value.",
+                                  "Calculated using real-time market prices. This reflects the estimated change in your holding's value since the last market close.",
                               child: Icon(
                                 Icons.info_outline,
                                 size: 14,
@@ -93,7 +93,7 @@ class HoldingRow extends ConsumerWidget {
                     ),
 
                   // Historical Settled Brokerage Delta Values
-                  if (rowState.historicalFrame != null && rowState.historicalFrame.valueChange != 0)
+                  if (rowState.historicalFrame != null && rowState.historicalFrame!.valueChange != 0)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -109,7 +109,7 @@ class HoldingRow extends ConsumerWidget {
                             Tooltip(
                               constraints: const BoxConstraints(maxWidth: 280),
                               message:
-                                  "This is the most recent change reported by ${rowState.account?.provider ?? "Unknown"}. This value updates less often and may lag behind live market movements.",
+                                  "The 24-hour change reported by ${rowState.account?.provider ?? "Unknown"} based on official market closing prices.",
                               child: Icon(
                                 Icons.info_outline,
                                 size: 14,
@@ -128,7 +128,7 @@ class HoldingRow extends ConsumerWidget {
                       ],
                     ),
 
-                  // Total Value Change (All-Time)
+                  // Total Value Change (Tracking Window)
                   if (rowState.totalGainPercent.round() != 0)
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                       Row(
@@ -141,8 +141,9 @@ class HoldingRow extends ConsumerWidget {
                             ),
                           ),
                           Tooltip(
+                            constraints: const BoxConstraints(maxWidth: 280),
                             message:
-                                "The total all-time gains or losses for this holding based on your average cost basis. This value updates less often and may lag behind live market movements.",
+                                "Gains or losses recorded since tracking began via ${rowState.account?.provider ?? "your provider"}. Historical performance from before this account was linked may not be included.",
                             child: Icon(
                               Icons.info_outline,
                               size: 14,
