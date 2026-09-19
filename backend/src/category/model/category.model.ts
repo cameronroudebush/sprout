@@ -1,10 +1,10 @@
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
-import { User } from "@backend/user/model/user.model";
+import type { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
-import { startCase } from "lodash";
+import { startCase } from "lodash-es";
 import { JoinColumn, ManyToOne } from "typeorm";
 
 /** This class defines a category that a transcription belongs to */
@@ -15,7 +15,7 @@ export class Category extends DatabaseBase {
   static UNKNOWN_NAME = "Unknown";
 
   /** The category this user belongs to */
-  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
+  @ManyToOne("User", (u: User) => u.id, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   @ApiHideProperty()
   user: User;

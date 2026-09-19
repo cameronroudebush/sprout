@@ -16,27 +16,27 @@ import { of, throwError } from "rxjs";
 
 describe("OIDCStrategy", () => {
   let strategy: OIDCStrategy;
-  let httpService: jest.Mocked<HttpService>;
-  let authService: jest.Mocked<AuthService>;
-  let cacheManager: jest.Mocked<Cache>;
+  let httpService: Mocked<HttpService>;
+  let authService: Mocked<AuthService>;
+  let cacheManager: Mocked<Cache>;
   let mockRequest: any;
   let tokenPayload: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     httpService = {
-      get: jest.fn(),
+      get: vi.fn(),
     } as any;
 
     authService = {
-      performOIDCRefresh: jest.fn(),
-      getCookie: jest.fn(),
+      performOIDCRefresh: vi.fn(),
+      getCookie: vi.fn(),
     } as any;
 
     cacheManager = {
-      get: jest.fn(),
-      set: jest.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
     } as any;
 
     mockRequest = {
@@ -69,9 +69,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("valid-cookie-access-token");
       cacheManager.get.mockResolvedValue({
@@ -81,7 +81,7 @@ describe("OIDCStrategy", () => {
       });
 
       const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe" });
-      jest.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
 
       const result = await strategy.validate(mockRequest as Request, tokenPayload);
 
@@ -97,9 +97,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: true,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.performOIDCRefresh.mockResolvedValue(OIDCTokens.fromPlain({ accessToken: "freshly-minted-token" }));
       cacheManager.get.mockResolvedValue({
@@ -109,7 +109,7 @@ describe("OIDCStrategy", () => {
       });
 
       const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe" });
-      jest.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
 
       const result = await strategy.validate(mockRequest as Request, tokenPayload);
 
@@ -123,9 +123,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: true,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.performOIDCRefresh.mockRejectedValue(new Error("Network drop"));
 
@@ -137,9 +137,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("token");
       cacheManager.get.mockResolvedValue({ sub: "user-uuid" });
@@ -154,9 +154,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("token");
       cacheManager.get.mockResolvedValue({
@@ -165,7 +165,7 @@ describe("OIDCStrategy", () => {
         email: "ghost@domain.local",
       });
 
-      jest.spyOn(User, "findOne").mockResolvedValue(null);
+      vi.spyOn(User, "findOne").mockResolvedValue(null);
 
       await expect(strategy.validate(mockRequest as Request, tokenPayload)).rejects.toThrow(new UnauthorizedException("User ghost_rider not found"));
     });
@@ -177,9 +177,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("fetch-token");
       cacheManager.get.mockResolvedValue(null);
@@ -190,7 +190,7 @@ describe("OIDCStrategy", () => {
         email: "john@domain.local",
       };
       httpService.get.mockReturnValue(of({ status: 200, data: apiPayload } as any));
-      jest.spyOn(User, "findOne").mockResolvedValue(User.fromPlain({}));
+      vi.spyOn(User, "findOne").mockResolvedValue(User.fromPlain({}));
 
       await strategy.validate(mockRequest as Request, tokenPayload);
 
@@ -205,9 +205,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("bad-token");
       cacheManager.get.mockResolvedValue(null);
@@ -222,9 +222,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("axios-fail-token");
       cacheManager.get.mockResolvedValue(null);
@@ -245,9 +245,9 @@ describe("OIDCStrategy", () => {
         issuer: "https://identity.provider.local",
         authorizedParty: "app-client-id",
         isExpired: false,
-        checkIssuedState: jest.fn(),
+        checkIssuedState: vi.fn(),
       } as any;
-      jest.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
 
       authService.getCookie.mockReturnValue("generic-fail-token");
       cacheManager.get.mockResolvedValue(null);

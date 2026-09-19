@@ -11,23 +11,23 @@ import { BadRequestException, NotFoundException } from "@nestjs/common";
 
 describe("HoldingController", () => {
   let controller: HoldingController;
-  let holdingService: jest.Mocked<HoldingService>;
-  let netWorthService: jest.Mocked<NetWorthService>;
+  let holdingService: Mocked<HoldingService>;
+  let netWorthService: Mocked<NetWorthService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     holdingService = {
-      getMajorIndices: jest.fn(),
-      getMajorIndicesTimeline: jest.fn(),
-      getTimelineForHolding: jest.fn(),
-      getLiveHoldingPrices: jest.fn(),
+      getMajorIndices: vi.fn(),
+      getMajorIndicesTimeline: vi.fn(),
+      getTimelineForHolding: vi.fn(),
+      getLiveHoldingPrices: vi.fn(),
     } as any;
 
     netWorthService = {
-      getHistoryForHoldings: jest.fn(),
-      getHistoryForHolding: jest.fn(),
+      getHistoryForHoldings: vi.fn(),
+      getHistoryForHolding: vi.fn(),
     } as any;
 
     controller = new HoldingController(holdingService, netWorthService);
@@ -35,7 +35,7 @@ describe("HoldingController", () => {
 
   describe("getHoldings", () => {
     it("should throw NotFoundException if account does not exist", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.getHoldings(user, "invalid-acc")).rejects.toThrow(NotFoundException);
     });
@@ -43,8 +43,8 @@ describe("HoldingController", () => {
     it("should return holdings for valid account", async () => {
       const account = TestEntities.account;
       const holdings = [TestEntities.holding];
-      jest.spyOn(Account, "findOne").mockResolvedValue(account);
-      jest.spyOn(Holding, "getForAccount").mockResolvedValue(holdings as any);
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue(holdings as any);
 
       const res = await controller.getHoldings(user, account.id);
 
@@ -54,14 +54,14 @@ describe("HoldingController", () => {
 
   describe("getHoldingHistory", () => {
     it("should throw NotFoundException if account is missing or not investment type", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.getHoldingHistory(user, "invalid-acc")).rejects.toThrow(NotFoundException);
     });
 
     it("should return mapped history for holdings", async () => {
       const account = TestEntities.account;
-      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
       netWorthService.getHistoryForHoldings.mockResolvedValue([{ history: { id: "h1" } } as any]);
 
       const res = await controller.getHoldingHistory(user, account.id);
@@ -72,14 +72,14 @@ describe("HoldingController", () => {
 
   describe("getSpecificHoldingHistory", () => {
     it("should throw NotFoundException if holding not found", async () => {
-      jest.spyOn(Holding, "findOne").mockResolvedValue(null);
+      vi.spyOn(Holding, "findOne").mockResolvedValue(null);
 
       await expect(controller.getSpecificHoldingHistory("h-invalid", user)).rejects.toThrow(NotFoundException);
     });
 
     it("should return history for holding", async () => {
       const holding = TestEntities.holding;
-      jest.spyOn(Holding, "findOne").mockResolvedValue(holding);
+      vi.spyOn(Holding, "findOne").mockResolvedValue(holding);
       netWorthService.getHistoryForHolding.mockResolvedValue({ history: { id: "h1" } } as any);
 
       const res = await controller.getSpecificHoldingHistory(holding.id, user);
@@ -112,17 +112,17 @@ describe("HoldingController", () => {
 
   describe("getHoldingTimeline", () => {
     it("should throw NotFoundException if holding not found", async () => {
-      jest.spyOn(Holding, "findOne").mockResolvedValue(null);
+      vi.spyOn(Holding, "findOne").mockResolvedValue(null);
 
       await expect(controller.getHoldingTimeline("h-invalid", user)).rejects.toThrow(NotFoundException);
     });
 
     it("should return timeline for holding", async () => {
       const holding = TestEntities.holding;
-      jest.spyOn(Holding, "findOne").mockResolvedValue(holding);
+      vi.spyOn(Holding, "findOne").mockResolvedValue(holding);
 
       const mockHoldingHistoryList = {
-        timeline: jest.fn().mockReturnValue([{ time: "2026-01-01", value: 100 }]),
+        timeline: vi.fn().mockReturnValue([{ time: "2026-01-01", value: 100 }]),
       };
       holdingService.getTimelineForHolding.mockResolvedValue(mockHoldingHistoryList as any);
 

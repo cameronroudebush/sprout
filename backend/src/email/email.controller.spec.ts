@@ -8,15 +8,15 @@ import ejs from "ejs";
 
 describe("EmailController", () => {
   let controller: EmailController;
-  let emailService: jest.Mocked<EmailService>;
+  let emailService: Mocked<EmailService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     emailService = {
-      sendWeeklyUpdate: jest.fn(),
-      getWeeklyEmailContent: jest.fn().mockResolvedValue({ user }),
+      sendWeeklyUpdate: vi.fn(),
+      getWeeklyEmailContent: vi.fn().mockResolvedValue({ user }),
     } as any;
 
     controller = new EmailController(emailService);
@@ -32,15 +32,15 @@ describe("EmailController", () => {
 
   describe("previewWeeklyUpdate", () => {
     it("should render EJS content and send html response on success", async () => {
-      jest.spyOn(ejs, "renderFile").mockImplementation((_path, _ctx, cb: any) => {
+      vi.spyOn(ejs, "renderFile").mockImplementation((_path, _ctx, cb: any) => {
         if (typeof cb === "function") cb(null, "<html>Email Content</html>");
         return Promise.resolve("<html>Email Content</html>");
       });
 
       const mockRes: any = {
-        setHeader: jest.fn(),
-        send: jest.fn(),
-        status: jest.fn().mockReturnThis(),
+        setHeader: vi.fn(),
+        send: vi.fn(),
+        status: vi.fn().mockReturnThis(),
       };
 
       await controller.previewWeeklyUpdate(user, mockRes);
@@ -51,12 +51,12 @@ describe("EmailController", () => {
     });
 
     it("should return 500 error if EJS rendering fails", async () => {
-      jest.spyOn(ejs, "renderFile").mockRejectedValue(new Error("Template missing"));
+      vi.spyOn(ejs, "renderFile").mockRejectedValue(new Error("Template missing"));
 
       const mockRes: any = {
-        setHeader: jest.fn(),
-        send: jest.fn(),
-        status: jest.fn().mockReturnThis(),
+        setHeader: vi.fn(),
+        send: vi.fn(),
+        status: vi.fn().mockReturnThis(),
       };
 
       await controller.previewWeeklyUpdate(user, mockRes);

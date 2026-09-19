@@ -8,15 +8,15 @@ import fs from "fs";
 
 describe("ConfigurationService", () => {
   let service: ConfigurationService;
-  let logger: jest.Mocked<SproutLogger>;
+  let logger: Mocked<SproutLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = {
-      setContext: jest.fn(),
-      log: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      setContext: vi.fn(),
+      log: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any;
     service = new ConfigurationService(logger);
   });
@@ -43,7 +43,7 @@ describe("ConfigurationService", () => {
       const originalWrite = Configuration.writeConfigFile;
       Configuration.writeConfigFile = true;
 
-      jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
+      vi.spyOn(fs, "writeFileSync").mockImplementation(() => {});
 
       service.save("test-path.yml", true);
 
@@ -54,9 +54,9 @@ describe("ConfigurationService", () => {
     });
 
     it("should load config, environment variables, and save when load is called", () => {
-      jest.spyOn(fs, "existsSync").mockReturnValue(true);
-      jest.spyOn(fs, "readFileSync").mockReturnValue(Buffer.from("server:\n  port: 9000\n"));
-      jest.spyOn(service, "save").mockImplementation(() => service);
+      vi.spyOn(fs, "existsSync").mockReturnValue(true);
+      vi.spyOn(fs, "readFileSync").mockReturnValue(Buffer.from("server:\n  port: 9000\n"));
+      vi.spyOn(service, "save").mockImplementation(() => service);
 
       const res = service.load("test-path.yml", true);
 
@@ -65,8 +65,8 @@ describe("ConfigurationService", () => {
     });
 
     it("should skip file reading if config file does not exist", () => {
-      jest.spyOn(fs, "existsSync").mockReturnValue(false);
-      jest.spyOn(service, "save").mockImplementation(() => service);
+      vi.spyOn(fs, "existsSync").mockReturnValue(false);
+      vi.spyOn(service, "save").mockImplementation(() => service);
 
       const res = service.load("test-path.yml", false);
 

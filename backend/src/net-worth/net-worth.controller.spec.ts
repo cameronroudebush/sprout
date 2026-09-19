@@ -10,17 +10,17 @@ import { TotalNetWorthDTO } from "@backend/net-worth/model/api/total.dto";
 
 describe("NetWorthController", () => {
   let controller: NetWorthController;
-  let service: jest.Mocked<NetWorthService>;
+  let service: Mocked<NetWorthService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     service = {
-      getTotalSummary: jest.fn(),
-      getNetWorthSummary: jest.fn(),
-      getNetWorthByAccounts: jest.fn(),
-      getNetWorthByAccount: jest.fn(),
+      getTotalSummary: vi.fn(),
+      getNetWorthSummary: vi.fn(),
+      getNetWorthByAccounts: vi.fn(),
+      getNetWorthByAccount: vi.fn(),
     } as any;
 
     controller = new NetWorthController(service);
@@ -32,7 +32,7 @@ describe("NetWorthController", () => {
 
       const mockHistoryList = {
         history: { total: 10000 },
-        timeline: jest.fn().mockReturnValue([{ time: "2026-01-01", value: 10000 }]),
+        timeline: vi.fn().mockReturnValue([{ time: "2026-01-01", value: 10000 }]),
       };
       service.getNetWorthSummary.mockResolvedValue(mockHistoryList as any);
 
@@ -55,17 +55,17 @@ describe("NetWorthController", () => {
 
   describe("getNetWorthTimelineAccount", () => {
     it("should throw NotFoundException if account not found", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.getNetWorthTimelineAccount("acc-invalid", user)).rejects.toThrow(NotFoundException);
     });
 
     it("should return timeline for specified account", async () => {
       const account = TestEntities.account;
-      jest.spyOn(Account, "findOne").mockResolvedValue(account);
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
       const mockHistoryList = {
-        timeline: jest.fn().mockReturnValue([{ time: "2026-01-01", value: 500 }]),
+        timeline: vi.fn().mockReturnValue([{ time: "2026-01-01", value: 500 }]),
       };
       service.getNetWorthByAccount.mockResolvedValue(mockHistoryList as any);
 
