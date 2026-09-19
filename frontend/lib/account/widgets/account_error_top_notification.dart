@@ -26,30 +26,12 @@ class AccountErrorNotificationWidget extends ConsumerWidget {
 
     String message;
 
-    if (brokenAccounts.length == 1) {
+    if (brokenAccounts.length < 2) {
       final account = brokenAccounts.first;
-      if (account.isArchived) {
-        message = "Account '${account.name}' is archived and needs review";
-      } else {
-        message = "Connection lost with ${account.institution.name}";
-      }
+      final name = account.isArchived ? account.name : account.institution.name;
+      message = "$name needs fixed";
     } else {
-      final archivedCount = brokenAccounts.where((a) => a.isArchived).length;
-      final connectionErrorCount = brokenAccounts.length - archivedCount;
-
-      if (archivedCount > 0 && connectionErrorCount > 0) {
-        final connText = connectionErrorCount == 1 ? "1 connection error" : "$connectionErrorCount connection errors";
-        final archText = archivedCount == 1 ? "1 archived account" : "$archivedCount archived accounts";
-        message = "$connText and $archText require attention";
-      } else if (archivedCount > 0) {
-        message = archivedCount == 1
-            ? "1 archived account requires review"
-            : "$archivedCount archived accounts require review";
-      } else {
-        message = connectionErrorCount == 1
-            ? "Connection error found across 1 financial institution"
-            : "Connection errors found across $connectionErrorCount financial institutions";
-      }
+      message = "${brokenAccounts.length} accounts need fixed";
     }
 
     return SproutNotificationWidget(
