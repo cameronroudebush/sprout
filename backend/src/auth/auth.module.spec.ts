@@ -11,30 +11,26 @@ const mockConfigState = {
   },
 };
 
-jest.mock("@backend/config/core", () => ({
+vi.mock("@backend/config/core", () => ({
   get Configuration() {
     return mockConfigState;
   },
 }));
 
-jest.mock("@backend/auth/auth.service", () => ({ AuthService: class {} }));
-jest.mock("@backend/auth/strategy/local.strategy", () => ({ LocalStrategy: class {} }));
-jest.mock("@backend/auth/strategy/oidc.strategy", () => ({ OIDCStrategy: class {} }));
-jest.mock("@backend/auth/auth.controller", () => ({ AuthController: class {} }));
-jest.mock("@backend/auth/auth.oidc.controller", () => ({ OIDCController: class {} }));
-jest.mock("@backend/user/user.module", () => ({ UserModule: class {} }));
-jest.mock("@nestjs/axios", () => ({ HttpModule: class {} }));
-jest.mock("@nestjs/passport", () => ({ PassportModule: class {} }));
+vi.mock("@backend/auth/auth.service", () => ({ AuthService: class {} }));
+vi.mock("@backend/auth/strategy/local.strategy", () => ({ LocalStrategy: class {} }));
+vi.mock("@backend/auth/strategy/oidc.strategy", () => ({ OIDCStrategy: class {} }));
+vi.mock("@backend/auth/auth.controller", () => ({ AuthController: class {} }));
+vi.mock("@backend/auth/auth.oidc.controller", () => ({ OIDCController: class {} }));
+vi.mock("@backend/user/user.module", () => ({ UserModule: class {} }));
+vi.mock("@nestjs/axios", () => ({ HttpModule: class {} }));
+vi.mock("@nestjs/passport", () => ({ PassportModule: class {} }));
 
 describe("AuthModule", () => {
   async function compileIsolatedModule() {
-    let AuthModule: any;
-
-    jest.isolateModules(() => {
-      AuthModule = require("./auth.module").AuthModule;
-    });
-
-    const { Test } = require("@nestjs/testing");
+    vi.resetModules();
+    const { AuthModule } = await import("./auth.module.js");
+    const { Test } = await import("@nestjs/testing");
     return Test.createTestingModule({
       imports: [AuthModule],
     }).compile();
@@ -42,10 +38,10 @@ describe("AuthModule", () => {
 
   beforeAll(() => {
     // Suppress log outputs during unit tests
-    jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, "error").mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
-    jest.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
+    vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
   });
 
   it("should compile successfully and include LocalStrategy when config type is local", async () => {

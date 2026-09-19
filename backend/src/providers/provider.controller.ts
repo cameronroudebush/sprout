@@ -14,7 +14,7 @@ import { User } from "@backend/user/model/user.model";
 import { Body, Controller, Get, Inject, InternalServerErrorException, Put } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { startOfDay } from "date-fns";
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash-es";
 import { MoreThanOrEqual } from "typeorm";
 
 /** This controller provides endpoints for basic provider functionality shared across all providers */

@@ -13,20 +13,20 @@ import { BadRequestException, InternalServerErrorException } from "@nestjs/commo
 
 describe("ZillowProviderController", () => {
   let controller: ZillowProviderController;
-  let zillowService: jest.Mocked<ZillowProviderService>;
-  let sseService: jest.Mocked<SSEService>;
+  let zillowService: Mocked<ZillowProviderService>;
+  let sseService: Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     zillowService = {
       config: { url: "https://zillow.com" },
-      getInfoByAddress: jest.fn(),
+      getInfoByAddress: vi.fn(),
     } as any;
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     controller = new ZillowProviderController(sseService, zillowService);
@@ -66,14 +66,14 @@ describe("ZillowProviderController", () => {
 
     it("should create institution, account, asset, history and trigger force update", async () => {
       zillowService.getInfoByAddress.mockResolvedValue({ zpid: 999, zestimate: 450000 } as any);
-      jest.spyOn(Institution, "findOne").mockResolvedValue(TestEntities.institution);
+      vi.spyOn(Institution, "findOne").mockResolvedValue(TestEntities.institution);
 
       const newAcc = TestEntities.account;
-      newAcc.insert = jest.fn().mockResolvedValue(newAcc);
-      jest.spyOn(Account.prototype, "insert").mockResolvedValue(newAcc);
+      newAcc.insert = vi.fn().mockResolvedValue(newAcc);
+      vi.spyOn(Account.prototype, "insert").mockResolvedValue(newAcc);
 
-      zillowService.exchangeAndCreateAccounts = jest.fn().mockResolvedValue([{ account: TestEntities.account }]);
-      jest.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+      zillowService.exchangeAndCreateAccounts = vi.fn().mockResolvedValue([{ account: TestEntities.account }]);
+      vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
 
       const res = await controller.link(user, { address: "123 Main St", city: "City", state: "ST", zip: 12345 });
 

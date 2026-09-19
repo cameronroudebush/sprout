@@ -10,7 +10,7 @@ describe("LocalStrategy", () => {
   let strategy: LocalStrategy;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     strategy = new LocalStrategy();
   });
 
@@ -19,7 +19,7 @@ describe("LocalStrategy", () => {
       const payload: LocalJWTContent = { username: "alex_dev" } as LocalJWTContent;
       const mockUser = User.fromPlain({ id: "user-456", username: "alex_dev" });
 
-      const findOneSpy = jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
+      const findOneSpy = vi.spyOn(User, "findOne").mockResolvedValue(mockUser);
 
       const result = await strategy.validate(payload);
 
@@ -32,7 +32,7 @@ describe("LocalStrategy", () => {
     it("should throw UnauthorizedException when the username does not exist in the database", async () => {
       const payload: LocalJWTContent = { username: "non_existent_user" } as LocalJWTContent;
 
-      jest.spyOn(User, "findOne").mockResolvedValue(null);
+      vi.spyOn(User, "findOne").mockResolvedValue(null);
 
       await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
     });

@@ -7,17 +7,17 @@ import { TestEntities } from "@backend/test/entities";
 
 describe("CashFlowController", () => {
   let controller: CashFlowController;
-  let service: jest.Mocked<CashFlowService>;
+  let service: Mocked<CashFlowService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
     service = {
-      buildSankey: jest.fn(),
-      calculateFlows: jest.fn(),
-      calculateMonthlySpending: jest.fn(),
-      getSpendingTimeline: jest.fn(),
-      getDailySpendingMap: jest.fn(),
-      getLoanAmortizationProjections: jest.fn(),
+      buildSankey: vi.fn(),
+      calculateFlows: vi.fn(),
+      calculateMonthlySpending: vi.fn(),
+      getSpendingTimeline: vi.fn(),
+      getDailySpendingMap: vi.fn(),
+      getLoanAmortizationProjections: vi.fn(),
     } as any;
 
     controller = new CashFlowController(service);

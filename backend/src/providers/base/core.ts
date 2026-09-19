@@ -12,7 +12,7 @@ import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
 import { Inject, InternalServerErrorException, Logger, NotImplementedException } from "@nestjs/common";
 import { FindOptionsWhere } from "typeorm";
-import { ProviderRateLimit } from "./rate-limit";
+import { ProviderRateLimit } from "./rate-limit.js";
 
 /** Standardized response payload for all provider sync operations. */
 export interface ProviderSyncResult<TSyncMetadata = unknown> {

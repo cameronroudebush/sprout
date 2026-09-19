@@ -1,7 +1,7 @@
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { Logger } from "@nestjs/common";
-import CronExpressionParser, { CronExpression } from "cron-parser";
+import { CronExpression, CronExpressionParser } from "cron-parser";
 import { addMinutes } from "date-fns";
 
 /** A generic class that lets us create background jobs based on a cronjob timeframe. Intended to be used as an extension. */

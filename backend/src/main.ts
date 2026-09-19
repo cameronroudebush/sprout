@@ -1,10 +1,10 @@
+import { ConfigurationService } from "@backend/config/config.service";
 import { Configuration } from "@backend/config/core";
+import { SproutLogger } from "@backend/core/logger";
 import { Logger } from "@nestjs/common";
-import { startCase } from "lodash";
-import "source-map-support/register";
-import { name } from "../package.json";
-import { ConfigurationService } from "./config/config.service";
-import { SproutLogger } from "./core/logger";
+import { startCase } from "lodash-es";
+import pkg from "../package.json" with { type: "json" };
+const { name } = pkg;
 
 /**
  * This allows us to run this app and then execute a specific script
@@ -14,9 +14,11 @@ export async function checkScript() {
   const scriptName = process.argv[2];
   try {
     switch (scriptName) {
-      case "generate.api-spec":
-        await require("./scripts/generate.api-spec").generateOpenApiSpec(process.argv[3]);
+      case "generate.api-spec": {
+        const { generateOpenApiSpec } = await import("./scripts/generate.api-spec.js");
+        await generateOpenApiSpec(process.argv[3]);
         process.exit(0);
+      }
       default:
         throw new Error("Failed to locate matching script to execute");
     }
@@ -38,13 +40,15 @@ async function main() {
   // Auto generate open api spec on startup in-case of changes for development environment
   if (Configuration.isDevBuild) {
     Configuration.isRunningScript = true; // Set as startup script so the endpoints aren't hidden
-    await require("./scripts/generate.api-spec").generateOpenApiSpec("../docs/assets/openapi-spec.json");
+    const { generateOpenApiSpec } = await import("./scripts/generate.api-spec.js");
+    await generateOpenApiSpec("../docs/assets/openapi-spec.json");
     Configuration.isRunningScript = false;
   }
 
   // Execute the server startup.
-  await require("./server").startupServer();
+  const { startupServer } = await import("./server.js");
+  await startupServer(name);
 }
 
 // Execute main so long as this file is not being imported
-if (require.main === module) main();
+if (import.meta.main) main();

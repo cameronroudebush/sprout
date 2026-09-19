@@ -8,14 +8,14 @@ import { of } from "rxjs";
 
 describe("SSEController", () => {
   let controller: SSEController;
-  let sseService: jest.Mocked<SSEService>;
+  let sseService: Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     sseService = {
-      subscribe: jest.fn(),
+      subscribe: vi.fn(),
     } as any;
 
     controller = new SSEController(sseService);

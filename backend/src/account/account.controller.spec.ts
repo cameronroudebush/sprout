@@ -15,27 +15,27 @@ import { BadRequestException, InternalServerErrorException, NotFoundException } 
 
 describe("AccountController", () => {
   let controller: AccountController;
-  let sseService: jest.Mocked<SSEService>;
+  let sseService: Mocked<SSEService>;
   let databaseService: any;
-  let plaidProvider: jest.Mocked<PlaidProviderService>;
+  let plaidProvider: Mocked<PlaidProviderService>;
   let mockUser: User;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     databaseService = {
       source: {
-        transaction: jest.fn(),
+        transaction: vi.fn(),
       },
     };
 
     plaidProvider = {
       config: { dbType: ProviderType.plaid },
-      unlinkInstitution: jest.fn(),
+      unlinkInstitution: vi.fn(),
     } as any;
 
     mockUser = User.fromPlain({ id: "user-123" });
@@ -46,7 +46,7 @@ describe("AccountController", () => {
   describe("getById", () => {
     it("should return the account when it exists and belongs to the user", async () => {
       const mockAccount = Account.fromPlain({ id: "acc-1", name: "Savings" });
-      const findOneSpy = jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      const findOneSpy = vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
       const result = await controller.getById("acc-1", mockUser);
 
@@ -57,7 +57,7 @@ describe("AccountController", () => {
     });
 
     it("should throw NotFoundException when the account does not exist", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.getById("acc-invalid", mockUser)).rejects.toThrow(NotFoundException);
     });
@@ -65,15 +65,15 @@ describe("AccountController", () => {
 
   describe("delete", () => {
     it("should throw NotFoundException if account to delete is not found", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.delete("acc-invalid", mockUser)).rejects.toThrow(NotFoundException);
     });
 
     it("should throw InternalServerErrorException if delete action affects 0 records", async () => {
       const mockAccount = Account.fromPlain({ id: "acc-1", institution: { id: "inst-1" }, provider: "manual" });
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
-      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 0 } as any);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "deleteById").mockResolvedValue({ affected: 0 } as any);
 
       await expect(controller.delete("acc-1", mockUser)).rejects.toThrow(InternalServerErrorException);
     });
@@ -82,9 +82,9 @@ describe("AccountController", () => {
       const mockInstitution = Institution.fromPlain({ id: "inst-1", name: "Bank" });
       const mockAccount = Account.fromPlain({ id: "acc-1", institution: mockInstitution, provider: "manual" });
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
-      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
-      jest.spyOn(Account, "count").mockResolvedValue(2);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      vi.spyOn(Account, "count").mockResolvedValue(2);
 
       const result = await controller.delete("acc-1", mockUser);
 
@@ -98,10 +98,10 @@ describe("AccountController", () => {
       const mockInstitution = Institution.fromPlain({ id: "inst-1", name: "Bank" });
       const mockAccount = Account.fromPlain({ id: "acc-1", institution: mockInstitution, provider: "manual" });
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
-      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
-      jest.spyOn(Account, "count").mockResolvedValue(0);
-      const deleteInstitutionSpy = jest.spyOn(Institution, "delete").mockResolvedValue({} as any);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      vi.spyOn(Account, "count").mockResolvedValue(0);
+      const deleteInstitutionSpy = vi.spyOn(Institution, "delete").mockResolvedValue({} as any);
 
       await controller.delete("acc-1", mockUser);
 
@@ -113,10 +113,10 @@ describe("AccountController", () => {
       const mockInstitution = Institution.fromPlain({ id: "inst-plaid", name: "Plaid Bank" });
       const mockAccount = Account.fromPlain({ id: "acc-1", institution: mockInstitution, provider: ProviderType.plaid });
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
-      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
-      jest.spyOn(Account, "count").mockResolvedValue(0);
-      jest.spyOn(Institution, "delete").mockResolvedValue({} as any);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      vi.spyOn(Account, "count").mockResolvedValue(0);
+      vi.spyOn(Institution, "delete").mockResolvedValue({} as any);
 
       await controller.delete("acc-1", mockUser);
 
@@ -127,9 +127,9 @@ describe("AccountController", () => {
     it("should bypass cleanup entirely if the account has no associated institution", async () => {
       const mockAccount = Account.fromPlain({ id: "acc-1", provider: "manual" });
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
-      jest.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
-      const countSpy = jest.spyOn(Account, "count");
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "deleteById").mockResolvedValue({ affected: 1 } as any);
+      const countSpy = vi.spyOn(Account, "count");
 
       await controller.delete("acc-1", mockUser);
 
@@ -139,14 +139,14 @@ describe("AccountController", () => {
 
   describe("edit", () => {
     it("should throw NotFoundException if account does not exist for editing", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValue(null);
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.edit("acc-1", mockUser, { name: "Valid Name" })).rejects.toThrow(NotFoundException);
     });
 
     it("should throw BadRequestException if target name modification is shorter than 2 characters", async () => {
       const mockAccount = Account.fromPlain({ id: "acc-1" });
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
       await expect(controller.edit("acc-1", mockUser, { name: "s" })).rejects.toThrow(BadRequestException);
     });
@@ -159,9 +159,9 @@ describe("AccountController", () => {
         subType: null,
         interestRate: null,
       });
-      mockAccount.update = jest.fn().mockResolvedValue({ id: "acc-1" });
+      mockAccount.update = vi.fn().mockResolvedValue({ id: "acc-1" });
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
       const payload = {
         name: "  Brand New Name  ",
@@ -189,9 +189,9 @@ describe("AccountController", () => {
         subType: "savings",
         interestRate: 1.2,
       });
-      mockAccount.update = jest.fn().mockResolvedValue({ id: "acc-1" });
+      mockAccount.update = vi.fn().mockResolvedValue({ id: "acc-1" });
 
-      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
 
       await controller.edit("acc-1", mockUser, {});
 
@@ -205,7 +205,7 @@ describe("AccountController", () => {
   describe("getAccounts", () => {
     it("should yield all profiles linked to the current user reference", async () => {
       const mockCollection = [Account.fromPlain({ id: "1" }), Account.fromPlain({ id: "2" })];
-      const findSpy = jest.spyOn(Account, "find").mockResolvedValue(mockCollection);
+      const findSpy = vi.spyOn(Account, "find").mockResolvedValue(mockCollection);
 
       const result = await controller.getAccounts(mockUser);
 
@@ -220,7 +220,7 @@ describe("AccountController", () => {
     });
 
     it("should throw NotFoundException when one or both accounts are missing from lookup", async () => {
-      jest.spyOn(Account, "findOne").mockResolvedValueOnce(null);
+      vi.spyOn(Account, "findOne").mockResolvedValueOnce(null);
 
       await expect(controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser)).rejects.toThrow(NotFoundException);
     });
@@ -229,7 +229,7 @@ describe("AccountController", () => {
       const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.depository });
       const mockSource = Account.fromPlain({ id: "acc-source", type: AccountType.credit });
 
-      jest.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
+      vi.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
 
       await expect(controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser)).rejects.toThrow(BadRequestException);
     });
@@ -245,26 +245,26 @@ describe("AccountController", () => {
         provider: "manual",
       });
 
-      jest.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
+      vi.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
 
       const mockQueryBuilder = {
-        update: jest.fn().mockReturnThis(),
-        set: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        execute: jest.fn().mockResolvedValue({}),
+        update: vi.fn().mockReturnThis(),
+        set: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue({}),
       };
 
       const mockManager = {
-        save: jest.fn().mockResolvedValue({}),
-        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
-        remove: jest.fn().mockResolvedValue({}),
-        find: jest.fn().mockResolvedValue([]),
+        save: vi.fn().mockResolvedValue({}),
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+        remove: vi.fn().mockResolvedValue({}),
+        find: vi.fn().mockResolvedValue([]),
       };
 
-      jest.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
-      jest.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
-      jest.spyOn(Account, "count").mockResolvedValue(0);
-      jest.spyOn(Institution, "delete").mockResolvedValue({} as any);
+      vi.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
+      vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+      vi.spyOn(Account, "count").mockResolvedValue(0);
+      vi.spyOn(Institution, "delete").mockResolvedValue({} as any);
 
       const result = await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
 
@@ -282,25 +282,25 @@ describe("AccountController", () => {
       const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.depository, subType: "savings" as any });
       const mockSource = Account.fromPlain({ id: "acc-source", type: AccountType.depository, subType: "checking" as any });
 
-      jest.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
+      vi.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
 
       const mockQueryBuilder = {
-        update: jest.fn().mockReturnThis(),
-        set: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        execute: jest.fn().mockResolvedValue({}),
+        update: vi.fn().mockReturnThis(),
+        set: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue({}),
       };
 
       const mockManager = {
-        save: jest.fn(),
-        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
-        remove: jest.fn(),
-        find: jest.fn().mockResolvedValue([]),
+        save: vi.fn(),
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+        remove: vi.fn(),
+        find: vi.fn().mockResolvedValue([]),
       };
 
-      jest.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
-      jest.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
-      jest.spyOn(Account, "count").mockResolvedValue(1);
+      vi.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
+      vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+      vi.spyOn(Account, "count").mockResolvedValue(1);
 
       await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
 

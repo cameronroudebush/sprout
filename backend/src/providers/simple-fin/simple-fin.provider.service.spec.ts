@@ -7,9 +7,9 @@ import { Institution } from "@backend/institution/model/institution.model";
 import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException } from "@nestjs/common";
-import { ProviderRateLimit } from "../base/rate-limit";
+import { ProviderRateLimit } from "../base/rate-limit.js";
 
-jest.mock("@backend/config/core", () => ({
+vi.mock("@backend/config/core", () => ({
   Configuration: {
     providers: {
       simpleFIN: {
@@ -24,39 +24,45 @@ jest.mock("@backend/config/core", () => ({
   },
 }));
 
-jest.mock("../base/rate-limit");
-jest.mock("@backend/account/model/account.model");
-jest.mock("@backend/holding/model/holding.model");
-jest.mock("@backend/category/model/category.model");
-jest.mock("@backend/transaction/model/transaction.model");
-jest.mock("@backend/institution/model/institution.model");
+const mockIncrementOrError = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("../base/rate-limit.js", () => {
+  const ProviderRateLimitMock = vi.fn().mockImplementation(function (this: any) {
+    this.incrementOrError = mockIncrementOrError;
+    return this;
+  });
+  return {
+    ProviderRateLimit: ProviderRateLimitMock,
+  };
+});
+vi.mock("@backend/account/model/account.model");
+vi.mock("@backend/holding/model/holding.model");
+vi.mock("@backend/category/model/category.model");
+vi.mock("@backend/transaction/model/transaction.model");
+vi.mock("@backend/institution/model/institution.model");
 
 describe("SimpleFINProviderService", () => {
   let service: SimpleFINProviderService;
   let mockUser: User;
-  let mockIncrementOrError: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new SimpleFINProviderService();
 
     mockUser = {
       id: "user_1",
       config: {
         simpleFinToken: "https://username:password@bridge.simplefin.org",
-        update: jest.fn().mockResolvedValue(true),
+        update: vi.fn().mockResolvedValue(true),
       },
     } as unknown as User;
 
-    mockIncrementOrError = jest.fn().mockResolvedValue(undefined);
-    (ProviderRateLimit as unknown as jest.Mock).mockImplementation(() => ({
-      incrementOrError: mockIncrementOrError,
-    }));
-    global.fetch = jest.fn();
+    mockIncrementOrError.mockResolvedValue(undefined);
+    global.fetch = vi.fn();
 
     // Setup base TypeORM mock returns
-    Account.find = jest.fn().mockResolvedValue([]);
-    Account.fromPlain = jest.fn().mockImplementation((val) => val);
+    Account.find = vi.fn().mockResolvedValue([]);
+    Account.fromPlain = vi.fn().mockImplementation((val) => val);
   });
 
   describe("Configuration & Getters", () => {
@@ -120,8 +126,8 @@ describe("SimpleFINProviderService", () => {
   describe("fetchData", () => {
     it("should execute fetch successfully with correctly parsed authorization and URLs", async () => {
       const mockJsonResponse = { accounts: [] };
-      (global.fetch as jest.Mock).mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockJsonResponse),
+      (global.fetch as Mock).mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockJsonResponse),
       });
 
       const result = await (service as any).fetchData("https://username:password@bridge.simplefin.org", false, mockUser);
@@ -148,7 +154,7 @@ describe("SimpleFINProviderService", () => {
 
     it("should throw an error if the claim endpoint returns a non-OK status", async () => {
       const validUrlToken = Buffer.from("https://bridge.simplefin.org/claim").toString("base64");
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 400,
       });
@@ -158,9 +164,9 @@ describe("SimpleFINProviderService", () => {
 
     it("should return access token text on successful exchange", async () => {
       const validUrlToken = Buffer.from("https://bridge.simplefin.org/claim").toString("base64");
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
-        text: jest.fn().mockResolvedValue("generated-access-token-string"),
+        text: vi.fn().mockResolvedValue("generated-access-token-string"),
       });
 
       const token = await service.convertSetupToken(validUrlToken);
@@ -176,10 +182,10 @@ describe("SimpleFINProviderService", () => {
   describe("getUnlinkedAccounts", () => {
     it("should fetch remote accounts and filter out those that already exist locally", async () => {
       // Mock local DB having acc_1
-      Account.find = jest.fn().mockResolvedValue([{ id: "acc_1" }]);
+      Account.find = vi.fn().mockResolvedValue([{ id: "acc_1" }]);
 
       // Mock remote SimpleFIN returning acc_1 and acc_2
-      jest.spyOn(service as any, "fetchData").mockResolvedValue({
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [
           { id: "acc_1", name: "Old", balance: "0", "available-balance": "0", currency: "USD", org: { name: "Bank", url: "url" } },
           { id: "acc_2", name: "New", balance: "100", "available-balance": "100", currency: "USD", org: { name: "Bank", url: "url" } },
@@ -195,7 +201,7 @@ describe("SimpleFINProviderService", () => {
 
   describe("performExchange", () => {
     it("should fetch remote accounts, filter to requested IDs, and group them by Institution name", async () => {
-      jest.spyOn(service as any, "fetchData").mockResolvedValue({
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [
           { id: "acc_1", name: "Chase Checking", org: { name: "Chase", url: "chase.com" } },
           { id: "acc_2", name: "Chase Savings", org: { name: "Chase", url: "chase.com" } },
@@ -244,7 +250,7 @@ describe("SimpleFINProviderService", () => {
       };
       const mockAccount = { id: "acc_1" } as Account;
 
-      (Category.getOrCreate as jest.Mock).mockResolvedValue({ id: "cat_food" });
+      (Category.getOrCreate as Mock).mockResolvedValue({ id: "cat_food" });
 
       const result = await (service as any).fetchInitialSyncData(rawAccount, mockAccount, "auth", mockUser);
 

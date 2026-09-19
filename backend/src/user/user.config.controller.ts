@@ -9,7 +9,7 @@ import { User } from "@backend/user/model/user.model";
 import { UserService } from "@backend/user/user.service";
 import { Body, Controller, Get, NotFoundException, Patch } from "@nestjs/common";
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { isEqual } from "lodash";
+import { isEqual } from "lodash-es";
 
 /** This controller provides the endpoint for all User configuration related content */
 @Controller("user-config")

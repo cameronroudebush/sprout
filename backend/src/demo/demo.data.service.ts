@@ -20,7 +20,7 @@ import { UserConfig } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
 import { addYears, eachDayOfInterval, subDays } from "date-fns";
-import { startCase } from "lodash";
+import { startCase } from "lodash-es";
 
 /**
  * A simple seeded pseudo-random number generator (PRNG) to produce consistent results.
@@ -307,7 +307,7 @@ export class DemoDataService {
         const randomFactor = (seededRandom() - 0.5) * 0.01 * account.balance; // Fluctuate by up to 1% of balance
         const trend = (daysFromEnd / days) * 0.05 * account.balance; // Create a slight trend
         account.balance -= randomFactor + trend / days; // Adjust balance for the day
-        allHistories.push(account.toAccountHistory(day));
+        allHistories.push(AccountHistory.fromAccount(account, day));
       }
     }
     logger.log(`Inserting ${allHistories.length} account histories.`);

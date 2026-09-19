@@ -20,7 +20,7 @@ export class EmailController {
 
   /** Renders the given content as EJS to the response for viewing */
   private async renderEjsContent(context: Object, template: "weekly-update", res: Response) {
-    const templatePath = path.join(__dirname, `templates/${template}.ejs`);
+    const templatePath = path.join(import.meta.dirname, `templates/${template}.ejs`);
 
     try {
       const html = await ejs.renderFile(templatePath, context);
