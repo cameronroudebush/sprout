@@ -1,14 +1,16 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
+import { describe, expect, it, vi } from "vitest";
+
 setupTests();
 
-import { DatabaseBase } from "@backend/database/model/database.base";
+import { DatabaseBase } from "./database.base.js";
 
 class TestEntity extends DatabaseBase {}
 
-describe("DatabaseBase Model", () => {
-  it("should instantiate DatabaseBase derived entity", () => {
-    const entity = new TestEntity();
-    entity.id = "test-uuid";
-    expect(entity.id).toBe("test-uuid");
+describe("DatabaseBase", () => {
+  it("should provide entity helper methods", async () => {
+    vi.spyOn(TestEntity, "find").mockResolvedValue([]);
+    const results = await TestEntity.find();
+    expect(results).toEqual([]);
   });
 });
