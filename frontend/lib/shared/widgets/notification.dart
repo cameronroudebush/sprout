@@ -19,10 +19,10 @@ class SproutNotificationWidget extends StatelessWidget {
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       return SproutCard(
         bgColor: notification.bgColor,
-        child: Padding(
-          padding: EdgeInsetsGeometry.all(8),
-          child: InkWell(
-            onTap: notification.onClick,
+        child: InkWell(
+          onTap: notification.onClick,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
             child: Row(
               spacing: 8,
               children: [

@@ -54,7 +54,8 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
     final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
 
     // Filter down to a unique list of providers currently in use
-    final activeProviders = accounts.map((account) => account.provider).toSet().toList();
+    final activeProviders = accounts.map((account) => account.provider).toSet().toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
 
     // Handle case where user has no accounts to sync
     if (activeProviders.isEmpty) {

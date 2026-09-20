@@ -15,6 +15,7 @@ class Holding {
   Holding({
     required this.id,
     required this.accountId,
+    this.extra = const {},
     required this.purchasePrice,
     required this.costBasis,
     required this.marketValue,
@@ -27,6 +28,9 @@ class Holding {
 
   /// The Id of the account related to this holding.
   String accountId;
+
+  /// Additional metadata for this holding.
+  Map<String, Object> extra;
 
   /// The numeric value converted to the user's preferred currency format. This overrides the original purchasePrice property.
   num purchasePrice;
@@ -50,6 +54,7 @@ class Holding {
   bool operator ==(Object other) => identical(this, other) || other is Holding &&
     other.id == id &&
     other.accountId == accountId &&
+    _deepEquality.equals(other.extra, extra) &&
     other.purchasePrice == purchasePrice &&
     other.costBasis == costBasis &&
     other.marketValue == marketValue &&
@@ -62,6 +67,7 @@ class Holding {
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
     (accountId.hashCode) +
+    (extra.hashCode) +
     (purchasePrice.hashCode) +
     (costBasis.hashCode) +
     (marketValue.hashCode) +
@@ -70,12 +76,13 @@ class Holding {
     (symbol.hashCode);
 
   @override
-  String toString() => 'Holding[id=$id, accountId=$accountId, purchasePrice=$purchasePrice, costBasis=$costBasis, marketValue=$marketValue, description=$description, shares=$shares, symbol=$symbol]';
+  String toString() => 'Holding[id=$id, accountId=$accountId, extra=$extra, purchasePrice=$purchasePrice, costBasis=$costBasis, marketValue=$marketValue, description=$description, shares=$shares, symbol=$symbol]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
       json[r'accountId'] = this.accountId;
+      json[r'extra'] = this.extra;
       json[r'purchasePrice'] = this.purchasePrice;
       json[r'costBasis'] = this.costBasis;
       json[r'marketValue'] = this.marketValue;
@@ -118,6 +125,7 @@ class Holding {
       return Holding(
         id: mapValueOfType<String>(json, r'id')!,
         accountId: mapValueOfType<String>(json, r'accountId')!,
+        extra: mapCastOfType<String, Object>(json, r'extra') ?? const {},
         purchasePrice: num.parse('${json[r'purchasePrice']}'),
         costBasis: num.parse('${json[r'costBasis']}'),
         marketValue: num.parse('${json[r'marketValue']}'),

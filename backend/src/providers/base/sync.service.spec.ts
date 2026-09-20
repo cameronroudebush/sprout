@@ -16,6 +16,7 @@ import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service.js";
 import { User } from "@backend/user/model/user.model.js";
+import { Mocked } from "vitest";
 
 describe("ProviderSyncService", () => {
   let service: ProviderSyncService;
@@ -45,7 +46,8 @@ describe("ProviderSyncService", () => {
 
     Configuration.holding.cleanupRemovedHoldings = true;
 
-    vi.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
+    vi.spyOn(AccountHistory, "insertForAccount").mockResolvedValue({} as any);
+    vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
     vi.spyOn(Holding.prototype, "insert").mockResolvedValue({} as any);
     vi.spyOn(HoldingHistory.prototype, "insert").mockResolvedValue({} as any);
     vi.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
@@ -84,11 +86,13 @@ describe("ProviderSyncService", () => {
 
       mockProvider.get.mockResolvedValue([
         {
+          providerAccountId: "acc-123",
           account: providerAccountWithError,
         },
       ]);
 
       const mockAccountInDb = TestEntities.account;
+      mockAccountInDb.providerAccountId = "acc-123";
       mockAccountInDb.institution.update = vi.fn().mockResolvedValue({});
       mockAccountInDb.update = vi.fn().mockResolvedValue({});
 
@@ -118,12 +122,12 @@ describe("ProviderSyncService", () => {
   describe("syncUserAccounts Evaluation Blocks", () => {
     it("should skip updating database storage targets if matching operational record entities are completely missing", async () => {
       vi.spyOn(Account, "count").mockResolvedValue(1);
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account }]);
+      mockProvider.get.mockResolvedValue([{ providerAccountId: "acc-123", account: TestEntities.account }]);
       vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(AccountHistory.prototype.insert).not.toHaveBeenCalled();
+      expect(AccountHistory.insertForAccount).not.toHaveBeenCalled();
     });
 
     it("should auto-create missing account when providerAccountId is present and preventAutoCreation is false", async () => {
@@ -180,7 +184,9 @@ describe("ProviderSyncService", () => {
 
     beforeEach(() => {
       mockAccountInDb = TestEntities.account;
+      mockAccountInDb.providerAccountId = "acc-123";
       mockAccountInDb.type = AccountType.investment;
+      Object.defineProperty(mockAccountInDb, "isInvestment", { get: () => true, configurable: true });
       mockAccountInDb.institution.update = vi.fn();
       mockAccountInDb.update = vi.fn();
 
@@ -194,6 +200,7 @@ describe("ProviderSyncService", () => {
 
       mockProvider.get.mockResolvedValue([
         {
+          providerAccountId: "acc-123",
           account: TestEntities.account,
           transactions: [TestEntities.transaction, txWithIdOnly],
           removedTransactionIds: ["tx-old-1"],
@@ -206,7 +213,7 @@ describe("ProviderSyncService", () => {
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(AccountHistory.prototype.insert).toHaveBeenCalled();
+      expect(AccountHistory.insertForAccount).toHaveBeenCalled();
       expect(mockAccountInDb.balance).toBe(1000);
       expect(mockAccountInDb.update).toHaveBeenCalled();
     });
@@ -214,6 +221,7 @@ describe("ProviderSyncService", () => {
     it("should initialize holding instances from plain contexts on matching asset storage record cache misses", async () => {
       mockProvider.get.mockResolvedValue([
         {
+          providerAccountId: "acc-123",
           account: TestEntities.account,
           holdings: [TestEntities.holding],
         },
@@ -229,6 +237,7 @@ describe("ProviderSyncService", () => {
     it("should backup previous holding data positions to ledger history models and refresh matching live instances", async () => {
       mockProvider.get.mockResolvedValue([
         {
+          providerAccountId: "acc-123",
           account: TestEntities.account,
           holdings: [TestEntities.holding],
         },
@@ -246,7 +255,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should erase remaining asset holdings completely if configuration clean overrides evaluate to true", async () => {
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
+      mockProvider.get.mockResolvedValue([{ providerAccountId: "acc-123", account: TestEntities.account, holdings: [] }]);
 
       const mockStaleHolding = TestEntities.holding;
       mockStaleHolding.remove = vi.fn();
@@ -259,7 +268,7 @@ describe("ProviderSyncService", () => {
 
     it("should zero out asset balances and retain database entries if clean configs evaluate to false parameters", async () => {
       Configuration.holding.cleanupRemovedHoldings = false;
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
+      mockProvider.get.mockResolvedValue([{ providerAccountId: "acc-123", account: TestEntities.account, holdings: [] }]);
 
       const mockStaleHolding = TestEntities.holding;
       mockStaleHolding.update = vi.fn();
