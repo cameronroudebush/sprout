@@ -25,7 +25,7 @@ class UserConfigApi {
   /// Parameters:
   ///
   /// * [UserConfig] userConfig (required):
-  Future<Response> userConfigControllerEditWithHttpInfo(UserConfig userConfig,) async {
+  Future<Response> userConfigControllerEditWithHttpInfo(UserConfig userConfig, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/user-config';
 
@@ -47,6 +47,7 @@ class UserConfigApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -57,8 +58,8 @@ class UserConfigApi {
   /// Parameters:
   ///
   /// * [UserConfig] userConfig (required):
-  Future<UserConfig?> userConfigControllerEdit(UserConfig userConfig,) async {
-    final response = await userConfigControllerEditWithHttpInfo(userConfig,);
+  Future<UserConfig?> userConfigControllerEdit(UserConfig userConfig, { Future<void>? abortTrigger, }) async {
+    final response = await userConfigControllerEditWithHttpInfo(userConfig, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -77,7 +78,7 @@ class UserConfigApi {
   /// Retrieves the current user's configuration.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> userConfigControllerGetWithHttpInfo() async {
+  Future<Response> userConfigControllerGetWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/user-config';
 
@@ -99,14 +100,15 @@ class UserConfigApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Get user config.
   ///
   /// Retrieves the current user's configuration.
-  Future<UserConfig?> userConfigControllerGet() async {
-    final response = await userConfigControllerGetWithHttpInfo();
+  Future<UserConfig?> userConfigControllerGet({ Future<void>? abortTrigger, }) async {
+    final response = await userConfigControllerGetWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

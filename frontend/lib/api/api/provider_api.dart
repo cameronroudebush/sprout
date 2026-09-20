@@ -21,7 +21,7 @@ class ProviderApi {
   /// Returns the provider configuration so we know what providers are available.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> baseProviderControllerGetConfigWithHttpInfo() async {
+  Future<Response> baseProviderControllerGetConfigWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/config';
 
@@ -43,14 +43,15 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Get provider configuration.
   ///
   /// Returns the provider configuration so we know what providers are available.
-  Future<List<ProviderConfig>?> baseProviderControllerGetConfig() async {
-    final response = await baseProviderControllerGetConfigWithHttpInfo();
+  Future<List<ProviderConfig>?> baseProviderControllerGetConfig({ Future<void>? abortTrigger, }) async {
+    final response = await baseProviderControllerGetConfigWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -76,7 +77,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ManualSyncDto] manualSyncDto (required):
-  Future<Response> baseProviderControllerManualSyncWithHttpInfo(ManualSyncDto manualSyncDto,) async {
+  Future<Response> baseProviderControllerManualSyncWithHttpInfo(ManualSyncDto manualSyncDto, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/sync';
 
@@ -98,6 +99,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -108,8 +110,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ManualSyncDto] manualSyncDto (required):
-  Future<void> baseProviderControllerManualSync(ManualSyncDto manualSyncDto,) async {
-    final response = await baseProviderControllerManualSyncWithHttpInfo(manualSyncDto,);
+  Future<void> baseProviderControllerManualSync(ManualSyncDto manualSyncDto, { Future<void>? abortTrigger, }) async {
+    final response = await baseProviderControllerManualSyncWithHttpInfo(manualSyncDto, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -120,7 +122,7 @@ class ProviderApi {
   /// Fetches active balances from Coinbase API credentials and links the unified Coinbase Wallet.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> coinbaseProviderControllerLinkAccountWithHttpInfo() async {
+  Future<Response> coinbaseProviderControllerLinkAccountWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/coinbase/link';
 
@@ -142,14 +144,15 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Link Coinbase account.
   ///
   /// Fetches active balances from Coinbase API credentials and links the unified Coinbase Wallet.
-  Future<Account?> coinbaseProviderControllerLinkAccount() async {
-    final response = await coinbaseProviderControllerLinkAccountWithHttpInfo();
+  Future<Account?> coinbaseProviderControllerLinkAccount({ Future<void>? abortTrigger, }) async {
+    final response = await coinbaseProviderControllerLinkAccountWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -170,7 +173,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] institutionId:
-  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo({ String? institutionId, }) async {
+  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo({ String? institutionId, Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/plaid/create-link-token';
 
@@ -196,6 +199,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -204,8 +208,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] institutionId:
-  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken({ String? institutionId, }) async {
-    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo( institutionId: institutionId, );
+  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken({ String? institutionId, Future<void>? abortTrigger, }) async {
+    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo(institutionId: institutionId, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -228,7 +232,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [PlaidLinkDTO] plaidLinkDTO (required):
-  Future<Response> plaidProviderControllerExchangeAndLinkWithHttpInfo(PlaidLinkDTO plaidLinkDTO,) async {
+  Future<Response> plaidProviderControllerExchangeAndLinkWithHttpInfo(PlaidLinkDTO plaidLinkDTO, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/plaid/exchange-token';
 
@@ -250,6 +254,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -260,8 +265,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [PlaidLinkDTO] plaidLinkDTO (required):
-  Future<List<Account>?> plaidProviderControllerExchangeAndLink(PlaidLinkDTO plaidLinkDTO,) async {
-    final response = await plaidProviderControllerExchangeAndLinkWithHttpInfo(plaidLinkDTO,);
+  Future<List<Account>?> plaidProviderControllerExchangeAndLink(PlaidLinkDTO plaidLinkDTO, { Future<void>? abortTrigger, }) async {
+    final response = await plaidProviderControllerExchangeAndLinkWithHttpInfo(plaidLinkDTO, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -283,7 +288,7 @@ class ProviderApi {
   /// Retrieves accounts that the user has not yet linked.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> simpleFinProviderControllerGetAccountsWithHttpInfo() async {
+  Future<Response> simpleFinProviderControllerGetAccountsWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/simple-fin';
 
@@ -305,14 +310,15 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Get accounts from the simple-fin provider that are not yet synced.
   ///
   /// Retrieves accounts that the user has not yet linked.
-  Future<List<Account>?> simpleFinProviderControllerGetAccounts() async {
-    final response = await simpleFinProviderControllerGetAccountsWithHttpInfo();
+  Future<List<Account>?> simpleFinProviderControllerGetAccounts({ Future<void>? abortTrigger, }) async {
+    final response = await simpleFinProviderControllerGetAccountsWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -338,7 +344,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [List<Account>] account (required):
-  Future<Response> simpleFinProviderControllerLinkAccountsWithHttpInfo(List<Account> account,) async {
+  Future<Response> simpleFinProviderControllerLinkAccountsWithHttpInfo(List<Account> account, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/simple-fin/link';
 
@@ -360,6 +366,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -370,8 +377,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [List<Account>] account (required):
-  Future<List<Account>?> simpleFinProviderControllerLinkAccounts(List<Account> account,) async {
-    final response = await simpleFinProviderControllerLinkAccountsWithHttpInfo(account,);
+  Future<List<Account>?> simpleFinProviderControllerLinkAccounts(List<Account> account, { Future<void>? abortTrigger, }) async {
+    final response = await simpleFinProviderControllerLinkAccountsWithHttpInfo(account, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -397,7 +404,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] redirectUrl:
-  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo({ String? redirectUrl, }) async {
+  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo({ String? redirectUrl, Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/snap-trade/link';
 
@@ -423,6 +430,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -433,8 +441,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] redirectUrl:
-  Future<String?> snapTradeProviderControllerGenerateLink({ String? redirectUrl, }) async {
-    final response = await snapTradeProviderControllerGenerateLinkWithHttpInfo( redirectUrl: redirectUrl, );
+  Future<String?> snapTradeProviderControllerGenerateLink({ String? redirectUrl, Future<void>? abortTrigger, }) async {
+    final response = await snapTradeProviderControllerGenerateLinkWithHttpInfo(redirectUrl: redirectUrl, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -451,7 +459,7 @@ class ProviderApi {
   /// Fires actions to perform once a user has linked new accounts.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> snapTradeProviderControllerPostLinkWithHttpInfo() async {
+  Future<Response> snapTradeProviderControllerPostLinkWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/snap-trade/post-link';
 
@@ -473,12 +481,13 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Fires actions to perform once a user has linked new accounts.
-  Future<List<Account>?> snapTradeProviderControllerPostLink() async {
-    final response = await snapTradeProviderControllerPostLinkWithHttpInfo();
+  Future<List<Account>?> snapTradeProviderControllerPostLink({ Future<void>? abortTrigger, }) async {
+    final response = await snapTradeProviderControllerPostLinkWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -505,7 +514,7 @@ class ProviderApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to lookup
-  Future<Response> zillowProviderControllerGetByAccountWithHttpInfo(String accountId,) async {
+  Future<Response> zillowProviderControllerGetByAccountWithHttpInfo(String accountId, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/zillow/{accountId}'
       .replaceAll('{accountId}', accountId);
@@ -528,6 +537,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -539,8 +549,8 @@ class ProviderApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to lookup
-  Future<String?> zillowProviderControllerGetByAccount(String accountId,) async {
-    final response = await zillowProviderControllerGetByAccountWithHttpInfo(accountId,);
+  Future<String?> zillowProviderControllerGetByAccount(String accountId, { Future<void>? abortTrigger, }) async {
+    final response = await zillowProviderControllerGetByAccountWithHttpInfo(accountId, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -563,7 +573,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<Response> zillowProviderControllerLinkWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO,) async {
+  Future<Response> zillowProviderControllerLinkWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/zillow/link';
 
@@ -585,6 +595,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -595,8 +606,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<Account?> zillowProviderControllerLink(ZillowPropertyDTO zillowPropertyDTO,) async {
-    final response = await zillowProviderControllerLinkWithHttpInfo(zillowPropertyDTO,);
+  Future<Account?> zillowProviderControllerLink(ZillowPropertyDTO zillowPropertyDTO, { Future<void>? abortTrigger, }) async {
+    final response = await zillowProviderControllerLinkWithHttpInfo(zillowPropertyDTO, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -619,7 +630,7 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<Response> zillowProviderControllerLookupPropertyWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO,) async {
+  Future<Response> zillowProviderControllerLookupPropertyWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/zillow/lookup';
 
@@ -641,6 +652,7 @@ class ProviderApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -651,8 +663,8 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<ZillowPropertyResultDto?> zillowProviderControllerLookupProperty(ZillowPropertyDTO zillowPropertyDTO,) async {
-    final response = await zillowProviderControllerLookupPropertyWithHttpInfo(zillowPropertyDTO,);
+  Future<ZillowPropertyResultDto?> zillowProviderControllerLookupProperty(ZillowPropertyDTO zillowPropertyDTO, { Future<void>? abortTrigger, }) async {
+    final response = await zillowProviderControllerLookupPropertyWithHttpInfo(zillowPropertyDTO, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

@@ -150,13 +150,27 @@ The backend follows modular NestJS architecture patterns across features:
 - **Styling**: `flex_color_scheme` for unified light/dark mode design.
 - **API Communication**: Auto-generated Dart HTTP client from backend OpenAPI specification located in `lib/api/`.
 
-### Modular Organization
+### Modular Organization & File Layout
 
-Feature packages (`account`, `transaction`, `net-worth`, `cash-flow`, `holding`, `chat`, etc.) follow a consistent component layout:
+Feature packages (`account`, `transaction`, `net-worth`, `cash-flow`, `holding`, `chat`, `budget`, etc.) follow a consistent component layout:
 
-- `models/`: Client-side domain models and JSON serialization logic.
-- `widgets/`: Pure UI components, view layouts, filter drawers, and modal dialogs.
-- **Riverpod Providers**: Reactive providers managing network calls to backend APIs, caching, and local UI state changes.
+- `models/`: Client-side domain models, state view models, and JSON serialization helpers.
+- `widgets/`: Pure UI components, feature-specific cards, charts, list tiles, and modal dialogs.
+- **Riverpod Providers**: Reactive `@riverpod` state providers managing network calls to backend APIs (`DefaultApi`), caching, and local state.
+- `routes/`: Main route page views placed under `frontend/lib/routes/<feature>.dart` and registered in `frontend/lib/routes/util/router.dart` and `frontend/lib/routes/util/routes.dart`. Shell navigation wrappers (`sidenav.dart`, `bottom_nav.dart`, `mobile_more_sheet.dart`) adapt navigation dynamically based on `UserConfig`.
+
+### Reusing Shared Frontend Components (`frontend/lib/shared/`)
+
+When building new frontend features or UI screens:
+
+- **UI Widgets**: Always reuse common components from `frontend/lib/shared/widgets/`:
+    - `SproutCard`: Standard card container with consistent border radius, background color, and padding.
+    - `SproutDialog`: Standard modal dialog container for feature dialogs and creation/edit forms.
+    - `LoadingWidget`, `SproutErrorWidget`: Standardized loading indicators and error display views.
+    - `CenteringLayout`: Layout wrapper for responsive centered container styling on web and mobile.
+    - `SproutIcon`: Unified icon rendering across category and feature icons.
+- **Charts**: Utilize `fl_chart` wrappers located in `frontend/lib/shared/widgets/charts/` or feature-specific chart widgets for data visualization.
+- **Theme**: Rely on Sprout's global `flex_color_scheme` setup (`frontend/lib/theme/`) for colors, dark/light theme awareness, and typography.
 
 ---
 
@@ -201,13 +215,30 @@ When working with backend unit tests:
 
 To re-generate the Dart API client for the frontend after changing backend controllers or DTOs:
 
-1. Export the OpenAPI specification:
+1. Export the OpenAPI specification from the backend:
     ```bash
     npm run export:api:spec --prefix backend
     ```
-2. Generate the Dart code:
+2. Generate the Dart API client code from the repository root:
     ```bash
     npm run api:generate:dart
+    ```
+
+### Frontend Build & Verification
+
+To verify and build the Flutter frontend client:
+
+1. **Analyze / Format Check**:
+    ```bash
+    cd frontend && flutter analyze
+    ```
+2. **Build Web Output**:
+    ```bash
+    cd frontend && flutter build web
+    ```
+3. **Run Frontend Tests**:
+    ```bash
+    cd frontend && flutter test
     ```
 
 ### Database Migrations
