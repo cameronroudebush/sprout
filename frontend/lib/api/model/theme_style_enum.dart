@@ -11,31 +11,30 @@
 part of openapi.api;
 
 /// The visual theme style selected by the user
-class ThemeStyleEnum {
-  /// Instantiate a new enum with the provided [value].
-  const ThemeStyleEnum._(this.value);
+enum ThemeStyleEnum {
+  bliss._(r'bliss'),
+  absolute._(r'absolute'),
+  colored._(r'colored'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const ThemeStyleEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const bliss = ThemeStyleEnum._(r'bliss');
-  static const absolute = ThemeStyleEnum._(r'absolute');
-  static const colored = ThemeStyleEnum._(r'colored');
-
-  /// List of all possible values in this [enum][ThemeStyleEnum].
-  static const values = <ThemeStyleEnum>[
-    bliss,
-    absolute,
-    colored,
-  ];
-
+  /// Returns the instance of [ThemeStyleEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static ThemeStyleEnum? fromJson(dynamic value) => ThemeStyleEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [ThemeStyleEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<ThemeStyleEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ThemeStyleEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -57,9 +56,11 @@ class ThemeStyleEnumTypeTransformer {
 
   const ThemeStyleEnumTypeTransformer._();
 
-  String encode(ThemeStyleEnum data) => data.value;
+  /// Encodes this enum as a value suitable for JSON.
+  String encode(ThemeStyleEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a ThemeStyleEnum.
+  /// Returns the instance of [ThemeStyleEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -68,6 +69,9 @@ class ThemeStyleEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   ThemeStyleEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is ThemeStyleEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'bliss': return ThemeStyleEnum.bliss;
@@ -82,7 +86,7 @@ class ThemeStyleEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [ThemeStyleEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static ThemeStyleEnumTypeTransformer? _instance;
 }
 

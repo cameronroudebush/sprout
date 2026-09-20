@@ -11,29 +11,29 @@
 part of openapi.api;
 
 /// How often the user should receive email updates.
-class EmailUpdateFrequencyEnum {
-  /// Instantiate a new enum with the provided [value].
-  const EmailUpdateFrequencyEnum._(this.value);
+enum EmailUpdateFrequencyEnum {
+  none._(r'none'),
+  weekly._(r'weekly'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const EmailUpdateFrequencyEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const none = EmailUpdateFrequencyEnum._(r'none');
-  static const weekly = EmailUpdateFrequencyEnum._(r'weekly');
-
-  /// List of all possible values in this [enum][EmailUpdateFrequencyEnum].
-  static const values = <EmailUpdateFrequencyEnum>[
-    none,
-    weekly,
-  ];
-
+  /// Returns the instance of [EmailUpdateFrequencyEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static EmailUpdateFrequencyEnum? fromJson(dynamic value) => EmailUpdateFrequencyEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [EmailUpdateFrequencyEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<EmailUpdateFrequencyEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <EmailUpdateFrequencyEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -55,9 +55,11 @@ class EmailUpdateFrequencyEnumTypeTransformer {
 
   const EmailUpdateFrequencyEnumTypeTransformer._();
 
-  String encode(EmailUpdateFrequencyEnum data) => data.value;
+  /// Encodes this enum as a value suitable for JSON.
+  String encode(EmailUpdateFrequencyEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a EmailUpdateFrequencyEnum.
+  /// Returns the instance of [EmailUpdateFrequencyEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -66,6 +68,9 @@ class EmailUpdateFrequencyEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   EmailUpdateFrequencyEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is EmailUpdateFrequencyEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'none': return EmailUpdateFrequencyEnum.none;
@@ -79,7 +84,7 @@ class EmailUpdateFrequencyEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [EmailUpdateFrequencyEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static EmailUpdateFrequencyEnumTypeTransformer? _instance;
 }
 

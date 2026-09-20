@@ -25,7 +25,7 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
-  Future<Response> authControllerLoginWithHttpInfo(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
+  Future<Response> authControllerLoginWithHttpInfo(UsernamePasswordLoginRequest usernamePasswordLoginRequest, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/login';
 
@@ -47,6 +47,7 @@ class AuthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -57,8 +58,8 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
-  Future<User?> authControllerLogin(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
-    final response = await authControllerLoginWithHttpInfo(usernamePasswordLoginRequest,);
+  Future<User?> authControllerLogin(UsernamePasswordLoginRequest usernamePasswordLoginRequest, { Future<void>? abortTrigger, }) async {
+    final response = await authControllerLoginWithHttpInfo(usernamePasswordLoginRequest, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -77,7 +78,7 @@ class AuthApi {
   /// Clears the session cookies any authentication that has happened.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> authControllerLogoutWithHttpInfo() async {
+  Future<Response> authControllerLogoutWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/logout';
 
@@ -99,14 +100,15 @@ class AuthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Logout the user
   ///
   /// Clears the session cookies any authentication that has happened.
-  Future<void> authControllerLogout() async {
-    final response = await authControllerLogoutWithHttpInfo();
+  Future<void> authControllerLogout({ Future<void>? abortTrigger, }) async {
+    final response = await authControllerLogoutWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -121,7 +123,7 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [MobileTokenExchangeDto] mobileTokenExchangeDto (required):
-  Future<Response> oIDCControllerExchangeWithHttpInfo(MobileTokenExchangeDto mobileTokenExchangeDto,) async {
+  Future<Response> oIDCControllerExchangeWithHttpInfo(MobileTokenExchangeDto mobileTokenExchangeDto, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/exchange';
 
@@ -143,6 +145,7 @@ class AuthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -153,8 +156,8 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [MobileTokenExchangeDto] mobileTokenExchangeDto (required):
-  Future<void> oIDCControllerExchange(MobileTokenExchangeDto mobileTokenExchangeDto,) async {
-    final response = await oIDCControllerExchangeWithHttpInfo(mobileTokenExchangeDto,);
+  Future<void> oIDCControllerExchange(MobileTokenExchangeDto mobileTokenExchangeDto, { Future<void>? abortTrigger, }) async {
+    final response = await oIDCControllerExchangeWithHttpInfo(mobileTokenExchangeDto, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -171,7 +174,7 @@ class AuthApi {
   /// * [String] code (required):
   ///
   /// * [String] state (required):
-  Future<Response> oIDCControllerLoginCallbackOIDCWithHttpInfo(String code, String state,) async {
+  Future<Response> oIDCControllerLoginCallbackOIDCWithHttpInfo(String code, String state, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/callback';
 
@@ -196,6 +199,7 @@ class AuthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -208,8 +212,8 @@ class AuthApi {
   /// * [String] code (required):
   ///
   /// * [String] state (required):
-  Future<void> oIDCControllerLoginCallbackOIDC(String code, String state,) async {
-    final response = await oIDCControllerLoginCallbackOIDCWithHttpInfo(code, state,);
+  Future<void> oIDCControllerLoginCallbackOIDC(String code, String state, { Future<void>? abortTrigger, }) async {
+    final response = await oIDCControllerLoginCallbackOIDCWithHttpInfo(code, state, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -228,7 +232,7 @@ class AuthApi {
   ///
   /// * [String] appChallenge:
   ///   A base64url-encoded SHA-256 hash of a secret verifier string generated by the requesting client. Used to cryptographically bind the login request to the final token exchange to prevent interception attacks.
-  Future<Response> oIDCControllerLoginOIDCWithHttpInfo(String targetUrl, { String? appChallenge, }) async {
+  Future<Response> oIDCControllerLoginOIDCWithHttpInfo(String targetUrl, { String? appChallenge, Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/login';
 
@@ -255,6 +259,7 @@ class AuthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -269,8 +274,8 @@ class AuthApi {
   ///
   /// * [String] appChallenge:
   ///   A base64url-encoded SHA-256 hash of a secret verifier string generated by the requesting client. Used to cryptographically bind the login request to the final token exchange to prevent interception attacks.
-  Future<void> oIDCControllerLoginOIDC(String targetUrl, { String? appChallenge, }) async {
-    final response = await oIDCControllerLoginOIDCWithHttpInfo(targetUrl,  appChallenge: appChallenge, );
+  Future<void> oIDCControllerLoginOIDC(String targetUrl, { String? appChallenge, Future<void>? abortTrigger, }) async {
+    final response = await oIDCControllerLoginOIDCWithHttpInfo(targetUrl, appChallenge: appChallenge, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

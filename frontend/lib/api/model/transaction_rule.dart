@@ -207,29 +207,29 @@ class TransactionRule {
 }
 
 
-class TransactionRuleTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const TransactionRuleTypeEnum._(this.value);
+enum TransactionRuleTypeEnum {
+  description._(r'description'),
+  amount._(r'amount'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const TransactionRuleTypeEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const description = TransactionRuleTypeEnum._(r'description');
-  static const amount = TransactionRuleTypeEnum._(r'amount');
-
-  /// List of all possible values in this [enum][TransactionRuleTypeEnum].
-  static const values = <TransactionRuleTypeEnum>[
-    description,
-    amount,
-  ];
-
+  /// Returns the instance of [TransactionRuleTypeEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static TransactionRuleTypeEnum? fromJson(dynamic value) => TransactionRuleTypeEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [TransactionRuleTypeEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<TransactionRuleTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <TransactionRuleTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -251,9 +251,10 @@ class TransactionRuleTypeEnumTypeTransformer {
 
   const TransactionRuleTypeEnumTypeTransformer._();
 
-  String encode(TransactionRuleTypeEnum data) => data.value;
+  String encode(TransactionRuleTypeEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a TransactionRuleTypeEnum.
+  /// Returns the instance of [TransactionRuleTypeEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -262,6 +263,9 @@ class TransactionRuleTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   TransactionRuleTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is TransactionRuleTypeEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'description': return TransactionRuleTypeEnum.description;
@@ -275,7 +279,7 @@ class TransactionRuleTypeEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [TransactionRuleTypeEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static TransactionRuleTypeEnumTypeTransformer? _instance;
 }
 

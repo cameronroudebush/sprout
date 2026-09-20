@@ -11,26 +11,26 @@
 part of openapi.api;
 
 
-class CategoryApi {
-  CategoryApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+class BudgetApi {
+  BudgetApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
-  /// Creates a new category.
+  /// Create a new category budget.
   ///
-  /// Creates a new category that can be used for transactions to associate to.
+  /// Creates a new monthly budget target for a category.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [Category] category (required):
-  Future<Response> categoryControllerCreateWithHttpInfo(Category category, { Future<void>? abortTrigger, }) async {
+  /// * [CreateBudgetDto] createBudgetDto (required):
+  Future<Response> budgetControllerCreateBudgetWithHttpInfo(CreateBudgetDto createBudgetDto, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/category';
+    final path = r'/budget';
 
     // ignore: prefer_final_locals
-    Object? postBody = category;
+    Object? postBody = createBudgetDto;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -51,15 +51,15 @@ class CategoryApi {
     );
   }
 
-  /// Creates a new category.
+  /// Create a new category budget.
   ///
-  /// Creates a new category that can be used for transactions to associate to.
+  /// Creates a new monthly budget target for a category.
   ///
   /// Parameters:
   ///
-  /// * [Category] category (required):
-  Future<Category?> categoryControllerCreate(Category category, { Future<void>? abortTrigger, }) async {
-    final response = await categoryControllerCreateWithHttpInfo(category, abortTrigger: abortTrigger,);
+  /// * [CreateBudgetDto] createBudgetDto (required):
+  Future<Budget?> budgetControllerCreateBudget(CreateBudgetDto createBudgetDto, { Future<void>? abortTrigger, }) async {
+    final response = await budgetControllerCreateBudgetWithHttpInfo(createBudgetDto, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -67,24 +67,24 @@ class CategoryApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Category',) as Category;
-    
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Budget',) as Budget;
+
     }
     return null;
   }
 
-  /// Delete category by ID.
+  /// Delete a budget target.
   ///
-  /// Deletes a category by the given ID and updates references to it to reset them.
+  /// Deletes an existing category budget target.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> categoryControllerDeleteWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerDeleteBudgetWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/category/{id}'
+    final path = r'/budget/{id}'
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
@@ -109,23 +109,215 @@ class CategoryApi {
     );
   }
 
-  /// Delete category by ID.
+  /// Delete a budget target.
   ///
-  /// Deletes a category by the given ID and updates references to it to reset them.
+  /// Deletes an existing category budget target.
   ///
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> categoryControllerDelete(String id, { Future<void>? abortTrigger, }) async {
-    final response = await categoryControllerDeleteWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<void> budgetControllerDeleteBudget(String id, { Future<void>? abortTrigger, }) async {
+    final response = await budgetControllerDeleteBudgetWithHttpInfo(id, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
   }
 
-  /// Edit category.
+  /// Get all user budgets.
   ///
-  /// Edits a category by the given ID.
+  /// Retrieves all configured budget targets for the current user.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> budgetControllerGetAllBudgetsWithHttpInfo({ Future<void>? abortTrigger, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/budget';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Get all user budgets.
+  ///
+  /// Retrieves all configured budget targets for the current user.
+  Future<List<Budget>?> budgetControllerGetAllBudgets({ Future<void>? abortTrigger, }) async {
+    final response = await budgetControllerGetAllBudgetsWithHttpInfo(abortTrigger: abortTrigger,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      final responseBody = await _decodeBodyBytes(response);
+      return (await apiClient.deserializeAsync(responseBody, 'List<Budget>') as List)
+        .cast<Budget>()
+        .toList(growable: false);
+
+    }
+    return null;
+  }
+
+  /// Get historical budget performance.
+  ///
+  /// Retrieves historical monthly performance looking backwards in time.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] categoryId:
+  ///   Filter history to a specific category.
+  ///
+  /// * [num] months:
+  ///   Number of months to look back (default 6).
+  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({ String? categoryId, num? months, Future<void>? abortTrigger, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/budget/history';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (categoryId != null) {
+      queryParams.addAll(_queryParams('', 'categoryId', categoryId));
+    }
+    if (months != null) {
+      queryParams.addAll(_queryParams('', 'months', months));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Get historical budget performance.
+  ///
+  /// Retrieves historical monthly performance looking backwards in time.
+  ///
+  /// Parameters:
+  ///
+  /// * [String] categoryId:
+  ///   Filter history to a specific category.
+  ///
+  /// * [num] months:
+  ///   Number of months to look back (default 6).
+  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({ String? categoryId, num? months, Future<void>? abortTrigger, }) async {
+    final response = await budgetControllerGetBudgetHistoryWithHttpInfo(categoryId: categoryId, months: months, abortTrigger: abortTrigger,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BudgetHistoryResponseDto',) as BudgetHistoryResponseDto;
+
+    }
+    return null;
+  }
+
+  /// Get budget overview.
+  ///
+  /// Retrieves budget targets vs actual spending breakdown for a given month and year.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [num] year:
+  ///
+  /// * [num] month:
+  Future<Response> budgetControllerGetBudgetOverviewWithHttpInfo({ num? year, num? month, Future<void>? abortTrigger, }) async {
+    // ignore: prefer_const_declarations
+    final path = r'/budget/overview';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    if (year != null) {
+      queryParams.addAll(_queryParams('', 'year', year));
+    }
+    if (month != null) {
+      queryParams.addAll(_queryParams('', 'month', month));
+    }
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
+    );
+  }
+
+  /// Get budget overview.
+  ///
+  /// Retrieves budget targets vs actual spending breakdown for a given month and year.
+  ///
+  /// Parameters:
+  ///
+  /// * [num] year:
+  ///
+  /// * [num] month:
+  Future<BudgetOverviewResponseDto?> budgetControllerGetBudgetOverview({ num? year, num? month, Future<void>? abortTrigger, }) async {
+    final response = await budgetControllerGetBudgetOverviewWithHttpInfo(year: year, month: month, abortTrigger: abortTrigger,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BudgetOverviewResponseDto',) as BudgetOverviewResponseDto;
+
+    }
+    return null;
+  }
+
+  /// Update a budget target.
+  ///
+  /// Updates an existing budget target's monthly amount.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -133,14 +325,14 @@ class CategoryApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [Category] category (required):
-  Future<Response> categoryControllerEditWithHttpInfo(String id, Category category, { Future<void>? abortTrigger, }) async {
+  /// * [UpdateBudgetDto] updateBudgetDto (required):
+  Future<Response> budgetControllerUpdateBudgetWithHttpInfo(String id, UpdateBudgetDto updateBudgetDto, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/category/{id}'
+    final path = r'/budget/{id}'
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody = category;
+    Object? postBody = updateBudgetDto;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -161,17 +353,17 @@ class CategoryApi {
     );
   }
 
-  /// Edit category.
+  /// Update a budget target.
   ///
-  /// Edits a category by the given ID.
+  /// Updates an existing budget target's monthly amount.
   ///
   /// Parameters:
   ///
   /// * [String] id (required):
   ///
-  /// * [Category] category (required):
-  Future<Category?> categoryControllerEdit(String id, Category category, { Future<void>? abortTrigger, }) async {
-    final response = await categoryControllerEditWithHttpInfo(id, category, abortTrigger: abortTrigger,);
+  /// * [UpdateBudgetDto] updateBudgetDto (required):
+  Future<Budget?> budgetControllerUpdateBudget(String id, UpdateBudgetDto updateBudgetDto, { Future<void>? abortTrigger, }) async {
+    final response = await budgetControllerUpdateBudgetWithHttpInfo(id, updateBudgetDto, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -179,211 +371,8 @@ class CategoryApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Category',) as Category;
-    
-    }
-    return null;
-  }
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Budget',) as Budget;
 
-  /// Get categories.
-  ///
-  /// Retrieves all categories for the authenticated user.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  Future<Response> categoryControllerGetCategoriesWithHttpInfo({ Future<void>? abortTrigger, }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/category';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
-    );
-  }
-
-  /// Get categories.
-  ///
-  /// Retrieves all categories for the authenticated user.
-  Future<List<Category>?> categoryControllerGetCategories({ Future<void>? abortTrigger, }) async {
-    final response = await categoryControllerGetCategoriesWithHttpInfo(abortTrigger: abortTrigger,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Category>') as List)
-        .cast<Category>()
-        .toList(growable: false);
-
-    }
-    return null;
-  }
-
-  /// Gets category stats.
-  ///
-  /// Retrieves all categories for the authenticated user with the total number of transactions per category for the given query.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [num] year (required):
-  ///   The year we want the stats for.
-  ///
-  /// * [num] month:
-  ///   The month we want the stats for. If not given, assumes we want the whole year.
-  ///
-  /// * [num] day:
-  ///   The day we want the stats for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.
-  ///
-  /// * [String] accountId:
-  ///   The ID of the account to retrieve transactions from.
-  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/category/stats';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-      queryParams.addAll(_queryParams('', 'year', year));
-    if (month != null) {
-      queryParams.addAll(_queryParams('', 'month', month));
-    }
-    if (day != null) {
-      queryParams.addAll(_queryParams('', 'day', day));
-    }
-    if (accountId != null) {
-      queryParams.addAll(_queryParams('', 'accountId', accountId));
-    }
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
-    );
-  }
-
-  /// Gets category stats.
-  ///
-  /// Retrieves all categories for the authenticated user with the total number of transactions per category for the given query.
-  ///
-  /// Parameters:
-  ///
-  /// * [num] year (required):
-  ///   The year we want the stats for.
-  ///
-  /// * [num] month:
-  ///   The month we want the stats for. If not given, assumes we want the whole year.
-  ///
-  /// * [num] day:
-  ///   The day we want the stats for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.
-  ///
-  /// * [String] accountId:
-  ///   The ID of the account to retrieve transactions from.
-  Future<CategoryStats?> categoryControllerGetCategoryStats(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
-    final response = await categoryControllerGetCategoryStatsWithHttpInfo(year, month: month, day: day, accountId: accountId, abortTrigger: abortTrigger,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CategoryStats',) as CategoryStats;
-    
-    }
-    return null;
-  }
-
-  /// Gets unknown category stats.
-  ///
-  /// Retrieves the count of transactions with unknown categories for the authenticated user. This includes all possible transactions.
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] accountId:
-  ///   The ID of the account to retrieve transactions from.
-  Future<Response> categoryControllerGetUnknownCategoryStatsWithHttpInfo({ String? accountId, Future<void>? abortTrigger, }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/category/stats/unknown';
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (accountId != null) {
-      queryParams.addAll(_queryParams('', 'accountId', accountId));
-    }
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
-    );
-  }
-
-  /// Gets unknown category stats.
-  ///
-  /// Retrieves the count of transactions with unknown categories for the authenticated user. This includes all possible transactions.
-  ///
-  /// Parameters:
-  ///
-  /// * [String] accountId:
-  ///   The ID of the account to retrieve transactions from.
-  Future<int?> categoryControllerGetUnknownCategoryStats({ String? accountId, Future<void>? abortTrigger, }) async {
-    final response = await categoryControllerGetUnknownCategoryStatsWithHttpInfo(accountId: accountId, abortTrigger: abortTrigger,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'int',) as int;
-    
     }
     return null;
   }
