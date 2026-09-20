@@ -7,10 +7,12 @@ import { ChatPromptService } from "@backend/chat/chat.prompt.service.js";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { Configuration } from "@backend/config/core.js";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model.js";
 import { Holding } from "@backend/holding/model/holding.model.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { TransactionService } from "@backend/transaction/transaction.service.js";
+import { Mocked } from "vitest";
 
 describe("ChatPromptService", () => {
   let service: ChatPromptService;
@@ -46,6 +48,10 @@ describe("ChatPromptService", () => {
     vi.spyOn(Transaction, "convertListToTargetCurrency").mockImplementation((list: any) => list);
     vi.spyOn(Holding, "find").mockResolvedValue([TestEntities.holding]);
     vi.spyOn(Holding, "convertListToTargetCurrency").mockImplementation((list: any) => list);
+
+    vi.spyOn(HoldingHistory, "find").mockResolvedValue([]);
+    vi.spyOn(HoldingHistory, "convertListToTargetCurrency").mockImplementation((list: any) => list);
+
     vi.spyOn(ChatHistory, "find").mockResolvedValue([]);
   });
 
