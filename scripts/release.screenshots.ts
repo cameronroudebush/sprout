@@ -308,11 +308,11 @@ async function createHorizontalBanner(
       { input: logoBuffer, top: 140, left: 60 },
       { input: badgeBuffer, top: 680, left: 130 },
       // Left card
-      { input: card1Rotated, top: Math.round(yPos - 40), left: Math.round(xCenter - 340) },
+      { input: card1Rotated, top: Math.round(yPos), left: Math.round(xCenter - 340) },
       // Right card
-      { input: card2Rotated, top: Math.round(yPos - 40), left: Math.round(xCenter + 130) },
+      { input: card2Rotated, top: Math.round(yPos), left: Math.round(xCenter + 130) },
       // Center card
-      { input: mainCard, top: Math.round(yPos - 60), left: Math.round(xCenter - 80) },
+      { input: mainCard, top: Math.round(yPos - 20), left: Math.round(xCenter - 80) },
     ])
     .toBuffer();
 }
