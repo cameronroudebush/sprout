@@ -11,6 +11,9 @@ vi.mock("typeorm", async () => {
       query = vi.fn().mockResolvedValue([{ name: "users" }]);
       runMigrations = vi.fn().mockResolvedValue([]);
       driver = {
+        databaseConnection: {
+          function: vi.fn(),
+        },
         createSchemaBuilder: () => ({
           log: vi.fn().mockResolvedValue({ upQueries: [] }),
         }),
@@ -22,14 +25,27 @@ vi.mock("typeorm", async () => {
 setupTests();
 
 import { DatabaseService } from "./database.service.js";
+import { Configuration } from "@backend/config/core.js";
 
 describe("DatabaseService", () => {
-  it("should initialize database connection and check migrations", async () => {
+  it("should initialize database connection, inject regex functions, and check migrations", async () => {
+    Configuration.database.type = "better-sqlite3";
     const service = new DatabaseService();
-    vi.spyOn(service, "databaseExists").mockResolvedValue(true);
-    vi.spyOn(service, "executeMigrations").mockResolvedValue([]);
+
+    vi.spyOn(service, "databaseExists").mockResolvedValue(false);
+    vi.spyOn(service, "executeMigrations").mockResolvedValue(["m1"] as any);
 
     await service.init();
     expect(service.source.initialize).toHaveBeenCalled();
+  });
+
+  it("should set SQLite PRAGMA and validate source", async () => {
+    const service = new DatabaseService();
+
+    Configuration.database.type = "better-sqlite3";
+    await service.setSQLitePRAGMA(true);
+    await service.setSQLitePRAGMA(false);
+
+    expect(() => service.validateSource(null as any)).toThrow();
   });
 });

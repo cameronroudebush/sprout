@@ -1,6 +1,5 @@
 import { ExecutionContext, Logger } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { Mocked } from "vitest";
 
 vi.mock("@backend/config/core", () => ({
   Configuration: {
@@ -19,10 +18,6 @@ vi.mock("@backend/auth/strategy/oidc.strategy", () => ({ OIDCStrategyName: "oidc
 vi.mock("@nestjs/passport", () => ({
   AuthGuard: () => class MockPassportGuard {},
 }));
-vi.mock("@backend/user/model/user.model.js", () => {
-  class User {}
-  return { User };
-});
 
 describe("AuthGuard", () => {
   let reflector: Mocked<Reflector>;
@@ -40,7 +35,6 @@ describe("AuthGuard", () => {
 
   // Helper returns both the guard instance and its internal isolated User class definition
   async function getIsolatedGuardContext(authType: "local" | "oidc") {
-    vi.resetModules();
     const { Configuration } = await import("@backend/config/core.js");
     Configuration.server.auth.type = authType;
 
