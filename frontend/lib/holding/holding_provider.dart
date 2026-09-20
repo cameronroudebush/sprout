@@ -176,7 +176,12 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
     ref.listen(batchedLivePricesProvider, (_, __) {}, fireImmediately: false);
     ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
     final livePrices = ref.watch(batchedLivePricesProvider);
-    liveData = livePrices[holding.symbol];
+    final fetchedData = livePrices[holding.symbol];
+
+    // Only use liveData if it's resolved and not marked as UNKNOWN
+    if (fetchedData != null && fetchedData.type != MarketIndexDtoTypeEnum.INVALID) {
+      liveData = fetchedData;
+    }
   }
 
   final holdingHistory = ref.watch(accountHoldingHistoryProvider(holding.id)).value;

@@ -4282,7 +4282,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "enum": ["EQUITY", "MUTUALFUND", "MONEYMARKET", "ETF", "INDEX", "CURRENCY", "CRYPTOCURRENCY"],
+            "enum": ["EQUITY", "MUTUALFUND", "MONEYMARKET", "ETF", "INDEX", "CURRENCY", "CRYPTOCURRENCY", "INVALID"],
             "type": "string",
             "description": "The type of financial instrument"
           },

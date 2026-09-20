@@ -251,6 +251,7 @@ class MarketIndexDtoTypeEnum {
   static const INDEX = MarketIndexDtoTypeEnum._(r'INDEX');
   static const CURRENCY = MarketIndexDtoTypeEnum._(r'CURRENCY');
   static const CRYPTOCURRENCY = MarketIndexDtoTypeEnum._(r'CRYPTOCURRENCY');
+  static const INVALID = MarketIndexDtoTypeEnum._(r'INVALID');
 
   /// List of all possible values in this [enum][MarketIndexDtoTypeEnum].
   static const values = <MarketIndexDtoTypeEnum>[
@@ -261,6 +262,7 @@ class MarketIndexDtoTypeEnum {
     INDEX,
     CURRENCY,
     CRYPTOCURRENCY,
+    INVALID,
   ];
 
   static MarketIndexDtoTypeEnum? fromJson(dynamic value) => MarketIndexDtoTypeEnumTypeTransformer().decode(value);
@@ -306,6 +308,7 @@ class MarketIndexDtoTypeEnumTypeTransformer {
         case r'INDEX': return MarketIndexDtoTypeEnum.INDEX;
         case r'CURRENCY': return MarketIndexDtoTypeEnum.CURRENCY;
         case r'CRYPTOCURRENCY': return MarketIndexDtoTypeEnum.CRYPTOCURRENCY;
+        case r'INVALID': return MarketIndexDtoTypeEnum.INVALID;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
