@@ -127,33 +127,31 @@ class FirebaseNotificationDTO {
 }
 
 /// Notification importance level
-class FirebaseNotificationDTOImportanceEnum {
-  /// Instantiate a new enum with the provided [value].
-  const FirebaseNotificationDTOImportanceEnum._(this.value);
+enum FirebaseNotificationDTOImportanceEnum {
+  max._(r'max'),
+  high._(r'high'),
+  default_._(r'default'),
+  low._(r'low'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const FirebaseNotificationDTOImportanceEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const max = FirebaseNotificationDTOImportanceEnum._(r'max');
-  static const high = FirebaseNotificationDTOImportanceEnum._(r'high');
-  static const default_ = FirebaseNotificationDTOImportanceEnum._(r'default');
-  static const low = FirebaseNotificationDTOImportanceEnum._(r'low');
-
-  /// List of all possible values in this [enum][FirebaseNotificationDTOImportanceEnum].
-  static const values = <FirebaseNotificationDTOImportanceEnum>[
-    max,
-    high,
-    default_,
-    low,
-  ];
-
+  /// Returns the instance of [FirebaseNotificationDTOImportanceEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static FirebaseNotificationDTOImportanceEnum? fromJson(dynamic value) => FirebaseNotificationDTOImportanceEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [FirebaseNotificationDTOImportanceEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<FirebaseNotificationDTOImportanceEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <FirebaseNotificationDTOImportanceEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -175,9 +173,10 @@ class FirebaseNotificationDTOImportanceEnumTypeTransformer {
 
   const FirebaseNotificationDTOImportanceEnumTypeTransformer._();
 
-  String encode(FirebaseNotificationDTOImportanceEnum data) => data.value;
+  String encode(FirebaseNotificationDTOImportanceEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a FirebaseNotificationDTOImportanceEnum.
+  /// Returns the instance of [FirebaseNotificationDTOImportanceEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -186,6 +185,9 @@ class FirebaseNotificationDTOImportanceEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   FirebaseNotificationDTOImportanceEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is FirebaseNotificationDTOImportanceEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'max': return FirebaseNotificationDTOImportanceEnum.max;
@@ -201,7 +203,7 @@ class FirebaseNotificationDTOImportanceEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [FirebaseNotificationDTOImportanceEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static FirebaseNotificationDTOImportanceEnumTypeTransformer? _instance;
 }
 

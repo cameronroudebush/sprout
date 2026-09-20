@@ -22,6 +22,7 @@ class UserConfig {
     required this.secureMode,
     required this.allowWidgets,
     required this.includeAICapabilities,
+    this.enableBudgeting = true,
     this.simpleFinToken,
     this.coinbaseApiKey,
     this.coinbaseApiKeyName,
@@ -52,6 +53,9 @@ class UserConfig {
 
   /// If the user wants to see AI powered stats and ideas.
   bool includeAICapabilities;
+
+  /// If the user wants to see budgeting information and features.
+  bool enableBudgeting;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -90,6 +94,7 @@ class UserConfig {
     other.secureMode == secureMode &&
     other.allowWidgets == allowWidgets &&
     other.includeAICapabilities == includeAICapabilities &&
+    other.enableBudgeting == enableBudgeting &&
     other.simpleFinToken == simpleFinToken &&
     other.coinbaseApiKey == coinbaseApiKey &&
     other.coinbaseApiKeyName == coinbaseApiKeyName;
@@ -106,12 +111,13 @@ class UserConfig {
     (secureMode.hashCode) +
     (allowWidgets.hashCode) +
     (includeAICapabilities.hashCode) +
+    (enableBudgeting.hashCode) +
     (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
     (coinbaseApiKey == null ? 0 : coinbaseApiKey!.hashCode) +
     (coinbaseApiKeyName == null ? 0 : coinbaseApiKeyName!.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName]';
+  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, enableBudgeting=$enableBudgeting, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -124,6 +130,7 @@ class UserConfig {
       json[r'secureMode'] = this.secureMode;
       json[r'allowWidgets'] = this.allowWidgets;
       json[r'includeAICapabilities'] = this.includeAICapabilities;
+      json[r'enableBudgeting'] = this.enableBudgeting;
     if (this.simpleFinToken != null) {
       json[r'simpleFinToken'] = this.simpleFinToken;
     } else {
@@ -171,6 +178,8 @@ class UserConfig {
         assert(json[r'allowWidgets'] != null, 'Required key "UserConfig[allowWidgets]" has a null value in JSON.');
         assert(json.containsKey(r'includeAICapabilities'), 'Required key "UserConfig[includeAICapabilities]" is missing from JSON.');
         assert(json[r'includeAICapabilities'] != null, 'Required key "UserConfig[includeAICapabilities]" has a null value in JSON.');
+        assert(json.containsKey(r'enableBudgeting'), 'Required key "UserConfig[enableBudgeting]" is missing from JSON.');
+        assert(json[r'enableBudgeting'] != null, 'Required key "UserConfig[enableBudgeting]" has a null value in JSON.');
         return true;
       }());
 
@@ -184,6 +193,7 @@ class UserConfig {
         secureMode: mapValueOfType<bool>(json, r'secureMode')!,
         allowWidgets: mapValueOfType<bool>(json, r'allowWidgets')!,
         includeAICapabilities: mapValueOfType<bool>(json, r'includeAICapabilities')!,
+        enableBudgeting: mapValueOfType<bool>(json, r'enableBudgeting')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         coinbaseApiKey: mapValueOfType<String>(json, r'coinbaseApiKey'),
         coinbaseApiKeyName: mapValueOfType<String>(json, r'coinbaseApiKeyName'),
@@ -243,6 +253,7 @@ class UserConfig {
     'secureMode',
     'allowWidgets',
     'includeAICapabilities',
+    'enableBudgeting',
   };
 }
 

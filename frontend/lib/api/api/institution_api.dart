@@ -27,7 +27,7 @@ class InstitutionApi {
   /// * [String] id (required):
   ///
   /// * [UpdateInstitutionRequest] updateInstitutionRequest (required):
-  Future<Response> institutionControllerUpdateWithHttpInfo(String id, UpdateInstitutionRequest updateInstitutionRequest,) async {
+  Future<Response> institutionControllerUpdateWithHttpInfo(String id, UpdateInstitutionRequest updateInstitutionRequest, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/institution/{id}/update'
       .replaceAll('{id}', id);
@@ -50,6 +50,7 @@ class InstitutionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -62,8 +63,8 @@ class InstitutionApi {
   /// * [String] id (required):
   ///
   /// * [UpdateInstitutionRequest] updateInstitutionRequest (required):
-  Future<Institution?> institutionControllerUpdate(String id, UpdateInstitutionRequest updateInstitutionRequest,) async {
-    final response = await institutionControllerUpdateWithHttpInfo(id, updateInstitutionRequest,);
+  Future<Institution?> institutionControllerUpdate(String id, UpdateInstitutionRequest updateInstitutionRequest, { Future<void>? abortTrigger, }) async {
+    final response = await institutionControllerUpdateWithHttpInfo(id, updateInstitutionRequest, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

@@ -11,29 +11,29 @@
 part of openapi.api;
 
 /// The asset variant variant to request from Brandfetch (icon or symbol)
-class InstitutionIconType {
-  /// Instantiate a new enum with the provided [value].
-  const InstitutionIconType._(this.value);
+enum InstitutionIconType {
+  icon._(r'icon'),
+  symbol._(r'symbol'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const InstitutionIconType._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const icon = InstitutionIconType._(r'icon');
-  static const symbol = InstitutionIconType._(r'symbol');
-
-  /// List of all possible values in this [enum][InstitutionIconType].
-  static const values = <InstitutionIconType>[
-    icon,
-    symbol,
-  ];
-
+  /// Returns the instance of [InstitutionIconType] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static InstitutionIconType? fromJson(dynamic value) => InstitutionIconTypeTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [InstitutionIconType]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<InstitutionIconType> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <InstitutionIconType>[];
     if (json is List && json.isNotEmpty) {
@@ -55,9 +55,11 @@ class InstitutionIconTypeTypeTransformer {
 
   const InstitutionIconTypeTypeTransformer._();
 
-  String encode(InstitutionIconType data) => data.value;
+  /// Encodes this enum as a value suitable for JSON.
+  String encode(InstitutionIconType data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a InstitutionIconType.
+  /// Returns the instance of [InstitutionIconType] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -66,6 +68,9 @@ class InstitutionIconTypeTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   InstitutionIconType? decode(dynamic data, {bool allowNull = true}) {
+    if (data is InstitutionIconType) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'icon': return InstitutionIconType.icon;
@@ -79,7 +84,7 @@ class InstitutionIconTypeTypeTransformer {
     return null;
   }
 
-  /// Singleton [InstitutionIconTypeTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static InstitutionIconTypeTypeTransformer? _instance;
 }
 

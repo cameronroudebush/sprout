@@ -11,31 +11,30 @@
 part of openapi.api;
 
 
-class ProviderSubTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const ProviderSubTypeEnum._(this.value);
+enum ProviderSubTypeEnum {
+  bankInvestments._(r'Bank Investments'),
+  realEstate._(r'Real Estate'),
+  crypto._(r'Crypto'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const ProviderSubTypeEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const bankInvestments = ProviderSubTypeEnum._(r'Bank Investments');
-  static const realEstate = ProviderSubTypeEnum._(r'Real Estate');
-  static const crypto = ProviderSubTypeEnum._(r'Crypto');
-
-  /// List of all possible values in this [enum][ProviderSubTypeEnum].
-  static const values = <ProviderSubTypeEnum>[
-    bankInvestments,
-    realEstate,
-    crypto,
-  ];
-
+  /// Returns the instance of [ProviderSubTypeEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static ProviderSubTypeEnum? fromJson(dynamic value) => ProviderSubTypeEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [ProviderSubTypeEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<ProviderSubTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ProviderSubTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -57,9 +56,11 @@ class ProviderSubTypeEnumTypeTransformer {
 
   const ProviderSubTypeEnumTypeTransformer._();
 
-  String encode(ProviderSubTypeEnum data) => data.value;
+  /// Encodes this enum as a value suitable for JSON.
+  String encode(ProviderSubTypeEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a ProviderSubTypeEnum.
+  /// Returns the instance of [ProviderSubTypeEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -68,6 +69,9 @@ class ProviderSubTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   ProviderSubTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is ProviderSubTypeEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'Bank Investments': return ProviderSubTypeEnum.bankInvestments;
@@ -82,7 +86,7 @@ class ProviderSubTypeEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [ProviderSubTypeEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static ProviderSubTypeEnumTypeTransformer? _instance;
 }
 

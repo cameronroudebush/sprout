@@ -123,33 +123,31 @@ class SSEData {
 }
 
 
-class SSEDataEventEnum {
-  /// Instantiate a new enum with the provided [value].
-  const SSEDataEventEnum._(this.value);
+enum SSEDataEventEnum {
+  sync_._(r'sync'),
+  forceUpdate._(r'force-update'),
+  notification._(r'notification'),
+  chat._(r'chat'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const SSEDataEventEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const sync_ = SSEDataEventEnum._(r'sync');
-  static const forceUpdate = SSEDataEventEnum._(r'force-update');
-  static const notification = SSEDataEventEnum._(r'notification');
-  static const chat = SSEDataEventEnum._(r'chat');
-
-  /// List of all possible values in this [enum][SSEDataEventEnum].
-  static const values = <SSEDataEventEnum>[
-    sync_,
-    forceUpdate,
-    notification,
-    chat,
-  ];
-
+  /// Returns the instance of [SSEDataEventEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static SSEDataEventEnum? fromJson(dynamic value) => SSEDataEventEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [SSEDataEventEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<SSEDataEventEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <SSEDataEventEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -171,9 +169,10 @@ class SSEDataEventEnumTypeTransformer {
 
   const SSEDataEventEnumTypeTransformer._();
 
-  String encode(SSEDataEventEnum data) => data.value;
+  String encode(SSEDataEventEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a SSEDataEventEnum.
+  /// Returns the instance of [SSEDataEventEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -182,6 +181,9 @@ class SSEDataEventEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   SSEDataEventEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is SSEDataEventEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'sync': return SSEDataEventEnum.sync_;
@@ -197,7 +199,7 @@ class SSEDataEventEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [SSEDataEventEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static SSEDataEventEnumTypeTransformer? _instance;
 }
 
