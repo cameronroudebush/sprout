@@ -149,6 +149,7 @@ describe("ProviderSyncService", () => {
 
     it("should skip account if filtering by institutionId and account's institution doesn't match", async () => {
       vi.spyOn(Account, "count").mockResolvedValue(1);
+      const insertSpy = vi.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
 
       const dbAccount = { ...TestEntities.account, institution: { id: "inst-other" } };
       mockProvider.get.mockResolvedValue([{ account: TestEntities.account, providerAccountId: "p-1" }]);
@@ -156,7 +157,7 @@ describe("ProviderSyncService", () => {
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED, "inst-target");
 
-      expect(AccountHistory.prototype.insert).not.toHaveBeenCalled();
+      expect(insertSpy).not.toHaveBeenCalled();
     });
 
     it("should attach institution if account in DB has no institution attached yet and attach brand new institution if missing in DB", async () => {
@@ -168,7 +169,7 @@ describe("ProviderSyncService", () => {
       const dbAccountNoInst = { ...TestEntities.account, institution: null as any, update: vi.fn() };
       const incomingAcc = { ...TestEntities.account, institution: incomingInst };
 
-      mockProvider.get.mockResolvedValue([{ account: incomingAcc, providerAccountId: "p-1" }]);
+      mockProvider.get.mockResolvedValue([{ account: incomingAcc, providerAccountId: "p-1" } as any]);
       vi.spyOn(Account, "findOne").mockResolvedValue(dbAccountNoInst as any);
       vi.spyOn(Institution, "findOne").mockResolvedValue(null);
 
