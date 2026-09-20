@@ -9,7 +9,7 @@ class ExpandedHolding extends MarketIndexDto {
   final num liveMarketValue;
   final num dayChange;
   final num dayPercent;
-  final dynamic historicalFrame;
+  final EntityHistoryDataPoint? historicalFrame;
   final bool isLive;
   final num totalGain;
   final num totalGainPercent;

@@ -491,7 +491,7 @@ final class WebsiteIconProvider extends $FunctionalProvider<
   }
 }
 
-String _$websiteIconHash() => r'7b60171c6e6f9d82dd482b2b639f4c30c2b0d9a1';
+String _$websiteIconHash() => r'27bccb31f61114416ac6937e80bdf70eb6395e02';
 
 /// Provides an icon for an arbitrary website URL
 

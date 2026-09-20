@@ -417,16 +417,29 @@ export class PlaidProviderService extends ProviderBase<
 
   private convertPlaidHolding(holding: PlaidHolding, securities: PlaidSecurity[], account: Account) {
     const security = securities.find((s) => s.security_id === holding.security_id);
-    return new Holding(
+
+    const costBasis = holding.cost_basis || 0;
+    const quantity = holding.quantity || 0;
+
+    // Calculate the average unit purchase price per share paid at acquisition
+    const averagePurchasePrice = quantity > 0 && costBasis > 0 ? costBasis / quantity : holding.institution_price || 0;
+
+    const sproutHolding = new Holding(
       holding.iso_currency_code || "USD",
-      holding.cost_basis || 0,
+      costBasis, // e.g. 99.72
       security?.name || "Unknown Security",
-      holding.institution_value || 0,
-      holding.institution_price || 0,
-      holding.quantity || 0,
+      holding.institution_value || 0, // e.g. 111.87
+      averagePurchasePrice, // e.g. 334.63 per share average cost basis
+      quantity, // e.g. 0.298
       security?.ticker_symbol || "???",
       account,
+      {
+        closePrice: security?.close_price || null, // e.g. 375.43
+        closePriceAsOf: security?.close_price_as_of || null,
+        institutionPrice: holding.institution_price || null,
+      },
     );
+    return sproutHolding;
   }
 
   private mapType(plaidType: PlaidAccountType): AccountType {

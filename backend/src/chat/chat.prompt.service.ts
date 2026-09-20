@@ -4,6 +4,7 @@ import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { Configuration } from "@backend/config/core";
 import { Utility } from "@backend/core/model/utility/utility";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
@@ -33,6 +34,10 @@ export class ChatPromptService {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
       `Write a warm, natural daily financial summary over the last 24 hours.`,
+      `ACCOUNT MOVEMENT RECONCILIATION:
+       - Calculate the delta between today's live balance and the most recent previous entry in 'his'.
+       - Match transactions using 'AccountID' to determine if spending/deposits account for that delta.
+       - If an account balance changed BUT there are no matching transactions, attribute the movement to market/interest fluctuations.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence quick takeaway (e.g., "Your checking account saw some downward movement today primarily driven by weekend spending.").`,
       `2. Follow with short key bullet points for accounts with notable activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
@@ -49,6 +54,8 @@ export class ChatPromptService {
       ...this.getSharedSystemInstructions(user, false),
       `Write a clear, balanced daily investment performance summary covering the last 24 hours.`,
       `Focus exclusively on investment, retirement, and brokerage accounts (e.g., 401(k), IRA, taxable brokerage, crypto). Ignore standard checking, savings, or credit accounts.`,
+      `ACCOUNT MOVEMENT RECONCILIATION:
+       - Use 'hol' (CSV Symbol:CurrentValue:History[Date:MarketValue]) and 'his' balance history to evaluate historical market value movements and determine which holdings drove overall portfolio movement over the last 24 hours.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence high-level takeaway summarizing overall portfolio direction today (e.g., "Your overall investments saw solid upward momentum today, lifted by strong broad-market gains.").`,
       `2. Follow with short bullet points for individual investment accounts or key asset categories that experienced notable movement. State the direction of change and provide the qualitative driver (e.g., "Roth IRA trended upward, largely driven by gains in broad index funds" or "Taxable Brokerage dipped slightly due to sector-wide tech pullbacks").`,
@@ -67,14 +74,14 @@ export class ChatPromptService {
    * @param allowCharts If we should allow the LLM to generate charts for rendering. False by default.
    */
   private getSharedSystemInstructions(user: User, includeCYA: boolean = true, allowCharts = false): string[] {
-    const today = formatDate(new Date(), "MM/dd/yyyy");
+    const today = formatDate(new Date(), "MM/dd/yyyy HH:mm");
     return [
       `You are a financial assistant for Sprout (https://sprout.croudebush.net/).`,
-      `Today's date is: ${today}. Use this to determine if bills or subscriptions are upcoming or overdue.`,
+      `Today's date and current time is: ${today}. Use this exact timestamp to evaluate activity within the last 24 hours.`,
       `Be concise. Avoid conversational filler.`,
       `Refer to accounts strictly by the provided IDs (e.g., Acc_0).`,
       `Context Data Key Mapping:
-         - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate, hol=Holdings (CSV Symbol:Value), his=History (CSV Date:Balance)
+         - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate, hol=Holdings (CSV Symbol:CurrentValue:History[Date:MarketValue]), his=History (CSV Date:Balance)
          - Transactions are pipe-delimited: Date|DescriptionID|Amount|Category|AccountID
          - Subscriptions are pipe-delimited: DescriptionID|AvgAmount|Period|LastPaidDate|AccountID`,
       `MANDATORY ENTITY FORMATTING:
@@ -83,7 +90,7 @@ export class ChatPromptService {
         - CRITICAL: Never strip the '@' prefix. If you write the ID without the '@' prefix, the user's interface will break.
         - Example Correct: "Analysis for @Acc_0"
         - Example Incorrect: "Analysis for Acc_0"
-        - Do not guess names; only use the @ID provided in the mapping.'
+        - Do not guess names; only use the @ID provided in the mapping.
         - Only provide the ID of the account, don't include * for boldness around account ID's.
         - Don't include the account type when referencing the account by ID.`,
       `The users chosen currency is: ${user.config.currency}. All values will be in this currency already. Please make sure to use the proper currency symbol leading the numbers.`,
@@ -159,6 +166,9 @@ export class ChatPromptService {
 
     let accIndex = 0;
     const isExtendedTimeframe = timeframe === ChatTimeframe.sixMonths || timeframe === ChatTimeframe.oneYear;
+    const isOneDayTimeframe = timeframe === ChatTimeframe.oneDay;
+    const dateFormat = isOneDayTimeframe ? "MM/dd HH:mm" : "MM/dd";
+    const todayStr = formatDate(new Date(), "MM/dd");
 
     const accountData = await Promise.all(
       accounts.map(async (acc) => {
@@ -185,14 +195,60 @@ export class ChatPromptService {
           });
         }
 
+        // Format account history dates
+        const historyFormatted = history.map((h) => `${formatDate(h.time, dateFormat)}:${Number(h.balance).toFixed(0)}`);
+
+        // Inject current live balance into account history if today's snapshot isn't saved yet
+        const hasTodayAccountHistory = history.some((h) => formatDate(h.time, "MM/dd") === todayStr);
+        if (!hasTodayAccountHistory) {
+          const nowStr = formatDate(new Date(), dateFormat);
+          historyFormatted.unshift(`${nowStr}:${Number(acc.balance).toFixed(0)}`);
+        }
+
+        // Process holdings and their respective historical records
+        const formattedHoldings = await Promise.all(
+          holdings.map(async (h) => {
+            let holdingHistories = HoldingHistory.convertListToTargetCurrency(
+              await HoldingHistory.find({
+                where: { holding: { id: h.id }, time: MoreThan(historicalTimeFrame) },
+                order: { time: "DESC" },
+              }),
+              user,
+            );
+
+            if (isExtendedTimeframe) {
+              const seenMonths = new Set<string>();
+              holdingHistories = holdingHistories.filter((hh) => {
+                const monthKey = formatDate(hh.time, "yyyy-MM");
+                if (seenMonths.has(monthKey)) return false;
+                seenMonths.add(monthKey);
+                return true;
+              });
+            }
+
+            const formattedHoldingHistory = holdingHistories.map((hh) => `${formatDate(hh.time, dateFormat)}:${Number(hh.marketValue).toFixed(0)}`);
+
+            // Inject today's live holding snapshot if today's history isn't present
+            const hasTodayHoldingHistory = holdingHistories.some((hh) => formatDate(hh.time, "MM/dd") === todayStr);
+            if (!hasTodayHoldingHistory) {
+              const liveHoldingHistory = HoldingHistory.fromHolding(h);
+              const nowStr = formatDate(liveHoldingHistory.time, dateFormat);
+              formattedHoldingHistory.unshift(`${nowStr}:${Number(liveHoldingHistory.marketValue).toFixed(0)}`);
+            }
+
+            const val = Number(h.marketValue).toFixed(2);
+            return `${h.symbol}:${val}:[${formattedHoldingHistory.join(",")}]`;
+          }),
+        );
+
         return {
           i: genericId,
           t: acc.type,
           s: acc.subType,
           b: Number(acc.balance).toFixed(2),
           r: acc.interestRate,
-          hol: holdings.map((h) => `${h.symbol}:${Number(h.marketValue).toFixed(2)}`).join(","),
-          his: history.map((h) => `${formatDate(h.time, "MM/dd")}:${Number(h.balance).toFixed(0)}`).join(","),
+          hol: formattedHoldings.join(","),
+          his: historyFormatted.join(","),
         };
       }),
     );
@@ -205,7 +261,8 @@ export class ChatPromptService {
       const accId = idMap.get(t.account.id) || idMap.get(t.account.name) || "?";
       const cat = t.category?.name || "Uncategorized";
       const amt = Number(t.amount).toFixed(2);
-      const date = formatDate(t.posted, "MM/dd/yy");
+      const txDateFormat = isOneDayTimeframe ? "MM/dd/yy HH:mm" : "MM/dd/yy";
+      const date = formatDate(t.posted, txDateFormat);
       return `${date}|${genericDescriptionId}|${amt}|${cat}|${accId}`;
     });
 

@@ -14,7 +14,6 @@ class WidgetImageUtility {
     Color fallbackBgColor = const Color(0xFF2C353D),
     Color iconColor = Colors.white,
     double size = 48.0,
-    double borderRadius = 4.0,
   }) async {
     ui.Image? networkImage;
 
@@ -41,11 +40,14 @@ class WidgetImageUtility {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, size, size));
 
+    // Dynamic corner radius matching LogoBaseWidget
+    final dynamicRadius = (size * 0.2);
+
     // Define clip region across full bounds
     final rect = Rect.fromLTWH(0, 0, size, size);
     final rRect = RRect.fromRectAndRadius(
       rect,
-      Radius.circular(borderRadius),
+      Radius.circular(dynamicRadius),
     );
 
     // Apply smooth anti-aliased clip

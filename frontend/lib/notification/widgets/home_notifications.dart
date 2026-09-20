@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/account/widgets/account_error_top_notification.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/notification.dart';
@@ -16,6 +17,9 @@ class HomeNotificationsWidget extends ConsumerWidget {
     final unknownCatCount = ref.watch(unknownCategoryCountProvider()).value ?? 0;
 
     final List<Widget> notifications = [];
+
+    // Account Error Notification
+    notifications.add(const AccountErrorNotificationWidget());
 
     // Uncategorized Transactions Notification
     if (unknownCatCount > 0) {
@@ -35,7 +39,10 @@ class HomeNotificationsWidget extends ConsumerWidget {
       );
     }
 
-    if (notifications.isEmpty) return const SizedBox.shrink();
-    return Column(spacing: 0, children: notifications);
+    // Filter out empty shrink widgets if no notifications are active
+    final activeNotifications = notifications.where((w) => w is! SizedBox).toList();
+
+    if (activeNotifications.isEmpty) return const SizedBox.shrink();
+    return Column(spacing: 0, children: activeNotifications);
   }
 }
