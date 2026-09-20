@@ -92,6 +92,32 @@ describe("AppModule", () => {
       expect(result.stores).toBeDefined();
     });
 
+    it("should handle redis store when already open", async () => {
+      Configuration.server.cache = {
+        type: "redis",
+        redis: {
+          validate: vi.fn(),
+          host: "localhost",
+          port: 6379,
+          password: "",
+        },
+      } as any;
+
+      const { default: KeyvRedis } = await import("@keyv/redis");
+      KeyvRedis.mockImplementationOnce(function () {
+        return {
+          client: {
+            isOpen: true,
+            connect: vi.fn(),
+            ping: vi.fn().mockResolvedValue("PONG"),
+          },
+        };
+      });
+
+      const result = await cacheFactory();
+      expect(result.stores).toHaveLength(2);
+    });
+
     it("should fallback to L1 cache when redis connection fails or times out", async () => {
       Configuration.server.cache = {
         type: "redis",

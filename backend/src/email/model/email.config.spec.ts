@@ -1,14 +1,22 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { EmailConfig } from "@backend/email/model/email.config";
+import { EmailConfig } from "@backend/email/model/email.config.js";
 
 describe("EmailConfig", () => {
   it("should validate and construct properly", () => {
     const config = new EmailConfig();
     config.enabled = false;
-    config.from = "test@sprout.local";
+    expect(() => config.validate()).not.toThrow();
 
-    expect(config.from).toBe("test@sprout.local");
+    config.enabled = true;
+    expect(() => config.validate()).toThrow("The host must be set to use email");
+
+    config.host = "smtp.sprout.local";
+    expect(() => config.validate()).toThrow("The username must be set to use email");
+
+    config.user = "user@sprout.local";
+    config.pass = "secret";
+    expect(() => config.validate()).not.toThrow();
   });
 });

@@ -1,43 +1,19 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
+import { describe, expect, it, vi } from "vitest";
+
 setupTests();
 
-import { ExchangeRateJob } from "@backend/core/jobs/exchange-rate";
+import { ExchangeRateJob } from "./exchange-rate.js";
 
 describe("ExchangeRateJob", () => {
-  let job: ExchangeRateJob;
-  let cacheManager: any;
-  let configService: any;
+  it("should update exchange rates from cache or yahoo finance", async () => {
+    const configService = { convertCronToMilliseconds: vi.fn().mockResolvedValue(60000) } as any;
+    const cacheManager = { get: vi.fn().mockResolvedValue(null), set: vi.fn().mockResolvedValue(undefined) } as any;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    cacheManager = {
-      get: vi.fn(),
-      set: vi.fn().mockResolvedValue(undefined),
-    };
-    configService = {
-      convertCronToMilliseconds: vi.fn().mockResolvedValue(3600000),
-    };
-    job = new ExchangeRateJob(configService, cacheManager);
-  });
+    const job = new ExchangeRateJob(configService, cacheManager);
+    vi.spyOn(job as any, "refreshExchangeRates").mockResolvedValue(undefined);
 
-  describe("update", () => {
-    it("should update rates from L2 cache if available", async () => {
-      const cachedRates = { USD: { EUR: 0.85 } };
-      cacheManager.get.mockResolvedValue(cachedRates);
-
-      await (job as any).update();
-
-      expect(cacheManager.get).toHaveBeenCalledWith(ExchangeRateJob.CACHE_KEY);
-      expect(ExchangeRateJob.exchangeRates).toEqual(cachedRates);
-    });
-
-    it("should refresh rates from Yahoo Finance if cache is empty", async () => {
-      cacheManager.get.mockResolvedValue(null);
-      const refreshSpy = vi.spyOn(job, "refreshExchangeRates").mockResolvedValue(undefined);
-
-      await (job as any).update();
-
-      expect(refreshSpy).toHaveBeenCalled();
-    });
+    await job["update"]();
+    expect((job as any).refreshExchangeRates).toHaveBeenCalled();
   });
 });

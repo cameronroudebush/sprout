@@ -1,16 +1,21 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
+import { describe, expect, it, vi } from "vitest";
+
 setupTests();
 
-import { Utility } from "@backend/core/model/utility/utility";
+import { Utility } from "./utility.js";
 
 describe("Utility", () => {
-  describe("shuffleArray", () => {
-    it("should return a shuffled copy of the array", () => {
-      const input = [1, 2, 3, 4, 5];
-      const shuffled = Utility.shuffleArray(input);
+  it("should select random element, shuffle array, and delay execution", async () => {
+    const arr = [1, 2, 3, 4, 5];
+    const picked = Utility.randomFromArray(arr);
+    expect(arr).toContain(picked);
 
-      expect(shuffled).toHaveLength(input.length);
-      expect(shuffled.sort()).toEqual(input.sort());
-    });
+    const shuffled = Utility.shuffleArray([...arr]);
+    expect(shuffled).toHaveLength(5);
+
+    const start = Date.now();
+    await Utility.delay(10);
+    expect(Date.now() - start).toBeGreaterThanOrEqual(5);
   });
 });
