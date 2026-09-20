@@ -1,25 +1,46 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
+import { describe, expect, it, vi } from "vitest";
+
 setupTests();
 
-import { JobExplorerService } from "@backend/core/services/job.explorer.service";
+import { JobExplorerService } from "./job.explorer.service.js";
+import { BackgroundJob } from "@backend/core/jobs/model/job-base.js";
+import { Configuration } from "@backend/config/core.js";
+
+class DummyJob extends BackgroundJob<any> {
+  constructor() {
+    super("dummy-job", "0 * * * *", false, false);
+  }
+  protected async update() {}
+}
 
 describe("JobExplorerService", () => {
-  let service: JobExplorerService;
-  let discoveryService: any;
+  it("should discover and start background jobs when not running script", async () => {
+    Configuration.isRunningScript = false;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+    const dummyJob = new DummyJob();
+    vi.spyOn(dummyJob, "start").mockResolvedValue(undefined as any);
 
-    discoveryService = {
-      getProviders: vi.fn().mockReturnValue([]),
-    };
+    const discoveryService = {
+      getProviders: () => [{ instance: null }, { instance: dummyJob }, { instance: [dummyJob] }],
+    } as any;
 
-    service = new JobExplorerService(discoveryService);
+    const service = new JobExplorerService(discoveryService);
+    await service.onApplicationBootstrap();
+
+    expect(dummyJob.start).toHaveBeenCalled();
   });
 
-  describe("getJobs", () => {
-    it("should discover registered background job classes", () => {
-      expect(service).toBeDefined();
-    });
+  it("should skip background job startup when running script", async () => {
+    Configuration.isRunningScript = true;
+
+    const discoveryService = {
+      getProviders: vi.fn(),
+    } as any;
+
+    const service = new JobExplorerService(discoveryService);
+    await service.onApplicationBootstrap();
+
+    expect(discoveryService.getProviders).not.toHaveBeenCalled();
   });
 });

@@ -1,25 +1,53 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
+import { describe, expect, it, vi } from "vitest";
+
 setupTests();
 
-import { RequestLoggerMiddleware } from "@backend/core/middleware/request.logger.middleware";
+import { RequestLoggerMiddleware } from "./request.logger.middleware.js";
 
 describe("RequestLoggerMiddleware", () => {
-  let middleware: RequestLoggerMiddleware;
+  it("should log request metrics and mask sensitive query parameters", () => {
+    const middleware = new RequestLoggerMiddleware();
 
-  beforeEach(() => {
-    middleware = new RequestLoggerMiddleware();
+    const req = {
+      ip: "192.168.1.100",
+      method: "GET",
+      originalUrl: "/api/oauth/callback?code=secret123&state=abc",
+      socket: { bytesWritten: 100 },
+    } as any;
+
+    let finishCallback: () => void = () => {};
+    const res = {
+      get: vi.fn().mockReturnValue(null),
+      on: (event: string, cb: () => void) => {
+        if (event === "finish") finishCallback = cb;
+      },
+      statusCode: 200,
+    } as any;
+
+    const next = vi.fn();
+
+    middleware.use(req, res, next);
+    expect(next).toHaveBeenCalled();
+
+    req.socket.bytesWritten = 500;
+    finishCallback();
   });
 
-  describe("use", () => {
-    it("should log request and invoke next function", () => {
-      const req = { method: "GET", originalUrl: "/api/test", ip: "127.0.0.1", socket: { bytesWritten: 500 } };
-      const res = { statusCode: 200, get: vi.fn().mockReturnValue("100"), on: vi.fn((_event, cb) => cb()) };
-      const next = vi.fn();
+  it("should ignore internal heartbeat requests and handle malformed URLs", () => {
+    const middleware = new RequestLoggerMiddleware();
 
-      middleware.use(req as any, res as any, next);
+    const heartbeatReq = {
+      ip: "127.0.0.1",
+      method: "GET",
+      originalUrl: "/api/core/heartbeat",
+    } as any;
 
-      expect(next).toHaveBeenCalled();
-      expect(res.on).toHaveBeenCalledWith("finish", expect.any(Function));
-    });
+    const next = vi.fn();
+    middleware.use(heartbeatReq, {} as any, next);
+    expect(next).toHaveBeenCalled();
+
+    const malformedUrl = (middleware as any).maskSensitiveInfo("http://invalid-url-:::bad");
+    expect(malformedUrl).toBe("http://invalid-url-:::bad");
   });
 });
