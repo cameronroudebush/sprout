@@ -6,6 +6,9 @@ import { Logger } from "@nestjs/common";
 
 vi.mock("@backend/config/core", () => ({
   Configuration: {
+    appName: "sprout",
+    writeConfigFile: true,
+    isDevBuild: false,
     encryptionKey: "66c60231a85abcf9fa2c6c07fd0b075c50c4a313585afb447c95838ecc6170d8",
     isDemoMode: false,
     version: "1.0.0",

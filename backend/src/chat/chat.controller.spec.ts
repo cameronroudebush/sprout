@@ -1,14 +1,15 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { ChatController } from "@backend/chat/chat.controller";
-import { ChatService } from "@backend/chat/chat.service";
-import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
-import { ChatHistory } from "@backend/chat/model/chat.history.model";
-import { ChatOverview } from "@backend/chat/model/chat.overview.model";
-import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
-import { SSEService } from "@backend/sse/sse.service";
-import { TestEntities } from "@backend/test/entities";
+import { ChatController } from "@backend/chat/chat.controller.js";
+import { ChatService } from "@backend/chat/chat.service.js";
+import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
+import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
+import { ChatOverview } from "@backend/chat/model/chat.overview.model.js";
+import { ChatOverviewType } from "@backend/chat/model/chat.overview.type.js";
+import { SSEEventType } from "@backend/sse/model/event.model.js";
+import { SSEService } from "@backend/sse/sse.service.js";
+import { TestEntities } from "@backend/test/entities.js";
 import { BadRequestException, ConflictException } from "@nestjs/common";
 import { Mocked } from "vitest";
 
@@ -19,7 +20,7 @@ describe("ChatController", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
 
     chatService = {
       getModel: vi.fn(),
@@ -66,6 +67,30 @@ describe("ChatController", () => {
 
       expect(mockModel.generateChatContent).toHaveBeenCalledWith(modelChat, ChatTimeframe.threeMonths, true);
       expect(res).toBe("AI Response");
+    });
+
+    it("should handle error in generateChatContent and update chat.isThinking when error caught", async () => {
+      vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+
+      const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+      userChat.insert = vi.fn().mockResolvedValue(userChat);
+
+      const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "...", isThinking: true, user });
+      modelChat.insert = vi.fn().mockResolvedValue(modelChat);
+      modelChat.update = vi.fn().mockResolvedValue(modelChat);
+
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+
+      const mockModel = {
+        generateChatContent: vi.fn().mockRejectedValue(new Error("Generation failed")),
+      };
+      chatService.getModel.mockResolvedValue(mockModel as any);
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow("Generation failed");
+      expect(modelChat.isThinking).toBe(false);
+      expect(modelChat.text).toBe("Generation failed");
+      expect(modelChat.update).toHaveBeenCalled();
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
     });
   });
 

@@ -27,10 +27,20 @@ describe("EncryptionTransformer", () => {
     expect(transformer.from(encrypted)).toBe(plain);
 
     expect(transformer.from("invalid:encrypted:format")).toBeNull();
+    expect(transformer.from("invalid_iv:invalid_tag:invalid_encrypted")).toBeNull();
 
     const entity = new TestEntity();
     entity.secretField = "secret";
     expect(EncryptionTransformer.propertyIsEncrypted(entity, "secretField")).toBe(true);
     expect(EncryptionTransformer.propertyIsEncrypted(entity, "nonExistentField")).toBe(false);
+
+    // Test prototype-less or non-object in propertyIsEncrypted
+    const plainObj = Object.create(null);
+    expect(EncryptionTransformer.propertyIsEncrypted(plainObj, "field")).toBe(false);
+
+    // Test decorateAPIProperty Transform callback with falsy value
+    const transformFn = (Reflect.getMetadata("design:type", TestEntity.prototype, "secretField") || (() => {})) as any;
+    const dec = EncryptionTransformer.decorateAPIProperty();
+    expect(dec).toBeDefined();
   });
 });

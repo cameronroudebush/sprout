@@ -9,7 +9,6 @@ import { TestEntities } from "@backend/test/entities.js";
 import { User } from "@backend/user/model/user.model.js";
 import { BadRequestException, NotImplementedException } from "@nestjs/common";
 import axios from "axios";
-import { sign } from "jsonwebtoken";
 
 vi.mock("jsonwebtoken", () => ({
   sign: vi.fn().mockReturnValue("mocked-jwt-token"),
@@ -24,7 +23,7 @@ describe("CoinbaseProviderService", () => {
   let user: User;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     cacheManager = {
       get: vi.fn(),
       set: vi.fn().mockResolvedValue(undefined),

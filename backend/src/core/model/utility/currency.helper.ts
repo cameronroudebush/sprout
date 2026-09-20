@@ -24,10 +24,10 @@ export class CurrencyHelper {
    * @param sourceProperty The property that contains the source numeric value (think account balance).
    * @param currencyProperty The property that contains what currency the source numeric value is (so an account balance could be in EUR for one account and USD in another).
    */
-  static ExposeCurrencyFields<T>(sourceProperty: CustomTypes.PropertyNames<T, number>, currencyProperty: CustomTypes.PropertyPaths<T>): ClassDecorator {
-    return function (constructor: Function) {
-      const target = constructor.prototype;
-      const targetKey = sourceProperty as string;
+  static ExposeCurrencyFields<T>(sourceProperty: CustomTypes.PropertyNames<T, number>, currencyProperty: CustomTypes.PropertyPaths<T>): any {
+    return function (targetOrConstructor: any, propertyKey?: string) {
+      const target = typeof targetOrConstructor === "function" ? targetOrConstructor.prototype : targetOrConstructor;
+      const targetKey = (sourceProperty ?? propertyKey) as string;
       ApiProperty({
         type: "number",
         required: true,

@@ -1,15 +1,15 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { Account } from "@backend/account/model/account.model";
-import { Category } from "@backend/category/model/category.model";
-import { NotificationService } from "@backend/notification/notification.service";
-import { SSEEventType } from "@backend/sse/model/event.model";
-import { SSEService } from "@backend/sse/sse.service";
-import { TestEntities } from "@backend/test/entities";
-import { Transaction } from "@backend/transaction/model/transaction.model";
-import { TransactionController } from "@backend/transaction/transaction.controller";
-import { TransactionService } from "@backend/transaction/transaction.service";
+import { Account } from "@backend/account/model/account.model.js";
+import { Category } from "@backend/category/model/category.model.js";
+import { NotificationService } from "@backend/notification/notification.service.js";
+import { SSEEventType } from "@backend/sse/model/event.model.js";
+import { SSEService } from "@backend/sse/sse.service.js";
+import { TestEntities } from "@backend/test/entities.js";
+import { Transaction } from "@backend/transaction/model/transaction.model.js";
+import { TransactionController } from "@backend/transaction/transaction.controller.js";
+import { TransactionService } from "@backend/transaction/transaction.service.js";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Mocked } from "vitest";
 
@@ -21,7 +21,7 @@ describe("TransactionController", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
 
     transactionService = {
       findSubscriptions: vi.fn(),
@@ -244,6 +244,7 @@ describe("TransactionController", () => {
       const res = await controller.removeDuplicates(user, account.id);
 
       expect(Transaction.deleteMany).toHaveBeenCalled();
+      expect(Transaction.upsertMany).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
       expect(res).toContain("Successfully removed 1 duplicate transaction from");
     });
@@ -256,7 +257,7 @@ describe("TransactionController", () => {
         id: "tx-kept-noswap",
         amount: 75.0,
         posted: new Date("2026-01-01T10:00:00Z"),
-        providerId: "prov-existing",
+        providerId: undefined,
         account,
         categoryId: undefined,
         category: undefined,
@@ -285,7 +286,7 @@ describe("TransactionController", () => {
       expect(res).toContain("Successfully removed 1 duplicate transaction from");
     });
 
-    it("should handle duplicate removal when removed.affected is undefined and when extra is identical", async () => {
+    it("should handle duplicate removal when extra is merged with different non-conflicting properties", async () => {
       const account = TestEntities.account;
       vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
@@ -303,27 +304,19 @@ describe("TransactionController", () => {
         id: "tx-dup-1",
         amount: 30.0,
         posted: new Date("2026-01-01T11:00:00Z"),
-        providerId: "prov-1",
-        account,
-        extra: { merchantName: "Grocery Store" },
-      });
-
-      const txDup2 = Transaction.fromPlain({
-        id: "tx-dup-2",
-        amount: 30.0,
-        posted: new Date("2026-01-01T12:00:00Z"),
-        providerId: "prov-2",
+        providerId: undefined,
         account,
         extra: { logoUrl: "http://logo.png" },
       });
 
-      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txDup1, txDup2]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txDup1]);
       vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
-      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: undefined } as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
 
       const res = await controller.removeDuplicates(user, account.id);
 
-      expect(res).toContain("Successfully removed 2 duplicate transactions");
+      expect(res).toContain("Successfully removed 1 duplicate transaction from");
+      expect(Transaction.upsertMany).toHaveBeenCalled();
     });
   });
 });

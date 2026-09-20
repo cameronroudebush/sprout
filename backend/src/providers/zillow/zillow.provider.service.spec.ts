@@ -15,7 +15,7 @@ describe("ZillowProviderService", () => {
   let user: User;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     user = TestEntities.user;
 
     vi.spyOn(ProviderRateLimit.prototype, "incrementOrError").mockResolvedValue(undefined);
@@ -35,7 +35,7 @@ describe("ZillowProviderService", () => {
   });
 
   describe("get", () => {
-    it("should fetch zillow info for accounts and update balances", async () => {
+    it("should fetch zillow info for accounts, update balances, and skip accounts with missing zpid", async () => {
       const zillowAcc1 = TestEntities.account;
       zillowAcc1.provider = ProviderType.zillow;
       zillowAcc1.providerAccountId = "123456";

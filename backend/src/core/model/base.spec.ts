@@ -3,11 +3,15 @@ import { describe, expect, it } from "vitest";
 
 setupTests();
 
-import { Base } from "./base.js";
+import { Base, DBBase } from "./base.js";
 
 class DummyModel extends Base {
   name!: string;
   age!: number;
+}
+
+class DummyDBModel extends DBBase {
+  name!: string;
 }
 
 describe("Base model", () => {
@@ -24,5 +28,18 @@ describe("Base model", () => {
     expect(list).toHaveLength(2);
     expect(list[0]).toBeInstanceOf(DummyModel);
     expect(list[1]).toBeInstanceOf(DummyModel);
+  });
+
+  it("should convert model instance to JSON string and plain object", () => {
+    const model = DummyModel.fromPlain({ name: "John", age: 30 });
+    expect(model.toJSONString()).toBe('{"name":"John","age":30}');
+    expect(model.toPlain()).toEqual({ name: "John", age: 30 });
+  });
+
+  it("should support DBBase subclass with id", () => {
+    const dbModel = DummyDBModel.fromPlain({ id: "db-123", name: "Test" });
+    expect(dbModel).toBeInstanceOf(DBBase);
+    expect(dbModel.id).toBe("db-123");
+    expect(dbModel.name).toBe("Test");
   });
 });

@@ -6,6 +6,11 @@ setupTests();
 import { SproutLogger } from "./logger.js";
 
 describe("SproutLogger", () => {
+  it("should construct with default parameters", () => {
+    const defaultLogger = new SproutLogger();
+    expect(defaultLogger).toBeDefined();
+  });
+
   it("should ignore contexts in contextsToIgnore and format log levels", () => {
     const logger = new SproutLogger("Sprout");
 
@@ -17,6 +22,9 @@ describe("SproutLogger", () => {
 
     logger.log("test message", "InstanceLoader");
     expect(called).toBe(false);
+
+    // Call super.log when context is NOT ignored
+    logger.log("test message", "CustomContext");
 
     // Test formatting log levels
     const formattedError = (logger as any).formatMessage("error", "An error occurred", "", "", "[SproutTest]", " +1ms");

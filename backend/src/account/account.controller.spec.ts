@@ -1,16 +1,16 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { AccountController } from "@backend/account/account.controller";
-import { AccountHistory } from "@backend/account/model/account.history.model";
-import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
-import { Institution } from "@backend/institution/model/institution.model";
-import { ProviderType } from "@backend/providers/base/provider.type";
-import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
-import { SSEEventType } from "@backend/sse/model/event.model";
-import { SSEService } from "@backend/sse/sse.service";
-import { User } from "@backend/user/model/user.model";
+import { AccountController } from "@backend/account/account.controller.js";
+import { AccountHistory } from "@backend/account/model/account.history.model.js";
+import { Account } from "@backend/account/model/account.model.js";
+import { AccountType } from "@backend/account/model/account.type.js";
+import { Institution } from "@backend/institution/model/institution.model.js";
+import { ProviderType } from "@backend/providers/base/provider.type.js";
+import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service.js";
+import { SSEEventType } from "@backend/sse/model/event.model.js";
+import { SSEService } from "@backend/sse/sse.service.js";
+import { User } from "@backend/user/model/user.model.js";
 import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 
 describe("AccountController", () => {
@@ -21,7 +21,7 @@ describe("AccountController", () => {
   let mockUser: User;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
 
     sseService = {
       sendToUser: vi.fn(),
@@ -234,13 +234,15 @@ describe("AccountController", () => {
       await expect(controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser)).rejects.toThrow(BadRequestException);
     });
 
-    it("should execute transactional operations smoothly, update subType, merge history/entities, and do cleanup", async () => {
+    it("should execute transactional operations smoothly with source holdings migration", async () => {
       const mockInstitution = Institution.fromPlain({ id: "inst-src" });
-      const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.depository, subType: null });
+      const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.investment, subType: null });
       const mockSource = Account.fromPlain({
         id: "acc-source",
-        type: AccountType.depository,
-        subType: "checking" as any,
+        type: AccountType.investment,
+        subType: "brokerage" as any,
+        interestRate: 3.5,
+        extra: { foo: "bar" },
         institution: mockInstitution,
         provider: "manual",
       });
@@ -249,16 +251,27 @@ describe("AccountController", () => {
 
       const mockQueryBuilder = {
         update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
         execute: vi.fn().mockResolvedValue({}),
       };
 
+      const sourceHoldings = [
+        { id: "sh-1", symbol: "AAPL" },
+        { id: "sh-2", symbol: "MSFT" },
+      ];
+      const targetHoldings = [{ id: "th-1", symbol: "AAPL" }];
+
       const mockManager = {
         save: vi.fn().mockResolvedValue({}),
         createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
         remove: vi.fn().mockResolvedValue({}),
-        find: vi.fn().mockResolvedValue([]),
+        find: vi.fn().mockImplementation((entity: any) => {
+          if (entity.name === "Holding") return Promise.resolve(sourceHoldings);
+          return Promise.resolve(targetHoldings);
+        }),
       };
 
       vi.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
@@ -269,8 +282,11 @@ describe("AccountController", () => {
       const result = await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
 
       expect(mockManager.save).toHaveBeenCalledWith(mockTarget);
-      expect(mockTarget.subType).toBe("checking");
-      expect(mockQueryBuilder.update).toHaveBeenCalledTimes(3);
+      expect(mockTarget.subType).toBe("brokerage");
+      expect(mockTarget.interestRate).toBe(3.5);
+      expect(mockTarget.extra).toEqual({ foo: "bar" });
+      expect(mockQueryBuilder.update).toHaveBeenCalled();
+      expect(mockQueryBuilder.delete).toHaveBeenCalled();
       expect(AccountHistory.insertForNewAccount).toHaveBeenCalledWith(mockTarget, true);
       expect(mockManager.remove).toHaveBeenCalledWith(mockSource);
       expect(Institution.delete).toHaveBeenCalledWith({ id: "inst-src" });
@@ -286,6 +302,8 @@ describe("AccountController", () => {
 
       const mockQueryBuilder = {
         update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
         execute: vi.fn().mockResolvedValue({}),

@@ -7,10 +7,12 @@ import { DatabaseBase } from "./database.base.js";
 
 class TestEntity extends DatabaseBase {
   id!: string;
+  userId!: string;
+  created!: Date;
 }
 
 describe("DatabaseBase", () => {
-  it("should provide entity helper methods", async () => {
+  it("should provide entity helper methods and static getRepository", async () => {
     const repo: any = {
       find: vi.fn().mockResolvedValue([]),
       findOne: vi.fn().mockImplementation(({ where }) => {
@@ -34,6 +36,8 @@ describe("DatabaseBase", () => {
     };
 
     vi.spyOn(TestEntity.prototype, "getRepository").mockReturnValue(repo);
+
+    expect(TestEntity.getRepository()).toBeDefined();
 
     expect(await TestEntity.find({})).toEqual([]);
     expect(await TestEntity.findOne({})).toBeNull();
@@ -59,9 +63,66 @@ describe("DatabaseBase", () => {
     await entity.upsert();
   });
 
-  it("should handle error cases in update and remove", async () => {
+  it("should handle error cases in get, update, and remove", async () => {
+    const repo: any = {
+      findOne: vi.fn().mockResolvedValue(null),
+    };
+    vi.spyOn(TestEntity.prototype, "getRepository").mockReturnValue(repo);
+
+    const entity = new TestEntity();
+    entity.id = "missing";
+
+    await expect(entity.get()).rejects.toThrow("Failed to locate matching element in db for id: missing");
+
     const noIdEntity = new TestEntity();
     await expect(noIdEntity.update()).rejects.toThrow();
     await expect(noIdEntity.remove()).rejects.toThrow();
+  });
+
+  it("should execute findMostRecentInGroup query and handle empty results", async () => {
+    const subQueryBuilder: any = {
+      select: vi.fn().mockReturnThis(),
+      addSelect: vi.fn().mockReturnThis(),
+      leftJoinAndSelect: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      getQuery: vi.fn().mockReturnValue("SELECT * FROM test_entity"),
+      getParameters: vi.fn().mockReturnValue({}),
+    };
+
+    const mainQueryBuilder: any = {
+      select: vi.fn().mockReturnThis(),
+      from: vi.fn().mockReturnThis(),
+      setParameters: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      getRawMany: vi.fn().mockResolvedValue([{ id: "123", row_num: 1 }]),
+    };
+
+    const repo: any = {
+      metadata: { tableName: "test_entity" },
+      createQueryBuilder: vi.fn().mockReturnValue(subQueryBuilder),
+      manager: {
+        connection: {
+          createQueryBuilder: vi.fn().mockReturnValue(mainQueryBuilder),
+        },
+      },
+    };
+
+    vi.spyOn(TestEntity.prototype, "getRepository").mockReturnValue(repo);
+
+    const testItem = new TestEntity();
+    testItem.id = "123";
+    vi.spyOn(TestEntity, "find").mockResolvedValue([testItem]);
+
+    const result = await TestEntity.findMostRecentInGroup({
+      dateColumn: "created",
+      partitionBy: ["userId"],
+      partitionByDateOnly: false,
+      where: { userId: "user-1" } as any,
+      joins: ["user"],
+    });
+
+    expect(result).toEqual([testItem]);
+    expect(subQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith("test_entity.user", "user");
+    expect(subQueryBuilder.where).toHaveBeenCalledWith({ userId: "user-1" });
   });
 });
