@@ -262,7 +262,7 @@ class _SproutLineChartState extends State<SproutLineChart> {
       maxY: yAxisBounds.maxY,
       minX: 0,
       maxX: maxPoints > 1 ? (maxPoints - 1).toDouble() : 1.0,
-      titlesData: _buildTitlesData(theme, safeYInterval, safeXInterval, baseChartData),
+      titlesData: _buildTitlesData(theme, safeYInterval, safeXInterval, baseChartData, chartWidth),
       borderData: FlBorderData(
         show: widget.showBorder,
         border: Border.all(
@@ -298,7 +298,21 @@ class _SproutLineChartState extends State<SproutLineChart> {
   }
 
   FlTitlesData _buildTitlesData(
-      ThemeData theme, double yInterval, double xInterval, SproutLineChartData baseChartData) {
+      ThemeData theme, double yInterval, double xInterval, SproutLineChartData baseChartData, double chartWidth) {
+    final int maxPoints = baseChartData.sortedEntries.length;
+    final int visibleLabels = maxPoints > 1 ? ((maxPoints - 1) / xInterval).floor() + 1 : 1;
+    final double availableWidthPerLabel = chartWidth / math.max(1, visibleLabels);
+
+    final String format = ChartRangeUtility.getDateFormat(widget.chartRange);
+    final String sampleText = baseChartData.sortedEntries.isNotEmpty
+        ? DateFormat(format).format(baseChartData.sortedEntries.first.key)
+        : 'Jan 2025';
+    final double approxTextWidth = sampleText.length * 6.5;
+
+    final bool shouldRotate = availableWidthPerLabel < (approxTextWidth + 12);
+    final double bottomReservedSize = shouldRotate ? 44.0 : 32.0;
+    final double rotationAngle = shouldRotate ? -math.pi / 4 : 0.0;
+
     return FlTitlesData(
       show: true,
       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -306,7 +320,7 @@ class _SproutLineChartState extends State<SproutLineChart> {
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: widget.showXAxis,
-          reservedSize: 32,
+          reservedSize: bottomReservedSize,
           interval: xInterval,
           getTitlesWidget: (value, meta) {
             // Prevent overlapping by hiding absolute max if it doesn't land on an interval stride
@@ -319,14 +333,17 @@ class _SproutLineChartState extends State<SproutLineChart> {
             }
 
             final date = baseChartData.sortedEntries[index].key;
-            String format = ChartRangeUtility.getDateFormat(widget.chartRange);
 
             return SideTitleWidget(
               meta: meta,
-              space: 8,
+              space: shouldRotate ? 4 : 8,
+              angle: rotationAngle,
               child: Text(
                 DateFormat(format).format(date),
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 10),
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
               ),
             );
           },
