@@ -1,7 +1,9 @@
 import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
+import { ProviderSyncService } from "@backend/providers/base/sync.service.js";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset.js";
+import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service.js";
 import { PlaidWebhookController } from "@backend/providers/plaid/plaid.webhook.controller.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
@@ -10,155 +12,221 @@ import jwt from "jsonwebtoken";
 
 describe("PlaidWebhookController", () => {
   let controller: PlaidWebhookController;
-  let mockPlaidProvider: any;
-  let mockSyncService: any;
+  let plaidProvider: Mocked<PlaidProviderService>;
+  let providerSyncService: Mocked<ProviderSyncService>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-
-    mockPlaidProvider = {
-      updateAllItemWebhooks: vi.fn().mockResolvedValue({ successCount: 1, failureCount: 0 }),
+    vi.restoreAllMocks();
+    plaidProvider = {
+      updateAllItemWebhooks: vi.fn().mockResolvedValue({ updatedCount: 2, failedCount: 0 }),
       plaidClient: {
         webhookVerificationKeyGet: vi.fn(),
       },
-    };
+    } as any;
 
-    mockSyncService = {
+    providerSyncService = {
       syncForProvider: vi.fn().mockResolvedValue(undefined),
       flagInstitution: vi.fn().mockResolvedValue(undefined),
-    };
+    } as any;
 
-    controller = new PlaidWebhookController(mockPlaidProvider, mockSyncService);
+    controller = new PlaidWebhookController(plaidProvider, providerSyncService);
   });
 
   describe("handlePlaidWebhook", () => {
-    it("should throw BadRequestException if signature header or rawBody is missing", async () => {
-      const headers: Record<string, string> = {};
+    it("should throw BadRequestException if signature header is missing", async () => {
+      const headers = {};
       const req: any = { rawBody: Buffer.from("body") };
 
       await expect(controller.handlePlaidWebhook(headers, req, {} as any)).rejects.toThrow(BadRequestException);
-
-      const headersWithSig = { "plaid-verification": "sig" };
-      const reqNoBody: any = { rawBody: null };
-      await expect(controller.handlePlaidWebhook(headersWithSig, reqNoBody, {} as any)).rejects.toThrow(BadRequestException);
     });
 
-    it("should throw BadRequestException if signature verification fails", async () => {
-      const headers = { "plaid-verification": "invalid-sig" };
-      const req: any = { rawBody: Buffer.from("body") };
+    it("should throw BadRequestException if rawBody is missing", async () => {
+      const headers = { "plaid-verification": "jwt-sig" };
+      const req: any = {};
 
+      await expect(controller.handlePlaidWebhook(headers, req, {} as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it("should throw BadRequestException if verification fails", async () => {
+      const headers = { "plaid-verification": "jwt-sig" };
+      const req: any = { rawBody: Buffer.from("body") };
       vi.spyOn(controller as any, "verifyPlaidWebhook").mockResolvedValue(false);
 
       await expect(controller.handlePlaidWebhook(headers, req, {} as any)).rejects.toThrow(BadRequestException);
     });
 
-    it("should return received on valid webhook and delegate to handleWebhook", async () => {
-      const headers = { "plaid-verification": "valid-sig" };
+    it("should process webhook and return received status when signature is valid", async () => {
+      const headers = { "plaid-verification": "jwt-sig" };
       const req: any = { rawBody: Buffer.from("body") };
-
       vi.spyOn(controller as any, "verifyPlaidWebhook").mockResolvedValue(true);
-      vi.spyOn(controller as any, "handleWebhook").mockImplementation(async () => {});
+      const handleWebhookSpy = vi.spyOn(controller as any, "handleWebhook").mockImplementation(() => Promise.resolve());
 
-      const res = await controller.handlePlaidWebhook(headers, req, {
-        webhook_type: "TRANSACTIONS",
-        webhook_code: "SYNC_UPDATES_AVAILABLE",
-        item_id: "item-123",
-      } as any);
+      const res = await controller.handlePlaidWebhook(headers, req, { webhook_type: "TRANSACTIONS", webhook_code: "SYNC_UPDATES_AVAILABLE" } as any);
 
       expect(res).toEqual({ status: "received" });
+      expect(handleWebhookSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("migrateWebhookUrls", () => {
+    it("should throw UnauthorizedException if user is not admin", async () => {
+      const nonAdminUser = TestEntities.user; // admin: false
+      await expect(controller.migrateWebhookUrls(nonAdminUser, "https://new-url.com")).rejects.toThrow(UnauthorizedException);
     });
 
-    it("should process handleWebhook for TRANSACTIONS, ITEM, HOLDINGS, and unknown types", async () => {
-      const inst = TestEntities.institution;
-      inst.user = TestEntities.user;
-      const asset = new PlaidInstitutionAsset(inst, "access-123", "item-123");
+    it("should throw BadRequestException if baseUrl is invalid", async () => {
+      const adminUser = TestEntities.adminUser;
+      await expect(controller.migrateWebhookUrls(adminUser, "invalid-url")).rejects.toThrow(BadRequestException);
+    });
 
-      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(asset);
+    it("should call updateAllItemWebhooks and return migration result when admin", async () => {
+      const adminUser = TestEntities.adminUser;
+      const res = await controller.migrateWebhookUrls(adminUser, "https://new-url.com///");
 
-      // TRANSACTIONS / SYNC_UPDATES_AVAILABLE
+      expect(plaidProvider.updateAllItemWebhooks).toHaveBeenCalledWith("https://new-url.com");
+      expect(res.message).toBe("Webhook migration sequence complete.");
+      expect(res.updatedCount).toBe(2);
+    });
+  });
+
+  describe("handleWebhook internal logic", () => {
+    it("should trigger syncForProvider on TRANSACTIONS:SYNC_UPDATES_AVAILABLE", async () => {
+      const user = TestEntities.user;
+      const mockAsset = {
+        item_id: "item-123",
+        institution: { ...TestEntities.institution, user },
+      };
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(mockAsset as any);
+
       await (controller as any).handleWebhook({
         webhook_type: "TRANSACTIONS",
         webhook_code: "SYNC_UPDATES_AVAILABLE",
         item_id: "item-123",
       });
 
-      expect(mockSyncService.syncForProvider).toHaveBeenCalled();
+      expect(PlaidInstitutionAsset.findOne).toHaveBeenCalled();
+      expect(providerSyncService.syncForProvider).toHaveBeenCalled();
+    });
 
-      // ITEM / ERROR
+    it("should flag institution broken on ITEM:ERROR", async () => {
+      const user = TestEntities.user;
+      const mockAsset = {
+        item_id: "item-123",
+        institution: { ...TestEntities.institution, user },
+      };
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(mockAsset as any);
+
       await (controller as any).handleWebhook({
         webhook_type: "ITEM",
         webhook_code: "ERROR",
         item_id: "item-123",
       });
 
-      expect(mockSyncService.flagInstitution).toHaveBeenCalledWith(asset.institution, true);
+      expect(providerSyncService.flagInstitution).toHaveBeenCalledWith(mockAsset.institution, true);
+    });
 
-      // HOLDINGS / DEFAULT_UPDATE
+    it("should trigger syncForProvider on HOLDINGS:DEFAULT_UPDATE and INVESTMENTS_TRANSACTIONS:HISTORICAL_UPDATE", async () => {
+      const user = TestEntities.user;
+      const mockAsset = {
+        item_id: "item-123",
+        institution: { ...TestEntities.institution, user },
+      };
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(mockAsset as any);
+
       await (controller as any).handleWebhook({
         webhook_type: "HOLDINGS",
         webhook_code: "DEFAULT_UPDATE",
         item_id: "item-123",
       });
 
-      // Unknown code/type
       await (controller as any).handleWebhook({
-        webhook_type: "UNKNOWN",
-        webhook_code: "UNKNOWN",
-      });
-    });
-
-    it("should throw BadRequestException in getPlaidInstitutionAsset if asset missing", async () => {
-      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(null);
-
-      await expect((controller as any).getPlaidInstitutionAsset({ item_id: "missing" })).rejects.toThrow(BadRequestException);
-      await expect((controller as any).getPlaidInstitutionAsset({})).rejects.toThrow(BadRequestException);
-    });
-
-    it("should test verifyPlaidWebhook branches and successful verification", async () => {
-      vi.spyOn(jwt, "decode").mockReturnValue(null);
-      const res1 = await (controller as any).verifyPlaidWebhook("body", "jwt");
-      expect(res1).toBe(false);
-
-      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "key-1" } } as any);
-      mockPlaidProvider.plaidClient.webhookVerificationKeyGet.mockRejectedValue(new Error("Key get error"));
-      const res2 = await (controller as any).verifyPlaidWebhook("body", "jwt");
-      expect(res2).toBe(false);
-
-      // Successful verification path
-      const body = '{"test": true}';
-      const bodyHash = crypto.createHash("sha256").update(body).digest("hex");
-
-      mockPlaidProvider.plaidClient.webhookVerificationKeyGet.mockResolvedValue({
-        data: { key: { kty: "EC", crv: "P-256", x: "x", y: "y" } },
+        webhook_type: "INVESTMENTS_TRANSACTIONS",
+        webhook_code: "HISTORICAL_UPDATE",
+        item_id: "item-123",
       });
 
-      vi.spyOn(crypto, "createPublicKey").mockReturnValue({} as any);
-      vi.spyOn(jwt, "verify").mockReturnValue({ request_body_sha256: bodyHash } as any);
+      expect(providerSyncService.syncForProvider).toHaveBeenCalledTimes(2);
+    });
 
-      const res3 = await (controller as any).verifyPlaidWebhook(body, "jwt");
-      expect(res3).toBe(true);
+    it("should log unknown webhook codes or types", async () => {
+      await (controller as any).handleWebhook({
+        webhook_type: "TRANSACTIONS",
+        webhook_code: "UNKNOWN_CODE",
+      });
+
+      await (controller as any).handleWebhook({
+        webhook_type: "ITEM",
+        webhook_code: "UNKNOWN_CODE",
+      });
+
+      await (controller as any).handleWebhook({
+        webhook_type: "HOLDINGS",
+        webhook_code: "UNKNOWN_CODE",
+      });
+
+      await (controller as any).handleWebhook({
+        webhook_type: "UNKNOWN_TYPE",
+        webhook_code: "UNKNOWN_CODE",
+      });
+
+      expect(providerSyncService.syncForProvider).not.toHaveBeenCalled();
+    });
+
+    it("should handle exceptions gracefully in handleWebhook", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockRejectedValue(new Error("DB error"));
+
+      await expect((controller as any).handleWebhook({
+        webhook_type: "TRANSACTIONS",
+        webhook_code: "SYNC_UPDATES_AVAILABLE",
+        item_id: "item-123",
+      })).resolves.not.toThrow();
     });
   });
 
-  describe("migrateWebhookUrls", () => {
-    it("should throw UnauthorizedException if user is not admin", async () => {
-      const user = TestEntities.user;
-      user.admin = false;
+  describe("getPlaidInstitutionAsset", () => {
+    it("should throw BadRequestException when item_id is missing or asset not found", async () => {
+      await expect((controller as any).getPlaidInstitutionAsset({})).rejects.toThrow(BadRequestException);
 
-      await expect(controller.migrateWebhookUrls(user, "https://new.url")).rejects.toThrow(UnauthorizedException);
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(null);
+      await expect((controller as any).getPlaidInstitutionAsset({ item_id: "missing" })).rejects.toThrow(BadRequestException);
     });
+  });
 
-    it("should throw BadRequestException if baseUrl is invalid", async () => {
-      const admin = TestEntities.adminUser;
-      await expect(controller.migrateWebhookUrls(admin, "invalid-url")).rejects.toThrow(BadRequestException);
-    });
+  describe("verifyPlaidWebhook", () => {
+    it("should verify webhook signature correctly or return false on error", async () => {
+      const verifyFn = (controller as any).verifyPlaidWebhook.bind(controller);
 
-    it("should trigger webhook migration when user is admin and URL is valid", async () => {
-      const admin = TestEntities.adminUser;
-      const res = await controller.migrateWebhookUrls(admin, "https://new.url/");
+      // Invalid JWT decode
+      vi.spyOn(jwt, "decode").mockReturnValue(null as any);
+      expect(await verifyFn("body", "jwt")).toBe(false);
 
-      expect(res.successCount).toBe(1);
-      expect(mockPlaidProvider.updateAllItemWebhooks).toHaveBeenCalledWith("https://new.url");
+      // Decoded without kid header
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: {} } as any);
+      expect(await verifyFn("body", "jwt")).toBe(false);
+
+      // Valid decoded JWT header with kid, failed verification key fetch
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "kid-1" } } as any);
+      plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockRejectedValue(new Error("Key fetch failed"));
+      expect(await verifyFn("body", "jwt")).toBe(false);
+
+      // Successful verification key fetch, but jwt.verify fails
+      const mockKey = { kty: "EC", crv: "P-256", x: "x", y: "y" };
+      plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockResolvedValue({ data: { key: mockKey } });
+      vi.spyOn(crypto, "createPublicKey").mockReturnValue({} as any);
+      vi.spyOn(jwt, "verify").mockImplementation(() => {
+        throw new Error("Invalid JWT signature");
+      });
+      expect(await verifyFn("body", "jwt")).toBe(false);
+
+      // Successful jwt.verify and hash comparison
+      const body = "test-body";
+      const computedHash = crypto.createHash("sha256").update(body).digest("hex");
+      vi.spyOn(jwt, "verify").mockReturnValue({ request_body_sha256: computedHash } as any);
+      expect(await verifyFn(body, "jwt")).toBe(true);
+
+      // Claimed body hash missing in payload
+      vi.spyOn(jwt, "verify").mockReturnValue({ request_body_sha256: undefined } as any);
+      expect(await verifyFn(body, "jwt")).toBe(false);
     });
   });
 });

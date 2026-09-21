@@ -1,7 +1,6 @@
 import { AppModule } from "@backend/app.module";
 import { SproutLogger } from "@backend/core/logger";
 import { configureApiDocument } from "@backend/core/openapi";
-import { PRETTIER_OPTS } from "@backend/scripts/util";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule } from "@nestjs/swagger";
@@ -25,7 +24,7 @@ export async function generateOpenApiSpec(givenPath = process.argv[2] || "./open
 
   // Write the OpenAPI spec to a JSON file
   const jsonString = JSON.stringify(document, null, 2);
-  const formatted = await prettier.format(jsonString, { ...PRETTIER_OPTS, parser: "json" });
+  const formatted = await prettier.format(jsonString, { parser: "json", printWidth: 140 });
   fs.writeFileSync(outputPath, formatted);
 
   // Close the app instance to exit the script

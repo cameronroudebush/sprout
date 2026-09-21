@@ -5,6 +5,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 setupTests();
 
 import { HoldingService } from "./holding.service.js";
+import { HttpException } from "@nestjs/common";
 
 describe("HoldingService", () => {
   let service: HoldingService;
@@ -15,6 +16,7 @@ describe("HoldingService", () => {
   const mockHolding = TestEntities.holding;
 
   beforeEach(() => {
+    vi.restoreAllMocks();
     netWorthService = {
       getHistoryForHoldings: vi.fn().mockResolvedValue([{ history: { connectedId: "h1" } }]),
       getHistoryForHolding: vi.fn().mockResolvedValue({ history: {}, timeline: () => [] }),
@@ -48,30 +50,69 @@ describe("HoldingService", () => {
       expect(results).toHaveLength(1);
     });
 
-    it("should fetch missing prices from yahoo finance", async () => {
+    it("should handle quoteSummary rejection gracefully for missing symbols", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockRejectedValue(new Error("Symbol not found"));
+
+      const results = await service.getLiveHoldingPrices(["UNKNOWN_SYM"]);
+      expect(results).toEqual([]);
+    });
+
+    it("should fetch missing prices from yahoo finance and handle mutual fund dividends", async () => {
       cacheManager.get.mockResolvedValue(null);
       vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
-        price: { symbol: "AAPL", regularMarketPrice: 150, quoteType: "EQUITY" },
+        price: { symbol: "VFIAX", regularMarketPrice: 400, quoteType: "MUTUALFUND" },
         summaryDetail: { dividendYield: 0.01 },
       });
 
-      const results = await service.getLiveHoldingPrices(["AAPL"]);
+      vi.spyOn((service as any).yf, "chart").mockResolvedValue({
+        events: {
+          dividends: [{ amount: 10 }],
+        },
+      } as any);
+
+      const results = await service.getLiveHoldingPrices(["VFIAX"]);
       expect(results).toHaveLength(1);
+      expect(cacheManager.set).toHaveBeenCalled();
+    });
+
+    it("should handle error in chart fetch inside mutual fund dividends gracefully", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
+        price: { symbol: "VFIAX", regularMarketPrice: 400, quoteType: "MUTUALFUND" },
+        summaryDetail: { dividendYield: 0.01 },
+      });
+
+      vi.spyOn((service as any).yf, "chart").mockRejectedValue(new Error("Chart error"));
+
+      const results = await service.getLiveHoldingPrices(["VFIAX"]);
+      expect(results).toHaveLength(1);
+    });
+
+    it("should throw HttpException when cacheManager set fails", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
+        price: { symbol: "AAPL", regularMarketPrice: 150 },
+      });
+      cacheManager.set.mockRejectedValue(new Error("Cache set error"));
+
+      await expect(service.getLiveHoldingPrices(["AAPL"])).rejects.toThrow(HttpException);
     });
   });
 
   describe("getMajorIndices", () => {
-    it("should map major index names properly", async () => {
+    it("should map major index names properly and fallback to symbol if unknown index", async () => {
       cacheManager.get.mockResolvedValue(null);
       vi.spyOn((service as any).yf, "quoteSummary").mockImplementation((symbol: string) =>
         Promise.resolve({
-          price: { symbol, regularMarketPrice: 4000, quoteType: "INDEX" },
+          price: { symbol: symbol === "^GSPC" ? "UNKNOWN_INDEX" : symbol, regularMarketPrice: 4000, quoteType: "INDEX" },
           summaryDetail: {},
         }),
       );
 
       const indices = await service.getMajorIndices();
       expect(indices.length).toBeGreaterThan(0);
+      expect(indices.some((idx) => idx.name === "UNKNOWN_INDEX")).toBe(true);
     });
   });
 
@@ -93,6 +134,23 @@ describe("HoldingService", () => {
 
       const res = await service.getMajorIndicesTimeline();
       expect(res.length).toBeGreaterThan(0);
+    });
+
+    it("should handle null quotes in chart response during timeline mapping", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "chart").mockResolvedValue({
+        quotes: [null, { date: "2026-06-01", close: 100 }],
+      } as any);
+
+      const res = await service.getMajorIndicesTimeline();
+      expect(res.length).toBeGreaterThan(0);
+    });
+
+    it("should handle error in chart fetch and throw SERVICE_UNAVAILABLE if overall timeline fails", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      cacheManager.set.mockRejectedValue(new Error("Cache set error"));
+
+      await expect(service.getMajorIndicesTimeline()).rejects.toThrow(HttpException);
     });
   });
 });

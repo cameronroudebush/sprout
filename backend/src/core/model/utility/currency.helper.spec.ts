@@ -4,9 +4,14 @@ setupTests();
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { ExchangeRateJob } from "@backend/core/jobs/exchange-rate.js";
+import { instanceToPlain } from "class-transformer";
 
 describe("CurrencyHelper", () => {
   const user = TestEntities.user;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
 
   describe("format", () => {
     it("should format number into currency string using fallback when user is null", () => {
@@ -41,6 +46,34 @@ describe("CurrencyHelper", () => {
       const items = [{ balance: 100, currency: "EUR" }];
       const converted = CurrencyHelper.convertList(items, "balance", "currency", user);
       expect(converted[0]!.balance).toBe(118);
+    });
+  });
+
+  describe("ExposeCurrencyFields decorator", () => {
+    it("should transform balance using user preferred currency and handle null balance", () => {
+      vi.spyOn(CurrencyHelper, "ExposeCurrencyFields").mockRestore();
+
+      class TestClass {
+        balance!: number | null;
+        currency!: string;
+
+        constructor(balance?: number | null, currency?: string) {
+          this.balance = balance === undefined ? 100 : balance;
+          this.currency = currency ?? "EUR";
+        }
+      }
+
+      CurrencyHelper.ExposeCurrencyFields<TestClass>("balance", "currency")(TestClass);
+
+      ExchangeRateJob.exchangeRates = { EUR: { USD: 1.18 } };
+      const instance = new TestClass(100, "EUR");
+
+      const plain = instanceToPlain(instance, { context: { user } } as any);
+      expect(plain.balance).toBe(118);
+
+      const nullInstance = new TestClass(null, "EUR");
+      const nullPlain = instanceToPlain(nullInstance, { context: { user } } as any);
+      expect(nullPlain.balance).toBeNull();
     });
   });
 });

@@ -20,7 +20,7 @@ describe("PlaidProviderService", () => {
   let user: User;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     user = TestEntities.user;
 
     Configuration.providers.plaid.clientId = "test-client-id";
@@ -49,9 +49,10 @@ describe("PlaidProviderService", () => {
       expect(avail).toBe(true);
     });
 
-    it("should throw InternalServerErrorException if plaidClient is null", () => {
+    it("should throw InternalServerErrorException if plaidClient is null", async () => {
       (service as unknown as { plaidClient: null }).plaidClient = null;
       expect(() => (service as unknown as { checkPlaidClient: () => void }).checkPlaidClient()).toThrow(InternalServerErrorException);
+      await expect(service.updateAllItemWebhooks("https://url.com")).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -289,6 +290,8 @@ describe("PlaidProviderService", () => {
 
       expect(priv.mapType(PlaidAccountType.Credit)).toBe(AccountType.credit);
       expect(priv.mapType(PlaidAccountType.Depository)).toBe(AccountType.depository);
+      expect(priv.mapType(PlaidAccountType.Brokerage)).toBe(AccountType.investment);
+      expect(priv.mapType(PlaidAccountType.Investment)).toBe(AccountType.investment);
       expect(priv.mapType(PlaidAccountType.Loan)).toBe(AccountType.loan);
 
       expect(priv.extractProviderAccountId({ account_id: "acc-id-1" } as PlaidAccount)).toBe("acc-id-1");

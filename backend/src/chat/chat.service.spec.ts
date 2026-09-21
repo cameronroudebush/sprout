@@ -38,7 +38,7 @@ describe("ChatService", () => {
   const user = TestEntities.user;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
 
     sseService = {
       sendToUser: vi.fn(),
@@ -105,18 +105,26 @@ describe("ChatService", () => {
       const overview = await modelWrapper.generateOverview(ChatOverviewType.daily);
       expect(overview).toBeDefined();
 
-      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(new ChatOverview(user, "Old text", ChatOverviewType.holdings));
-      vi.spyOn(ChatOverview.prototype, "update").mockImplementation(async function (this: ChatOverview) {
-        return this;
-      });
+      const existingOverview = new ChatOverview(user, "Old text", ChatOverviewType.holdings);
+      existingOverview.update = vi.fn().mockResolvedValue(existingOverview);
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(existingOverview);
 
       const holdingsOverview = await modelWrapper.generateOverview(ChatOverviewType.holdings);
       expect(holdingsOverview).toBeDefined();
+
+      // Test empty aiText returned from generateContent
+      mockModels.generateContent.mockResolvedValueOnce({ text: "" });
+      await expect(modelWrapper.generateOverview(ChatOverviewType.daily)).rejects.toThrow(InternalServerErrorException);
     });
 
-    it("should handle 503 retry overload and error branches in generateOverview", async () => {
+    it("should handle 503 retry overload, JSON parse errors, and error branches in generateOverview", async () => {
       vi.useFakeTimers();
       const modelWrapper = await service.getModel(user, "overview");
+
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
+      vi.spyOn(ChatOverview.prototype, "insert").mockImplementation(async function (this: ChatOverview) {
+        return this;
+      });
 
       // 503 overloaded retry then success
       mockModels.generateContent.mockRejectedValueOnce({ code: 503, message: "high demand" }).mockResolvedValueOnce({ text: "Recovered summary" });
@@ -138,6 +146,10 @@ describe("ChatService", () => {
       // 429 error
       mockModels.generateContent.mockRejectedValueOnce(new Error("429 Too Many Requests"));
       await expect(modelWrapper.generateOverview(ChatOverviewType.daily)).rejects.toThrow(ThrottlerException);
+
+      // JSON parse error handling inside catch block (message starts with { but is invalid JSON)
+      mockModels.generateContent.mockRejectedValueOnce(new Error("{ invalid json string"));
+      await expect(modelWrapper.generateOverview(ChatOverviewType.daily)).rejects.toThrow("{ invalid json string");
 
       // JSON error message
       mockModels.generateContent.mockRejectedValueOnce(new Error('{"error":{"message":"API Error Msg"}}'));

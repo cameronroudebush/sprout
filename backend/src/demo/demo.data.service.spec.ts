@@ -25,7 +25,7 @@ describe("DemoDataService", () => {
   let databaseService: Mocked<DatabaseService>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
 
     databaseService = {
       source: {
@@ -101,17 +101,17 @@ describe("DemoDataService", () => {
 
       // 2. Second run when user is new and created
       vi.spyOn(User, "findOne")
-        .mockResolvedValueOnce(null) // first check
-        .mockResolvedValueOnce(TestEntities.user); // check after User.createUser
+        .mockResolvedValueOnce(null) // first findOne in createUser returns null
+        .mockResolvedValueOnce(TestEntities.user); // second findOne returns demoUser
 
-      vi.spyOn(User, "createUser").mockResolvedValue({} as any);
-
-      const userConfig = TestEntities.userConfig;
-      userConfig.update = vi.fn().mockResolvedValue(userConfig);
-      vi.spyOn(UserConfig, "findOne").mockResolvedValue(userConfig);
+      vi.spyOn(User, "createUser").mockResolvedValue(TestEntities.user);
+      const mockUserConfig = { netWorthRange: undefined, update: vi.fn().mockResolvedValue(true) };
+      vi.spyOn(UserConfig, "findOne").mockResolvedValue(mockUserConfig as any);
 
       await service.populateDemoData(30);
+
       expect(User.createUser).toHaveBeenCalled();
+      expect(mockUserConfig.update).toHaveBeenCalled();
 
       Configuration.isDemoMode = originalIsDemo;
     });

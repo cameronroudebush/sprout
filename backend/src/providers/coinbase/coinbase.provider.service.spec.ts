@@ -9,7 +9,6 @@ import { TestEntities } from "@backend/test/entities.js";
 import { User } from "@backend/user/model/user.model.js";
 import { BadRequestException, NotImplementedException } from "@nestjs/common";
 import axios from "axios";
-import { sign } from "jsonwebtoken";
 
 vi.mock("jsonwebtoken", () => ({
   sign: vi.fn().mockReturnValue("mocked-jwt-token"),
@@ -24,7 +23,7 @@ describe("CoinbaseProviderService", () => {
   let user: User;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     cacheManager = {
       get: vi.fn(),
       set: vi.fn().mockResolvedValue(undefined),
@@ -79,13 +78,14 @@ describe("CoinbaseProviderService", () => {
       expect(results[0]?.institutionName).toBe("Coinbase");
     });
 
-    it("should performSync with existing account", async () => {
+    it("should performSync with existing account and fallback to USD for currency if balance.currency is undefined", async () => {
       const existingAccount = TestEntities.account;
       existingAccount.providerAccountId = "coinbase-primary-wallet";
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
 
       vi.spyOn(service as unknown as { fetchCoinbaseData: () => Promise<unknown[]> }, "fetchCoinbaseData").mockResolvedValue([
-        { id: "acc-1", name: "BTC Wallet", balance: { amount: "2.0", currency: "BTC" } },
+        { id: "acc-1", name: "BTC Wallet", balance: { amount: "2.0" }, currency: { code: "BTC" } },
+        { id: "acc-2", name: "USD Wallet", balance: { amount: "10.0" } },
       ]);
       vi.spyOn(service as unknown as { getUsdExchangeRates: () => Promise<Record<string, number>> }, "getUsdExchangeRates").mockResolvedValue({ BTC: 60000 });
 
@@ -93,7 +93,7 @@ describe("CoinbaseProviderService", () => {
         service as unknown as { performSync: (u: User, a: undefined, ao: boolean) => Promise<Array<{ holdings: unknown[] }>> }
       ).performSync(user, undefined, false);
       expect(syncRes.length).toBe(1);
-      expect(syncRes[0]?.holdings.length).toBe(1);
+      expect(syncRes[0]?.holdings.length).toBe(2);
     });
 
     it("should return empty array in performSync if user unavailable or no existing account", async () => {

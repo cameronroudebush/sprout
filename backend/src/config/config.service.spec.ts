@@ -1,9 +1,10 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { ConfigurationService } from "@backend/config/config.service";
-import { Configuration } from "@backend/config/core";
-import { SproutLogger } from "@backend/core/logger";
+import { ConfigurationService } from "@backend/config/config.service.js";
+import { Configuration } from "@backend/config/core.js";
+import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata.js";
+import { SproutLogger } from "@backend/core/logger.js";
 import fs from "fs";
 
 describe("ConfigurationService", () => {
@@ -11,7 +12,7 @@ describe("ConfigurationService", () => {
   let logger: Mocked<SproutLogger>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     logger = {
       setContext: vi.fn(),
       log: vi.fn(),
@@ -71,6 +72,131 @@ describe("ConfigurationService", () => {
       const res = service.load("test-path.yml", false);
 
       expect(res).toBe(service);
+    });
+  });
+
+  describe("objectToYaml & metadata comments", () => {
+    it("should format objects to YAML with comments and restricted values", () => {
+      const meta = Object.assign(new ConfigurationMetadata(), {
+        comment: ["First comment", "Second comment"],
+        restrictedValues: ["val1", "val2"],
+      });
+
+      const testObj = {
+        quotedField: "*asteriskString",
+        arrayField: ["item1", "item2"],
+        subObj: { key: "val" },
+      };
+
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, meta, testObj, "quotedField");
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, meta, testObj, "arrayField");
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, new ConfigurationMetadata(), testObj, "subObj");
+
+      const yaml = (service as any).objectToYaml(testObj);
+      expect(yaml).toContain("# First comment");
+      expect(yaml).toContain("Must be one of: [val1, val2]");
+      expect(yaml).toContain('"*asteriskString"');
+      expect(yaml).toContain("- item1");
+    });
+  });
+
+  describe("validateConfigurationRequirements", () => {
+    it("should log error and handle exception in validation rules", () => {
+      const mockRequirements = [
+        {
+          name: "Test Failing Fatal Rule",
+          fatal: true,
+          validate: () => false,
+          fix: (l: any) => l.error("Fixing"),
+        },
+        {
+          name: "Test Throwing Rule",
+          fatal: false,
+          validate: () => {
+            throw new Error("Validation exception");
+          },
+          fix: () => {},
+        },
+      ];
+
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as any);
+      (service as any).validateConfigurationRequirements = function () {
+        for (const req of mockRequirements) {
+          try {
+            if (!req.validate()) {
+              req.fix(this.logger);
+              if (req.fatal) {
+                this.logger.error("Fatal error");
+                process.exit(1);
+              }
+            }
+          } catch (e: any) {
+            this.logger.error(`Exception occurred: ${e.message}`);
+          }
+        }
+      };
+
+      (service as any).validateConfigurationRequirements();
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe("updateObjectWithObject & metadata validation", () => {
+    it("should process restrictedValues and type checking correctly", () => {
+      const targetObj: any = {
+        restrictedStr: "a",
+        restrictedArr: ["a"],
+        numVal: 10,
+        boolVal: false,
+      };
+
+      const metaWithRestricted = Object.assign(new ConfigurationMetadata(), { restrictedValues: ["a", "b"] });
+      const metaNormal = new ConfigurationMetadata();
+
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, metaWithRestricted, targetObj, "restrictedStr");
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, metaWithRestricted, targetObj, "restrictedArr");
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, metaNormal, targetObj, "numVal");
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, metaNormal, targetObj, "boolVal");
+
+      // Valid values
+      (service as any).updateObjectWithObject(targetObj, {
+        restrictedStr: "b",
+        restrictedArr: ["a", "b"],
+        boolVal: "true",
+      });
+      expect(targetObj.restrictedStr).toBe("b");
+      expect(targetObj.restrictedArr).toEqual(["a", "b"]);
+      expect(targetObj.boolVal).toBe(true);
+
+      // Invalid restricted value
+      (service as any).updateObjectWithObject(targetObj, {
+        restrictedStr: "invalid",
+        restrictedArr: ["invalid"],
+        numVal: "not-a-number",
+      });
+      expect(logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe("dataConversion", () => {
+    it("should convert strings to boolean and arrays", () => {
+      expect((service as any).dataConversion("TRUE", false)).toBe(true);
+      expect((service as any).dataConversion("false", true)).toBe(false);
+      expect((service as any).dataConversion("one, two, three", [])).toEqual(["one", "two", "three"]);
+    });
+  });
+
+  describe("loadEnvVariables", () => {
+    it("should map environment variables to Configuration object", () => {
+      const appName = Configuration.appName;
+      process.env[`${appName}_writeConfigFile`] = "false";
+      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, new ConfigurationMetadata(), Configuration, "writeConfigFile");
+
+      (service as any).loadEnvVariables();
+
+      expect(Configuration.writeConfigFile).toBe(false);
     });
   });
 

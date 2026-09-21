@@ -15,7 +15,7 @@ describe("SnapTradeProviderService", () => {
   let user: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     user = TestEntities.user;
 
     Configuration.providers.snapTrade.clientId = "test-client-id";
@@ -128,6 +128,10 @@ describe("SnapTradeProviderService", () => {
 
       await (service as unknown as { performUnlink: (u: unknown, a: SnapTradeInstitutionAsset) => Promise<void> }).performUnlink(user, asset);
       expect(service.snaptrade.connections.deleteConnection).toHaveBeenCalledTimes(2);
+
+      // Perform unlink when snapTradeUser is null
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(null);
+      await (service as unknown as { performUnlink: (u: unknown, a: SnapTradeInstitutionAsset) => Promise<void> }).performUnlink(user, asset);
     });
   });
 
@@ -151,8 +155,8 @@ describe("SnapTradeProviderService", () => {
       });
 
       (
-        (service as unknown as { snaptrade: { accountInformation: { getAllAccountPositions: () => Promise<unknown> } } }).snaptrade.accountInformation
-          .getAllAccountPositions as Mock
+        (service as unknown as { snaptrade: { accountInformation: { getAllAccountPositions: () => Promise<unknown> } } }).snaptrade.getAllAccountPositions ||
+        (service as unknown as { snaptrade: { accountInformation: { getAllAccountPositions: () => Promise<unknown> } } }).snaptrade.accountInformation.getAllAccountPositions
       ).mockResolvedValue({
         data: {
           results: [{ units: 10, price: 150, cost_basis: 140, currency: "USD", instrument: { description: "Apple", symbol: "AAPL" } }],
@@ -178,6 +182,14 @@ describe("SnapTradeProviderService", () => {
       expect(results.length).toBe(1);
       expect(results[0]?.holdings.length).toBe(1);
       expect(results[0]?.transactions.length).toBe(1);
+    });
+
+    it("should return empty array in performSync if snapTradeUser missing", async () => {
+      const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(null);
+
+      const res = await (service as unknown as { performSync: (u: unknown, a: SnapTradeInstitutionAsset, ao: boolean) => Promise<unknown[]> }).performSync(user, asset, false);
+      expect(res).toEqual([]);
     });
 
     it("should handle sync error for 401, 403, and non-401/403 error statuses", async () => {

@@ -19,7 +19,6 @@ export class Holding extends DatabaseBase {
   @ApiHideProperty()
   @Exclude({ toPlainOnly: true })
   account: Account;
-
   @DatabaseDecorators.column({ nullable: false })
   @ApiProperty({ description: "The Id of the account related to this holding." })
   accountId!: string;
@@ -52,10 +51,6 @@ export class Holding extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   symbol: string;
 
-  @DatabaseDecorators.column({ type: "jsonb", nullable: true })
-  @ApiProperty({ description: "Additional metadata for this holding.", required: false })
-  extra?: Record<string, any>;
-
   constructor(
     currency: string,
     costBasis: number,
@@ -65,7 +60,6 @@ export class Holding extends DatabaseBase {
     shares: number,
     symbol: string,
     account: Account,
-    extra?: Record<string, any>,
   ) {
     super();
     this.currency = currency;
@@ -76,7 +70,6 @@ export class Holding extends DatabaseBase {
     this.shares = shares;
     this.symbol = symbol;
     this.account = account;
-    this.extra = extra;
   }
 
   /** Given an account, returns all holdings in the database for that account. */

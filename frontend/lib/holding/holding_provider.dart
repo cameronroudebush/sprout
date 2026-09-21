@@ -176,12 +176,7 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
     ref.listen(batchedLivePricesProvider, (_, __) {}, fireImmediately: false);
     ref.read(batchedLivePricesProvider.notifier).requestSymbol(holding.symbol);
     final livePrices = ref.watch(batchedLivePricesProvider);
-    final fetchedData = livePrices[holding.symbol];
-
-    // Only use liveData if it's resolved and not marked as UNKNOWN
-    if (fetchedData != null && fetchedData.type != MarketIndexDtoTypeEnum.INVALID) {
-      liveData = fetchedData;
-    }
+    liveData = livePrices[holding.symbol];
   }
 
   final holdingHistory = ref.watch(accountHoldingHistoryProvider(holding.id)).value;
@@ -195,57 +190,35 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
   final previousMarketValue = previousClosePrice * holding.shares;
   final dayPercent = previousMarketValue > 0 ? (dayChange / previousMarketValue) * 100 : 0.0;
 
-  var frame = holdingHistory?.getValueByFrame(ChartRangeEnum.oneDay);
-  if (frame == null || frame.valueChange == 0) {
-    final double? closePrice = (holding.extra as Map<String, dynamic>?)?['closePrice']?.toDouble();
-    if (closePrice != null && closePrice > 0) {
-      final double currentPrice = holding.purchasePrice > 0 ? (holding.marketValue / holding.shares) : closePrice;
-      final double settledPerShareChange = currentPrice - closePrice;
-      final double settledValueChange = settledPerShareChange * holding.shares;
-      final double settledPercentChange = (settledPerShareChange / closePrice) * 100;
-
-      // Use EntityHistoryDataPoint instead of HistoricalDataPoint
-      frame = EntityHistoryDataPoint(
-        start: DateTime.now(),
-        valueChange: settledValueChange,
-        percentChange: settledPercentChange,
-      );
-    }
-  }
-
-  // Total time value change (Using costBasis vs current Valuation)
-  final num currentValuation = liveMarketValue;
-  final double initialCost = holding.costBasis > 0
-      ? holding.costBasis.toDouble()
-      : (holding.shares.toDouble() * holding.purchasePrice.toDouble());
-
-  final double totalGain = initialCost > 0 ? (currentValuation - initialCost) : 0.0;
+  final frame = holdingHistory?.getValueByFrame(ChartRangeEnum.oneDay);
+  final double currentValuation = holding.marketValue.toDouble();
+  final double initialCost = holding.shares.toDouble() * holding.purchasePrice.toDouble();
+  final double totalGain = currentValuation - initialCost;
   final double totalGainPercent = initialCost > 0 ? (totalGain / initialCost) * 100 : 0.0;
 
   return ExpandedHolding(
-    holding: holding,
-    account: account,
-    livePrice: livePrice,
-    liveMarketValue: liveMarketValue,
-    dayChange: dayChange,
-    dayPercent: dayPercent,
-    historicalFrame: frame,
-    isLive: !isCrypto && liveData != null && liveData.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
-    previousClose: liveData?.previousClose,
-    dayLow: liveData?.dayLow,
-    dayHigh: liveData?.dayHigh,
-    marketState: liveData?.marketState,
-    dividendYield: liveData?.dividendYield,
-    basePrice: livePrice,
-    baseSymbol: liveData?.symbol ?? holding.symbol,
-    baseName: liveData?.name ?? holding.symbol,
-    baseChange: liveData?.change ?? dayChange,
-    baseChangePercent: liveData?.changePercent ?? dayPercent,
-    baseLastUpdated: liveData?.lastUpdated ?? DateTime.now().toIso8601String(),
-    totalGain: totalGain,
-    totalGainPercent: totalGainPercent,
-    type: liveData?.type ?? MarketIndexDtoTypeEnum.INDEX,
-  );
+      holding: holding,
+      account: account,
+      livePrice: livePrice,
+      liveMarketValue: liveMarketValue,
+      dayChange: dayChange,
+      dayPercent: dayPercent,
+      historicalFrame: frame,
+      isLive: !isCrypto && liveData != null && liveData.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
+      previousClose: liveData?.previousClose,
+      dayLow: liveData?.dayLow,
+      dayHigh: liveData?.dayHigh,
+      marketState: liveData?.marketState,
+      dividendYield: liveData?.dividendYield,
+      basePrice: livePrice,
+      baseSymbol: liveData?.symbol ?? holding.symbol,
+      baseName: liveData?.name ?? holding.symbol,
+      baseChange: liveData?.change ?? dayChange,
+      baseChangePercent: liveData?.changePercent ?? dayPercent,
+      baseLastUpdated: liveData?.lastUpdated ?? DateTime.now().toIso8601String(),
+      totalGain: totalGain,
+      totalGainPercent: totalGainPercent,
+      type: liveData?.type ?? MarketIndexDtoTypeEnum.INDEX);
 }
 
 /// Aggregates and calculates estimated dividend values across multiple investment accounts.
