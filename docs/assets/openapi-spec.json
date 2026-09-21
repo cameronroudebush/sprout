@@ -3617,6 +3617,11 @@
           "hasError": {
             "type": "boolean",
             "description": "If this institution has connection errors and needs fixed"
+          },
+          "extra": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Any extra data that we want to store as JSON"
           }
         },
         "required": ["id", "iconType", "url", "name", "hasError"]

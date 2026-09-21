@@ -60,7 +60,7 @@ export class Transaction extends DatabaseBase {
   extra?: TransactionExtraData;
 
   /** Tracks if this transaction was manually edited by the user. Used to prevent automation from overwriting it for transactional rules. This will be rest if automation does update it. */
-  @DatabaseDecorators.jsonColumn({ nullable: true })
+  @DatabaseDecorators.column({ nullable: true })
   @Optional()
   manuallyEdited?: boolean = false;
 

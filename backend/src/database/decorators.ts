@@ -34,7 +34,7 @@ export class DatabaseDecorators {
   /** Decorates this column to expect json data */
   static jsonColumn(options?: ColumnOptions) {
     return function (target: any, key: string) {
-      return Column({ ...options, type: "json" })(target, key);
+      return Column({ ...options, type: "jsonb" })(target, key);
     };
   }
 

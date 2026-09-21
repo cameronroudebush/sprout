@@ -2,6 +2,7 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { InstitutionIconType } from "@backend/institution/model/institution.icon.type";
 import { User } from "@backend/user/model/user.model";
+import { Optional } from "@nestjs/common";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { ManyToOne } from "typeorm";
@@ -30,6 +31,11 @@ export class Institution extends DatabaseBase {
   @ApiHideProperty()
   @Exclude()
   user: User;
+
+  /** Any extra data that we want to store as JSON */
+  @DatabaseDecorators.jsonColumn({ nullable: true })
+  @Optional()
+  extra?: Record<string, any>;
 
   constructor(url: string, name: string, hasError: boolean, user: User, iconType: InstitutionIconType = InstitutionIconType.ICON) {
     super();

@@ -52,7 +52,7 @@ export class Holding extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   symbol: string;
 
-  @DatabaseDecorators.column({ type: "jsonb", nullable: true })
+  @DatabaseDecorators.jsonColumn({ nullable: true })
   @ApiProperty({ description: "Additional metadata for this holding.", required: false })
   extra?: Record<string, any>;
 
