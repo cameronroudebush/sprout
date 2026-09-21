@@ -21,7 +21,7 @@ class ConfigApi {
   /// Returns the app configuration for the frontend to be able to reference.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> configControllerGetWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> configControllerGetWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/config';
 
@@ -43,15 +43,14 @@ class ConfigApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get app configuration.
   ///
   /// Returns the app configuration for the frontend to be able to reference.
-  Future<APIConfig?> configControllerGet({ Future<void>? abortTrigger, }) async {
-    final response = await configControllerGetWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<APIConfig?> configControllerGet() async {
+    final response = await configControllerGetWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -70,7 +69,7 @@ class ConfigApi {
   /// Returns the unsecure app configuration. This won't contain any sensitive information but gives required metadata for the app to properly configure itself.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> configControllerGetUnsecureWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> configControllerGetUnsecureWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/config/unsecure';
 
@@ -92,15 +91,14 @@ class ConfigApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get unsecure app configuration.
   ///
   /// Returns the unsecure app configuration. This won't contain any sensitive information but gives required metadata for the app to properly configure itself.
-  Future<UnsecureAppConfiguration?> configControllerGetUnsecure({ Future<void>? abortTrigger, }) async {
-    final response = await configControllerGetUnsecureWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<UnsecureAppConfiguration?> configControllerGetUnsecure() async {
+    final response = await configControllerGetUnsecureWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

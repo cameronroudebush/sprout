@@ -178,3 +178,4 @@ class CategoryBudgetOverviewItem {
     'isOverBudget',
   };
 }
+

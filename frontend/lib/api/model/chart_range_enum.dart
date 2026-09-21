@@ -11,34 +11,39 @@
 part of openapi.api;
 
 /// The net worth range to display by default
-enum ChartRangeEnum {
-  oneDay._(r'oneDay'),
-  sevenDays._(r'sevenDays'),
-  oneMonth._(r'oneMonth'),
-  threeMonths._(r'threeMonths'),
-  sixMonths._(r'sixMonths'),
-  oneYear._(r'oneYear'),
-  allTime._(r'allTime'),
-  ;
-
-  /// Instantiate a new enum with the provided value.
-  const ChartRangeEnum._(this._value);
+class ChartRangeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const ChartRangeEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [ChartRangeEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const oneDay = ChartRangeEnum._(r'oneDay');
+  static const sevenDays = ChartRangeEnum._(r'sevenDays');
+  static const oneMonth = ChartRangeEnum._(r'oneMonth');
+  static const threeMonths = ChartRangeEnum._(r'threeMonths');
+  static const sixMonths = ChartRangeEnum._(r'sixMonths');
+  static const oneYear = ChartRangeEnum._(r'oneYear');
+  static const allTime = ChartRangeEnum._(r'allTime');
+
+  /// List of all possible values in this [enum][ChartRangeEnum].
+  static const values = <ChartRangeEnum>[
+    oneDay,
+    sevenDays,
+    oneMonth,
+    threeMonths,
+    sixMonths,
+    oneYear,
+    allTime,
+  ];
+
   static ChartRangeEnum? fromJson(dynamic value) => ChartRangeEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [ChartRangeEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<ChartRangeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChartRangeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -60,11 +65,9 @@ class ChartRangeEnumTypeTransformer {
 
   const ChartRangeEnumTypeTransformer._();
 
-  /// Encodes this enum as a value suitable for JSON.
-  String encode(ChartRangeEnum data) => data._value;
+  String encode(ChartRangeEnum data) => data.value;
 
-  /// Returns the instance of [ChartRangeEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a ChartRangeEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -73,9 +76,6 @@ class ChartRangeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   ChartRangeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is ChartRangeEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
         case r'oneDay': return ChartRangeEnum.oneDay;
@@ -94,7 +94,7 @@ class ChartRangeEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [ChartRangeEnumTypeTransformer] instance.
   static ChartRangeEnumTypeTransformer? _instance;
 }
 

@@ -128,3 +128,4 @@ class Budget {
     'amount',
   };
 }
+

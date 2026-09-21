@@ -11,34 +11,39 @@
 part of openapi.api;
 
 /// What currency we should display everything in.
-enum CurrencyOptionsEnum {
-  USD._(r'USD'),
-  EUR._(r'EUR'),
-  GBP._(r'GBP'),
-  CAD._(r'CAD'),
-  AUD._(r'AUD'),
-  JPY._(r'JPY'),
-  CNY._(r'CNY'),
-  ;
-
-  /// Instantiate a new enum with the provided value.
-  const CurrencyOptionsEnum._(this._value);
+class CurrencyOptionsEnum {
+  /// Instantiate a new enum with the provided [value].
+  const CurrencyOptionsEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [CurrencyOptionsEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const USD = CurrencyOptionsEnum._(r'USD');
+  static const EUR = CurrencyOptionsEnum._(r'EUR');
+  static const GBP = CurrencyOptionsEnum._(r'GBP');
+  static const CAD = CurrencyOptionsEnum._(r'CAD');
+  static const AUD = CurrencyOptionsEnum._(r'AUD');
+  static const JPY = CurrencyOptionsEnum._(r'JPY');
+  static const CNY = CurrencyOptionsEnum._(r'CNY');
+
+  /// List of all possible values in this [enum][CurrencyOptionsEnum].
+  static const values = <CurrencyOptionsEnum>[
+    USD,
+    EUR,
+    GBP,
+    CAD,
+    AUD,
+    JPY,
+    CNY,
+  ];
+
   static CurrencyOptionsEnum? fromJson(dynamic value) => CurrencyOptionsEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [CurrencyOptionsEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<CurrencyOptionsEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CurrencyOptionsEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -60,11 +65,9 @@ class CurrencyOptionsEnumTypeTransformer {
 
   const CurrencyOptionsEnumTypeTransformer._();
 
-  /// Encodes this enum as a value suitable for JSON.
-  String encode(CurrencyOptionsEnum data) => data._value;
+  String encode(CurrencyOptionsEnum data) => data.value;
 
-  /// Returns the instance of [CurrencyOptionsEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a CurrencyOptionsEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -73,9 +76,6 @@ class CurrencyOptionsEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   CurrencyOptionsEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is CurrencyOptionsEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
         case r'USD': return CurrencyOptionsEnum.USD;
@@ -94,7 +94,7 @@ class CurrencyOptionsEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [CurrencyOptionsEnumTypeTransformer] instance.
   static CurrencyOptionsEnumTypeTransformer? _instance;
 }
 

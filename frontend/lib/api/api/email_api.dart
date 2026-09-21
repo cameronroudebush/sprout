@@ -21,7 +21,7 @@ class EmailApi {
   /// Notifies the current user about their weekly update via email. Only works in dev mode.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> emailControllerNotifyWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> emailControllerNotifyWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/email/test/email/weekly';
 
@@ -43,15 +43,14 @@ class EmailApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Send Test Weekly Email
   ///
   /// Notifies the current user about their weekly update via email. Only works in dev mode.
-  Future<void> emailControllerNotify({ Future<void>? abortTrigger, }) async {
-    final response = await emailControllerNotifyWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<void> emailControllerNotify() async {
+    final response = await emailControllerNotifyWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -62,7 +61,7 @@ class EmailApi {
   /// Renders the weekly update email with some fake data. Only works in dev mode.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> emailControllerPreviewWeeklyUpdateWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> emailControllerPreviewWeeklyUpdateWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/email/preview/weekly-update';
 
@@ -84,15 +83,14 @@ class EmailApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Preview Weekly Update Email
   ///
   /// Renders the weekly update email with some fake data. Only works in dev mode.
-  Future<void> emailControllerPreviewWeeklyUpdate({ Future<void>? abortTrigger, }) async {
-    final response = await emailControllerPreviewWeeklyUpdateWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<void> emailControllerPreviewWeeklyUpdate() async {
+    final response = await emailControllerPreviewWeeklyUpdateWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
