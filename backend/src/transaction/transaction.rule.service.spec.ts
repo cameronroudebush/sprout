@@ -42,6 +42,60 @@ describe("TransactionRuleService", () => {
       expect(rule.update).toHaveBeenCalled();
     });
 
+    it("should skip disabled rules, filter by account, and support description matching and manual edit overrides", async () => {
+      const disabledRule = TransactionRule.fromPlain({
+        id: "r-disabled",
+        user,
+        enabled: false,
+        type: "description",
+        value: "starbucks",
+        category: TestEntities.category,
+      });
+
+      const accountRule = TransactionRule.fromPlain({
+        id: "r-acc",
+        user,
+        enabled: true,
+        type: "description",
+        value: "starbucks",
+        account: { id: "acc-specific" } as any,
+        category: TestEntities.category,
+      });
+
+      const descriptionRule = TransactionRule.fromPlain({
+        id: "r-desc",
+        user,
+        enabled: true,
+        type: "description",
+        value: "coffee",
+        category: TestEntities.category,
+      });
+
+      const txOtherAcc = TestEntities.transaction;
+      txOtherAcc.id = "tx-other-acc";
+      txOtherAcc.description = "Starbucks Coffee";
+      txOtherAcc.account = { id: "acc-other" } as any;
+
+      const txManual = TestEntities.transaction;
+      txManual.id = "tx-manual";
+      txManual.description = "Coffee Shop";
+      txManual.manuallyEdited = true;
+      txManual.category = undefined;
+      txManual.account = { id: "acc-specific" } as any;
+      txManual.update = vi.fn().mockResolvedValue(txManual);
+
+      disabledRule.update = vi.fn();
+      accountRule.update = vi.fn();
+      descriptionRule.update = vi.fn();
+
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([disabledRule, accountRule, descriptionRule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([txOtherAcc, txManual]);
+
+      await service.applyRulesToTransactions(user, { id: "acc-specific" } as any, true, true);
+
+      expect(txManual.category).toBe(TestEntities.category);
+    });
+
     it("should handle description strict matching, amount matching, and resetCategories option", async () => {
       const strictRule = TransactionRule.fromPlain({
         id: "r-2",

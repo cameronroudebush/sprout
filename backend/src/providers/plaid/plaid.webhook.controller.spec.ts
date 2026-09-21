@@ -229,6 +229,14 @@ describe("PlaidWebhookController", () => {
       // Claimed body hash missing in payload
       vi.spyOn(jwt, "verify").mockReturnValue({ request_body_sha256: undefined } as any);
       expect(await verifyFn(body, "jwt")).toBe(false);
+
+      // Unexpected error inside verification pipeline
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "kid-1" } } as any);
+      plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockResolvedValue({ data: { key: {} } });
+      vi.spyOn(crypto, "createPublicKey").mockImplementation(() => {
+        throw new Error("Unexpected key creation error");
+      });
+      expect(await verifyFn(body, "jwt")).toBe(false);
     });
   });
 });

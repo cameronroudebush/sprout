@@ -42,5 +42,16 @@ describe("EncryptionTransformer", () => {
     const transformFn = (Reflect.getMetadata("design:type", TestEntity.prototype, "secretField") || (() => {})) as any;
     const dec = EncryptionTransformer.decorateAPIProperty();
     expect(dec).toBeDefined();
+
+    const { instanceToPlain } = require("class-transformer");
+    const entityWithVal = new TestEntity();
+    entityWithVal.secretField = "secret";
+    const plainWithVal = instanceToPlain(entityWithVal);
+    expect(plainWithVal.secretField).toBe(EncryptionTransformer.HIDDEN_VALUE);
+
+    const entityWithEmpty = new TestEntity();
+    entityWithEmpty.secretField = "";
+    const plainWithEmpty = instanceToPlain(entityWithEmpty);
+    expect(plainWithEmpty.secretField).toBe("");
   });
 });

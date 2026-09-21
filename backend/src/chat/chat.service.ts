@@ -76,11 +76,14 @@ export class ChatService {
             // Check if the error is a temporary 503 / High Demand issue
             const isOverloaded = e?.code === 503 || e?.status === "UNAVAILABLE" || e?.message?.includes("high demand");
 
-            if (isOverloaded && attempt < maxRetries) {
-              const delayMs = attempt * 5000; // Exponential backoff
-              this.logger.warn(`Model overloaded (503). Retrying attempt ${attempt}/${maxRetries} in ${delayMs}ms...`);
-              await new Promise((resolve) => setTimeout(resolve, delayMs));
-              continue; // Loop again
+            if (isOverloaded) {
+              if (attempt < maxRetries) {
+                const delayMs = attempt * 5000; // Exponential backoff
+                this.logger.warn(`Model overloaded (503). Retrying attempt ${attempt}/${maxRetries} in ${delayMs}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delayMs));
+                continue; // Loop again
+              }
+              break;
             }
 
             // If we exhaust retries or it's a different error, throw normally

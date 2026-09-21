@@ -57,6 +57,11 @@ describe("ChatPromptService", () => {
 
   describe("buildChatPrompt, buildDailyOverviewPrompt, buildHoldingsOverviewPrompt", () => {
     it("should build chat prompt with charts allowed and timeframe filtering", async () => {
+      const hh1 = { time: new Date("2026-06-01T10:00:00Z"), value: 100 } as any;
+      const hh2 = { time: new Date("2026-06-01T15:00:00Z"), value: 105 } as any; // Duplicate day
+      const hh3 = { time: new Date("2026-06-15T10:00:00Z"), value: 110 } as any; // Same month
+      vi.spyOn(HoldingHistory, "find").mockResolvedValue([hh1, hh2, hh3]);
+
       const payload = await service.buildChatPrompt(user, ChatTimeframe.sixMonths, true);
       expect(payload.contents).toBeDefined();
       expect(payload.idMap).toBeDefined();

@@ -53,19 +53,26 @@ describe("SimpleFinProviderController", () => {
       const accountToLink = TestEntities.account;
       accountToLink.subType = AccountSubType.checking;
 
+      const accountNoOverride = Account.fromPlain({ id: "acc-no-sub", name: "No Sub" });
+      accountNoOverride.subType = undefined;
+
       const mockSyncResult = {
         account: Account.fromPlain({ id: accountToLink.id, name: "Test" }),
       };
       mockSyncResult.account.update = vi.fn().mockResolvedValue(mockSyncResult.account);
 
-      simpleFinService.exchangeAndCreateAccounts.mockResolvedValue([mockSyncResult] as any);
+      const mockSyncResult2 = {
+        account: accountNoOverride,
+      };
 
-      const res = await controller.linkAccounts([accountToLink], user);
+      simpleFinService.exchangeAndCreateAccounts.mockResolvedValue([mockSyncResult, mockSyncResult2] as any);
 
-      expect(simpleFinService.exchangeAndCreateAccounts).toHaveBeenCalledWith(user, [accountToLink.id]);
+      const res = await controller.linkAccounts([accountToLink, accountNoOverride as any], user);
+
+      expect(simpleFinService.exchangeAndCreateAccounts).toHaveBeenCalledWith(user, [accountToLink.id, accountNoOverride.id]);
       expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user, undefined, true);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
-      expect(res.length).toBe(1);
+      expect(res.length).toBe(2);
     });
   });
 });

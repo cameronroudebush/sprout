@@ -50,4 +50,30 @@ describe("RequestLoggerMiddleware", () => {
     const malformedUrl = (middleware as any).maskSensitiveInfo("http://invalid-url-:::bad");
     expect(malformedUrl).toBe("http://invalid-url-:::bad");
   });
+
+  it("should handle request when socket is missing or content-length is present", () => {
+    const middleware = new RequestLoggerMiddleware();
+
+    const reqNoSocket = {
+      ip: "10.0.0.1",
+      method: "POST",
+      originalUrl: "/api/test",
+      socket: undefined,
+    } as any;
+
+    let finishCallback: () => void = () => {};
+    const res = {
+      get: vi.fn().mockReturnValue("250"),
+      on: (event: string, cb: () => void) => {
+        if (event === "finish") finishCallback = cb;
+      },
+      statusCode: 201,
+    } as any;
+
+    const next = vi.fn();
+
+    middleware.use(reqNoSocket, res, next);
+    expect(next).toHaveBeenCalled();
+    finishCallback();
+  });
 });

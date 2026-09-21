@@ -93,6 +93,29 @@ describe("ChatController", () => {
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
     });
 
+    it("should skip cleanup if chat.isThinking is already false when error is caught", async () => {
+      vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+
+      const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+      userChat.insert = vi.fn().mockResolvedValue(userChat);
+
+      const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "...", isThinking: true, user });
+      modelChat.insert = vi.fn().mockResolvedValue(modelChat);
+      modelChat.update = vi.fn().mockResolvedValue(modelChat);
+
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+
+      const mockModel = {
+        generateChatContent: vi.fn().mockImplementation(async () => {
+          modelChat.isThinking = false;
+          throw new Error("Pre-cleaned error");
+        }),
+      };
+      chatService.getModel.mockResolvedValue(mockModel as any);
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow("Pre-cleaned error");
+    });
+
     it("should handle error in generateChatContent and update chat.isThinking when error caught", async () => {
       vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
 
@@ -148,7 +171,12 @@ describe("ChatController", () => {
     });
 
     it("should regenerate overview if missing or stale", async () => {
-      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
+      const staleOverview = ChatOverview.fromPlain({
+        user,
+        type: ChatOverviewType.accounts,
+        time: new Date(2000, 0, 1),
+      });
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(staleOverview);
 
       const newOverview = ChatOverview.fromPlain({ user, type: ChatOverviewType.accounts });
       const mockModel = {

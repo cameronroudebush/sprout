@@ -6,6 +6,7 @@ import { UserService } from "@backend/user/user.service";
 import { TestEntities } from "@backend/test/entities";
 import { APIConfig } from "@backend/config/model/api/configuration.dto";
 import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app.config.dto";
+import { Configuration } from "@backend/config/core";
 
 describe("ConfigController", () => {
   let controller: ConfigController;
@@ -34,6 +35,17 @@ describe("ConfigController", () => {
 
       expect(userService.allowUserCreation).toHaveBeenCalled();
       expect(config).toBeInstanceOf(UnsecureAppConfiguration);
+    });
+
+    it("should include demo credentials when isDemoMode is enabled", async () => {
+      const origDemo = Configuration.isDemoMode;
+      Configuration.isDemoMode = true;
+
+      const config = await controller.getUnsecure();
+
+      expect(config.demoMode).toBeDefined();
+
+      Configuration.isDemoMode = origDemo;
     });
   });
 });

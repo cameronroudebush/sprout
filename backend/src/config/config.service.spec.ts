@@ -4,6 +4,7 @@ setupTests();
 import { ConfigurationService } from "@backend/config/config.service.js";
 import { Configuration } from "@backend/config/core.js";
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata.js";
+import { CONFIGURATION_REQUIREMENTS } from "@backend/config/model/config.requirement.js";
 import { SproutLogger } from "@backend/core/logger.js";
 import fs from "fs";
 
@@ -101,7 +102,9 @@ describe("ConfigurationService", () => {
   });
 
   describe("validateConfigurationRequirements", () => {
-    it("should log error and handle exception in validation rules", () => {
+    it("should log error and exit process on fatal rule failure or exception", () => {
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as any);
+
       const mockRequirements = [
         {
           name: "Test Failing Fatal Rule",
@@ -110,8 +113,8 @@ describe("ConfigurationService", () => {
           fix: (l: any) => l.error("Fixing"),
         },
         {
-          name: "Test Throwing Rule",
-          fatal: false,
+          name: "Test Throwing Fatal Rule",
+          fatal: true,
           validate: () => {
             throw new Error("Validation exception");
           },
@@ -119,27 +122,15 @@ describe("ConfigurationService", () => {
         },
       ];
 
-      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as any);
-      (service as any).validateConfigurationRequirements = function () {
-        for (const req of mockRequirements) {
-          try {
-            if (!req.validate()) {
-              req.fix(this.logger);
-              if (req.fatal) {
-                this.logger.error("Fatal error");
-                process.exit(1);
-              }
-            }
-          } catch (e: any) {
-            this.logger.error(`Exception occurred: ${e.message}`);
-          }
-        }
-      };
+      CONFIGURATION_REQUIREMENTS.push(...mockRequirements);
 
       (service as any).validateConfigurationRequirements();
 
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining("Fatal Configuration Error"));
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining("Exception occurred processing validation rule"));
       expect(exitSpy).toHaveBeenCalledWith(1);
+
+      CONFIGURATION_REQUIREMENTS.splice(CONFIGURATION_REQUIREMENTS.length - mockRequirements.length, mockRequirements.length);
     });
   });
 

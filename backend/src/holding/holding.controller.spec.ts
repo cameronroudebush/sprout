@@ -86,6 +86,14 @@ describe("HoldingController", () => {
 
       expect(res).toEqual({ id: "h1" });
     });
+
+    it("should throw NotFoundException if history is null in getSpecificHoldingHistory", async () => {
+      const holding = TestEntities.holding;
+      vi.spyOn(Holding, "findOne").mockResolvedValue(holding);
+      netWorthService.getHistoryForHolding.mockResolvedValue(null as any);
+
+      await expect(controller.getSpecificHoldingHistory(holding.id, user)).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe("getLiveMajor", () => {

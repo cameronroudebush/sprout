@@ -16,6 +16,8 @@ describe("EmailConfig", () => {
     expect(() => config.validate()).toThrow("The username must be set to use email");
 
     config.user = "user@sprout.local";
+    expect(() => config.validate()).toThrow("The password must be set to use email");
+
     config.pass = "secret";
     expect(() => config.validate()).not.toThrow();
   });

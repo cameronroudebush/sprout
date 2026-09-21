@@ -68,5 +68,16 @@ describe("DatabaseBackupJob", () => {
       (runner as any).pruneGfsBackups();
       expect(unlinkSpy).toHaveBeenCalled();
     });
+
+    it("should handle ISO week calculation across year boundary and different week tiers", () => {
+      const gfsFn = (runner as any).getGfsBucketKey.bind(runner);
+      const date1 = new Date("2026-01-01T12:00:00Z");
+      const key1 = gfsFn(date1, "weekly");
+      expect(key1).toBeDefined();
+
+      const date2 = new Date("2026-12-31T12:00:00Z");
+      const key2 = gfsFn(date2, "weekly");
+      expect(key2).toBeDefined();
+    });
   });
 });

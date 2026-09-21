@@ -51,6 +51,19 @@ describe("CashFlowController", () => {
       expect(stats.totalExpense).toBe(3000);
       expect(stats.count).toBe(20);
     });
+
+    it("should handle null largestExpense gracefully", async () => {
+      service.calculateFlows.mockResolvedValue({
+        totalIncome: 0,
+        totalExpense: 0,
+        transactionCount: 0,
+        largestExpense: null,
+      } as any);
+
+      const stats = await controller.getStats(user, 2026, 5);
+
+      expect(stats.largestExpense).toBeUndefined();
+    });
   });
 
   describe("getTrend", () => {
@@ -61,6 +74,15 @@ describe("CashFlowController", () => {
 
       expect(trend.length).toBe(2);
       expect(service.calculateFlows).toHaveBeenCalledTimes(2);
+    });
+
+    it("should default to 6 months look-back when monthsQuery is omitted", async () => {
+      service.calculateFlows.mockResolvedValue({ totalIncome: 1000, totalExpense: -500 } as any);
+
+      const trend = await controller.getTrend(user);
+
+      expect(trend.length).toBe(6);
+      expect(service.calculateFlows).toHaveBeenCalledTimes(6);
     });
   });
 

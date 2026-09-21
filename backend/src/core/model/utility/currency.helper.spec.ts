@@ -74,6 +74,12 @@ describe("CurrencyHelper", () => {
       const nullInstance = new TestClass(null, "EUR");
       const nullPlain = instanceToPlain(nullInstance, { context: { user } } as any);
       expect(nullPlain.balance).toBeNull();
+
+      // Test fallback when obj.currency is missing or user is missing from context
+      const noCurrencyInstance = new TestClass(100, undefined);
+      delete (noCurrencyInstance as any).currency;
+      const fallbackPlain = instanceToPlain(noCurrencyInstance, { context: {} } as any);
+      expect(fallbackPlain.balance).toBe(100);
     });
   });
 });

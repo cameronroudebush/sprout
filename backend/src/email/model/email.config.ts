@@ -33,6 +33,6 @@ export class EmailConfig {
     if (!this.enabled) return;
     if (!this.host) throw new Error("The host must be set to use email");
     if (!this.user) throw new Error("The username must be set to use email");
-    if (!this.user) throw new Error("The password must be set to use email");
+    if (!this.pass) throw new Error("The password must be set to use email");
   }
 }

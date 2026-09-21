@@ -16,4 +16,13 @@ describe("DatabaseConfig", () => {
     const dbConfig = config.dbConfig;
     expect(dbConfig.type).toBe("better-sqlite3");
   });
+
+  it("should load migrations from directory when files exist", () => {
+    const glob = require("glob");
+    vi.spyOn(glob, "sync").mockReturnValue(["/mock/migration.js"]);
+
+    const config = new DatabaseConfig();
+    const dbConfig = config.dbConfig;
+    expect(dbConfig.migrations).toBeDefined();
+  });
 });

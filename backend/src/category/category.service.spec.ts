@@ -86,5 +86,27 @@ describe("CategoryService", () => {
 
       expect(stats.categoryCount).toEqual({});
     });
+
+    it("should query stats without date filters when year is omitted", async () => {
+      const mockQueryBuilder: any = {
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([{ category_name: "Shopping", total: 1 }]),
+      };
+
+      vi.spyOn(Transaction, "getRepository").mockReturnValue({
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+      } as any);
+
+      const stats = await service.getStats(user, undefined as any);
+
+      expect(stats.categoryCount).toEqual({ Shopping: 1 });
+    });
   });
 });

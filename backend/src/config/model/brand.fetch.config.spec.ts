@@ -27,5 +27,6 @@ describe("BrandFetchConfig", () => {
     // Invalid URL fallback test
     const cleanDomainFn = (config as any).cleanDomain.bind(config);
     expect(cleanDomainFn("http://::invalid::")).toBe("http://::invalid::");
+    expect(cleanDomainFn("mailto:")).toBe("mailto");
   });
 });

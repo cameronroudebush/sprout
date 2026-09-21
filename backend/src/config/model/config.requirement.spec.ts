@@ -72,5 +72,22 @@ describe("CONFIGURATION_REQUIREMENTS", () => {
     expect(jobReq.validate()).toBe(false);
     jobReq.fix(logger);
     expect(Configuration.database.backup.enabled).toBe(false);
+
+    Configuration.transaction.stuckTransactions.enabled = true;
+    expect(jobReq.validate()).toBe(false);
+
+    Configuration.transaction.stuckTransactions.enabled = false;
+    Configuration.user.deviceCheck.enabled = true;
+    expect(jobReq.validate()).toBe(false);
+
+    Configuration.user.deviceCheck.enabled = false;
+    Configuration.server.email.enabled = true;
+    expect(jobReq.validate()).toBe(false);
+
+    Configuration.server.email.enabled = false;
+    Configuration.providers.syncNotifications.enabled = true;
+    expect(jobReq.validate()).toBe(false);
+    jobReq.fix(logger);
+    expect(Configuration.providers.syncNotifications.enabled).toBe(false);
   });
 });

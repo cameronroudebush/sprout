@@ -38,6 +38,15 @@ describe("ExchangeRateJob", () => {
     expect(refreshSpy).toHaveBeenCalled();
   });
 
+  it("should return false from loadFromL2Cache when cachedData is null", async () => {
+    cacheManager.get.mockResolvedValue(null);
+    const refreshSpy = vi.spyOn(job, "refreshExchangeRates").mockResolvedValue();
+
+    await job["update"]();
+
+    expect(refreshSpy).toHaveBeenCalled();
+  });
+
   it("should refresh exchange rates using YahooFinance", async () => {
     const mockQuote = vi.spyOn(YahooFinance.prototype, "quote").mockImplementation(async (symbol: any) => {
       return { symbol, regularMarketPrice: 1.25 } as any;

@@ -293,6 +293,16 @@ describe("PlaidProviderService", () => {
       expect(priv.mapType(PlaidAccountType.Brokerage)).toBe(AccountType.investment);
       expect(priv.mapType(PlaidAccountType.Investment)).toBe(AccountType.investment);
       expect(priv.mapType(PlaidAccountType.Loan)).toBe(AccountType.loan);
+      expect(priv.mapType("other" as any)).toBe(AccountType.other);
+
+      const mockInst = { ...TestEntities.institution, update: vi.fn() };
+      const mockAssetWithInst = { institution: mockInst };
+      await (service as any).setInstitutionError(mockAssetWithInst, true);
+      expect(mockInst.hasError).toBe(true);
+      expect(mockInst.update).toHaveBeenCalled();
+
+      const initData = await (service as any).fetchInitialSyncData({}, {}, {}, user);
+      expect(initData).toEqual({ transactions: [], removedTransactionIds: [], holdings: [] });
 
       expect(priv.extractProviderAccountId({ account_id: "acc-id-1" } as PlaidAccount)).toBe("acc-id-1");
       expect(priv.extractAccountName({ name: "Account Name 1" } as PlaidAccount)).toBe("Account Name 1");

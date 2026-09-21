@@ -22,7 +22,7 @@ describe("JobExplorerService", () => {
     vi.spyOn(dummyJob, "start").mockResolvedValue(undefined as any);
 
     const discoveryService = {
-      getProviders: () => [{ instance: null }, { instance: dummyJob }, { instance: [dummyJob] }],
+      getProviders: () => [{ instance: null }, { instance: { notAJob: true } }, { instance: dummyJob }, { instance: [dummyJob] }],
     } as any;
 
     const service = new JobExplorerService(discoveryService);

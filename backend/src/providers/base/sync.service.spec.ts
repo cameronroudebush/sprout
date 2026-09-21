@@ -202,18 +202,21 @@ describe("ProviderSyncService", () => {
       const txWithIdOnly = Transaction.fromPlain({ id: "tx-local-1", amount: -20, description: "", account: TestEntities.account });
       txWithIdOnly.update = vi.fn().mockResolvedValue(txWithIdOnly);
 
+      const txWithProviderId = Transaction.fromPlain({ providerId: "p-tx-1", amount: -30, description: "", account: TestEntities.account });
+      txWithProviderId.update = vi.fn().mockResolvedValue(txWithProviderId);
+
       const account = { ...TestEntities.account, isInvestment: true };
 
       mockProvider.get.mockResolvedValue([
         {
           account: account as any,
           providerAccountId: "p-test-1",
-          transactions: [TestEntities.transaction, txWithIdOnly],
+          transactions: [txWithProviderId, txWithIdOnly],
           removedTransactionIds: ["tx-old-1"],
         },
       ]);
       vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
-      vi.spyOn(Transaction, "find").mockResolvedValueOnce([TestEntities.transaction]).mockResolvedValueOnce([txWithIdOnly]);
+      vi.spyOn(Transaction, "find").mockResolvedValueOnce([txWithProviderId]).mockResolvedValueOnce([txWithIdOnly]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 

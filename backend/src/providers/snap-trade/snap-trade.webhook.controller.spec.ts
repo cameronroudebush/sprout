@@ -130,6 +130,12 @@ describe("SnapTradeWebHookController", () => {
         }),
       ).resolves.not.toThrow();
     });
+
+    it("should throw BadRequestException in getSnapTradeInstitutionAsset if asset is missing", async () => {
+      vi.spyOn(SnapTradeInstitutionAsset, "findOne").mockResolvedValue(null);
+
+      await expect((controller as any).getSnapTradeInstitutionAsset("missing-auth-id")).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe("verifyWebhookSignature", () => {

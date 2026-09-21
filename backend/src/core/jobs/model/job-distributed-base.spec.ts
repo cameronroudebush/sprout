@@ -83,6 +83,18 @@ describe("DistributedQueueJob", () => {
   });
 
   describe("start and Initialization", () => {
+    it("should set logger name with L2 prefix when isCacheEnabled is true", () => {
+      Configuration.server.cache.type = "redis";
+      const l2Job = new TestDistributedQueueJob("l2-job", "* * * * *", true);
+      expect((l2Job as any).logger.context).toContain("L2:");
+    });
+
+    it("should return super.start() directly when job is disabled", async () => {
+      const disabledJob = new TestDistributedQueueJob("disabled-job", "* * * * *", false);
+      await disabledJob.start();
+      expect(superStartSpy).toHaveBeenCalled();
+    });
+
     it("should initialize with local memory parameters when cache type is memory", async () => {
       await testJob.start();
 

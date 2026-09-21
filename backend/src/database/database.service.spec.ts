@@ -61,6 +61,14 @@ describe("DatabaseService", () => {
     expect(service.executeMigrations).toHaveBeenCalled();
   });
 
+  it("should execute migrations smoothly and manage PRAGMA settings", async () => {
+    vi.spyOn(service, "setSQLitePRAGMA").mockResolvedValue(undefined as any);
+    const result = await service.executeMigrations();
+    expect(result).toEqual([]);
+    expect(service.setSQLitePRAGMA).toHaveBeenCalledWith(false);
+    expect(service.setSQLitePRAGMA).toHaveBeenCalledWith(true);
+  });
+
   it("should check databaseExists for non-SQLite databases", async () => {
     (Configuration.database as any).isSqlite = false;
     vi.spyOn(service.source, "query").mockResolvedValue([{ name: "sprout" }]);
