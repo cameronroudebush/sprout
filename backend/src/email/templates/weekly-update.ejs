@@ -93,11 +93,11 @@
                 </thead>
                 <tbody>
                 <% locals.transactions.forEach(function(tx) { %>
-                <tr>
+                <tr class="<%= tx.pending ? 'pending' : '' %>" style="<%= tx.pending ? 'background-color: rgba(160, 202, 253, 0.15);' : '' %>">
                     <!-- Merchant Icon -->
                     <td style="width: 36px; text-align: center; padding-left: 0.5rem;">
                       <% if (tx.iconUrl) { %>
-                        <img src="<%= tx.iconUrl %>" alt="" width="28" height="28" style="border-radius: 50%; display: block; object-fit: cover; background-color: #1d2127; margin: 0 auto;" />
+                        <img src="<%= tx.iconUrl %>" alt="" width="28" height="28" style="border-radius: 20%; display: block; object-fit: cover; background-color: #1d2127; margin: 0 auto;" />
                       <% } else { %>
                         <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #1d2127; color: #a0cafd; text-align: center; line-height: 28px; font-weight: bold; font-size: 12px; margin: 0 auto;">
                           <%= tx.description ? tx.description.charAt(0).toUpperCase() : '$' %>
