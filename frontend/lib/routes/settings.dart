@@ -12,6 +12,7 @@ import 'package:sprout/config/widgets/tiles/action_tile.dart';
 import 'package:sprout/config/widgets/tiles/switch_tile.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
+import 'package:sprout/provider/widgets/provider_icon.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
@@ -66,8 +67,8 @@ class SettingsPage extends ConsumerWidget {
     final packageInfo = ref.watch(packageInfoProvider).value;
     final providers = ref.watch(providerConfigProvider).value;
     final backendUrl = ref.watch(secureConfigApiProvider).value?.apiClient.basePath;
-    final simpleFinEnabled = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin) != null;
-    final coinbaseEnabled = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.coinbase) != null;
+    final simpleFinConfig = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin);
+    final coinbaseConfig = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.coinbase);
 
     if (userConfig == null || config == null) {
       return const Center(child: CircularProgressIndicator());
@@ -209,11 +210,14 @@ class SettingsPage extends ConsumerWidget {
           ),
       ],
       "Integrations": [
-        if (simpleFinEnabled)
+        if (simpleFinConfig != null)
           ActionSettingTile(
             title: "SimpleFIN Token",
             subtitle: userConfig.simpleFinToken?.isNotEmpty == true ? "Token Set" : "Configure Token",
-            icon: Icons.api,
+            icon: FinanceProviderIcon(
+              simpleFinConfig,
+              size: 32,
+            ),
             onTap: () => showSproutEditDialog(
               context: context,
               title: "Update SimpleFIN Token",
@@ -225,14 +229,14 @@ class SettingsPage extends ConsumerWidget {
               onSave: (values) => _update(ref, (c) => c.copyWith(simpleFinToken: values.first)),
             ),
           ),
-        if (coinbaseEnabled)
+        if (coinbaseConfig != null)
           ActionSettingTile(
             title: "Coinbase API Key",
             subtitle:
                 (userConfig.coinbaseApiKey?.isNotEmpty == true && userConfig.coinbaseApiKeyName?.isNotEmpty == true)
                     ? "Key Configured"
                     : "Configure Key",
-            icon: Icons.api,
+            icon: FinanceProviderIcon(coinbaseConfig, size: 32),
             onTap: () => showSproutEditDialog(
               context: context,
               title: "Update Coinbase API Credentials",

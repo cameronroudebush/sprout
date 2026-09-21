@@ -13,7 +13,8 @@ class ActionSettingTile extends ConsumerWidget {
   final String? subtitle;
 
   /// The icon displayed at the start of the tile.
-  final IconData icon;
+  /// Can be provided as either a [Widget] or an [IconData].
+  final dynamic icon;
 
   /// Custom widget displayed at the end of the tile (defaults to chevron icon).
   final Widget? trailing;
@@ -28,7 +29,14 @@ class ActionSettingTile extends ConsumerWidget {
     required this.icon,
     this.trailing,
     this.onTap,
-  });
+  }) : assert(icon is IconData || icon is Widget, 'icon must be either IconData or Widget');
+
+  Widget _buildLeading() {
+    if (icon is Widget) {
+      return icon as Widget;
+    }
+    return Icon(icon as IconData);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +44,7 @@ class ActionSettingTile extends ConsumerWidget {
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-      leading: Icon(icon),
+      leading: _buildLeading(),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       trailing: trailing ?? (isDemoMode ? null : const Icon(Icons.chevron_right, size: 16)),
