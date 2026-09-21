@@ -1,10 +1,14 @@
+import { SproutLogger } from "@backend/core/logger";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { Logger } from "@nestjs/common";
 
-jest.mock("@backend/config/core", () => ({
+vi.mock("@backend/config/core", () => ({
   Configuration: {
+    appName: "sprout",
+    writeConfigFile: true,
+    isDevBuild: false,
     encryptionKey: "66c60231a85abcf9fa2c6c07fd0b075c50c4a313585afb447c95838ecc6170d8",
     isDemoMode: false,
     version: "1.0.0",
@@ -31,20 +35,46 @@ jest.mock("@backend/config/core", () => ({
           clientId: "app-client-id",
         },
       },
+      rateLimit: {
+        ttl: 60,
+        limit: 100,
+      },
       cache: {
         type: "local",
       },
       email: {
         enabled: true,
         sendTime: "0 12 * * 0",
-        validate: jest.fn(),
+        validate: vi.fn(),
+      },
+      notification: {
+        maxNotificationsPerUser: 50,
+        firebase: {
+          enabled: false,
+          apiKey: "test-api-key",
+          appId: "test-app-id",
+          projectNumber: 12345,
+          projectId: "test-project-id",
+          clientEmail: "test@project.iam.gserviceaccount.com",
+          privateKey: "test-private-key",
+          validate: vi.fn(),
+        },
       },
       prompt: {
+        type: "gemini",
         enabled: true,
+        gemini: {
+          key: "test-gemini-key",
+          chatModel: "gemini-2.5-flash",
+          overviewModel: "gemini-2.5-flash",
+        },
       },
       lightModeTiles: [],
       darkModeTiles: [],
-      brandFetch: { clientId: "bf-id" },
+      brandFetch: { clientId: "bf-id", getWebsiteIconUrl: vi.fn().mockReturnValue("https://icon.local") },
+      exchangeRate: {
+        time: "0 0 * * *",
+      },
     },
     holding: {
       cleanupRemovedHoldings: true,
@@ -80,6 +110,9 @@ jest.mock("@backend/config/core", () => ({
       zillow: {
         enabled: true,
       },
+      coinbase: {
+        enabled: true,
+      },
     },
   },
 }));
@@ -94,46 +127,56 @@ export function setupTests() {
 
 /** Mocks the logger to not actually output and litter the log for testing */
 function mockLogger() {
-  jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});
-  jest.spyOn(Logger.prototype, "error").mockImplementation(() => {});
-  jest.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
-  jest.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
-  jest.spyOn(Logger.prototype, "verbose").mockImplementation(() => {});
+  // Disable NestJS builtin logger
+  Logger.overrideLogger(false);
+
+  // Silence process output streams (catches custom loggers writing directly to stdout/stderr)
+  vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+  vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+  // Silence standard console
+  vi.spyOn(console, "log").mockImplementation(() => {});
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  vi.spyOn(console, "debug").mockImplementation(() => {});
+
+  // Spy prototypes for Nest Logger & SproutLogger
+  vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
+  vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+  vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
+  vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
+  vi.spyOn(Logger.prototype, "verbose").mockImplementation(() => {});
+
+  vi.spyOn(SproutLogger.prototype, "log").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "error").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "warn").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "debug").mockImplementation(() => {});
+  vi.spyOn(SproutLogger.prototype, "verbose").mockImplementation(() => {});
 }
 
 /** Mocks the database so DatabaseBase will be set */
 function mockDatabase() {
   DatabaseBase.database = {
     source: {
-      getRepository: jest.fn().mockReturnValue({
-        save: jest.fn((arg) => {
+      getRepository: vi.fn().mockReturnValue({
+        save: vi.fn((arg) => {
           Object.assign(arg, { id: "test-id" });
           return arg;
         }),
-        findOne: jest.fn().mockReturnThis(),
+        findOne: vi.fn().mockReturnThis(),
       }),
     },
   } as any;
 }
 
 /** Mocks DateFns so functions are setup */
-function setupMockDateFns() {
-  jest.mock("date-fns", () => {
-    const original = jest.requireActual("date-fns");
-    return {
-      ...original,
-      subDays: jest.fn((date, amount) => original.subDays(date, amount)),
-      startOfDay: jest.fn((date) => original.startOfDay(date)),
-      addMinutes: jest.fn((date, amount) => original.addMinutes(date, amount)),
-    };
-  });
-}
+function setupMockDateFns() {}
 
 /** Mocks various decorators to make sure they are covered */
 function setupMockDecorators() {
-  jest.spyOn(DatabaseDecorators, "entity").mockImplementation(() => (target: any) => target);
-  jest.spyOn(DatabaseDecorators, "column").mockImplementation(() => (_target: any, _propertyKey: string) => {});
-  jest.spyOn(DatabaseDecorators, "numericColumn").mockImplementation(() => (_target: any, _propertyKey: string) => {});
-  jest.spyOn(DatabaseDecorators, "jsonColumn").mockImplementation(() => (_target: any, _propertyKey: string) => {});
-  jest.spyOn(CurrencyHelper, "ExposeCurrencyFields").mockImplementation(() => (target: any) => target);
+  vi.spyOn(DatabaseDecorators, "entity").mockImplementation(() => (target: any) => target);
+  vi.spyOn(DatabaseDecorators, "column").mockImplementation(() => (_target: any, _propertyKey: string) => {});
+  vi.spyOn(DatabaseDecorators, "numericColumn").mockImplementation(() => (_target: any, _propertyKey: string) => {});
+  vi.spyOn(DatabaseDecorators, "jsonColumn").mockImplementation(() => (_target: any, _propertyKey: string) => {});
+  vi.spyOn(CurrencyHelper, "ExposeCurrencyFields").mockImplementation(() => (target: any) => target);
 }

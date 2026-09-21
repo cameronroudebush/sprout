@@ -11,14 +11,14 @@ import { NotFoundException } from "@nestjs/common";
 
 describe("InstitutionController", () => {
   let controller: InstitutionController;
-  let sseService: jest.Mocked<SSEService>;
+  let sseService: Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     sseService = {
-      sendToUser: jest.fn(),
+      sendToUser: vi.fn(),
     } as any;
 
     controller = new InstitutionController(sseService);
@@ -26,15 +26,15 @@ describe("InstitutionController", () => {
 
   describe("update", () => {
     it("should throw NotFoundException if institution does not exist for user", async () => {
-      jest.spyOn(Institution, "findOne").mockResolvedValue(null);
+      vi.spyOn(Institution, "findOne").mockResolvedValue(null);
 
       await expect(controller.update("inst-invalid", user, { iconType: InstitutionIconType.ICON })).rejects.toThrow(NotFoundException);
     });
 
     it("should update institution iconType and trigger force update", async () => {
       const inst = TestEntities.institution;
-      inst.update = jest.fn().mockResolvedValue(inst);
-      jest.spyOn(Institution, "findOne").mockResolvedValue(inst);
+      inst.update = vi.fn().mockResolvedValue(inst);
+      vi.spyOn(Institution, "findOne").mockResolvedValue(inst);
 
       const res = await controller.update(inst.id, user, { iconType: InstitutionIconType.ICON });
 

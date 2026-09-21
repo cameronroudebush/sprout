@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import { Configuration } from "@backend/config/core";
 import { TimeZone } from "@backend/config/model/tz";
 import { setupOpenApiHelp } from "@backend/core/openapi";
@@ -11,7 +13,7 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 import { ConfigurationService } from "./config/config.service";
-import { SproutLogger } from "./core/logger";
+import { SproutLogger } from "./core/logger.js";
 
 /**
  * This function spins up main server for the Sprout app. It handles creating the proper nest handlers and running their execution.

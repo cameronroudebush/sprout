@@ -12,7 +12,7 @@ import { TransactionRuleService } from "@backend/transaction/transaction.rule.se
 import { User } from "@backend/user/model/user.model";
 import { Injectable, Logger } from "@nestjs/common";
 import { subDays } from "date-fns";
-import { merge } from "lodash";
+import { merge } from "lodash-es";
 import { In } from "typeorm";
 
 /** Generic sync service to sync provider account info for users. Dynamically used across background jobs and manual calls. */
@@ -91,7 +91,12 @@ export class ProviderSyncService {
 
     for (const data of accounts) {
       try {
-        let accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
+        let accountInDB = data.providerAccountId
+          ? await Account.findOne({
+              where: { providerAccountId: data.providerAccountId, user: { id: user.id } },
+              relations: { institution: true },
+            })
+          : null;
         // Determine if we should insert the missing account
         if (!accountInDB) {
           // Only auto-link newly discovered accounts if auto-creation isn't explicitly disabled

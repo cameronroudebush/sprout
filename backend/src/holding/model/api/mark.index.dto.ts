@@ -20,6 +20,8 @@ export enum MarketQuoteType {
   INDEX = "INDEX",
   CURRENCY = "CURRENCY",
   CRYPTOCURRENCY = "CRYPTOCURRENCY",
+  /** This is an invalid market quote that will contain no data because we couldn't find this symbol */
+  INVALID = "INVALID",
 }
 
 @CurrencyHelper.ExposeCurrencyFields<MarketIndexDto>("price", "currency")
@@ -35,6 +37,7 @@ export class MarketIndexDto {
   type: MarketQuoteType;
 
   @IsNumber()
+  @IsOptional()
   price: number;
 
   @IsNumber()
@@ -64,9 +67,11 @@ export class MarketIndexDto {
   currency?: string;
 
   @IsNumber()
+  @IsOptional()
   change: number;
 
   @IsNumber()
+  @IsOptional()
   changePercent: number;
 
   @IsISO8601()

@@ -12,7 +12,7 @@ import { User } from "@backend/user/model/user.model";
 import { HttpService } from "@nestjs/axios";
 import { Inject, InternalServerErrorException, Logger, NotImplementedException } from "@nestjs/common";
 import { FindOptionsWhere } from "typeorm";
-import { ProviderRateLimit } from "./rate-limit";
+import { ProviderRateLimit } from "./rate-limit.js";
 
 /** Standardized response payload for all provider sync operations. */
 export interface ProviderSyncResult<TSyncMetadata = unknown> {
@@ -104,7 +104,7 @@ export abstract class ProviderBase<
     }
 
     // Only reconcile missing accounts on scheduled background syncs where a full payload is guaranteed
-    if (triggerType === SyncTriggerType.SCHEDULED) await this.reconcileMissingAccounts(user, results, institutionId);
+    await this.reconcileMissingAccounts(user, results, triggerType, institutionId);
 
     return results;
   }
@@ -113,7 +113,7 @@ export abstract class ProviderBase<
    * Compares the database accounts for this provider against the accounts
    * actively returned in sync results. Archives missing accounts and un-archives restored ones.
    */
-  private async reconcileMissingAccounts(user: User, syncResults: ProviderSyncResult[], institutionId?: string): Promise<void> {
+  private async reconcileMissingAccounts(user: User, syncResults: ProviderSyncResult[], triggerType: SyncTriggerType, institutionId?: string): Promise<void> {
     // Safely collect providerAccountIds from both explicit results and attached Account models
     const activeProviderAccountIds = new Set(
       syncResults.map((r) => r.providerAccountId || r.account?.providerAccountId).filter((id): id is string => Boolean(id)),
@@ -126,11 +126,14 @@ export abstract class ProviderBase<
     const existingDbAccounts = await Account.find({ where: whereCondition });
     for (const dbAccount of existingDbAccounts) {
       const isPresentInSync = activeProviderAccountIds.has(dbAccount.providerAccountId);
-      if (!isPresentInSync && !dbAccount.isArchived) {
+      // Only archive if missing AND it is a scheduled background sync
+      if (!isPresentInSync && !dbAccount.isArchived && triggerType === SyncTriggerType.SCHEDULED) {
         this.logger.warn(`Account '${dbAccount.name}' (${dbAccount.providerAccountId}) missing from provider ${this.config.name}. Marking as archived.`);
         dbAccount.isArchived = true;
         await dbAccount.update();
-      } else if (isPresentInSync && dbAccount.isArchived) {
+      }
+      // Always restore if present, regardless of the sync trigger type
+      else if (isPresentInSync && dbAccount.isArchived) {
         this.logger.log(`Account '${dbAccount.name}' (${dbAccount.providerAccountId}) reappeared from provider ${this.config.name}. Restoring account.`);
         dbAccount.isArchived = false;
         await dbAccount.update();
@@ -247,6 +250,7 @@ export abstract class ProviderBase<
       finalAccount.providerAccountId = providerAccountId;
       finalAccount.balance = incomingAccount.balance;
       finalAccount.availableBalance = incomingAccount.availableBalance;
+      finalAccount.isArchived = false; // Immediately restore on re-link
       await finalAccount.update();
       await AccountHistory.insertForAccount(finalAccount);
     }

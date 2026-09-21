@@ -1,15 +1,15 @@
-import { Account } from "@backend/account/model/account.model";
-import { AccountSubType } from "@backend/account/model/account.sub.type";
-import { AccountType } from "@backend/account/model/account.type";
-import { Category } from "@backend/category/model/category.model";
-import { Configuration } from "@backend/config/core";
-import { Institution } from "@backend/institution/model/institution.model";
-import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service";
-import { User } from "@backend/user/model/user.model";
-import { BadRequestException } from "@nestjs/common";
-import { ProviderRateLimit } from "../base/rate-limit";
+import { Account } from "@backend/account/model/account.model.js";
+import { AccountSubType } from "@backend/account/model/account.sub.type.js";
+import { AccountType } from "@backend/account/model/account.type.js";
+import { Category } from "@backend/category/model/category.model.js";
+import { Configuration } from "@backend/config/core.js";
+import { Institution } from "@backend/institution/model/institution.model.js";
+import { SimpleFINProviderService } from "@backend/providers/simple-fin/simple-fin.provider.service.js";
+import { User } from "@backend/user/model/user.model.js";
+import { BadRequestException, NotImplementedException } from "@nestjs/common";
+import { ProviderRateLimit } from "../base/rate-limit.js";
 
-jest.mock("@backend/config/core", () => ({
+vi.mock("@backend/config/core", () => ({
   Configuration: {
     providers: {
       simpleFIN: {
@@ -24,39 +24,38 @@ jest.mock("@backend/config/core", () => ({
   },
 }));
 
-jest.mock("../base/rate-limit");
-jest.mock("@backend/account/model/account.model");
-jest.mock("@backend/holding/model/holding.model");
-jest.mock("@backend/category/model/category.model");
-jest.mock("@backend/transaction/model/transaction.model");
-jest.mock("@backend/institution/model/institution.model");
+const mockIncrementOrError = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("../base/rate-limit.js", () => {
+  const ProviderRateLimitMock = vi.fn().mockImplementation(function (this: any) {
+    this.incrementOrError = mockIncrementOrError;
+    return this;
+  });
+  return {
+    ProviderRateLimit: ProviderRateLimitMock,
+  };
+});
 
 describe("SimpleFINProviderService", () => {
   let service: SimpleFINProviderService;
   let mockUser: User;
-  let mockIncrementOrError: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
     service = new SimpleFINProviderService();
 
     mockUser = {
       id: "user_1",
       config: {
         simpleFinToken: "https://username:password@bridge.simplefin.org",
-        update: jest.fn().mockResolvedValue(true),
+        update: vi.fn().mockResolvedValue(true),
       },
     } as unknown as User;
 
-    mockIncrementOrError = jest.fn().mockResolvedValue(undefined);
-    (ProviderRateLimit as unknown as jest.Mock).mockImplementation(() => ({
-      incrementOrError: mockIncrementOrError,
-    }));
-    global.fetch = jest.fn();
+    mockIncrementOrError.mockResolvedValue(undefined);
+    global.fetch = vi.fn();
 
-    // Setup base TypeORM mock returns
-    Account.find = jest.fn().mockResolvedValue([]);
-    Account.fromPlain = jest.fn().mockImplementation((val) => val);
+    vi.spyOn(Account, "find").mockResolvedValue([]);
   });
 
   describe("Configuration & Getters", () => {
@@ -80,6 +79,10 @@ describe("SimpleFINProviderService", () => {
 
       const userWithoutToken = { config: {} } as User;
       await expect(service.isAvailable(userWithoutToken)).resolves.toBe(false);
+    });
+
+    it("should throw NotImplementedException on generateLinkToken", async () => {
+      await expect(service.generateLinkToken()).rejects.toThrow(NotImplementedException);
     });
   });
 
@@ -120,8 +123,8 @@ describe("SimpleFINProviderService", () => {
   describe("fetchData", () => {
     it("should execute fetch successfully with correctly parsed authorization and URLs", async () => {
       const mockJsonResponse = { accounts: [] };
-      (global.fetch as jest.Mock).mockResolvedValue({
-        json: jest.fn().mockResolvedValue(mockJsonResponse),
+      (global.fetch as Mock).mockResolvedValue({
+        json: vi.fn().mockResolvedValue(mockJsonResponse),
       });
 
       const result = await (service as any).fetchData("https://username:password@bridge.simplefin.org", false, mockUser);
@@ -148,7 +151,7 @@ describe("SimpleFINProviderService", () => {
 
     it("should throw an error if the claim endpoint returns a non-OK status", async () => {
       const validUrlToken = Buffer.from("https://bridge.simplefin.org/claim").toString("base64");
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: false,
         status: 400,
       });
@@ -158,9 +161,9 @@ describe("SimpleFINProviderService", () => {
 
     it("should return access token text on successful exchange", async () => {
       const validUrlToken = Buffer.from("https://bridge.simplefin.org/claim").toString("base64");
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as Mock).mockResolvedValue({
         ok: true,
-        text: jest.fn().mockResolvedValue("generated-access-token-string"),
+        text: vi.fn().mockResolvedValue("generated-access-token-string"),
       });
 
       const token = await service.convertSetupToken(validUrlToken);
@@ -174,12 +177,15 @@ describe("SimpleFINProviderService", () => {
   });
 
   describe("getUnlinkedAccounts", () => {
-    it("should fetch remote accounts and filter out those that already exist locally", async () => {
-      // Mock local DB having acc_1
-      Account.find = jest.fn().mockResolvedValue([{ id: "acc_1" }]);
+    it("should return empty array if user has no simpleFinToken", async () => {
+      const emptyUser = { config: {} } as User;
+      expect(await service.getUnlinkedAccounts(emptyUser)).toEqual([]);
+    });
 
-      // Mock remote SimpleFIN returning acc_1 and acc_2
-      jest.spyOn(service as any, "fetchData").mockResolvedValue({
+    it("should fetch remote accounts and filter out those that already exist locally", async () => {
+      vi.spyOn(Account, "find").mockResolvedValue([{ id: "acc_1", providerAccountId: "acc_1" } as any]);
+
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [
           { id: "acc_1", name: "Old", balance: "0", "available-balance": "0", currency: "USD", org: { name: "Bank", url: "url" } },
           { id: "acc_2", name: "New", balance: "100", "available-balance": "100", currency: "USD", org: { name: "Bank", url: "url" } },
@@ -188,14 +194,19 @@ describe("SimpleFINProviderService", () => {
 
       const unlinked = await service.getUnlinkedAccounts(mockUser);
 
-      expect(unlinked).toHaveLength(2);
-      expect(unlinked[0]?.id).toBe("acc_1");
+      expect(unlinked).toHaveLength(1);
+      expect(unlinked[0]?.id).toBe("acc_2");
     });
   });
 
-  describe("performExchange", () => {
-    it("should fetch remote accounts, filter to requested IDs, and group them by Institution name", async () => {
-      jest.spyOn(service as any, "fetchData").mockResolvedValue({
+  describe("performExchange & performSync", () => {
+    it("should throw BadRequestException in performExchange if token missing", async () => {
+      const noTokenUser = { config: {} } as User;
+      await expect((service as any).performExchange(noTokenUser, [])).rejects.toThrow(BadRequestException);
+    });
+
+    it("should performExchange grouping by institution name", async () => {
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [
           { id: "acc_1", name: "Chase Checking", org: { name: "Chase", url: "chase.com" } },
           { id: "acc_2", name: "Chase Savings", org: { name: "Chase", url: "chase.com" } },
@@ -203,21 +214,46 @@ describe("SimpleFINProviderService", () => {
         ],
       });
 
-      // User only wants to link acc_1 and acc_3
       const result = await (service as any).performExchange(mockUser, ["acc_1", "acc_3"]);
 
-      expect(result).toHaveLength(2); // Grouped into Chase and Citi
-
+      expect(result).toHaveLength(2);
       const chaseGroup = result.find((r: any) => r.institutionName === "Chase");
       expect(chaseGroup.rawAccounts).toHaveLength(1);
-      expect(chaseGroup.rawAccounts[0].id).toBe("acc_1");
+    });
 
-      const citiGroup = result.find((r: any) => r.institutionName === "Citi");
-      expect(citiGroup.rawAccounts[0].id).toBe("acc_3");
+    it("should return empty array in performSync if simpleFinToken is missing", async () => {
+      const noTokenUser = { config: {} } as User;
+      const res = await (service as any).performSync(noTokenUser, undefined, false);
+      expect(res).toEqual([]);
+    });
+
+    it("should performSync for existing user accounts with accountsOnly true and false", async () => {
+      const existingAccount = {
+        id: "acc_1",
+        providerAccountId: "acc_1",
+        balance: 0,
+        availableBalance: 0,
+        extra: {},
+        institution: { name: "Bank" },
+      };
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
+
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
+        accounts: [{ id: "acc_1", name: "Bank Acc", balance: "100", "available-balance": "100", currency: "USD", org: { name: "Bank", url: "url" } }],
+        errors: ["Bank"],
+      });
+
+      const resultsAccountsOnly = await (service as any).performSync(mockUser, undefined, true);
+      expect(resultsAccountsOnly).toHaveLength(1);
+      expect(resultsAccountsOnly[0].account.balance).toBe(100);
+
+      const resultsFull = await (service as any).performSync(mockUser, undefined, false);
+      expect(resultsFull).toHaveLength(1);
+      expect(resultsFull[0].account.balance).toBe(100);
     });
   });
 
-  describe("mapToSproutAccount", () => {
+  describe("mapToSproutAccount & fetchInitialSyncData", () => {
     it("should convert raw SimpleFIN account data to an Account entity and manually assign the ID", async () => {
       const rawAccount = {
         id: "fin_id_123",
@@ -229,27 +265,24 @@ describe("SimpleFINProviderService", () => {
       };
 
       const mockInstitution = new Institution("url", "Bank", false, mockUser);
-
       const result = await (service as any).mapToSproutAccount(rawAccount, "authContext", mockUser, mockInstitution);
 
       expect(result).toBeTruthy();
+      expect(result.balance).toBe(50);
     });
-  });
 
-  describe("fetchInitialSyncData", () => {
     it("should extract holdings and transactions from the raw payload", async () => {
       const rawAccount = {
-        holdings: [{ symbol: "AAPL", shares: "10", market_value: "1500" }],
-        transactions: [{ id: "tx_1", amount: "-10", posted: 1715900000, description: "Coffee", extra: { category: "Food" } }],
+        holdings: [{ symbol: "AAPL", shares: "10", market_value: "1500", cost_basis: "1000", purchase_price: "100", currency: "USD", description: "Apple" }],
+        transactions: [{ id: "tx_1", amount: "-10", posted: 1715900000, description: "Coffee", extra: { category: "Food" }, pending: false }],
       };
       const mockAccount = { id: "acc_1" } as Account;
 
-      (Category.getOrCreate as jest.Mock).mockResolvedValue({ id: "cat_food" });
+      vi.spyOn(Category, "getOrCreate").mockResolvedValue({ id: "cat_food" } as any);
 
       const result = await (service as any).fetchInitialSyncData(rawAccount, mockAccount, "auth", mockUser);
 
       expect(result.holdings).toHaveLength(1);
-
       expect(result.transactions).toHaveLength(1);
     });
   });

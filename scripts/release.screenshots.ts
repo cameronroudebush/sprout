@@ -25,8 +25,10 @@ class ScreenshotRoute {
 const routes = [
   new ScreenshotRoute("/", { title: "Overview", desc: "Your Financial Growth at a Glance" }, "home"),
   new ScreenshotRoute("/accounts"),
+  new ScreenshotRoute("/accounts/ea5b551f-05fc-482c-8133-8cbadeb4e669", undefined, "account"),
   new ScreenshotRoute("/reports", { title: "Insights", desc: "Visualize your spending patterns" }),
   new ScreenshotRoute("/transactions", { title: "Activity", desc: "Every transaction, categorized instantly" }),
+  new ScreenshotRoute("/transactions/1c91e240-5126-4234-a66c-464c1ff05ab0", undefined, "transaction"),
   new ScreenshotRoute("/holdings", { title: "Portfolio", desc: "Track your investments effortlessly" }),
   new ScreenshotRoute("/subscriptions"),
   new ScreenshotRoute("/chat", { title: "AI Assistant", desc: "Ask questions, get financial answers" }),
@@ -251,10 +253,13 @@ async function createHorizontalBanner(
   },
 ) {
   const background = await getBackground(c.width, c.height, "right");
-  // Helper to process a card (round corners and ensure PNG)
-  const processCard = async (buf: Buffer) => {
-    const meta = await sharp(buf).metadata();
-    return sharp(buf)
+
+  // Helper to process and resize card height so the full UI fits neatly
+  const processCard = async (buf: Buffer, targetHeight = 820) => {
+    const resized = await sharp(buf).resize({ height: targetHeight, fit: "inside" }).toBuffer();
+    const meta = await sharp(resized).metadata();
+
+    return sharp(resized)
       .composite([
         {
           input: Buffer.from(`
@@ -269,18 +274,18 @@ async function createHorizontalBanner(
       .toBuffer();
   };
 
-  // Process all screenshots
-  const mainCard = await processCard(mainScreenshot);
-  const backCard1 = await processCard(extraScreenshots[0]!);
-  const backCard2 = await processCard(extraScreenshots[1]!);
+  // Process screenshots with fixed height for uniform scaling
+  const mainCard = await processCard(mainScreenshot, 840);
+  const backCard1 = await processCard(extraScreenshots[0]!, 780); // Left background card
+  const backCard2 = await processCard(extraScreenshots[1]!, 780); // Right background card
 
-  // Rotate the background cards for the "fan" effect
+  // Rotate background cards for the soft fan effect
   const card1Rotated = await sharp(backCard1)
-    .rotate(-10, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .rotate(-5, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .toBuffer();
 
   const card2Rotated = await sharp(backCard2)
-    .rotate(10, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .rotate(5, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .toBuffer();
 
   // Assets
@@ -294,8 +299,7 @@ async function createHorizontalBanner(
     </svg>
   `);
 
-  // Positioning for card fans
-  const xPos = c.width * 0.7;
+  const xCenter = c.width * 0.7;
   const yPos = 180;
 
   return sharp(background)
@@ -303,9 +307,12 @@ async function createHorizontalBanner(
       { input: brandingOverlay, top: 0, left: 0 },
       { input: logoBuffer, top: 140, left: 60 },
       { input: badgeBuffer, top: 680, left: 130 },
-      { input: card1Rotated, top: yPos - 60, left: xPos - 320 },
-      { input: card2Rotated, top: yPos - 60, left: xPos + 20 },
-      { input: mainCard, top: yPos - 40, left: xPos - 80 },
+      // Left card
+      { input: card1Rotated, top: Math.round(yPos), left: Math.round(xCenter - 340) },
+      // Right card
+      { input: card2Rotated, top: Math.round(yPos), left: Math.round(xCenter + 130) },
+      // Center card
+      { input: mainCard, top: Math.round(yPos - 20), left: Math.round(xCenter - 80) },
     ])
     .toBuffer();
 }
@@ -367,6 +374,15 @@ export async function captureScreenshots() {
   }
 }
 
+/** Helper function to read a mobile screenshot buffer by path */
+function getScreenshotByPath(routePath: string): Buffer {
+  const route = routes.find((r) => r.path === routePath);
+  if (!route) {
+    throw new Error(`Route with path "${routePath}" not found.`);
+  }
+  return fs.readFileSync(route.getImagePathOutput("mobile"));
+}
+
 /** Iterates over every route that wants store screenshots and saves them */
 async function buildStoreScreenshots() {
   console.log(`--- Building Store Screenshots ---`);
@@ -393,13 +409,15 @@ async function buildStoreScreenshots() {
 
   // Generate marketing banner
   console.log(`--- Generating Marketing Banner ---`);
-  const buffers = routes.slice(0, 3).map((x) => fs.readFileSync(x.getImagePathOutput("mobile")));
+  const mainBuffer = getScreenshotByPath("/");
+  const extraBuffers = [getScreenshotByPath("/chat"), getScreenshotByPath("/transactions")];
+
   fs.writeFileSync(
     path.join("docs", "images", "store", "horizontal.png"),
     new Uint8Array(
       await createHorizontalBanner(
-        buffers[0]!,
-        buffers.slice(1),
+        mainBuffer,
+        extraBuffers,
         path.join("frontend", "assets", "logo", "color-transparent.png"),
         path.join("docs", "assets", "google-play.png"),
       ),

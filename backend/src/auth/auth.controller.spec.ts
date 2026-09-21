@@ -7,12 +7,12 @@ import { UsernamePasswordLoginRequest } from "./model/api/login.request.dto";
 
 describe("AuthController", () => {
   let controller: AuthController;
-  let authService: jest.Mocked<AuthService>;
+  let authService: Mocked<AuthService>;
 
   const mockResponse = () => {
     const res = {} as Partial<Response>;
-    res.status = jest.fn().mockReturnThis();
-    res.json = jest.fn().mockReturnThis();
+    res.status = vi.fn().mockReturnThis();
+    res.json = vi.fn().mockReturnThis();
     return res as Response;
   };
 
@@ -20,9 +20,9 @@ describe("AuthController", () => {
 
   beforeEach(async () => {
     const mockAuthService = {
-      login: jest.fn(),
-      setCookieTokens: jest.fn(),
-      clearAllCookieTokens: jest.fn(),
+      login: vi.fn(),
+      setCookieTokens: vi.fn(),
+      clearAllCookieTokens: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

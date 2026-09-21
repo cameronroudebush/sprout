@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_error_icon.dart';
 import 'package:sprout/account/widgets/account_item_row.dart';
 import 'package:sprout/api/api.dart';
@@ -68,7 +69,7 @@ class AccountGroupSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
     final total = accounts.fold(0.0, (sum, a) => sum + a.balance);
-    final bool groupHasError = accounts.any((a) => a.institution.hasError);
+    final bool groupHasError = accounts.any((a) => a.hasProblem);
 
     final innerContent = Padding(
       padding: EdgeInsets.zero,
@@ -129,7 +130,7 @@ class AccountGroupSection extends ConsumerWidget {
                   final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
                   final dataPoint = history?.getValueByFrame(selectedRange);
                   final isSelected = selectedAccounts?.contains(acc) ?? false;
-                  final hasError = acc.institution.hasError || acc.isArchived;
+                  final hasError = acc.hasProblem;
 
                   // Main row content
                   Widget row = Padding(
