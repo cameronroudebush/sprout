@@ -8,6 +8,7 @@ describe("PendingTransactionJob", () => {
   let job: PendingTransactionJob;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     job = new PendingTransactionJob();
   });
 

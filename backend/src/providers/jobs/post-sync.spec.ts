@@ -1,18 +1,19 @@
-import { setupTests } from "@backend/test/helpers";
+import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import { ChatService } from "@backend/chat/chat.service";
-import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
-import { Configuration } from "@backend/config/core";
-import { NotificationService } from "@backend/notification/notification.service";
-import { ProviderType } from "@backend/providers/base/provider.type";
-import { PostSyncProcessingJob } from "@backend/providers/jobs/post-sync";
-import { Sync } from "@backend/providers/model/sync.model";
-import { SSEEventType } from "@backend/sse/model/event.model";
-import { SSEService } from "@backend/sse/sse.service";
-import { TestEntities } from "@backend/test/entities";
-import { UserDevice } from "@backend/user/model/user.device.model";
-import { User } from "@backend/user/model/user.model";
+import { ChatService } from "@backend/chat/chat.service.js";
+import { ChatOverviewType } from "@backend/chat/model/chat.overview.type.js";
+import { Configuration } from "@backend/config/core.js";
+import { NotificationService } from "@backend/notification/notification.service.js";
+import { ProviderType } from "@backend/providers/base/provider.type.js";
+import { PostSyncProcessingJob } from "@backend/providers/jobs/post-sync.js";
+import { Sync } from "@backend/providers/model/sync.model.js";
+import { SyncTriggerType } from "@backend/providers/model/sync.type.js";
+import { SSEEventType } from "@backend/sse/model/event.model.js";
+import { SSEService } from "@backend/sse/sse.service.js";
+import { TestEntities } from "@backend/test/entities.js";
+import { UserDevice } from "@backend/user/model/user.device.model.js";
+import { User } from "@backend/user/model/user.model.js";
 import { Mocked } from "vitest";
 
 describe("PostSyncProcessingJob", () => {
@@ -22,6 +23,8 @@ describe("PostSyncProcessingJob", () => {
   let chatService: Mocked<ChatService>;
 
   beforeEach(() => {
+    vi.restoreAllMocks();
+
     notificationService = {
       notifyUser: vi.fn().mockResolvedValue({}),
     } as any;
@@ -42,7 +45,20 @@ describe("PostSyncProcessingJob", () => {
       const mockQueryBuilder = {
         select: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
-        andWhere: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockImplementation((fn: any) => {
+          if (typeof fn === "function") {
+            const subQb = {
+              subQuery: vi.fn().mockReturnThis(),
+              select: vi.fn().mockReturnThis(),
+              from: vi.fn().mockReturnThis(),
+              where: vi.fn().mockReturnThis(),
+              andWhere: vi.fn().mockReturnThis(),
+              getQuery: vi.fn().mockReturnValue("(SELECT 1 FROM sync)"),
+            };
+            fn(subQb);
+          }
+          return mockQueryBuilder;
+        }),
         groupBy: vi.fn().mockReturnThis(),
         getRawMany: vi.fn().mockResolvedValue([{ userId: "user-1" }, { userId: "user-2" }]),
       };
@@ -132,9 +148,9 @@ describe("PostSyncProcessingJob", () => {
   });
 
   describe("sendDigest", () => {
-    it("should trigger force update SSE and process overviews when successes exist", async () => {
+    it("should trigger force update SSE and process overviews when successes exist in scheduled sync", async () => {
       const user = TestEntities.user;
-      const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, user });
+      const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
 
       vi.spyOn(Sync, "count").mockResolvedValue(0);
       Configuration.providers.syncNotifications.enabled = true;
@@ -147,7 +163,14 @@ describe("PostSyncProcessingJob", () => {
 
     it("should notify error when failures exist and fallback to 'Unknown error' if failureReason is missing", async () => {
       const user = TestEntities.user;
-      const syncFailed = Sync.fromPlain({ id: "s2", status: "failed", failureReason: undefined, provider: ProviderType.plaid, user });
+      const syncFailed = Sync.fromPlain({
+        id: "s2",
+        status: "failed",
+        failureReason: undefined,
+        provider: ProviderType.plaid,
+        triggerType: SyncTriggerType.SCHEDULED,
+        user,
+      });
 
       vi.spyOn(Sync, "count").mockResolvedValue(0);
       Configuration.providers.syncNotifications.enabled = true;
@@ -159,7 +182,7 @@ describe("PostSyncProcessingJob", () => {
 
     it("should skip notification if notification already sent today", async () => {
       const user = TestEntities.user;
-      const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, user });
+      const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
 
       vi.spyOn(Sync, "count").mockResolvedValue(1); // Already processed today
       Configuration.providers.syncNotifications.enabled = true;
@@ -171,7 +194,7 @@ describe("PostSyncProcessingJob", () => {
 
     it("should skip notification logic if sync notifications are disabled in configuration", async () => {
       const user = TestEntities.user;
-      const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, user });
+      const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
 
       vi.spyOn(Sync, "count").mockResolvedValue(0);
       Configuration.providers.syncNotifications.enabled = false;

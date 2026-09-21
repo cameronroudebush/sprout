@@ -40,7 +40,7 @@ export async function checkScript() {
 }
 
 /** Main execution wrapper */
-async function main() {
+export async function main() {
   const projName = startCase(name);
   new ConfigurationService(new SproutLogger(projName, { logLevels: ["verbose"] })).load();
 
