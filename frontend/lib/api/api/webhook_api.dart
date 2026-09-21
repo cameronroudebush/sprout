@@ -21,7 +21,7 @@ class WebhookApi {
   /// Used to listen for responses from plaid to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> plaidWebhookControllerHandlePlaidWebhookWithHttpInfo() async {
+  Future<Response> plaidWebhookControllerHandlePlaidWebhookWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/webhooks/plaid';
 
@@ -43,14 +43,15 @@ class WebhookApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Handle plaid update webhook
   ///
   /// Used to listen for responses from plaid to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.
-  Future<void> plaidWebhookControllerHandlePlaidWebhook() async {
-    final response = await plaidWebhookControllerHandlePlaidWebhookWithHttpInfo();
+  Future<void> plaidWebhookControllerHandlePlaidWebhook({ Future<void>? abortTrigger, }) async {
+    final response = await plaidWebhookControllerHandlePlaidWebhookWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -65,7 +66,7 @@ class WebhookApi {
   /// Parameters:
   ///
   /// * [PlaidWebhookControllerMigrateWebhookUrlsRequest] plaidWebhookControllerMigrateWebhookUrlsRequest (required):
-  Future<Response> plaidWebhookControllerMigrateWebhookUrlsWithHttpInfo(PlaidWebhookControllerMigrateWebhookUrlsRequest plaidWebhookControllerMigrateWebhookUrlsRequest,) async {
+  Future<Response> plaidWebhookControllerMigrateWebhookUrlsWithHttpInfo(PlaidWebhookControllerMigrateWebhookUrlsRequest plaidWebhookControllerMigrateWebhookUrlsRequest, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/webhooks/plaid/migrate-url';
 
@@ -87,6 +88,7 @@ class WebhookApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -97,8 +99,8 @@ class WebhookApi {
   /// Parameters:
   ///
   /// * [PlaidWebhookControllerMigrateWebhookUrlsRequest] plaidWebhookControllerMigrateWebhookUrlsRequest (required):
-  Future<void> plaidWebhookControllerMigrateWebhookUrls(PlaidWebhookControllerMigrateWebhookUrlsRequest plaidWebhookControllerMigrateWebhookUrlsRequest,) async {
-    final response = await plaidWebhookControllerMigrateWebhookUrlsWithHttpInfo(plaidWebhookControllerMigrateWebhookUrlsRequest,);
+  Future<void> plaidWebhookControllerMigrateWebhookUrls(PlaidWebhookControllerMigrateWebhookUrlsRequest plaidWebhookControllerMigrateWebhookUrlsRequest, { Future<void>? abortTrigger, }) async {
+    final response = await plaidWebhookControllerMigrateWebhookUrlsWithHttpInfo(plaidWebhookControllerMigrateWebhookUrlsRequest, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -109,7 +111,7 @@ class WebhookApi {
   /// Used to listen for responses from SnapTrade to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> snapTradeWebHookControllerHandleSnapTradeWebhookWithHttpInfo() async {
+  Future<Response> snapTradeWebHookControllerHandleSnapTradeWebhookWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/webhooks/snap-trade';
 
@@ -131,14 +133,15 @@ class WebhookApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Handle SnapTrade update webhook
   ///
   /// Used to listen for responses from SnapTrade to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.
-  Future<void> snapTradeWebHookControllerHandleSnapTradeWebhook() async {
-    final response = await snapTradeWebHookControllerHandleSnapTradeWebhookWithHttpInfo();
+  Future<void> snapTradeWebHookControllerHandleSnapTradeWebhook({ Future<void>? abortTrigger, }) async {
+    final response = await snapTradeWebHookControllerHandleSnapTradeWebhookWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

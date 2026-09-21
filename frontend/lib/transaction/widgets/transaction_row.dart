@@ -48,7 +48,7 @@ class TransactionRow extends ConsumerWidget {
 
     final websiteUrl = transaction.extra?.website;
     final Widget effectiveIcon = (websiteUrl != null && websiteUrl.isNotEmpty)
-        ? WebsiteIconWidget(websiteUrl, size: 32)
+        ? WebsiteIconWidget(websiteUrl: websiteUrl, size: 32)
         : (icon ?? CategoryIcon(cat, avatarSize: 16));
 
     return InkWell(

@@ -14,20 +14,20 @@ import { InternalServerErrorException } from "@nestjs/common";
 
 describe("UserService", () => {
   let service: UserService;
-  let mockProvider: Mocked<ProviderBase>;
-  let mockSimpleFinProviderService: Mocked<SimpleFINProviderService>;
+  let mockProvider: jest.Mocked<ProviderBase>;
+  let mockSimpleFinProviderService: jest.Mocked<SimpleFINProviderService>;
   const originalAuth = Configuration.server.auth;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     mockProvider = {
       config: { name: "MockProvider" },
-      unlinkInstitution: vi.fn(),
+      unlinkInstitution: jest.fn(),
     } as any;
 
     mockSimpleFinProviderService = {
-      convertSetupToken: vi.fn(),
+      convertSetupToken: jest.fn(),
     } as any;
 
     service = new UserService([mockProvider], mockSimpleFinProviderService);
@@ -62,7 +62,7 @@ describe("UserService", () => {
       Configuration.server.auth = {
         type: "local",
       } as any;
-      vi.spyOn(User, "count").mockResolvedValue(0);
+      jest.spyOn(User, "count").mockResolvedValue(0);
 
       const result = await service.allowUserCreation();
       expect(result).toBe(true);
@@ -72,7 +72,7 @@ describe("UserService", () => {
       Configuration.server.auth = {
         type: "local",
       } as any;
-      vi.spyOn(User, "count").mockResolvedValue(1);
+      jest.spyOn(User, "count").mockResolvedValue(1);
 
       const result = await service.allowUserCreation();
       expect(result).toBe(false);
@@ -87,7 +87,7 @@ describe("UserService", () => {
       const incoming = TestEntities.userConfig;
       incoming.simpleFinToken = EncryptionTransformer.HIDDEN_VALUE;
 
-      vi.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
+      jest.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
 
       await service.syncEncryptedFields(incoming, existing);
 
@@ -102,7 +102,7 @@ describe("UserService", () => {
       const incoming = TestEntities.userConfig;
       incoming.simpleFinToken = "new_setup_token";
 
-      vi.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
+      jest.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
       mockSimpleFinProviderService.convertSetupToken.mockResolvedValue("converted_access_token");
 
       await service.syncEncryptedFields(incoming, existing);
@@ -118,7 +118,7 @@ describe("UserService", () => {
       const incoming = TestEntities.userConfig;
       incoming.currency = CurrencyOptions.EUR;
 
-      vi.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockReturnValue(false);
+      jest.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockReturnValue(false);
 
       await service.syncEncryptedFields(incoming, existing);
 
@@ -132,12 +132,12 @@ describe("UserService", () => {
 
     beforeEach(() => {
       mockUser = TestEntities.user;
-      mockUser.remove = vi.fn().mockResolvedValue(undefined);
+      mockUser.remove = jest.fn().mockResolvedValue(undefined);
     });
 
     it("should successfully unlink institutions and delete user", async () => {
       const mockInstitution = TestEntities.institution;
-      vi.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
+      jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockResolvedValue(true);
 
       await service.deleteUser(mockUser);
@@ -148,7 +148,7 @@ describe("UserService", () => {
 
     it("should abort deletion if provider unlink returns false and forceDelete is false", async () => {
       const mockInstitution = TestEntities.institution;
-      vi.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
+      jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockResolvedValue(false);
 
       await expect(service.deleteUser(mockUser, false)).rejects.toThrow(InternalServerErrorException);
@@ -157,7 +157,7 @@ describe("UserService", () => {
 
     it("should proceed with deletion if provider unlink returns false but forceDelete is true", async () => {
       const mockInstitution = TestEntities.institution;
-      vi.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
+      jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockResolvedValue(false);
 
       await service.deleteUser(mockUser, true);
@@ -167,7 +167,7 @@ describe("UserService", () => {
 
     it("should rethrow InternalServerErrorException if thrown during unlink when forceDelete is false", async () => {
       const mockInstitution = TestEntities.institution;
-      vi.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
+      jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockRejectedValue(new InternalServerErrorException("API error"));
 
       await expect(service.deleteUser(mockUser, false)).rejects.toThrow(InternalServerErrorException);
@@ -176,7 +176,7 @@ describe("UserService", () => {
 
     it("should handle generic exception, log error, and abort deletion when forceDelete is false", async () => {
       const mockInstitution = TestEntities.institution;
-      vi.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
+      jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockRejectedValue(new Error("Network crash"));
 
       await expect(service.deleteUser(mockUser, false)).rejects.toThrow(InternalServerErrorException);
@@ -185,7 +185,7 @@ describe("UserService", () => {
 
     it("should handle generic exception and proceed with deletion when forceDelete is true", async () => {
       const mockInstitution = TestEntities.institution;
-      vi.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
+      jest.spyOn(Institution, "find").mockResolvedValue([mockInstitution]);
       mockProvider.unlinkInstitution.mockRejectedValue(new Error("Network crash"));
 
       await service.deleteUser(mockUser, true);

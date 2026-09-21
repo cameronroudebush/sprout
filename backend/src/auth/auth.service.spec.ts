@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import { of, throwError } from "rxjs";
 import { AuthService } from "./auth.service";
 
-vi.mock("@backend/config/core", () => ({
+jest.mock("@backend/config/core", () => ({
   Configuration: {
     isDevBuild: false,
     server: {
@@ -26,31 +26,31 @@ vi.mock("@backend/config/core", () => ({
   },
 }));
 
-vi.mock("jsonwebtoken");
-vi.mock("@backend/user/model/user.model");
+jest.mock("jsonwebtoken");
+jest.mock("@backend/user/model/user.model");
 
 describe("AuthService", () => {
   let service: AuthService;
-  let httpService: Mocked<HttpService>;
+  let httpService: jest.Mocked<HttpService>;
 
   const mockResponse = () => {
     const res = {} as Partial<Response>;
-    res.cookie = vi.fn().mockReturnThis();
-    res.clearCookie = vi.fn().mockReturnThis();
+    res.cookie = jest.fn().mockReturnThis();
+    res.clearCookie = jest.fn().mockReturnThis();
     return res as Response;
   };
 
   const mockRequest = (cookies = {}, headers = {}) => ({ cookies, headers }) as unknown as Request;
 
   beforeAll(() => {
-    vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
-    vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
-    vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
-    vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
+    jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});
+    jest.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+    jest.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
+    jest.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
   });
 
   beforeEach(async () => {
-    const mockHttpService = { post: vi.fn() };
+    const mockHttpService = { post: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [AuthService, { provide: HttpService, useValue: mockHttpService }],
@@ -61,7 +61,7 @@ describe("AuthService", () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe("getCookie", () => {
@@ -113,21 +113,21 @@ describe("AuthService", () => {
     const loginDto = UsernamePasswordLoginRequest.fromPlain({ username: "user", password: "pwd" });
 
     it("should throw UnauthorizedException if matching user entity does not exist", async () => {
-      (User.findOne as Mock).mockResolvedValue(null);
+      (User.findOne as jest.Mock).mockResolvedValue(null);
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it("should throw UnauthorizedException if password validation routine fails", async () => {
-      const mockUserInstance = { password: "hashed_password", verifyPassword: vi.fn().mockReturnValue(false) };
-      (User.findOne as Mock).mockResolvedValue(mockUserInstance);
+      const mockUserInstance = { password: "hashed_password", verifyPassword: jest.fn().mockReturnValue(false) };
+      (User.findOne as jest.Mock).mockResolvedValue(mockUserInstance);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it("should log in user and return signed token upon valid password evaluation", async () => {
-      const mockUserInstance = { username: "user", password: "hashed_password", verifyPassword: vi.fn().mockReturnValue(true) };
-      (User.findOne as Mock).mockResolvedValue(mockUserInstance);
-      (jwt.sign as Mock).mockReturnValue("signed-jwt");
+      const mockUserInstance = { username: "user", password: "hashed_password", verifyPassword: jest.fn().mockReturnValue(true) };
+      (User.findOne as jest.Mock).mockResolvedValue(mockUserInstance);
+      (jwt.sign as jest.Mock).mockReturnValue("signed-jwt");
 
       const result = await service.login(loginDto);
       expect(result.user).toBe(mockUserInstance);
@@ -137,18 +137,18 @@ describe("AuthService", () => {
 
   describe("loginWithJWT", () => {
     it("should throw UnauthorizedException if input token verification throws", async () => {
-      (jwt.verify as Mock).mockImplementation(() => {
+      (jwt.verify as jest.Mock).mockImplementation(() => {
         throw new Error();
       });
       await expect(service.loginWithJWT("bad-jwt")).rejects.toThrow(UnauthorizedException);
     });
 
     it("should extract username, find user entity, and return a freshly signed token", async () => {
-      (jwt.verify as Mock).mockReturnValue({});
-      (jwt.decode as Mock).mockReturnValue({ username: "user" });
+      (jwt.verify as jest.Mock).mockReturnValue({});
+      (jwt.decode as jest.Mock).mockReturnValue({ username: "user" });
       const mockUserInstance = { username: "user", password: "pwd" };
-      (User.findOne as Mock).mockResolvedValue(mockUserInstance);
-      (jwt.sign as Mock).mockReturnValue("new-jwt");
+      (User.findOne as jest.Mock).mockResolvedValue(mockUserInstance);
+      (jwt.sign as jest.Mock).mockReturnValue("new-jwt");
 
       const result = await service.loginWithJWT("old-jwt");
       expect(result.user).toBe(mockUserInstance);
@@ -156,9 +156,9 @@ describe("AuthService", () => {
     });
 
     it("should fail validation if verification works but database entity lookup returns null", async () => {
-      (jwt.verify as Mock).mockReturnValue({});
-      (jwt.decode as Mock).mockReturnValue({ username: "ghost" });
-      (User.findOne as Mock).mockResolvedValue(null);
+      (jwt.verify as jest.Mock).mockReturnValue({});
+      (jwt.decode as jest.Mock).mockReturnValue({ username: "ghost" });
+      (User.findOne as jest.Mock).mockResolvedValue(null);
 
       await expect(service.loginWithJWT("old-jwt")).rejects.toThrow(UnauthorizedException);
     });
@@ -192,12 +192,12 @@ describe("AuthService", () => {
 
   describe("performOIDCRefresh", () => {
     beforeEach(() => {
-      vi.useFakeTimers();
+      jest.useFakeTimers();
     });
 
     afterEach(() => {
-      vi.runAllTimers();
-      vi.useRealTimers();
+      jest.runAllTimers();
+      jest.useRealTimers();
     });
 
     it("should throw UnauthorizedException if query yields no usable refresh token asset", async () => {
@@ -243,7 +243,7 @@ describe("AuthService", () => {
       await service.performOIDCRefresh(req);
       httpService.post.mockClear();
 
-      vi.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(10000);
 
       await service.performOIDCRefresh(req);
       expect(httpService.post).toHaveBeenCalledTimes(1);

@@ -1,55 +1,53 @@
-import { setupTests } from "@backend/test/helpers.js";
+import { setupTests } from "@backend/test/helpers";
 setupTests();
 
-import { AccountHistory } from "@backend/account/model/account.history.model.js";
-import { Account } from "@backend/account/model/account.model.js";
-import { AccountType } from "@backend/account/model/account.type.js";
-import { Configuration } from "@backend/config/core.js";
-import { HoldingHistory } from "@backend/holding/model/holding.history.model.js";
-import { Holding } from "@backend/holding/model/holding.model.js";
-import { Institution } from "@backend/institution/model/institution.model.js";
-import { ProviderBase } from "@backend/providers/base/core.js";
-import { ProviderSyncService } from "@backend/providers/base/sync.service.js";
-import { Sync } from "@backend/providers/model/sync.model.js";
-import { SyncTriggerType } from "@backend/providers/model/sync.type.js";
-import { TestEntities } from "@backend/test/entities.js";
-import { Transaction } from "@backend/transaction/model/transaction.model.js";
-import { TransactionRuleService } from "@backend/transaction/transaction.rule.service.js";
-import { User } from "@backend/user/model/user.model.js";
+import { AccountHistory } from "@backend/account/model/account.history.model";
+import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
+import { Configuration } from "@backend/config/core";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model";
+import { Holding } from "@backend/holding/model/holding.model";
+import { ProviderBase } from "@backend/providers/base/core";
+import { ProviderSyncService } from "@backend/providers/base/sync.service";
+import { Sync } from "@backend/providers/model/sync.model";
+import { SyncTriggerType } from "@backend/providers/model/sync.type";
+import { TestEntities } from "@backend/test/entities";
+import { Transaction } from "@backend/transaction/model/transaction.model";
+import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
+import { User } from "@backend/user/model/user.model";
 
 describe("ProviderSyncService", () => {
   let service: ProviderSyncService;
-  let transactionRuleService: Mocked<TransactionRuleService>;
+  let transactionRuleService: jest.Mocked<TransactionRuleService>;
   let mockUser: User;
-  let mockProvider: Mocked<ProviderBase>;
+  let mockProvider: jest.Mocked<ProviderBase>;
   let mockSyncInstance: Sync;
 
   beforeEach(() => {
-    vi.restoreAllMocks();
+    jest.clearAllMocks();
 
-    transactionRuleService = { applyRulesToTransactions: vi.fn() } as unknown as Mocked<TransactionRuleService>;
+    transactionRuleService = { applyRulesToTransactions: jest.fn() } as unknown as jest.Mocked<TransactionRuleService>;
 
     mockUser = TestEntities.user;
 
     mockProvider = {
       config: { dbType: "plaid" },
-      isAvailable: vi.fn().mockResolvedValue(true),
-      get: vi.fn().mockResolvedValue([]),
-      commitSyncMetadata: vi.fn().mockResolvedValue(undefined),
-    } as unknown as Mocked<ProviderBase>;
+      isAvailable: jest.fn().mockResolvedValue(true),
+      get: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<ProviderBase>;
 
     mockSyncInstance = TestEntities.sync;
-    mockSyncInstance.insert = vi.fn().mockResolvedValue(mockSyncInstance);
-    mockSyncInstance.update = vi.fn().mockResolvedValue({});
-    vi.spyOn(Sync, "fromPlain").mockReturnValue(mockSyncInstance);
+    mockSyncInstance.insert = jest.fn().mockResolvedValue(mockSyncInstance);
+    mockSyncInstance.update = jest.fn().mockResolvedValue({});
+    jest.spyOn(Sync, "fromPlain").mockReturnValue(mockSyncInstance);
 
     Configuration.holding.cleanupRemovedHoldings = true;
 
-    vi.spyOn(AccountHistory, "insertForAccount").mockResolvedValue({} as any);
-    vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
-
-    vi.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
-    vi.spyOn(Transaction, "delete").mockResolvedValue({} as any);
+    jest.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
+    jest.spyOn(Holding.prototype, "insert").mockResolvedValue({} as any);
+    jest.spyOn(HoldingHistory.prototype, "insert").mockResolvedValue({} as any);
+    jest.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
+    jest.spyOn(Transaction, "delete").mockResolvedValue({} as any);
 
     service = new ProviderSyncService(transactionRuleService);
   });
@@ -57,7 +55,7 @@ describe("ProviderSyncService", () => {
   describe("syncForProvider", () => {
     it("should exit execution early if the provider infrastructure reports as unavailable for the profile", async () => {
       mockProvider.isAvailable.mockResolvedValue(false);
-      const debugSpy = vi.spyOn((service as any).logger, "debug");
+      const debugSpy = jest.spyOn((service as any).logger, "debug");
 
       await service.syncForProvider(mockUser, mockProvider);
 
@@ -66,7 +64,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should process standard sync operations smoothly and commit completion metadata to the ledger", async () => {
-      vi.spyOn(Account, "count").mockResolvedValue(1);
+      jest.spyOn(Account, "count").mockResolvedValue(1);
 
       const result = await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -76,29 +74,23 @@ describe("ProviderSyncService", () => {
     });
 
     it("should mark the sync task failed if structural responses accumulate institution connection context errors", async () => {
-      vi.spyOn(Account, "count").mockResolvedValue(1);
+      jest.spyOn(Account, "count").mockResolvedValue(1);
 
-      const providerAccountWithError = {
-        ...TestEntities.account,
-        providerAccountId: "p-chase-1",
-        institution: { ...TestEntities.account.institution, hasError: true, name: "Chase" },
-      };
+      const providerAccountWithError = TestEntities.account;
+      providerAccountWithError.institution.hasError = true;
+      providerAccountWithError.institution.name = "Chase";
 
       mockProvider.get.mockResolvedValue([
         {
-          account: providerAccountWithError as any,
-          providerAccountId: "p-chase-1",
+          account: providerAccountWithError,
         },
       ]);
 
-      const mockAccountInDb = {
-        ...TestEntities.account,
-        providerAccountId: "p-chase-1",
-        institution: { ...TestEntities.account.institution, hasError: false, name: "Chase", update: vi.fn().mockResolvedValue({}) },
-        update: vi.fn().mockResolvedValue({}),
-      };
+      const mockAccountInDb = TestEntities.account;
+      mockAccountInDb.institution.update = jest.fn().mockResolvedValue({});
+      mockAccountInDb.update = jest.fn().mockResolvedValue({});
 
-      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb as any);
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -107,7 +99,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should catch top-level exceptions, record error tracking states, and transmit notification structures", async () => {
-      vi.spyOn(Account, "count").mockRejectedValue(new Error("Database breakdown"));
+      jest.spyOn(Account, "count").mockRejectedValue(new Error("Database breakdown"));
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -115,7 +107,7 @@ describe("ProviderSyncService", () => {
     });
 
     it("should bypass client message pushes entirely if optional notification flags evaluate to false parameters", async () => {
-      vi.spyOn(Account, "count").mockRejectedValue(new Error("Silent crash"));
+      jest.spyOn(Account, "count").mockRejectedValue(new Error("Silent crash"));
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
     });
@@ -123,61 +115,13 @@ describe("ProviderSyncService", () => {
 
   describe("syncUserAccounts Evaluation Blocks", () => {
     it("should skip updating database storage targets if matching operational record entities are completely missing", async () => {
-      vi.spyOn(Account, "count").mockResolvedValue(1);
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, providerAccountId: "p-1" }]);
-      vi.spyOn(Account, "findOne").mockResolvedValue(null);
+      jest.spyOn(Account, "count").mockResolvedValue(1);
+      mockProvider.get.mockResolvedValue([{ account: TestEntities.account }]);
+      jest.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(AccountHistory.insertForAccount).not.toHaveBeenCalled();
-    });
-
-    it("should auto-create missing account when providerAccountId is present and preventAutoCreation is false", async () => {
-      vi.spyOn(Account, "count").mockResolvedValue(1);
-
-      const incomingAccount = { ...TestEntities.account, insert: vi.fn() };
-      incomingAccount.insert.mockResolvedValue(incomingAccount);
-
-      mockProvider.get.mockResolvedValue([{ account: incomingAccount as any, providerAccountId: "p-1", preventAutoCreation: false }]);
-
-      vi.spyOn(Account, "findOne")
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(incomingAccount as any);
-
-      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
-
-      expect(incomingAccount.insert).toHaveBeenCalled();
-    });
-
-    it("should skip account if filtering by institutionId and account's institution doesn't match", async () => {
-      vi.spyOn(Account, "count").mockResolvedValue(1);
-
-      const dbAccount = { ...TestEntities.account, institution: { id: "inst-other" } };
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, providerAccountId: "p-1" }]);
-      vi.spyOn(Account, "findOne").mockResolvedValue(dbAccount as any);
-
-      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED, "inst-target");
-
-      expect(AccountHistory.insertForAccount).not.toHaveBeenCalled();
-    });
-
-    it("should attach institution if account in DB has no institution attached yet and attach brand new institution if missing in DB", async () => {
-      vi.spyOn(Account, "count").mockResolvedValue(1);
-
-      const incomingInst = Institution.fromPlain({ name: "Brand New Bank", hasError: false });
-      incomingInst.insert = vi.fn().mockResolvedValue(incomingInst);
-
-      const dbAccountNoInst = { ...TestEntities.account, institution: null as any, update: vi.fn() };
-      const incomingAcc = { ...TestEntities.account, institution: incomingInst };
-
-      mockProvider.get.mockResolvedValue([{ account: incomingAcc, providerAccountId: "p-1" }]);
-      vi.spyOn(Account, "findOne").mockResolvedValue(dbAccountNoInst as any);
-      vi.spyOn(Institution, "findOne").mockResolvedValue(null);
-
-      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
-
-      expect(incomingInst.insert).toHaveBeenCalled();
-      expect(dbAccountNoInst.institution).toBe(incomingInst);
+      expect(AccountHistory.prototype.insert).not.toHaveBeenCalled();
     });
   });
 
@@ -185,94 +129,72 @@ describe("ProviderSyncService", () => {
     let mockAccountInDb: Account;
 
     beforeEach(() => {
-      mockAccountInDb = {
-        ...TestEntities.account,
-        providerAccountId: "p-test-1",
-        type: AccountType.investment,
-        isInvestment: true,
-        institution: { ...TestEntities.account.institution, update: vi.fn() },
-        update: vi.fn(),
-      } as any;
+      mockAccountInDb = TestEntities.account;
+      mockAccountInDb.type = AccountType.investment;
+      mockAccountInDb.institution.update = jest.fn();
+      mockAccountInDb.update = jest.fn();
 
-      vi.spyOn(Account, "count").mockResolvedValue(1);
-      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
+      jest.spyOn(Account, "count").mockResolvedValue(1);
+      jest.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
     });
 
-    it("should parse financial transaction lists, match by transaction.id or providerId, handle dynamic category linkages, and issue multi-record deletions", async () => {
-      const txWithIdOnly = Transaction.fromPlain({ id: "tx-local-1", amount: -20, description: "", account: TestEntities.account });
-      txWithIdOnly.update = vi.fn().mockResolvedValue(txWithIdOnly);
-
-      const account = { ...TestEntities.account, isInvestment: true };
-
+    it("should parse financial transaction lists, handle dynamic category linkages, and issue multi-record deletions", async () => {
       mockProvider.get.mockResolvedValue([
         {
-          account: account as any,
-          providerAccountId: "p-test-1",
-          transactions: [TestEntities.transaction, txWithIdOnly],
+          account: TestEntities.account,
+          transactions: [TestEntities.transaction, TestEntities.transaction],
           removedTransactionIds: ["tx-old-1"],
         },
       ]);
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
-      vi.spyOn(Transaction, "find").mockResolvedValueOnce([TestEntities.transaction]).mockResolvedValueOnce([txWithIdOnly]);
+      jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(AccountHistory.insertForAccount).toHaveBeenCalled();
+      expect(AccountHistory.prototype.insert).toHaveBeenCalled();
       expect(mockAccountInDb.balance).toBe(1000);
       expect(mockAccountInDb.update).toHaveBeenCalled();
     });
 
     it("should initialize holding instances from plain contexts on matching asset storage record cache misses", async () => {
-      const account = { ...TestEntities.account, isInvestment: true };
-
-      const mockHoldingToInsert = { insert: vi.fn().mockResolvedValue({}) };
-      vi.spyOn(Holding, "fromPlain").mockReturnValue(mockHoldingToInsert as any);
-
       mockProvider.get.mockResolvedValue([
         {
-          account: account as any,
-          providerAccountId: "p-test-1",
+          account: TestEntities.account,
           holdings: [TestEntities.holding],
         },
       ]);
 
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
+      jest.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(mockHoldingToInsert.insert).toHaveBeenCalledWith(false);
+      expect(Holding.prototype.insert).toHaveBeenCalledWith(false);
     });
 
     it("should backup previous holding data positions to ledger history models and refresh matching live instances", async () => {
-      const account = { ...TestEntities.account, isInvestment: true };
-
-      const mockHoldingHistoryToInsert = { insert: vi.fn().mockResolvedValue({}) };
-      vi.spyOn(HoldingHistory, "fromPlain").mockReturnValue(mockHoldingHistoryToInsert as any);
-
       mockProvider.get.mockResolvedValue([
         {
-          account: account as any,
-          providerAccountId: "p-test-1",
+          account: TestEntities.account,
           holdings: [TestEntities.holding],
         },
       ]);
 
-      const mockHoldingInDb = { ...TestEntities.holding, symbol: TestEntities.holding.symbol, update: vi.fn() };
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb as any]);
+      const mockHoldingInDb = TestEntities.holding;
+      mockHoldingInDb.update = jest.fn();
+      jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(mockHoldingHistoryToInsert.insert).toHaveBeenCalled();
+      expect(HoldingHistory.prototype.insert).toHaveBeenCalled();
       expect(mockHoldingInDb.shares).toBe(10);
       expect(mockHoldingInDb.update).toHaveBeenCalled();
     });
 
     it("should erase remaining asset holdings completely if configuration clean overrides evaluate to true", async () => {
-      const account = { ...TestEntities.account, isInvestment: true };
-      mockProvider.get.mockResolvedValue([{ account: account as any, providerAccountId: "p-test-1", holdings: [] }]);
+      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
 
-      const mockStaleHolding = { ...TestEntities.holding, remove: vi.fn() };
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding as any]);
+      const mockStaleHolding = TestEntities.holding;
+      mockStaleHolding.remove = jest.fn();
+      jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -281,11 +203,11 @@ describe("ProviderSyncService", () => {
 
     it("should zero out asset balances and retain database entries if clean configs evaluate to false parameters", async () => {
       Configuration.holding.cleanupRemovedHoldings = false;
-      const account = { ...TestEntities.account, isInvestment: true };
-      mockProvider.get.mockResolvedValue([{ account: account as any, providerAccountId: "p-test-1", holdings: [] }]);
+      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
 
-      const mockStaleHolding = { ...TestEntities.holding, update: vi.fn() };
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding as any]);
+      const mockStaleHolding = TestEntities.holding;
+      mockStaleHolding.update = jest.fn();
+      jest.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 

@@ -5,14 +5,7 @@ description: Learn how to install and use Sprout.
 
 # Installation
 
-The recommended way to install Sprout is with Docker.
-
-## Prerequisites
-
-Before installing Sprout, ensure you have the following software installed on your server or host system:
-
-- [Docker Engine](https://docs.docker.com/engine/install/) (v20.10 or newer)
-- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0 or newer, recommended)
+The recommended way to install Sprout is with a Docker image.
 
 ## Docker Setup
 

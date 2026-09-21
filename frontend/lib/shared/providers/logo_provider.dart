@@ -83,9 +83,7 @@ Future<List<String>> websiteIcon(
   double size, {
   String type = 'svg',
 }) async {
-// Await the future to ensure it loads fully in background contexts
-  final secureConfig = await ref.watch(secureConfigProvider.future);
-  final clientId = secureConfig?.brandFetchClientId;
+  final clientId = ref.watch(secureConfigProvider).value?.brandFetchClientId;
   if (clientId == null || websiteUrl.isEmpty) return [];
 
   final domain = _cleanDomain(websiteUrl);

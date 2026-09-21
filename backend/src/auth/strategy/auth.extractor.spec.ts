@@ -4,7 +4,7 @@ setupTests();
 import { extractIdToken } from "@backend/auth/strategy/auth.extractor";
 import { Request } from "express";
 
-vi.mock("@backend/auth/auth.service", () => ({
+jest.mock("@backend/auth/auth.service", () => ({
   AuthService: {
     idTokenCookie: "id_token_cookie_key",
   },

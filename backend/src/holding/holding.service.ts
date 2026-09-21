@@ -1,6 +1,6 @@
 import { Account } from "@backend/account/model/account.model";
 import { MajorIndexTimelineDto, MajorIndexTimelinePoint } from "@backend/holding/model/api/major.index.timeline.dto";
-import { MarketIndexDto, MarketQuoteType } from "@backend/holding/model/api/mark.index.dto";
+import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { EntityHistory } from "@backend/net-worth/model/api/entity.history.dto";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
@@ -68,7 +68,7 @@ export class HoldingService {
                 modules: ["price", "summaryDetail"],
               });
               return { symbol, summary };
-            } catch (e) {
+            } catch {
               return { symbol, summary: null };
             }
           }),
@@ -77,18 +77,7 @@ export class HoldingService {
         // Concurrent Cache Update
         await Promise.all(
           summaries.map(async ({ symbol, summary }) => {
-            if (!summary || !summary.price) {
-              const unknownDto = new MarketIndexDto({
-                symbol,
-                shortName: symbol,
-                quoteType: MarketQuoteType.INVALID,
-                regularMarketPrice: null,
-                regularMarketTime: new Date().toISOString(),
-              });
-              await this.cacheManager.set(`quote:${symbol}`, undefined, ttlMs);
-              finalResults.push(unknownDto);
-              return;
-            }
+            if (!summary || !summary.price) return;
             let rawYield = summary.summaryDetail?.dividendYield ?? summary.summaryDetail?.yield ?? 0.0;
             const isMutualFund = summary.price.quoteType === "MUTUALFUND";
 

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/account_tab_item.dart';
-import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/account/widgets/account_merge_dialog.dart';
 import 'package:sprout/account/widgets/account_net_worth.dart';
@@ -617,7 +616,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   /// Builds notifications to display for the account content
   Widget _buildNotifications(ThemeData theme) {
     final List<Widget> notifications = [];
-    final hasAnError = widget.account.hasProblem;
+    final hasAnError = widget.account.institution.hasError || widget.account.isArchived;
 
     if (hasAnError) {
       final String message;

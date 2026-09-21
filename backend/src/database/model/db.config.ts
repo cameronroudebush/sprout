@@ -1,12 +1,8 @@
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { registeredEntities } from "@backend/database/decorators";
-import betterSqlite3 from "better-sqlite3";
 import { glob } from "glob";
-import { createRequire } from "module";
 import path from "path";
 import { DataSourceOptions } from "typeorm";
-
-const nativeRequire = createRequire(__filename);
 
 /** SQLite specific configuration options */
 export class SQLiteConfig {
@@ -68,17 +64,12 @@ export class DatabaseConfig {
     const dbType: "sqlite" = this.type === "better-sqlite3" ? "sqlite" : "sqlite";
     const migrationsDirectory = path.resolve(path.join(__dirname, "database", "migration", dbType));
     const migrationFiles = glob.sync("/**/*.*[!.map]", { root: path.join(migrationsDirectory) });
-    const loadedMigrations = migrationFiles.flatMap((file) => {
-      const module = nativeRequire(file);
-      return Object.values(module);
-    });
     return {
       ...this.sqlite,
       type: this.type,
-      driver: betterSqlite3,
       entities: registeredEntities,
       migrationsRun: false,
-      migrations: loadedMigrations,
+      migrations: migrationFiles,
       synchronize: false,
     } as DataSourceOptions;
   }

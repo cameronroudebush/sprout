@@ -9,7 +9,7 @@ describe("AdminGuard", () => {
   let guard: AdminGuard;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     guard = new AdminGuard();
   });
 

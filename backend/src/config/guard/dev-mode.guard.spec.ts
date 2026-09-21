@@ -11,7 +11,7 @@ describe("DevModeGuard", () => {
   const originalIsRunningScript = Configuration.isRunningScript;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     guard = new DevModeGuard();
   });
 
@@ -38,7 +38,7 @@ describe("DevModeGuard", () => {
       Configuration.isRunningScript = false;
 
       const target = {};
-      const descriptor = { value: vi.fn() };
+      const descriptor = { value: jest.fn() };
       const decorator = DevModeGuard.attach();
 
       decorator(target, "testProperty", descriptor);

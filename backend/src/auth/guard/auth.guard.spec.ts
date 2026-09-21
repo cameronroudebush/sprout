@@ -1,7 +1,7 @@
 import { ExecutionContext, Logger } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
-vi.mock("@backend/config/core", () => ({
+jest.mock("@backend/config/core", () => ({
   Configuration: {
     isDevBuild: false,
     server: {
@@ -13,53 +13,58 @@ vi.mock("@backend/config/core", () => ({
   },
 }));
 
-vi.mock("@backend/auth/strategy/local.strategy", () => ({ LocalStrategyName: "local-strat" }));
-vi.mock("@backend/auth/strategy/oidc.strategy", () => ({ OIDCStrategyName: "oidc-strat" }));
-vi.mock("@nestjs/passport", () => ({
+jest.mock("@backend/auth/strategy/local.strategy", () => ({ LocalStrategyName: "local-strat" }));
+jest.mock("@backend/auth/strategy/oidc.strategy", () => ({ OIDCStrategyName: "oidc-strat" }));
+jest.mock("@nestjs/passport", () => ({
   AuthGuard: () => class MockPassportGuard {},
 }));
 
 describe("AuthGuard", () => {
-  let reflector: Mocked<Reflector>;
-  let mockContext: Mocked<ExecutionContext>;
+  let reflector: jest.Mocked<Reflector>;
+  let mockContext: jest.Mocked<ExecutionContext>;
 
   beforeAll(() => {
-    vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
-    vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
+    jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});
+    jest.spyOn(Logger.prototype, "error").mockImplementation(() => {});
   });
 
   beforeEach(() => {
-    reflector = { get: vi.fn() } as any;
-    mockContext = { getHandler: vi.fn(), getClass: vi.fn() } as any;
+    reflector = { get: jest.fn() } as any;
+    mockContext = { getHandler: jest.fn(), getClass: jest.fn() } as any;
   });
 
   // Helper returns both the guard instance and its internal isolated User class definition
-  async function getIsolatedGuardContext(authType: "local" | "oidc") {
-    const { Configuration } = await import("@backend/config/core.js");
+  function getIsolatedGuardContext(authType: "local" | "oidc") {
+    const { Configuration } = require("@backend/config/core");
     Configuration.server.auth.type = authType;
 
-    const { AuthGuard: AuthGuardClass } = await import("./auth.guard.js");
-    const { User: IsolatedUserModel } = await import("@backend/user/model/user.model.js");
+    let AuthGuardClass: any;
+    let IsolatedUserModel: any;
+
+    jest.isolateModules(() => {
+      AuthGuardClass = require("./auth.guard").AuthGuard;
+      IsolatedUserModel = require("@backend/user/model/user.model").User;
+    });
 
     const guardInstance = new AuthGuardClass(reflector);
     return { guard: guardInstance, User: IsolatedUserModel };
   }
 
   describe("Strategy Initialization", () => {
-    it("should initialize with LocalStrategyName when auth type is local", async () => {
-      const { guard } = await getIsolatedGuardContext("local");
+    it("should initialize with LocalStrategyName when auth type is local", () => {
+      const { guard } = getIsolatedGuardContext("local");
       expect(guard).toBeDefined();
     });
 
-    it("should initialize with OIDCStrategyName when auth type is oidc", async () => {
-      const { guard } = await getIsolatedGuardContext("oidc");
+    it("should initialize with OIDCStrategyName when auth type is oidc", () => {
+      const { guard } = getIsolatedGuardContext("oidc");
       expect(guard).toBeDefined();
     });
   });
 
   describe("handleRequest", () => {
-    it("should return the user if authentication succeeds and entity is a User instance", async () => {
-      const { guard, User } = await getIsolatedGuardContext("local");
+    it("should return the user if authentication succeeds and entity is a User instance", () => {
+      const { guard, User } = getIsolatedGuardContext("local");
       // Derive prototype explicitly from the isolated context's User class instance
       const mockUser = Object.create(User.prototype);
       reflector.get.mockReturnValue(false);
@@ -68,8 +73,8 @@ describe("AuthGuard", () => {
       expect(result).toBe(mockUser);
     });
 
-    it("should return null if authentication fails but anonymous access is permitted", async () => {
-      const { guard } = await getIsolatedGuardContext("local");
+    it("should return null if authentication fails but anonymous access is permitted", () => {
+      const { guard } = getIsolatedGuardContext("local");
       reflector.get.mockReturnValue(true);
 
       const result = guard.handleRequest(new Error("Auth failed"), null, null, mockContext);
@@ -77,23 +82,23 @@ describe("AuthGuard", () => {
       expect(reflector.get).toHaveBeenCalledWith("allow_anon", mockContext.getHandler());
     });
 
-    it("should throw the original error if authentication fails and anonymous access is disabled", async () => {
-      const { guard } = await getIsolatedGuardContext("local");
+    it("should throw the original error if authentication fails and anonymous access is disabled", () => {
+      const { guard } = getIsolatedGuardContext("local");
       const inputError = new Error("Custom passport error");
       reflector.get.mockReturnValue(false);
 
       expect(() => guard.handleRequest(inputError, null, null, mockContext)).toThrow("Custom passport error");
     });
 
-    it("should throw UnauthorizedException if passport fails without an explicit error object", async () => {
-      const { guard } = await getIsolatedGuardContext("local");
+    it("should throw UnauthorizedException if passport fails without an explicit error object", () => {
+      const { guard } = getIsolatedGuardContext("local");
       reflector.get.mockReturnValue(false);
 
       expect(() => guard.handleRequest(null, null, null, mockContext)).toThrow("Unauthorized");
     });
 
-    it("should throw UnauthorizedException if user is found but is not an instance of User model", async () => {
-      const { guard } = await getIsolatedGuardContext("local");
+    it("should throw UnauthorizedException if user is found but is not an instance of User model", () => {
+      const { guard } = getIsolatedGuardContext("local");
       const genericUserObj = { username: "imposter" };
       reflector.get.mockReturnValue(false);
 
@@ -102,13 +107,13 @@ describe("AuthGuard", () => {
   });
 
   describe("Static Decorator Attachments", () => {
-    it("should return valid decorator compositions for attach", async () => {
-      const { AuthGuard } = await import("./auth.guard.js");
+    it("should return valid decorator compositions for attach", () => {
+      const { AuthGuard } = require("./auth.guard");
       expect(AuthGuard.attach()).toBeDefined();
     });
 
-    it("should return valid decorator compositions for attachOptional", async () => {
-      const { AuthGuard } = await import("./auth.guard.js");
+    it("should return valid decorator compositions for attachOptional", () => {
+      const { AuthGuard } = require("./auth.guard");
       expect(AuthGuard.attachOptional()).toBeDefined();
     });
   });

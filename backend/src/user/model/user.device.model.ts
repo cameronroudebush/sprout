@@ -35,7 +35,7 @@ export class UserDevice extends DatabaseBase {
   lastSeenAt: Date = new Date();
 
   /** The user this device belongs to */
-  @ManyToOne("User", (u: User) => u.id, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (u) => u.id, { onDelete: "CASCADE" })
   @ApiHideProperty()
   @Exclude()
   user: User;

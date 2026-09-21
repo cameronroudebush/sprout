@@ -1,6 +1,7 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
+import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
@@ -14,7 +15,7 @@ describe("Account", () => {
   let mockInstitution: Institution;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockUser = { id: "user-123" } as User;
     mockInstitution = { id: "inst-123" } as Institution;
   });
@@ -56,12 +57,43 @@ describe("Account", () => {
 
   describe("getForUser", () => {
     it("should invoke the static DatabaseBase find method with the correct query structure", async () => {
-      const findSpy = vi.spyOn(Account, "find").mockResolvedValue([]);
+      const findSpy = jest.spyOn(Account, "find").mockResolvedValue([]);
 
       await Account.getForUser(mockUser);
 
       expect(findSpy).toHaveBeenCalledWith({
         where: { user: { id: "user-123" } },
+      });
+    });
+  });
+
+  describe("toAccountHistory", () => {
+    it("should generate an AccountHistory instance from the account metrics using the provided date", () => {
+      const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
+      const testDate = new Date("2026-06-02T00:00:00.000Z");
+      const fromPlainSpy = jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
+
+      account.toAccountHistory(testDate);
+
+      expect(fromPlainSpy).toHaveBeenCalledWith({
+        balance: 5000,
+        account: account,
+        availableBalance: 5000,
+        time: testDate,
+      });
+    });
+
+    it("should generate an AccountHistory instance using a default current date if none is supplied", () => {
+      const account = new Account("Savings", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 5000, 5000, AccountType.depository, "USD");
+      const fromPlainSpy = jest.spyOn(AccountHistory, "fromPlain").mockReturnValue({} as AccountHistory);
+
+      account.toAccountHistory();
+
+      expect(fromPlainSpy).toHaveBeenCalledWith({
+        balance: 5000,
+        account: account,
+        availableBalance: 5000,
+        time: expect.any(Date),
       });
     });
   });
@@ -98,7 +130,7 @@ describe("Account", () => {
       const account1 = new Account("A1", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, 10, 10, AccountType.depository, "EUR");
       const account2 = new Account("A2", ProviderType.simpleFin, crypto.randomUUID(), mockUser, mockInstitution, 20, 20, AccountType.depository, "GBP");
       const list = [account1, account2];
-      const convertListSpy = vi.spyOn(CurrencyHelper, "convertList").mockImplementation(() => {});
+      const convertListSpy = jest.spyOn(CurrencyHelper, "convertList").mockImplementation(() => {});
 
       const result = Account.convertListToTargetCurrency(list, mockUser);
 

@@ -79,7 +79,9 @@ class EntityHistoryDataPoint {
 
       return EntityHistoryDataPoint(
         start: mapDateTime(json, r'start', r'')!,
-        percentChange: num.parse('${json[r'percentChange']}'),
+        percentChange: json[r'percentChange'] == null
+            ? null
+            : num.parse('${json[r'percentChange']}'),
         valueChange: num.parse('${json[r'valueChange']}'),
       );
     }

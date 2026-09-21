@@ -24,7 +24,7 @@ import { EmailService } from "./email.service";
         },
       },
       template: {
-        dir: path.join(import.meta.dirname, "templates"),
+        dir: path.join(__dirname, "templates"),
         adapter: new EjsAdapter(),
         options: {
           strict: true,

@@ -11,20 +11,20 @@ import { User } from "@backend/user/model/user.model";
 
 describe("ProviderSyncJob", () => {
   let job: ProviderSyncJob;
-  let providerSyncService: Mocked<ProviderSyncService>;
+  let providerSyncService: jest.Mocked<ProviderSyncService>;
   let mockProvider: ProviderBase;
   let mockUser: User;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     providerSyncService = {
-      syncForProvider: vi.fn(),
+      syncForProvider: jest.fn(),
     } as any;
 
     mockProvider = {
       config: { dbType: ProviderType.plaid },
-      getAppConfiguration: vi.fn().mockReturnValue({
+      getAppConfiguration: jest.fn().mockReturnValue({
         syncFrequency: "0 0 * * *",
         enabled: true,
       }),
@@ -36,8 +36,8 @@ describe("ProviderSyncJob", () => {
 
     // Ensure logger exists on instance for spy coverage
     (job as any).logger = {
-      log: vi.fn(),
-      error: vi.fn(),
+      log: jest.fn(),
+      error: jest.fn(),
     };
   });
 
@@ -50,8 +50,8 @@ describe("ProviderSyncJob", () => {
 
   describe("generateTasks", () => {
     it("should execute cleanup and return mapped user task payloads", async () => {
-      const cleanupSpy = vi.spyOn(job as any, "cleanupOldSyncs").mockResolvedValue(undefined);
-      const findSpy = vi.spyOn(User, "find").mockResolvedValue([User.fromPlain({ id: "u1" }) as User, User.fromPlain({ id: "u2" }) as User]);
+      const cleanupSpy = jest.spyOn(job as any, "cleanupOldSyncs").mockResolvedValue(undefined);
+      const findSpy = jest.spyOn(User, "find").mockResolvedValue([User.fromPlain({ id: "u1" }) as User, User.fromPlain({ id: "u2" }) as User]);
 
       const result = await (job as any).generateTasks();
 
@@ -63,7 +63,7 @@ describe("ProviderSyncJob", () => {
 
   describe("processTask", () => {
     it("should fetch user and invoke providerSyncService", async () => {
-      const findOneSpy = vi.spyOn(User, "findOne").mockResolvedValue(mockUser);
+      const findOneSpy = jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
       providerSyncService.syncForProvider.mockResolvedValue({ status: "synced" } as any);
 
       const result = await job.processTask({ userId: "user-abc" });
@@ -74,7 +74,7 @@ describe("ProviderSyncJob", () => {
     });
 
     it("should return early if user is not found in database", async () => {
-      vi.spyOn(User, "findOne").mockResolvedValue(null);
+      jest.spyOn(User, "findOne").mockResolvedValue(null);
 
       const result = await job.processTask({ userId: "user-missing" });
 
@@ -85,16 +85,16 @@ describe("ProviderSyncJob", () => {
 
   describe("cleanupOldSyncs", () => {
     beforeEach(() => {
-      vi.useFakeTimers().setSystemTime(new Date("2026-06-02T12:00:00.000Z"));
+      jest.useFakeTimers().setSystemTime(new Date("2026-06-02T12:00:00.000Z"));
     });
 
     afterEach(() => {
-      vi.useRealTimers();
+      jest.useRealTimers();
     });
 
     it("should delete old sync records and log affected count when > 0", async () => {
-      const deleteSpy = vi.spyOn(Sync, "delete").mockResolvedValue({ affected: 15 } as any);
-      const logSpy = vi.spyOn((job as any).logger, "log");
+      const deleteSpy = jest.spyOn(Sync, "delete").mockResolvedValue({ affected: 15 } as any);
+      const logSpy = jest.spyOn((job as any).logger, "log");
 
       await (job as any).cleanupOldSyncs();
 
@@ -106,8 +106,8 @@ describe("ProviderSyncJob", () => {
     });
 
     it("should skip log emission when affected count is 0 or undefined", async () => {
-      vi.spyOn(Sync, "delete").mockResolvedValue({ affected: 0 } as any);
-      const logSpy = vi.spyOn((job as any).logger, "log");
+      jest.spyOn(Sync, "delete").mockResolvedValue({ affected: 0 } as any);
+      const logSpy = jest.spyOn((job as any).logger, "log");
 
       await (job as any).cleanupOldSyncs();
 
@@ -115,8 +115,8 @@ describe("ProviderSyncJob", () => {
     });
 
     it("should catch and log error on database failure without throwing", async () => {
-      vi.spyOn(Sync, "delete").mockRejectedValue(new Error("Database connection timeout"));
-      const errorSpy = vi.spyOn((job as any).logger, "error");
+      jest.spyOn(Sync, "delete").mockRejectedValue(new Error("Database connection timeout"));
+      const errorSpy = jest.spyOn((job as any).logger, "error");
 
       await expect((job as any).cleanupOldSyncs(60)).resolves.not.toThrow();
       expect(errorSpy).toHaveBeenCalledWith("Failed to cleanup old sync records: Database connection timeout");

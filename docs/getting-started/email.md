@@ -21,11 +21,11 @@ To enable email functionality, you must set the following environment variables 
 | `sprout_server_email_user`    | The username for your SMTP server.                          |
 | `sprout_server_email_pass`    | The password or App Password for your SMTP server.          |
 
-For more configuration information, [see the configuration page](./configuration.md).
+Fore more configuration information, [see the configuration page](./configuration.md).
 
 ## Using email
 
-To utilize email, it is by default disabled for every user. To enable it, navigate to settings, confirm your email address is populated, then set the update interval. If the interval is not set, or no email is set, then you will not receive reports as part of the recurring job.
+To utilize email, it is by default disabled for every user. To enable it, navigate to settings, confirm your email is populated, then set the update interval. If the interval is not set, or no email is set, then you will not receive the email as part of the reoccurring job.
 
 ## Email Varieties
 

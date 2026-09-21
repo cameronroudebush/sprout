@@ -48,7 +48,7 @@ export class WeeklyEmailContent {
   /** Daily spending chart metrics */
   dailySpendingBars: Array<{ label: string; amount: number; amountText: string; heightPercent: number }>;
 
-  transactions: Array<{ description: string; category: string; amount: number; amountText: string; iconUrl?: string | null; pending?: boolean }>;
+  transactions: Array<{ description: string; category: string; amount: number; amountText: string; iconUrl?: string | null }>;
 
   constructor(user: User, totalNetWorth: number, weeklyExpenses: number, weeklyIncome: number, transactionCount: number, transactions: Array<Transaction>) {
     this.user = user.username;

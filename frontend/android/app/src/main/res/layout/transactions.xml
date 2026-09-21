@@ -51,7 +51,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/widget_header"
         android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
+        android:dividerHeight="8dp"
         android:scrollbars="none"
         android:visibility="gone"
         tools:itemCount="3"

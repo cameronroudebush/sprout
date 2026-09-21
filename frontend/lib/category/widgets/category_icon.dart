@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/shared/widgets/logo_base.dart';
 
 /// An icon display for transaction categories
-class CategoryIcon extends LogoBaseWidget<Category?> {
-  /// Creates a [CategoryIcon] instance.
-  const CategoryIcon(
-    Category? category, {
-    super.key,
-    double avatarSize = 20.0,
-    super.backgroundColor,
-  }) : super(category, size: avatarSize * 2);
+class CategoryIcon extends StatelessWidget {
+  final Category? category;
+  final double avatarSize;
+  const CategoryIcon(this.category, {super.key, this.avatarSize = 20});
 
   /// Icons that we support for our category display
   static const Map<String, IconData> iconLibrary = {
@@ -164,29 +157,16 @@ class CategoryIcon extends LogoBaseWidget<Category?> {
     'category': Icons.category,
   };
 
-  /// Attempts to load the icon from the library, else defaults to the question mark icon
+  /// Attempts to load the icon from the library, else defaults to the category icon
   IconData _getIconForCategory(Category? category) {
     return iconLibrary[category?.icon] ?? Icons.question_mark_rounded;
   }
 
   @override
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, Category? data, double size) {
-    // Categories do not fetch remote network URLs; return an empty list data provider
-    return Provider((_) => const AsyncValue.data([]));
-  }
-
-  @override
-  Color? getBackgroundColor(BuildContext context) {
-    return backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
-  }
-
-  @override
-  Icon getFallbackIcon(BuildContext context) {
-    final theme = Theme.of(context);
-    return Icon(
-      _getIconForCategory(logoClass),
-      size: size / 2,
-      color: theme.colorScheme.onPrimaryContainer,
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: avatarSize,
+      child: Icon(_getIconForCategory(category), size: avatarSize),
     );
   }
 }

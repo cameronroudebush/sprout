@@ -25,7 +25,7 @@ export class Sync extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: true })
   declare failureReason?: string;
 
-  @DatabaseDecorators.column({ nullable: false, enum: ProviderType })
+  @DatabaseDecorators.column({ nullable: false })
   provider!: ProviderType;
 
   /** This user properly allows us to track if this sync was for a specific user */
@@ -39,7 +39,7 @@ export class Sync extends DatabaseBase {
    * Used by post-sync processing to differentiate scheduled notification batches
    * from silent webhooks or user-initiated refreshes.
    */
-  @DatabaseDecorators.column({ type: "varchar", enum: SyncTriggerType, default: SyncTriggerType.SCHEDULED })
+  @DatabaseDecorators.column({ type: "varchar", default: SyncTriggerType.SCHEDULED })
   @ApiHideProperty()
   @IsEnum(SyncTriggerType)
   @Exclude({ toPlainOnly: true })

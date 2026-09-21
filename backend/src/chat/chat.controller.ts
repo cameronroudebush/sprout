@@ -12,8 +12,8 @@ import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Query, RequestTimeoutException } from "@nestjs/common";
 import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { CronExpressionParser } from "cron-parser";
-import { startCase } from "lodash-es";
+import cronParser from "cron-parser";
+import { startCase } from "lodash";
 
 /** This controller provides the endpoint for chatting with LLM's */
 @Controller("chat")
@@ -85,7 +85,7 @@ export class ChatController {
     if (status) {
       // Find the last scheduled sync time before NOW using the configured cron schedule
       const cron = Configuration.providers.simpleFIN.syncFrequency;
-      const interval = CronExpressionParser.parse(cron, { currentDate: new Date() });
+      const interval = cronParser.parse(cron, { currentDate: new Date() });
       const lastScheduledSyncTime = interval.prev().toDate();
 
       // If status was generated AFTER the last scheduled sync execution, it is still fresh

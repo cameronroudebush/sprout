@@ -8,15 +8,15 @@ import { Reflector } from "@nestjs/core";
 
 describe("EnabledGuard", () => {
   let guard: EnabledGuard;
-  let reflector: Mocked<Reflector>;
+  let reflector: jest.Mocked<Reflector>;
   const originalIsDemoMode = Configuration.isDemoMode;
   const originalIsDevBuild = Configuration.isDevBuild;
   const originalIsRunningScript = Configuration.isRunningScript;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     reflector = {
-      getAllAndOverride: vi.fn(),
+      getAllAndOverride: jest.fn(),
     } as any;
     guard = new EnabledGuard(reflector);
   });
@@ -30,8 +30,8 @@ describe("EnabledGuard", () => {
   describe("canActivate", () => {
     function createMockContext(): ExecutionContext {
       return {
-        getHandler: () => vi.fn(),
-        getClass: () => vi.fn(),
+        getHandler: () => jest.fn(),
+        getClass: () => jest.fn(),
       } as any;
     }
 
@@ -72,7 +72,7 @@ describe("EnabledGuard", () => {
       Configuration.isRunningScript = false;
 
       const target = {};
-      const descriptor = { value: vi.fn() };
+      const descriptor = { value: jest.fn() };
       const decorator = EnabledGuard.attach(false, { hideFromDocs: true });
 
       decorator(target, "myEndpoint", descriptor);

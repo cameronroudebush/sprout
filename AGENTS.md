@@ -184,14 +184,6 @@ To install all dependencies across root and backend projects:
 npm run install:all
 ```
 
-### Production Build
-
-To compile the backend production build and binary executable:
-
-```bash
-npm run build --prefix backend
-```
-
 ### Backend Testing & Coverage Guidelines
 
 When working with backend unit tests:
@@ -210,13 +202,13 @@ When working with backend unit tests:
 4. **Writing Backend Unit Tests**:
     - Always invoke `setupTests()` from `@backend/test/helpers` at the top of each test file before importing NestJS modules or application entities:
         ```typescript
-        import { setupTests } from "@backend/test/helpers.js";
+        import { setupTests } from "@backend/test/helpers";
         setupTests();
         ```
     - Use NestJS absolute path aliases starting with `@backend/`.
-    - Use `vi.clearAllMocks()` in `beforeEach()` to ensure strict test isolation.
+    - Use `jest.clearAllMocks()` in `beforeEach()` to ensure strict test isolation.
     - For static properties or global state modified in tests (e.g. `Configuration.server.auth`), capture original values and restore them in `afterEach()`.
-    - Use `vi.spyOn()` for static model methods.
+    - Use `jest.spyOn()` for static model methods.
     - Use `.rejects.toThrow()` for asynchronous error assertions.
 
 ### OpenAPI Client Generation
@@ -270,42 +262,3 @@ npm run migrate --prefix backend -- --name=MY-NAME-HERE
     ```bash
     npm run prettier:check
     ```
-
-## Documentation Structure & Formatting Guidelines
-
-When writing, updating, or reorganizing documentation under `/docs`:
-
-1. **Frontmatter Standards:**
-    - Every Markdown file in `docs/` should start with valid YAML frontmatter specifying `title` and `description`.
-    - If navigation elements or table of contents need to be hidden, use valid syntax under `hide:` (e.g. `hide:\n  - navigation\n  - toc`). Do not leave `hide:` empty.
-
-2. **Heading Hierarchy:**
-    - Use a single level-1 heading (`# Page Title`) per document.
-    - Organize sub-sections using level-2 (`## Section`) and level-3 (`### Sub-section`) headings sequentially. Avoid skipping heading levels.
-
-3. **MkDocs Material Admonitions:**
-    - Use standard MkDocs Material admonition blocks for important tips, notes, warnings, or security warnings:
-        ```markdown
-        !!! note "Optional Configuration"
-        Content goes here.
-
-        !!! warning "Security Warning"
-        Content goes here.
-        ```
-    - Ensure indented code blocks or lists inside admonitions are indented properly (4 spaces per level) so MkDocs renders them cleanly.
-
-4. **Environment Variables & Configuration Standards:**
-    - All environment variable references must strictly match application runtime keys (prefixed with `sprout_` and using underscores for nested YAML properties, e.g., `sprout_server_publicUrl`).
-    - Present environment variables using formatted Markdown tables with clear column headers: `Variable`, `Required`, `Default`, and `Description`.
-
-5. **Code Snippets & Command Examples:**
-    - Specify exact syntax highlighting tags for code blocks (`yaml title="..." linenums="1"`, `bash`, `powershell`, `sql`, `typescript`).
-    - Ensure command examples and sample code snippets are clear, self-contained, and tested.
-
-6. **Usability & Onboarding:**
-    - Include explicit **Prerequisites** and **Step-by-Step** instructions for new users setting up features.
-    - Provide relative Markdown links (`[Configuration](./configuration.md)`) when referencing other documentation pages and verify all relative links resolve correctly.
-
-7. **Doc Formatting & Validation:**
-    - Validate Markdown and code formatting by running `npm run prettier:write`.
-    - Verify that documentation builds cleanly without syntax errors using `python3 -m mkdocs build` (or `npm run docs:serve` via Docker).

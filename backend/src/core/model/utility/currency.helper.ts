@@ -6,7 +6,7 @@ import { User } from "@backend/user/model/user.model";
 import { Logger } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { get } from "lodash-es";
+import { get } from "lodash";
 
 /** This class provides formatting help to convert currencies between one another and format them into strings. */
 export class CurrencyHelper {

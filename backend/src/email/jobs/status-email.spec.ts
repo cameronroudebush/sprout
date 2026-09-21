@@ -10,13 +10,13 @@ import { IsNull, Not } from "typeorm";
 
 describe("StatusEmailJob", () => {
   let job: StatusEmailJob;
-  let emailService: Mocked<EmailService>;
+  let emailService: jest.Mocked<EmailService>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     emailService = {
-      sendWeeklyUpdate: vi.fn(),
+      sendWeeklyUpdate: jest.fn(),
     } as any;
 
     job = new StatusEmailJob(emailService);
@@ -24,9 +24,9 @@ describe("StatusEmailJob", () => {
 
   describe("generateTasks", () => {
     it("should validate configurations, query targeted users with weekly configurations, and map down to queue payloads", async () => {
-      const validateSpy = vi.spyOn(Configuration.server.email, "validate").mockImplementation(() => {});
-      const findSpy = vi.spyOn(User, "find").mockResolvedValue([User.fromPlain({ id: "user-alpha" }), User.fromPlain({ id: "user-beta" })]);
-      const logSpy = vi.spyOn((job as any).logger, "log");
+      const validateSpy = jest.spyOn(Configuration.server.email, "validate").mockImplementation(() => {});
+      const findSpy = jest.spyOn(User, "find").mockResolvedValue([User.fromPlain({ id: "user-alpha" }), User.fromPlain({ id: "user-beta" })]);
+      const logSpy = jest.spyOn((job as any).logger, "log");
 
       const result = await (job as any).generateTasks();
 
@@ -46,7 +46,7 @@ describe("StatusEmailJob", () => {
   describe("processTask", () => {
     it("should load the precise user object and dispatch the operational transmission through email service parameters", async () => {
       const mockUser = User.fromPlain({ id: "user-alpha", email: "alpha@domain.local" });
-      const findOneSpy = vi.spyOn(User, "findOne").mockResolvedValue(mockUser);
+      const findOneSpy = jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
       emailService.sendWeeklyUpdate.mockResolvedValue(undefined);
 
       await (job as any).processTask({ userId: "user-alpha" });
@@ -57,9 +57,9 @@ describe("StatusEmailJob", () => {
 
     it("should swallow downstream dispatch failures safely and redirect details out to internal error log parameters", async () => {
       const mockUser = User.fromPlain({ id: "user-beta" });
-      vi.spyOn(User, "findOne").mockResolvedValue(mockUser);
+      jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
       emailService.sendWeeklyUpdate.mockRejectedValue(new Error("SMTP server unreachable"));
-      const errorSpy = vi.spyOn((job as any).logger, "error");
+      const errorSpy = jest.spyOn((job as any).logger, "error");
 
       await expect((job as any).processTask({ userId: "user-beta" })).resolves.not.toThrow();
       expect(errorSpy).toHaveBeenCalledWith("Failed to process status email task for user ID user-beta: SMTP server unreachable");

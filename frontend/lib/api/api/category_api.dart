@@ -25,7 +25,7 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [Category] category (required):
-  Future<Response> categoryControllerCreateWithHttpInfo(Category category,) async {
+  Future<Response> categoryControllerCreateWithHttpInfo(Category category, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category';
 
@@ -47,6 +47,7 @@ class CategoryApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -57,8 +58,8 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [Category] category (required):
-  Future<Category?> categoryControllerCreate(Category category,) async {
-    final response = await categoryControllerCreateWithHttpInfo(category,);
+  Future<Category?> categoryControllerCreate(Category category, { Future<void>? abortTrigger, }) async {
+    final response = await categoryControllerCreateWithHttpInfo(category, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -81,7 +82,7 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> categoryControllerDeleteWithHttpInfo(String id,) async {
+  Future<Response> categoryControllerDeleteWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/{id}'
       .replaceAll('{id}', id);
@@ -104,6 +105,7 @@ class CategoryApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -114,8 +116,8 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> categoryControllerDelete(String id,) async {
-    final response = await categoryControllerDeleteWithHttpInfo(id,);
+  Future<void> categoryControllerDelete(String id, { Future<void>? abortTrigger, }) async {
+    final response = await categoryControllerDeleteWithHttpInfo(id, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -132,7 +134,7 @@ class CategoryApi {
   /// * [String] id (required):
   ///
   /// * [Category] category (required):
-  Future<Response> categoryControllerEditWithHttpInfo(String id, Category category,) async {
+  Future<Response> categoryControllerEditWithHttpInfo(String id, Category category, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/{id}'
       .replaceAll('{id}', id);
@@ -155,6 +157,7 @@ class CategoryApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -167,8 +170,8 @@ class CategoryApi {
   /// * [String] id (required):
   ///
   /// * [Category] category (required):
-  Future<Category?> categoryControllerEdit(String id, Category category,) async {
-    final response = await categoryControllerEditWithHttpInfo(id, category,);
+  Future<Category?> categoryControllerEdit(String id, Category category, { Future<void>? abortTrigger, }) async {
+    final response = await categoryControllerEditWithHttpInfo(id, category, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -187,7 +190,7 @@ class CategoryApi {
   /// Retrieves all categories for the authenticated user.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> categoryControllerGetCategoriesWithHttpInfo() async {
+  Future<Response> categoryControllerGetCategoriesWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category';
 
@@ -209,14 +212,15 @@ class CategoryApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Get categories.
   ///
   /// Retrieves all categories for the authenticated user.
-  Future<List<Category>?> categoryControllerGetCategories() async {
-    final response = await categoryControllerGetCategoriesWithHttpInfo();
+  Future<List<Category>?> categoryControllerGetCategories({ Future<void>? abortTrigger, }) async {
+    final response = await categoryControllerGetCategoriesWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -252,7 +256,7 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
+  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/stats';
 
@@ -285,6 +289,7 @@ class CategoryApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -305,8 +310,8 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<CategoryStats?> categoryControllerGetCategoryStats(num year, { num? month, num? day, String? accountId, }) async {
-    final response = await categoryControllerGetCategoryStatsWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
+  Future<CategoryStats?> categoryControllerGetCategoryStats(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
+    final response = await categoryControllerGetCategoryStatsWithHttpInfo(year, month: month, day: day, accountId: accountId, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -330,7 +335,7 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> categoryControllerGetUnknownCategoryStatsWithHttpInfo({ String? accountId, }) async {
+  Future<Response> categoryControllerGetUnknownCategoryStatsWithHttpInfo({ String? accountId, Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/stats/unknown';
 
@@ -356,6 +361,7 @@ class CategoryApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -367,8 +373,8 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<int?> categoryControllerGetUnknownCategoryStats({ String? accountId, }) async {
-    final response = await categoryControllerGetUnknownCategoryStatsWithHttpInfo( accountId: accountId, );
+  Future<int?> categoryControllerGetUnknownCategoryStats({ String? accountId, Future<void>? abortTrigger, }) async {
+    final response = await categoryControllerGetUnknownCategoryStatsWithHttpInfo(accountId: accountId, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

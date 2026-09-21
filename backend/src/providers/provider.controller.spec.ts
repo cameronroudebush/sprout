@@ -12,30 +12,30 @@ import { InternalServerErrorException } from "@nestjs/common";
 
 describe("BaseProviderController", () => {
   let controller: BaseProviderController;
-  let sseService: Mocked<SSEService>;
-  let providerService: Mocked<ProviderService>;
+  let sseService: jest.Mocked<SSEService>;
+  let providerService: jest.Mocked<ProviderService>;
   let mockProviders: any[];
   const user = TestEntities.user;
 
   beforeEach(() => {
     sseService = {
-      sendToUser: vi.fn(),
+      sendToUser: jest.fn(),
     } as any;
 
     providerService = {
-      syncUserProviders: vi.fn(),
+      syncUserProviders: jest.fn(),
     } as any;
 
     mockProviders = [
       {
         config: { dbType: "plaid", name: "Plaid", enabled: true },
-        getAppConfiguration: vi.fn().mockReturnValue({ enabled: true }),
-        isAvailable: vi.fn().mockResolvedValue(true),
+        getAppConfiguration: jest.fn().mockReturnValue({ enabled: true }),
+        isAvailable: jest.fn().mockResolvedValue(true),
       },
       {
         config: { dbType: "disabled_provider", name: "Disabled", enabled: false },
-        getAppConfiguration: vi.fn().mockReturnValue({ enabled: false }),
-        isAvailable: vi.fn().mockResolvedValue(false),
+        getAppConfiguration: jest.fn().mockReturnValue({ enabled: false }),
+        isAvailable: jest.fn().mockResolvedValue(false),
       },
     ];
 
@@ -54,13 +54,13 @@ describe("BaseProviderController", () => {
 
   describe("manualSync", () => {
     it("should throw InternalServerErrorException if a sync is already running and force is false", async () => {
-      vi.spyOn(Sync, "findOne").mockResolvedValue(TestEntities.sync);
+      jest.spyOn(Sync, "findOne").mockResolvedValue(TestEntities.sync);
 
       await expect(controller.manualSync(user, { force: false })).rejects.toThrow(InternalServerErrorException);
     });
 
     it("should proceed with sync if a sync is running but force is true", async () => {
-      vi.spyOn(Sync, "findOne").mockResolvedValue(TestEntities.sync);
+      jest.spyOn(Sync, "findOne").mockResolvedValue(TestEntities.sync);
       const syncResult = TestEntities.sync;
       providerService.syncUserProviders.mockResolvedValue([syncResult] as any);
 
@@ -71,7 +71,7 @@ describe("BaseProviderController", () => {
     });
 
     it("should sync all providers if providers list is empty or omitted", async () => {
-      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+      jest.spyOn(Sync, "findOne").mockResolvedValue(null);
       const syncResult = TestEntities.sync;
       providerService.syncUserProviders.mockResolvedValue([syncResult] as any);
 
@@ -83,7 +83,7 @@ describe("BaseProviderController", () => {
     });
 
     it("should sync specific requested providers if provided", async () => {
-      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+      jest.spyOn(Sync, "findOne").mockResolvedValue(null);
       const syncResult = TestEntities.sync;
       providerService.syncUserProviders.mockResolvedValue(syncResult as any);
 

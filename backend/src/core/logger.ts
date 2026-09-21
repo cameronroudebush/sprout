@@ -1,14 +1,9 @@
 import { TimeZone } from "@backend/config/model/tz";
-import { ConsoleLogger, ConsoleLoggerOptions, Injectable, LogLevel, Optional, Scope } from "@nestjs/common";
+import { ConsoleLogger, LogLevel } from "@nestjs/common";
 
 /** A custom logger to use with NestJS to improve our logging capabilities */
-@Injectable({ scope: Scope.TRANSIENT })
 export class SproutLogger extends ConsoleLogger {
   static contextsToIgnore = ["InstanceLoader", "RoutesResolver", "RouterExplorer", "NestFactory", "NestApplication"];
-
-  constructor(@Optional() context?: string, @Optional() options?: ConsoleLoggerOptions) {
-    super(context ?? "Sprout", options ?? {});
-  }
 
   // Color codes for console display
   private readonly colorCodes = {

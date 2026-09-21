@@ -4,8 +4,7 @@ import { HoldingConfig } from "@backend/holding/model/holding.config";
 import { ProvidersConfig } from "@backend/providers/model/provider.config";
 import { TransactionConfig } from "@backend/transaction/model/transaction.config";
 import { UserConfig } from "@backend/user/model/user.config.backend.model";
-import pkg from "../../package.json" with { type: "json" };
-const { name } = pkg;
+import { name } from "../../package.json";
 import { ConfigurationMetadata } from "./model/configuration.metadata";
 
 /**

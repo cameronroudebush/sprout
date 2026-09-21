@@ -29,7 +29,7 @@ class TransactionRuleApi {
   ///
   /// * [bool] resetCategories:
   ///   If true, resets categories to null for transactions that do not match any current rules.
-  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({ bool? force, bool? resetCategories, }) async {
+  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({ bool? force, bool? resetCategories, Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule/apply';
 
@@ -58,6 +58,7 @@ class TransactionRuleApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -72,8 +73,8 @@ class TransactionRuleApi {
   ///
   /// * [bool] resetCategories:
   ///   If true, resets categories to null for transactions that do not match any current rules.
-  Future<void> transactionRuleControllerApplyRules({ bool? force, bool? resetCategories, }) async {
-    final response = await transactionRuleControllerApplyRulesWithHttpInfo( force: force, resetCategories: resetCategories, );
+  Future<void> transactionRuleControllerApplyRules({ bool? force, bool? resetCategories, Future<void>? abortTrigger, }) async {
+    final response = await transactionRuleControllerApplyRulesWithHttpInfo(force: force, resetCategories: resetCategories, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -88,7 +89,7 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<Response> transactionRuleControllerCreateWithHttpInfo(TransactionRule transactionRule,) async {
+  Future<Response> transactionRuleControllerCreateWithHttpInfo(TransactionRule transactionRule, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule';
 
@@ -110,6 +111,7 @@ class TransactionRuleApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -120,8 +122,8 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<TransactionRule?> transactionRuleControllerCreate(TransactionRule transactionRule,) async {
-    final response = await transactionRuleControllerCreateWithHttpInfo(transactionRule,);
+  Future<TransactionRule?> transactionRuleControllerCreate(TransactionRule transactionRule, { Future<void>? abortTrigger, }) async {
+    final response = await transactionRuleControllerCreateWithHttpInfo(transactionRule, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -144,7 +146,7 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> transactionRuleControllerDeleteWithHttpInfo(String id,) async {
+  Future<Response> transactionRuleControllerDeleteWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule/{id}'
       .replaceAll('{id}', id);
@@ -167,6 +169,7 @@ class TransactionRuleApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -177,8 +180,8 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> transactionRuleControllerDelete(String id,) async {
-    final response = await transactionRuleControllerDeleteWithHttpInfo(id,);
+  Future<void> transactionRuleControllerDelete(String id, { Future<void>? abortTrigger, }) async {
+    final response = await transactionRuleControllerDeleteWithHttpInfo(id, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -195,7 +198,7 @@ class TransactionRuleApi {
   /// * [String] id (required):
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<Response> transactionRuleControllerEditWithHttpInfo(String id, TransactionRule transactionRule,) async {
+  Future<Response> transactionRuleControllerEditWithHttpInfo(String id, TransactionRule transactionRule, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule/{id}'
       .replaceAll('{id}', id);
@@ -218,6 +221,7 @@ class TransactionRuleApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -230,8 +234,8 @@ class TransactionRuleApi {
   /// * [String] id (required):
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<TransactionRule?> transactionRuleControllerEdit(String id, TransactionRule transactionRule,) async {
-    final response = await transactionRuleControllerEditWithHttpInfo(id, transactionRule,);
+  Future<TransactionRule?> transactionRuleControllerEdit(String id, TransactionRule transactionRule, { Future<void>? abortTrigger, }) async {
+    final response = await transactionRuleControllerEditWithHttpInfo(id, transactionRule, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -250,7 +254,7 @@ class TransactionRuleApi {
   /// Retrieves all transaction rules for the authenticated user.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> transactionRuleControllerGetWithHttpInfo() async {
+  Future<Response> transactionRuleControllerGetWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule';
 
@@ -272,14 +276,15 @@ class TransactionRuleApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Get transaction rules.
   ///
   /// Retrieves all transaction rules for the authenticated user.
-  Future<List<TransactionRule>?> transactionRuleControllerGet() async {
-    final response = await transactionRuleControllerGetWithHttpInfo();
+  Future<List<TransactionRule>?> transactionRuleControllerGet({ Future<void>? abortTrigger, }) async {
+    final response = await transactionRuleControllerGetWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

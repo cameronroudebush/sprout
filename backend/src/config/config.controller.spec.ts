@@ -9,12 +9,12 @@ import { UnsecureAppConfiguration } from "@backend/config/model/api/unsecure.app
 
 describe("ConfigController", () => {
   let controller: ConfigController;
-  let userService: Mocked<UserService>;
+  let userService: jest.Mocked<UserService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
     userService = {
-      allowUserCreation: vi.fn().mockResolvedValue(true),
+      allowUserCreation: jest.fn().mockResolvedValue(true),
     } as any;
 
     controller = new ConfigController(userService);
