@@ -85,7 +85,6 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Budgeting',
     icon: Icons.pie_chart_rounded,
     bottomNavPriority: 1,
-    category: 'Management',
     builder: (context, state) => const BudgetPage(),
     enabled: (secureConfig, unsecureConfig, userConfig) => userConfig?.enableBudgeting ?? true,
   ),

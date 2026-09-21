@@ -7,18 +7,18 @@ import { TestEntities } from "@backend/test/entities";
 
 describe("BudgetController", () => {
   let controller: BudgetController;
-  let service: jest.Mocked<BudgetService>;
+  let service: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = {
-      getAllBudgets: jest.fn(),
-      createBudget: jest.fn(),
-      updateBudget: jest.fn(),
-      deleteBudget: jest.fn(),
-      getBudgetOverview: jest.fn(),
-      getBudgetHistory: jest.fn(),
-    } as any;
+      getAllBudgets: vi.fn(),
+      createBudget: vi.fn(),
+      updateBudget: vi.fn(),
+      deleteBudget: vi.fn(),
+      getBudgetOverview: vi.fn(),
+      getBudgetHistory: vi.fn(),
+    };
     controller = new BudgetController(service);
   });
 
