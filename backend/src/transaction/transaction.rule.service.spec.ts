@@ -5,6 +5,7 @@ import { TestEntities } from "@backend/test/entities";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
+import { IsNull } from "typeorm";
 
 describe("TransactionRuleService", () => {
   let service: TransactionRuleService;
@@ -16,6 +17,35 @@ describe("TransactionRuleService", () => {
   });
 
   describe("applyRulesToTransactions", () => {
+    it("should construct query options without category key when onlyApplyToEmpty is false", async () => {
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([]);
+      const findSpy = vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await service.applyRulesToTransactions(user, undefined, false);
+
+      expect(findSpy).toHaveBeenCalledWith({
+        where: {
+          account: { user: { id: user.id } },
+        },
+      });
+      const passedWhere = findSpy.mock.calls[0][0]?.where as Record<string, any>;
+      expect(Object.prototype.hasOwnProperty.call(passedWhere, "category")).toBe(false);
+    });
+
+    it("should construct query options with category: IsNull() when onlyApplyToEmpty is true", async () => {
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([]);
+      const findSpy = vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await service.applyRulesToTransactions(user, undefined, true);
+
+      expect(findSpy).toHaveBeenCalledWith({
+        where: {
+          account: { user: { id: user.id } },
+          category: IsNull(),
+        },
+      });
+    });
+
     it("should fetch rules and apply description matching rules to transactions", async () => {
       const rule = TransactionRule.fromPlain({
         id: "r-1",

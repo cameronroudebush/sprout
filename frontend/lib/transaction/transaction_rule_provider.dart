@@ -88,13 +88,19 @@ class TransactionRules extends _$TransactionRules {
   /// Triggers the backend to apply transaction rules to existing transactions.
   Future<void> manualRefresh({bool force = false}) async {
     _setRunning(true);
-    final api = await ref.read(transactionRuleApiProvider.future);
-    await api.transactionRuleControllerApplyRules(force: force);
-    _setRunning(false);
+    try {
+      final api = await ref.read(transactionRuleApiProvider.future);
+      await api.transactionRuleControllerApplyRules(force: force);
 
-    // After rules are applied, transactions likely changed.
-    // Invalidate the transaction list to show the new categories/data.
-    ref.invalidate(transactionsProvider);
+      // After rules are applied, transactions likely changed.
+      // Invalidate the transaction list to show the new categories/data.
+      ref.invalidate(transactionsProvider);
+    } catch (e) {
+      ref.read(notificationsProvider.notifier).openWithAPIException(e);
+      rethrow;
+    } finally {
+      _setRunning(false);
+    }
   }
 
   /// Helper to toggle the [isRunning] state for UI feedback.

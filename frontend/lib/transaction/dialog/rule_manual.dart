@@ -70,11 +70,15 @@ class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleMan
       onSubmitClick: isRunning
           ? null
           : () async {
-              // Trigger the manual refresh on our new Riverpod provider
-              await ref.read(transactionRulesProvider.notifier).manualRefresh(force: _force);
+              try {
+                // Trigger the manual refresh on our new Riverpod provider
+                await ref.read(transactionRulesProvider.notifier).manualRefresh(force: _force);
 
-              // Close the dialog upon successful trigger
-              if (mounted) Navigator.of(context).pop();
+                // Close the dialog upon successful trigger
+                if (mounted) Navigator.of(context).pop();
+              } catch (_) {
+                // Error is caught and displayed by notification provider in manualRefresh.
+              }
             },
       child: _buildForm(theme),
     );
