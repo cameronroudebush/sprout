@@ -173,39 +173,34 @@ class TransactionSubscription {
 }
 
 /// How often this is billed
-class TransactionSubscriptionPeriodEnum {
-  /// Instantiate a new enum with the provided [value].
-  const TransactionSubscriptionPeriodEnum._(this.value);
+enum TransactionSubscriptionPeriodEnum {
+  weekly._(r'weekly'),
+  biWeekly._(r'bi-weekly'),
+  monthly._(r'monthly'),
+  quarterly._(r'quarterly'),
+  semiAnnually._(r'semi-annually'),
+  yearly._(r'yearly'),
+  unknown._(r'unknown'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const TransactionSubscriptionPeriodEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const weekly = TransactionSubscriptionPeriodEnum._(r'weekly');
-  static const biWeekly = TransactionSubscriptionPeriodEnum._(r'bi-weekly');
-  static const monthly = TransactionSubscriptionPeriodEnum._(r'monthly');
-  static const quarterly = TransactionSubscriptionPeriodEnum._(r'quarterly');
-  static const semiAnnually = TransactionSubscriptionPeriodEnum._(r'semi-annually');
-  static const yearly = TransactionSubscriptionPeriodEnum._(r'yearly');
-  static const unknown = TransactionSubscriptionPeriodEnum._(r'unknown');
-
-  /// List of all possible values in this [enum][TransactionSubscriptionPeriodEnum].
-  static const values = <TransactionSubscriptionPeriodEnum>[
-    weekly,
-    biWeekly,
-    monthly,
-    quarterly,
-    semiAnnually,
-    yearly,
-    unknown,
-  ];
-
+  /// Returns the instance of [TransactionSubscriptionPeriodEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static TransactionSubscriptionPeriodEnum? fromJson(dynamic value) => TransactionSubscriptionPeriodEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [TransactionSubscriptionPeriodEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<TransactionSubscriptionPeriodEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <TransactionSubscriptionPeriodEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -227,9 +222,10 @@ class TransactionSubscriptionPeriodEnumTypeTransformer {
 
   const TransactionSubscriptionPeriodEnumTypeTransformer._();
 
-  String encode(TransactionSubscriptionPeriodEnum data) => data.value;
+  String encode(TransactionSubscriptionPeriodEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a TransactionSubscriptionPeriodEnum.
+  /// Returns the instance of [TransactionSubscriptionPeriodEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -238,6 +234,9 @@ class TransactionSubscriptionPeriodEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   TransactionSubscriptionPeriodEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is TransactionSubscriptionPeriodEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'weekly': return TransactionSubscriptionPeriodEnum.weekly;
@@ -256,7 +255,7 @@ class TransactionSubscriptionPeriodEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [TransactionSubscriptionPeriodEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static TransactionSubscriptionPeriodEnumTypeTransformer? _instance;
 }
 

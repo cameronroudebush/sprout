@@ -150,29 +150,29 @@ class ChatHistory {
 }
 
 /// Who said the message, either the LLM (AI) or the user.
-class ChatHistoryRoleEnum {
-  /// Instantiate a new enum with the provided [value].
-  const ChatHistoryRoleEnum._(this.value);
+enum ChatHistoryRoleEnum {
+  user._(r'user'),
+  model._(r'model'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const ChatHistoryRoleEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const user = ChatHistoryRoleEnum._(r'user');
-  static const model = ChatHistoryRoleEnum._(r'model');
-
-  /// List of all possible values in this [enum][ChatHistoryRoleEnum].
-  static const values = <ChatHistoryRoleEnum>[
-    user,
-    model,
-  ];
-
+  /// Returns the instance of [ChatHistoryRoleEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static ChatHistoryRoleEnum? fromJson(dynamic value) => ChatHistoryRoleEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [ChatHistoryRoleEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<ChatHistoryRoleEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChatHistoryRoleEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -194,9 +194,10 @@ class ChatHistoryRoleEnumTypeTransformer {
 
   const ChatHistoryRoleEnumTypeTransformer._();
 
-  String encode(ChatHistoryRoleEnum data) => data.value;
+  String encode(ChatHistoryRoleEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a ChatHistoryRoleEnum.
+  /// Returns the instance of [ChatHistoryRoleEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -205,6 +206,9 @@ class ChatHistoryRoleEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   ChatHistoryRoleEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is ChatHistoryRoleEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'user': return ChatHistoryRoleEnum.user;
@@ -218,7 +222,7 @@ class ChatHistoryRoleEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [ChatHistoryRoleEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static ChatHistoryRoleEnumTypeTransformer? _instance;
 }
 

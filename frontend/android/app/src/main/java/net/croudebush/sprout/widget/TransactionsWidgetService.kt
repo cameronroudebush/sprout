@@ -34,17 +34,15 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
     }
 
     override fun getViewAt(position: Int): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.transaction_item)
-
-        if (position >= transactions.length()) {
-            return views
-        }
-
         val item = transactions.getJSONObject(position)
+        val views = RemoteViews(context.packageName, R.layout.transaction_item)
 
         // Theme colors passed from Flutter
         val txtColor = themeData?.optString("txtColor", "#FFFFFF")?.toColorInt()
         val txtMuted = themeData?.optString("txtColorMuted", "#A0A0A0")?.toColorInt()
+        val cardColor = themeData?.optString("cardColor", "#1E262E")?.toColorInt()
+        val amountColor = item.optString("amountColor", "#FF0000").toColorInt()
+
         val merchant = item.optString("merchant", "Unknown")
         val account = item.optString("account", item.optString("category", "Unknown"))
         val amountText = item.optString("amount", "$0.00")
@@ -54,36 +52,28 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         val id = item.optString("id", "")
         val iconBase64 = item.optString("iconBase64", null)
 
-        // Clean & Decode Icon safely
-        var iconLoaded = false
-        if (!iconBase64.isNullOrBlank()) {
+        // Icon Rendering
+        if (!iconBase64.isNullOrEmpty()) {
             try {
-                // Strip linebreaks and whitespace from Base64 string
-                val cleanBase64 = iconBase64.replace("\n", "").replace("\r", "").trim()
-                val decodedBytes = Base64.decode(cleanBase64, Base64.NO_WRAP or Base64.NO_PADDING)
-                
-                if (decodedBytes.isNotEmpty()) {
-                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    if (bitmap != null && bitmap.width > 0 && bitmap.height > 0) {
-                        views.setImageViewBitmap(R.id.item_merchant_icon, bitmap)
-                        iconLoaded = true
-                    }
+                val decodedBytes = Base64.decode(iconBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                if (bitmap != null) {
+                    views.setImageViewBitmap(R.id.item_merchant_icon, bitmap)
+                } else {
+                    views.setImageViewResource(R.id.item_merchant_icon, android.R.drawable.ic_menu_report_image)
                 }
             } catch (e: Exception) {
-                // Log/Ignore corrupt byte streams
+                views.setImageViewResource(R.id.item_merchant_icon, android.R.drawable.ic_menu_report_image)
             }
-        }
-
-        if (!iconLoaded) {
-            views.setImageViewResource(
-                R.id.item_merchant_icon,
-                android.R.drawable.ic_menu_report_image
-            )
+        } else {
+            views.setImageViewResource(R.id.item_merchant_icon, android.R.drawable.ic_menu_report_image)
         }
 
         // Apply Pending Highlight vs Default Row background
         if (isPending) {
             views.setViewVisibility(R.id.item_pending, View.VISIBLE)
+
+            // Subtle 10% white overlay background
             val highlightOverlay = Color.argb(0x1A, 0xFF, 0xFF, 0xFF) // ~10% white overlay
             views.setInt(R.id.transaction_item_root, "setBackgroundColor", highlightOverlay)
         } else {
@@ -113,7 +103,7 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         views.setTextViewText(R.id.item_amount, amountText)
         views.setTextViewText(R.id.item_date, date)
 
-        // Amount coloring
+        // Amount coloring (Positive vs Negative)
         val isPositive = amountNumeric >= 0
         val colorRes = if (isPositive) {
             R.color.sprout_accent_green

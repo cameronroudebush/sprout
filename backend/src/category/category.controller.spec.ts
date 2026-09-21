@@ -13,17 +13,17 @@ import { IsNull } from "typeorm";
 
 describe("CategoryController", () => {
   let controller: CategoryController;
-  let categoryService: Mocked<CategoryService>;
-  let sseService: Mocked<SSEService>;
+  let categoryService: jest.Mocked<CategoryService>;
+  let sseService: jest.Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
     categoryService = {
-      getStats: vi.fn(),
+      getStats: jest.fn(),
     } as any;
 
     sseService = {
-      sendToUser: vi.fn(),
+      sendToUser: jest.fn(),
     } as any;
 
     controller = new CategoryController(categoryService, sseService);
@@ -32,7 +32,7 @@ describe("CategoryController", () => {
   describe("getCategories", () => {
     it("should return categories for user", async () => {
       const mockCategories = [TestEntities.category];
-      vi.spyOn(Category, "find").mockResolvedValue(mockCategories);
+      jest.spyOn(Category, "find").mockResolvedValue(mockCategories);
 
       const res = await controller.getCategories(user);
 
@@ -58,7 +58,7 @@ describe("CategoryController", () => {
 
   describe("getUnknownCategoryStats", () => {
     it("should count transactions with null category when accountId is provided", async () => {
-      vi.spyOn(Transaction, "count").mockResolvedValue(7);
+      jest.spyOn(Transaction, "count").mockResolvedValue(7);
 
       const res = await controller.getUnknownCategoryStats(user, "acc-1");
 
@@ -69,7 +69,7 @@ describe("CategoryController", () => {
     });
 
     it("should count transactions with null category when accountId is undefined", async () => {
-      vi.spyOn(Transaction, "count").mockResolvedValue(3);
+      jest.spyOn(Transaction, "count").mockResolvedValue(3);
 
       const res = await controller.getUnknownCategoryStats(user);
 
@@ -82,7 +82,7 @@ describe("CategoryController", () => {
 
   describe("create", () => {
     it("should throw ConflictException if a similar category exists", async () => {
-      vi.spyOn(Category, "find").mockResolvedValue([TestEntities.category]);
+      jest.spyOn(Category, "find").mockResolvedValue([TestEntities.category]);
 
       const newCategory = Category.fromPlain({ name: "Groceries" });
 
@@ -90,8 +90,8 @@ describe("CategoryController", () => {
     });
 
     it("should insert category if no conflict and handle parentCategoryId", async () => {
-      vi.spyOn(Category, "find").mockResolvedValue([]);
-      const insertSpy = vi.spyOn(Category.prototype, "insert").mockResolvedValue({} as any);
+      jest.spyOn(Category, "find").mockResolvedValue([]);
+      const insertSpy = jest.spyOn(Category.prototype, "insert").mockResolvedValue({} as any);
 
       const cat = Category.fromPlain({ name: "Dining Out", parentCategoryId: "parent-123" });
 
@@ -108,8 +108,8 @@ describe("CategoryController", () => {
     });
 
     it("should insert category using IsNull() when parentCategoryId is undefined", async () => {
-      vi.spyOn(Category, "find").mockResolvedValue([]);
-      const insertSpy = vi.spyOn(Category.prototype, "insert").mockResolvedValue({} as any);
+      jest.spyOn(Category, "find").mockResolvedValue([]);
+      const insertSpy = jest.spyOn(Category.prototype, "insert").mockResolvedValue({} as any);
 
       const cat = Category.fromPlain({ name: "Utilities" });
 
@@ -128,7 +128,7 @@ describe("CategoryController", () => {
 
   describe("delete", () => {
     it("should throw NotFoundException if category does not exist", async () => {
-      vi.spyOn(Category, "findOne").mockResolvedValue(null);
+      jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
       await expect(controller.delete("invalid-id", user)).rejects.toThrow(NotFoundException);
     });
@@ -141,9 +141,9 @@ describe("CategoryController", () => {
       cat.id = "cat-1";
       cat.parentCategory = parent;
 
-      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
-      const updateWhereSpy = vi.spyOn(Category, "updateWhere").mockResolvedValue({} as any);
-      vi.spyOn(Category, "deleteById").mockResolvedValue({} as any);
+      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
+      const updateWhereSpy = jest.spyOn(Category, "updateWhere").mockResolvedValue({} as any);
+      jest.spyOn(Category, "deleteById").mockResolvedValue({} as any);
 
       const msg = await controller.delete("cat-1", user);
 
@@ -157,8 +157,8 @@ describe("CategoryController", () => {
       const cat = new Category(user, "Root Category");
       cat.id = "cat-1";
 
-      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
-      vi.spyOn(Category, "deleteById").mockResolvedValue({} as any);
+      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
+      jest.spyOn(Category, "deleteById").mockResolvedValue({} as any);
 
       const msg = await controller.delete("cat-1", user);
 
@@ -170,17 +170,17 @@ describe("CategoryController", () => {
 
   describe("edit", () => {
     it("should throw NotFoundException if category to edit is not found", async () => {
-      vi.spyOn(Category, "findOne").mockResolvedValue(null);
+      jest.spyOn(Category, "findOne").mockResolvedValue(null);
 
       await expect(controller.edit("invalid-id", user, Category.fromPlain({ name: "Test" }))).rejects.toThrow(NotFoundException);
     });
 
     it("should update category, trim name, set parentCategoryId null on 'unknown', and notify user", async () => {
       const cat = Category.fromPlain({ id: "cat-1", name: "Old Name", user });
-      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
+      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
 
       const updateData = Category.fromPlain({ name: "  Updated Name  ", parentCategoryId: "unknown" });
-      const updateSpy = vi.spyOn(Category.prototype, "update").mockResolvedValue({} as any);
+      const updateSpy = jest.spyOn(Category.prototype, "update").mockResolvedValue({} as any);
 
       const res = await controller.edit("cat-1", user, updateData);
 
@@ -192,10 +192,10 @@ describe("CategoryController", () => {
 
     it("should retain existing name if update.name is undefined and assign valid parentCategoryId", async () => {
       const cat = Category.fromPlain({ id: "cat-1", name: "Existing Name", user });
-      vi.spyOn(Category, "findOne").mockResolvedValue(cat);
+      jest.spyOn(Category, "findOne").mockResolvedValue(cat);
 
       const updateData = Category.fromPlain({ parentCategoryId: "parent-456" });
-      const updateSpy = vi.spyOn(Category.prototype, "update").mockResolvedValue({} as any);
+      const updateSpy = jest.spyOn(Category.prototype, "update").mockResolvedValue({} as any);
 
       const res = await controller.edit("cat-1", user, updateData);
 

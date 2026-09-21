@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
+import 'package:sprout/budget/widgets/dashboard_budget_card.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_calendar.dart';
 import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
@@ -47,6 +48,8 @@ class DashboardPage extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const HomeNotificationsWidget(),
+        const DashboardBudgetCard(),
+        const SizedBox(height: 12),
         const SizedBox(
           height: 300,
           child: Row(
@@ -132,6 +135,9 @@ class DashboardPage extends ConsumerWidget {
       children: [
         // Important notifications that the user needs to know
         const HomeNotificationsWidget(),
+        // Dashboard budget card
+        const DashboardBudgetCard(mobile: true),
+        const SizedBox(height: 8),
         // Net worth chart
         const SizedBox(
           height: 200,

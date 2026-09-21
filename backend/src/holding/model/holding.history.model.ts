@@ -4,7 +4,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { subDays } from "date-fns";
 import { ManyToOne } from "typeorm";
-import type { Holding } from "./holding.model";
+import { Holding } from "./holding.model";
 
 /** This class provides information for a historical stock data. */
 @DatabaseDecorators.entity()
@@ -13,7 +13,7 @@ import type { Holding } from "./holding.model";
 @CurrencyHelper.ExposeCurrencyFields<HoldingHistory>("purchasePrice", "holding.currency")
 export class HoldingHistory extends DatabaseBase {
   /** The holding this history is associated to */
-  @ManyToOne("Holding", (h: Holding) => h.id, { eager: true, onDelete: "CASCADE" })
+  @ManyToOne(() => Holding, (h) => h.id, { eager: true, onDelete: "CASCADE" })
   holding!: Holding;
 
   @DatabaseDecorators.column({ nullable: false })
@@ -50,17 +50,5 @@ export class HoldingHistory extends DatabaseBase {
     history.purchasePrice = includeValues ? holding.purchasePrice : 0;
     history.shares = includeValues ? holding.shares : 0;
     return await history.insert();
-  }
-
-  /** Turns this given holding to act like a holding history for today */
-  static fromHolding(hol: Holding, date = new Date()) {
-    return HoldingHistory.fromPlain({
-      costBasis: hol.costBasis,
-      marketValue: hol.marketValue,
-      purchasePrice: hol.purchasePrice,
-      shares: hol.shares,
-      holding: hol,
-      time: date,
-    });
   }
 }

@@ -11,29 +11,29 @@
 part of openapi.api;
 
 
-class ChatOverviewTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const ChatOverviewTypeEnum._(this.value);
+enum ChatOverviewTypeEnum {
+  accounts._(r'accounts'),
+  holdings._(r'holdings'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const ChatOverviewTypeEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const accounts = ChatOverviewTypeEnum._(r'accounts');
-  static const holdings = ChatOverviewTypeEnum._(r'holdings');
-
-  /// List of all possible values in this [enum][ChatOverviewTypeEnum].
-  static const values = <ChatOverviewTypeEnum>[
-    accounts,
-    holdings,
-  ];
-
+  /// Returns the instance of [ChatOverviewTypeEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static ChatOverviewTypeEnum? fromJson(dynamic value) => ChatOverviewTypeEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [ChatOverviewTypeEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<ChatOverviewTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChatOverviewTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -55,9 +55,11 @@ class ChatOverviewTypeEnumTypeTransformer {
 
   const ChatOverviewTypeEnumTypeTransformer._();
 
-  String encode(ChatOverviewTypeEnum data) => data.value;
+  /// Encodes this enum as a value suitable for JSON.
+  String encode(ChatOverviewTypeEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a ChatOverviewTypeEnum.
+  /// Returns the instance of [ChatOverviewTypeEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -66,6 +68,9 @@ class ChatOverviewTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   ChatOverviewTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is ChatOverviewTypeEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'accounts': return ChatOverviewTypeEnum.accounts;
@@ -79,7 +84,7 @@ class ChatOverviewTypeEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [ChatOverviewTypeEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static ChatOverviewTypeEnumTypeTransformer? _instance;
 }
 

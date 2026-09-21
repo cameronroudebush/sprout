@@ -10,20 +10,20 @@ import { InternalServerErrorException } from "@nestjs/common";
 
 describe("PlaidProviderController", () => {
   let controller: PlaidProviderController;
-  let plaidService: Mocked<PlaidProviderService>;
-  let sseService: Mocked<SSEService>;
+  let plaidService: jest.Mocked<PlaidProviderService>;
+  let sseService: jest.Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     plaidService = {
-      generateLinkToken: vi.fn(),
-      exchangeAndCreateAccounts: vi.fn(),
+      generateLinkToken: jest.fn(),
+      exchangeAndCreateAccounts: jest.fn(),
     } as any;
 
     sseService = {
-      sendToUser: vi.fn(),
+      sendToUser: jest.fn(),
     } as any;
 
     controller = new PlaidProviderController(sseService, plaidService);

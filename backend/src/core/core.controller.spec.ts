@@ -10,7 +10,7 @@ describe("CoreController", () => {
 
   beforeEach(() => {
     mockDatabaseBackupJob = {
-      getBackupSummary: vi.fn().mockReturnValue({
+      getBackupSummary: jest.fn().mockReturnValue({
         totalCount: 0,
         totalSizeBytes: 0,
         backups: [],

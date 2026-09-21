@@ -1,18 +1,16 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { Configuration } from "@backend/config/core";
 import { Utility } from "@backend/core/model/utility/utility";
-import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { formatDate, subDays, subMonths, subYears } from "date-fns";
-import { FindOptionsWhere, In, MoreThan } from "typeorm";
+import { MoreThan } from "typeorm";
 
 /** A service focused entirely around generating prompts for various capabilities */
 @Injectable()
@@ -31,14 +29,10 @@ export class ChatPromptService {
   }
 
   /** Generates a prompt tailored for a brief 24-hour daily overview of the user's financial activity. */
-  async buildDailyOverviewPrompt(user: User, includePendingTransactions = false) {
+  async buildDailyOverviewPrompt(user: User) {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
       `Write a warm, natural daily financial summary over the last 24 hours.`,
-      `ACCOUNT MOVEMENT RECONCILIATION:
-       - Calculate the delta between today's live balance and the most recent previous entry in 'his'.
-       - Match transactions using 'AccountID' to determine if spending/deposits account for that delta.
-       - If an account balance changed BUT there are no matching transactions, attribute the movement to market/interest fluctuations.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence quick takeaway (e.g., "Your checking account saw some downward movement today primarily driven by weekend spending.").`,
       `2. Follow with short key bullet points for accounts with notable activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
@@ -46,7 +40,7 @@ export class ChatPromptService {
       `4. DO NOT include ANY specific numbers, dollar amounts, percentages, or balances in your response. Focus entirely on the narrative, the direction of the changes, and the spending categories.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
   }
 
   /** Builds prompt payload focused specifically on investment accounts & market holdings. */
@@ -55,8 +49,6 @@ export class ChatPromptService {
       ...this.getSharedSystemInstructions(user, false),
       `Write a clear, balanced daily investment performance summary covering the last 24 hours.`,
       `Focus exclusively on investment, retirement, and brokerage accounts (e.g., 401(k), IRA, taxable brokerage, crypto). Ignore standard checking, savings, or credit accounts.`,
-      `ACCOUNT MOVEMENT RECONCILIATION:
-       - Use 'hol' (CSV Symbol:CurrentValue:History[Date:MarketValue]) and 'his' balance history to evaluate historical market value movements and determine which holdings drove overall portfolio movement over the last 24 hours.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence high-level takeaway summarizing overall portfolio direction today (e.g., "Your overall investments saw solid upward momentum today, lifted by strong broad-market gains.").`,
       `2. Follow with short bullet points for individual investment accounts or key asset categories that experienced notable movement. State the direction of change and provide the qualitative driver (e.g., "Roth IRA trended upward, largely driven by gains in broad index funds" or "Taxable Brokerage dipped slightly due to sector-wide tech pullbacks").`,
@@ -65,7 +57,7 @@ export class ChatPromptService {
       `5. Do not focus on one account causing most of the portfolio movement, we care about all accounts equally not proportionate to amount in account.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto]);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
   }
 
   /**
@@ -75,14 +67,14 @@ export class ChatPromptService {
    * @param allowCharts If we should allow the LLM to generate charts for rendering. False by default.
    */
   private getSharedSystemInstructions(user: User, includeCYA: boolean = true, allowCharts = false): string[] {
-    const today = formatDate(new Date(), "MM/dd/yyyy HH:mm");
+    const today = formatDate(new Date(), "MM/dd/yyyy");
     return [
       `You are a financial assistant for Sprout (https://sprout.croudebush.net/).`,
-      `Today's date and current time is: ${today}. Use this exact timestamp to evaluate activity within the last 24 hours.`,
+      `Today's date is: ${today}. Use this to determine if bills or subscriptions are upcoming or overdue.`,
       `Be concise. Avoid conversational filler.`,
       `Refer to accounts strictly by the provided IDs (e.g., Acc_0).`,
       `Context Data Key Mapping:
-         - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate, hol=Holdings (CSV Symbol:CurrentValue:History[Date:MarketValue]), his=History (CSV Date:Balance)
+         - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate, hol=Holdings (CSV Symbol:Value), his=History (CSV Date:Balance)
          - Transactions are pipe-delimited: Date|DescriptionID|Amount|Category|AccountID
          - Subscriptions are pipe-delimited: DescriptionID|AvgAmount|Period|LastPaidDate|AccountID`,
       `MANDATORY ENTITY FORMATTING:
@@ -91,7 +83,7 @@ export class ChatPromptService {
         - CRITICAL: Never strip the '@' prefix. If you write the ID without the '@' prefix, the user's interface will break.
         - Example Correct: "Analysis for @Acc_0"
         - Example Incorrect: "Analysis for Acc_0"
-        - Do not guess names; only use the @ID provided in the mapping.
+        - Do not guess names; only use the @ID provided in the mapping.'
         - Only provide the ID of the account, don't include * for boldness around account ID's.
         - Don't include the account type when referencing the account by ID.`,
       `The users chosen currency is: ${user.config.currency}. All values will be in this currency already. Please make sure to use the proper currency symbol leading the numbers.`,
@@ -117,18 +109,11 @@ export class ChatPromptService {
   }
 
   /** Assembles context, sanitizes chat history, and returns ready prompt contents. */
-  private async createPromptPayload(
-    user: User,
-    timeframe: ChatTimeframe,
-    instructions: string[],
-    includeChatHistory = true,
-    validAccountTypes?: AccountType[],
-    includePendingTransactions = true,
-  ) {
+  private async createPromptPayload(user: User, timeframe: ChatTimeframe, instructions: string[], includeChatHistory = true) {
     await this.cleanupUserMax(user);
 
     const idMap = new Map<string, string>();
-    const data = await this.buildUserAccountDetails(user, timeframe, idMap, validAccountTypes, includePendingTransactions);
+    const data = await this.buildUserAccountDetails(user, timeframe, idMap);
 
     let sanitizedHistory: { role: string; parts: Array<{ text: string }> }[] = [];
     if (includeChatHistory) {
@@ -159,22 +144,12 @@ export class ChatPromptService {
   }
 
   /** Fetches contextual financial data and generates generic ID maps for privacy. */
-  private async buildUserAccountDetails(
-    user: User,
-    timeframe: ChatTimeframe,
-    idMap: Map<string, string>,
-    validAccountTypes?: AccountType[],
-    includePendingTransactions = true,
-  ) {
+  private async buildUserAccountDetails(user: User, timeframe: ChatTimeframe, idMap: Map<string, string>) {
     const historicalTimeFrame = this.getTimeframeDate(timeframe);
-    const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
-    if (validAccountTypes) accountWhere.type = In(validAccountTypes);
-    const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: accountWhere })), user);
-    const txWhere: FindOptionsWhere<Transaction> = { account: accountWhere, posted: MoreThan(historicalTimeFrame) };
-    if (!includePendingTransactions) txWhere.pending = false;
+    const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: { user: { id: user.id } } })), user);
     const transactions = Transaction.convertListToTargetCurrency(
       await Transaction.find({
-        where: txWhere,
+        where: { account: { user: { id: user.id } }, posted: MoreThan(historicalTimeFrame) },
         order: { posted: "DESC" },
         relations: { category: true },
       }),
@@ -184,8 +159,6 @@ export class ChatPromptService {
 
     let accIndex = 0;
     const isExtendedTimeframe = timeframe === ChatTimeframe.sixMonths || timeframe === ChatTimeframe.oneYear;
-    const isOneDayTimeframe = timeframe === ChatTimeframe.oneDay;
-    const todayStr = formatDate(new Date(), "MM/dd");
 
     const accountData = await Promise.all(
       accounts.map(async (acc) => {
@@ -202,15 +175,6 @@ export class ChatPromptService {
           user,
         );
 
-        // Deduplicate intra-day syncs: Keep only the latest snapshot per calendar day
-        const seenDays = new Set<string>();
-        history = history.filter((h) => {
-          const dayKey = formatDate(h.time, "yyyy-MM-dd");
-          if (seenDays.has(dayKey)) return false;
-          seenDays.add(dayKey);
-          return true;
-        });
-
         if (isExtendedTimeframe) {
           const seenMonths = new Set<string>();
           history = history.filter((h) => {
@@ -221,67 +185,14 @@ export class ChatPromptService {
           });
         }
 
-        // Format account history dates using MM/dd (without HH:mm) so LLM evaluates daily snapshots cleanly
-        const historyFormatted = history.map((h) => `${formatDate(h.time, "MM/dd")}:${Number(h.balance).toFixed(0)}`);
-
-        // Inject current live balance into account history if today's snapshot isn't saved yet
-        const hasTodayAccountHistory = history.some((h) => formatDate(h.time, "MM/dd") === todayStr);
-        if (!hasTodayAccountHistory) {
-          historyFormatted.unshift(`${todayStr}:${Number(acc.balance).toFixed(0)}`);
-        }
-
-        // Process holdings and their respective historical records
-        const formattedHoldings = await Promise.all(
-          holdings.map(async (h) => {
-            let holdingHistories = HoldingHistory.convertListToTargetCurrency(
-              await HoldingHistory.find({
-                where: { holding: { id: h.id }, time: MoreThan(historicalTimeFrame) },
-                order: { time: "DESC" },
-              }),
-              user,
-            );
-
-            // Deduplicate intra-day holding syncs: Keep only the latest snapshot per calendar day
-            const seenHoldingDays = new Set<string>();
-            holdingHistories = holdingHistories.filter((hh) => {
-              const dayKey = formatDate(hh.time, "yyyy-MM-dd");
-              if (seenHoldingDays.has(dayKey)) return false;
-              seenHoldingDays.add(dayKey);
-              return true;
-            });
-
-            if (isExtendedTimeframe) {
-              const seenMonths = new Set<string>();
-              holdingHistories = holdingHistories.filter((hh) => {
-                const monthKey = formatDate(hh.time, "yyyy-MM");
-                if (seenMonths.has(monthKey)) return false;
-                seenMonths.add(monthKey);
-                return true;
-              });
-            }
-
-            const formattedHoldingHistory = holdingHistories.map((hh) => `${formatDate(hh.time, "MM/dd")}:${Number(hh.marketValue).toFixed(0)}`);
-
-            // Inject today's live holding snapshot if today's history isn't present
-            const hasTodayHoldingHistory = holdingHistories.some((hh) => formatDate(hh.time, "MM/dd") === todayStr);
-            if (!hasTodayHoldingHistory) {
-              const liveHoldingHistory = HoldingHistory.fromHolding(h);
-              formattedHoldingHistory.unshift(`${todayStr}:${Number(liveHoldingHistory.marketValue).toFixed(0)}`);
-            }
-
-            const val = Number(h.marketValue).toFixed(2);
-            return `${h.symbol}:${val}:[${formattedHoldingHistory.join(",")}]`;
-          }),
-        );
-
         return {
           i: genericId,
           t: acc.type,
           s: acc.subType,
           b: Number(acc.balance).toFixed(2),
           r: acc.interestRate,
-          hol: formattedHoldings.join(","),
-          his: historyFormatted.join(","),
+          hol: holdings.map((h) => `${h.symbol}:${Number(h.marketValue).toFixed(2)}`).join(","),
+          his: history.map((h) => `${formatDate(h.time, "MM/dd")}:${Number(h.balance).toFixed(0)}`).join(","),
         };
       }),
     );
@@ -294,8 +205,7 @@ export class ChatPromptService {
       const accId = idMap.get(t.account.id) || idMap.get(t.account.name) || "?";
       const cat = t.category?.name || "Uncategorized";
       const amt = Number(t.amount).toFixed(2);
-      const txDateFormat = isOneDayTimeframe ? "MM/dd/yy HH:mm" : "MM/dd/yy";
-      const date = formatDate(t.posted, txDateFormat);
+      const date = formatDate(t.posted, "MM/dd/yy");
       return `${date}|${genericDescriptionId}|${amt}|${cat}|${accId}`;
     });
 

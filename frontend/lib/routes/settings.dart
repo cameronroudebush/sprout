@@ -127,7 +127,7 @@ class SettingsPage extends ConsumerWidget {
                 items: EmailUpdateFrequencyEnum.values
                     .map((freq) => DropdownMenuItem(
                           value: freq,
-                          child: Text(freq.value.toTitleCase),
+                          child: Text(freq.toJson().toTitleCase),
                         ))
                     .toList(),
               ),
@@ -141,6 +141,13 @@ class SettingsPage extends ConsumerWidget {
             value: userConfig.includeAICapabilities,
             onChanged: (val) => _update(ref, (c) => c.copyWith(includeAICapabilities: val)),
           ),
+        SwitchSettingTile(
+          title: "Enable Budgeting",
+          subtitle: "Display budgeting overview, targets, and history.",
+          icon: Icons.pie_chart_rounded,
+          value: userConfig.enableBudgeting,
+          onChanged: (val) => _update(ref, (c) => c.copyWith(enableBudgeting: val)),
+        ),
       ],
       "Appearance": [
         ThemePicker(
@@ -166,7 +173,7 @@ class SettingsPage extends ConsumerWidget {
                   .map((style) => DropdownMenuItem(
                       value: style,
                       child: Text(
-                          "${NumberFormat.simpleCurrency(name: style.toString()).currencySymbol} - ${style.value}")))
+                          "${NumberFormat.simpleCurrency(name: style.toString()).currencySymbol} - ${style.toJson()}")))
                   .toList(),
             ),
           ),

@@ -11,17 +11,17 @@ import { TestEntities } from "@backend/test/entities";
 
 describe("NotificationController", () => {
   let controller: NotificationController;
-  let sseService: Mocked<SSEService>;
-  let notificationService: Mocked<NotificationService>;
+  let sseService: jest.Mocked<SSEService>;
+  let notificationService: jest.Mocked<NotificationService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
     sseService = {
-      sendToUser: vi.fn(),
+      sendToUser: jest.fn(),
     } as any;
 
     notificationService = {
-      notifyUser: vi.fn().mockResolvedValue({}),
+      notifyUser: jest.fn().mockResolvedValue({}),
     } as any;
 
     (Configuration as any).server = {
@@ -38,7 +38,7 @@ describe("NotificationController", () => {
   describe("getNotifications", () => {
     it("should return notifications for current user ordered by createdAt DESC", async () => {
       const notifications = [TestEntities.notification];
-      vi.spyOn(Notification, "find").mockResolvedValue(notifications);
+      jest.spyOn(Notification, "find").mockResolvedValue(notifications);
 
       const res = await controller.getNotifications(user);
 
@@ -52,7 +52,7 @@ describe("NotificationController", () => {
 
   describe("markAllRead", () => {
     it("should update all notifications to read and send SSE notification event", async () => {
-      const updateWhereSpy = vi.spyOn(Notification, "updateWhere").mockResolvedValue({} as any);
+      const updateWhereSpy = jest.spyOn(Notification, "updateWhere").mockResolvedValue({} as any);
 
       await controller.markAllRead(user);
 
@@ -63,7 +63,7 @@ describe("NotificationController", () => {
 
   describe("markRead", () => {
     it("should update single notification to read and send SSE notification event", async () => {
-      const updateWhereSpy = vi.spyOn(Notification, "updateWhere").mockResolvedValue({} as any);
+      const updateWhereSpy = jest.spyOn(Notification, "updateWhere").mockResolvedValue({} as any);
 
       await controller.markRead("note-1", user);
 
@@ -85,7 +85,7 @@ describe("NotificationController", () => {
   describe("getById", () => {
     it("should find notification by id for current user", async () => {
       const notification = TestEntities.notification;
-      vi.spyOn(Notification, "findOne").mockResolvedValue(notification);
+      jest.spyOn(Notification, "findOne").mockResolvedValue(notification);
 
       const res = await controller.getById(notification.id, user);
 

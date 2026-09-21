@@ -213,7 +213,7 @@ class TransactionConfigCard extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             spacing: 8,
                             children: [
-                              WebsiteIconWidget(websiteUrl, size: 20),
+                              WebsiteIconWidget(websiteUrl: websiteUrl, size: 20),
                               if (displayDomain != null)
                                 Text(
                                   displayDomain,

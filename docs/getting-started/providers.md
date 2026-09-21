@@ -1,6 +1,7 @@
 ---
+hide:
 title: Providers
-description: Learn about the financial data providers supported by Sprout.
+description: Learn about the providers of Sprout.
 ---
 
 # Data Providers

@@ -6,11 +6,11 @@ import { DemoDataService } from "@backend/demo/demo.data.service";
 
 describe("DemoDataResetJob", () => {
   let job: DemoDataResetJob;
-  let demoDataService: Mocked<DemoDataService>;
+  let demoDataService: jest.Mocked<DemoDataService>;
 
   beforeEach(() => {
     demoDataService = {
-      populateDemoData: vi.fn().mockResolvedValue(true),
+      populateDemoData: jest.fn().mockResolvedValue(true),
     } as any;
 
     job = new DemoDataResetJob(demoDataService);

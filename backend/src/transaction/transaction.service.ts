@@ -5,13 +5,17 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { addDays, differenceInDays } from "date-fns";
-import subscriptionQuery from "./sql/subscription.sql?raw";
+import * as fs from "fs/promises";
+import path from "path";
 
 /**
  * This service provides injectable capabilities for handling data involving Transactions.
  */
 @Injectable()
 export class TransactionService {
+  /** SQL file that contains the complex subscription lookup query */
+  private static readonly SUBSCRIPTION_FILE = path.join(__dirname, "transaction", "sql", "subscription.sql");
+
   constructor(private readonly databaseService: DatabaseService) {}
 
   /**
@@ -30,7 +34,8 @@ export class TransactionService {
   async findSubscriptions(user: User, overdueDays = 40, transactionCount = 2, increasedVariance = 1.2, variance = 0.2) {
     const subscriptions: TransactionSubscription[] = [];
     const today = new Date();
-    const rawResults = await this.databaseService.source.query(subscriptionQuery, [user.id, transactionCount, increasedVariance, variance]);
+    const sqlQuery = await fs.readFile(TransactionService.SUBSCRIPTION_FILE, "utf-8");
+    const rawResults = await this.databaseService.source.query(sqlQuery, [user.id, transactionCount, increasedVariance, variance]);
 
     // Process results and filter inactive subscriptions
     for (const row of rawResults) {

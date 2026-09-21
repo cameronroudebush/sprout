@@ -38,7 +38,6 @@ export class EmailService implements OnModuleInit {
       undefined,
       undefined,
       dateRange,
-      true,
     );
 
     const netWorth = await this.netWorthService.getTotalSummary(user);

@@ -107,4 +107,3 @@ class UpdateBudgetDto {
     'amount',
   };
 }
-

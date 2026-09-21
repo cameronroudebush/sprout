@@ -22,9 +22,4 @@ extension AccountExtensions on Account {
   bool get isAsset {
     return !isDebt;
   }
-
-  /// If this account has problems that need fixed
-  bool get hasProblem {
-    return institution.hasError || isArchived;
-  }
 }

@@ -3,9 +3,8 @@ import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
 import { Request, Response } from "express";
-import { startCase } from "lodash-es";
-import pkg from "../../package.json" with { type: "json" };
-const { name } = pkg;
+import { startCase } from "lodash";
+import { name } from "../../package.json";
 
 const projName = startCase(name);
 const title = `${projName} API`;

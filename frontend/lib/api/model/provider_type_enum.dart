@@ -11,35 +11,32 @@
 part of openapi.api;
 
 
-class ProviderTypeEnum {
-  /// Instantiate a new enum with the provided [value].
-  const ProviderTypeEnum._(this.value);
+enum ProviderTypeEnum {
+  simpleFin._(r'simple-fin'),
+  zillow._(r'zillow'),
+  plaid._(r'plaid'),
+  snapTrade._(r'snapTrade'),
+  coinbase._(r'coinbase'),
+  ;
+
+  /// Instantiate a new enum with the provided value.
+  const ProviderTypeEnum._(this._value);
 
   /// The underlying value of this enum member.
-  final String value;
+  final String _value;
 
   @override
-  String toString() => value;
+  String toString() => _value;
 
-  String toJson() => value;
+  /// Encodes this enum as a value suitable for JSON.
+  String toJson() => _value;
 
-  static const simpleFin = ProviderTypeEnum._(r'simple-fin');
-  static const zillow = ProviderTypeEnum._(r'zillow');
-  static const plaid = ProviderTypeEnum._(r'plaid');
-  static const snapTrade = ProviderTypeEnum._(r'snapTrade');
-  static const coinbase = ProviderTypeEnum._(r'coinbase');
-
-  /// List of all possible values in this [enum][ProviderTypeEnum].
-  static const values = <ProviderTypeEnum>[
-    simpleFin,
-    zillow,
-    plaid,
-    snapTrade,
-    coinbase,
-  ];
-
+  /// Returns the instance of [ProviderTypeEnum] that was successfully decoded
+  /// from the passed [value] on success, null otherwise.
   static ProviderTypeEnum? fromJson(dynamic value) => ProviderTypeEnumTypeTransformer().decode(value);
 
+  /// Returns a [List] containing instances of [ProviderTypeEnum]
+  /// that were successfully decoded from the passed [JSON][json].
   static List<ProviderTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ProviderTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -61,9 +58,11 @@ class ProviderTypeEnumTypeTransformer {
 
   const ProviderTypeEnumTypeTransformer._();
 
-  String encode(ProviderTypeEnum data) => data.value;
+  /// Encodes this enum as a value suitable for JSON.
+  String encode(ProviderTypeEnum data) => data._value;
 
-  /// Decodes a [dynamic value][data] to a ProviderTypeEnum.
+  /// Returns the instance of [ProviderTypeEnum] that was successfully decoded
+  /// from the passed [data] value on success, null otherwise.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -72,6 +71,9 @@ class ProviderTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   ProviderTypeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data is ProviderTypeEnum) {
+      return data;
+    }
     if (data != null) {
       switch (data) {
         case r'simple-fin': return ProviderTypeEnum.simpleFin;
@@ -88,7 +90,7 @@ class ProviderTypeEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [ProviderTypeEnumTypeTransformer] instance.
+  /// The singleton instance of this transformer.
   static ProviderTypeEnumTypeTransformer? _instance;
 }
 

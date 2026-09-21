@@ -12,7 +12,7 @@ import { endOfDay, endOfMonth, endOfYear, format, startOfDay, startOfMonth, star
 import { Between, FindOperator, FindOptionsWhere, In, IsNull, MoreThan, Not } from "typeorm";
 import { CashFlowSpending, MonthlySpendingStats } from "./model/api/cash.flow.spending.dto";
 import { SankeyData, SankeyLink } from "./model/api/sankey.dto";
-import { Colors } from "./model/colors.js";
+import { Colors } from "./model/colors";
 
 @Injectable()
 export class CashFlowService {
@@ -20,15 +20,7 @@ export class CashFlowService {
    * Core calculation engine.
    * Aggregates transactions into Inflow/Outflow per category. Only considers certain account types (depository, credit)
    */
-  async calculateFlows(
-    user: User,
-    year?: number,
-    month?: number,
-    day?: number,
-    accountId?: string,
-    customRange?: FindOperator<Date>,
-    includePending: boolean = false,
-  ) {
+  async calculateFlows(user: User, year?: number, month?: number, day?: number, accountId?: string, customRange?: FindOperator<Date>) {
     if (month) month -= 1;
     let between;
     if (customRange) {
@@ -52,12 +44,11 @@ export class CashFlowService {
     };
     if (accountId) accountWhere.id = accountId;
 
-    const where: FindOptionsWhere<Transaction> = {
+    const where = {
       account: accountWhere,
       posted: between,
-    };
-
-    if (!includePending) where.pending = false;
+      pending: false,
+    } as FindOptionsWhere<Transaction>;
 
     const transactionsRaw = await Transaction.find({ where, relations: { account: true, category: true }, order: { posted: "DESC" } });
     /** All raw transactions, converted to the users currency */

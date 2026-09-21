@@ -1,3 +1,4 @@
+import { AccountHistory } from "@backend/account/model/account.history.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
@@ -17,7 +18,7 @@ export class Account extends DatabaseBase {
   @DatabaseDecorators.column({ nullable: false })
   name: string;
 
-  @DatabaseDecorators.column({ enum: ProviderType, nullable: false })
+  @DatabaseDecorators.column({ nullable: false })
   @ApiProperty({
     enum: ProviderType,
     enumName: "ProviderTypeEnum",
@@ -110,6 +111,16 @@ export class Account extends DatabaseBase {
     this.currency = currency;
     this.subType = subType;
     this.providerAccountId = providerAccountId;
+  }
+
+  /** Turns this account to act like account history for today */
+  toAccountHistory(date = new Date()) {
+    return AccountHistory.fromPlain({
+      balance: this.balance,
+      account: this,
+      availableBalance: this.availableBalance,
+      time: date,
+    });
   }
 
   /** Returns if this account affects the net worth negativity due to being a loan type. */

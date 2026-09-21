@@ -12,19 +12,19 @@ import { SSEEventType } from "@backend/sse/model/event.model";
 
 describe("UserConfigController", () => {
   let controller: UserConfigController;
-  let userService: Mocked<UserService>;
-  let sseService: Mocked<SSEService>;
+  let userService: jest.Mocked<UserService>;
+  let sseService: jest.Mocked<SSEService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     userService = {
-      syncEncryptedFields: vi.fn().mockResolvedValue(undefined),
+      syncEncryptedFields: jest.fn().mockResolvedValue(undefined),
     } as any;
 
     sseService = {
-      sendToUser: vi.fn(),
+      sendToUser: jest.fn(),
     } as any;
 
     controller = new UserConfigController(userService, sseService);
@@ -32,13 +32,13 @@ describe("UserConfigController", () => {
 
   describe("get", () => {
     it("should throw NotFoundException if user missing", async () => {
-      vi.spyOn(User, "findOne").mockResolvedValue(null);
+      jest.spyOn(User, "findOne").mockResolvedValue(null);
 
       await expect(controller.get(user)).rejects.toThrow(NotFoundException);
     });
 
     it("should return config for current user", async () => {
-      vi.spyOn(User, "findOne").mockResolvedValue(user);
+      jest.spyOn(User, "findOne").mockResolvedValue(user);
 
       const res = await controller.get(user);
 
@@ -48,18 +48,18 @@ describe("UserConfigController", () => {
 
   describe("edit", () => {
     it("should throw NotFoundException if existing user config missing", async () => {
-      vi.spyOn(UserConfig, "findOne").mockResolvedValue(null);
+      jest.spyOn(UserConfig, "findOne").mockResolvedValue(null);
 
       await expect(controller.edit(user, {} as any)).rejects.toThrow(NotFoundException);
     });
 
     it("should update config, sync encrypted fields, and trigger force update if currency changed", async () => {
       const existingConf = UserConfig.fromPlain({ id: "c1", currency: "USD", user });
-      vi.spyOn(UserConfig, "findOne").mockResolvedValue(existingConf);
+      jest.spyOn(UserConfig, "findOne").mockResolvedValue(existingConf);
 
       const newConf = UserConfig.fromPlain({ currency: "EUR" });
-      newConf.update = vi.fn().mockResolvedValue(newConf);
-      vi.spyOn(UserConfig, "fromPlain").mockReturnValue(newConf);
+      newConf.update = jest.fn().mockResolvedValue(newConf);
+      jest.spyOn(UserConfig, "fromPlain").mockReturnValue(newConf);
 
       const res = await controller.edit(user, newConf);
 

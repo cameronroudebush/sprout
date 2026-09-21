@@ -25,7 +25,7 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> notificationControllerGetByIdWithHttpInfo(String id,) async {
+  Future<Response> notificationControllerGetByIdWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/notification/{id}'
       .replaceAll('{id}', id);
@@ -48,6 +48,7 @@ class NotificationApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -58,8 +59,8 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Notification?> notificationControllerGetById(String id,) async {
-    final response = await notificationControllerGetByIdWithHttpInfo(id,);
+  Future<Notification?> notificationControllerGetById(String id, { Future<void>? abortTrigger, }) async {
+    final response = await notificationControllerGetByIdWithHttpInfo(id, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -78,7 +79,7 @@ class NotificationApi {
   /// Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> notificationControllerGetFirebaseConfigWithHttpInfo() async {
+  Future<Response> notificationControllerGetFirebaseConfigWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/notification/config/firebase';
 
@@ -100,14 +101,15 @@ class NotificationApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Returns the firebase configuration.
   ///
   /// Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.
-  Future<FirebaseConfigDTO?> notificationControllerGetFirebaseConfig() async {
-    final response = await notificationControllerGetFirebaseConfigWithHttpInfo();
+  Future<FirebaseConfigDTO?> notificationControllerGetFirebaseConfig({ Future<void>? abortTrigger, }) async {
+    final response = await notificationControllerGetFirebaseConfigWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -126,7 +128,7 @@ class NotificationApi {
   /// Returns all the notifications for the currently authenticated user.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> notificationControllerGetNotificationsWithHttpInfo() async {
+  Future<Response> notificationControllerGetNotificationsWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/notification';
 
@@ -148,14 +150,15 @@ class NotificationApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Get's the notifications
   ///
   /// Returns all the notifications for the currently authenticated user.
-  Future<List<Notification>?> notificationControllerGetNotifications() async {
-    final response = await notificationControllerGetNotificationsWithHttpInfo();
+  Future<List<Notification>?> notificationControllerGetNotifications({ Future<void>? abortTrigger, }) async {
+    final response = await notificationControllerGetNotificationsWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -177,7 +180,7 @@ class NotificationApi {
   /// Used for when the user opens their notification shade.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> notificationControllerMarkAllReadWithHttpInfo() async {
+  Future<Response> notificationControllerMarkAllReadWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/notification/read/all';
 
@@ -199,14 +202,15 @@ class NotificationApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Marks all notifications read.
   ///
   /// Used for when the user opens their notification shade.
-  Future<void> notificationControllerMarkAllRead() async {
-    final response = await notificationControllerMarkAllReadWithHttpInfo();
+  Future<void> notificationControllerMarkAllRead({ Future<void>? abortTrigger, }) async {
+    final response = await notificationControllerMarkAllReadWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -221,7 +225,7 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> notificationControllerMarkReadWithHttpInfo(String id,) async {
+  Future<Response> notificationControllerMarkReadWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/notification/read/{id}'
       .replaceAll('{id}', id);
@@ -244,6 +248,7 @@ class NotificationApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
@@ -254,8 +259,8 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> notificationControllerMarkRead(String id,) async {
-    final response = await notificationControllerMarkReadWithHttpInfo(id,);
+  Future<void> notificationControllerMarkRead(String id, { Future<void>? abortTrigger, }) async {
+    final response = await notificationControllerMarkReadWithHttpInfo(id, abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -266,7 +271,7 @@ class NotificationApi {
   /// Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> notificationControllerNotifyWithHttpInfo() async {
+  Future<Response> notificationControllerNotifyWithHttpInfo({ Future<void>? abortTrigger, }) async {
     // ignore: prefer_const_declarations
     final path = r'/notification/test/notify';
 
@@ -288,14 +293,15 @@ class NotificationApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
+      abortTrigger: abortTrigger,
     );
   }
 
   /// Send Test Notification
   ///
   /// Notifies all of the current users (the authenticated user) devices with a test notification. Only available in dev mode.
-  Future<void> notificationControllerNotify() async {
-    final response = await notificationControllerNotifyWithHttpInfo();
+  Future<void> notificationControllerNotify({ Future<void>? abortTrigger, }) async {
+    final response = await notificationControllerNotifyWithHttpInfo(abortTrigger: abortTrigger,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

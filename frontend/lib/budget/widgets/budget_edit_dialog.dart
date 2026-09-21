@@ -4,6 +4,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/budget/provider/budget_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/widgets/info_card.dart';
 
 /// Shows a dialog to create or edit a budget target
 void showBudgetEditDialog({
@@ -137,7 +138,13 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 12),
+          const Padding(
+            padding: EdgeInsets.only(top: 8, bottom: 12),
+            child: InfoCard(
+              text:
+                  "Set a monthly target budget for this spending category. Sprout will automatically track your posted transactions against this limit each month.",
+            ),
+          ),
           CategoryDropdown(
             _selectedCategory?.id,
             (cat) => setState(() => _selectedCategory = cat),

@@ -4,9 +4,8 @@ import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { DatabaseBackupJob } from "@backend/core/jobs/backup";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { startCase } from "lodash-es";
-import pkg from "../../package.json" with { type: "json" };
-const { name } = pkg;
+import { startCase } from "lodash";
+import { name } from "../../package.json";
 
 /** This controller contains core functionality that is not placed better anywhere else. */
 @Controller("core")
