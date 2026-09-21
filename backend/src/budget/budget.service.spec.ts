@@ -10,13 +10,13 @@ import { BudgetService } from "./budget.service";
 
 describe("BudgetService", () => {
   let service: BudgetService;
-  let cashFlowService: jest.Mocked<CashFlowService>;
+  let cashFlowService: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cashFlowService = {
-      calculateFlows: jest.fn(),
-    } as any;
+      calculateFlows: vi.fn(),
+    };
     service = new BudgetService(cashFlowService);
   });
 
@@ -31,7 +31,7 @@ describe("BudgetService", () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
       const budget = TestEntities.budget;
-      jest.spyOn(Budget, "find").mockResolvedValue([budget]);
+      vi.spyOn(Budget, "find").mockResolvedValue([budget]);
 
       const result = await service.getAllBudgets(user);
       expect(result).toHaveLength(1);
@@ -54,7 +54,7 @@ describe("BudgetService", () => {
     it("should throw NotFoundException if category is not found", async () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
-      jest.spyOn(Category, "findOne").mockResolvedValue(null);
+      vi.spyOn(Category, "findOne").mockResolvedValue(null);
 
       await expect(service.createBudget(user, { categoryId: "invalid-id", amount: 100 })).rejects.toThrow(NotFoundException);
     });
@@ -65,8 +65,8 @@ describe("BudgetService", () => {
       const category = TestEntities.category;
       const budget = TestEntities.budget;
 
-      jest.spyOn(Category, "findOne").mockResolvedValue(category);
-      jest.spyOn(Budget, "findOne").mockResolvedValue(budget);
+      vi.spyOn(Category, "findOne").mockResolvedValue(category);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(budget);
 
       await expect(service.createBudget(user, { categoryId: category.id, amount: 100 })).rejects.toThrow(BadRequestException);
     });
@@ -76,9 +76,9 @@ describe("BudgetService", () => {
       user.config.enableBudgeting = true;
       const category = TestEntities.category;
 
-      jest.spyOn(Category, "findOne").mockResolvedValue(category);
-      jest.spyOn(Budget, "findOne").mockResolvedValue(null);
-      jest.spyOn(Budget.prototype, "insert").mockResolvedValue({} as any);
+      vi.spyOn(Category, "findOne").mockResolvedValue(category);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(null);
+      vi.spyOn(Budget.prototype, "insert").mockResolvedValue({} as any);
 
       const dto = { categoryId: category.id, amount: 250 };
       const result = await service.createBudget(user, dto);
@@ -99,7 +99,7 @@ describe("BudgetService", () => {
     it("should throw NotFoundException if budget is not found", async () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
-      jest.spyOn(Budget, "findOne").mockResolvedValue(null);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(null);
 
       await expect(service.updateBudget(user, "invalid-b", { amount: 300 })).rejects.toThrow(NotFoundException);
     });
@@ -109,8 +109,8 @@ describe("BudgetService", () => {
       user.config.enableBudgeting = true;
       const budget = TestEntities.budget;
 
-      jest.spyOn(Budget, "findOne").mockResolvedValue(budget);
-      jest.spyOn(budget, "update").mockResolvedValue(budget);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(budget);
+      vi.spyOn(budget, "update").mockResolvedValue(budget);
 
       const result = await service.updateBudget(user, budget.id, { amount: 650 });
       expect(result.amount).toBe(650);
@@ -128,7 +128,7 @@ describe("BudgetService", () => {
     it("should throw NotFoundException if budget is not found", async () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
-      jest.spyOn(Budget, "findOne").mockResolvedValue(null);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(null);
 
       await expect(service.deleteBudget(user, "invalid-b")).rejects.toThrow(NotFoundException);
     });
@@ -138,8 +138,8 @@ describe("BudgetService", () => {
       user.config.enableBudgeting = true;
       const budget = TestEntities.budget;
 
-      jest.spyOn(Budget, "findOne").mockResolvedValue(budget);
-      jest.spyOn(budget, "remove").mockResolvedValue(budget);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(budget);
+      vi.spyOn(budget, "remove").mockResolvedValue(budget);
 
       await service.deleteBudget(user, budget.id);
       expect(budget.remove).toHaveBeenCalled();
@@ -164,7 +164,7 @@ describe("BudgetService", () => {
         excludeFromCashFlow: false,
       });
 
-      jest.spyOn(Budget, "find").mockResolvedValue([budget]);
+      vi.spyOn(Budget, "find").mockResolvedValue([budget]);
 
       // Spending 600 in cat-1 (overbudget by 100) and 75 in cat-unbudgeted (overbudget by 75)
       const categoryStats = new Map<string, any>([
@@ -204,7 +204,7 @@ describe("BudgetService", () => {
     it("should handle default current year and month when not provided", async () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
-      jest.spyOn(Budget, "find").mockResolvedValue([]);
+      vi.spyOn(Budget, "find").mockResolvedValue([]);
       cashFlowService.calculateFlows.mockResolvedValue({ categoryStats: new Map() } as any);
 
       const overview = await service.getBudgetOverview(user);
@@ -227,7 +227,7 @@ describe("BudgetService", () => {
       user.config.enableBudgeting = true;
       const budget = TestEntities.budget;
 
-      jest.spyOn(Budget, "find").mockResolvedValue([budget]);
+      vi.spyOn(Budget, "find").mockResolvedValue([budget]);
 
       const categoryStats = new Map<string, any>([[budget.category.id, { category: budget.category, outflow: 200 }]]);
       cashFlowService.calculateFlows.mockResolvedValue({ categoryStats } as any);
@@ -248,7 +248,7 @@ describe("BudgetService", () => {
       user.config.enableBudgeting = true;
       const budget = TestEntities.budget;
 
-      jest.spyOn(Budget, "findOne").mockResolvedValue(budget);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(budget);
 
       const categoryStats = new Map<string, any>([[budget.category.id, { category: budget.category, outflow: 600 }]]);
       cashFlowService.calculateFlows.mockResolvedValue({ categoryStats } as any);
@@ -267,7 +267,7 @@ describe("BudgetService", () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
 
-      jest.spyOn(Budget, "findOne").mockResolvedValue(null);
+      vi.spyOn(Budget, "findOne").mockResolvedValue(null);
       cashFlowService.calculateFlows.mockResolvedValue({ categoryStats: new Map() } as any);
 
       const result = await service.getBudgetHistory(user, 2, "non-existent-cat");
@@ -284,7 +284,7 @@ describe("BudgetService", () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
 
-      jest.spyOn(Budget, "find").mockResolvedValue([]);
+      vi.spyOn(Budget, "find").mockResolvedValue([]);
       const category = TestEntities.category;
       const categoryStats = new Map<string, any>([[category.id, { category, outflow: 100 }]]);
       cashFlowService.calculateFlows.mockResolvedValue({ categoryStats } as any);

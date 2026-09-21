@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
+import 'package:sprout/budget/widgets/dashboard_budget_card.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_calendar.dart';
 import 'package:sprout/cash-flow/widgets/spending_compare.dart';
 import 'package:sprout/category/widgets/category_pie_chart.dart';
@@ -16,6 +17,7 @@ import 'package:sprout/shared/widgets/height_matched_row.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/widgets/dashboard_recent_transactions.dart';
 import 'package:sprout/transaction/widgets/subscriptions_calendar.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// The initial landing page when the user logs in to the app
 class DashboardPage extends ConsumerWidget {
@@ -24,16 +26,19 @@ class DashboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isChatEnabled = ref.watch(chatEnabledProvider);
+    final userConfig = ref.watch(userConfigProvider).value;
+    final isBudgetEnabled = userConfig?.enableBudgeting ?? true;
+
     return SingleChildScrollView(
       child: SproutLayoutBuilder(
         (isDesktop, context, constraints) {
           if (isDesktop) {
             return SproutRouteWrapper(
               size: SproutRouteSize.large,
-              child: _buildDesktop(context, ref, isChatEnabled),
+              child: _buildDesktop(context, ref, isChatEnabled, isBudgetEnabled),
             );
           } else {
-            return SproutRouteWrapper(child: _buildMobile(ref, isChatEnabled));
+            return SproutRouteWrapper(child: _buildMobile(ref, isChatEnabled, isBudgetEnabled));
           }
         },
       ),
@@ -41,18 +46,18 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// Desktop gets a robust 2-column masonry display utilizing flex factors
-  Widget _buildDesktop(BuildContext context, WidgetRef ref, bool chatEnabled) {
+  Widget _buildDesktop(BuildContext context, WidgetRef ref, bool chatEnabled, bool isBudgetEnabled) {
     final topCategoryCount = 10;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const HomeNotificationsWidget(),
-        const SizedBox(
+        SizedBox(
           height: 300,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Flexible(
+              const Flexible(
                 flex: 2,
                 child: SproutCard(
                   child: Padding(
@@ -61,7 +66,7 @@ class DashboardPage extends ConsumerWidget {
                   ),
                 ),
               ),
-              Flexible(
+              const Flexible(
                 flex: 1,
                 child: SproutCard(
                   child: Padding(
@@ -70,6 +75,11 @@ class DashboardPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              if (isBudgetEnabled)
+                const Flexible(
+                  flex: 1,
+                  child: DashboardBudgetCard(),
+                ),
             ],
           ),
         ),
@@ -126,7 +136,7 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// Mobile just renders vertically
-  Widget _buildMobile(WidgetRef ref, bool chatEnabled) {
+  Widget _buildMobile(WidgetRef ref, bool chatEnabled, bool isBudgetEnabled) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,6 +148,7 @@ class DashboardPage extends ConsumerWidget {
           child: UserNetWorthWidget(mobile: true),
         ),
         if (chatEnabled) const DashboardDailyChatCard(mobile: true),
+        if (isBudgetEnabled) const DashboardBudgetCard(),
         // Account overview
         const DashboardAccountsCard(),
         // Recent transactions
