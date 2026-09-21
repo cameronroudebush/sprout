@@ -25,7 +25,7 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [CreateBudgetDto] createBudgetDto (required):
-  Future<Response> budgetControllerCreateBudgetWithHttpInfo(CreateBudgetDto createBudgetDto, { Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerCreateBudgetWithHttpInfo(CreateBudgetDto createBudgetDto,) async {
     // ignore: prefer_const_declarations
     final path = r'/budget';
 
@@ -47,7 +47,6 @@ class BudgetApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -58,8 +57,8 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [CreateBudgetDto] createBudgetDto (required):
-  Future<Budget?> budgetControllerCreateBudget(CreateBudgetDto createBudgetDto, { Future<void>? abortTrigger, }) async {
-    final response = await budgetControllerCreateBudgetWithHttpInfo(createBudgetDto, abortTrigger: abortTrigger,);
+  Future<Budget?> budgetControllerCreateBudget(CreateBudgetDto createBudgetDto,) async {
+    final response = await budgetControllerCreateBudgetWithHttpInfo(createBudgetDto,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -68,7 +67,7 @@ class BudgetApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Budget',) as Budget;
-
+    
     }
     return null;
   }
@@ -82,7 +81,7 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> budgetControllerDeleteBudgetWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerDeleteBudgetWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/{id}'
       .replaceAll('{id}', id);
@@ -105,7 +104,6 @@ class BudgetApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -116,8 +114,8 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> budgetControllerDeleteBudget(String id, { Future<void>? abortTrigger, }) async {
-    final response = await budgetControllerDeleteBudgetWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<void> budgetControllerDeleteBudget(String id,) async {
+    final response = await budgetControllerDeleteBudgetWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -128,7 +126,7 @@ class BudgetApi {
   /// Retrieves all configured budget targets for the current user.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> budgetControllerGetAllBudgetsWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerGetAllBudgetsWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/budget';
 
@@ -150,15 +148,14 @@ class BudgetApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get all user budgets.
   ///
   /// Retrieves all configured budget targets for the current user.
-  Future<List<Budget>?> budgetControllerGetAllBudgets({ Future<void>? abortTrigger, }) async {
-    final response = await budgetControllerGetAllBudgetsWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<Budget>?> budgetControllerGetAllBudgets() async {
+    final response = await budgetControllerGetAllBudgetsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -188,7 +185,7 @@ class BudgetApi {
   ///
   /// * [num] months:
   ///   Number of months to look back (default 6).
-  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({ String? categoryId, num? months, Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({ String? categoryId, num? months, }) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/history';
 
@@ -217,7 +214,6 @@ class BudgetApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -232,8 +228,8 @@ class BudgetApi {
   ///
   /// * [num] months:
   ///   Number of months to look back (default 6).
-  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({ String? categoryId, num? months, Future<void>? abortTrigger, }) async {
-    final response = await budgetControllerGetBudgetHistoryWithHttpInfo(categoryId: categoryId, months: months, abortTrigger: abortTrigger,);
+  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({ String? categoryId, num? months, }) async {
+    final response = await budgetControllerGetBudgetHistoryWithHttpInfo( categoryId: categoryId, months: months, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -242,7 +238,7 @@ class BudgetApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BudgetHistoryResponseDto',) as BudgetHistoryResponseDto;
-
+    
     }
     return null;
   }
@@ -258,7 +254,7 @@ class BudgetApi {
   /// * [num] year:
   ///
   /// * [num] month:
-  Future<Response> budgetControllerGetBudgetOverviewWithHttpInfo({ num? year, num? month, Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerGetBudgetOverviewWithHttpInfo({ num? year, num? month, }) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/overview';
 
@@ -287,7 +283,6 @@ class BudgetApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -300,8 +295,8 @@ class BudgetApi {
   /// * [num] year:
   ///
   /// * [num] month:
-  Future<BudgetOverviewResponseDto?> budgetControllerGetBudgetOverview({ num? year, num? month, Future<void>? abortTrigger, }) async {
-    final response = await budgetControllerGetBudgetOverviewWithHttpInfo(year: year, month: month, abortTrigger: abortTrigger,);
+  Future<BudgetOverviewResponseDto?> budgetControllerGetBudgetOverview({ num? year, num? month, }) async {
+    final response = await budgetControllerGetBudgetOverviewWithHttpInfo( year: year, month: month, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -310,7 +305,7 @@ class BudgetApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BudgetOverviewResponseDto',) as BudgetOverviewResponseDto;
-
+    
     }
     return null;
   }
@@ -326,7 +321,7 @@ class BudgetApi {
   /// * [String] id (required):
   ///
   /// * [UpdateBudgetDto] updateBudgetDto (required):
-  Future<Response> budgetControllerUpdateBudgetWithHttpInfo(String id, UpdateBudgetDto updateBudgetDto, { Future<void>? abortTrigger, }) async {
+  Future<Response> budgetControllerUpdateBudgetWithHttpInfo(String id, UpdateBudgetDto updateBudgetDto,) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/{id}'
       .replaceAll('{id}', id);
@@ -349,7 +344,6 @@ class BudgetApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -362,8 +356,8 @@ class BudgetApi {
   /// * [String] id (required):
   ///
   /// * [UpdateBudgetDto] updateBudgetDto (required):
-  Future<Budget?> budgetControllerUpdateBudget(String id, UpdateBudgetDto updateBudgetDto, { Future<void>? abortTrigger, }) async {
-    final response = await budgetControllerUpdateBudgetWithHttpInfo(id, updateBudgetDto, abortTrigger: abortTrigger,);
+  Future<Budget?> budgetControllerUpdateBudget(String id, UpdateBudgetDto updateBudgetDto,) async {
+    final response = await budgetControllerUpdateBudgetWithHttpInfo(id, updateBudgetDto,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -372,7 +366,7 @@ class BudgetApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Budget',) as Budget;
-
+    
     }
     return null;
   }
