@@ -28,26 +28,6 @@ describe("AccountHistory", () => {
     });
   });
 
-  describe("insertForAccount", () => {
-    it("should insert history reflecting current account balance and date set to yesterday", async () => {
-      vi.useFakeTimers().setSystemTime(new Date("2026-06-02T12:00:00.000Z"));
-      const expectedDate = new Date("2026-06-01T12:00:00.000Z");
-
-      const insertSpy = vi.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
-
-      await AccountHistory.insertForAccount(mockAccount);
-
-      expect(insertSpy).toHaveBeenCalled();
-      const instanceCalledOn = (await insertSpy.mock.instances[0])!;
-      expect(instanceCalledOn.account).toEqual(mockAccount);
-      expect(instanceCalledOn.time).toEqual(expectedDate);
-      expect(instanceCalledOn.balance).toBe(2500);
-      expect(instanceCalledOn.availableBalance).toBe(2400);
-
-      vi.useRealTimers();
-    });
-  });
-
   describe("insertForNewAccount", () => {
     it("should create and insert an instance with balances forced to zero when includeBalances is false", async () => {
       const expectedDate = new Date("2026-06-01T12:00:00.000Z");

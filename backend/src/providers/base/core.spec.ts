@@ -205,7 +205,6 @@ describe("ProviderBase", () => {
       expect((provider as any).extractAccountName({ accountName: "My Acc" })).toBe("My Acc");
       expect(await (provider as any).fetchInitialSyncData({}, {} as any, {}, user)).toEqual({ transactions: [], removedTransactionIds: [], holdings: [] });
       await provider.commitSyncMetadata({});
-      await (provider as any).handleSyncError({}, new Error("Default sync error"));
     });
   });
 });

@@ -249,7 +249,7 @@ describe("TransactionController", () => {
       expect(res).toContain("Successfully removed 1 duplicate transaction from");
     });
 
-    it("should inherit categoryId and extra when kept transaction lacks them and is not swapped", async () => {
+    it("should inherit categoryId, providerId, and extra when kept transaction lacks them and is not swapped", async () => {
       const account = TestEntities.account;
       vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
@@ -257,7 +257,7 @@ describe("TransactionController", () => {
         id: "tx-kept-noswap",
         amount: 75.0,
         posted: new Date("2026-01-01T10:00:00Z"),
-        providerId: "prov-1",
+        providerId: undefined,
         account,
         categoryId: undefined,
         category: undefined,
@@ -268,7 +268,7 @@ describe("TransactionController", () => {
         id: "tx-remove-noswap",
         amount: 75.0,
         posted: new Date("2026-01-01T11:00:00Z"),
-        providerId: "prov-1",
+        providerId: undefined,
         account,
         categoryId: "cat-inherited",
         category: TestEntities.category,

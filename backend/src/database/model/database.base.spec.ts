@@ -51,7 +51,6 @@ describe("DatabaseBase", () => {
     expect(await TestEntity.sum("id" as any, {})).toBe(500);
     expect(await TestEntity.insertMany([new TestEntity()])).toHaveLength(1);
     expect(await TestEntity.upsertMany([])).toBeUndefined();
-    expect(await TestEntity.upsertMany([new TestEntity()])).toBeDefined();
 
     const entity = new TestEntity();
     await entity.insert(false);

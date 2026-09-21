@@ -218,7 +218,9 @@ describe("CashFlowService", () => {
       const history3 = AccountHistory.fromPlain({ id: "h3", balance: -15500, time: now });
 
       vi.spyOn(Account, "find").mockResolvedValue([loanAcc, loanAccPositive, loanAccNoHistory]);
-      vi.spyOn(AccountHistory, "find").mockResolvedValueOnce([history3, history2, history1]).mockResolvedValueOnce([]);
+      vi.spyOn(AccountHistory, "find")
+        .mockResolvedValueOnce([history3, history2, history1])
+        .mockResolvedValueOnce([]);
 
       const projections = await service.getLoanAmortizationProjections(user);
 

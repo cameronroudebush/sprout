@@ -15,8 +15,8 @@ describe("ProviderRateLimit", () => {
     vi.restoreAllMocks();
   });
 
-  it("should create new rate limit record if not found in db and handle missing user", async () => {
-    const rateLimit = new ProviderRateLimit(ProviderType.plaid, 10);
+  it("should create new rate limit record if not found in db", async () => {
+    const rateLimit = new ProviderRateLimit(ProviderType.plaid, 10, user);
     vi.spyOn(ProviderRateLimit, "findOne").mockResolvedValue(null);
     const insertSpy = vi.spyOn(rateLimit, "insert").mockResolvedValue(rateLimit);
 

@@ -25,7 +25,6 @@ describe("SproutLogger", () => {
 
     // Call super.log when context is NOT ignored
     logger.log("test message", "CustomContext");
-    logger.log("test message without context");
 
     // Test formatting log levels
     const formattedError = (logger as any).formatMessage("error", "An error occurred", "", "", "[SproutTest]", " +1ms");

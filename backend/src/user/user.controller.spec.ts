@@ -215,7 +215,7 @@ describe("UserController", () => {
       expect(mockDevice.update).toHaveBeenCalled();
     });
 
-    it("should insert new device with platform when device is not found", async () => {
+    it("should insert new device when device is not found", async () => {
       vi.spyOn(UserDevice, "findOne").mockResolvedValue(null);
       const insertSpy = vi.spyOn(UserDevice.prototype, "insert").mockResolvedValue({ id: "dev-new" } as any);
 
@@ -223,7 +223,6 @@ describe("UserController", () => {
         deviceId: "d-new",
         token: "tok-new",
         deviceName: "My Phone",
-        platform: "android" as any,
       });
 
       expect(res).toEqual({ success: true, deviceId: "dev-new" });

@@ -35,7 +35,6 @@ describe("AuthGuard", () => {
 
   // Helper returns both the guard instance and its internal isolated User class definition
   async function getIsolatedGuardContext(authType: "local" | "oidc") {
-    vi.resetModules();
     const { Configuration } = await import("@backend/config/core.js");
     Configuration.server.auth.type = authType;
 

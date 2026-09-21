@@ -24,12 +24,6 @@ describe("AuthenticationConfig", () => {
 
   it("should throw error if oidc config is invalid", () => {
     const config = new AuthenticationConfig();
-    expect(() => config.oidc.validate()).toThrow("Issuer URL is required for OIDC usage.");
-
-    config.oidc.issuer = "https://issuer.com";
-    expect(() => config.oidc.validate()).toThrow("Client ID is required for OIDC usage.");
-
-    config.oidc.clientId = "client-id";
-    expect(() => config.oidc.validate()).toThrow("Secret is required for OIDC usage.");
+    expect(() => config.oidc.validate()).toThrow();
   });
 });

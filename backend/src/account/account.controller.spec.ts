@@ -260,7 +260,7 @@ describe("AccountController", () => {
 
       const sourceHoldings = [
         { id: "sh-1", symbol: "AAPL" },
-        { id: "sh-2", symbol: "GOOG" },
+        { id: "sh-2", symbol: "MSFT" },
       ];
       const targetHoldings = [{ id: "th-1", symbol: "AAPL" }];
 
@@ -268,8 +268,8 @@ describe("AccountController", () => {
         save: vi.fn().mockResolvedValue({}),
         createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
         remove: vi.fn().mockResolvedValue({}),
-        find: vi.fn().mockImplementation((entity: any, options: any) => {
-          if (options?.where?.accountId === "acc-source") return Promise.resolve(sourceHoldings);
+        find: vi.fn().mockImplementation((entity: any) => {
+          if (entity.name === "Holding") return Promise.resolve(sourceHoldings);
           return Promise.resolve(targetHoldings);
         }),
       };

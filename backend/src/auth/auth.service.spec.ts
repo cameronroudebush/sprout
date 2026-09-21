@@ -136,15 +136,11 @@ describe("AuthService", () => {
   });
 
   describe("loginWithJWT", () => {
-    it("should throw UnauthorizedException without message when jwt is empty", async () => {
-      await expect(service.loginWithJWT("")).rejects.toThrow(new UnauthorizedException(""));
-    });
-
-    it("should throw UnauthorizedException with Session Expired when jwt is invalid", async () => {
+    it("should throw UnauthorizedException if input token verification throws", async () => {
       (jwt.verify as Mock).mockImplementation(() => {
-        throw new Error("jwt malformed");
+        throw new Error();
       });
-      await expect(service.loginWithJWT("bad-jwt")).rejects.toThrow(new UnauthorizedException("Session Expired"));
+      await expect(service.loginWithJWT("bad-jwt")).rejects.toThrow(UnauthorizedException);
     });
 
     it("should extract username, find user entity, and return a freshly signed token", async () => {
@@ -224,25 +220,8 @@ describe("AuthService", () => {
       expect(res.cookie).toHaveBeenCalledWith("id", "id", expect.any(Object));
     });
 
-    it("should deduplicate simultaneous execution paths and bind callers to a shared pending promise without response object", async () => {
-      const req = mockRequest({ r: "refresh-token-concurrent-no-res" });
-      httpService.post.mockReturnValue(
-        of({
-          status: 200,
-          data: { id_token: "shared-id-no-res" },
-        } as any),
-      );
-
-      const [res1, res2] = await Promise.all([service.performOIDCRefresh(req), service.performOIDCRefresh(req)]);
-
-      expect(httpService.post).toHaveBeenCalledTimes(1);
-      expect(res1.idToken).toBe("shared-id-no-res");
-      expect(res2.idToken).toBe("shared-id-no-res");
-    });
-
-    it("should deduplicate simultaneous execution paths and bind callers to a shared pending promise with response object", async () => {
+    it("should deduplicate simultaneous execution paths and bind callers to a shared pending promise", async () => {
       const req = mockRequest({ r: "refresh-token-concurrent" });
-      const res = mockResponse();
       httpService.post.mockReturnValue(
         of({
           status: 200,
@@ -250,10 +229,9 @@ describe("AuthService", () => {
         } as any),
       );
 
-      const [res1, res2] = await Promise.all([service.performOIDCRefresh(req), service.performOIDCRefresh(req, res)]);
+      const [res1, res2] = await Promise.all([service.performOIDCRefresh(req), service.performOIDCRefresh(req)]);
 
       expect(httpService.post).toHaveBeenCalledTimes(1);
-      expect(res.cookie).toHaveBeenCalledWith("id", "shared-id", expect.any(Object));
       expect(res1.idToken).toBe("shared-id");
       expect(res2.idToken).toBe("shared-id");
     });

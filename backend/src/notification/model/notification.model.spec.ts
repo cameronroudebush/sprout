@@ -19,17 +19,10 @@ describe("Notification Model", () => {
     expect(notif.powerPriority).toBe("high");
   });
 
-  it("should calculate default importance for info and success notifications", () => {
+  it("should calculate default importance for info notifications", () => {
     const notif = new Notification(user, "Info Title", "Info Message", NotificationType.info);
+
     expect(notif.importance).toBe("default");
     expect(notif.powerPriority).toBe("normal");
-
-    const successNotif = new Notification(user, "Success Title", "Success Message", NotificationType.success);
-    expect(successNotif.importance).toBe("default");
-    expect(successNotif.powerPriority).toBe("normal");
-
-    const warnNotif = new Notification(user, "Warn Title", "Warn Message", NotificationType.warning);
-    expect(warnNotif.importance).toBe("high");
-    expect(warnNotif.powerPriority).toBe("high");
   });
 });

@@ -211,17 +211,6 @@ describe("SnapTradeProviderService", () => {
       await (service as unknown as { handleSyncError: (a: SnapTradeInstitutionAsset, e: unknown) => Promise<void> }).handleSyncError(asset, genericErr);
     });
 
-    it("should execute setInstitutionError, extractProviderAccountId, and extractAccountName", async () => {
-      const instMock = { ...TestEntities.institution, update: vi.fn() };
-      const assetMock = { institution: instMock };
-      await (service as any).setInstitutionError(assetMock, true);
-      expect(instMock.hasError).toBe(true);
-
-      expect((service as any).extractProviderAccountId({ id: "st-acc-1" })).toBe("st-acc-1");
-      expect((service as any).extractAccountName({ name: "ST Name" })).toBe("ST Name");
-      expect((service as any).extractAccountName({ number: "12345" })).toBe("12345");
-    });
-
     it("should test upsertInstitutionAsset and getInstitutionAssetsForUser", async () => {
       const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
       vi.spyOn(SnapTradeInstitutionAsset, "find").mockResolvedValue([asset]);

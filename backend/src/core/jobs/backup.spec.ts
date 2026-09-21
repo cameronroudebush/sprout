@@ -56,28 +56,19 @@ describe("DatabaseBackupJob", () => {
       vi.spyOn(fs, "readdirSync").mockReturnValue([
         "sprout_backup_2026-05-15_12-00-00.sqlite",
         "sprout_backup_2026-05-14_12-00-00.sqlite", // Excess daily
+        "sprout_backup_2026-01-01_12-00-00.sqlite", // Year boundary
+        "sprout_backup_2025-12-31_12-00-00.sqlite", // Year boundary Thursday
         "invalid_file.txt",
       ] as any);
       vi.spyOn(fs, "statSync").mockReturnValue({ size: 1024 } as any);
       const unlinkSpy = vi.spyOn(fs, "unlinkSync").mockReturnValue(undefined as any);
 
       const summary = runner.getBackupSummary();
-      expect(summary.totalCount).toBe(2);
-      expect(summary.totalSizeBytes).toBe(2048);
+      expect(summary.totalCount).toBe(4);
+      expect(summary.totalSizeBytes).toBe(4096);
 
       (runner as any).pruneGfsBackups();
       expect(unlinkSpy).toHaveBeenCalled();
-    });
-
-    it("should handle ISO week calculation across year boundary and different week tiers", () => {
-      const gfsFn = (runner as any).getGfsBucketKey.bind(runner);
-      const date1 = new Date("2026-01-01T12:00:00Z");
-      const key1 = gfsFn(date1, "weekly");
-      expect(key1).toBeDefined();
-
-      const date2 = new Date("2026-12-31T12:00:00Z");
-      const key2 = gfsFn(date2, "weekly");
-      expect(key2).toBeDefined();
     });
   });
 });

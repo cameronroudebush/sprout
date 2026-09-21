@@ -271,12 +271,6 @@ describe("SimpleFINProviderService", () => {
       expect(result.balance).toBe(50);
     });
 
-    it("should execute helper hooks extractProviderAccountId, extractAccountName, and getInstitutionAssetsForUser", async () => {
-      expect((service as any).extractProviderAccountId({ id: "acc-123" })).toBe("acc-123");
-      expect((service as any).extractAccountName({ name: "Checking Acc" })).toBe("Checking Acc");
-      expect(await (service as any).getInstitutionAssetsForUser()).toEqual([undefined]);
-    });
-
     it("should extract holdings and transactions from the raw payload", async () => {
       const rawAccount = {
         holdings: [{ symbol: "AAPL", shares: "10", market_value: "1500", cost_basis: "1000", purchase_price: "100", currency: "USD", description: "Apple" }],

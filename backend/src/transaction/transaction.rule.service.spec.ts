@@ -93,7 +93,7 @@ describe("TransactionRuleService", () => {
 
       await service.applyRulesToTransactions(user, { id: "acc-specific" } as any, true, true);
 
-      expect(txManual.category).toBe(TestEntities.category);
+      expect(txManual.category).toStrictEqual(TestEntities.category);
     });
 
     it("should handle description strict matching, amount matching, and resetCategories option", async () => {

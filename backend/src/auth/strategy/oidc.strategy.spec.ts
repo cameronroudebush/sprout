@@ -211,7 +211,6 @@ describe("OIDCStrategy", () => {
 
       authService.getCookie.mockReturnValue("bad-token");
       cacheManager.get.mockResolvedValue(null);
-      httpService.get.mockReturnValue(of({ status: 400, statusText: "Bad Request" } as any));
 
       await expect(strategy.validate(mockRequest as Request, tokenPayload)).rejects.toThrow(
         new UnauthorizedException("Could not determine username from token."),

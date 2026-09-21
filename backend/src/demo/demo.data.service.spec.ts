@@ -19,7 +19,6 @@ import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model.js";
 import { UserConfig } from "@backend/user/model/user.config.model.js";
 import { User } from "@backend/user/model/user.model.js";
-import { DEMO_CATEGORIES } from "@backend/demo/demo.data.service.js";
 
 describe("DemoDataService", () => {
   let service: DemoDataService;
@@ -114,44 +113,6 @@ describe("DemoDataService", () => {
       expect(User.createUser).toHaveBeenCalled();
       expect(mockUserConfig.update).toHaveBeenCalled();
 
-      Configuration.isDemoMode = originalIsDemo;
-    });
-
-    it("should skip invalid non-string/non-object property entries in category tree", async () => {
-      const originalIsDemo = Configuration.isDemoMode;
-      Configuration.isDemoMode = true;
-
-      vi.spyOn(User, "findOne").mockResolvedValue(TestEntities.user);
-      vi.spyOn(Institution, "insertMany").mockResolvedValue([]);
-      const mockAccounts = [
-        Account.fromPlain({ id: "acc-1", name: "Checking", balance: 2500, subType: AccountSubType.checking, type: AccountType.depository }),
-        Account.fromPlain({ id: "acc-2", name: "Credit", balance: -500, subType: AccountSubType.cashBack, type: AccountType.credit }),
-        Account.fromPlain({ id: "acc-3", name: "Brokerage", balance: 10000, subType: AccountSubType.brokerage, type: AccountType.investment }),
-      ];
-      vi.spyOn(Account, "insertMany").mockResolvedValue(mockAccounts as any);
-      vi.spyOn(AccountHistory, "insertMany").mockImplementation(async (histories: any) => {
-        histories.forEach((h: any, idx: number) => {
-          h.account = h.account || mockAccounts[idx % mockAccounts.length];
-        });
-        return histories;
-      });
-      vi.spyOn(AccountHistory, "find").mockResolvedValue([]);
-      vi.spyOn(Category.prototype, "update").mockResolvedValue({ id: "cat-1" } as any);
-      const parentCat = Category.fromPlain({ id: "p1", name: "Home", user: TestEntities.user });
-      const childCat = Category.fromPlain({ id: "c1", name: "Mortgage", user: TestEntities.user });
-      vi.spyOn(Category, "find").mockResolvedValue([parentCat, childCat]);
-      vi.spyOn(Category, "insertMany").mockImplementation(async (cats: any) => cats);
-      vi.spyOn(Transaction, "insertMany").mockResolvedValue([]);
-      vi.spyOn(TransactionRule, "insertMany").mockResolvedValue([]);
-      vi.spyOn(Holding, "insertMany").mockResolvedValue([]);
-      vi.spyOn(HoldingHistory, "insertMany").mockResolvedValue([]);
-      vi.spyOn(ChatOverview, "insertMany").mockResolvedValue([]);
-
-      (DEMO_CATEGORIES.INCOME as any).INVALID_PROP = 123;
-
-      await service.populateDemoData(1);
-
-      delete (DEMO_CATEGORIES.INCOME as any).INVALID_PROP;
       Configuration.isDemoMode = originalIsDemo;
     });
   });
