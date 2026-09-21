@@ -21,7 +21,7 @@ class CoreApi {
   /// Returns a list of all current database backups along with size and GFS tier metadata.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> coreControllerGetBackupsWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> coreControllerGetBackupsWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/core/backups';
 
@@ -43,15 +43,14 @@ class CoreApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get database backup details.
   ///
   /// Returns a list of all current database backups along with size and GFS tier metadata.
-  Future<void> coreControllerGetBackups({ Future<void>? abortTrigger, }) async {
-    final response = await coreControllerGetBackupsWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<void> coreControllerGetBackups() async {
+    final response = await coreControllerGetBackupsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -62,7 +61,7 @@ class CoreApi {
   /// Provides a return message if the app is running.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> coreControllerHeartbeatWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> coreControllerHeartbeatWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/core/heartbeat';
 
@@ -84,15 +83,14 @@ class CoreApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Check application status.
   ///
   /// Provides a return message if the app is running.
-  Future<String?> coreControllerHeartbeat({ Future<void>? abortTrigger, }) async {
-    final response = await coreControllerHeartbeatWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<String?> coreControllerHeartbeat() async {
+    final response = await coreControllerHeartbeatWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -109,7 +107,7 @@ class CoreApi {
   /// Subscribe to real-time server events to allow the server to inform our client of various info.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> sSEControllerSseWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> sSEControllerSseWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/sse';
 
@@ -131,13 +129,12 @@ class CoreApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Subscribe to real-time server events to allow the server to inform our client of various info.
-  Future<SSEData?> sSEControllerSse({ Future<void>? abortTrigger, }) async {
-    final response = await sSEControllerSseWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<SSEData?> sSEControllerSse() async {
+    final response = await sSEControllerSseWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

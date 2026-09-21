@@ -25,7 +25,7 @@ class TransactionApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> transactionControllerDeleteWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> transactionControllerDeleteWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/{id}'
       .replaceAll('{id}', id);
@@ -48,7 +48,6 @@ class TransactionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -59,8 +58,8 @@ class TransactionApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> transactionControllerDelete(String id, { Future<void>? abortTrigger, }) async {
-    final response = await transactionControllerDeleteWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<void> transactionControllerDelete(String id,) async {
+    final response = await transactionControllerDeleteWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -77,7 +76,7 @@ class TransactionApi {
   /// * [String] id (required):
   ///
   /// * [Transaction] transaction (required):
-  Future<Response> transactionControllerEditWithHttpInfo(String id, Transaction transaction, { Future<void>? abortTrigger, }) async {
+  Future<Response> transactionControllerEditWithHttpInfo(String id, Transaction transaction,) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/{id}'
       .replaceAll('{id}', id);
@@ -100,7 +99,6 @@ class TransactionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -113,8 +111,8 @@ class TransactionApi {
   /// * [String] id (required):
   ///
   /// * [Transaction] transaction (required):
-  Future<Transaction?> transactionControllerEdit(String id, Transaction transaction, { Future<void>? abortTrigger, }) async {
-    final response = await transactionControllerEditWithHttpInfo(id, transaction, abortTrigger: abortTrigger,);
+  Future<Transaction?> transactionControllerEdit(String id, Transaction transaction,) async {
+    final response = await transactionControllerEditWithHttpInfo(id, transaction,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -162,7 +160,7 @@ class TransactionApi {
   /// * [DateTime] endDate:
   ///
   /// * [bool] pending:
-  Future<Response> transactionControllerGetByQueryWithHttpInfo({ String? id, num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, Future<void>? abortTrigger, }) async {
+  Future<Response> transactionControllerGetByQueryWithHttpInfo({ String? id, num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction';
 
@@ -215,7 +213,6 @@ class TransactionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -251,8 +248,8 @@ class TransactionApi {
   /// * [DateTime] endDate:
   ///
   /// * [bool] pending:
-  Future<List<Transaction>?> transactionControllerGetByQuery({ String? id, num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, Future<void>? abortTrigger, }) async {
-    final response = await transactionControllerGetByQueryWithHttpInfo(id: id, startIndex: startIndex, endIndex: endIndex, accountId: accountId, category: category, description: description, date: date, startDate: startDate, endDate: endDate, pending: pending, abortTrigger: abortTrigger,);
+  Future<List<Transaction>?> transactionControllerGetByQuery({ String? id, num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, }) async {
+    final response = await transactionControllerGetByQueryWithHttpInfo( id: id, startIndex: startIndex, endIndex: endIndex, accountId: accountId, category: category, description: description, date: date, startDate: startDate, endDate: endDate, pending: pending, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -282,7 +279,7 @@ class TransactionApi {
   /// * [String] category:
   ///
   /// * [String] description:
-  Future<Response> transactionControllerGetTotalWithHttpInfo({ String? accountId, String? category, String? description, Future<void>? abortTrigger, }) async {
+  Future<Response> transactionControllerGetTotalWithHttpInfo({ String? accountId, String? category, String? description, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/count';
 
@@ -314,7 +311,6 @@ class TransactionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -329,8 +325,8 @@ class TransactionApi {
   /// * [String] category:
   ///
   /// * [String] description:
-  Future<TotalTransactions?> transactionControllerGetTotal({ String? accountId, String? category, String? description, Future<void>? abortTrigger, }) async {
-    final response = await transactionControllerGetTotalWithHttpInfo(accountId: accountId, category: category, description: description, abortTrigger: abortTrigger,);
+  Future<TotalTransactions?> transactionControllerGetTotal({ String? accountId, String? category, String? description, }) async {
+    final response = await transactionControllerGetTotalWithHttpInfo( accountId: accountId, category: category, description: description, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -354,7 +350,7 @@ class TransactionApi {
   ///
   /// * [String] accountId:
   ///   Optional. Scopes the deduplication to a specific account.
-  Future<Response> transactionControllerRemoveDuplicatesWithHttpInfo({ String? accountId, Future<void>? abortTrigger, }) async {
+  Future<Response> transactionControllerRemoveDuplicatesWithHttpInfo({ String? accountId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/duplicates/remove';
 
@@ -380,7 +376,6 @@ class TransactionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -392,8 +387,8 @@ class TransactionApi {
   ///
   /// * [String] accountId:
   ///   Optional. Scopes the deduplication to a specific account.
-  Future<void> transactionControllerRemoveDuplicates({ String? accountId, Future<void>? abortTrigger, }) async {
-    final response = await transactionControllerRemoveDuplicatesWithHttpInfo(accountId: accountId, abortTrigger: abortTrigger,);
+  Future<void> transactionControllerRemoveDuplicates({ String? accountId, }) async {
+    final response = await transactionControllerRemoveDuplicatesWithHttpInfo( accountId: accountId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -404,7 +399,7 @@ class TransactionApi {
   /// Retrieves subscriptions based on historical transactions by guessing if they are reoccurring or not.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> transactionControllerSubscriptionsWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> transactionControllerSubscriptionsWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/subscriptions';
 
@@ -426,15 +421,14 @@ class TransactionApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get's subscriptions.
   ///
   /// Retrieves subscriptions based on historical transactions by guessing if they are reoccurring or not.
-  Future<List<TransactionSubscription>?> transactionControllerSubscriptions({ Future<void>? abortTrigger, }) async {
-    final response = await transactionControllerSubscriptionsWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<TransactionSubscription>?> transactionControllerSubscriptions() async {
+    final response = await transactionControllerSubscriptionsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

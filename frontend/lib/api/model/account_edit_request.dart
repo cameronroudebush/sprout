@@ -112,9 +112,7 @@ class AccountEditRequest {
         subType: AccountSubTypeEnum.fromJson(json[r'subType']),
         type: AccountTypeEnum.fromJson(json[r'type']),
         name: mapValueOfType<String>(json, r'name'),
-        interestRate: json[r'interestRate'] == null
-            ? null
-            : num.parse('${json[r'interestRate']}'),
+        interestRate: num.parse('${json[r'interestRate']}'),
       );
     }
     return null;

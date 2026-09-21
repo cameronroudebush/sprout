@@ -26,7 +26,7 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holding history for.
-  Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo(String accountId, { Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo(String accountId,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/history';
 
@@ -50,7 +50,6 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -62,8 +61,8 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holding history for.
-  Future<List<EntityHistory>?> holdingControllerGetHoldingHistory(String accountId, { Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetHoldingHistoryWithHttpInfo(accountId, abortTrigger: abortTrigger,);
+  Future<List<EntityHistory>?> holdingControllerGetHoldingHistory(String accountId,) async {
+    final response = await holdingControllerGetHoldingHistoryWithHttpInfo(accountId,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -89,7 +88,7 @@ class HoldingApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> holdingControllerGetHoldingTimelineWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetHoldingTimelineWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/timeline/{id}'
       .replaceAll('{id}', id);
@@ -112,7 +111,6 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -123,8 +121,8 @@ class HoldingApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<List<HistoricalDataPoint>?> holdingControllerGetHoldingTimeline(String id, { Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetHoldingTimelineWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<List<HistoricalDataPoint>?> holdingControllerGetHoldingTimeline(String id,) async {
+    final response = await holdingControllerGetHoldingTimelineWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -151,7 +149,7 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holdings for.
-  Future<Response> holdingControllerGetHoldingsWithHttpInfo(String accountId, { Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetHoldingsWithHttpInfo(String accountId,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding';
 
@@ -175,7 +173,6 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -187,8 +184,8 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holdings for.
-  Future<List<Holding>?> holdingControllerGetHoldings(String accountId, { Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetHoldingsWithHttpInfo(accountId, abortTrigger: abortTrigger,);
+  Future<List<Holding>?> holdingControllerGetHoldings(String accountId,) async {
+    final response = await holdingControllerGetHoldingsWithHttpInfo(accountId,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -210,7 +207,7 @@ class HoldingApi {
   /// Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> holdingControllerGetLiveMajorWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetLiveMajorWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/holding/live/major';
 
@@ -232,15 +229,14 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Returns major holding prices.
   ///
   /// Retrieves the major holdings current ticker value and returns them. Calling this more than every 5 minutes will result in the same data.
-  Future<List<MarketIndexDto>?> holdingControllerGetLiveMajor({ Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetLiveMajorWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<MarketIndexDto>?> holdingControllerGetLiveMajor() async {
+    final response = await holdingControllerGetLiveMajorWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -267,7 +263,7 @@ class HoldingApi {
   ///
   /// * [List<String>] symbols (required):
   ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
-  Future<Response> holdingControllerGetLivePricesWithHttpInfo(List<String> symbols, { Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetLivePricesWithHttpInfo(List<String> symbols,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/live';
 
@@ -291,7 +287,6 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -303,8 +298,8 @@ class HoldingApi {
   ///
   /// * [List<String>] symbols (required):
   ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
-  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(List<String> symbols, { Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetLivePricesWithHttpInfo(symbols, abortTrigger: abortTrigger,);
+  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(List<String> symbols,) async {
+    final response = await holdingControllerGetLivePricesWithHttpInfo(symbols,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -326,7 +321,7 @@ class HoldingApi {
   /// Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> holdingControllerGetMajorIndicesTimelineWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetMajorIndicesTimelineWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/holding/timeline/major';
 
@@ -348,15 +343,14 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get 7-day historical performance for major market indices.
   ///
   /// Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.
-  Future<List<MajorIndexTimelineDto>?> holdingControllerGetMajorIndicesTimeline({ Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetMajorIndicesTimelineWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<MajorIndexTimelineDto>?> holdingControllerGetMajorIndicesTimeline() async {
+    final response = await holdingControllerGetMajorIndicesTimelineWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -383,7 +377,7 @@ class HoldingApi {
   ///
   /// * [String] id (required):
   ///   The ID of the specific holding.
-  Future<Response> holdingControllerGetSpecificHoldingHistoryWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> holdingControllerGetSpecificHoldingHistoryWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/history/{id}'
       .replaceAll('{id}', id);
@@ -406,7 +400,6 @@ class HoldingApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -418,8 +411,8 @@ class HoldingApi {
   ///
   /// * [String] id (required):
   ///   The ID of the specific holding.
-  Future<EntityHistory?> holdingControllerGetSpecificHoldingHistory(String id, { Future<void>? abortTrigger, }) async {
-    final response = await holdingControllerGetSpecificHoldingHistoryWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<EntityHistory?> holdingControllerGetSpecificHoldingHistory(String id,) async {
+    final response = await holdingControllerGetSpecificHoldingHistoryWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

@@ -21,7 +21,7 @@ class NetWorthApi {
   /// Retrieves the net worth overtime of each account associated to the current user. Does not include any timeline data.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> netWorthControllerGetNetWorthByAccountsWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> netWorthControllerGetNetWorthByAccountsWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/net-worth/accounts';
 
@@ -43,15 +43,14 @@ class NetWorthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get net worth by ALL accounts represented as time frames.
   ///
   /// Retrieves the net worth overtime of each account associated to the current user. Does not include any timeline data.
-  Future<List<EntityHistory>?> netWorthControllerGetNetWorthByAccounts({ Future<void>? abortTrigger, }) async {
-    final response = await netWorthControllerGetNetWorthByAccountsWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<EntityHistory>?> netWorthControllerGetNetWorthByAccounts() async {
+    final response = await netWorthControllerGetNetWorthByAccountsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -77,7 +76,7 @@ class NetWorthApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/net-worth/timeline/account/{id}'
       .replaceAll('{id}', id);
@@ -100,7 +99,6 @@ class NetWorthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -111,8 +109,8 @@ class NetWorthApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<List<HistoricalDataPoint>?> netWorthControllerGetNetWorthTimelineAccount(String id, { Future<void>? abortTrigger, }) async {
-    final response = await netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<List<HistoricalDataPoint>?> netWorthControllerGetNetWorthTimelineAccount(String id,) async {
+    final response = await netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -134,7 +132,7 @@ class NetWorthApi {
   /// Retrieves all data related to the overarching accounts and how they performed over time.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> netWorthControllerGetNetWorthTotalWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> netWorthControllerGetNetWorthTotalWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/net-worth/total';
 
@@ -156,15 +154,14 @@ class NetWorthApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Retrieves the historical net-worth data for all accounts.
   ///
   /// Retrieves all data related to the overarching accounts and how they performed over time.
-  Future<TotalNetWorthDTO?> netWorthControllerGetNetWorthTotal({ Future<void>? abortTrigger, }) async {
-    final response = await netWorthControllerGetNetWorthTotalWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<TotalNetWorthDTO?> netWorthControllerGetNetWorthTotal() async {
+    final response = await netWorthControllerGetNetWorthTotalWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
