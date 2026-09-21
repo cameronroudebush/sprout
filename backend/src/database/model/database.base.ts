@@ -26,7 +26,7 @@ export class DatabaseBase extends DBBase {
 
   /** Returns this current element with {@link id} from the database */
   async get(): Promise<this> {
-    const element = await this.getRepository().findOne({ where: { id: this.id as any } });
+    const element = this.getRepository().findOne({ where: { id: this.id as any } });
     if (element == null) throw new Error(`Failed to locate matching element in db for id: ${this.id}`);
     return element as any;
   }

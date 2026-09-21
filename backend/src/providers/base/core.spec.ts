@@ -8,12 +8,11 @@ import { AccountSubType } from "@backend/account/model/account.sub.type.js";
 import { AccountType } from "@backend/account/model/account.type.js";
 import { Institution } from "@backend/institution/model/institution.model.js";
 import { BaseProviderConfig } from "@backend/providers/base/config.js";
-import { ProviderBase, ProviderSyncResult } from "@backend/providers/base/core.js";
+import { ProviderBase } from "@backend/providers/base/core.js";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model.js";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit.js";
 import { SyncTriggerType } from "@backend/providers/model/sync.type.js";
 import { TestEntities } from "@backend/test/entities.js";
-import { User } from "@backend/user/model/user.model.js";
 import { InternalServerErrorException, Logger, NotImplementedException } from "@nestjs/common";
 
 class TestProvider extends ProviderBase {
@@ -51,16 +50,28 @@ describe("ProviderBase", () => {
     it("should execute performSync for each asset and reconcile missing accounts on SCHEDULED trigger", async () => {
       const asset = { id: "asset-1" };
       (provider as any).getInstitutionAssetsForUser.mockResolvedValue([asset]);
-      (provider as any).performSync.mockResolvedValue([
-        { providerAccountId: "acc-active", account: { providerAccountId: "acc-active" } as any },
-      ]);
+      (provider as any).performSync.mockResolvedValue([{ providerAccountId: "acc-active", account: { providerAccountId: "acc-active" } as any }]);
 
       const activeAcc = TestEntities.account;
       activeAcc.providerAccountId = "acc-active";
       activeAcc.isArchived = false;
 
-      const missingAcc = { ...TestEntities.account, id: "missing-1", name: "Missing Acc", providerAccountId: "acc-missing", isArchived: false, update: vi.fn() };
-      const restoredAcc = { ...TestEntities.account, id: "restored-1", name: "Restored Acc", providerAccountId: "acc-active", isArchived: true, update: vi.fn() };
+      const missingAcc = {
+        ...TestEntities.account,
+        id: "missing-1",
+        name: "Missing Acc",
+        providerAccountId: "acc-missing",
+        isArchived: false,
+        update: vi.fn(),
+      };
+      const restoredAcc = {
+        ...TestEntities.account,
+        id: "restored-1",
+        name: "Restored Acc",
+        providerAccountId: "acc-active",
+        isArchived: true,
+        update: vi.fn(),
+      };
 
       vi.spyOn(Account, "find").mockResolvedValue([missingAcc as any, restoredAcc as any]);
 
@@ -77,6 +88,7 @@ describe("ProviderBase", () => {
       const asset = { id: "asset-1" };
       (provider as any).getInstitutionAssetsForUser.mockResolvedValue([asset]);
       (provider as any).performSync.mockRejectedValue(new Error("Sync crash"));
+      vi.spyOn(Account, "find").mockResolvedValue([]);
 
       const handleErrSpy = vi.spyOn(provider as any, "handleSyncError").mockResolvedValue();
 
@@ -109,7 +121,7 @@ describe("ProviderBase", () => {
 
       const mockHolding = { insert: vi.fn().mockResolvedValue({}) };
       const mockTx = TestEntities.transaction;
-      vi.spyOn((provider as any), "fetchInitialSyncData").mockResolvedValue({
+      vi.spyOn(provider as any, "fetchInitialSyncData").mockResolvedValue({
         holdings: [mockHolding],
         transactions: [mockTx],
         removedTransactionIds: [],

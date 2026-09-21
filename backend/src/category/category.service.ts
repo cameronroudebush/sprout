@@ -24,12 +24,7 @@ export class CategoryService {
       results.andWhere("account.id = :accountId", { accountId: accountId });
     }
 
-    if (day != null && month != null && year != null) {
-      const queryDate = new Date(year, month, day);
-      results.andWhere({
-        posted: queryDate,
-      });
-    } else if (month != null && year != null) {
+    if (month != null && year != null) {
       const queryDate = new Date(year, month ?? 0, 1);
       results.andWhere({
         posted: Between(startOfMonth(queryDate), endOfMonth(queryDate)),
@@ -38,6 +33,11 @@ export class CategoryService {
       results.andWhere("t.posted BETWEEN :startOfYear AND :endOfYear", {
         startOfYear: new Date(year, 0, 1),
         endOfYear: new Date(year, 11, 31, 23, 59, 59, 999),
+      });
+    } else if (day != null && month != null && year != null) {
+      const queryDate = new Date(year, month, day);
+      results.andWhere({
+        posted: queryDate,
       });
     }
 
