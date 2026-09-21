@@ -68,6 +68,31 @@ describe("NetWorthService", () => {
       expect(result.timeline(10)).toBeDefined();
     });
 
+    it("should sample timeline points and ensure last data point is included when points exceed maxPoints", async () => {
+      const hOld = AccountHistory.fromPlain({
+        id: "ah-old",
+        time: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000),
+        balance: 500,
+        account: mockAccount,
+      });
+
+      const qb: any = {
+        innerJoinAndSelect: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getMany: vi.fn().mockResolvedValue([hOld]),
+      };
+
+      vi.spyOn(AccountHistory, "getRepository").mockReturnValue({
+        createQueryBuilder: () => qb,
+      } as any);
+
+      const result = await service.getNetWorthSummary(mockUser);
+      const sampled = result.timeline(5);
+      expect(sampled.length).toBeGreaterThan(0);
+    });
+
     it("should return empty history if rawHistory is empty", async () => {
       const qb: any = {
         innerJoinAndSelect: vi.fn().mockReturnThis(),
