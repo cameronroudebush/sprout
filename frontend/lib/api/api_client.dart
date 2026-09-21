@@ -44,9 +44,8 @@ class ApiClient {
     Object? body,
     Map<String, String> headerParams,
     Map<String, String> formParams,
-    String? contentType, {
-    Future<void>? abortTrigger,
-  }) async {
+    String? contentType,
+  ) async {
     await authentication?.applyToParams(queryParams, headerParams);
 
     headerParams.addAll(_defaultHeaderMap);
@@ -64,7 +63,7 @@ class ApiClient {
         body is MultipartFile && (contentType == null ||
         !contentType.toLowerCase().startsWith('multipart/form-data'))
       ) {
-        final request = AbortableStreamedRequest(method, uri, abortTrigger: abortTrigger);
+        final request = StreamedRequest(method, uri);
         request.headers.addAll(headerParams);
         request.contentLength = body.length;
         body.finalize().listen(
@@ -79,7 +78,7 @@ class ApiClient {
       }
 
       if (body is MultipartRequest) {
-        final request = AbortableMultipartRequest(method, uri, abortTrigger: abortTrigger);
+        final request = MultipartRequest(method, uri);
         request.fields.addAll(body.fields);
         request.files.addAll(body.files);
         request.headers.addAll(body.headers);
@@ -93,19 +92,14 @@ class ApiClient {
         : await serializeAsync(body);
       final nullableHeaderParams = headerParams.isEmpty ? null : headerParams;
 
-      final request = AbortableRequest(method, uri, abortTrigger: abortTrigger);
-      if (nullableHeaderParams != null) {
-        request.headers.addAll(nullableHeaderParams);
+      switch(method) {
+        case 'POST': return await _client.post(uri, headers: nullableHeaderParams, body: msgBody,);
+        case 'PUT': return await _client.put(uri, headers: nullableHeaderParams, body: msgBody,);
+        case 'DELETE': return await _client.delete(uri, headers: nullableHeaderParams, body: msgBody,);
+        case 'PATCH': return await _client.patch(uri, headers: nullableHeaderParams, body: msgBody,);
+        case 'HEAD': return await _client.head(uri, headers: nullableHeaderParams,);
+        case 'GET': return await _client.get(uri, headers: nullableHeaderParams,);
       }
-      if (msgBody is String && msgBody.isNotEmpty) {
-        request.body = msgBody;
-      } else if (msgBody is List<int> && msgBody.isNotEmpty) {
-        request.bodyBytes = msgBody;
-      } else if (msgBody is Map<String, String>) {
-        request.bodyFields = msgBody;
-      }
-      final response = await _client.send(request);
-      return Response.fromStream(response);
     } on SocketException catch (error, trace) {
       throw ApiException.withInner(
         HttpStatus.badRequest,
@@ -142,6 +136,11 @@ class ApiClient {
         trace,
       );
     }
+
+    throw ApiException(
+      HttpStatus.badRequest,
+      'Invalid HTTP operation: $method $path',
+    );
   }
 
   Future<dynamic> deserializeAsync(String value, String targetType, {bool growable = false,}) async =>
@@ -195,12 +194,6 @@ class ApiClient {
           return AccountSubTypeEnumTypeTransformer().decode(value);
         case 'AccountTypeEnum':
           return AccountTypeEnumTypeTransformer().decode(value);
-        case 'Budget':
-          return Budget.fromJson(value);
-        case 'BudgetHistoryResponseDto':
-          return BudgetHistoryResponseDto.fromJson(value);
-        case 'BudgetOverviewResponseDto':
-          return BudgetOverviewResponseDto.fromJson(value);
         case 'CashFlowComparisonDTO':
           return CashFlowComparisonDTO.fromJson(value);
         case 'CashFlowSpending':
@@ -211,8 +204,6 @@ class ApiClient {
           return CashFlowTrendStats.fromJson(value);
         case 'Category':
           return Category.fromJson(value);
-        case 'CategoryBudgetOverviewItem':
-          return CategoryBudgetOverviewItem.fromJson(value);
         case 'CategoryStats':
           return CategoryStats.fromJson(value);
         case 'ChartRangeEnum':
@@ -225,8 +216,6 @@ class ApiClient {
           return ChatOverviewTypeEnumTypeTransformer().decode(value);
         case 'ChatRequestDTO':
           return ChatRequestDTO.fromJson(value);
-        case 'CreateBudgetDto':
-          return CreateBudgetDto.fromJson(value);
         case 'CurrencyOptionsEnum':
           return CurrencyOptionsEnumTypeTransformer().decode(value);
         case 'DailySpendingCalendarResponseDTO':
@@ -265,8 +254,6 @@ class ApiClient {
           return MarketIndexDto.fromJson(value);
         case 'MobileTokenExchangeDto':
           return MobileTokenExchangeDto.fromJson(value);
-        case 'MonthlyCategoryBudgetPerformance':
-          return MonthlyCategoryBudgetPerformance.fromJson(value);
         case 'MonthlyCategoryData':
           return MonthlyCategoryData.fromJson(value);
         case 'MonthlySpendingStats':
@@ -321,8 +308,6 @@ class ApiClient {
           return TransactionSubscription.fromJson(value);
         case 'UnsecureAppConfiguration':
           return UnsecureAppConfiguration.fromJson(value);
-        case 'UpdateBudgetDto':
-          return UpdateBudgetDto.fromJson(value);
         case 'UpdateInstitutionRequest':
           return UpdateInstitutionRequest.fromJson(value);
         case 'UpdateUserDto':

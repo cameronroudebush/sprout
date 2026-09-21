@@ -25,7 +25,7 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UserCreationRequest] userCreationRequest (required):
-  Future<Response> userControllerCreateWithHttpInfo(UserCreationRequest userCreationRequest, { Future<void>? abortTrigger, }) async {
+  Future<Response> userControllerCreateWithHttpInfo(UserCreationRequest userCreationRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/user/create';
 
@@ -47,7 +47,6 @@ class UserApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -58,8 +57,8 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UserCreationRequest] userCreationRequest (required):
-  Future<UserCreationResponse?> userControllerCreate(UserCreationRequest userCreationRequest, { Future<void>? abortTrigger, }) async {
-    final response = await userControllerCreateWithHttpInfo(userCreationRequest, abortTrigger: abortTrigger,);
+  Future<UserCreationResponse?> userControllerCreate(UserCreationRequest userCreationRequest,) async {
+    final response = await userControllerCreateWithHttpInfo(userCreationRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -82,7 +81,7 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> userControllerDeleteByIdWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> userControllerDeleteByIdWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/user/{id}'
       .replaceAll('{id}', id);
@@ -105,7 +104,6 @@ class UserApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -116,8 +114,8 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> userControllerDeleteById(String id, { Future<void>? abortTrigger, }) async {
-    final response = await userControllerDeleteByIdWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<void> userControllerDeleteById(String id,) async {
+    final response = await userControllerDeleteByIdWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -132,7 +130,7 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> userControllerGetByIdWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> userControllerGetByIdWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/user/{id}'
       .replaceAll('{id}', id);
@@ -155,7 +153,6 @@ class UserApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -166,8 +163,8 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<UserGetDTO?> userControllerGetById(String id, { Future<void>? abortTrigger, }) async {
-    final response = await userControllerGetByIdWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<UserGetDTO?> userControllerGetById(String id,) async {
+    final response = await userControllerGetByIdWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -186,7 +183,7 @@ class UserApi {
   /// Returns the current user from the database.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> userControllerMeWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> userControllerMeWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/user/me';
 
@@ -208,15 +205,14 @@ class UserApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get's current user info.
   ///
   /// Returns the current user from the database.
-  Future<User?> userControllerMe({ Future<void>? abortTrigger, }) async {
-    final response = await userControllerMeWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<User?> userControllerMe() async {
+    final response = await userControllerMeWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -239,7 +235,7 @@ class UserApi {
   /// Parameters:
   ///
   /// * [RegisterDeviceDto] registerDeviceDto (required):
-  Future<Response> userControllerRegisterDeviceWithHttpInfo(RegisterDeviceDto registerDeviceDto, { Future<void>? abortTrigger, }) async {
+  Future<Response> userControllerRegisterDeviceWithHttpInfo(RegisterDeviceDto registerDeviceDto,) async {
     // ignore: prefer_const_declarations
     final path = r'/user/device/register';
 
@@ -261,7 +257,6 @@ class UserApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -272,8 +267,8 @@ class UserApi {
   /// Parameters:
   ///
   /// * [RegisterDeviceDto] registerDeviceDto (required):
-  Future<void> userControllerRegisterDevice(RegisterDeviceDto registerDeviceDto, { Future<void>? abortTrigger, }) async {
-    final response = await userControllerRegisterDeviceWithHttpInfo(registerDeviceDto, abortTrigger: abortTrigger,);
+  Future<void> userControllerRegisterDevice(RegisterDeviceDto registerDeviceDto,) async {
+    final response = await userControllerRegisterDeviceWithHttpInfo(registerDeviceDto,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -288,7 +283,7 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UpdateUserDto] updateUserDto (required):
-  Future<Response> userControllerUpdateMeWithHttpInfo(UpdateUserDto updateUserDto, { Future<void>? abortTrigger, }) async {
+  Future<Response> userControllerUpdateMeWithHttpInfo(UpdateUserDto updateUserDto,) async {
     // ignore: prefer_const_declarations
     final path = r'/user/me';
 
@@ -310,7 +305,6 @@ class UserApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -321,8 +315,8 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UpdateUserDto] updateUserDto (required):
-  Future<User?> userControllerUpdateMe(UpdateUserDto updateUserDto, { Future<void>? abortTrigger, }) async {
-    final response = await userControllerUpdateMeWithHttpInfo(updateUserDto, abortTrigger: abortTrigger,);
+  Future<User?> userControllerUpdateMe(UpdateUserDto updateUserDto,) async {
+    final response = await userControllerUpdateMeWithHttpInfo(updateUserDto,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

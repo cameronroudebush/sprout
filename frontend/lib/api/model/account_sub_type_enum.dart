@@ -11,44 +11,59 @@
 part of openapi.api;
 
 /// The subtype of this account. For example, a depository could be a checking account, savings account, or HYSA.
-enum AccountSubTypeEnum {
-  other._(r'other'),
-  savings._(r'Savings'),
-  checking._(r'Checking'),
-  HYSA._(r'HYSA'),
-  n401k._(r'401K'),
-  brokerage._(r'Brokerage'),
-  IRA._(r'IRA'),
-  HSA._(r'HSA'),
-  student._(r'Student'),
-  mortgage._(r'Mortgage'),
-  personal._(r'Personal'),
-  auto._(r'Auto'),
-  travel._(r'Travel'),
-  cashBack._(r'Cash Back'),
-  wallet._(r'Wallet'),
-  staking._(r'Staking'),
-  house._(r'House'),
-  ;
-
-  /// Instantiate a new enum with the provided value.
-  const AccountSubTypeEnum._(this._value);
+class AccountSubTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const AccountSubTypeEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [AccountSubTypeEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const other = AccountSubTypeEnum._(r'other');
+  static const savings = AccountSubTypeEnum._(r'Savings');
+  static const checking = AccountSubTypeEnum._(r'Checking');
+  static const HYSA = AccountSubTypeEnum._(r'HYSA');
+  static const n401k = AccountSubTypeEnum._(r'401K');
+  static const brokerage = AccountSubTypeEnum._(r'Brokerage');
+  static const IRA = AccountSubTypeEnum._(r'IRA');
+  static const HSA = AccountSubTypeEnum._(r'HSA');
+  static const student = AccountSubTypeEnum._(r'Student');
+  static const mortgage = AccountSubTypeEnum._(r'Mortgage');
+  static const personal = AccountSubTypeEnum._(r'Personal');
+  static const auto = AccountSubTypeEnum._(r'Auto');
+  static const travel = AccountSubTypeEnum._(r'Travel');
+  static const cashBack = AccountSubTypeEnum._(r'Cash Back');
+  static const wallet = AccountSubTypeEnum._(r'Wallet');
+  static const staking = AccountSubTypeEnum._(r'Staking');
+  static const house = AccountSubTypeEnum._(r'House');
+
+  /// List of all possible values in this [enum][AccountSubTypeEnum].
+  static const values = <AccountSubTypeEnum>[
+    other,
+    savings,
+    checking,
+    HYSA,
+    n401k,
+    brokerage,
+    IRA,
+    HSA,
+    student,
+    mortgage,
+    personal,
+    auto,
+    travel,
+    cashBack,
+    wallet,
+    staking,
+    house,
+  ];
+
   static AccountSubTypeEnum? fromJson(dynamic value) => AccountSubTypeEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [AccountSubTypeEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<AccountSubTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <AccountSubTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -70,11 +85,9 @@ class AccountSubTypeEnumTypeTransformer {
 
   const AccountSubTypeEnumTypeTransformer._();
 
-  /// Encodes this enum as a value suitable for JSON.
-  String encode(AccountSubTypeEnum data) => data._value;
+  String encode(AccountSubTypeEnum data) => data.value;
 
-  /// Returns the instance of [AccountSubTypeEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a AccountSubTypeEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -83,9 +96,6 @@ class AccountSubTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   AccountSubTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is AccountSubTypeEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
         case r'other': return AccountSubTypeEnum.other;
@@ -114,7 +124,7 @@ class AccountSubTypeEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [AccountSubTypeEnumTypeTransformer] instance.
   static AccountSubTypeEnumTypeTransformer? _instance;
 }
 

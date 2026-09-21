@@ -21,7 +21,7 @@ class CashFlowApi {
   /// Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> cashFlowControllerGetAmortizationWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetAmortizationWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/amortization';
 
@@ -43,15 +43,14 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get loan amortization projections.
   ///
   /// Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.
-  Future<List<LoanAmortizationSeries>?> cashFlowControllerGetAmortization({ Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetAmortizationWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<LoanAmortizationSeries>?> cashFlowControllerGetAmortization() async {
+    final response = await cashFlowControllerGetAmortizationWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -81,7 +80,7 @@ class CashFlowApi {
   /// * [num] baselineMonth:
   ///
   /// * [num] targetMonth:
-  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/comparison-timeline';
 
@@ -112,7 +111,6 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -127,8 +125,8 @@ class CashFlowApi {
   /// * [num] baselineMonth:
   ///
   /// * [num] targetMonth:
-  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(baselineYear, targetYear, baselineMonth: baselineMonth, targetMonth: targetMonth, abortTrigger: abortTrigger,);
+  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, }) async {
+    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(baselineYear, targetYear,  baselineMonth: baselineMonth, targetMonth: targetMonth, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -151,7 +149,7 @@ class CashFlowApi {
   /// * [num] year (required):
   ///
   /// * [num] month (required):
-  Future<Response> cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(num year, num month, { Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(num year, num month,) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/daily-calendar-spending';
 
@@ -176,7 +174,6 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -187,8 +184,8 @@ class CashFlowApi {
   /// * [num] year (required):
   ///
   /// * [num] month (required):
-  Future<DailySpendingCalendarResponseDTO?> cashFlowControllerGetDailyCalendarSpending(num year, num month, { Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(year, month, abortTrigger: abortTrigger,);
+  Future<DailySpendingCalendarResponseDTO?> cashFlowControllerGetDailyCalendarSpending(num year, num month,) async {
+    final response = await cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(year, month,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -221,7 +218,7 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> cashFlowControllerGetSankeyWithHttpInfo(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetSankeyWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/sankey';
 
@@ -254,7 +251,6 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -275,8 +271,8 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<SankeyData?> cashFlowControllerGetSankey(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetSankeyWithHttpInfo(year, month: month, day: day, accountId: accountId, abortTrigger: abortTrigger,);
+  Future<SankeyData?> cashFlowControllerGetSankey(num year, { num? month, num? day, String? accountId, }) async {
+    final response = await cashFlowControllerGetSankeyWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -301,7 +297,7 @@ class CashFlowApi {
   /// * [num] months:
   ///
   /// * [num] categories:
-  Future<Response> cashFlowControllerGetSpendingWithHttpInfo({ num? months, num? categories, Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetSpendingWithHttpInfo({ num? months, num? categories, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/spending';
 
@@ -330,7 +326,6 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -343,8 +338,8 @@ class CashFlowApi {
   /// * [num] months:
   ///
   /// * [num] categories:
-  Future<CashFlowSpending?> cashFlowControllerGetSpending({ num? months, num? categories, Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetSpendingWithHttpInfo(months: months, categories: categories, abortTrigger: abortTrigger,);
+  Future<CashFlowSpending?> cashFlowControllerGetSpending({ num? months, num? categories, }) async {
+    final response = await cashFlowControllerGetSpendingWithHttpInfo( months: months, categories: categories, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -377,7 +372,7 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> cashFlowControllerGetStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/stats';
 
@@ -410,7 +405,6 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -431,8 +425,8 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<CashFlowStats?> cashFlowControllerGetStats(num year, { num? month, num? day, String? accountId, Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetStatsWithHttpInfo(year, month: month, day: day, accountId: accountId, abortTrigger: abortTrigger,);
+  Future<CashFlowStats?> cashFlowControllerGetStats(num year, { num? month, num? day, String? accountId, }) async {
+    final response = await cashFlowControllerGetStatsWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -455,7 +449,7 @@ class CashFlowApi {
   /// Parameters:
   ///
   /// * [num] months:
-  Future<Response> cashFlowControllerGetTrendWithHttpInfo({ num? months, Future<void>? abortTrigger, }) async {
+  Future<Response> cashFlowControllerGetTrendWithHttpInfo({ num? months, }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/trend';
 
@@ -481,7 +475,6 @@ class CashFlowApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -492,8 +485,8 @@ class CashFlowApi {
   /// Parameters:
   ///
   /// * [num] months:
-  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend({ num? months, Future<void>? abortTrigger, }) async {
-    final response = await cashFlowControllerGetTrendWithHttpInfo(months: months, abortTrigger: abortTrigger,);
+  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend({ num? months, }) async {
+    final response = await cashFlowControllerGetTrendWithHttpInfo( months: months, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
