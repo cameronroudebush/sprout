@@ -90,17 +90,14 @@ describe("NetWorthService", () => {
     it("should calculate net worth for each account belonging to user", async () => {
       vi.spyOn(Account, "getForUser").mockResolvedValue([mockAccount]);
 
-      const qb: any = {
-        innerJoinAndSelect: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        andWhere: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockReturnThis(),
-        getMany: vi.fn().mockResolvedValue([]),
-      };
+      const h1 = AccountHistory.fromPlain({
+        id: "ah-1",
+        time: new Date(),
+        balance: 1000,
+        account: mockAccount,
+      });
 
-      vi.spyOn(AccountHistory, "getRepository").mockReturnValue({
-        createQueryBuilder: () => qb,
-      } as any);
+      vi.spyOn(service as any, "getAccountHistoryForUser").mockResolvedValue([h1]);
 
       const result = await service.getNetWorthByAccounts(mockUser);
       expect(result).toHaveLength(1);

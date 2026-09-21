@@ -37,6 +37,10 @@ describe("OIDCIntrospection", () => {
     expect(() => idTokenRes.checkIssuedState()).not.toThrow();
 
     idTokenRes.issuer = "wrong-issuer";
-    expect(() => idTokenRes.checkIssuedState()).toThrow(UnauthorizedException);
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token issuer."));
+
+    idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.authorizedParty = "wrong-client";
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token audience."));
   });
 });

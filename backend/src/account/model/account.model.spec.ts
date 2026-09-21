@@ -66,6 +66,23 @@ describe("Account", () => {
     });
   });
 
+  describe("isInvestment", () => {
+    it("should evaluate to true if the account type is investment", () => {
+      const account = new Account("Brokerage", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.investment, "USD");
+      expect(account.isInvestment).toBe(true);
+    });
+
+    it("should evaluate to true if the account type is crypto", () => {
+      const account = new Account("Crypto Wallet", ProviderType.coinbase, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.crypto, "USD");
+      expect(account.isInvestment).toBe(true);
+    });
+
+    it("should evaluate to false if the account type is depository", () => {
+      const account = new Account("Checking", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.depository, "USD");
+      expect(account.isInvestment).toBe(false);
+    });
+  });
+
   describe("isNegativeNetWorth", () => {
     it("should evaluate to true if the account type is credit", () => {
       const account = new Account("Card", ProviderType.plaid, crypto.randomUUID(), mockUser, mockInstitution, 0, 0, AccountType.credit, "USD");
