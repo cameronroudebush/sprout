@@ -1,5 +1,6 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { Configuration } from "@backend/config/core";
@@ -11,7 +12,7 @@ import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
 import { Injectable } from "@nestjs/common";
 import { formatDate, subDays, subMonths, subYears } from "date-fns";
-import { MoreThan } from "typeorm";
+import { FindOptionsWhere, In, MoreThan } from "typeorm";
 
 /** A service focused entirely around generating prompts for various capabilities */
 @Injectable()
@@ -30,7 +31,7 @@ export class ChatPromptService {
   }
 
   /** Generates a prompt tailored for a brief 24-hour daily overview of the user's financial activity. */
-  async buildDailyOverviewPrompt(user: User) {
+  async buildDailyOverviewPrompt(user: User, includePendingTransactions = false) {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
       `Write a warm, natural daily financial summary over the last 24 hours.`,
@@ -45,7 +46,7 @@ export class ChatPromptService {
       `4. DO NOT include ANY specific numbers, dollar amounts, percentages, or balances in your response. Focus entirely on the narrative, the direction of the changes, and the spending categories.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions);
   }
 
   /** Builds prompt payload focused specifically on investment accounts & market holdings. */
@@ -64,7 +65,7 @@ export class ChatPromptService {
       `5. Do not focus on one account causing most of the portfolio movement, we care about all accounts equally not proportionate to amount in account.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto]);
   }
 
   /**
@@ -116,11 +117,18 @@ export class ChatPromptService {
   }
 
   /** Assembles context, sanitizes chat history, and returns ready prompt contents. */
-  private async createPromptPayload(user: User, timeframe: ChatTimeframe, instructions: string[], includeChatHistory = true) {
+  private async createPromptPayload(
+    user: User,
+    timeframe: ChatTimeframe,
+    instructions: string[],
+    includeChatHistory = true,
+    validAccountTypes?: AccountType[],
+    includePendingTransactions = true,
+  ) {
     await this.cleanupUserMax(user);
 
     const idMap = new Map<string, string>();
-    const data = await this.buildUserAccountDetails(user, timeframe, idMap);
+    const data = await this.buildUserAccountDetails(user, timeframe, idMap, validAccountTypes, includePendingTransactions);
 
     let sanitizedHistory: { role: string; parts: Array<{ text: string }> }[] = [];
     if (includeChatHistory) {
@@ -151,12 +159,22 @@ export class ChatPromptService {
   }
 
   /** Fetches contextual financial data and generates generic ID maps for privacy. */
-  private async buildUserAccountDetails(user: User, timeframe: ChatTimeframe, idMap: Map<string, string>) {
+  private async buildUserAccountDetails(
+    user: User,
+    timeframe: ChatTimeframe,
+    idMap: Map<string, string>,
+    validAccountTypes?: AccountType[],
+    includePendingTransactions = true,
+  ) {
     const historicalTimeFrame = this.getTimeframeDate(timeframe);
-    const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: { user: { id: user.id } } })), user);
+    const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
+    if (validAccountTypes) accountWhere.type = In(validAccountTypes);
+    const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: accountWhere })), user);
+    const txWhere: FindOptionsWhere<Transaction> = { account: accountWhere, posted: MoreThan(historicalTimeFrame) };
+    if (!includePendingTransactions) txWhere.pending = false;
     const transactions = Transaction.convertListToTargetCurrency(
       await Transaction.find({
-        where: { account: { user: { id: user.id } }, posted: MoreThan(historicalTimeFrame) },
+        where: txWhere,
         order: { posted: "DESC" },
         relations: { category: true },
       }),
@@ -167,7 +185,6 @@ export class ChatPromptService {
     let accIndex = 0;
     const isExtendedTimeframe = timeframe === ChatTimeframe.sixMonths || timeframe === ChatTimeframe.oneYear;
     const isOneDayTimeframe = timeframe === ChatTimeframe.oneDay;
-    const dateFormat = isOneDayTimeframe ? "MM/dd HH:mm" : "MM/dd";
     const todayStr = formatDate(new Date(), "MM/dd");
 
     const accountData = await Promise.all(
@@ -185,6 +202,15 @@ export class ChatPromptService {
           user,
         );
 
+        // Deduplicate intra-day syncs: Keep only the latest snapshot per calendar day
+        const seenDays = new Set<string>();
+        history = history.filter((h) => {
+          const dayKey = formatDate(h.time, "yyyy-MM-dd");
+          if (seenDays.has(dayKey)) return false;
+          seenDays.add(dayKey);
+          return true;
+        });
+
         if (isExtendedTimeframe) {
           const seenMonths = new Set<string>();
           history = history.filter((h) => {
@@ -195,14 +221,13 @@ export class ChatPromptService {
           });
         }
 
-        // Format account history dates
-        const historyFormatted = history.map((h) => `${formatDate(h.time, dateFormat)}:${Number(h.balance).toFixed(0)}`);
+        // Format account history dates using MM/dd (without HH:mm) so LLM evaluates daily snapshots cleanly
+        const historyFormatted = history.map((h) => `${formatDate(h.time, "MM/dd")}:${Number(h.balance).toFixed(0)}`);
 
         // Inject current live balance into account history if today's snapshot isn't saved yet
         const hasTodayAccountHistory = history.some((h) => formatDate(h.time, "MM/dd") === todayStr);
         if (!hasTodayAccountHistory) {
-          const nowStr = formatDate(new Date(), dateFormat);
-          historyFormatted.unshift(`${nowStr}:${Number(acc.balance).toFixed(0)}`);
+          historyFormatted.unshift(`${todayStr}:${Number(acc.balance).toFixed(0)}`);
         }
 
         // Process holdings and their respective historical records
@@ -216,6 +241,15 @@ export class ChatPromptService {
               user,
             );
 
+            // Deduplicate intra-day holding syncs: Keep only the latest snapshot per calendar day
+            const seenHoldingDays = new Set<string>();
+            holdingHistories = holdingHistories.filter((hh) => {
+              const dayKey = formatDate(hh.time, "yyyy-MM-dd");
+              if (seenHoldingDays.has(dayKey)) return false;
+              seenHoldingDays.add(dayKey);
+              return true;
+            });
+
             if (isExtendedTimeframe) {
               const seenMonths = new Set<string>();
               holdingHistories = holdingHistories.filter((hh) => {
@@ -226,14 +260,13 @@ export class ChatPromptService {
               });
             }
 
-            const formattedHoldingHistory = holdingHistories.map((hh) => `${formatDate(hh.time, dateFormat)}:${Number(hh.marketValue).toFixed(0)}`);
+            const formattedHoldingHistory = holdingHistories.map((hh) => `${formatDate(hh.time, "MM/dd")}:${Number(hh.marketValue).toFixed(0)}`);
 
             // Inject today's live holding snapshot if today's history isn't present
             const hasTodayHoldingHistory = holdingHistories.some((hh) => formatDate(hh.time, "MM/dd") === todayStr);
             if (!hasTodayHoldingHistory) {
               const liveHoldingHistory = HoldingHistory.fromHolding(h);
-              const nowStr = formatDate(liveHoldingHistory.time, dateFormat);
-              formattedHoldingHistory.unshift(`${nowStr}:${Number(liveHoldingHistory.marketValue).toFixed(0)}`);
+              formattedHoldingHistory.unshift(`${todayStr}:${Number(liveHoldingHistory.marketValue).toFixed(0)}`);
             }
 
             const val = Number(h.marketValue).toFixed(2);

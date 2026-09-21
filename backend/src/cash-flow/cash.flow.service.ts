@@ -20,7 +20,15 @@ export class CashFlowService {
    * Core calculation engine.
    * Aggregates transactions into Inflow/Outflow per category. Only considers certain account types (depository, credit)
    */
-  async calculateFlows(user: User, year?: number, month?: number, day?: number, accountId?: string, customRange?: FindOperator<Date>) {
+  async calculateFlows(
+    user: User,
+    year?: number,
+    month?: number,
+    day?: number,
+    accountId?: string,
+    customRange?: FindOperator<Date>,
+    includePending: boolean = false,
+  ) {
     if (month) month -= 1;
     let between;
     if (customRange) {
@@ -44,11 +52,12 @@ export class CashFlowService {
     };
     if (accountId) accountWhere.id = accountId;
 
-    const where = {
+    const where: FindOptionsWhere<Transaction> = {
       account: accountWhere,
       posted: between,
-      pending: false,
-    } as FindOptionsWhere<Transaction>;
+    };
+
+    if (!includePending) where.pending = false;
 
     const transactionsRaw = await Transaction.find({ where, relations: { account: true, category: true }, order: { posted: "DESC" } });
     /** All raw transactions, converted to the users currency */
