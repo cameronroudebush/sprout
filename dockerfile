@@ -1,7 +1,7 @@
 # -------------------------------
 #       Build Frontend
 # -------------------------------
-FROM ghcr.io/adrianjagielak/flutter:3.47.4 AS frontend-build
+FROM ghcr.io/adrianjagielak/flutter:3.47.5 AS frontend-build
 WORKDIR /app
 COPY .git .git
 COPY ./frontend ./
@@ -10,7 +10,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:24-alpine3.23 AS backend-build
+FROM node:26-alpine3.23 AS backend-build
 # Install build tools for compiling native C++ modules
 RUN apk add --no-cache git python3 make g++
 WORKDIR /app
