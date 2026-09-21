@@ -54,12 +54,14 @@ export class TransactionController {
       const matchingCategory = await Category.findOne({ where: { id: transaction.categoryId, user: { id: user.id } } });
       if (matchingCategory == null) throw new NotFoundException("Failed to locate a matching category to assign the transaction to.");
       matchingTransaction.category = matchingCategory;
+      matchingTransaction.manuallyEdited = true;
     }
 
     // Description
-    matchingTransaction.description = transaction.description ?? matchingTransaction.description;
-
-    matchingTransaction.manuallyEdited = true;
+    if (transaction.description != null) {
+      matchingTransaction.description = transaction.description;
+      matchingTransaction.manuallyEdited = true;
+    }
 
     const updated = await matchingTransaction.update();
     // Updating a transaction has a lot of effect on reports and other locations. Tell the frontend to update all data.

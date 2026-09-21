@@ -94,6 +94,24 @@ describe("TransactionController", () => {
       expect(tx.description).toBe("Original Description");
       expect(res).toBe(tx);
     });
+
+    it("should set category to null and manuallyEdited to false when categoryId is 'unknown'", async () => {
+      const tx = TestEntities.transaction;
+      tx.pending = false;
+      tx.category = TestEntities.category;
+      tx.manuallyEdited = true;
+      tx.update = vi.fn().mockResolvedValue(tx);
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(tx);
+
+      const res = await controller.edit(tx.id, user, {
+        categoryId: "unknown",
+      } as any);
+
+      expect(tx.category).toBeNull();
+      expect(tx.manuallyEdited).toBe(false);
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+      expect(res).toBe(tx);
+    });
   });
 
   describe("delete", () => {
