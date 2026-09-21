@@ -11,34 +11,39 @@
 part of openapi.api;
 
 /// The type of this account to better separate it from the others.
-enum AccountTypeEnum {
-  other._(r'other'),
-  depository._(r'depository'),
-  credit._(r'credit'),
-  asset._(r'asset'),
-  loan._(r'loan'),
-  investment._(r'investment'),
-  crypto._(r'crypto'),
-  ;
-
-  /// Instantiate a new enum with the provided value.
-  const AccountTypeEnum._(this._value);
+class AccountTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const AccountTypeEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [AccountTypeEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const other = AccountTypeEnum._(r'other');
+  static const depository = AccountTypeEnum._(r'depository');
+  static const credit = AccountTypeEnum._(r'credit');
+  static const asset = AccountTypeEnum._(r'asset');
+  static const loan = AccountTypeEnum._(r'loan');
+  static const investment = AccountTypeEnum._(r'investment');
+  static const crypto = AccountTypeEnum._(r'crypto');
+
+  /// List of all possible values in this [enum][AccountTypeEnum].
+  static const values = <AccountTypeEnum>[
+    other,
+    depository,
+    credit,
+    asset,
+    loan,
+    investment,
+    crypto,
+  ];
+
   static AccountTypeEnum? fromJson(dynamic value) => AccountTypeEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [AccountTypeEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<AccountTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <AccountTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -60,11 +65,9 @@ class AccountTypeEnumTypeTransformer {
 
   const AccountTypeEnumTypeTransformer._();
 
-  /// Encodes this enum as a value suitable for JSON.
-  String encode(AccountTypeEnum data) => data._value;
+  String encode(AccountTypeEnum data) => data.value;
 
-  /// Returns the instance of [AccountTypeEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a AccountTypeEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -73,9 +76,6 @@ class AccountTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   AccountTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is AccountTypeEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
         case r'other': return AccountTypeEnum.other;
@@ -94,7 +94,7 @@ class AccountTypeEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [AccountTypeEnumTypeTransformer] instance.
   static AccountTypeEnumTypeTransformer? _instance;
 }
 

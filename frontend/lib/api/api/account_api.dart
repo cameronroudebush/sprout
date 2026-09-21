@@ -25,7 +25,7 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> accountControllerDeleteWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> accountControllerDeleteWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/account/{id}'
       .replaceAll('{id}', id);
@@ -48,7 +48,6 @@ class AccountApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -59,8 +58,8 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> accountControllerDelete(String id, { Future<void>? abortTrigger, }) async {
-    final response = await accountControllerDeleteWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<void> accountControllerDelete(String id,) async {
+    final response = await accountControllerDeleteWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -77,7 +76,7 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountEditRequest] accountEditRequest (required):
-  Future<Response> accountControllerEditWithHttpInfo(String id, AccountEditRequest accountEditRequest, { Future<void>? abortTrigger, }) async {
+  Future<Response> accountControllerEditWithHttpInfo(String id, AccountEditRequest accountEditRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/account/{id}'
       .replaceAll('{id}', id);
@@ -100,7 +99,6 @@ class AccountApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -113,8 +111,8 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountEditRequest] accountEditRequest (required):
-  Future<Account?> accountControllerEdit(String id, AccountEditRequest accountEditRequest, { Future<void>? abortTrigger, }) async {
-    final response = await accountControllerEditWithHttpInfo(id, accountEditRequest, abortTrigger: abortTrigger,);
+  Future<Account?> accountControllerEdit(String id, AccountEditRequest accountEditRequest,) async {
+    final response = await accountControllerEditWithHttpInfo(id, accountEditRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -133,7 +131,7 @@ class AccountApi {
   /// Retrieves all accounts for the authenticated user.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> accountControllerGetAccountsWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> accountControllerGetAccountsWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/account';
 
@@ -155,15 +153,14 @@ class AccountApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Get accounts.
   ///
   /// Retrieves all accounts for the authenticated user.
-  Future<List<Account>?> accountControllerGetAccounts({ Future<void>? abortTrigger, }) async {
-    final response = await accountControllerGetAccountsWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<Account>?> accountControllerGetAccounts() async {
+    final response = await accountControllerGetAccountsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -189,7 +186,7 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> accountControllerGetByIdWithHttpInfo(String id, { Future<void>? abortTrigger, }) async {
+  Future<Response> accountControllerGetByIdWithHttpInfo(String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/account/{id}'
       .replaceAll('{id}', id);
@@ -212,7 +209,6 @@ class AccountApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -223,8 +219,8 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Account?> accountControllerGetById(String id, { Future<void>? abortTrigger, }) async {
-    final response = await accountControllerGetByIdWithHttpInfo(id, abortTrigger: abortTrigger,);
+  Future<Account?> accountControllerGetById(String id,) async {
+    final response = await accountControllerGetByIdWithHttpInfo(id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -249,7 +245,7 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountMergeDTO] accountMergeDTO (required):
-  Future<Response> accountControllerMergeAccountsWithHttpInfo(String id, AccountMergeDTO accountMergeDTO, { Future<void>? abortTrigger, }) async {
+  Future<Response> accountControllerMergeAccountsWithHttpInfo(String id, AccountMergeDTO accountMergeDTO,) async {
     // ignore: prefer_const_declarations
     final path = r'/account/{id}/merge'
       .replaceAll('{id}', id);
@@ -272,7 +268,6 @@ class AccountApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -285,8 +280,8 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountMergeDTO] accountMergeDTO (required):
-  Future<Account?> accountControllerMergeAccounts(String id, AccountMergeDTO accountMergeDTO, { Future<void>? abortTrigger, }) async {
-    final response = await accountControllerMergeAccountsWithHttpInfo(id, accountMergeDTO, abortTrigger: abortTrigger,);
+  Future<Account?> accountControllerMergeAccounts(String id, AccountMergeDTO accountMergeDTO,) async {
+    final response = await accountControllerMergeAccountsWithHttpInfo(id, accountMergeDTO,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

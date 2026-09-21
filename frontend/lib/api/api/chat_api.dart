@@ -24,7 +24,7 @@ class ChatApi {
   ///
   /// * [String] type:
   ///   The type of overview to retrieve (defaults to 'accounts').
-  Future<Response> chatControllerGetOverviewWithHttpInfo({ String? type, Future<void>? abortTrigger, }) async {
+  Future<Response> chatControllerGetOverviewWithHttpInfo({ String? type, }) async {
     // ignore: prefer_const_declarations
     final path = r'/chat/overview';
 
@@ -50,7 +50,6 @@ class ChatApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -60,8 +59,8 @@ class ChatApi {
   ///
   /// * [String] type:
   ///   The type of overview to retrieve (defaults to 'accounts').
-  Future<ChatOverview?> chatControllerGetOverview({ String? type, Future<void>? abortTrigger, }) async {
-    final response = await chatControllerGetOverviewWithHttpInfo(type: type, abortTrigger: abortTrigger,);
+  Future<ChatOverview?> chatControllerGetOverview({ String? type, }) async {
+    final response = await chatControllerGetOverviewWithHttpInfo( type: type, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -78,7 +77,7 @@ class ChatApi {
   /// Returns the chat history for previous LLM conversations.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> chatControllerHistoryWithHttpInfo({ Future<void>? abortTrigger, }) async {
+  Future<Response> chatControllerHistoryWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/chat/history';
 
@@ -100,13 +99,12 @@ class ChatApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
   /// Returns the chat history for previous LLM conversations.
-  Future<List<ChatHistory>?> chatControllerHistory({ Future<void>? abortTrigger, }) async {
-    final response = await chatControllerHistoryWithHttpInfo(abortTrigger: abortTrigger,);
+  Future<List<ChatHistory>?> chatControllerHistory() async {
+    final response = await chatControllerHistoryWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -130,7 +128,7 @@ class ChatApi {
   /// Parameters:
   ///
   /// * [ChatRequestDTO] chatRequestDTO (required):
-  Future<Response> chatControllerNewWithHttpInfo(ChatRequestDTO chatRequestDTO, { Future<void>? abortTrigger, }) async {
+  Future<Response> chatControllerNewWithHttpInfo(ChatRequestDTO chatRequestDTO,) async {
     // ignore: prefer_const_declarations
     final path = r'/chat/new';
 
@@ -152,7 +150,6 @@ class ChatApi {
       headerParams,
       formParams,
       contentTypes.isEmpty ? null : contentTypes.first,
-      abortTrigger: abortTrigger,
     );
   }
 
@@ -161,8 +158,8 @@ class ChatApi {
   /// Parameters:
   ///
   /// * [ChatRequestDTO] chatRequestDTO (required):
-  Future<void> chatControllerNew(ChatRequestDTO chatRequestDTO, { Future<void>? abortTrigger, }) async {
-    final response = await chatControllerNewWithHttpInfo(chatRequestDTO, abortTrigger: abortTrigger,);
+  Future<void> chatControllerNew(ChatRequestDTO chatRequestDTO,) async {
+    final response = await chatControllerNewWithHttpInfo(chatRequestDTO,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

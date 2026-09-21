@@ -55,45 +55,42 @@ class MarketIndexDto {
   String lastUpdated;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MarketIndexDto &&
-          other.type == type &&
-          other.previousClose == previousClose &&
-          other.dayLow == dayLow &&
-          other.dayHigh == dayHigh &&
-          other.marketState == marketState &&
-          other.dividendYield == dividendYield &&
-          other.price == price &&
-          other.symbol == symbol &&
-          other.name == name &&
-          other.change == change &&
-          other.changePercent == changePercent &&
-          other.lastUpdated == lastUpdated;
+  bool operator ==(Object other) => identical(this, other) || other is MarketIndexDto &&
+    other.type == type &&
+    other.previousClose == previousClose &&
+    other.dayLow == dayLow &&
+    other.dayHigh == dayHigh &&
+    other.marketState == marketState &&
+    other.dividendYield == dividendYield &&
+    other.price == price &&
+    other.symbol == symbol &&
+    other.name == name &&
+    other.change == change &&
+    other.changePercent == changePercent &&
+    other.lastUpdated == lastUpdated;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (type.hashCode) +
-      (previousClose == null ? 0 : previousClose!.hashCode) +
-      (dayLow == null ? 0 : dayLow!.hashCode) +
-      (dayHigh == null ? 0 : dayHigh!.hashCode) +
-      (marketState == null ? 0 : marketState!.hashCode) +
-      (dividendYield == null ? 0 : dividendYield!.hashCode) +
-      (price.hashCode) +
-      (symbol.hashCode) +
-      (name.hashCode) +
-      (change.hashCode) +
-      (changePercent.hashCode) +
-      (lastUpdated.hashCode);
+    // ignore: unnecessary_parenthesis
+    (type.hashCode) +
+    (previousClose == null ? 0 : previousClose!.hashCode) +
+    (dayLow == null ? 0 : dayLow!.hashCode) +
+    (dayHigh == null ? 0 : dayHigh!.hashCode) +
+    (marketState == null ? 0 : marketState!.hashCode) +
+    (dividendYield == null ? 0 : dividendYield!.hashCode) +
+    (price.hashCode) +
+    (symbol.hashCode) +
+    (name.hashCode) +
+    (change.hashCode) +
+    (changePercent.hashCode) +
+    (lastUpdated.hashCode);
 
   @override
-  String toString() =>
-      'MarketIndexDto[type=$type, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
+  String toString() => 'MarketIndexDto[type=$type, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'type'] = this.type;
+      json[r'type'] = this.type;
     if (this.previousClose != null) {
       json[r'previousClose'] = this.previousClose;
     } else {
@@ -119,12 +116,12 @@ class MarketIndexDto {
     } else {
       json[r'dividendYield'] = null;
     }
-    json[r'price'] = this.price;
-    json[r'symbol'] = this.symbol;
-    json[r'name'] = this.name;
-    json[r'change'] = this.change;
-    json[r'changePercent'] = this.changePercent;
-    json[r'lastUpdated'] = this.lastUpdated;
+      json[r'price'] = this.price;
+      json[r'symbol'] = this.symbol;
+      json[r'name'] = this.name;
+      json[r'change'] = this.change;
+      json[r'changePercent'] = this.changePercent;
+      json[r'lastUpdated'] = this.lastUpdated;
     return json;
   }
 
@@ -149,10 +146,8 @@ class MarketIndexDto {
         assert(json[r'name'] != null, 'Required key "MarketIndexDto[name]" has a null value in JSON.');
         assert(json.containsKey(r'change'), 'Required key "MarketIndexDto[change]" is missing from JSON.');
         assert(json[r'change'] != null, 'Required key "MarketIndexDto[change]" has a null value in JSON.');
-        assert(
-            json.containsKey(r'changePercent'), 'Required key "MarketIndexDto[changePercent]" is missing from JSON.');
-        assert(
-            json[r'changePercent'] != null, 'Required key "MarketIndexDto[changePercent]" has a null value in JSON.');
+        assert(json.containsKey(r'changePercent'), 'Required key "MarketIndexDto[changePercent]" is missing from JSON.');
+        assert(json[r'changePercent'] != null, 'Required key "MarketIndexDto[changePercent]" has a null value in JSON.');
         assert(json.containsKey(r'lastUpdated'), 'Required key "MarketIndexDto[lastUpdated]" is missing from JSON.');
         assert(json[r'lastUpdated'] != null, 'Required key "MarketIndexDto[lastUpdated]" has a null value in JSON.');
         return true;
@@ -160,11 +155,19 @@ class MarketIndexDto {
 
       return MarketIndexDto(
         type: MarketIndexDtoTypeEnum.fromJson(json[r'type'])!,
-        previousClose: json[r'previousClose'] == null ? null : num.parse('${json[r'previousClose']}'),
-        dayLow: json[r'dayLow'] == null ? null : num.parse('${json[r'dayLow']}'),
-        dayHigh: json[r'dayHigh'] == null ? null : num.parse('${json[r'dayHigh']}'),
+        previousClose: json[r'previousClose'] == null
+            ? null
+            : num.parse('${json[r'previousClose']}'),
+        dayLow: json[r'dayLow'] == null
+            ? null
+            : num.parse('${json[r'dayLow']}'),
+        dayHigh: json[r'dayHigh'] == null
+            ? null
+            : num.parse('${json[r'dayHigh']}'),
         marketState: MarketIndexDtoMarketStateEnum.fromJson(json[r'marketState']),
-        dividendYield: json[r'dividendYield'] == null ? null : num.parse('${json[r'dividendYield']}'),
+        dividendYield: json[r'dividendYield'] == null
+            ? null
+            : num.parse('${json[r'dividendYield']}'),
         price: num.parse('${json[r'price']}'),
         symbol: mapValueOfType<String>(json, r'symbol')!,
         name: mapValueOfType<String>(json, r'name')!,
@@ -176,10 +179,7 @@ class MarketIndexDto {
     return null;
   }
 
-  static List<MarketIndexDto> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<MarketIndexDto> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MarketIndexDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -207,19 +207,13 @@ class MarketIndexDto {
   }
 
   // maps a json object with a list of MarketIndexDto-objects as value to a dart map
-  static Map<String, List<MarketIndexDto>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<MarketIndexDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<MarketIndexDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MarketIndexDto.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        map[entry.key] = MarketIndexDto.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -238,38 +232,42 @@ class MarketIndexDto {
 }
 
 /// The type of financial instrument
-enum MarketIndexDtoTypeEnum {
-  EQUITY._(r'EQUITY'),
-  MUTUALFUND._(r'MUTUALFUND'),
-  MONEYMARKET._(r'MONEYMARKET'),
-  ETF._(r'ETF'),
-  INDEX._(r'INDEX'),
-  CURRENCY._(r'CURRENCY'),
-  CRYPTOCURRENCY._(r'CRYPTOCURRENCY'),
-  ;
-
-  /// Instantiate a new enum with the provided value.
-  const MarketIndexDtoTypeEnum._(this._value);
+class MarketIndexDtoTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const MarketIndexDtoTypeEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [MarketIndexDtoTypeEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const EQUITY = MarketIndexDtoTypeEnum._(r'EQUITY');
+  static const MUTUALFUND = MarketIndexDtoTypeEnum._(r'MUTUALFUND');
+  static const MONEYMARKET = MarketIndexDtoTypeEnum._(r'MONEYMARKET');
+  static const ETF = MarketIndexDtoTypeEnum._(r'ETF');
+  static const INDEX = MarketIndexDtoTypeEnum._(r'INDEX');
+  static const CURRENCY = MarketIndexDtoTypeEnum._(r'CURRENCY');
+  static const CRYPTOCURRENCY = MarketIndexDtoTypeEnum._(r'CRYPTOCURRENCY');
+  static const INVALID = MarketIndexDtoTypeEnum._(r'INVALID');
+
+  /// List of all possible values in this [enum][MarketIndexDtoTypeEnum].
+  static const values = <MarketIndexDtoTypeEnum>[
+    EQUITY,
+    MUTUALFUND,
+    MONEYMARKET,
+    ETF,
+    INDEX,
+    CURRENCY,
+    CRYPTOCURRENCY,
+    INVALID,
+  ];
+
   static MarketIndexDtoTypeEnum? fromJson(dynamic value) => MarketIndexDtoTypeEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [MarketIndexDtoTypeEnum]
-  /// that were successfully decoded from the passed [JSON][json].
-  static List<MarketIndexDtoTypeEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<MarketIndexDtoTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MarketIndexDtoTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -290,10 +288,9 @@ class MarketIndexDtoTypeEnumTypeTransformer {
 
   const MarketIndexDtoTypeEnumTypeTransformer._();
 
-  String encode(MarketIndexDtoTypeEnum data) => data._value;
+  String encode(MarketIndexDtoTypeEnum data) => data.value;
 
-  /// Returns the instance of [MarketIndexDtoTypeEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a MarketIndexDtoTypeEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -302,27 +299,16 @@ class MarketIndexDtoTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   MarketIndexDtoTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is MarketIndexDtoTypeEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
-        case r'EQUITY':
-          return MarketIndexDtoTypeEnum.EQUITY;
-        case r'MUTUALFUND':
-          return MarketIndexDtoTypeEnum.MUTUALFUND;
-        case r'MONEYMARKET':
-          return MarketIndexDtoTypeEnum.MONEYMARKET;
-        case r'ETF':
-          return MarketIndexDtoTypeEnum.ETF;
-        case r'INDEX':
-          return MarketIndexDtoTypeEnum.INDEX;
-        case r'CURRENCY':
-          return MarketIndexDtoTypeEnum.CURRENCY;
-        case r'CRYPTOCURRENCY':
-          return MarketIndexDtoTypeEnum.CRYPTOCURRENCY;
-        case r'INVALID':
-          return MarketIndexDtoTypeEnum.INVALID;
+        case r'EQUITY': return MarketIndexDtoTypeEnum.EQUITY;
+        case r'MUTUALFUND': return MarketIndexDtoTypeEnum.MUTUALFUND;
+        case r'MONEYMARKET': return MarketIndexDtoTypeEnum.MONEYMARKET;
+        case r'ETF': return MarketIndexDtoTypeEnum.ETF;
+        case r'INDEX': return MarketIndexDtoTypeEnum.INDEX;
+        case r'CURRENCY': return MarketIndexDtoTypeEnum.CURRENCY;
+        case r'CRYPTOCURRENCY': return MarketIndexDtoTypeEnum.CRYPTOCURRENCY;
+        case r'INVALID': return MarketIndexDtoTypeEnum.INVALID;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -332,42 +318,44 @@ class MarketIndexDtoTypeEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [MarketIndexDtoTypeEnumTypeTransformer] instance.
   static MarketIndexDtoTypeEnumTypeTransformer? _instance;
 }
 
-enum MarketIndexDtoMarketStateEnum {
-  REGULAR._(r'REGULAR'),
-  CLOSED._(r'CLOSED'),
-  PRE._(r'PRE'),
-  POST._(r'POST'),
-  PREPRE._(r'PREPRE'),
-  POSTPOST._(r'POSTPOST'),
-  ;
 
-  /// Instantiate a new enum with the provided value.
-  const MarketIndexDtoMarketStateEnum._(this._value);
+
+class MarketIndexDtoMarketStateEnum {
+  /// Instantiate a new enum with the provided [value].
+  const MarketIndexDtoMarketStateEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [MarketIndexDtoMarketStateEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
-  static MarketIndexDtoMarketStateEnum? fromJson(dynamic value) =>
-      MarketIndexDtoMarketStateEnumTypeTransformer().decode(value);
+  static const REGULAR = MarketIndexDtoMarketStateEnum._(r'REGULAR');
+  static const CLOSED = MarketIndexDtoMarketStateEnum._(r'CLOSED');
+  static const PRE = MarketIndexDtoMarketStateEnum._(r'PRE');
+  static const POST = MarketIndexDtoMarketStateEnum._(r'POST');
+  static const PREPRE = MarketIndexDtoMarketStateEnum._(r'PREPRE');
+  static const POSTPOST = MarketIndexDtoMarketStateEnum._(r'POSTPOST');
 
-  /// Returns a [List] containing instances of [MarketIndexDtoMarketStateEnum]
-  /// that were successfully decoded from the passed [JSON][json].
-  static List<MarketIndexDtoMarketStateEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  /// List of all possible values in this [enum][MarketIndexDtoMarketStateEnum].
+  static const values = <MarketIndexDtoMarketStateEnum>[
+    REGULAR,
+    CLOSED,
+    PRE,
+    POST,
+    PREPRE,
+    POSTPOST,
+  ];
+
+  static MarketIndexDtoMarketStateEnum? fromJson(dynamic value) => MarketIndexDtoMarketStateEnumTypeTransformer().decode(value);
+
+  static List<MarketIndexDtoMarketStateEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MarketIndexDtoMarketStateEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -384,15 +372,13 @@ enum MarketIndexDtoMarketStateEnum {
 /// Transformation class that can [encode] an instance of [MarketIndexDtoMarketStateEnum] to String,
 /// and [decode] dynamic data back to [MarketIndexDtoMarketStateEnum].
 class MarketIndexDtoMarketStateEnumTypeTransformer {
-  factory MarketIndexDtoMarketStateEnumTypeTransformer() =>
-      _instance ??= const MarketIndexDtoMarketStateEnumTypeTransformer._();
+  factory MarketIndexDtoMarketStateEnumTypeTransformer() => _instance ??= const MarketIndexDtoMarketStateEnumTypeTransformer._();
 
   const MarketIndexDtoMarketStateEnumTypeTransformer._();
 
-  String encode(MarketIndexDtoMarketStateEnum data) => data._value;
+  String encode(MarketIndexDtoMarketStateEnum data) => data.value;
 
-  /// Returns the instance of [MarketIndexDtoMarketStateEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a MarketIndexDtoMarketStateEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -401,23 +387,14 @@ class MarketIndexDtoMarketStateEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   MarketIndexDtoMarketStateEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is MarketIndexDtoMarketStateEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
-        case r'REGULAR':
-          return MarketIndexDtoMarketStateEnum.REGULAR;
-        case r'CLOSED':
-          return MarketIndexDtoMarketStateEnum.CLOSED;
-        case r'PRE':
-          return MarketIndexDtoMarketStateEnum.PRE;
-        case r'POST':
-          return MarketIndexDtoMarketStateEnum.POST;
-        case r'PREPRE':
-          return MarketIndexDtoMarketStateEnum.PREPRE;
-        case r'POSTPOST':
-          return MarketIndexDtoMarketStateEnum.POSTPOST;
+        case r'REGULAR': return MarketIndexDtoMarketStateEnum.REGULAR;
+        case r'CLOSED': return MarketIndexDtoMarketStateEnum.CLOSED;
+        case r'PRE': return MarketIndexDtoMarketStateEnum.PRE;
+        case r'POST': return MarketIndexDtoMarketStateEnum.POST;
+        case r'PREPRE': return MarketIndexDtoMarketStateEnum.PREPRE;
+        case r'POSTPOST': return MarketIndexDtoMarketStateEnum.POSTPOST;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -427,6 +404,8 @@ class MarketIndexDtoMarketStateEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [MarketIndexDtoMarketStateEnumTypeTransformer] instance.
   static MarketIndexDtoMarketStateEnumTypeTransformer? _instance;
 }
+
+

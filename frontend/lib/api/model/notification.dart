@@ -178,31 +178,33 @@ class Notification {
 }
 
 /// The type of notification this is
-enum NotificationTypeEnum {
-  info._(r'info'),
-  success._(r'success'),
-  warning._(r'warning'),
-  error._(r'error'),
-  ;
-
-  /// Instantiate a new enum with the provided value.
-  const NotificationTypeEnum._(this._value);
+class NotificationTypeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const NotificationTypeEnum._(this.value);
 
   /// The underlying value of this enum member.
-  final String _value;
+  final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [NotificationTypeEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const info = NotificationTypeEnum._(r'info');
+  static const success = NotificationTypeEnum._(r'success');
+  static const warning = NotificationTypeEnum._(r'warning');
+  static const error = NotificationTypeEnum._(r'error');
+
+  /// List of all possible values in this [enum][NotificationTypeEnum].
+  static const values = <NotificationTypeEnum>[
+    info,
+    success,
+    warning,
+    error,
+  ];
+
   static NotificationTypeEnum? fromJson(dynamic value) => NotificationTypeEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [NotificationTypeEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<NotificationTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <NotificationTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -224,10 +226,9 @@ class NotificationTypeEnumTypeTransformer {
 
   const NotificationTypeEnumTypeTransformer._();
 
-  String encode(NotificationTypeEnum data) => data._value;
+  String encode(NotificationTypeEnum data) => data.value;
 
-  /// Returns the instance of [NotificationTypeEnum] that was successfully decoded
-  /// from the passed [data] value on success, null otherwise.
+  /// Decodes a [dynamic value][data] to a NotificationTypeEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -236,9 +237,6 @@ class NotificationTypeEnumTypeTransformer {
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
   NotificationTypeEnum? decode(dynamic data, {bool allowNull = true}) {
-    if (data is NotificationTypeEnum) {
-      return data;
-    }
     if (data != null) {
       switch (data) {
         case r'info': return NotificationTypeEnum.info;
@@ -254,7 +252,7 @@ class NotificationTypeEnumTypeTransformer {
     return null;
   }
 
-  /// The singleton instance of this transformer.
+  /// Singleton [NotificationTypeEnumTypeTransformer] instance.
   static NotificationTypeEnumTypeTransformer? _instance;
 }
 
