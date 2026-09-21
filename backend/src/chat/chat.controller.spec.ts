@@ -69,6 +69,30 @@ describe("ChatController", () => {
       expect(res).toBe("AI Response");
     });
 
+    it("should handle error without message property in catch block", async () => {
+      vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+
+      const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+      userChat.insert = vi.fn().mockResolvedValue(userChat);
+
+      const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "...", isThinking: true, user });
+      modelChat.insert = vi.fn().mockResolvedValue(modelChat);
+      modelChat.update = vi.fn().mockResolvedValue(modelChat);
+
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+
+      const mockModel = {
+        generateChatContent: vi.fn().mockRejectedValue("string error without message property"),
+      };
+      chatService.getModel.mockResolvedValue(mockModel as any);
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toBeDefined();
+      expect(modelChat.isThinking).toBe(false);
+      expect(modelChat.text).toBe("An unexpected timeout or error occurred.");
+      expect(modelChat.update).toHaveBeenCalled();
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
+    });
+
     it("should handle error in generateChatContent and update chat.isThinking when error caught", async () => {
       vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
 

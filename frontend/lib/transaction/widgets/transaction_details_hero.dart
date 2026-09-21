@@ -40,7 +40,7 @@ class TransactionHeroCard extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (websiteUrl != null && websiteUrl.isNotEmpty) ...[
-                        WebsiteIconWidget(websiteUrl, size: 24),
+                        WebsiteIconWidget(websiteUrl: websiteUrl, size: 24),
                         const SizedBox(width: 8),
                       ],
                       Flexible(

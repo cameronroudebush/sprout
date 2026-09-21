@@ -6,11 +6,9 @@ import { startCase } from "lodash-es";
 import pkg from "../package.json" with { type: "json" };
 const { name } = pkg;
 
-// Determine if we're running the script before we try to initialize the config
-Configuration.isRunningScript = Configuration.isDevBuild && process.argv[2] != null;
-
 /**
- * Executes runner scripts and exits before starting the HTTP server.
+ * This allows us to run this app and then execute a specific script
+ *  instead. This helps configure the app like it would normally be but then allows us to execute specific functionality.
  */
 export async function checkScript() {
   const scriptName = process.argv[2];
@@ -21,17 +19,8 @@ export async function checkScript() {
         await generateOpenApiSpec(process.argv[3]);
         process.exit(0);
       }
-      case "generate.migration": {
-        const migrationName = process.argv[3];
-        if (!migrationName) {
-          throw new Error("Migration name is required. Example: npm run migrate -- MY_MIGRATION_NAME");
-        }
-        const { generateMigration } = await import("./scripts/generate.migration.js");
-        await generateMigration(migrationName);
-        process.exit(0);
-      }
       default:
-        throw new Error(`Failed to locate matching script to execute: ${scriptName}`);
+        throw new Error("Failed to locate matching script to execute");
     }
   } catch (e) {
     Logger.error(e);
@@ -43,6 +32,7 @@ export async function checkScript() {
 export async function main() {
   const projName = startCase(name);
   new ConfigurationService(new SproutLogger(projName, { logLevels: ["verbose"] })).load();
+  Configuration.isRunningScript = Configuration.isDevBuild && process.argv[2] != null;
 
   // Check if we have scripts to run
   if (Configuration.isRunningScript) await checkScript();

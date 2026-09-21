@@ -50,6 +50,14 @@ describe("HoldingService", () => {
       expect(results).toHaveLength(1);
     });
 
+    it("should handle quoteSummary rejection gracefully for missing symbols", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockRejectedValue(new Error("Symbol not found"));
+
+      const results = await service.getLiveHoldingPrices(["UNKNOWN_SYM"]);
+      expect(results).toEqual([]);
+    });
+
     it("should fetch missing prices from yahoo finance and handle mutual fund dividends", async () => {
       cacheManager.get.mockResolvedValue(null);
       vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
@@ -93,17 +101,18 @@ describe("HoldingService", () => {
   });
 
   describe("getMajorIndices", () => {
-    it("should map major index names properly", async () => {
+    it("should map major index names properly and fallback to symbol if unknown index", async () => {
       cacheManager.get.mockResolvedValue(null);
       vi.spyOn((service as any).yf, "quoteSummary").mockImplementation((symbol: string) =>
         Promise.resolve({
-          price: { symbol, regularMarketPrice: 4000, quoteType: "INDEX" },
+          price: { symbol: symbol === "^GSPC" ? "UNKNOWN_INDEX" : symbol, regularMarketPrice: 4000, quoteType: "INDEX" },
           summaryDetail: {},
         }),
       );
 
       const indices = await service.getMajorIndices();
       expect(indices.length).toBeGreaterThan(0);
+      expect(indices.some((idx) => idx.name === "UNKNOWN_INDEX")).toBe(true);
     });
   });
 

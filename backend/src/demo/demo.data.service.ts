@@ -140,7 +140,7 @@ export class DemoDataService {
     const logger = new Logger("demo:institution");
     const institutions = [
       Institution.fromPlain({ name: "Chase Bank", url: "https://www.chase.com", id: "www.chase.com", hasError: false }),
-      Institution.fromPlain({ name: "Fidelity Investments", url: "https://www.fidelity.com", id: "www.fidelity.com", hasError: false }),
+      Institution.fromPlain({ name: "Fidelity Investments", url: "https://www.fidelity.com", id: "www.fidelity.com", hasError: true }),
       Institution.fromPlain({ name: "Vanguard Investments", url: "https://investor.vanguard.com/", id: "investor.vanguard.com", hasError: false }),
       Institution.fromPlain({ name: "Wells Fargo Bank", url: "https://www.wellsfargo.com", id: "www.wellsfargo.com", hasError: false }),
       Institution.fromPlain({ name: "Toyota Financial", url: "https://www.toyotafinancial.com", id: "www.toyotafinancial.com", hasError: false }),
@@ -282,8 +282,7 @@ export class DemoDataService {
       ),
     ];
     logger.log(`Creating ${accounts.length} accounts.`);
-    // Force an Id for one account so it's easy to link to
-    accounts[0]!.id = "ea5b551f-05fc-482c-8133-8cbadeb4e669";
+
     return await Account.insertMany(accounts);
   }
 
@@ -526,8 +525,6 @@ export class DemoDataService {
     }
 
     logger.log(`Inserting ${allTransactions.length} transactions.`);
-    // Force an Id for one transaction so it's easy to link to
-    allTransactions[0]!.id = "1c91e240-5126-4234-a66c-464c1ff05ab0";
     await Transaction.insertMany(allTransactions);
     return allTransactions;
   }

@@ -101,6 +101,14 @@ describe("DatabaseService", () => {
     expect(service.source.query).toHaveBeenCalledWith("PRAGMA foreign_keys=OFF;");
   });
 
+  it("should return early in setSQLitePRAGMA when database is SQLite", async () => {
+    (Configuration.database as any).isSqlite = true;
+    const querySpy = vi.spyOn(service.source, "query");
+
+    await service.setSQLitePRAGMA(true, service.source);
+    expect(querySpy).not.toHaveBeenCalled();
+  });
+
   it("should inject native better-sqlite3 regex methods", () => {
     const fnMap = new Map<string, Function>();
     (service.source.driver as any).databaseConnection = {

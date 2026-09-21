@@ -111,6 +111,10 @@ describe("ChatService", () => {
 
       const holdingsOverview = await modelWrapper.generateOverview(ChatOverviewType.holdings);
       expect(holdingsOverview).toBeDefined();
+
+      // Test empty aiText returned from generateContent
+      mockModels.generateContent.mockResolvedValueOnce({ text: "" });
+      await expect(modelWrapper.generateOverview(ChatOverviewType.daily)).rejects.toThrow(InternalServerErrorException);
     });
 
     it("should handle 503 retry overload, JSON parse errors, and error branches in generateOverview", async () => {

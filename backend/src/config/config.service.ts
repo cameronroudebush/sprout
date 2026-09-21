@@ -139,7 +139,7 @@ export class ConfigurationService {
     this.save(undefined, log);
     // Load any env variables
     this.loadEnvVariables();
-    if (!Configuration.isRunningScript) this.validateConfigurationRequirements();
+    this.validateConfigurationRequirements();
     return this;
   }
 

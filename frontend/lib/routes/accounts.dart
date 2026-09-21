@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/widgets/account_error_top_notification.dart';
 import 'package:sprout/account/widgets/account_sync_dialog.dart';
 import 'package:sprout/account/widgets/account_total_summary_card.dart';
 import 'package:sprout/account/widgets/accounts_empty.dart';
@@ -43,10 +42,6 @@ class AccountsPage extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Display connection error notifications if any exist
-                            const AccountErrorNotificationWidget(
-                              allowClick: false,
-                            ),
                             SproutCard(
                                 child: Padding(
                                     padding: const EdgeInsets.all(12), child: TotalSummary(accounts: state.accounts))),

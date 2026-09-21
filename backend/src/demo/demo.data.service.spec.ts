@@ -101,10 +101,17 @@ describe("DemoDataService", () => {
 
       // 2. Second run when user is new and created
       vi.spyOn(User, "findOne")
-        .mockResolvedValueOnce(TestEntities.user) // existing check in createUser
-        .mockResolvedValueOnce(TestEntities.user);
+        .mockResolvedValueOnce(null) // first findOne in createUser returns null
+        .mockResolvedValueOnce(TestEntities.user); // second findOne returns demoUser
+
+      vi.spyOn(User, "createUser").mockResolvedValue(TestEntities.user);
+      const mockUserConfig = { netWorthRange: undefined, update: vi.fn().mockResolvedValue(true) };
+      vi.spyOn(UserConfig, "findOne").mockResolvedValue(mockUserConfig as any);
 
       await service.populateDemoData(30);
+
+      expect(User.createUser).toHaveBeenCalled();
+      expect(mockUserConfig.update).toHaveBeenCalled();
 
       Configuration.isDemoMode = originalIsDemo;
     });

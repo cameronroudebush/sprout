@@ -91,12 +91,7 @@ export class ProviderSyncService {
 
     for (const data of accounts) {
       try {
-        let accountInDB = data.providerAccountId
-          ? await Account.findOne({
-              where: { providerAccountId: data.providerAccountId, user: { id: user.id } },
-              relations: { institution: true },
-            })
-          : null;
+        let accountInDB = await Account.findOne({ where: { id: data.account.id, user: { id: user.id } }, relations: { institution: true } });
         // Determine if we should insert the missing account
         if (!accountInDB) {
           // Only auto-link newly discovered accounts if auto-creation isn't explicitly disabled

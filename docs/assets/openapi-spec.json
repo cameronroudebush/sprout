@@ -4194,11 +4194,6 @@
             "type": "string",
             "description": "The Id of the account related to this holding."
           },
-          "extra": {
-            "type": "object",
-            "additionalProperties": true,
-            "description": "Additional metadata for this holding."
-          },
           "purchasePrice": {
             "type": "number",
             "description": "The numeric value converted to the user's preferred currency format. This overrides the original purchasePrice property.",
@@ -4282,7 +4277,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "enum": ["EQUITY", "MUTUALFUND", "MONEYMARKET", "ETF", "INDEX", "CURRENCY", "CRYPTOCURRENCY", "INVALID"],
+            "enum": ["EQUITY", "MUTUALFUND", "MONEYMARKET", "ETF", "INDEX", "CURRENCY", "CRYPTOCURRENCY"],
             "type": "string",
             "description": "The type of financial instrument"
           },

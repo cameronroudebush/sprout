@@ -1,7 +1,7 @@
-import { SproutLogger } from "@backend/core/logger";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
+import { SproutLogger } from "@backend/core/logger";
 import { Logger } from "@nestjs/common";
 
 vi.mock("@backend/config/core", () => ({
@@ -127,26 +127,16 @@ export function setupTests() {
 
 /** Mocks the logger to not actually output and litter the log for testing */
 function mockLogger() {
-  // Disable NestJS builtin logger
-  Logger.overrideLogger(false);
-
-  // Silence process output streams (catches custom loggers writing directly to stdout/stderr)
-  vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-  vi.spyOn(process.stderr, "write").mockImplementation(() => true);
-
-  // Silence standard console
-  vi.spyOn(console, "log").mockImplementation(() => {});
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  vi.spyOn(console, "warn").mockImplementation(() => {});
-  vi.spyOn(console, "debug").mockImplementation(() => {});
-
-  // Spy prototypes for Nest Logger & SproutLogger
+  vi.spyOn(Logger, "log").mockImplementation(() => {});
+  vi.spyOn(Logger, "error").mockImplementation(() => {});
+  vi.spyOn(Logger, "warn").mockImplementation(() => {});
+  vi.spyOn(Logger, "debug").mockImplementation(() => {});
+  vi.spyOn(Logger, "verbose").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "log").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "error").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "debug").mockImplementation(() => {});
   vi.spyOn(Logger.prototype, "verbose").mockImplementation(() => {});
-
   vi.spyOn(SproutLogger.prototype, "log").mockImplementation(() => {});
   vi.spyOn(SproutLogger.prototype, "error").mockImplementation(() => {});
   vi.spyOn(SproutLogger.prototype, "warn").mockImplementation(() => {});
