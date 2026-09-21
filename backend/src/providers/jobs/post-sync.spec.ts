@@ -163,7 +163,14 @@ describe("PostSyncProcessingJob", () => {
 
     it("should notify error when failures exist and fallback to 'Unknown error' if failureReason is missing", async () => {
       const user = TestEntities.user;
-      const syncFailed = Sync.fromPlain({ id: "s2", status: "failed", failureReason: undefined, provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
+      const syncFailed = Sync.fromPlain({
+        id: "s2",
+        status: "failed",
+        failureReason: undefined,
+        provider: ProviderType.plaid,
+        triggerType: SyncTriggerType.SCHEDULED,
+        user,
+      });
 
       vi.spyOn(Sync, "count").mockResolvedValue(0);
       Configuration.providers.syncNotifications.enabled = true;

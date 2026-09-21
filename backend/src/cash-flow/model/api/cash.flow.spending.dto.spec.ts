@@ -1,11 +1,7 @@
 import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import {
-  CashFlowSpending,
-  MonthlyCategoryData,
-  MonthlySpendingStats,
-} from "@backend/cash-flow/model/api/cash.flow.spending.dto.js";
+import { CashFlowSpending, MonthlyCategoryData, MonthlySpendingStats } from "@backend/cash-flow/model/api/cash.flow.spending.dto.js";
 
 describe("CashFlowSpending DTO", () => {
   it("should instantiate MonthlyCategoryData", () => {

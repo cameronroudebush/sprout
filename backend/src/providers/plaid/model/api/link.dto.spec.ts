@@ -1,12 +1,7 @@
 import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
-import {
-  PlaidAccountDTO,
-  PlaidInstitutionDTO,
-  PlaidLinkDTO,
-  PlaidMetadataDTO,
-} from "@backend/providers/plaid/model/api/link.dto.js";
+import { PlaidAccountDTO, PlaidInstitutionDTO, PlaidLinkDTO, PlaidMetadataDTO } from "@backend/providers/plaid/model/api/link.dto.js";
 
 describe("PlaidLinkDTO", () => {
   it("should instantiate PlaidAccountDTO with and without mask", () => {

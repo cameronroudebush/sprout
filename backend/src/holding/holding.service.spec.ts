@@ -1,11 +1,12 @@
-import { setupTests } from "@backend/test/helpers.js";
 import { TestEntities } from "@backend/test/entities.js";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { setupTests } from "@backend/test/helpers.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 setupTests();
 
-import { HoldingService } from "./holding.service.js";
+import { MarketQuoteType } from "@backend/holding/model/api/mark.index.dto.js";
 import { HttpException } from "@nestjs/common";
+import { HoldingService } from "./holding.service.js";
 
 describe("HoldingService", () => {
   let service: HoldingService;
@@ -55,7 +56,9 @@ describe("HoldingService", () => {
       vi.spyOn((service as any).yf, "quoteSummary").mockRejectedValue(new Error("Symbol not found"));
 
       const results = await service.getLiveHoldingPrices(["UNKNOWN_SYM"]);
-      expect(results).toEqual([]);
+      expect(results).toHaveLength(1);
+      expect(results[0]!.symbol).toBe("UNKNOWN_SYM");
+      expect(results[0]!.type).toBe(MarketQuoteType.INVALID);
     });
 
     it("should fetch missing prices from yahoo finance and handle mutual fund dividends", async () => {

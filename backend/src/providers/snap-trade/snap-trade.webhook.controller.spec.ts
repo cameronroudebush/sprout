@@ -123,10 +123,12 @@ describe("SnapTradeWebHookController", () => {
     it("should handle exceptions in handleWebhook gracefully", async () => {
       vi.spyOn(SnapTradeInstitutionAsset, "findOne").mockRejectedValue(new Error("DB error"));
 
-      await expect((controller as any).handleWebhook({
-        eventType: "TRANSACTIONS_SYNC_COMPLETED",
-        brokerageAuthorizationId: "auth-123",
-      })).resolves.not.toThrow();
+      await expect(
+        (controller as any).handleWebhook({
+          eventType: "TRANSACTIONS_SYNC_COMPLETED",
+          brokerageAuthorizationId: "auth-123",
+        }),
+      ).resolves.not.toThrow();
     });
   });
 

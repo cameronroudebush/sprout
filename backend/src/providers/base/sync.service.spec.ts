@@ -45,9 +45,9 @@ describe("ProviderSyncService", () => {
 
     Configuration.holding.cleanupRemovedHoldings = true;
 
-    vi.spyOn(AccountHistory.prototype, "insert").mockResolvedValue({} as any);
-    vi.spyOn(Holding.prototype, "insert").mockResolvedValue({} as any);
-    vi.spyOn(HoldingHistory.prototype, "insert").mockResolvedValue({} as any);
+    vi.spyOn(AccountHistory, "insertForAccount").mockResolvedValue({} as any);
+    vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+
     vi.spyOn(Transaction, "upsertMany").mockResolvedValue({} as any);
     vi.spyOn(Transaction, "delete").mockResolvedValue({} as any);
 
@@ -78,21 +78,27 @@ describe("ProviderSyncService", () => {
     it("should mark the sync task failed if structural responses accumulate institution connection context errors", async () => {
       vi.spyOn(Account, "count").mockResolvedValue(1);
 
-      const providerAccountWithError = TestEntities.account;
-      providerAccountWithError.institution.hasError = true;
-      providerAccountWithError.institution.name = "Chase";
+      const providerAccountWithError = {
+        ...TestEntities.account,
+        providerAccountId: "p-chase-1",
+        institution: { ...TestEntities.account.institution, hasError: true, name: "Chase" },
+      };
 
       mockProvider.get.mockResolvedValue([
         {
-          account: providerAccountWithError,
+          account: providerAccountWithError as any,
+          providerAccountId: "p-chase-1",
         },
       ]);
 
-      const mockAccountInDb = TestEntities.account;
-      mockAccountInDb.institution.update = vi.fn().mockResolvedValue({});
-      mockAccountInDb.update = vi.fn().mockResolvedValue({});
+      const mockAccountInDb = {
+        ...TestEntities.account,
+        providerAccountId: "p-chase-1",
+        institution: { ...TestEntities.account.institution, hasError: false, name: "Chase", update: vi.fn().mockResolvedValue({}) },
+        update: vi.fn().mockResolvedValue({}),
+      };
 
-      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb as any);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.MANUAL);
 
@@ -118,25 +124,25 @@ describe("ProviderSyncService", () => {
   describe("syncUserAccounts Evaluation Blocks", () => {
     it("should skip updating database storage targets if matching operational record entities are completely missing", async () => {
       vi.spyOn(Account, "count").mockResolvedValue(1);
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account }]);
+      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, providerAccountId: "p-1" }]);
       vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(AccountHistory.prototype.insert).not.toHaveBeenCalled();
+      expect(AccountHistory.insertForAccount).not.toHaveBeenCalled();
     });
 
     it("should auto-create missing account when providerAccountId is present and preventAutoCreation is false", async () => {
       vi.spyOn(Account, "count").mockResolvedValue(1);
 
-      const incomingAccount = TestEntities.account;
-      incomingAccount.insert = vi.fn().mockResolvedValue(incomingAccount);
+      const incomingAccount = { ...TestEntities.account, insert: vi.fn() };
+      incomingAccount.insert.mockResolvedValue(incomingAccount);
 
-      mockProvider.get.mockResolvedValue([{ account: incomingAccount, providerAccountId: "p-1", preventAutoCreation: false }]);
+      mockProvider.get.mockResolvedValue([{ account: incomingAccount as any, providerAccountId: "p-1", preventAutoCreation: false }]);
 
       vi.spyOn(Account, "findOne")
-        .mockResolvedValueOnce(null) // first check
-        .mockResolvedValueOnce(incomingAccount); // reload check
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(incomingAccount as any);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -152,7 +158,7 @@ describe("ProviderSyncService", () => {
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED, "inst-target");
 
-      expect(AccountHistory.prototype.insert).not.toHaveBeenCalled();
+      expect(AccountHistory.insertForAccount).not.toHaveBeenCalled();
     });
 
     it("should attach institution if account in DB has no institution attached yet and attach brand new institution if missing in DB", async () => {
@@ -179,10 +185,14 @@ describe("ProviderSyncService", () => {
     let mockAccountInDb: Account;
 
     beforeEach(() => {
-      mockAccountInDb = TestEntities.account;
-      mockAccountInDb.type = AccountType.investment;
-      mockAccountInDb.institution.update = vi.fn();
-      mockAccountInDb.update = vi.fn();
+      mockAccountInDb = {
+        ...TestEntities.account,
+        providerAccountId: "p-test-1",
+        type: AccountType.investment,
+        isInvestment: true,
+        institution: { ...TestEntities.account.institution, update: vi.fn() },
+        update: vi.fn(),
+      } as any;
 
       vi.spyOn(Account, "count").mockResolvedValue(1);
       vi.spyOn(Account, "findOne").mockResolvedValue(mockAccountInDb);
@@ -192,29 +202,36 @@ describe("ProviderSyncService", () => {
       const txWithIdOnly = Transaction.fromPlain({ id: "tx-local-1", amount: -20, description: "", account: TestEntities.account });
       txWithIdOnly.update = vi.fn().mockResolvedValue(txWithIdOnly);
 
+      const account = { ...TestEntities.account, isInvestment: true };
+
       mockProvider.get.mockResolvedValue([
         {
-          account: TestEntities.account,
+          account: account as any,
+          providerAccountId: "p-test-1",
           transactions: [TestEntities.transaction, txWithIdOnly],
           removedTransactionIds: ["tx-old-1"],
         },
       ]);
       vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
-      vi.spyOn(Transaction, "find")
-        .mockResolvedValueOnce([TestEntities.transaction]) // for providerId
-        .mockResolvedValueOnce([txWithIdOnly]); // for id
+      vi.spyOn(Transaction, "find").mockResolvedValueOnce([TestEntities.transaction]).mockResolvedValueOnce([txWithIdOnly]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(AccountHistory.prototype.insert).toHaveBeenCalled();
+      expect(AccountHistory.insertForAccount).toHaveBeenCalled();
       expect(mockAccountInDb.balance).toBe(1000);
       expect(mockAccountInDb.update).toHaveBeenCalled();
     });
 
     it("should initialize holding instances from plain contexts on matching asset storage record cache misses", async () => {
+      const account = { ...TestEntities.account, isInvestment: true };
+
+      const mockHoldingToInsert = { insert: vi.fn().mockResolvedValue({}) };
+      vi.spyOn(Holding, "fromPlain").mockReturnValue(mockHoldingToInsert as any);
+
       mockProvider.get.mockResolvedValue([
         {
-          account: TestEntities.account,
+          account: account as any,
+          providerAccountId: "p-test-1",
           holdings: [TestEntities.holding],
         },
       ]);
@@ -223,34 +240,39 @@ describe("ProviderSyncService", () => {
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(Holding.prototype.insert).toHaveBeenCalledWith(false);
+      expect(mockHoldingToInsert.insert).toHaveBeenCalledWith(false);
     });
 
     it("should backup previous holding data positions to ledger history models and refresh matching live instances", async () => {
+      const account = { ...TestEntities.account, isInvestment: true };
+
+      const mockHoldingHistoryToInsert = { insert: vi.fn().mockResolvedValue({}) };
+      vi.spyOn(HoldingHistory, "fromPlain").mockReturnValue(mockHoldingHistoryToInsert as any);
+
       mockProvider.get.mockResolvedValue([
         {
-          account: TestEntities.account,
+          account: account as any,
+          providerAccountId: "p-test-1",
           holdings: [TestEntities.holding],
         },
       ]);
 
-      const mockHoldingInDb = TestEntities.holding;
-      mockHoldingInDb.update = vi.fn();
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb]);
+      const mockHoldingInDb = { ...TestEntities.holding, symbol: TestEntities.holding.symbol, update: vi.fn() };
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb as any]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
-      expect(HoldingHistory.prototype.insert).toHaveBeenCalled();
+      expect(mockHoldingHistoryToInsert.insert).toHaveBeenCalled();
       expect(mockHoldingInDb.shares).toBe(10);
       expect(mockHoldingInDb.update).toHaveBeenCalled();
     });
 
     it("should erase remaining asset holdings completely if configuration clean overrides evaluate to true", async () => {
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
+      const account = { ...TestEntities.account, isInvestment: true };
+      mockProvider.get.mockResolvedValue([{ account: account as any, providerAccountId: "p-test-1", holdings: [] }]);
 
-      const mockStaleHolding = TestEntities.holding;
-      mockStaleHolding.remove = vi.fn();
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
+      const mockStaleHolding = { ...TestEntities.holding, remove: vi.fn() };
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding as any]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
@@ -259,11 +281,11 @@ describe("ProviderSyncService", () => {
 
     it("should zero out asset balances and retain database entries if clean configs evaluate to false parameters", async () => {
       Configuration.holding.cleanupRemovedHoldings = false;
-      mockProvider.get.mockResolvedValue([{ account: TestEntities.account, holdings: [] }]);
+      const account = { ...TestEntities.account, isInvestment: true };
+      mockProvider.get.mockResolvedValue([{ account: account as any, providerAccountId: "p-test-1", holdings: [] }]);
 
-      const mockStaleHolding = TestEntities.holding;
-      mockStaleHolding.update = vi.fn();
-      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding]);
+      const mockStaleHolding = { ...TestEntities.holding, update: vi.fn() };
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockStaleHolding as any]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 

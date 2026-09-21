@@ -156,7 +156,8 @@ describe("SnapTradeProviderService", () => {
 
       (
         (service as unknown as { snaptrade: { accountInformation: { getAllAccountPositions: () => Promise<unknown> } } }).snaptrade.getAllAccountPositions ||
-        (service as unknown as { snaptrade: { accountInformation: { getAllAccountPositions: () => Promise<unknown> } } }).snaptrade.accountInformation.getAllAccountPositions
+        (service as unknown as { snaptrade: { accountInformation: { getAllAccountPositions: () => Promise<unknown> } } }).snaptrade.accountInformation
+          .getAllAccountPositions
       ).mockResolvedValue({
         data: {
           results: [{ units: 10, price: 150, cost_basis: 140, currency: "USD", instrument: { description: "Apple", symbol: "AAPL" } }],
@@ -188,7 +189,11 @@ describe("SnapTradeProviderService", () => {
       const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
       vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(null);
 
-      const res = await (service as unknown as { performSync: (u: unknown, a: SnapTradeInstitutionAsset, ao: boolean) => Promise<unknown[]> }).performSync(user, asset, false);
+      const res = await (service as unknown as { performSync: (u: unknown, a: SnapTradeInstitutionAsset, ao: boolean) => Promise<unknown[]> }).performSync(
+        user,
+        asset,
+        false,
+      );
       expect(res).toEqual([]);
     });
 

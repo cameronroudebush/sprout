@@ -175,11 +175,13 @@ describe("PlaidWebhookController", () => {
     it("should handle exceptions gracefully in handleWebhook", async () => {
       vi.spyOn(PlaidInstitutionAsset, "findOne").mockRejectedValue(new Error("DB error"));
 
-      await expect((controller as any).handleWebhook({
-        webhook_type: "TRANSACTIONS",
-        webhook_code: "SYNC_UPDATES_AVAILABLE",
-        item_id: "item-123",
-      })).resolves.not.toThrow();
+      await expect(
+        (controller as any).handleWebhook({
+          webhook_type: "TRANSACTIONS",
+          webhook_code: "SYNC_UPDATES_AVAILABLE",
+          item_id: "item-123",
+        }),
+      ).resolves.not.toThrow();
     });
   });
 

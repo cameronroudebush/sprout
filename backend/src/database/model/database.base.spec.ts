@@ -65,7 +65,7 @@ describe("DatabaseBase", () => {
 
   it("should handle error cases in get, update, and remove", async () => {
     const repo: any = {
-      findOne: vi.fn().mockResolvedValue(null),
+      findOne: vi.fn().mockRejectedValue(new Error("Failed to locate matching element in db for id: missing")),
     };
     vi.spyOn(TestEntity.prototype, "getRepository").mockReturnValue(repo);
 
