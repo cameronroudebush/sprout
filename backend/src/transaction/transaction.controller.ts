@@ -47,7 +47,10 @@ export class TransactionController {
     // Allow updating the various fields
 
     // Category
-    if (transaction.categoryId != null) {
+    if (transaction.categoryId === "unknown") {
+      matchingTransaction.category = null!;
+      matchingTransaction.manuallyEdited = false;
+    } else if (transaction.categoryId != null) {
       const matchingCategory = await Category.findOne({ where: { id: transaction.categoryId, user: { id: user.id } } });
       if (matchingCategory == null) throw new NotFoundException("Failed to locate a matching category to assign the transaction to.");
       matchingTransaction.category = matchingCategory;
