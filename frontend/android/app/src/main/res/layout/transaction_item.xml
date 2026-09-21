@@ -30,7 +30,7 @@
 
         <LinearLayout
             android:id="@+id/text_container"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@+id/item_merchant_icon"
@@ -39,10 +39,9 @@
 
             <TextView
                 android:id="@+id/item_merchant_name"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:maxWidth="200dp"
                 android:maxLines="1"
                 android:textColor="@color/sprout_text_primary"
                 android:textSize="14sp"
@@ -50,20 +49,23 @@
                 tools:text="Starbucks" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/item_category"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/item_account"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:alpha="0.8"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:textColor="@color/sprout_text_secondary"
                     android:textSize="10sp"
-                    tools:text="DINING" />
+                    tools:text="Checking" />
 
                 <TextView
                     android:id="@+id/item_pending"

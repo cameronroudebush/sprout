@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/category/category_provider.dart';
@@ -49,6 +50,7 @@ class WidgetSync extends _$WidgetSync {
     ref.listen(transactionsProvider(TransactionFilter.defaultFilter), (_, __) => updateData());
     ref.listen(totalNetWorthProvider, (_, __) => updateData());
     ref.listen(userConfigProvider, (_, __) => updateData());
+    ref.listen(accountsProvider, (_, __) => updateData());
 
     ref.listen(sseProvider, (prev, next) {
       if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
@@ -94,6 +96,7 @@ class WidgetSync extends _$WidgetSync {
     final theme = userConfigAsync.activeTheme(userConfig);
     final formatter = ref.read(currencyFormatterProvider);
     final categories = ref.read(categoriesProvider).value ?? [];
+    final accounts = ref.read(accountsProvider).value?.accounts ?? [];
     Map<String, Object>? data;
     String failureMessage = "No data available. Check settings.";
     num? pastNetWorthChange;
@@ -115,6 +118,8 @@ class WidgetSync extends _$WidgetSync {
           final recentFutures = transactions.take(10).map((t) async {
             final category = categories.firstWhereOrNull((c) => c.id == t.categoryId);
             final categoryName = category?.name ?? "Unknown";
+            final account = accounts.firstWhereOrNull((a) => a.id == t.accountId);
+            final accountName = account?.name ?? "Unknown";
             final websiteUrl = t.extra?.website;
             String? resolvedIconUrl;
             // Resolve the network URL if available
@@ -138,6 +143,7 @@ class WidgetSync extends _$WidgetSync {
               "id": t.id,
               "merchant": t.description,
               "category": categoryName,
+              "account": accountName,
               "amount": formatter.format(t.amount, handlePrivateMode: false),
               "amountNumeric": t.amount,
               "date": t.timeText,
@@ -215,6 +221,7 @@ void callbackDispatcher() {
       await container.read(totalNetWorthProvider.future);
       await container.read(transactionsProvider(TransactionFilter.defaultFilter).future);
       await container.read(categoriesProvider.future);
+      await container.read(accountsProvider.future);
       // Perform the native widget update
       await container.read(widgetSyncProvider.notifier).updateData();
       LoggerProvider.debug("Background widget update successful");
