@@ -32,9 +32,11 @@ export class TransactionRuleService {
     const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
     if (account) accountWhere.id = account.id;
     const where: FindOptionsWhere<Transaction> = {
-      category: onlyApplyToEmpty ? IsNull() : undefined,
       account: accountWhere,
     };
+    if (onlyApplyToEmpty) {
+      where.category = IsNull();
+    }
     const transactions = await Transaction.find({
       where,
     });
