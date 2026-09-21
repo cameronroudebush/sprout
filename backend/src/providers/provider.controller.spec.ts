@@ -92,5 +92,17 @@ describe("BaseProviderController", () => {
       expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL, "plaid");
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
     });
+
+    it("should handle failed sync status when requested specific providers", async () => {
+      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+      const failedSync = { ...TestEntities.sync, status: "failed" } as Sync;
+      providerService.syncUserProviders.mockResolvedValue([failedSync] as any);
+
+      await controller.manualSync(user, { providers: ["plaid" as any] });
+
+      expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL, "plaid");
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
+      expect(sseService.sendToUser).not.toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+    });
   });
 });

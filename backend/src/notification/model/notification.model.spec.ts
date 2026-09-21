@@ -25,4 +25,14 @@ describe("Notification Model", () => {
     expect(notif.importance).toBe("default");
     expect(notif.powerPriority).toBe("normal");
   });
+
+  it("should calculate importance and powerPriority for success and warning types", () => {
+    const successNotif = new Notification(user, "Success", "Success Msg", NotificationType.success);
+    expect(successNotif.importance).toBe("default");
+    expect(successNotif.powerPriority).toBe("normal");
+
+    const warnNotif = new Notification(user, "Warning", "Warn Msg", NotificationType.warning);
+    expect(warnNotif.importance).toBe("high");
+    expect(warnNotif.powerPriority).toBe("high");
+  });
 });

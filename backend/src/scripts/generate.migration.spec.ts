@@ -38,10 +38,12 @@ describe("generateMigration", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
 
+    const mockInit = vi.fn().mockResolvedValue("init_res");
+
     mockDatabaseService = {
       source: {
         isInitialized: false,
-        initialize: vi.fn().mockResolvedValue(undefined),
+        initialize: mockInit,
         driver: {
           createSchemaBuilder: vi.fn().mockReturnValue({
             log: vi.fn().mockResolvedValue({
@@ -66,6 +68,15 @@ describe("generateMigration", () => {
     await generateMigration("test_migration");
 
     expect(mockDatabaseService.setSQLitePRAGMA).toHaveBeenCalledWith(false);
+    expect(prettier.format).toHaveBeenCalled();
+    expect(CommandUtils.createFile).toHaveBeenCalled();
+    expect(mockApp.close).toHaveBeenCalled();
+  });
+
+  it("should skip initialization when source is already initialized", async () => {
+    mockDatabaseService.source.isInitialized = true;
+    await generateMigration("test_migration_initialized");
+
     expect(prettier.format).toHaveBeenCalled();
     expect(CommandUtils.createFile).toHaveBeenCalled();
     expect(mockApp.close).toHaveBeenCalled();
