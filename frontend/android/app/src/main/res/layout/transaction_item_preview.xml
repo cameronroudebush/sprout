@@ -26,12 +26,15 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/item_category"
+            android:id="@+id/item_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:alpha="0.8"
-            android:text="Dining"
+            android:ellipsize="end"
+            android:maxWidth="200dp"
+            android:maxLines="1"
+            android:text="Checking"
             android:textColor="@color/sprout_text_secondary"
             android:textSize="10sp" />
     </LinearLayout>

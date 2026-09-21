@@ -46,7 +46,7 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         val txtColor = themeData?.optString("txtColor", "#FFFFFF")?.toColorInt()
         val txtMuted = themeData?.optString("txtColorMuted", "#A0A0A0")?.toColorInt()
         val merchant = item.optString("merchant", "Unknown")
-        val category = item.optString("category", "General")
+        val account = item.optString("account", item.optString("category", "Unknown"))
         val amountText = item.optString("amount", "$0.00")
         val date = item.optString("date", "")
         val amountNumeric = item.optDouble("amountNumeric", 0.0)
@@ -96,7 +96,7 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
             views.setTextColor(R.id.item_merchant_name, txtColor)
         }
         if (txtMuted != null) {
-            views.setTextColor(R.id.item_category, txtMuted)
+            views.setTextColor(R.id.item_account, txtMuted)
             views.setTextColor(R.id.item_date, txtMuted)
             views.setTextColor(R.id.item_pending, txtMuted)
         }
@@ -109,7 +109,7 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         views.setOnClickFillInIntent(R.id.transaction_item_root, fillInIntent)
 
         views.setTextViewText(R.id.item_merchant_name, merchant)
-        views.setTextViewText(R.id.item_category, category)
+        views.setTextViewText(R.id.item_account, account)
         views.setTextViewText(R.id.item_amount, amountText)
         views.setTextViewText(R.id.item_date, date)
 
