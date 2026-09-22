@@ -41,7 +41,6 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
     super.initState();
 
     final rules = ref.read(transactionRulesProvider).value?.rules ?? [];
-    final lastRuleOrder = rules.lastOrNull?.order;
 
     final rule = widget.rule;
     if (rule != null) {
@@ -55,7 +54,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
     } else {
       // Initialize for a new rule
       _valueController.text = widget.initialValue == null ? "" : widget.initialValue.toString();
-      _priorityController.text = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
+      _priorityController.text = (rules.length + 1).toString();
       _type = TransactionRuleTypeEnum.description;
       _categoryId = null;
       _accountId = null;
