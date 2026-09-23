@@ -151,4 +151,10 @@ describe("SnapTradeWebHookController", () => {
       expect(verifyFn(body, "invalid-hmac-signature")).toBe(false);
     });
   });
+
+  it("should reject when webhook institution asset is missing", async () => {
+    vi.spyOn(SnapTradeInstitutionAsset, "findOne").mockResolvedValue(null);
+
+    await expect((controller as any).getSnapTradeInstitutionAsset("missing-auth")).rejects.toThrow(BadRequestException);
+  });
 });

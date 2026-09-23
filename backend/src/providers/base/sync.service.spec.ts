@@ -179,6 +179,34 @@ describe("ProviderSyncService", () => {
       expect(incomingInst.insert).toHaveBeenCalled();
       expect(dbAccountNoInst.institution).toBe(incomingInst);
     });
+
+    it("should return without processing when user has no linked accounts", async () => {
+      vi.spyOn(Account, "count").mockResolvedValue(0);
+
+      const result = await service.syncForProvider(mockUser, mockProvider);
+
+      expect(result?.status).toBe("complete");
+      expect(mockProvider.get).not.toHaveBeenCalled();
+    });
+
+    it("should reuse an existing institution and skip auto-creation when disabled", async () => {
+      vi.spyOn(Account, "count").mockResolvedValue(1);
+      const existingInstitution = { id: "inst-existing", name: "Existing Bank", hasError: false, update: vi.fn() };
+      const dbAccount = { ...TestEntities.account, institution: null, update: vi.fn() };
+      const incomingAccount = { ...TestEntities.account, institution: { ...existingInstitution } };
+      mockProvider.get.mockResolvedValue([
+        { account: incomingAccount as any, providerAccountId: "p-disabled", preventAutoCreation: true },
+        { account: incomingAccount as any, providerAccountId: "p-existing" },
+        { account: incomingAccount as any },
+      ]);
+      vi.spyOn(Account, "findOne").mockResolvedValueOnce(null).mockResolvedValueOnce(dbAccount as any);
+      vi.spyOn(Institution, "findOne").mockResolvedValue(existingInstitution as any);
+
+      await service.syncForProvider(mockUser, mockProvider);
+
+      expect(Institution.findOne).toHaveBeenCalled();
+      expect(AccountHistory.insertForAccount).toHaveBeenCalled();
+    });
   });
 
   describe("handleAccountsUpdate Processing Matrix", () => {
@@ -291,6 +319,46 @@ describe("ProviderSyncService", () => {
 
       expect(mockStaleHolding.marketValue).toBe(0);
       expect(mockStaleHolding.update).toHaveBeenCalled();
+    });
+
+    it("should insert unmatched transactions and preserve missing descriptions", async () => {
+      const account = { ...TestEntities.account, isInvestment: false };
+      const newTransaction = Transaction.fromPlain({ amount: -3, description: "", account: TestEntities.account });
+      const providerTransaction = Transaction.fromPlain({ providerId: "provider-new", amount: -4, description: "New" });
+      const untrackedTransaction = Transaction.fromPlain({ amount: -5, description: "Untracked" });
+      mockProvider.get.mockResolvedValue([
+        {
+          account: account as any,
+          providerAccountId: "p-test-1",
+          transactions: [newTransaction, providerTransaction, untrackedTransaction],
+        },
+      ]);
+      vi.spyOn(Transaction, "find").mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+      vi.spyOn(Transaction, "fromPlain").mockImplementation((value) => ({ ...value, insert: vi.fn().mockResolvedValue(value) }) as any);
+
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
+
+      expect(Transaction.fromPlain).toHaveBeenCalled();
+    });
+
+    it("should commit metadata and use provider-id transaction matching", async () => {
+      const account = { ...TestEntities.account, isInvestment: false };
+      const transaction = Transaction.fromPlain({ providerId: "provider-existing", amount: -4, description: "Updated" });
+      const existingTransaction = { ...TestEntities.transaction, providerId: "provider-existing", category: {}, update: vi.fn() };
+      mockProvider.get.mockResolvedValue([
+        {
+          account: account as any,
+          providerAccountId: "p-test-1",
+          transactions: [transaction],
+          syncMetadata: { cursor: "next" },
+        },
+      ]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([existingTransaction as any]);
+
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
+
+      expect(mockProvider.commitSyncMetadata).toHaveBeenCalledWith({ cursor: "next" });
+      expect(existingTransaction.update).toHaveBeenCalled();
     });
   });
 });

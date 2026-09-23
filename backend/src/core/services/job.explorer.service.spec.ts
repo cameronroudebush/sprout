@@ -31,6 +31,25 @@ describe("JobExplorerService", () => {
     expect(dummyJob.start).toHaveBeenCalled();
   });
 
+  it("should skip providers that are not valid background jobs", async () => {
+    Configuration.isRunningScript = false;
+
+    const dummyJob = new DummyJob();
+    const startSpy = vi.spyOn(dummyJob, "start").mockResolvedValue(undefined as any);
+
+    // instanceof BackgroundJob but missing a callable `start`
+    const brokenJob = Object.assign(new DummyJob(), { start: undefined });
+
+    const discoveryService = {
+      getProviders: () => [{ instance: {} as any }, { instance: [null, {} as any] }, { instance: [brokenJob] }, { instance: dummyJob }],
+    } as any;
+
+    const service = new JobExplorerService(discoveryService);
+    await service.onApplicationBootstrap();
+
+    expect(startSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should skip background job startup when running script", async () => {
     Configuration.isRunningScript = true;
 

@@ -488,9 +488,9 @@ export class DemoDataService {
           const numTransactions = Math.floor(seededRandom() * 3);
 
           for (let i = 0; i < numTransactions; i++) {
-            let amount = 0;
-            let description = "Random Transaction";
-            let category: Category | undefined;
+            let amount: number;
+            let description: string;
+            let category: Category;
 
             if (account.type === AccountType.depository) {
               amount = -(seededRandom() * 100 + 5); // Expense
@@ -505,15 +505,13 @@ export class DemoDataService {
               ][Math.floor(seededRandom() * 7)];
               description = `${expenseType} Purchase`;
               category = getCategory(expenseType!);
-            } else if (account.type === AccountType.credit) {
+            } else {
               amount = -(seededRandom() * 75 + 10);
               description = "Credit Card Purchase";
               category = getCategory(DEMO_CATEGORIES.EXPENSE.PERSONAL.SHOPPING);
             }
 
-            if (amount !== 0) {
-              allTransactions.push(new Transaction(amount, day, description, category, seededRandom() > 0.8, account));
-            }
+            allTransactions.push(new Transaction(amount, day, description, category, seededRandom() > 0.8, account));
           }
         } else if (account.type === AccountType.investment) {
           // For investment accounts, only create occasional large contributions

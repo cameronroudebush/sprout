@@ -4,6 +4,13 @@ import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import { Logger } from "@nestjs/common";
 
+// Zillow's native scraper binding requires newer glibc than some test environments provide.
+vi.mock("impit", () => ({
+  Impit: class {
+    fetch = vi.fn();
+  },
+}));
+
 vi.mock("@backend/config/core", () => ({
   Configuration: {
     appName: "sprout",

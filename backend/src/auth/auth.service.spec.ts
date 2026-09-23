@@ -7,6 +7,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { of, throwError } from "rxjs";
+import { Mock, Mocked } from "vitest";
 import { AuthService } from "./auth.service";
 
 vi.mock("@backend/config/core", () => ({
@@ -136,11 +137,20 @@ describe("AuthService", () => {
   });
 
   describe("loginWithJWT", () => {
-    it("should throw UnauthorizedException if input token verification throws", async () => {
+    it("should throw UnauthorizedException with empty message when jwt is empty/falsy", async () => {
       (jwt.verify as Mock).mockImplementation(() => {
         throw new Error();
       });
-      await expect(service.loginWithJWT("bad-jwt")).rejects.toThrow(UnauthorizedException);
+
+      await expect(service.loginWithJWT("")).rejects.toThrow(new UnauthorizedException(""));
+    });
+
+    it("should throw UnauthorizedException with 'Session Expired' when input token verification fails", async () => {
+      (jwt.verify as Mock).mockImplementation(() => {
+        throw new Error();
+      });
+
+      await expect(service.loginWithJWT("bad-jwt")).rejects.toThrow(new UnauthorizedException("Session Expired"));
     });
 
     it("should extract username, find user entity, and return a freshly signed token", async () => {
@@ -234,6 +244,29 @@ describe("AuthService", () => {
       expect(httpService.post).toHaveBeenCalledTimes(1);
       expect(res1.idToken).toBe("shared-id");
       expect(res2.idToken).toBe("shared-id");
+    });
+
+    it("should set cookie tokens on response object when joining an existing refresh promise", async () => {
+      const req = mockRequest({ r: "refresh-token-concurrent-res" });
+      const res1 = mockResponse();
+      const res2 = mockResponse();
+
+      httpService.post.mockReturnValue(
+        of({
+          status: 200,
+          data: { id_token: "id-token-shared", access_token: "at-shared", refresh_token: "r-shared" },
+        } as any),
+      );
+
+      const p1 = service.performOIDCRefresh(req, res1);
+      const p2 = service.performOIDCRefresh(req, res2);
+
+      const [tokens1, tokens2] = await Promise.all([p1, p2]);
+
+      expect(tokens1).toEqual(tokens2);
+      expect(res2.cookie).toHaveBeenCalledWith("id", "id-token-shared", expect.any(Object));
+      expect(res2.cookie).toHaveBeenCalledWith("at", "at-shared", expect.any(Object));
+      expect(res2.cookie).toHaveBeenCalledWith("r", "r-shared", expect.any(Object));
     });
 
     it("should flush promise entries cleanly out of tracking structures after the 10-second buffer phase", async () => {

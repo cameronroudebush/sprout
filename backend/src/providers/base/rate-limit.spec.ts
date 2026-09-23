@@ -72,4 +72,14 @@ describe("ProviderRateLimit", () => {
     expect(existingInDb.count).toBe(4);
     expect(existingInDb.update).toHaveBeenCalled();
   });
+
+  it("should omit user from lookup when no user is provided", async () => {
+    const rateLimit = new ProviderRateLimit(ProviderType.plaid, 10);
+    vi.spyOn(ProviderRateLimit, "findOne").mockResolvedValue(null);
+    vi.spyOn(rateLimit, "insert").mockResolvedValue(rateLimit);
+
+    await rateLimit.incrementOrError();
+
+    expect(ProviderRateLimit.findOne).toHaveBeenCalledWith({ where: { name: ProviderType.plaid } });
+  });
 });

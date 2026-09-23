@@ -6,6 +6,12 @@ setupTests();
 import { CancellablePromise } from "./cancellable.promise.js";
 
 describe("CancellablePromise", () => {
+  class InspectablePromise extends CancellablePromise<string> {
+    checkPublic() {
+      return this.check();
+    }
+  }
+
   it("should resolve normally when not cancelled", async () => {
     const promise = new CancellablePromise<string>((resolve) => {
       setTimeout(() => resolve("success"), 10);
@@ -26,5 +32,11 @@ describe("CancellablePromise", () => {
     expect(() => internalPromise.check()).toThrow("Promise canceled");
 
     await expect(promise).rejects.toBe("Promise cancelled");
+  });
+
+  it("should not throw from check before cancellation", async () => {
+    const promise = new InspectablePromise((resolve) => resolve("ok"));
+    expect(() => promise.checkPublic()).not.toThrow();
+    await expect(promise).resolves.toBe("ok");
   });
 });

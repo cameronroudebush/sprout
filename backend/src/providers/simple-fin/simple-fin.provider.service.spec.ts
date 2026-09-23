@@ -214,11 +214,21 @@ describe("SimpleFINProviderService", () => {
         ],
       });
 
-      const result = await (service as any).performExchange(mockUser, ["acc_1", "acc_3"]);
+      const result = await (service as any).performExchange(mockUser, ["acc_1", "acc_2", "acc_3"]);
 
       expect(result).toHaveLength(2);
       const chaseGroup = result.find((r: any) => r.institutionName === "Chase");
-      expect(chaseGroup.rawAccounts).toHaveLength(1);
+      expect(chaseGroup.rawAccounts).toHaveLength(2);
+    });
+
+    it("should fall back to configured provider URL when institution URL is absent", async () => {
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
+        accounts: [{ id: "acc-no-url", name: "Account", org: { name: "NoUrl" } }],
+      });
+
+      const result = await (service as any).performExchange(mockUser, ["acc-no-url"]);
+
+      expect(result[0].institutionUrl).toBe(service.config.url);
     });
 
     it("should return empty array in performSync if simpleFinToken is missing", async () => {
@@ -250,6 +260,25 @@ describe("SimpleFINProviderService", () => {
       const resultsFull = await (service as any).performSync(mockUser, undefined, false);
       expect(resultsFull).toHaveLength(1);
       expect(resultsFull[0].account.balance).toBe(100);
+    });
+
+    it("should skip provider accounts that are not linked locally", async () => {
+      vi.spyOn(Account, "find").mockResolvedValue([]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({ accounts: [{ id: "unlinked", org: { name: "Bank", url: "url" } }] });
+
+      await expect((service as any).performSync(mockUser, undefined, false)).resolves.toEqual([]);
+    });
+
+    it("should create an institution when linked account has none and errors are absent", async () => {
+      const existingAccount = { id: "acc-no-institution", providerAccountId: "acc-no-institution", balance: 0, availableBalance: 0, extra: {}, institution: undefined };
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
+        accounts: [{ id: "acc-no-institution", name: "Account", balance: "10", "available-balance": "10", currency: "USD", org: { name: "Bank", url: "url" } }],
+      });
+      const mapSpy = vi.spyOn(service as any, "mapToSproutAccount");
+
+      await expect((service as any).performSync(mockUser, undefined, true)).resolves.toHaveLength(1);
+      expect(mapSpy).toHaveBeenCalledWith(expect.anything(), mockUser.config.simpleFinToken, mockUser, expect.any(Institution));
     });
   });
 
@@ -284,6 +313,38 @@ describe("SimpleFINProviderService", () => {
 
       expect(result.holdings).toHaveLength(1);
       expect(result.transactions).toHaveLength(1);
+    });
+
+    it("should expose account extraction hooks and provider assets", async () => {
+      const raw = { id: "raw-id", name: "Raw Name" };
+      expect((service as any).extractProviderAccountId(raw)).toBe("raw-id");
+      expect((service as any).extractAccountName(raw)).toBe("Raw Name");
+      await expect((service as any).getInstitutionAssetsForUser()).resolves.toEqual([undefined]);
+    });
+
+    it("should support missing optional balances, holdings, and pending values", async () => {
+      const rawAccount = {
+        id: "minimal",
+        name: "Minimal",
+        balance: "1",
+        "available-balance": "1",
+        currency: "USD",
+        transactions: [{ id: "t", amount: "-1", posted: 1, description: "Test" }],
+      };
+      const result = await (service as any).fetchInitialSyncData(rawAccount, { id: "account" }, "auth", mockUser);
+
+      expect(result.holdings).toBeUndefined();
+      expect(result.transactions[0].pending).toBe(false);
+    });
+
+    it("should fetch data using encoded SimpleFIN credentials and balance mode", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+        json: vi.fn().mockResolvedValue({ accounts: [] }),
+      } as any);
+
+      await (service as any).fetchData("https://user:pass@example.com", true, mockUser);
+
+      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("balances-only=1"), expect.any(Object));
     });
   });
 });

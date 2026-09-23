@@ -92,6 +92,42 @@ describe("HoldingService", () => {
       expect(results).toHaveLength(1);
     });
 
+    it("should handle dividend events with missing amounts and a lower calculated yield", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
+        price: { symbol: "MUTF", regularMarketPrice: 400, quoteType: "MUTUALFUND" },
+        summaryDetail: { dividendYield: 0.5 },
+      });
+      vi.spyOn((service as any).yf, "chart").mockResolvedValue({ events: { dividends: [{}, { amount: undefined }] } } as any);
+
+      const results = await service.getLiveHoldingPrices(["MUTF"]);
+      expect(results).toHaveLength(1);
+    });
+
+    it("should skip dividend yield calculation when the market price is not positive", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
+        price: { symbol: "ZEROFUND", regularMarketPrice: 0, quoteType: "MUTUALFUND" },
+        summaryDetail: { dividendYield: 0.01 },
+      });
+      vi.spyOn((service as any).yf, "chart").mockResolvedValue({ events: { dividends: [{ amount: 10 }] } } as any);
+
+      const results = await service.getLiveHoldingPrices(["ZEROFUND"]);
+      expect(results).toHaveLength(1);
+    });
+
+    it("should fall back to the requested symbol when the quote payload omits it", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
+        price: { regularMarketPrice: 150 },
+      } as any);
+
+      const results = await service.getLiveHoldingPrices(["NO_SYMBOL"]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]!.symbol).toBe("NO_SYMBOL");
+    });
+
     it("should throw HttpException when cacheManager set fails", async () => {
       cacheManager.get.mockResolvedValue(null);
       vi.spyOn((service as any).yf, "quoteSummary").mockResolvedValue({
@@ -147,6 +183,28 @@ describe("HoldingService", () => {
 
       const res = await service.getMajorIndicesTimeline();
       expect(res.length).toBeGreaterThan(0);
+    });
+
+    it("should handle a rejected chart lookup for one index while mapping the rest", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "chart").mockImplementation((symbol: string) =>
+        symbol === "^GSPC" ? Promise.reject(new Error("Index unavailable")) : Promise.resolve({ quotes: [{ date: "2026-06-01", close: 100 }] } as any),
+      );
+
+      const res = await service.getMajorIndicesTimeline();
+      expect(res).toHaveLength(3);
+      expect(res[0]!.timeline).toHaveLength(0);
+    });
+
+    it("should return an empty timeline when all quotes are invalid", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn((service as any).yf, "chart").mockResolvedValue({
+        quotes: [{ date: null, close: null }],
+      } as any);
+
+      const res = await service.getMajorIndicesTimeline();
+      expect(res).toHaveLength(3);
+      expect(res[0]!.timeline).toHaveLength(0);
     });
 
     it("should handle error in chart fetch and throw SERVICE_UNAVAILABLE if overall timeline fails", async () => {

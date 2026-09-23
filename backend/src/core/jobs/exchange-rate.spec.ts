@@ -5,6 +5,7 @@ setupTests();
 
 import { ExchangeRateJob } from "./exchange-rate.js";
 import YahooFinance from "yahoo-finance2";
+import { CurrencyOptions } from "@backend/user/model/user.config.model.js";
 
 describe("ExchangeRateJob", () => {
   let configService: any;
@@ -69,5 +70,42 @@ describe("ExchangeRateJob", () => {
     vi.spyOn(YahooFinance.prototype, "quote").mockRejectedValue(new Error("API Error"));
 
     await expect(job.refreshExchangeRates()).resolves.not.toThrow();
+  });
+
+  it("should return false from L2 hydration when the cache holds no rates", async () => {
+    cacheManager.get.mockResolvedValue({});
+    const refreshSpy = vi.spyOn(job, "refreshExchangeRates").mockResolvedValue();
+
+    await job["update"]();
+
+    expect(refreshSpy).toHaveBeenCalled();
+  });
+
+  it("should return early when there are no currency pairs to build", async () => {
+    const original = { ...CurrencyOptions };
+    for (const key of Object.keys(original)) delete (CurrencyOptions as any)[key];
+    (CurrencyOptions as any).USD = "USD";
+    try {
+      const quoteSpy = vi.spyOn(YahooFinance.prototype, "quote").mockResolvedValue({} as any);
+
+      await job.refreshExchangeRates();
+
+      expect(quoteSpy).not.toHaveBeenCalled();
+    } finally {
+      for (const key of Object.keys(CurrencyOptions as any)) delete (CurrencyOptions as any)[key];
+      Object.assign(CurrencyOptions, original);
+    }
+  });
+
+  it("should skip quotes that reference unknown pairs or omit a price", async () => {
+    vi.spyOn(YahooFinance.prototype, "quote").mockImplementation(async (symbol: any) => {
+      if (symbol === "USDEUR=X") return { symbol: "NOT_A_PAIR", regularMarketPrice: 2 } as any;
+      if (symbol === "USDJPY=X") return { symbol: "USDJPY=X", regularMarketPrice: undefined } as any;
+      return { symbol, regularMarketPrice: 1.25 } as any;
+    });
+
+    await job.refreshExchangeRates();
+
+    expect(cacheManager.set).toHaveBeenCalled();
   });
 });

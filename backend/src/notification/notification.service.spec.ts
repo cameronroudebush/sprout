@@ -121,5 +121,15 @@ describe("NotificationService", () => {
 
       Configuration.server.notification.firebase.enabled = false;
     });
+
+    it("should notify app through disabled Firebase path without sending", async () => {
+      Configuration.server.notification.firebase.enabled = false;
+      vi.spyOn(Notification.prototype, "insert").mockResolvedValue(TestEntities.notification);
+      vi.spyOn(Notification, "find").mockResolvedValue([]);
+
+      await service.notifyUser(user, "message", "title", NotificationType.info, true);
+
+      expect(mockSend).not.toHaveBeenCalled();
+    });
   });
 });

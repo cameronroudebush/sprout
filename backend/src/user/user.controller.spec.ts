@@ -5,10 +5,12 @@ import { Configuration } from "@backend/config/core";
 import { TestEntities } from "@backend/test/entities";
 import { UserCreationRequest } from "@backend/user/model/api/creation.request.dto";
 import { UserDevice } from "@backend/user/model/user.device.model";
+import { DevicePlatform } from "@backend/user/model/user.device.type";
 import { User } from "@backend/user/model/user.model";
 import { UserController } from "@backend/user/user.controller";
 import { UserService } from "@backend/user/user.service";
 import { BadRequestException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Mocked } from "vitest";
 
 describe("UserController", () => {
   let controller: UserController;
@@ -18,6 +20,7 @@ describe("UserController", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    originalAuthConfig = Configuration.server.auth;
 
     userService = {
       allowUserCreation: vi.fn().mockResolvedValue(true),
@@ -60,6 +63,25 @@ describe("UserController", () => {
       await expect(controller.me(null as any, req)).rejects.toThrow(NotFoundException);
     });
 
+    it("should throw UnauthorizedException if user is null and auth type is neither local nor oidc (allowUserCreation true)", async () => {
+      Configuration.server.auth = { type: "other" } as any;
+      userService.allowUserCreation.mockResolvedValue(true);
+
+      await expect(controller.me(null as any, {} as any)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("should throw UnauthorizedException on fallback when user is null and conditions fail", async () => {
+      // Case 1: allowUserCreation is true, but auth type is unsupported (e.g. "saml")
+      Configuration.server.auth = { type: "saml" } as any;
+      userService.allowUserCreation.mockResolvedValue(true);
+      await expect(controller.me(null as any, {} as any)).rejects.toThrow(UnauthorizedException);
+
+      // Case 2: allowUserCreation is false with local auth
+      Configuration.server.auth = { type: "local" } as any;
+      userService.allowUserCreation.mockResolvedValue(false);
+      await expect(controller.me(null as any, {} as any)).rejects.toThrow(UnauthorizedException);
+    });
+
     it("should return user if user is present", async () => {
       vi.spyOn(User, "findOne").mockResolvedValue(user);
 
@@ -76,6 +98,17 @@ describe("UserController", () => {
       vi.spyOn(User, "findOne").mockResolvedValue(otherUser);
 
       await expect(controller.updateMe(user, { email: "taken@sprout.local" })).rejects.toThrow(BadRequestException);
+    });
+
+    it("should update email when email is provided and not taken by another user", async () => {
+      const existingUser = User.fromPlain({ id: "user-same", email: "same@sprout.local" });
+      vi.spyOn(User, "findOne").mockResolvedValue(existingUser);
+      existingUser.update = vi.fn().mockResolvedValue(existingUser);
+
+      const res = await controller.updateMe(existingUser, { email: "same@sprout.local" });
+
+      expect(existingUser.update).toHaveBeenCalled();
+      expect(res).toBe(existingUser);
     });
 
     it("should update email and call user.update()", async () => {
@@ -177,6 +210,23 @@ describe("UserController", () => {
       expect(res).toBe(mockCreated);
     });
 
+    it("should create non-admin user when existing user count is greater than zero", async () => {
+      Configuration.server.auth = { type: "local" } as any;
+      userService.allowUserCreation.mockResolvedValue(true);
+      vi.spyOn(User, "count").mockResolvedValue(1);
+      const mockCreated = { username: "secondaryUser", id: "u-2" };
+      vi.spyOn(User, "createUser").mockResolvedValue(mockCreated as any);
+
+      const res = await controller.create(UserCreationRequest.fromPlain({ username: "secondaryUser", password: "pwd" }), {} as any);
+
+      expect(User.createUser).toHaveBeenCalledWith({
+        username: "secondaryUser",
+        password: "pwd",
+        admin: false,
+      });
+      expect(res).toBe(mockCreated);
+    });
+
     it("should create user and return UserCreationResponse for oidc auth", async () => {
       Configuration.server.auth = { type: "oidc" } as any;
       userService.allowUserCreation.mockResolvedValue(true);
@@ -209,9 +259,19 @@ describe("UserController", () => {
       const mockDevice = { id: "dev-1", update: vi.fn().mockResolvedValue({ id: "dev-1" }) };
       vi.spyOn(UserDevice, "findOne").mockResolvedValue(mockDevice as any);
 
-      const res = await controller.registerDevice(user, { deviceId: "d-123", token: "tok-123" });
+      const res = await controller.registerDevice(user, { deviceId: "d-123", token: "tok-123", platform: DevicePlatform.IOS });
 
       expect(res).toEqual({ success: true, deviceId: "dev-1" });
+      expect(mockDevice.update).toHaveBeenCalled();
+    });
+
+    it("should update device using existing attributes if optional payload properties are omitted", async () => {
+      const mockDevice = { id: "dev-2", deviceName: "Old Name", platform: DevicePlatform.ANDROID, update: vi.fn().mockResolvedValue({ id: "dev-2" }) };
+      vi.spyOn(UserDevice, "findOne").mockResolvedValue(mockDevice as any);
+
+      const res = await controller.registerDevice(user, { deviceId: "d-456", token: "" });
+
+      expect(res).toEqual({ success: true, deviceId: "dev-2" });
       expect(mockDevice.update).toHaveBeenCalled();
     });
 

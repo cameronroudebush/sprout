@@ -22,8 +22,29 @@ describe("AuthenticationConfig", () => {
     expect(oidc.authHeader).toBe(Buffer.from("client-id:secret").toString("base64"));
   });
 
-  it("should throw error if oidc config is invalid", () => {
-    const config = new AuthenticationConfig();
-    expect(() => config.oidc.validate()).toThrow();
+  describe("OIDCConfig validation", () => {
+    it("should throw error if issuer is missing", () => {
+      const config = new AuthenticationConfig();
+      config.oidc.clientId = "client-id";
+      config.oidc.secret = "secret";
+
+      expect(() => config.oidc.validate()).toThrow("Issuer URL is required for OIDC usage.");
+    });
+
+    it("should throw error if clientId is missing", () => {
+      const config = new AuthenticationConfig();
+      config.oidc.issuer = "https://issuer.com";
+      config.oidc.secret = "secret";
+
+      expect(() => config.oidc.validate()).toThrow("Client ID is required for OIDC usage.");
+    });
+
+    it("should throw error if secret is missing", () => {
+      const config = new AuthenticationConfig();
+      config.oidc.issuer = "https://issuer.com";
+      config.oidc.clientId = "client-id";
+
+      expect(() => config.oidc.validate()).toThrow("Secret is required for OIDC usage.");
+    });
   });
 });

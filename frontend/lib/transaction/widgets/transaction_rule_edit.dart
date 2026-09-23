@@ -33,6 +33,10 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
   bool _strict = false;
   bool _enabled = true;
 
+  /// Tracks whether the user has manually edited the priority field, so we
+  /// don't overwrite their input once the rules provider finishes loading.
+  bool _priorityEdited = false;
+
   /// A style to display for our help text
   final helpStyle = TextStyle(fontSize: 12, color: Colors.grey);
 
@@ -152,6 +156,23 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
     final isEdit = widget.rule != null;
     final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
+    // The rules provider may still be loading when this dialog is opened (e.g.
+    // from a transaction's details). Once it resolves, initialize the priority
+    // for new rules to one greater than the highest existing order, unless the
+    // user has already edited the field themselves.
+    ref.listen(transactionRulesProvider, (previous, next) {
+      if (isEdit || _priorityEdited) return;
+
+      final rules = next.value?.rules;
+      if (rules == null) return;
+
+      final lastRuleOrder = rules.lastOrNull?.order;
+      final priority = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
+      if (_priorityController.text != priority) {
+        _priorityController.text = priority;
+      }
+    });
+
     return SproutBaseDialogWidget(
       isEdit ? "Edit Rule" : "Add Rule",
       showCloseDialogButton: true,
@@ -215,7 +236,10 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                     controller: _priorityController,
                     decoration: const InputDecoration(border: OutlineInputBorder()),
                     onFieldSubmitted: (value) => _submit(),
-                    onChanged: (value) => setState(() {}),
+                    onChanged: (value) {
+                      _priorityEdited = true;
+                      setState(() {});
+                    },
                     validator: (value) {
                       if (value == null || value.isEmpty) return "Please enter a value";
                       final parsed = int.tryParse(value);

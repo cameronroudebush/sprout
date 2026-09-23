@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 setupTests();
 
 import { SproutLogger } from "./logger.js";
+import { ConsoleLogger } from "@nestjs/common";
 
 describe("SproutLogger", () => {
   it("should construct with default parameters", () => {
@@ -37,5 +38,31 @@ describe("SproutLogger", () => {
     const formattedWarn = (logger as any).formatMessage("warn", "A warning occurred", "", "", "[SproutTest]", " +1ms");
     expect(formattedWarn).toContain("WARN");
     expect(formattedWarn).toContain("A warning occurred");
+  });
+
+  it("should format plain informational messages without a level prefix", () => {
+    const logger = new SproutLogger("Sprout");
+
+    const formattedLog = (logger as any).formatMessage("log", "Info message", "", "", "[SproutTest]", " +1ms");
+
+    expect(formattedLog).toContain("Info message");
+    expect(formattedLog).not.toContain("[ERROR]");
+    expect(formattedLog).not.toContain("[WARN]");
+  });
+
+  it("should run the custom log override and skip configured contexts", () => {
+    vi.mocked(SproutLogger.prototype.log).mockRestore();
+
+    const logger = new SproutLogger("Sprout");
+    const superLog = vi.spyOn(ConsoleLogger.prototype, "log").mockImplementation(() => {});
+
+    logger.log("ignored message", "InstanceLoader");
+    logger.log("kept message", "CustomContext");
+
+    expect(superLog).toHaveBeenCalledTimes(1);
+    expect(superLog).toHaveBeenCalledWith("kept message", "CustomContext");
+
+    superLog.mockRestore();
+    vi.spyOn(SproutLogger.prototype, "log").mockImplementation(() => {});
   });
 });

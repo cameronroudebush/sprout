@@ -27,5 +27,8 @@ describe("BrandFetchConfig", () => {
     // Invalid URL fallback test
     const cleanDomainFn = (config as any).cleanDomain.bind(config);
     expect(cleanDomainFn("http://::invalid::")).toBe("http://::invalid::");
+
+    // Valid URL that parses but resolves to an empty hostname (falls back to the raw input)
+    expect(cleanDomainFn("httpfoo:bar")).toBe("httpfoo:bar");
   });
 });

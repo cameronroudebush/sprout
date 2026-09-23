@@ -62,6 +62,41 @@ describe("ChatPromptService", () => {
       expect(payload.idMap).toBeDefined();
     });
 
+    it("should deduplicate daily and monthly account/holding history and preserve current snapshots", async () => {
+      const now = new Date();
+      const sameDay = new Date(now);
+      const sameMonth = new Date(now.getFullYear(), now.getMonth(), Math.max(1, now.getDate() - 1));
+      const accountHistories = [
+        AccountHistory.fromPlain({ time: sameDay, balance: 1000 }),
+        AccountHistory.fromPlain({ time: new Date(sameDay.getTime() - 60_000), balance: 999 }),
+        AccountHistory.fromPlain({ time: sameMonth, balance: 998 }),
+      ];
+      const holdingHistories = [
+        HoldingHistory.fromPlain({ time: sameDay, marketValue: 500 }),
+        HoldingHistory.fromPlain({ time: new Date(sameDay.getTime() - 60_000), marketValue: 499 }),
+        HoldingHistory.fromPlain({ time: sameMonth, marketValue: 498 }),
+      ];
+      vi.spyOn(AccountHistory, "find").mockResolvedValue(accountHistories as any);
+      vi.spyOn(HoldingHistory, "find").mockResolvedValue(holdingHistories as any);
+      vi.spyOn(Transaction, "find").mockResolvedValue([
+        Transaction.fromPlain({
+          id: "unmapped",
+          description: "Unmapped",
+          posted: new Date(),
+          account: { id: "missing", name: "Missing" } as any,
+        }),
+      ]);
+      transactionService.findSubscriptions.mockResolvedValue([
+        { transaction: TestEntities.transaction, account: { id: "missing", name: "Missing" }, period: "monthly", amount: 3 } as any,
+        { transaction: TestEntities.transaction, account: { id: "missing", name: "Missing" }, period: "weekly" } as any,
+      ]);
+
+      const payload = await service.buildChatPrompt(user, ChatTimeframe.oneYear, false);
+
+      expect(payload.contents).toBeDefined();
+      expect(payload.idMap).toBeDefined();
+    });
+
     it("should build daily overview prompt", async () => {
       const payload = await service.buildDailyOverviewPrompt(user);
       expect(payload.contents).toBeDefined();
@@ -113,6 +148,14 @@ describe("ChatPromptService", () => {
       expect(formatted[0]?.parts[0]?.text).toBe("Hello 2");
       expect(formatted[1]?.role).toBe("model");
       expect(formatted[1]?.parts[0]?.text).toBe("Second answer");
+
+      const whitespace = new ChatHistory(user, "   ", "user");
+      expect(
+        (service as unknown as { formatCleanHistory: (h: ChatHistory[], m: Map<string, string>) => unknown[] }).formatCleanHistory([whitespace], new Map()),
+      ).toEqual([]);
+
+      const noMapMessage = new ChatHistory(user, "No map", "user");
+      expect((service as unknown as { formatCleanHistory: (h: ChatHistory[], m: Map<string, string> | null) => unknown[] }).formatCleanHistory([noMapMessage], null)).toHaveLength(1);
     });
   });
 });

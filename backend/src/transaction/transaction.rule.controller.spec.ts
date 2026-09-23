@@ -103,6 +103,25 @@ describe("TransactionRuleController", () => {
       await expect(controller.edit(rule.id, user, updatePayload)).rejects.toThrow(BadRequestException);
     });
 
+    it("should update rule without reordering if order is unchanged or omitted", async () => {
+      const rule = TestEntities.transactionRule;
+      rule.order = 1;
+      vi.spyOn(TransactionRule, "findOne").mockResolvedValueOnce(rule).mockResolvedValueOnce(rule);
+
+      const updatePayload = TransactionRule.fromPlain({
+        type: TransactionRuleType.description,
+        value: "Grocery",
+        order: 1,
+      });
+      updatePayload.update = vi.fn().mockResolvedValue(updatePayload);
+
+      await controller.edit(rule.id, user, updatePayload);
+
+      expect(transactionRuleService.reorderRules).not.toHaveBeenCalled();
+      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+    });
+
     it("should update rule, reorder if order changed, apply rules, and force update", async () => {
       const rule = TestEntities.transactionRule;
       rule.order = 1;
@@ -138,6 +157,7 @@ describe("TransactionRuleController", () => {
     });
 
     it("should create rule without categoryId, set order, insert rule, apply rules, and force update", async () => {
+      const categorySpy = vi.spyOn(Category, "findOne").mockResolvedValue(null);
       vi.spyOn(TransactionRule, "findOne").mockResolvedValue(null);
 
       const rule = TransactionRule.fromPlain({ value: "Grocery", categoryId: undefined });
@@ -145,6 +165,7 @@ describe("TransactionRuleController", () => {
 
       await controller.create(rule, user);
 
+      expect(categorySpy).not.toHaveBeenCalled();
       expect(rule.order).toBe(0);
       expect(rule.value).toBe("Grocery");
       expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
@@ -163,6 +184,7 @@ describe("TransactionRuleController", () => {
       const ruleMockInstance = {
         value: "Grocery",
         user,
+        categoryId: cat.id,
         order: 0,
         insert: vi.fn().mockResolvedValue(undefined),
       };

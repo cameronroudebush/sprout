@@ -10,6 +10,12 @@ import { HoldingHistory } from "@backend/holding/model/holding.history.model.js"
 import { Account } from "@backend/account/model/account.model.js";
 import { AccountType } from "@backend/account/model/account.type.js";
 import { Holding } from "@backend/holding/model/holding.model.js";
+import { eachDayOfInterval } from "date-fns";
+
+vi.mock("date-fns", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("date-fns")>();
+  return { ...actual, eachDayOfInterval: vi.fn(actual.eachDayOfInterval) };
+});
 
 describe("NetWorthService", () => {
   let service: NetWorthService;
@@ -90,12 +96,19 @@ describe("NetWorthService", () => {
     it("should calculate net worth for each account belonging to user", async () => {
       vi.spyOn(Account, "getForUser").mockResolvedValue([mockAccount]);
 
+      const accountHistory = AccountHistory.fromPlain({
+        id: "ah-account",
+        time: new Date("2026-01-01T10:00:00Z"),
+        balance: 1000,
+        account: mockAccount,
+      });
+
       const qb: any = {
         innerJoinAndSelect: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
         andWhere: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
-        getMany: vi.fn().mockResolvedValue([]),
+        getMany: vi.fn().mockResolvedValue([accountHistory]),
       };
 
       vi.spyOn(AccountHistory, "getRepository").mockReturnValue({
@@ -196,6 +209,97 @@ describe("NetWorthService", () => {
       const getForHistoryFn = (service as any).getForHistory.bind(service);
       const res = getForHistoryFn([customHistory]);
       expect(res).toBeDefined();
+    });
+  });
+
+  describe("edge cases & defensive branches", () => {
+    it("should fall back to raw accountId and holdingId when relations are not loaded", () => {
+      const accountHistory = AccountHistory.fromPlain({ id: "ah-fallback", time: new Date(), balance: 10 });
+      (accountHistory as any).account = undefined;
+      (accountHistory as any).accountId = "acct-fallback";
+
+      const holdingHistory = HoldingHistory.fromPlain({ id: "hh-fallback", time: new Date(), marketValue: 20 });
+      (holdingHistory as any).holding = undefined;
+      (holdingHistory as any).holdingId = "hold-fallback";
+
+      const result = (service as any).getForHistory([accountHistory, holdingHistory]);
+      expect(result.history).toBeDefined();
+    });
+
+    it("should default to zero change when snapshots are empty", () => {
+      const result = (service as any).calculateChange([], undefined, new Date());
+      expect(result.valueChange).toBe(0);
+      expect(result.percentChange).toBe(0);
+    });
+
+    it("should handle positive, negative, and non-numeric percent changes", () => {
+      const snap = (netWorth: number) => ({ date: new Date(), netWorth });
+
+      const positive = (service as any).calculateChange([snap(0), snap(50)], undefined, new Date());
+      expect(positive.percentChange).toBe(100);
+
+      const negative = (service as any).calculateChange([snap(0), snap(-50)], undefined, new Date());
+      expect(negative.percentChange).toBe(-100);
+
+      const nonNumeric = (service as any).calculateChange([snap(NaN), snap(NaN)], undefined, new Date());
+      expect(nonNumeric.valueChange).toBe(0);
+      expect(nonNumeric.percentChange).toBe(0);
+    });
+
+    it("should use empty history for entities without matching history records", async () => {
+      const secondAccount = Account.fromPlain({ ...mockAccount, id: "acc-no-history" });
+      vi.spyOn(Account, "getForUser").mockResolvedValue([mockAccount, secondAccount]);
+
+      const historyEntry = AccountHistory.fromPlain({ id: "ah-present", time: new Date(), balance: 5, account: mockAccount });
+      const qb: any = {
+        innerJoinAndSelect: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getMany: vi.fn().mockResolvedValue([historyEntry]),
+      };
+      vi.spyOn(AccountHistory, "getRepository").mockReturnValue({ createQueryBuilder: () => qb } as any);
+
+      const result = await service.getNetWorthByAccounts(mockUser);
+      expect(result).toHaveLength(2);
+      expect(result[1]!.history.connectedId).toBe("acc-no-history");
+    });
+
+    it("should return an empty timeline when no days are generated", async () => {
+      const qb: any = {
+        innerJoinAndSelect: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getMany: vi.fn().mockResolvedValue([AccountHistory.fromPlain({ id: "ah-empty", time: new Date(), balance: 100, account: mockAccount })]),
+      };
+      vi.spyOn(AccountHistory, "getRepository").mockReturnValue({ createQueryBuilder: () => qb } as any);
+
+      vi.mocked(eachDayOfInterval).mockReturnValueOnce([]);
+
+      const result = await service.getNetWorthSummary(mockUser);
+      expect(result.timeline()).toEqual([]);
+    });
+
+    it("should keep the final sampled point when downsampling the timeline", async () => {
+      const historyEntry = AccountHistory.fromPlain({
+        id: "ah-sample",
+        time: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000),
+        balance: 250,
+        account: mockAccount,
+      });
+      const qb: any = {
+        innerJoinAndSelect: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getMany: vi.fn().mockResolvedValue([historyEntry]),
+      };
+      vi.spyOn(AccountHistory, "getRepository").mockReturnValue({ createQueryBuilder: () => qb } as any);
+
+      const result = await service.getNetWorthSummary(mockUser);
+      const sampled = result.timeline(365.1);
+      expect(sampled.length).toBeGreaterThan(0);
     });
   });
 });

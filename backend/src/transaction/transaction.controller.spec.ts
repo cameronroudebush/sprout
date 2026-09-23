@@ -267,41 +267,81 @@ describe("TransactionController", () => {
       expect(res).toContain("Successfully removed 1 duplicate transaction from");
     });
 
-    it("should inherit categoryId, providerId, and extra when kept transaction lacks them and is not swapped", async () => {
+    it("should format pluralized response message when multiple duplicates are removed", async () => {
       const account = TestEntities.account;
       vi.spyOn(Account, "findOne").mockResolvedValue(account);
 
       const txKept = Transaction.fromPlain({
-        id: "tx-kept-noswap",
-        amount: 75.0,
+        id: "tx-kept-plural",
+        amount: 100.0,
         posted: new Date("2026-01-01T10:00:00Z"),
-        providerId: undefined,
         account,
-        categoryId: undefined,
-        category: undefined,
-        extra: undefined,
       });
 
-      const txRemove = Transaction.fromPlain({
-        id: "tx-remove-noswap",
-        amount: 75.0,
+      const txDup1 = Transaction.fromPlain({
+        id: "tx-dup-1",
+        amount: 100.0,
         posted: new Date("2026-01-01T11:00:00Z"),
-        providerId: undefined,
         account,
-        categoryId: "cat-inherited",
-        category: TestEntities.category,
-        extra: { merchantName: "Inherited Merchant" },
       });
 
-      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txRemove]);
+      const txDup2 = Transaction.fromPlain({
+        id: "tx-dup-2",
+        amount: 100.0,
+        posted: new Date("2026-01-01T12:00:00Z"),
+        account,
+      });
+
+      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txDup1, txDup2]);
       vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
-      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 2 } as any);
 
       const res = await controller.removeDuplicates(user, account.id);
 
-      expect(txKept.category).toStrictEqual(TestEntities.category);
-      expect(txKept.extra).toEqual({ merchantName: "Inherited Merchant" });
-      expect(res).toContain("Successfully removed 1 duplicate transaction from");
+      expect(res).toContain("Successfully removed 2 duplicate transactions from");
+    });
+
+    it("should inherit providerId when kept transaction lacks it and swap is not triggered", async () => {
+      const account = TestEntities.account;
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
+
+      // Duplicate #1 (kept initially, no providerId)
+      const txKept = Transaction.fromPlain({
+        id: "tx-kept-no-prov",
+        amount: 85.0,
+        posted: new Date("2026-01-01T10:00:00Z"),
+        providerId: undefined,
+        account,
+      });
+
+      // Duplicate #2 (has providerId -> triggers swap, so txRemove becomes kept)
+      const txRemove = Transaction.fromPlain({
+        id: "tx-swap-prov",
+        amount: 85.0,
+        posted: new Date("2026-01-01T11:00:00Z"),
+        providerId: "prov-alpha",
+        account,
+        extra: undefined,
+      });
+
+      // Duplicate #3 (has extra data -> inherits extra onto kept transaction without swapping providerId)
+      const txDup3 = Transaction.fromPlain({
+        id: "tx-dup-3",
+        amount: 85.0,
+        posted: new Date("2026-01-01T12:00:00Z"),
+        providerId: "prov-beta",
+        account,
+        extra: { merchantName: "Inherited Merchant" },
+      });
+
+      vi.spyOn(Transaction, "find").mockResolvedValue([txKept, txRemove, txDup3]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 2 } as any);
+
+      const res = await controller.removeDuplicates(user, account.id);
+
+      expect(res).toContain("Successfully removed 2 duplicate transactions");
+      expect(Transaction.upsertMany).toHaveBeenCalled();
     });
 
     it("should handle duplicate removal when extra is merged with different non-conflicting properties", async () => {
@@ -335,6 +375,96 @@ describe("TransactionController", () => {
 
       expect(res).toContain("Successfully removed 1 duplicate transaction from");
       expect(Transaction.upsertMany).toHaveBeenCalled();
+    });
+
+    it("should inherit category from duplicate when kept transaction already has provider", async () => {
+      const account = TestEntities.account;
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
+      const kept = Transaction.fromPlain({
+        id: "tx-category-kept",
+        amount: 40,
+        posted: new Date("2026-01-01T10:00:00Z"),
+        providerId: "provider-kept",
+        account,
+      });
+      const duplicate = Transaction.fromPlain({
+        id: "tx-category-duplicate",
+        amount: 40,
+        posted: new Date("2026-01-01T11:00:00Z"),
+        account,
+        categoryId: "category-inherited",
+        category: TestEntities.category,
+      });
+      vi.spyOn(Transaction, "find").mockResolvedValue([kept, duplicate]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
+
+      await controller.removeDuplicates(user, account.id);
+
+      expect(Transaction.upsertMany).toHaveBeenCalled();
+      expect(kept.category?.id).toBe(TestEntities.category.id);
+    });
+
+    it("should handle duplicates without extra data and use duplicate count fallback", async () => {
+      const account = TestEntities.account;
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
+      const kept = Transaction.fromPlain({
+        id: "tx-no-extra-kept",
+        amount: 41,
+        posted: new Date("2026-01-01T10:00:00Z"),
+        account,
+        providerId: "provider",
+        extra: { source: "same" },
+      });
+      const duplicate = Transaction.fromPlain({
+        id: "tx-no-extra-duplicate",
+        amount: 41,
+        posted: new Date("2026-01-01T11:00:00Z"),
+        account,
+        providerId: undefined,
+        extra: { source: "same" },
+      });
+      vi.spyOn(Transaction, "find").mockResolvedValue([kept, duplicate]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({} as any);
+
+      const result = await controller.removeDuplicates(user, account.id);
+
+      expect(result).toContain("Successfully removed 1 duplicate transaction");
+      expect(Transaction.upsertMany).not.toHaveBeenCalled();
+    });
+
+    it("should inherit a provider id when it becomes available after the initial duplicate check", async () => {
+      const account = TestEntities.account;
+      vi.spyOn(Account, "findOne").mockResolvedValue(account);
+
+      const kept = Transaction.fromPlain({ id: "tx-late-kept", amount: 77, posted: new Date("2026-01-01T10:00:00Z"), account });
+      const duplicate = Transaction.fromPlain({ id: "tx-late-dup", amount: 77, posted: new Date("2026-01-01T11:00:00Z"), account });
+
+      let keptProviderId: string | undefined;
+      Object.defineProperty(kept, "providerId", {
+        get: () => keptProviderId,
+        set: (value: string) => {
+          keptProviderId = value;
+        },
+        configurable: true,
+      });
+      let providerIdReads = 0;
+      Object.defineProperty(duplicate, "providerId", {
+        get: () => (providerIdReads++ === 0 ? undefined : "prov-late"),
+        set: () => {},
+        configurable: true,
+      });
+
+      vi.spyOn(Transaction, "find").mockResolvedValue([kept, duplicate]);
+      vi.spyOn(Transaction, "upsertMany").mockResolvedValue([] as any);
+      vi.spyOn(Transaction, "deleteMany").mockResolvedValue({ affected: 1 } as any);
+
+      const result = await controller.removeDuplicates(user, account.id);
+
+      expect(keptProviderId).toBe("prov-late");
+      expect(Transaction.upsertMany).toHaveBeenCalled();
+      expect(result).toContain("Successfully removed 1 duplicate transaction");
     });
   });
 });

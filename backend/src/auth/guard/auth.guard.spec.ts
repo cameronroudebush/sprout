@@ -1,5 +1,6 @@
 import { ExecutionContext, Logger } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { Mocked } from "vitest";
 
 vi.mock("@backend/config/core", () => ({
   Configuration: {
@@ -35,6 +36,8 @@ describe("AuthGuard", () => {
 
   // Helper returns both the guard instance and its internal isolated User class definition
   async function getIsolatedGuardContext(authType: "local" | "oidc") {
+    vi.resetModules();
+
     const { Configuration } = await import("@backend/config/core.js");
     Configuration.server.auth.type = authType;
 

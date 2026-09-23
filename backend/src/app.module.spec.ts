@@ -143,5 +143,38 @@ describe("AppModule", () => {
       const result = await cacheFactory();
       expect(result.stores).toHaveLength(1);
     });
+
+    it("should fallback to L1 cache when the redis connection times out", async () => {
+      Configuration.server.cache = {
+        type: "redis",
+        redis: {
+          validate: vi.fn(),
+          host: "slowhost",
+          port: 6379,
+          password: "",
+        },
+      } as any;
+
+      const { default: KeyvRedis } = await import("@keyv/redis");
+      (KeyvRedis as any).mockImplementationOnce(function () {
+        return {
+          client: {
+            isOpen: false,
+            connect: vi.fn().mockReturnValue(new Promise(() => {})),
+            ping: vi.fn(),
+          },
+        };
+      });
+
+      vi.useFakeTimers();
+      try {
+        const resultPromise = cacheFactory();
+        await vi.advanceTimersByTimeAsync(5000);
+        const result = await resultPromise;
+        expect(result.stores).toHaveLength(1);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });

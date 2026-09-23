@@ -50,6 +50,17 @@ describe("SnapTradeProviderService", () => {
       expect(unconfiguredService.snaptrade).toBeUndefined();
     });
 
+    it("should expose configuration and update institution error state", async () => {
+      expect(service.getAppConfiguration()).toBe(Configuration.providers.snapTrade);
+      const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-error");
+      asset.institution.update = vi.fn().mockResolvedValue(asset.institution);
+
+      await (service as any).setInstitutionError(asset, true);
+
+      expect(asset.institution.hasError).toBe(true);
+      expect(asset.institution.update).toHaveBeenCalled();
+    });
+
     it("should return online status from snaptrade apiStatus", async () => {
       const avail = await service.isAvailable(user);
       expect(avail).toBe(true);
@@ -59,6 +70,12 @@ describe("SnapTradeProviderService", () => {
       );
       const offline = await service.isAvailable(user);
       expect(offline).toBe(false);
+
+      (service as unknown as { snaptrade?: unknown }).snaptrade = undefined;
+      await expect(service.isAvailable(user)).resolves.toBe(false);
+
+      (service as unknown as { snaptrade: any }).snaptrade = { apiStatus: { check: vi.fn().mockResolvedValue({ data: {} }) } };
+      await expect(service.isAvailable(user)).resolves.toBe(false);
     });
 
     it("should throw InternalServerErrorException if snaptrade client is null", () => {
@@ -87,6 +104,19 @@ describe("SnapTradeProviderService", () => {
 
       await expect(service.generateLinkToken(user)).rejects.toThrow(BadRequestException);
     });
+
+    it("should reject registration responses without a user secret", async () => {
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(null);
+      (service.snaptrade.authentication.registerSnapTradeUser as Mock).mockResolvedValue({ data: {} });
+
+      await expect(service.generateLinkToken(user)).rejects.toThrow(BadRequestException);
+    });
+
+    it("should log in an already registered SnapTrade user", async () => {
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(new SnapTradeUser(user, "existing-secret"));
+
+      await expect(service.generateLinkToken(user)).resolves.toBe("https://snaptrade.com/redirect");
+    });
   });
 
   describe("performExchange, rollbackExchange, performUnlink", () => {
@@ -110,6 +140,17 @@ describe("SnapTradeProviderService", () => {
       const res = await (service as unknown as { performExchange: (u: unknown) => Promise<Array<{ institutionName: string }>> }).performExchange(user);
       expect(res.length).toBe(1);
       expect(res[0]?.institutionName).toBe("Robinhood");
+    });
+
+    it("should use brokerage fallbacks when connection metadata is absent", async () => {
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(new SnapTradeUser(user, "sec-123"));
+      service.snaptrade.connections.listBrokerageAuthorizations = vi.fn().mockResolvedValue({ data: [{ id: "conn-fallback" }] });
+      service.snaptrade.accountInformation.listUserAccounts = vi.fn().mockResolvedValue({ data: [] });
+
+      const result = await (service as any).performExchange(user);
+
+      expect(result[0].institutionName).toBe("SnapTrade Brokerage");
+      expect(result[0].institutionUrl).toBe(service.config.url);
     });
 
     it("should throw BadRequestException if SnapTradeUser missing in performExchange", async () => {
@@ -185,6 +226,29 @@ describe("SnapTradeProviderService", () => {
       expect(results[0]?.transactions.length).toBe(1);
     });
 
+    it("should perform accounts-only sync and reuse an existing account ID", async () => {
+      const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(new SnapTradeUser(user, "sec-123"));
+      const rawAccount = { id: "acc-existing", name: "Brokerage", brokerage_authorization: "conn-1", balance: { total: { amount: 10, currency: "USD" } }, raw_type: "margin" };
+      service.snaptrade.accountInformation.listUserAccounts = vi.fn().mockResolvedValue({ data: [rawAccount] });
+      vi.spyOn(Account, "findOne").mockResolvedValue(TestEntities.account);
+
+      const results = await (service as any).performSync(user, asset, true);
+
+      expect(results[0].account.id).toBe(TestEntities.account.id);
+      expect(results[0].transactions).toEqual([]);
+    });
+
+    it("should sync accounts without an existing local account", async () => {
+      const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
+      vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(new SnapTradeUser(user, "sec-123"));
+      const rawAccount = { id: "acc-new", name: "New Brokerage", brokerage_authorization: "conn-1", balance: { total: { amount: 10, currency: "USD" } }, raw_type: "margin" };
+      service.snaptrade.accountInformation.listUserAccounts = vi.fn().mockResolvedValue({ data: [rawAccount] });
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
+
+      await expect((service as any).performSync(user, asset, true)).resolves.toHaveLength(1);
+    });
+
     it("should return empty array in performSync if snapTradeUser missing", async () => {
       const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
       vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(null);
@@ -239,6 +303,60 @@ describe("SnapTradeProviderService", () => {
       ).upsertInstitutionAsset(TestEntities.institution, { authorizationId: "conn-new", userSecret: "sec-1" });
       expect(existing.authorizationId).toBe("conn-new");
       expect(existing.update).toHaveBeenCalled();
+
+      await (service as any).getInstitutionAssetsForUser(user.id);
+      expect(SnapTradeInstitutionAsset.find).toHaveBeenCalledWith(expect.objectContaining({ where: { institution: { user: { id: user.id } } } }));
+
+      expect((service as any).extractProviderAccountId({ id: "id" })).toBe("id");
+      expect((service as any).extractAccountName({ name: "name" })).toBe("name");
+      expect((service as any).extractAccountName({ number: "number" })).toBe("number");
+    });
+
+    it("should map account balance fallbacks and tolerate incomplete activity responses", async () => {
+      service.snaptrade.accountInformation.getUserAccountBalance = vi.fn().mockResolvedValue({ data: {} });
+      const mapped = await (service as any).mapToSproutAccount(
+        { id: "account", balance: { total: { amount: 10 } }, raw_type: "margin" },
+        { userSecret: "secret" },
+        user,
+        TestEntities.institution,
+      );
+      expect(mapped.name).toBe("Brokerage Account");
+      expect(mapped.currency).toBe("USD");
+
+      service.snaptrade.accountInformation.getAllAccountPositions = vi.fn().mockResolvedValue({
+        data: {
+          results: [{ units: undefined, price: undefined, cost_basis: undefined, instrument: { symbol: "SYM" } }],
+        },
+      });
+      const today = new Date().toISOString();
+      service.snaptrade.accountInformation.getAccountActivities = vi.fn().mockResolvedValue({
+        data: {
+          data: [
+            { id: "default-activity", amount: undefined },
+            { id: "today-activity", trade_date: today, amount: 1, symbol: { symbol: "TODAY" } },
+            { id: "settlement-activity", settlement_date: "2026-01-01", amount: 1, type: "SETTLEMENT" },
+          ],
+        },
+      });
+      const result = await (service as any).fetchInitialSyncData(
+        { id: "account" },
+        TestEntities.account,
+        { userSecret: "secret" },
+        user,
+      );
+      expect(result.holdings).toHaveLength(1);
+      expect(result.transactions).toHaveLength(3);
+
+      service.snaptrade.accountInformation.getAllAccountPositions = vi.fn().mockResolvedValue({ data: { results: null } });
+      service.snaptrade.accountInformation.getAccountActivities = vi.fn().mockResolvedValue({ data: { data: null } });
+      const emptyResult = await (service as any).fetchInitialSyncData(
+        { id: "account" },
+        TestEntities.account,
+        { userSecret: "secret" },
+        user,
+      );
+      expect(emptyResult.holdings).toEqual([]);
+      expect(emptyResult.transactions).toEqual([]);
     });
   });
 });

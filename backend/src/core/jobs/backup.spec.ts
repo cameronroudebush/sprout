@@ -28,6 +28,21 @@ describe("DatabaseBackupJob", () => {
       expect(fs.mkdirSync).toHaveBeenCalledWith("/mock/backups", { recursive: true });
       expect(fs.copyFileSync).toHaveBeenCalledWith("/mock/sprout.sqlite", expect.stringContaining("sprout_backup_"));
     });
+
+    it("should skip directory creation when the backup directory already exists", async () => {
+      vi.spyOn(fs, "existsSync").mockReturnValue(true);
+      const mkdirSpy = vi.spyOn(fs, "mkdirSync").mockReturnValue(undefined as any);
+      vi.spyOn(fs, "copyFileSync").mockReturnValue(undefined as any);
+      vi.spyOn(fs, "readdirSync").mockReturnValue([]);
+
+      Configuration.database.backup.directory = "/mock/backups";
+      (Configuration.database as any).dbConfig = { database: "/mock/sprout.sqlite" };
+
+      await (runner as any).update();
+
+      expect(mkdirSpy).not.toHaveBeenCalled();
+      expect(fs.copyFileSync).toHaveBeenCalled();
+    });
   });
 
   describe("parseDateFromFileName", () => {
@@ -67,6 +82,41 @@ describe("DatabaseBackupJob", () => {
 
       (runner as any).pruneGfsBackups();
       expect(unlinkSpy).toHaveBeenCalled();
+    });
+
+    it("should skip unparseable backup files and handle years beginning on a non-Thursday", () => {
+      Configuration.database.backup.directory = "/mock/backups";
+      Configuration.database.backup.gfs = {
+        dailyCount: 1,
+        weeklyCount: 1,
+        monthlyCount: 1,
+        quarterlyCount: 1,
+        yearlyCount: 1,
+      };
+
+      vi.spyOn(fs, "existsSync").mockReturnValue(true);
+      vi.spyOn(fs, "readdirSync").mockReturnValue(["sprout_backup_bad.sqlite", "sprout_backup_2025-05-15_12-00-00.sqlite"] as any);
+      vi.spyOn(fs, "statSync").mockReturnValue({ size: 512 } as any);
+
+      const summary = runner.getBackupSummary();
+
+      expect(summary.totalCount).toBe(1);
+      expect(summary.backups[0]!.tiers).toContain("weekly");
+    });
+
+    it("should fall back to default GFS retention counts when none are configured", () => {
+      const originalGfs = Configuration.database.backup.gfs;
+      (Configuration.database.backup as any).gfs = undefined;
+      try {
+        vi.spyOn(fs, "existsSync").mockReturnValue(true);
+        vi.spyOn(fs, "readdirSync").mockReturnValue([] as any);
+
+        const summary = runner.getBackupSummary();
+
+        expect(summary.totalCount).toBe(0);
+      } finally {
+        Configuration.database.backup.gfs = originalGfs;
+      }
     });
   });
 });

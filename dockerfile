@@ -1,3 +1,6 @@
+ARG NODE_VERSION=26
+ARG ALPINE_VERSION=3.24
+
 # -------------------------------
 #       Build Frontend
 # -------------------------------
@@ -10,7 +13,7 @@ RUN flutter build web --release --no-tree-shake-icons --build-name=$(git describ
 # -------------------------------
 #       Build Backend
 # -------------------------------
-FROM node:26-alpine3.23 AS backend-build
+FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} AS backend-build
 # Install build tools for compiling native C++ modules
 RUN apk add --no-cache git python3 make g++
 WORKDIR /app
@@ -25,11 +28,11 @@ RUN npm run build
 # -------------------------------
 #       Build Final Result
 # -------------------------------
-FROM alpine:3.24.1 AS prod
+FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} AS prod
 EXPOSE 80
 
-# Install runtime Node engine and Nginx (no npm or build tools)
-RUN apk add --no-cache nginx libstdc++ ca-certificates nodejs=~24 \
+# Install Nginx and runtime dependencies
+RUN apk add --no-cache nginx ca-certificates \
     && rm -rf /var/cache/apk/*
 
 ENV sprout_server_port=8001

@@ -18,8 +18,13 @@ export default defineConfig({
     },
 
     coverage: {
+      reportOnFailure: true,
+      include: ["src/**/*.ts"],
+      exclude: ["src/**/migration/**/*.ts", "src/**/*.d.ts", "src/types/**/*.ts", "src/test/**/*"],
+      clean: false,
+      cleanOnRerun: false,
       provider: "v8",
-      reporter: ["text", "json-summary", "html", "clover", "cobertura"],
+      reporter: ["text", "json", "json-summary", "html", "clover", "cobertura"],
       // Set output directory for all coverage reports (defaults to './coverage')
       reportsDirectory: "./coverage",
     },

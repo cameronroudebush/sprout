@@ -172,20 +172,19 @@ export class HoldingService {
 
       const results = symbols.map((symbol, index) => {
         const rawChart = historicalResults[index];
-        const indexConfig = MAJOR_INDICES[symbol];
-        const name = indexConfig?.name ?? symbol;
-        const color = indexConfig?.color ?? "#888888";
+        const indexConfig = MAJOR_INDICES[symbol]!;
+        const name = indexConfig.name;
+        const color = indexConfig.color;
 
         const timeline: MajorIndexTimelinePoint[] = [];
         if (rawChart && Array.isArray(rawChart.quotes) && rawChart.quotes.length > 0) {
           const validQuotes = rawChart.quotes.filter((q) => q && q.date && q.close !== undefined && q.close !== null);
           if (validQuotes.length > 0) {
             // Track the previous day's price to calculate day-over-day change
-            let previousPrice = validQuotes[0]?.close ?? 0;
+            let previousPrice = validQuotes[0]!.close as number;
             for (let i = 0; i < validQuotes.length; i++) {
-              const quote = validQuotes[i];
-              if (!quote) continue;
-              const price = quote.close ?? 0;
+              const quote = validQuotes[i]!;
+              const price = quote.close as number;
               let changePercent = 0.0;
               if (i > 0 && previousPrice > 0) changePercent = ((price - previousPrice) / previousPrice) * 100;
               timeline.push({

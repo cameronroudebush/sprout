@@ -5,6 +5,7 @@ setupTests();
 
 import { EncryptionTransformer } from "./encryption.decorator.js";
 import { Configuration } from "@backend/config/core.js";
+import { instanceToPlain } from "class-transformer";
 
 class TestEntity {
   @EncryptionTransformer.decorateAPIProperty()
@@ -27,12 +28,18 @@ describe("EncryptionTransformer", () => {
     expect(transformer.from(encrypted)).toBe(plain);
 
     expect(transformer.from("invalid:encrypted:format")).toBeNull();
+    expect(transformer.from("invalid-format")).toBeNull();
     expect(transformer.from("invalid_iv:invalid_tag:invalid_encrypted")).toBeNull();
 
     const entity = new TestEntity();
     entity.secretField = "secret";
+    expect((instanceToPlain(entity) as any).secretField).toBe("***");
     expect(EncryptionTransformer.propertyIsEncrypted(entity, "secretField")).toBe(true);
     expect(EncryptionTransformer.propertyIsEncrypted(entity, "nonExistentField")).toBe(false);
+
+    const emptyEntity = new TestEntity();
+    emptyEntity.secretField = "";
+    expect((instanceToPlain(emptyEntity) as any).secretField).toBe("");
 
     // Test prototype-less or non-object in propertyIsEncrypted
     const plainObj = Object.create(null);

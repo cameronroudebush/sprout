@@ -30,4 +30,12 @@ describe("PendingTransactionJob", () => {
 
     expect(Transaction.delete).toHaveBeenCalled();
   });
+
+  it("should handle undefined affected count gracefully", async () => {
+    vi.spyOn(Transaction, "delete").mockResolvedValue({} as any);
+
+    await (job as any).update();
+
+    expect(Transaction.delete).toHaveBeenCalled();
+  });
 });
