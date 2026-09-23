@@ -340,7 +340,7 @@ describe("TransactionRuleService", () => {
 
       vi.spyOn(TransactionRule, "find").mockImplementation(async (opts: any) => {
         if (opts?.where?.order) {
-           return [rule2, rule3, ruleMismatch];
+          return [rule2, rule3, ruleMismatch];
         }
         return [rule1, rule2, rule3];
       });

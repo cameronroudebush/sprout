@@ -453,11 +453,16 @@ describe("PlaidProviderService", () => {
       );
       expect(investment[0].description).toBe("Investment");
 
-      service.plaidClient.investmentsTransactionsGet = vi.fn().mockResolvedValue({ data: { investment_transactions: [{ investment_transaction_id: "success" }] } });
+      service.plaidClient.investmentsTransactionsGet = vi
+        .fn()
+        .mockResolvedValue({ data: { investment_transactions: [{ investment_transaction_id: "success" }] } });
       Configuration.providers.lookBackDays = 30;
-      await expect((service as any).fetchInvestmentTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item"))).resolves.toHaveLength(1);
+      await expect(
+        (service as any).fetchInvestmentTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item")),
+      ).resolves.toHaveLength(1);
 
-      service.plaidClient.transactionsSync = vi.fn()
+      service.plaidClient.transactionsSync = vi
+        .fn()
         .mockResolvedValueOnce({ data: { added: [], modified: [], removed: [], next_cursor: "next", has_more: true } })
         .mockResolvedValueOnce({ data: { added: [], modified: [], removed: [], next_cursor: "done", has_more: false } });
       const paged = await priv.fetchAllInstitutionTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item"));
