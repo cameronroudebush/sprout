@@ -199,7 +199,9 @@ describe("ProviderSyncService", () => {
         { account: incomingAccount as any, providerAccountId: "p-existing" },
         { account: incomingAccount as any },
       ]);
-      vi.spyOn(Account, "findOne").mockResolvedValueOnce(null).mockResolvedValueOnce(dbAccount as any);
+      vi.spyOn(Account, "findOne")
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(dbAccount as any);
       vi.spyOn(Institution, "findOne").mockResolvedValue(existingInstitution as any);
 
       await service.syncForProvider(mockUser, mockProvider);

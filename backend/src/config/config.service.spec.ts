@@ -189,8 +189,22 @@ describe("ConfigurationService", () => {
       CONFIGURATION_REQUIREMENTS.push(
         { name: "nonfatal test", fatal: false, validate: () => false, fix: vi.fn() },
         { name: "fatal test", fatal: true, validate: () => false, fix: vi.fn() },
-        { name: "throwing test", fatal: true, validate: () => { throw new Error("boom"); }, fix: vi.fn() },
-        { name: "nonfatal throwing test", fatal: false, validate: () => { throw new Error("nonfatal boom"); }, fix: vi.fn() },
+        {
+          name: "throwing test",
+          fatal: true,
+          validate: () => {
+            throw new Error("boom");
+          },
+          fix: vi.fn(),
+        },
+        {
+          name: "nonfatal throwing test",
+          fatal: false,
+          validate: () => {
+            throw new Error("nonfatal boom");
+          },
+          fix: vi.fn(),
+        },
       );
       try {
         (service as any).validateConfigurationRequirements();
@@ -200,7 +214,6 @@ describe("ConfigurationService", () => {
         CONFIGURATION_REQUIREMENTS.splice(originalLength);
       }
     });
-
   });
 
   describe("updateObjectWithObject & metadata validation", () => {
@@ -241,7 +254,12 @@ describe("ConfigurationService", () => {
 
     it("should ignore disabled, mismatched, null, and nested values", () => {
       const target: any = { disabled: "old", number: 1, nested: { value: "old" } };
-      Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, Object.assign(new ConfigurationMetadata(), { externalControlDisabled: true }), target, "disabled");
+      Reflect.defineMetadata(
+        ConfigurationMetadata.METADATA_KEY,
+        Object.assign(new ConfigurationMetadata(), { externalControlDisabled: true }),
+        target,
+        "disabled",
+      );
       Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, new ConfigurationMetadata(), target, "number");
       Reflect.defineMetadata(ConfigurationMetadata.METADATA_KEY, new ConfigurationMetadata(), target, "nested");
 

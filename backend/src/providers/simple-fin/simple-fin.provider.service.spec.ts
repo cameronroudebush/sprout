@@ -270,7 +270,14 @@ describe("SimpleFINProviderService", () => {
     });
 
     it("should create an institution when linked account has none and errors are absent", async () => {
-      const existingAccount = { id: "acc-no-institution", providerAccountId: "acc-no-institution", balance: 0, availableBalance: 0, extra: {}, institution: undefined };
+      const existingAccount = {
+        id: "acc-no-institution",
+        providerAccountId: "acc-no-institution",
+        balance: 0,
+        availableBalance: 0,
+        extra: {},
+        institution: undefined,
+      };
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
       vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [{ id: "acc-no-institution", name: "Account", balance: "10", "available-balance": "10", currency: "USD", org: { name: "Bank", url: "url" } }],

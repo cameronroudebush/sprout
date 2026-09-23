@@ -229,7 +229,13 @@ describe("SnapTradeProviderService", () => {
     it("should perform accounts-only sync and reuse an existing account ID", async () => {
       const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
       vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(new SnapTradeUser(user, "sec-123"));
-      const rawAccount = { id: "acc-existing", name: "Brokerage", brokerage_authorization: "conn-1", balance: { total: { amount: 10, currency: "USD" } }, raw_type: "margin" };
+      const rawAccount = {
+        id: "acc-existing",
+        name: "Brokerage",
+        brokerage_authorization: "conn-1",
+        balance: { total: { amount: 10, currency: "USD" } },
+        raw_type: "margin",
+      };
       service.snaptrade.accountInformation.listUserAccounts = vi.fn().mockResolvedValue({ data: [rawAccount] });
       vi.spyOn(Account, "findOne").mockResolvedValue(TestEntities.account);
 
@@ -242,7 +248,13 @@ describe("SnapTradeProviderService", () => {
     it("should sync accounts without an existing local account", async () => {
       const asset = new SnapTradeInstitutionAsset(TestEntities.institution, "conn-1");
       vi.spyOn(SnapTradeUser, "findOne").mockResolvedValue(new SnapTradeUser(user, "sec-123"));
-      const rawAccount = { id: "acc-new", name: "New Brokerage", brokerage_authorization: "conn-1", balance: { total: { amount: 10, currency: "USD" } }, raw_type: "margin" };
+      const rawAccount = {
+        id: "acc-new",
+        name: "New Brokerage",
+        brokerage_authorization: "conn-1",
+        balance: { total: { amount: 10, currency: "USD" } },
+        raw_type: "margin",
+      };
       service.snaptrade.accountInformation.listUserAccounts = vi.fn().mockResolvedValue({ data: [rawAccount] });
       vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
@@ -338,23 +350,13 @@ describe("SnapTradeProviderService", () => {
           ],
         },
       });
-      const result = await (service as any).fetchInitialSyncData(
-        { id: "account" },
-        TestEntities.account,
-        { userSecret: "secret" },
-        user,
-      );
+      const result = await (service as any).fetchInitialSyncData({ id: "account" }, TestEntities.account, { userSecret: "secret" }, user);
       expect(result.holdings).toHaveLength(1);
       expect(result.transactions).toHaveLength(3);
 
       service.snaptrade.accountInformation.getAllAccountPositions = vi.fn().mockResolvedValue({ data: { results: null } });
       service.snaptrade.accountInformation.getAccountActivities = vi.fn().mockResolvedValue({ data: { data: null } });
-      const emptyResult = await (service as any).fetchInitialSyncData(
-        { id: "account" },
-        TestEntities.account,
-        { userSecret: "secret" },
-        user,
-      );
+      const emptyResult = await (service as any).fetchInitialSyncData({ id: "account" }, TestEntities.account, { userSecret: "secret" }, user);
       expect(emptyResult.holdings).toEqual([]);
       expect(emptyResult.transactions).toEqual([]);
     });

@@ -57,10 +57,10 @@ describe("generateMigration", () => {
               { query: "CREATE TABLE `user` (`id` varchar)", parameters: [] },
               { query: "INSERT INTO `user` VALUES (?)", parameters: ["admin"] },
             ],
-             downQueries: [
-               { query: "DROP TABLE `user`", parameters: ["admin"] },
-               { query: "DROP INDEX `user_idx`", parameters: [] },
-             ],
+            downQueries: [
+              { query: "DROP TABLE `user`", parameters: ["admin"] },
+              { query: "DROP INDEX `user_idx`", parameters: [] },
+            ],
           }),
         }),
       },
@@ -96,10 +96,7 @@ describe("generateMigration", () => {
         "        await queryRunner.query(`CREATE TABLE \\`user\\` (\\`id\\` varchar)`);",
         '        await queryRunner.query(`INSERT INTO \\`user\\` VALUES (?)`, ["admin"]);',
       ],
-       [
-         '        await queryRunner.query(`DROP INDEX \\`user_idx\\``);',
-         '        await queryRunner.query(`DROP TABLE \\`user\\``, ["admin"]);',
-       ],
+      ["        await queryRunner.query(`DROP INDEX \\`user_idx\\``);", '        await queryRunner.query(`DROP TABLE \\`user\\``, ["admin"]);'],
     );
 
     expect(prettier.format).toHaveBeenCalledWith("raw-template-content", expect.objectContaining({ parser: "typescript" }));

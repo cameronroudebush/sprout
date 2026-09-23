@@ -13,6 +13,7 @@ import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { User } from "@backend/user/model/user.model.js";
 import { InternalServerErrorException } from "@nestjs/common";
+import { format } from "date-fns";
 import { AccountBase as PlaidAccount, AccountType as PlaidAccountType } from "plaid";
 
 describe("PlaidProviderService", () => {
@@ -453,11 +454,16 @@ describe("PlaidProviderService", () => {
       );
       expect(investment[0].description).toBe("Investment");
 
-      service.plaidClient.investmentsTransactionsGet = vi.fn().mockResolvedValue({ data: { investment_transactions: [{ investment_transaction_id: "success" }] } });
+      service.plaidClient.investmentsTransactionsGet = vi
+        .fn()
+        .mockResolvedValue({ data: { investment_transactions: [{ investment_transaction_id: "success" }] } });
       Configuration.providers.lookBackDays = 30;
-      await expect((service as any).fetchInvestmentTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item"))).resolves.toHaveLength(1);
+      await expect(
+        (service as any).fetchInvestmentTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item")),
+      ).resolves.toHaveLength(1);
 
-      service.plaidClient.transactionsSync = vi.fn()
+      service.plaidClient.transactionsSync = vi
+        .fn()
         .mockResolvedValueOnce({ data: { added: [], modified: [], removed: [], next_cursor: "next", has_more: true } })
         .mockResolvedValueOnce({ data: { added: [], modified: [], removed: [], next_cursor: "done", has_more: false } });
       const paged = await priv.fetchAllInstitutionTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item"));
@@ -501,6 +507,25 @@ describe("PlaidProviderService", () => {
 
       expect(transactions).toHaveLength(1);
       expect(Transaction.findOne).toHaveBeenCalled();
+    });
+
+    it("should use current time for transactions dated today", async () => {
+      const priv = service as any;
+      const today = format(new Date(), "yyyy-MM-dd");
+
+      const [transaction] = await priv.convertPlaidTransactions(
+        [{ transaction_id: "today-tx", amount: 1, date: today, name: "Today" }],
+        TestEntities.account,
+        user,
+      );
+      const [investment] = await priv.convertPlaidInvestmentTransactions(
+        [{ investment_transaction_id: "today-investment", amount: 2, date: today, name: "Today investment" }],
+        TestEntities.account,
+        user,
+      );
+
+      expect(transaction.posted.toDateString()).toBe(new Date().toDateString());
+      expect(investment.posted.toDateString()).toBe(new Date().toDateString());
     });
   });
 });

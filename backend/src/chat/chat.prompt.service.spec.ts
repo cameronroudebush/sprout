@@ -155,7 +155,9 @@ describe("ChatPromptService", () => {
       ).toEqual([]);
 
       const noMapMessage = new ChatHistory(user, "No map", "user");
-      expect((service as unknown as { formatCleanHistory: (h: ChatHistory[], m: Map<string, string> | null) => unknown[] }).formatCleanHistory([noMapMessage], null)).toHaveLength(1);
+      expect(
+        (service as unknown as { formatCleanHistory: (h: ChatHistory[], m: Map<string, string> | null) => unknown[] }).formatCleanHistory([noMapMessage], null),
+      ).toHaveLength(1);
     });
   });
 });
