@@ -267,8 +267,6 @@ class MarketIndexDtoTypeEnum {
 
   static MarketIndexDtoTypeEnum? fromJson(dynamic value) => MarketIndexDtoTypeEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [MarketIndexDtoTypeEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<MarketIndexDtoTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MarketIndexDtoTypeEnum>[];
     if (json is List && json.isNotEmpty) {
@@ -326,16 +324,6 @@ class MarketIndexDtoTypeEnumTypeTransformer {
 
 
 
-enum MarketIndexDtoMarketStateEnum {
-  REGULAR._(r'REGULAR'),
-  CLOSED._(r'CLOSED'),
-  PRE._(r'PRE'),
-  POST._(r'POST'),
-  PREPRE._(r'PREPRE'),
-  POSTPOST._(r'POSTPOST'),
-  ;
-
-
 class MarketIndexDtoMarketStateEnum {
   /// Instantiate a new enum with the provided [value].
   const MarketIndexDtoMarketStateEnum._(this.value);
@@ -344,17 +332,29 @@ class MarketIndexDtoMarketStateEnum {
   final String value;
 
   @override
-  String toString() => _value;
+  String toString() => value;
 
-  /// Encodes this enum as a value suitable for JSON.
-  String toJson() => _value;
+  String toJson() => value;
 
-  /// Returns the instance of [MarketIndexDtoMarketStateEnum] that was successfully decoded
-  /// from the passed [value] on success, null otherwise.
+  static const REGULAR = MarketIndexDtoMarketStateEnum._(r'REGULAR');
+  static const CLOSED = MarketIndexDtoMarketStateEnum._(r'CLOSED');
+  static const PRE = MarketIndexDtoMarketStateEnum._(r'PRE');
+  static const POST = MarketIndexDtoMarketStateEnum._(r'POST');
+  static const PREPRE = MarketIndexDtoMarketStateEnum._(r'PREPRE');
+  static const POSTPOST = MarketIndexDtoMarketStateEnum._(r'POSTPOST');
+
+  /// List of all possible values in this [enum][MarketIndexDtoMarketStateEnum].
+  static const values = <MarketIndexDtoMarketStateEnum>[
+    REGULAR,
+    CLOSED,
+    PRE,
+    POST,
+    PREPRE,
+    POSTPOST,
+  ];
+
   static MarketIndexDtoMarketStateEnum? fromJson(dynamic value) => MarketIndexDtoMarketStateEnumTypeTransformer().decode(value);
 
-  /// Returns a [List] containing instances of [MarketIndexDtoMarketStateEnum]
-  /// that were successfully decoded from the passed [JSON][json].
   static List<MarketIndexDtoMarketStateEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MarketIndexDtoMarketStateEnum>[];
     if (json is List && json.isNotEmpty) {
