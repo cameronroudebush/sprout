@@ -13,6 +13,7 @@ import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { User } from "@backend/user/model/user.model.js";
 import { InternalServerErrorException } from "@nestjs/common";
+import { format } from "date-fns";
 import { AccountBase as PlaidAccount, AccountType as PlaidAccountType } from "plaid";
 
 describe("PlaidProviderService", () => {
@@ -506,6 +507,25 @@ describe("PlaidProviderService", () => {
 
       expect(transactions).toHaveLength(1);
       expect(Transaction.findOne).toHaveBeenCalled();
+    });
+
+    it("should use current time for transactions dated today", async () => {
+      const priv = service as any;
+      const today = format(new Date(), "yyyy-MM-dd");
+
+      const [transaction] = await priv.convertPlaidTransactions(
+        [{ transaction_id: "today-tx", amount: 1, date: today, name: "Today" }],
+        TestEntities.account,
+        user,
+      );
+      const [investment] = await priv.convertPlaidInvestmentTransactions(
+        [{ investment_transaction_id: "today-investment", amount: 2, date: today, name: "Today investment" }],
+        TestEntities.account,
+        user,
+      );
+
+      expect(transaction.posted.toDateString()).toBe(new Date().toDateString());
+      expect(investment.posted.toDateString()).toBe(new Date().toDateString());
     });
   });
 });
