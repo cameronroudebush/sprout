@@ -3,6 +3,7 @@ import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
+import { ChatPromptResult } from "@backend/chat/provider/chat.provider";
 import { Configuration } from "@backend/config/core";
 import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
@@ -20,7 +21,7 @@ export class ChatPromptService {
   constructor(private readonly transactionService: TransactionService) {}
 
   /** Generates the system instruction and prompt content to pass to the LLM for standard chatting. */
-  async buildChatPrompt(user: User, timeframe: ChatTimeframe, allowCharts: boolean) {
+  async buildChatPrompt(user: User, timeframe: ChatTimeframe, allowCharts: boolean): Promise<ChatPromptResult> {
     const instructions = [
       ...this.getSharedSystemInstructions(user, true, allowCharts),
       `ONLY answer the specific question asked by the user. Do not provide extra summaries or net worth trends unless requested. Keep responses always related to finances.`,
@@ -31,7 +32,7 @@ export class ChatPromptService {
   }
 
   /** Generates a prompt tailored for a brief 24-hour daily overview of the user's financial activity. */
-  async buildDailyOverviewPrompt(user: User, includePendingTransactions = false) {
+  async buildDailyOverviewPrompt(user: User, includePendingTransactions = false): Promise<ChatPromptResult> {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
       `Write a warm, natural daily financial summary over the last 24 hours.`,
@@ -50,7 +51,7 @@ export class ChatPromptService {
   }
 
   /** Builds prompt payload focused specifically on investment accounts & market holdings. */
-  async buildHoldingsOverviewPrompt(user: User) {
+  async buildHoldingsOverviewPrompt(user: User): Promise<ChatPromptResult> {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
       `Write a clear, balanced daily investment performance summary covering the last 24 hours.`,
@@ -80,6 +81,7 @@ export class ChatPromptService {
       `You are a financial assistant for Sprout (https://sprout.croudebush.net/).`,
       `Today's date and current time is: ${today}. Use this exact timestamp to evaluate activity within the last 24 hours.`,
       `Be concise. Avoid conversational filler.`,
+      `NEVER use Markdown tables. They render poorly in our interface. Present tabular or columnar data as bullet points or short labeled lines instead.`,
       `Refer to accounts strictly by the provided IDs (e.g., Acc_0).`,
       `Context Data Key Mapping:
          - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate, hol=Holdings (CSV Symbol:CurrentValue:History[Date:MarketValue]), his=History (CSV Date:Balance)
@@ -111,7 +113,7 @@ export class ChatPromptService {
           - Date format for line charts: "MM/dd/yyyy".
           - Plain text only for "title", "label", and data keys (no markdown or asterisks).
           - Map line chart "data" directly from the provided "his" context array.`
-        : `If the user asks for a chart or visual breakdown, politely inform them that chart generation is currently disabled/unavailable and present the financial insights cleanly using Markdown text, bullet points, or tables instead.`,
+        : `If the user asks for a chart or visual breakdown, politely inform them that chart generation is currently disabled/unavailable and present the financial insights cleanly using Markdown text or bullet points instead.`,
       includeCYA ? `Always include: "Consult a financial advisor before making decisions."` : "",
     ];
   }
@@ -124,7 +126,7 @@ export class ChatPromptService {
     includeChatHistory = true,
     validAccountTypes?: AccountType[],
     includePendingTransactions = true,
-  ) {
+  ): Promise<ChatPromptResult> {
     await this.cleanupUserMax(user);
 
     const idMap = new Map<string, string>();

@@ -41,14 +41,17 @@ export class ChatController {
     const chat = await new ChatHistory(user, ChatHistory.DEFAULT_MODEL_TEXT, "model", undefined, true).insert();
     this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
 
-    const model = await this.chatService.getModel(user, "chat");
-
     const timeoutMs = 60000; // 60 Seconds
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new RequestTimeoutException("The request to the LLM timed out.")), timeoutMs);
+      timeoutHandle = setTimeout(() => reject(new RequestTimeoutException("The request to the LLM timed out.")), timeoutMs);
     });
 
     try {
+      // Acquire the model inside the guarded block so misconfiguration (e.g. a missing
+      // API key, which throws a BadRequestException) still clears the pending state.
+      const model = await this.chatService.getModel(user, "chat");
+
       // Race the generation against the timeout
       return await Promise.race([model.generateChatContent(chat, data.timeframe, data.allowCharts ?? true), timeoutPromise]);
     } catch (error: any) {
@@ -60,6 +63,8 @@ export class ChatController {
         this.sseService.sendToUser(user, SSEEventType.CHAT, chat);
       }
       throw error;
+    } finally {
+      clearTimeout(timeoutHandle);
     }
   }
 

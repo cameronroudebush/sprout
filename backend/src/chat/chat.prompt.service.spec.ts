@@ -60,6 +60,7 @@ describe("ChatPromptService", () => {
       const payload = await service.buildChatPrompt(user, ChatTimeframe.sixMonths, true);
       expect(payload.contents).toBeDefined();
       expect(payload.idMap).toBeDefined();
+      expect(payload.contents[0]!.parts[0]!.text).toContain("NEVER use Markdown tables");
     });
 
     it("should deduplicate daily and monthly account/holding history and preserve current snapshots", async () => {
@@ -155,7 +156,9 @@ describe("ChatPromptService", () => {
       ).toEqual([]);
 
       const noMapMessage = new ChatHistory(user, "No map", "user");
-      expect((service as unknown as { formatCleanHistory: (h: ChatHistory[], m: Map<string, string> | null) => unknown[] }).formatCleanHistory([noMapMessage], null)).toHaveLength(1);
+      expect(
+        (service as unknown as { formatCleanHistory: (h: ChatHistory[], m: Map<string, string> | null) => unknown[] }).formatCleanHistory([noMapMessage], null),
+      ).toHaveLength(1);
     });
   });
 });

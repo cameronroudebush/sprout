@@ -117,6 +117,27 @@ describe("ChatController", () => {
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
     });
 
+    it("should clean up the pending chat when the model cannot be acquired", async () => {
+      vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+
+      const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+      userChat.insert = vi.fn().mockResolvedValue(userChat);
+
+      const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "...", isThinking: true, user });
+      modelChat.insert = vi.fn().mockResolvedValue(modelChat);
+      modelChat.update = vi.fn().mockResolvedValue(modelChat);
+
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+
+      chatService.getModel.mockRejectedValue(new BadRequestException("No API key configured. Please set an API key in settings"));
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow(BadRequestException);
+      expect(modelChat.isThinking).toBe(false);
+      expect(modelChat.text).toBe("No API key configured. Please set an API key in settings");
+      expect(modelChat.update).toHaveBeenCalled();
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
+    });
+
     it("should rethrow errors without updating a completed chat", async () => {
       vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
       const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });

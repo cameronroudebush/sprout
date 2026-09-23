@@ -75,6 +75,11 @@ vi.mock("@backend/config/core", () => ({
           chatModel: "gemini-2.5-flash",
           overviewModel: "gemini-2.5-flash",
         },
+        openCode: {
+          key: "test-opencode-key",
+          chatModel: "opencode-chat-model",
+          overviewModel: "opencode-overview-model",
+        },
       },
       lightModeTiles: [],
       darkModeTiles: [],

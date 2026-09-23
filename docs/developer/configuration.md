@@ -144,14 +144,18 @@ Settings that control how Sprout fetches data from external financial aggregator
 
 ## AI
 
-| YAML Key                             | Environment Variable                        | Default                    | Description                                                                                                  |
-| ------------------------------------ | ------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `server.prompt.maxChatHistory`       | `sprout_server_prompt_maxChatHistory`       | `10`                       | Number of previous chat messages to retain for context.                                                      |
-| `server.prompt.type`                 | `sprout_server_prompt_type`                 | `gemini`                   | The LLM provider to use. One of: [`gemini`].                                                                 |
-| **Gemini**                           |                                             |                            |                                                                                                              |
-| `server.prompt.gemini.chatModel`     | `sprout_server_prompt_gemini_chatModel`     | `gemini-flash-latest`      | The model gemini should use for conversations.                                                               |
-| `server.prompt.gemini.overviewModel` | `sprout_server_prompt_gemini_overviewModel` | `gemini-flash-lite-latest` | The model gemini should use to generate overviews.                                                           |
-| `server.prompt.gemini.key`           | `sprout_server_prompt_gemini_key`           |                            | **Optional.** A global key to use to authenticate to gemini. If not given, chat features will not be enabled |
+| YAML Key                               | Environment Variable                          | Default                    | Description                                                                                                  |
+| -------------------------------------- | --------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `server.prompt.maxChatHistory`         | `sprout_server_prompt_maxChatHistory`         | `10`                       | Number of previous chat messages to retain for context.                                                      |
+| `server.prompt.type`                   | `sprout_server_prompt_type`                   | `gemini`                   | The LLM provider to use. One of: [`gemini`, `opencode-zen`, `opencode-go`].                                  |
+| **Gemini**                             |                                               |                            |                                                                                                              |
+| `server.prompt.gemini.chatModel`       | `sprout_server_prompt_gemini_chatModel`       | `gemini-flash-latest`      | The model gemini should use for conversations.                                                               |
+| `server.prompt.gemini.overviewModel`   | `sprout_server_prompt_gemini_overviewModel`   | `gemini-flash-lite-latest` | The model gemini should use to generate overviews.                                                           |
+| `server.prompt.gemini.key`             | `sprout_server_prompt_gemini_key`             |                            | **Optional.** A global key to use to authenticate to gemini. If not given, chat features will not be enabled |
+| **OpenCode (Zen & Go)**                |                                               |                            |                                                                                                              |
+| `server.prompt.openCode.chatModel`     | `sprout_server_prompt_openCode_chatModel`     | `glm-5.3-flash`            | The OpenCode model to use for conversations. The gateway URL is derived from `server.prompt.type`.           |
+| `server.prompt.openCode.overviewModel` | `sprout_server_prompt_openCode_overviewModel` | `glm-5.3-flash`            | The OpenCode model to use to generate overviews.                                                             |
+| `server.prompt.openCode.key`           | `sprout_server_prompt_openCode_key`           |                            | **Optional.** The OpenCode API key. If not given, chat features will not be enabled.                         |
 
 ## Notifications
 
