@@ -53,7 +53,7 @@ describe("HoldingController", () => {
   });
 
   describe("getHoldingHistory", () => {
-    it("should throw NotFoundException if account is missing or not investment type", async () => {
+    it("should throw NotFoundException if account is missing", async () => {
       vi.spyOn(Account, "findOne").mockResolvedValue(null);
 
       await expect(controller.getHoldingHistory(user, "invalid-acc")).rejects.toThrow(NotFoundException);

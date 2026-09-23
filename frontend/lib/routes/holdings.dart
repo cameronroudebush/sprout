@@ -76,21 +76,17 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
       ),
       data: (state) {
         final accounts = state.accounts;
-        final investmentAccounts = [
-          ...accounts.where((a) => a.type == AccountTypeEnum.investment),
-          ...accounts.where((a) => a.type == AccountTypeEnum.crypto),
-        ];
-
         bool allLoaded = true;
-        bool hasHoldings = false;
+        final accountsWithHoldings = <Account>[];
 
-        for (final account in investmentAccounts) {
+        // Holdings can be attached to more than just crypto/investment accounts so we account for all of them here.
+        for (final account in accounts) {
           final holdingAsync = ref.watch(accountHoldingsProvider(account.id));
           if (holdingAsync.isLoading) {
             allLoaded = false;
           }
           if (holdingAsync.value?.isNotEmpty == true) {
-            hasHoldings = true;
+            accountsWithHoldings.add(account);
           }
         }
 
@@ -100,7 +96,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
           );
         }
 
-        if (!hasHoldings) {
+        if (accountsWithHoldings.isEmpty) {
           return SproutRouteWrapper(
             child: _buildWarningCard(
               theme,
@@ -114,7 +110,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
         if (!_hasInitialSelection) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && _selectedHolding == null) {
-              for (final account in investmentAccounts) {
+              for (final account in accountsWithHoldings) {
                 final holdings = ref.read(accountHoldingsProvider(account.id)).value ?? [];
                 if (holdings.isNotEmpty) {
                   setState(() {
@@ -158,12 +154,12 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                                   flex: 6,
                                   child: SproutCard(child: MajorIndicesTimelineWidget()),
                                 ),
-                                if (hasHoldings)
+                                if (accountsWithHoldings.isNotEmpty)
                                   Expanded(
                                     flex: 3,
                                     child: SproutCard(
                                       child: HoldingPieChart(
-                                        investmentAccounts: investmentAccounts,
+                                        investmentAccounts: accountsWithHoldings,
                                         topN: 5,
                                       ),
                                     ),
@@ -171,10 +167,10 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                               ],
                             ),
                           ),
-                          SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts)),
+                          SproutCard(child: HoldingMoverWidget(investmentAccounts: accountsWithHoldings)),
                           SproutCard(
                               child: HoldingDividendsWidget(
-                            investmentAccounts: investmentAccounts,
+                            investmentAccounts: accountsWithHoldings,
                             isDesktop: isDesktop,
                           )),
                         ],
@@ -186,10 +182,10 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                     flex: 5,
                     child: Column(
                       children: [
-                        if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme, isDesktop),
+                        if (accountsWithHoldings.isNotEmpty) _buildPerformanceChart(theme, isDesktop),
                         Expanded(
                           child: SingleChildScrollView(
-                            child: _buildHoldingsPanel(theme, investmentAccounts),
+                            child: _buildHoldingsPanel(theme, accountsWithHoldings),
                           ),
                         ),
                       ],
@@ -205,7 +201,7 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               children: [
                 const MajorIndicesBarWidget(),
                 if (_currentTab == MobileMarketTab.holdings) ...[
-                  if (accounts.isNotEmpty && hasHoldings) _buildPerformanceChart(theme, isDesktop),
+                  if (accountsWithHoldings.isNotEmpty) _buildPerformanceChart(theme, isDesktop),
                 ],
                 Expanded(
                   child: SingleChildScrollView(
@@ -215,29 +211,29 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (_currentTab == MobileMarketTab.holdings) ...[
-                          _buildHoldingsPanel(theme, investmentAccounts),
+                          _buildHoldingsPanel(theme, accountsWithHoldings),
                         ] else ...[
                           if (isChatEnabled) const HoldingsChatCard(mobile: true),
-                          SproutCard(child: HoldingMoverWidget(investmentAccounts: investmentAccounts)),
+                          SproutCard(child: HoldingMoverWidget(investmentAccounts: accountsWithHoldings)),
                           const SproutCard(
                             child: SizedBox(
                               height: 250,
                               child: MajorIndicesTimelineWidget(),
                             ),
                           ),
-                          if (hasHoldings)
+                          if (accountsWithHoldings.isNotEmpty)
                             SproutCard(
                               child: SizedBox(
                                 height: 250,
                                 child: HoldingPieChart(
-                                  investmentAccounts: investmentAccounts,
+                                  investmentAccounts: accountsWithHoldings,
                                   topN: 5,
                                 ),
                               ),
                             ),
                           SproutCard(
                             child: HoldingDividendsWidget(
-                              investmentAccounts: investmentAccounts,
+                              investmentAccounts: accountsWithHoldings,
                               isDesktop: isDesktop,
                             ),
                           ),
@@ -284,13 +280,13 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   }
 
   /// Displays a list of holdings the current user has across their accounts
-  Widget _buildHoldingsPanel(ThemeData theme, List<Account> investmentAccounts) {
+  Widget _buildHoldingsPanel(ThemeData theme, List<Account> accountsWithHoldings) {
     return SproutRouteWrapper(
       child: Column(
         spacing: 8,
         mainAxisSize: MainAxisSize.min,
         children: [
-          ...investmentAccounts.map((account) {
+          ...accountsWithHoldings.map((account) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 4,

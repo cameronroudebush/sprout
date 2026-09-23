@@ -273,6 +273,27 @@ describe("ProviderSyncService", () => {
       expect(mockHoldingToInsert.insert).toHaveBeenCalledWith(false);
     });
 
+    it("should sync holdings returned for a cash account", async () => {
+      mockAccountInDb.type = AccountType.depository;
+      mockAccountInDb.isInvestment = false;
+      const account = { ...TestEntities.account, isInvestment: false };
+
+      const mockHoldingToInsert = { insert: vi.fn().mockResolvedValue({}) };
+      vi.spyOn(Holding, "fromPlain").mockReturnValue(mockHoldingToInsert as any);
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
+      mockProvider.get.mockResolvedValue([
+        {
+          account: account as any,
+          providerAccountId: "p-test-1",
+          holdings: [TestEntities.holding],
+        },
+      ]);
+
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
+
+      expect(mockHoldingToInsert.insert).toHaveBeenCalledWith(false);
+    });
+
     it("should backup previous holding data positions to ledger history models and refresh matching live instances", async () => {
       const account = { ...TestEntities.account, isInvestment: true };
 

@@ -8,7 +8,7 @@ import 'package:sprout/shared/widgets/charts/bar_chart.dart';
 import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 
-/// Renders a bar chart displaying the aggregated dividend generation profile across ALL investment accounts.
+/// Renders a bar chart displaying aggregated dividend generation across accounts with holdings.
 class HoldingDividendsWidget extends ConsumerWidget {
   final List<Account> investmentAccounts;
   final int? topN;
