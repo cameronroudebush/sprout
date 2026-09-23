@@ -2,11 +2,11 @@ import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
 import { ChatPromptService } from "@backend/chat/chat.prompt.service.js";
+import { ChatService } from "@backend/chat/chat.service.js";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model.js";
 import { ChatOverviewType } from "@backend/chat/model/chat.overview.type.js";
-import { ChatService } from "@backend/chat/chat.service.js";
 import { Configuration } from "@backend/config/core.js";
 import { SSEEventType } from "@backend/sse/model/event.model.js";
 import { SSEService } from "@backend/sse/sse.service.js";
@@ -83,6 +83,11 @@ describe("ChatService", () => {
 
       const invalidJsonText = "```chart\n{invalid}\n```";
       expect((service as unknown as { injectChartColors: (t: string) => string }).injectChartColors(invalidJsonText)).toBe(invalidJsonText);
+
+      const unlabeledLine = '```chart\n{"type":"line","series":[{}]}\n```';
+      expect((service as unknown as { injectChartColors: (t: string) => string }).injectChartColors(unlabeledLine)).toContain("color");
+      const otherChart = '```chart\n{"type":"bar","data":{}}\n```';
+      expect((service as unknown as { injectChartColors: (t: string) => string }).injectChartColors(otherChart)).toContain('"type": "bar"');
     });
 
     it("should test model wrapper methods countTokens, generateChatContent, generateOverview", async () => {
@@ -134,10 +139,10 @@ describe("ChatService", () => {
       const res = await promise;
       expect(res).toBeDefined();
 
-      // Retry limit reached throws the error
+      // Retry limit reached surfaces the generic failure
       mockModels.generateContent.mockRejectedValue({ code: 503, message: "high demand" });
       const promiseFail = modelWrapper.generateOverview(ChatOverviewType.daily);
-      const expectPromise = expect(promiseFail).rejects.toBeDefined();
+      const expectPromise = expect(promiseFail).rejects.toThrow("Failed to generate content: retry limit reached or invalid configuration.");
       await vi.advanceTimersByTimeAsync(30000);
       await expectPromise;
 
@@ -173,6 +178,43 @@ describe("ChatService", () => {
       chatMsg.update = vi.fn().mockResolvedValue(chatMsg);
 
       await expect(modelWrapper.generateChatContent(chatMsg, ChatTimeframe.threeMonths, false, false)).rejects.toThrow("Stream fail");
+    });
+
+    it("should handle missing token counts, missing generated text, and non-streamed chunks", async () => {
+      mockModels.countTokens.mockResolvedValueOnce({});
+      const modelWrapper = await service.getModel(user, "overview");
+      await expect(modelWrapper.countTokens("no token count")).resolves.toBe(0);
+
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
+      vi.spyOn(ChatOverview.prototype, "insert").mockImplementation(async function (this: ChatOverview) {
+        return this;
+      });
+      mockModels.generateContent.mockResolvedValueOnce({});
+      await expect(modelWrapper.generateOverview(ChatOverviewType.daily)).rejects.toThrow(InternalServerErrorException);
+
+      mockModels.generateContentStream.mockImplementationOnce(async function* () {
+        yield { text: "" };
+        yield { text: "non-streamed response" };
+      });
+      const chatMsg = new ChatHistory(user, "Question", "user");
+      chatMsg.update = vi.fn().mockResolvedValue(chatMsg);
+      await modelWrapper.generateChatContent(chatMsg, ChatTimeframe.threeMonths, false, false);
+      expect(chatMsg.text).toContain("non-streamed response");
+
+      promptBuilder.buildChatPrompt.mockResolvedValueOnce({
+        contents: "multi-map prompt",
+        idMap: new Map([
+          ["Long Account Name", "Acc_0"],
+          ["T", "T_0"],
+        ]),
+      });
+      mockModels.generateContentStream.mockImplementationOnce(async function* () {
+        yield { text: "Acc_0 T_0" };
+      });
+      const mappedChat = new ChatHistory(user, "Mapped question", "user");
+      mappedChat.update = vi.fn().mockResolvedValue(mappedChat);
+      await modelWrapper.generateChatContent(mappedChat, ChatTimeframe.threeMonths, false, false);
+      expect(mappedChat.text).toContain("Long Account Name");
     });
   });
 });

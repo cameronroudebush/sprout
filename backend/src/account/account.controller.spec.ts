@@ -5,6 +5,7 @@ import { AccountController } from "@backend/account/account.controller.js";
 import { AccountHistory } from "@backend/account/model/account.history.model.js";
 import { Account } from "@backend/account/model/account.model.js";
 import { AccountType } from "@backend/account/model/account.type.js";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Institution } from "@backend/institution/model/institution.model.js";
 import { ProviderType } from "@backend/providers/base/provider.type.js";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service.js";
@@ -12,6 +13,7 @@ import { SSEEventType } from "@backend/sse/model/event.model.js";
 import { SSEService } from "@backend/sse/sse.service.js";
 import { User } from "@backend/user/model/user.model.js";
 import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { Mocked } from "vitest";
 
 describe("AccountController", () => {
   let controller: AccountController;
@@ -215,6 +217,46 @@ describe("AccountController", () => {
   });
 
   describe("mergeAccounts", () => {
+    it("should skip updating holding history when no matching symbol exists in target holdings", async () => {
+      const mockTarget = Account.fromPlain({ id: "acc-target", type: AccountType.investment });
+      const mockSource = Account.fromPlain({ id: "acc-source", type: AccountType.investment });
+
+      vi.spyOn(Account, "findOne").mockResolvedValueOnce(mockTarget).mockResolvedValueOnce(mockSource);
+
+      const updateSpy = vi.fn().mockReturnThis();
+      const mockQueryBuilder = {
+        update: updateSpy,
+        delete: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
+        set: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue({}),
+      };
+
+      const sourceHoldings = [{ id: "sh-1", symbol: "NON_MATCHING_SYMBOL" }];
+      const targetHoldings = [{ id: "th-1", symbol: "DIFFERENT_SYMBOL" }];
+
+      const mockManager = {
+        save: vi.fn(),
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+        remove: vi.fn(),
+        find: vi.fn().mockImplementation((_entity: any, options: any) => {
+          if (options?.where?.accountId === "acc-source") {
+            return Promise.resolve(sourceHoldings);
+          }
+          return Promise.resolve(targetHoldings);
+        }),
+      };
+
+      vi.spyOn(databaseService.source, "transaction").mockImplementation(async (cb: any) => await cb(mockManager));
+      vi.spyOn(AccountHistory, "insertForNewAccount").mockResolvedValue({} as any);
+
+      await controller.mergeAccounts("acc-target", { sourceId: "acc-source" }, mockUser);
+
+      // Verifies that update(HoldingHistory) was skipped (false branch of if (matchingTargetHoldingId))
+      expect(updateSpy).not.toHaveBeenCalledWith(HoldingHistory);
+    });
+
     it("should throw BadRequestException when trying to fuse an account with its own ID", async () => {
       await expect(controller.mergeAccounts("acc-same", { sourceId: "acc-same" }, mockUser)).rejects.toThrow(BadRequestException);
     });

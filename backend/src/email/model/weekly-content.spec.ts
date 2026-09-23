@@ -34,4 +34,21 @@ describe("WeeklyEmailContent", () => {
     expect(content.transactions[0]!.description).toBe("");
     expect(content.transactions[0]!.category).toBe("");
   });
+
+  it("should ignore negative transactions posted outside the past week", () => {
+    const oldDate = new Date();
+    oldDate.setDate(oldDate.getDate() - 30);
+    const tx = {
+      ...TestEntities.transaction,
+      amount: -25,
+      posted: oldDate,
+      description: "Old expense",
+      category: undefined,
+      account: TestEntities.account,
+    };
+
+    const content = new WeeklyEmailContent(user, 5000, 100, 0, 1, [tx as any]);
+
+    expect(content.dailySpendingBars.every((bar) => bar.amount === 0)).toBe(true);
+  });
 });

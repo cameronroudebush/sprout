@@ -1,4 +1,5 @@
 import { Configuration } from "@backend/config/core";
+import { getPublicUrl } from "@backend/core/decorator/public.url.decorator";
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
@@ -61,16 +62,15 @@ export function setupOpenApiHelp(app: INestApplication) {
   const document = configureApiDocument(app);
   app.use(Configuration.server.basePath, (req: Request, res: Response, next: Function) => {
     if (req.path === "/" || req.path === "") {
+      const publicUrl = getPublicUrl(req);
       return apiReference({
         content: document,
-        servers: Configuration.isDevBuild
-          ? [
-              {
-                url: "http://localhost:8001",
-                description: "Local Environment",
-              },
-            ]
-          : undefined,
+        servers: [
+          {
+            url: publicUrl,
+            description: Configuration.isDevBuild ? "Local Environment" : "Current Environment",
+          },
+        ],
         documentDownloadType: "none",
         hideClientButton: true,
         authentication: {
@@ -87,7 +87,7 @@ export function setupOpenApiHelp(app: INestApplication) {
         mcp: {
           disabled: true,
         },
-        hideTestRequestButton: !Configuration.isDevBuild,
+        hideTestRequestButton: false,
       })(req, res);
     }
     next();

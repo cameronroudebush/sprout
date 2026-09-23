@@ -72,8 +72,7 @@ describe("ProviderBase", () => {
         isArchived: true,
         update: vi.fn(),
       };
-
-      vi.spyOn(Account, "find").mockResolvedValue([missingAcc as any, restoredAcc as any]);
+      vi.spyOn(Account, "find").mockResolvedValue([missingAcc as any, restoredAcc as any, activeAcc as any]);
 
       const results = await provider.get(user, false, SyncTriggerType.SCHEDULED);
 
@@ -82,6 +81,18 @@ describe("ProviderBase", () => {
       expect(missingAcc.update).toHaveBeenCalled();
       expect(restoredAcc.isArchived).toBe(false);
       expect(restoredAcc.update).toHaveBeenCalled();
+    });
+
+    it("should reconcile by attached account provider id and apply institution filtering", async () => {
+      const asset = { id: "asset-1" };
+      (provider as any).getInstitutionAssetsForUser.mockResolvedValue([asset]);
+      (provider as any).performSync.mockResolvedValue([{ account: { providerAccountId: "attached-id" } as any }]);
+      vi.spyOn(Account, "find").mockResolvedValue([]);
+
+      await provider.get(user, false, SyncTriggerType.MANUAL, "inst-1");
+
+      expect((provider as any).getInstitutionAssetsForUser).toHaveBeenCalledWith(user.id, "inst-1");
+      expect(Account.find).toHaveBeenCalledWith({ where: { user: { id: user.id }, provider: "plaid", institution: { id: "inst-1" } } });
     });
 
     it("should handle sync error per asset gracefully", async () => {
@@ -103,12 +114,15 @@ describe("ProviderBase", () => {
       const rawAccount = { id: "p-acc-1", name: "Checking" };
       const exchangeInst = {
         institutionName: "New Bank",
-        institutionUrl: "https://newbank.com",
+        institutionUrl: undefined,
         authContext: { accessToken: "at-123" },
         rawAccounts: [rawAccount],
       };
 
-      (provider as any).performExchange.mockResolvedValue([exchangeInst]);
+      (provider as any).performExchange.mockResolvedValue([
+        exchangeInst,
+        { ...exchangeInst, institutionName: "Second Bank", institutionUrl: "https://secondbank.com", rawAccounts: [] },
+      ]);
 
       vi.spyOn(Institution, "findOne").mockResolvedValue(null);
 
@@ -143,6 +157,36 @@ describe("ProviderBase", () => {
 
       await expect(provider.exchangeAndCreateAccounts(user, {})).rejects.toThrow(InternalServerErrorException);
       expect(rollbackSpy).toHaveBeenCalled();
+    });
+
+    it("should not attempt rollback when exchange fails before returning data", async () => {
+      (provider as any).performExchange.mockRejectedValue(new Error("Exchange failed"));
+      const rollbackSpy = vi.spyOn(provider as any, "rollbackExchange").mockResolvedValue();
+
+      await expect(provider.exchangeAndCreateAccounts(user, {})).rejects.toThrow(InternalServerErrorException);
+      expect(rollbackSpy).not.toHaveBeenCalled();
+    });
+
+    it("should update an existing account and handle empty initial sync data", async () => {
+      const exchangeInst = { institutionName: "Bank", institutionUrl: undefined, authContext: {}, rawAccounts: [{ id: "p-acc-1", name: "Checking" }] };
+      const existingInstitution = { id: "inst-1", hasError: true, update: vi.fn() };
+      const existingAccount = { ...TestEntities.account, providerAccountId: "old-id", institution: existingInstitution, update: vi.fn() };
+      (provider as any).performExchange.mockResolvedValue([exchangeInst]);
+      vi.spyOn(Institution, "findOne").mockResolvedValue(existingInstitution as any);
+      vi.spyOn(Account, "findOne").mockResolvedValue(existingAccount as any);
+      (provider as any).mapToSproutAccount.mockResolvedValue({ balance: 123, availableBalance: 123 });
+      vi.spyOn(provider as any, "fetchInitialSyncData").mockResolvedValue({
+        holdings: undefined,
+        transactions: undefined,
+        removedTransactionIds: undefined,
+      });
+
+      const results = await provider.exchangeAndCreateAccounts(user, {});
+
+      expect(results[0].transactions).toEqual([]);
+      expect(results[0].removedTransactionIds).toEqual([]);
+      expect(existingAccount.providerAccountId).toBe("p-acc-1");
+      expect(existingAccount.update).toHaveBeenCalled();
     });
   });
 
@@ -195,16 +239,25 @@ describe("ProviderBase", () => {
       expect(provider.testDetermineSubType("personal loan")).toBe(AccountSubType.personal);
       expect(provider.testDetermineSubType("brokerage")).toBe(AccountSubType.brokerage);
       expect(provider.testDetermineSubType(null, AccountSubType.other)).toBe(AccountSubType.other);
+      expect(provider.testDetermineSubType("unknown subtype", AccountSubType.other)).toBe(AccountSubType.other);
     });
   });
 
   describe("default helper methods", () => {
     it("should execute default hooks without throwing", async () => {
       await (provider as any).setInstitutionError({ institution: { hasError: false, update: vi.fn() } }, true);
+      await (provider as any).setInstitutionError(null, true);
+      await (provider as any).setInstitutionError({ institution: { hasError: "unknown" } }, true);
       expect((provider as any).extractProviderAccountId({ id: "acc-1" })).toBe("acc-1");
+      expect((provider as any).extractProviderAccountId({ accountId: "acc-2" })).toBe("acc-2");
       expect((provider as any).extractAccountName({ accountName: "My Acc" })).toBe("My Acc");
+      expect((provider as any).extractAccountName({ name: "Named" })).toBe("Named");
+      expect((provider as any).extractAccountName({})).toBe("Account");
       expect(await (provider as any).fetchInitialSyncData({}, {} as any, {}, user)).toEqual({ transactions: [], removedTransactionIds: [], holdings: [] });
       await provider.commitSyncMetadata({});
+      await (provider as any).handleSyncError({}, new Error("default error"));
+      await (provider as any).rollbackExchange(user, {}, {});
+      await (provider as any).performUnlink(user, {});
     });
   });
 });

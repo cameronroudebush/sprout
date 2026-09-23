@@ -10,7 +10,7 @@ import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model.js";
 import { Configuration } from "@backend/config/core.js";
 import { DatabaseService } from "@backend/database/database.service.js";
-import { DemoDataService } from "@backend/demo/demo.data.service.js";
+import { DemoDataService, DEMO_CATEGORIES } from "@backend/demo/demo.data.service.js";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model.js";
 import { Holding } from "@backend/holding/model/holding.model.js";
 import { Institution } from "@backend/institution/model/institution.model.js";
@@ -114,6 +114,102 @@ describe("DemoDataService", () => {
       expect(mockUserConfig.update).toHaveBeenCalled();
 
       Configuration.isDemoMode = originalIsDemo;
+    });
+  });
+
+  describe("transaction generation edge cases", () => {
+    const buildCategoryTree = (categoryObject: Record<string, any>, parent?: Category): Category[] => {
+      const result: Category[] = [];
+      for (const key in categoryObject) {
+        if (key === "_name") continue;
+        const value = categoryObject[key];
+        const name: string = typeof value === "string" ? value : value._name;
+        const category = Category.fromPlain({ id: name, name, user: TestEntities.user });
+        if (parent) category.parentCategory = parent;
+        result.push(category);
+        if (value && typeof value === "object" && value._name) result.push(...buildCategoryTree(value, category));
+      }
+      return result;
+    };
+
+    const buildAccount = (overrides: Record<string, any>) =>
+      Account.fromPlain({
+        id: "acc-edge",
+        name: "Edge Account",
+        balance: 1000,
+        subType: AccountSubType.checking,
+        type: AccountType.depository,
+        currency: "USD",
+        user: TestEntities.user,
+        ...overrides,
+      });
+
+    beforeEach(() => {
+      vi.spyOn(Category, "find").mockResolvedValue([]);
+      vi.spyOn(Category, "insertMany").mockImplementation(async (categories: any) => categories);
+      vi.spyOn(Category.prototype, "update").mockImplementation(async function (this: Category) {
+        return this;
+      });
+      vi.spyOn(Transaction, "insertMany").mockResolvedValue([]);
+    });
+
+    it("should skip category creation when every demo category already exists", async () => {
+      vi.spyOn(Category, "find").mockResolvedValue(buildCategoryTree(DEMO_CATEGORIES));
+
+      await (service as any).createTransactions(TestEntities.user, [buildAccount({})], 5);
+
+      expect(Category.insertMany).not.toHaveBeenCalled();
+      expect(Transaction.insertMany).toHaveBeenCalled();
+    });
+
+    it("should skip category entries that are neither strings nor named groups", async () => {
+      (DEMO_CATEGORIES.EXPENSE as any).UNLABELED = { unexpected: true };
+      try {
+        await (service as any).createTransactions(TestEntities.user, [buildAccount({})], 5);
+        expect(Transaction.insertMany).toHaveBeenCalled();
+      } finally {
+        delete (DEMO_CATEGORIES.EXPENSE as any).UNLABELED;
+      }
+    });
+
+    it("should generate demo transactions without a checking account", async () => {
+      const accounts = [
+        buildAccount({ id: "savings-edge", subType: AccountSubType.savings }),
+        buildAccount({ id: "loan-edge", type: AccountType.loan, subType: AccountSubType.personal, balance: -1000 }),
+        buildAccount({ id: "crypto-edge", type: AccountType.crypto, subType: AccountSubType.wallet, balance: 200 }),
+      ];
+
+      await (service as any).createTransactions(TestEntities.user, accounts, 30);
+
+      expect(Transaction.insertMany).toHaveBeenCalled();
+    });
+
+    it("should throw when a referenced category is missing from the cache", async () => {
+      const original = DEMO_CATEGORIES.INCOME.PAYCHECK;
+      DEMO_CATEGORIES.INCOME.PAYCHECK = "weird-paycheck";
+      try {
+        await expect((service as any).createTransactions(TestEntities.user, [buildAccount({})], 14)).rejects.toThrow(
+          'Category "Weird Paycheck" not found in cache.',
+        );
+      } finally {
+        DEMO_CATEGORIES.INCOME.PAYCHECK = original;
+      }
+    });
+  });
+
+  describe("populateChatOverviews fallbacks", () => {
+    it("should compute overviews without investment accounts or history", async () => {
+      vi.spyOn(ChatOverview, "insertMany").mockResolvedValue([]);
+
+      const accounts = [
+        Account.fromPlain({ id: "dep-edge", name: "Savings", balance: 0, subType: AccountSubType.savings, type: AccountType.depository }),
+        Account.fromPlain({ id: "loan-edge", name: "Loan", balance: -500, subType: AccountSubType.personal, type: AccountType.loan }),
+        Account.fromPlain({ id: "crypto-edge", name: "Crypto", balance: 300, subType: AccountSubType.wallet, type: AccountType.crypto }),
+      ];
+
+      await (service as any).populateChatOverviews(TestEntities.user, accounts, []);
+
+      expect(ChatOverview.insertMany).toHaveBeenCalled();
     });
   });
 });

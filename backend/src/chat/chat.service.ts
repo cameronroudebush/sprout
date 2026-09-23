@@ -61,9 +61,7 @@ export class ChatService {
 
       /** Executes LLM generation for standard non-streamed responses (e.g. overviews). */
       const generateContent = async (contents: ContentListUnion, idMap: Map<string, string>, maxRetries = 3) => {
-        let attempt = 0;
-
-        while (attempt < maxRetries) {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
           try {
             const response = await aiModel.generateContent({ model: type, contents });
             const aiText = transformText(response.text ?? "", idMap);
@@ -71,8 +69,6 @@ export class ChatService {
             if (!aiText) throw new InternalServerErrorException("Failed to to process request to LLM.");
             return aiText;
           } catch (e: any) {
-            attempt++;
-
             // Check if the error is a temporary 503 / High Demand issue
             const isOverloaded = e?.code === 503 || e?.status === "UNAVAILABLE" || e?.message?.includes("high demand");
 
@@ -83,7 +79,10 @@ export class ChatService {
               continue; // Loop again
             }
 
-            // If we exhaust retries or it's a different error, throw normally
+            // Retries exhausted while the model is still overloaded: fall through to the generic failure below
+            if (isOverloaded) break;
+
+            // If it's a different error, throw normally
             if (e?.message?.includes("You exceeded your current quota") || e?.message?.includes("429"))
               throw new ThrottlerException("You have exceeded your request quota. Try again later.");
 
@@ -102,7 +101,6 @@ export class ChatService {
           }
         }
 
-        // Fallback
         throw new InternalServerErrorException("Failed to generate content: retry limit reached or invalid configuration.");
       };
 

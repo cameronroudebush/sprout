@@ -13,7 +13,7 @@ import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { User } from "@backend/user/model/user.model.js";
 import { InternalServerErrorException } from "@nestjs/common";
-import { AccountType as PlaidAccountType, AccountBase as PlaidAccount } from "plaid";
+import { AccountBase as PlaidAccount, AccountType as PlaidAccountType } from "plaid";
 
 describe("PlaidProviderService", () => {
   let service: PlaidProviderService;
@@ -53,6 +53,21 @@ describe("PlaidProviderService", () => {
       (service as unknown as { plaidClient: null }).plaidClient = null;
       expect(() => (service as unknown as { checkPlaidClient: () => void }).checkPlaidClient()).toThrow(InternalServerErrorException);
       await expect(service.updateAllItemWebhooks("https://url.com")).rejects.toThrow(InternalServerErrorException);
+    });
+
+    it("should report unavailable when Plaid credentials are missing", async () => {
+      const originalClientId = Configuration.providers.plaid.clientId;
+      const originalSecret = Configuration.providers.plaid.secret;
+      Configuration.providers.plaid.clientId = undefined;
+      Configuration.providers.plaid.secret = undefined;
+
+      try {
+        const unavailableService = new PlaidProviderService();
+        expect(await unavailableService.isAvailable(user)).toBe(false);
+      } finally {
+        Configuration.providers.plaid.clientId = originalClientId;
+        Configuration.providers.plaid.secret = originalSecret;
+      }
     });
   });
 
@@ -135,7 +150,22 @@ describe("PlaidProviderService", () => {
       expect(results[0]?.institutionUrl).toBe(service.config.url);
     });
 
-    it("should rollback exchange by removing item", async () => {
+    it("should use the default institution URL when Plaid metadata has no URL", async () => {
+      service.plaidClient.itemPublicTokenExchange = vi.fn().mockResolvedValue({
+        data: { access_token: "access-123", item_id: "item-123" },
+      });
+      service.plaidClient.institutionsGetById = vi.fn().mockResolvedValue({ data: { institution: { url: undefined } } });
+      service.plaidClient.accountsGet = vi.fn().mockResolvedValue({ data: { accounts: [] } });
+
+      const results = await (service as any).performExchange(user, {
+        publicToken: "public-123",
+        metadata: { institution: { institution_id: "ins_1", name: "Bank" } },
+      });
+
+      expect(results[0].institutionUrl).toBe(service.config.url);
+    });
+
+    it("should rollback exchange by removing item and handle error gracefully", async () => {
       service.plaidClient.itemRemove = vi.fn().mockResolvedValue({});
       await (service as unknown as { rollbackExchange: (u: User, p: unknown, a: PlaidAuthContext) => Promise<void> }).rollbackExchange(
         user,
@@ -143,11 +173,29 @@ describe("PlaidProviderService", () => {
         { accessToken: "access-123", itemId: "item-123" },
       );
       expect(service.plaidClient.itemRemove).toHaveBeenCalledWith({ access_token: "access-123" });
+
+      service.plaidClient.itemRemove = vi.fn().mockRejectedValue(new Error("Item remove failed"));
+      await expect(
+        (service as unknown as { rollbackExchange: (u: User, p: unknown, a: PlaidAuthContext) => Promise<void> }).rollbackExchange(
+          user,
+          {},
+          { accessToken: "access-123", itemId: "item-123" },
+        ),
+      ).resolves.not.toThrow();
+
+      await expect(
+        (service as unknown as { rollbackExchange: (u: User, p: unknown, a: PlaidAuthContext) => Promise<void> }).rollbackExchange(
+          user,
+          {},
+          {} as PlaidAuthContext,
+        ),
+      ).resolves.not.toThrow();
     });
   });
 
   describe("performSync, commitSyncMetadata, and helper hooks", () => {
     it("should perform sync with accounts, transactions, holdings, and removed transactions", async () => {
+      Configuration.providers.lookBackDays = 30;
       const asset = new PlaidInstitutionAsset(TestEntities.institution, "access-123", "item-123");
       asset.syncCursor = "cursor-0";
 
@@ -165,20 +213,33 @@ describe("PlaidProviderService", () => {
 
       service.plaidClient.investmentsHoldingsGet = vi.fn().mockResolvedValue({
         data: {
-          holdings: [{ account_id: "acc-1", security_id: "sec-1", cost_basis: 100, institution_value: 120, institution_price: 12, quantity: 10 }],
+          holdings: [
+            { account_id: "acc-1", security_id: "sec-1", cost_basis: 100, institution_value: 120, institution_price: 12, quantity: 10 },
+            { account_id: "acc-1", security_id: "sec-2", cost_basis: 0, institution_value: 0, institution_price: 0, quantity: 0 },
+          ],
           securities: [{ security_id: "sec-1", name: "Apple", ticker_symbol: "AAPL" }],
         },
       });
 
+      const todayStr = new Date().toISOString().split("T")[0];
       service.plaidClient.investmentsTransactionsGet = vi.fn().mockResolvedValue({
         data: {
-          investment_transactions: [{ investment_transaction_id: "inv-tx-1", account_id: "acc-1", amount: 50, date: "2026-06-15", name: "Buy AAPL" }],
+          investment_transactions: [{ investment_transaction_id: "inv-tx-1", account_id: "acc-1", amount: 50, date: todayStr, name: "Buy AAPL" }],
         },
       });
 
       service.plaidClient.transactionsSync = vi.fn().mockResolvedValue({
         data: {
-          added: [{ transaction_id: "tx-1", pending_transaction_id: "pending-123", account_id: "acc-1", amount: 20, date: "2026-06-15", name: "Store" }],
+          added: [
+            {
+              transaction_id: "tx-1",
+              pending_transaction_id: "pending-123",
+              account_id: "acc-1",
+              amount: 20,
+              date: todayStr,
+              authorized_date: todayStr,
+            },
+          ],
           modified: [],
           removed: [{ transaction_id: "tx-rem-1", account_id: "acc-1" }],
           next_cursor: "cursor-1",
@@ -206,7 +267,7 @@ describe("PlaidProviderService", () => {
       expect(results.length).toBe(1);
       expect(pendingTxInDb.remove).toHaveBeenCalled();
       expect(results[0]?.removedTransactionIds).toEqual(["tx-db-rem-1"]);
-      expect(results[0]?.holdings?.length).toBe(1);
+      expect(results[0]?.holdings?.length).toBe(2);
     });
 
     it("should handle error in fetchInvestmentTransactions and investmentsHoldingsGet gracefully", async () => {
@@ -242,10 +303,14 @@ describe("PlaidProviderService", () => {
       await service.commitSyncMetadata(metadata);
       expect(asset.syncCursor).toBe("new-cursor");
       expect(asset.update).toHaveBeenCalled();
+
+      await service.commitSyncMetadata({ institutionId: "inst-1" });
     });
 
-    it("should handle sync error and set institution error for ITEM_LOGIN_REQUIRED and generic error", async () => {
+    it("should handle sync error and set institution error for critical errors and generic errors", async () => {
       const asset = new PlaidInstitutionAsset(TestEntities.institution, "access-123", "item-123");
+      asset.institution.update = vi.fn().mockResolvedValue(asset.institution);
+
       const error = {
         response: {
           data: {
@@ -257,9 +322,23 @@ describe("PlaidProviderService", () => {
 
       const setErrorSpy = vi
         .spyOn(service as unknown as { setInstitutionError: (a: PlaidInstitutionAsset, e: boolean) => Promise<void> }, "setInstitutionError")
-        .mockResolvedValue(undefined);
+        .mockImplementation(async (a, h) => {
+          a.institution.hasError = h;
+          await a.institution.update();
+        });
+
       await (service as unknown as { handleSyncError: (a: PlaidInstitutionAsset, e: unknown) => Promise<void> }).handleSyncError(asset, error);
       expect(setErrorSpy).toHaveBeenCalledWith(asset, true);
+
+      const nonCriticalError = {
+        response: {
+          data: {
+            error_type: "ITEM_ERROR",
+            error_code: "NON_CRITICAL",
+          },
+        },
+      };
+      await (service as unknown as { handleSyncError: (a: PlaidInstitutionAsset, e: unknown) => Promise<void> }).handleSyncError(asset, nonCriticalError);
 
       const genericError = new Error("Generic sync fail");
       await (service as unknown as { handleSyncError: (a: PlaidInstitutionAsset, e: unknown) => Promise<void> }).handleSyncError(asset, genericError);
@@ -277,10 +356,11 @@ describe("PlaidProviderService", () => {
       expect(res.failureCount).toBe(1);
     });
 
-    it("should test mapType, performUnlink, getInstitutionAssetsForUser, and upsertInstitutionAsset", async () => {
+    it("should test mapType, performUnlink, fetchInitialSyncData, getInstitutionAssetsForUser, and upsertInstitutionAsset", async () => {
       type ServicePrivate = {
         mapType: (t: PlaidAccountType) => AccountType;
         performUnlink: (u: User, a: PlaidInstitutionAsset) => Promise<void>;
+        fetchInitialSyncData: (a: unknown, b: unknown, c: unknown, d: unknown) => Promise<unknown>;
         getInstitutionAssetsForUser: (uId: string, iId?: string) => Promise<PlaidInstitutionAsset[]>;
         upsertInstitutionAsset: (i: unknown, a: PlaidAuthContext) => Promise<void>;
         extractProviderAccountId: (r: PlaidAccount) => string;
@@ -288,14 +368,20 @@ describe("PlaidProviderService", () => {
       };
       const priv = service as unknown as ServicePrivate;
 
+      expect(service.getAppConfiguration()).toBe(Configuration.providers.plaid);
+
       expect(priv.mapType(PlaidAccountType.Credit)).toBe(AccountType.credit);
       expect(priv.mapType(PlaidAccountType.Depository)).toBe(AccountType.depository);
       expect(priv.mapType(PlaidAccountType.Brokerage)).toBe(AccountType.investment);
       expect(priv.mapType(PlaidAccountType.Investment)).toBe(AccountType.investment);
       expect(priv.mapType(PlaidAccountType.Loan)).toBe(AccountType.loan);
+      expect(priv.mapType("UNKNOWN" as PlaidAccountType)).toBe(AccountType.other);
 
       expect(priv.extractProviderAccountId({ account_id: "acc-id-1" } as PlaidAccount)).toBe("acc-id-1");
       expect(priv.extractAccountName({ name: "Account Name 1" } as PlaidAccount)).toBe("Account Name 1");
+
+      const initialData = await priv.fetchInitialSyncData({}, {}, {}, {});
+      expect(initialData).toEqual({ transactions: [], removedTransactionIds: [], holdings: [] });
 
       const asset = new PlaidInstitutionAsset(TestEntities.institution, "access-123", "item-123");
       service.plaidClient.itemRemove = vi.fn().mockResolvedValue({});
@@ -305,6 +391,7 @@ describe("PlaidProviderService", () => {
       vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([asset]);
       const assets = await priv.getInstitutionAssetsForUser(user.id, "inst-1");
       expect(assets.length).toBe(1);
+      await priv.getInstitutionAssetsForUser(user.id);
 
       // New asset
       vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(null);
@@ -313,13 +400,107 @@ describe("PlaidProviderService", () => {
       });
       await priv.upsertInstitutionAsset(TestEntities.institution, { accessToken: "a-1", itemId: "i-1" });
 
-      // Existing asset with new itemId
-      const existingAsset = new PlaidInstitutionAsset(TestEntities.institution, "a-old", "i-old");
-      existingAsset.update = vi.fn().mockResolvedValue(existingAsset);
-      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(existingAsset);
+      // Existing asset with same itemId
+      const existingAssetSame = new PlaidInstitutionAsset(TestEntities.institution, "a-old", "i-1");
+      existingAssetSame.update = vi.fn().mockResolvedValue(existingAssetSame);
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(existingAssetSame);
+      await priv.upsertInstitutionAsset(TestEntities.institution, { accessToken: "a-new", itemId: "i-1" });
+
+      // Existing asset with new itemId where itemRemove throws error
+      const existingAssetDiff = new PlaidInstitutionAsset(TestEntities.institution, "a-old", "i-old");
+      existingAssetDiff.update = vi.fn().mockResolvedValue(existingAssetDiff);
+      service.plaidClient.itemRemove = vi.fn().mockRejectedValue(new Error("Remove failed"));
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(existingAssetDiff);
       await priv.upsertInstitutionAsset(TestEntities.institution, { accessToken: "a-new", itemId: "i-new" });
-      expect(existingAsset.itemId).toBe("i-new");
-      expect(existingAsset.update).toHaveBeenCalled();
+      expect(existingAssetDiff.itemId).toBe("i-new");
+      expect(existingAssetDiff.update).toHaveBeenCalled();
+    });
+
+    it("should cover conversion helpers and pagination edge cases", async () => {
+      const priv = service as any;
+      const account = TestEntities.account;
+
+      const liability = await priv.mapToSproutAccount(
+        { account_id: "credit", name: "Credit", type: PlaidAccountType.Credit, balances: { current: undefined, iso_currency_code: undefined } },
+        undefined,
+        user,
+        TestEntities.institution,
+      );
+      expect(Math.abs(liability.balance)).toBe(0);
+      expect(liability.currency).toBe("USD");
+
+      const holding = priv.convertPlaidHolding(
+        { security_id: "missing", cost_basis: 0, quantity: 0, institution_price: 12, institution_value: 20 } as any,
+        [],
+        account,
+      );
+      expect(holding.symbol).toBe("???");
+      expect(holding.purchasePrice).toBe(12);
+
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(null);
+      const converted = await priv.convertPlaidTransactions(
+        [{ transaction_id: "t", amount: 5, date: "2020-01-01", merchant_name: "Merchant", pending: undefined }],
+        account,
+        user,
+      );
+      expect(converted[0].description).toBe("Merchant");
+      expect(converted[0].pending).toBe(false);
+
+      const investment = await priv.convertPlaidInvestmentTransactions(
+        [{ investment_transaction_id: "it", amount: 2, date: "2020-01-01", name: "Investment" }],
+        account,
+        user,
+      );
+      expect(investment[0].description).toBe("Investment");
+
+      service.plaidClient.investmentsTransactionsGet = vi.fn().mockResolvedValue({ data: { investment_transactions: [{ investment_transaction_id: "success" }] } });
+      Configuration.providers.lookBackDays = 30;
+      await expect((service as any).fetchInvestmentTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item"))).resolves.toHaveLength(1);
+
+      service.plaidClient.transactionsSync = vi.fn()
+        .mockResolvedValueOnce({ data: { added: [], modified: [], removed: [], next_cursor: "next", has_more: true } })
+        .mockResolvedValueOnce({ data: { added: [], modified: [], removed: [], next_cursor: "done", has_more: false } });
+      const paged = await priv.fetchAllInstitutionTransactions(user, new PlaidInstitutionAsset(TestEntities.institution, "access", "item"));
+      expect(paged.nextCursor).toBe("done");
+
+      const asset = new PlaidInstitutionAsset(TestEntities.institution, "access", "item");
+      asset.institution.update = vi.fn().mockResolvedValue(asset.institution);
+      await priv.setInstitutionError(asset, true);
+      expect(asset.institution.hasError).toBe(true);
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(null);
+      await service.commitSyncMetadata({ institutionId: "missing", nextCursor: "cursor" });
+    });
+
+    it("should sync non-investment accounts in accounts-only mode", async () => {
+      const asset = new PlaidInstitutionAsset(TestEntities.institution, "access", "item");
+      const rawAccount = {
+        account_id: "checking",
+        name: "Checking",
+        type: PlaidAccountType.Depository,
+        balances: { current: 100, iso_currency_code: "USD" },
+      };
+      service.plaidClient.accountsGet = vi.fn().mockResolvedValue({ data: { accounts: [rawAccount] } });
+      vi.spyOn(Account, "findOne").mockResolvedValue(null);
+
+      const results = await (service as any).performSync(user, asset, true);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].transactions).toEqual([]);
+      expect(results[0].holdings).toBeUndefined();
+    });
+
+    it("should skip pending transaction removal when pending transaction is absent", async () => {
+      const priv = service as any;
+      vi.spyOn(Transaction, "findOne").mockResolvedValue(null);
+
+      const transactions = await priv.convertPlaidTransactions(
+        [{ transaction_id: "tx", pending_transaction_id: "missing", amount: 1, date: "2020-01-01", name: "Payment" }],
+        TestEntities.account,
+        user,
+      );
+
+      expect(transactions).toHaveLength(1);
+      expect(Transaction.findOne).toHaveBeenCalled();
     });
   });
 });

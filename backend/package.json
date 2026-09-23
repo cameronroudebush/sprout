@@ -70,6 +70,7 @@
     "@types/node": "^26.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/ui": "^5.0.1",
     "cross-env": "^10.1.0",
     "cross-var": "^1.1.0",
     "git-describe": "^4.1.1",
@@ -91,8 +92,7 @@
   "scripts": {
     "start": "nest start --rspackPath rspack.config.mjs --watch",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:watch:cov": "vitest --coverage",
+    "test:watch": "vitest --watch --coverage --ui",
     "test:cov": "vitest run --coverage",
     "build": "cross-env NODE_ENV=prod nest build --rspackPath rspack.config.mjs",
     "migrate": "cross-var nest start --rspackPath rspack.config.mjs -- generate.migration $npm_config_name",

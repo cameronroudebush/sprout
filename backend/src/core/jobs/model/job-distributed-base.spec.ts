@@ -120,6 +120,33 @@ describe("DistributedQueueJob", () => {
 
       expect(errorSpy).toHaveBeenCalledWith("Task job-101 failed: Connection lost");
     });
+
+    it("should prefix the logger context with L2 when redis cache is enabled", () => {
+      Configuration.server.cache.type = "redis";
+
+      const redisJob = new TestDistributedQueueJob("l2-job", "* * * * *", true);
+
+      expect((redisJob as any).logger).toBeDefined();
+    });
+
+    it("should delegate straight to the base start without queue setup when disabled", async () => {
+      const disabledJob = new TestDistributedQueueJob("disabled-job", "* * * * *", false);
+
+      await disabledJob.start();
+
+      expect(superStartSpy).toHaveBeenCalled();
+    });
+
+    it("should process tasks through the BullMQ worker callback", async () => {
+      Configuration.server.cache.type = "redis";
+      await testJob.start();
+
+      const workerFactory = Worker as unknown as { mock: { calls: any[][] } };
+      const workerCallback = workerFactory.mock.calls[0]![1];
+      await workerCallback({ data: "redis-task" });
+
+      expect(testJob.processedTasks).toEqual(["redis-task"]);
+    });
   });
 
   describe("update (Producer Engine)", () => {
@@ -213,6 +240,15 @@ describe("DistributedQueueJob", () => {
       expect(testJob.getLocalQueue().length).toBe(0);
 
       vi.useRealTimers();
+    });
+
+    it("should skip undefined entries in the local consumer queue", async () => {
+      testJob.getLocalQueue().push(undefined as any);
+
+      await (testJob as any).startLocalConsumerLoop();
+
+      expect(testJob.processedTasks).toEqual([]);
+      expect(testJob.getLocalQueue().length).toBe(0);
     });
   });
 });

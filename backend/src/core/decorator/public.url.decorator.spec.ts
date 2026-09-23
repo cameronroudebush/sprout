@@ -34,5 +34,12 @@ describe("PublicURL Decorator", () => {
 
     Configuration.server.publicUrl = "";
     expect(factory(null, mockCtx)).toBe("http://localhost:3000");
+
+    const directRequest = {
+      protocol: "https",
+      headers: { "x-forwarded-proto": "https", "x-forwarded-host": "proxy.example" },
+      get: () => "ignored.example",
+    } as any;
+    expect((metadata[key!].factory as any)(null, directRequest)).toBe("https://proxy.example");
   });
 });

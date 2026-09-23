@@ -131,6 +131,16 @@ describe("BackgroundJob", () => {
       await vi.advanceTimersByTimeAsync(100);
       expect(job.updateCount).toBeGreaterThan(1);
     });
+
+    it("should skip the normal follow-up schedule when recovering from a failed run", async () => {
+      job = new TestBackgroundJob("RetryJob", "0 * * * *", true);
+
+      (job as any).scheduleNextUpdate(new Date(Date.now()), true);
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(job.updateCount).toBe(1);
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 
   describe("updateNow", () => {

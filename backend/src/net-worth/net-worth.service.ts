@@ -217,11 +217,9 @@ export class NetWorthService {
         const step = dailySnapshots.length / maxPoints;
         const sampledData = [];
         for (let i = 0; i < maxPoints; i++) {
-          const index = Math.floor(i * step);
-          if (index < dailySnapshots.length) {
-            const x = dailySnapshots[index];
-            sampledData.push(new HistoricalDataPoint(x!.date, x!.netWorth));
-          }
+          const index = Math.min(Math.floor(i * step), dailySnapshots.length - 1);
+          const x = dailySnapshots[index];
+          sampledData.push(new HistoricalDataPoint(x!.date, x!.netWorth));
         }
         // ALWAYS ensure the very last data point (Today) is included so the chart ends correctly
         const lastOriginal = dailySnapshots[dailySnapshots.length - 1];

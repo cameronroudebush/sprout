@@ -67,5 +67,16 @@ describe("SimpleFinProviderController", () => {
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
       expect(res.length).toBe(1);
     });
+
+    it("should link accounts without applying an absent subtype override", async () => {
+      const resultAccount = Account.fromPlain({ id: "result", name: "Result" });
+      resultAccount.update = vi.fn().mockResolvedValue(resultAccount);
+      simpleFinService.exchangeAndCreateAccounts.mockResolvedValue([{ account: resultAccount }] as any);
+
+      const res = await controller.linkAccounts([], user);
+
+      expect(resultAccount.update).not.toHaveBeenCalled();
+      expect(res).toEqual([resultAccount]);
+    });
   });
 });

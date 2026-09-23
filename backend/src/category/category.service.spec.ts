@@ -85,6 +85,28 @@ describe("CategoryService", () => {
       const stats = await service.getStats(user, 2026, 6, 15);
 
       expect(stats.categoryCount).toEqual({});
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith({ posted: new Date(2026, 5, 15) });
+    });
+
+    it("should query stats without date filter when year is absent", async () => {
+      const mockQueryBuilder: any = {
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        addSelect: vi.fn().mockReturnThis(),
+        groupBy: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        getRawMany: vi.fn().mockResolvedValue([{ category_name: "Uncategorized", total: 1 }]),
+      };
+      vi.spyOn(Transaction, "getRepository").mockReturnValue({
+        createQueryBuilder: vi.fn().mockReturnValue(mockQueryBuilder),
+      } as any);
+
+      await service.getStats(user, undefined as any, undefined, 15);
+
+      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
     });
   });
 });

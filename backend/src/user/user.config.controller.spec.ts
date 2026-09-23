@@ -1,14 +1,15 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
+import { SSEEventType } from "@backend/sse/model/event.model";
+import { SSEService } from "@backend/sse/sse.service";
+import { TestEntities } from "@backend/test/entities";
+import { UserConfig } from "@backend/user/model/user.config.model";
+import { User } from "@backend/user/model/user.model";
 import { UserConfigController } from "@backend/user/user.config.controller";
 import { UserService } from "@backend/user/user.service";
-import { SSEService } from "@backend/sse/sse.service";
-import { User } from "@backend/user/model/user.model";
-import { UserConfig } from "@backend/user/model/user.config.model";
-import { TestEntities } from "@backend/test/entities";
 import { NotFoundException } from "@nestjs/common";
-import { SSEEventType } from "@backend/sse/model/event.model";
+import { Mocked } from "vitest";
 
 describe("UserConfigController", () => {
   let controller: UserConfigController;
@@ -65,6 +66,21 @@ describe("UserConfigController", () => {
 
       expect(userService.syncEncryptedFields).toHaveBeenCalledWith(newConf, existingConf);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+      expect(res).toBe(newConf);
+    });
+
+    it("should update config and sync encrypted fields without sending SSE force update if currency did not change", async () => {
+      const existingConf = UserConfig.fromPlain({ id: "c1", currency: "USD", user });
+      vi.spyOn(UserConfig, "findOne").mockResolvedValue(existingConf);
+
+      const newConf = UserConfig.fromPlain({ currency: "USD" });
+      newConf.update = vi.fn().mockResolvedValue(newConf);
+      vi.spyOn(UserConfig, "fromPlain").mockReturnValue(newConf);
+
+      const res = await controller.edit(user, newConf);
+
+      expect(userService.syncEncryptedFields).toHaveBeenCalledWith(newConf, existingConf);
+      expect(sseService.sendToUser).not.toHaveBeenCalled();
       expect(res).toBe(newConf);
     });
   });

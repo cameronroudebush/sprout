@@ -61,4 +61,5 @@ export async function main() {
 }
 
 // Execute main so long as this file is not being imported
+/* v8 ignore next -- import.meta.main is true only when Node executes this module as its entrypoint. */
 if (import.meta.main) main();

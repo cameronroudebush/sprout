@@ -69,8 +69,45 @@ describe("CONFIGURATION_REQUIREMENTS", () => {
 
     // Job check
     Configuration.database.backup.enabled = true;
+    Configuration.transaction.stuckTransactions.enabled = true;
+    Configuration.user.deviceCheck.enabled = true;
+    Configuration.server.email.enabled = true;
+    Configuration.providers.syncNotifications.enabled = true;
     expect(jobReq.validate()).toBe(false);
     jobReq.fix(logger);
     expect(Configuration.database.backup.enabled).toBe(false);
+    expect(Configuration.transaction.stuckTransactions.enabled).toBe(false);
+    expect(Configuration.user.deviceCheck.enabled).toBe(false);
+    expect(Configuration.server.email.enabled).toBe(false);
+    expect(Configuration.providers.syncNotifications.enabled).toBe(false);
+  });
+
+  it("should pass demo mode job restrictions when every job is disabled", () => {
+    const jobReq = CONFIGURATION_REQUIREMENTS.find((r) => r.name.includes("Demo Mode Job"))!;
+
+    Configuration.isDemoMode = true;
+    Configuration.database.backup.enabled = false;
+    Configuration.transaction.stuckTransactions.enabled = false;
+    Configuration.user.deviceCheck.enabled = false;
+    Configuration.server.email.enabled = false;
+    Configuration.providers.syncNotifications.enabled = false;
+
+    expect(jobReq.validate()).toBe(true);
+  });
+
+  it("should not warn about demo mode jobs that are already disabled", () => {
+    const jobReq = CONFIGURATION_REQUIREMENTS.find((r) => r.name.includes("Demo Mode Job"))!;
+    const logger = { warn: vi.fn() } as any;
+
+    Configuration.isDemoMode = true;
+    Configuration.database.backup.enabled = false;
+    Configuration.transaction.stuckTransactions.enabled = false;
+    Configuration.user.deviceCheck.enabled = false;
+    Configuration.server.email.enabled = false;
+    Configuration.providers.syncNotifications.enabled = false;
+
+    jobReq.fix(logger);
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

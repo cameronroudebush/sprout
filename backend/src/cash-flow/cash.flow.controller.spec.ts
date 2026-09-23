@@ -4,6 +4,7 @@ setupTests();
 import { CashFlowController } from "@backend/cash-flow/cash.flow.controller";
 import { CashFlowService } from "@backend/cash-flow/cash.flow.service";
 import { TestEntities } from "@backend/test/entities";
+import { Mocked } from "vitest";
 
 describe("CashFlowController", () => {
   let controller: CashFlowController;
@@ -36,7 +37,7 @@ describe("CashFlowController", () => {
   });
 
   describe("getStats", () => {
-    it("should calculate flows and return CashFlowStats instance", async () => {
+    it("should calculate flows and pass defined largestExpense to CashFlowStats", async () => {
       service.calculateFlows.mockResolvedValue({
         totalIncome: 5000,
         totalExpense: 3000,
@@ -50,6 +51,21 @@ describe("CashFlowController", () => {
       expect(stats.totalIncome).toBe(5000);
       expect(stats.totalExpense).toBe(3000);
       expect(stats.count).toBe(20);
+      expect(stats.largestExpense).toEqual(TestEntities.transaction);
+    });
+
+    it("should fall back to undefined when largestExpense is null", async () => {
+      service.calculateFlows.mockResolvedValue({
+        totalIncome: 1000,
+        totalExpense: 200,
+        transactionCount: 5,
+        largestExpense: null,
+      } as any);
+
+      const stats = await controller.getStats(user, 2026, 5);
+
+      expect(service.calculateFlows).toHaveBeenCalledWith(user, 2026, 5, undefined, undefined);
+      expect(stats.largestExpense).toBeUndefined();
     });
   });
 
@@ -61,6 +77,15 @@ describe("CashFlowController", () => {
 
       expect(trend.length).toBe(2);
       expect(service.calculateFlows).toHaveBeenCalledTimes(2);
+    });
+
+    it("should fall back to default of 6 months when monthsQuery is omitted", async () => {
+      service.calculateFlows.mockResolvedValue({ totalIncome: 1000, totalExpense: -500 } as any);
+
+      const trend = await controller.getTrend(user);
+
+      expect(trend.length).toBe(6);
+      expect(service.calculateFlows).toHaveBeenCalledTimes(6);
     });
   });
 

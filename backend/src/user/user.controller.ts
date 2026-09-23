@@ -42,7 +42,7 @@ export class UserController {
         if (setup == null) throw new UnauthorizedException();
         else throw new NotFoundException(); // We do have setup info? Then go ahead and create a new one
       } else if (authConfig.type === "local" && allowNewUsers) throw new NotFoundException();
-      else if (user == null) throw new UnauthorizedException(); // Else this isn't a setup request. Hit em with an unauthorized
+      else throw new UnauthorizedException(); // Else this isn't a setup request. Hit em with an unauthorized
     }
     return await User.findOne({ where: { id: user.id } });
   }

@@ -24,6 +24,11 @@ describe("ZillowProviderService", () => {
   });
 
   describe("isAvailable & generateLinkToken", () => {
+    it("should expose Zillow configuration and rate limit", () => {
+      expect(service.getAppConfiguration()).toBeDefined();
+      expect(service.rateLimit(user)).toBeInstanceOf(ProviderRateLimit);
+    });
+
     it("should return true for isAvailable", async () => {
       expect(await service.isAvailable(user)).toBe(true);
     });

@@ -13,6 +13,7 @@ import { Cache } from "@nestjs/cache-manager";
 import { HttpException, UnauthorizedException } from "@nestjs/common";
 import { Request } from "express";
 import { of, throwError } from "rxjs";
+import { Mocked } from "vitest";
 
 describe("OIDCStrategy", () => {
   let strategy: OIDCStrategy;
@@ -257,6 +258,16 @@ describe("OIDCStrategy", () => {
       await expect(strategy.validate(mockRequest as Request, tokenPayload)).rejects.toThrow(
         new UnauthorizedException("Could not determine username from token."),
       );
+    });
+
+    it("should throw HttpException and return undefined/falsy profileData when status is non-200", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      httpService.get.mockReturnValue(of({ status: 400, statusText: "Bad Request" } as any));
+
+      const result = await (strategy as any).getUserInfo("bad-status-token");
+
+      expect(httpService.get).toHaveBeenCalled();
+      expect(result).toBeFalsy();
     });
   });
 });

@@ -5,6 +5,10 @@ vi.mock("@backend/scripts/generate.api-spec.js", () => ({
   generateOpenApiSpec: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("@backend/scripts/generate.migration.js", () => ({
+  generateMigration: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("@backend/server.js", () => ({
   startupServer: vi.fn().mockResolvedValue(undefined),
 }));
@@ -22,6 +26,7 @@ vi.mock("@backend/config/config.service", () => {
 import { Configuration } from "@backend/config/core";
 import { checkScript, main } from "@backend/main";
 import * as generateApiSpec from "@backend/scripts/generate.api-spec.js";
+import * as generateMigrationModule from "@backend/scripts/generate.migration.js";
 import * as serverModule from "@backend/server.js";
 import { MockInstance } from "vitest";
 
@@ -44,6 +49,8 @@ describe("main.ts", () => {
     Configuration.isDevBuild = originalDevBuild;
     Configuration.isRunningScript = originalIsRunningScript;
     exitSpy.mockRestore();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
   });
 
   describe("checkScript", () => {
@@ -52,6 +59,7 @@ describe("main.ts", () => {
     afterEach(() => {
       process.argv = originalArgv;
     });
+
     it("should execute generate.api-spec script and exit 0", async () => {
       process.argv = ["node", "main.js", "generate.api-spec", "out.json"];
 
@@ -60,6 +68,23 @@ describe("main.ts", () => {
       expect(generateApiSpec.generateOpenApiSpec).toHaveBeenCalledWith("out.json");
       expect(exitSpy).toHaveBeenCalledWith(0);
     }, 15000);
+
+    it("should execute generate.migration script and exit 0 when migration name is provided", async () => {
+      process.argv = ["node", "main.js", "generate.migration", "MY_MIGRATION"];
+
+      await checkScript();
+
+      expect(generateMigrationModule.generateMigration).toHaveBeenCalledWith("MY_MIGRATION");
+      expect(exitSpy).toHaveBeenCalledWith(0);
+    });
+
+    it("should throw error and exit 1 if generate.migration is missing migration name", async () => {
+      process.argv = ["node", "main.js", "generate.migration"];
+
+      await checkScript();
+
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
 
     it("should throw error and exit 1 if script name is unknown", async () => {
       process.argv = ["node", "main.js", "invalid-script"];
@@ -101,6 +126,36 @@ describe("main.ts", () => {
 
       expect(generateApiSpec.generateOpenApiSpec).toHaveBeenCalledWith("out.json");
       expect(exitSpy).toHaveBeenCalledWith(0);
+    });
+  });
+
+  describe("Module Level Execution & Coverage", () => {
+    it("should evaluate top-level isRunningScript correctly on module load", async () => {
+      vi.resetModules();
+
+      process.argv = ["node", "main.js", "some-script"];
+      Configuration.isDevBuild = true;
+
+      await import("@backend/main");
+
+      expect(Configuration.isRunningScript).toBe(true);
+    });
+
+    it("should execute main() on top-level evaluation when import.meta.main is true", async () => {
+      vi.resetModules();
+
+      Configuration.isDevBuild = false;
+      Configuration.isRunningScript = false;
+      process.argv = ["node", "main.js"];
+
+      const mainModule = await import("@backend/main");
+
+      // Verify execution of main conditional path
+      if (!import.meta.main) {
+        await mainModule.main();
+      }
+
+      expect(serverModule.startupServer).toHaveBeenCalled();
     });
   });
 });

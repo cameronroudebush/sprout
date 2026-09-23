@@ -92,5 +92,27 @@ describe("BaseProviderController", () => {
       expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL, "plaid");
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
     });
+
+    it("should wrap a single non-array sync result when syncing all providers", async () => {
+      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+      const syncResult = TestEntities.sync;
+      providerService.syncUserProviders.mockResolvedValue(syncResult as any);
+
+      await controller.manualSync(user, {});
+
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+    });
+
+    it("should skip the force update when every provider sync fails", async () => {
+      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+      const failedSync = { ...TestEntities.sync, status: "failed" };
+      providerService.syncUserProviders.mockResolvedValue([failedSync, null] as any);
+
+      await controller.manualSync(user, {});
+
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
+      expect(sseService.sendToUser).not.toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+    });
   });
 });

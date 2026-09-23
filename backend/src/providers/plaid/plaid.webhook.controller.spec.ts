@@ -9,6 +9,7 @@ import { TestEntities } from "@backend/test/entities.js";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { Mocked } from "vitest";
 
 describe("PlaidWebhookController", () => {
   let controller: PlaidWebhookController;
@@ -38,6 +39,16 @@ describe("PlaidWebhookController", () => {
       const req: any = { rawBody: Buffer.from("body") };
 
       await expect(controller.handlePlaidWebhook(headers, req, {} as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it("should accept plaid-verification-signature header alternative", async () => {
+      const headers = { "plaid-verification-signature": "jwt-sig" };
+      const req: any = { rawBody: Buffer.from("body") };
+      vi.spyOn(controller as any, "verifyPlaidWebhook").mockResolvedValue(true);
+      vi.spyOn(controller as any, "handleWebhook").mockImplementation(() => Promise.resolve());
+
+      const res = await controller.handlePlaidWebhook(headers, req, { webhook_type: "TRANSACTIONS", webhook_code: "SYNC_UPDATES_AVAILABLE" } as any);
+      expect(res).toEqual({ status: "received" });
     });
 
     it("should throw BadRequestException if rawBody is missing", async () => {
@@ -211,8 +222,13 @@ describe("PlaidWebhookController", () => {
       plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockRejectedValue(new Error("Key fetch failed"));
       expect(await verifyFn("body", "jwt")).toBe(false);
 
+      // Successful key fetch returning falsy cached key
+      plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockResolvedValue({ data: { key: null } });
+      expect(await verifyFn("body", "jwt")).toBe(false);
+
       // Successful verification key fetch, but jwt.verify fails
       const mockKey = { kty: "EC", crv: "P-256", x: "x", y: "y" };
+      (controller as any).cachedKey = undefined;
       plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockResolvedValue({ data: { key: mockKey } });
       vi.spyOn(crypto, "createPublicKey").mockReturnValue({} as any);
       vi.spyOn(jwt, "verify").mockImplementation(() => {
@@ -228,6 +244,22 @@ describe("PlaidWebhookController", () => {
 
       // Claimed body hash missing in payload
       vi.spyOn(jwt, "verify").mockReturnValue({ request_body_sha256: undefined } as any);
+      expect(await verifyFn(body, "jwt")).toBe(false);
+
+      // Valid signature structure with a mismatching body hash.
+      vi.spyOn(jwt, "verify").mockReturnValue({ request_body_sha256: "0".repeat(64) } as any);
+      expect(await verifyFn(body, "jwt")).toBe(false);
+
+      // A decoded string is not a usable JWT payload.
+      vi.spyOn(jwt, "decode").mockReturnValue("decoded" as any);
+      expect(await verifyFn(body, "jwt")).toBe(false);
+
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "kid-unexpected" } } as any);
+      (controller as any).cachedKey = undefined;
+      plaidProvider.plaidClient.webhookVerificationKeyGet = vi.fn().mockResolvedValue({ data: { key: mockKey } });
+      vi.spyOn(crypto, "createPublicKey").mockImplementation(() => {
+        throw new Error("invalid public key");
+      });
       expect(await verifyFn(body, "jwt")).toBe(false);
     });
   });

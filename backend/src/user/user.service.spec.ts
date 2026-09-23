@@ -11,6 +11,7 @@ import { CurrencyOptions } from "@backend/user/model/user.config.model";
 import { User } from "@backend/user/model/user.model";
 import { UserService } from "@backend/user/user.service";
 import { InternalServerErrorException } from "@nestjs/common";
+import { Mocked } from "vitest";
 
 describe("UserService", () => {
   let service: UserService;
@@ -109,6 +110,21 @@ describe("UserService", () => {
 
       expect(mockSimpleFinProviderService.convertSetupToken).toHaveBeenCalledWith("new_setup_token");
       expect(incoming.simpleFinToken).toBe("converted_access_token");
+    });
+
+    it("should skip converting token if simpleFinToken is empty or non-simpleFin encrypted property", async () => {
+      const existing = TestEntities.userConfig;
+      existing.simpleFinToken = "existing_token";
+
+      const incoming = TestEntities.userConfig;
+      incoming.simpleFinToken = "" as any;
+
+      vi.spyOn(EncryptionTransformer, "propertyIsEncrypted").mockImplementation((_obj, prop) => prop === "simpleFinToken");
+
+      await service.syncEncryptedFields(incoming, existing);
+
+      expect(mockSimpleFinProviderService.convertSetupToken).not.toHaveBeenCalled();
+      expect(incoming.simpleFinToken).toBe("");
     });
 
     it("should do nothing for non-encrypted properties or unhandled conditions", async () => {

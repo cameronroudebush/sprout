@@ -116,6 +116,40 @@ describe("ChatController", () => {
       expect(modelChat.update).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
     });
+
+    it("should rethrow errors without updating a completed chat", async () => {
+      vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+      const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+      const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "done", isThinking: false, user });
+      modelChat.update = vi.fn().mockResolvedValue(modelChat);
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+      chatService.getModel.mockResolvedValue({ generateChatContent: vi.fn().mockRejectedValue(new Error("completed failure")) } as any);
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow("completed failure");
+      expect(modelChat.update).not.toHaveBeenCalled();
+    });
+
+    it("should clean up and reject when generation times out", async () => {
+      vi.useFakeTimers();
+      try {
+        vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+        const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+        const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "...", isThinking: true, user });
+        modelChat.update = vi.fn().mockResolvedValue(modelChat);
+        vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+        chatService.getModel.mockResolvedValue({ generateChatContent: vi.fn().mockReturnValue(new Promise(() => {})) } as any);
+
+        const result = controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths });
+        const rejection = expect(result).rejects.toThrow("timed out");
+        await vi.advanceTimersByTimeAsync(60_000);
+
+        await rejection;
+        expect(modelChat.isThinking).toBe(false);
+        expect(modelChat.update).toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe("history", () => {
@@ -160,6 +194,15 @@ describe("ChatController", () => {
 
       expect(mockModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.accounts);
       expect(res).toBe(newOverview);
+    });
+
+    it("should regenerate a stale existing overview", async () => {
+      const stale = ChatOverview.fromPlain({ user, type: ChatOverviewType.accounts, time: new Date(2000, 0, 1) });
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(stale);
+      const newOverview = ChatOverview.fromPlain({ user, type: ChatOverviewType.accounts });
+      chatService.getModel.mockResolvedValue({ generateOverview: vi.fn().mockResolvedValue(newOverview) } as any);
+
+      await expect(controller.getOverview(user, ChatOverviewType.accounts)).resolves.toBe(newOverview);
     });
   });
 });

@@ -55,6 +55,10 @@ describe("CoinbaseProviderService", () => {
       expect(await service.isAvailable(user)).toBe(false);
     });
 
+    it("should expose Coinbase configuration", () => {
+      expect(service.getAppConfiguration()).toBe(Configuration.providers.coinbase);
+    });
+
     it("should throw NotImplementedException in generateLinkToken", async () => {
       await expect(service.generateLinkToken()).rejects.toThrow(NotImplementedException);
     });
@@ -70,6 +74,7 @@ describe("CoinbaseProviderService", () => {
       vi.spyOn(service as unknown as { fetchCoinbaseData: () => Promise<unknown[]> }, "fetchCoinbaseData").mockResolvedValue([
         { id: "acc-1", name: "BTC Wallet", balance: { amount: "1.5", currency: "BTC" } },
         { id: "acc-2", name: "ETH Wallet", balance: { amount: "0", currency: "ETH" } },
+        { id: "acc-3", name: "Unknown Wallet", balance: {} },
       ]);
       vi.spyOn(service as unknown as { getUsdExchangeRates: () => Promise<Record<string, number>> }, "getUsdExchangeRates").mockResolvedValue({ BTC: 50000 });
 
@@ -86,6 +91,7 @@ describe("CoinbaseProviderService", () => {
       vi.spyOn(service as unknown as { fetchCoinbaseData: () => Promise<unknown[]> }, "fetchCoinbaseData").mockResolvedValue([
         { id: "acc-1", name: "BTC Wallet", balance: { amount: "2.0" }, currency: { code: "BTC" } },
         { id: "acc-2", name: "USD Wallet", balance: { amount: "10.0" } },
+        { id: "acc-3", name: "Empty Wallet", balance: {} },
       ]);
       vi.spyOn(service as unknown as { getUsdExchangeRates: () => Promise<Record<string, number>> }, "getUsdExchangeRates").mockResolvedValue({ BTC: 60000 });
 
@@ -114,6 +120,21 @@ describe("CoinbaseProviderService", () => {
       );
       expect(res2).toEqual([]);
     });
+
+    it("should sync accounts-only data and create a default institution", async () => {
+      const existingAccount = TestEntities.account;
+      existingAccount.providerAccountId = "coinbase-primary-wallet";
+      existingAccount.institution = undefined;
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
+      vi.spyOn(service as any, "fetchCoinbaseData").mockResolvedValue([{ id: "btc", balance: { amount: "1", currency: "BTC" } }]);
+      vi.spyOn(service as any, "getUsdExchangeRates").mockResolvedValue({ BTC: 50000 });
+
+      const result = await (service as any).performSync(user, undefined, true);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].holdings).toBeUndefined();
+      expect(result[0].transactions).toBeUndefined();
+    });
   });
 
   describe("getUsdExchangeRates & fetchCoinbaseData", () => {
@@ -140,6 +161,17 @@ describe("CoinbaseProviderService", () => {
       expect(rates).toEqual({});
     });
 
+    it("should handle empty, invalid, and missing exchange-rate data", async () => {
+      cacheManager.get.mockResolvedValue(null);
+      vi.spyOn(axios, "get").mockResolvedValue({ data: { data: { rates: { BTC: "0", ETH: "-1" } } } } as any);
+
+      await expect((service as any).getUsdExchangeRates()).resolves.toEqual({});
+      expect(cacheManager.set).not.toHaveBeenCalled();
+
+      vi.mocked(axios.get).mockResolvedValueOnce({ data: { data: {} } } as any);
+      await expect((service as any).getUsdExchangeRates()).resolves.toEqual({});
+    });
+
     it("should fetchCoinbaseData with pagination and handles errors", async () => {
       vi.spyOn(axios, "get")
         .mockResolvedValueOnce({
@@ -161,12 +193,66 @@ describe("CoinbaseProviderService", () => {
       vi.spyOn(axios, "get").mockRejectedValue(new Error("API error"));
       const errData = await (service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts");
       expect(errData).toEqual([]);
+
+      vi.spyOn(axios, "get").mockResolvedValueOnce({ data: { data: [{ id: "from-data" }] } } as any);
+      const dataFallback = await (service as any).fetchCoinbaseData(user, "transactions");
+      expect(dataFallback).toEqual([{ id: "from-data" }]);
+
+      vi.spyOn(axios, "get").mockResolvedValueOnce({ data: {} } as any);
+      const emptyData = await (service as any).fetchCoinbaseData(user, "transactions");
+      expect(emptyData).toEqual([]);
+
+      user.config.coinbaseApiKey = "";
+      await expect((service as any).fetchCoinbaseData(user, "accounts")).rejects.toThrow(BadRequestException);
     });
 
     it("should test helper hooks", async () => {
       expect((service as unknown as { extractProviderAccountId: (r: { id: string }) => string }).extractProviderAccountId({ id: "wallet-1" })).toBe("wallet-1");
       expect((service as unknown as { extractAccountName: (r: { name: string }) => string }).extractAccountName({ name: "Primary" })).toBe("Primary");
       expect(await (service as unknown as { getInstitutionAssetsForUser: () => Promise<undefined[]> }).getInstitutionAssetsForUser()).toEqual([undefined]);
+    });
+
+    it("should map fallback currencies and skip zero-balance holdings", async () => {
+      const institution = TestEntities.institution;
+      const account = TestEntities.account;
+      vi.spyOn(service as any, "getUsdExchangeRates").mockResolvedValue({ BTC: 50000 });
+
+      const mapped = await (service as any).mapToSproutAccount(
+        {
+          id: "wallet",
+          name: "",
+          accounts: [
+            { name: "BTC", balance: { amount: "1" }, currency: { code: "BTC" } },
+            { name: "Unknown", balance: { amount: "2", currency: "DOGE" } },
+            { name: "USD", balance: { amount: "3" } },
+            { balance: undefined, currency: undefined },
+          ],
+        },
+        service.getAuthContext(user),
+        user,
+        institution,
+      );
+      expect(mapped.balance).toBe(50003);
+      expect(mapped.name).toBe("Coinbase Wallet");
+
+      const initial = await (service as any).fetchInitialSyncData(
+        {
+          id: "wallet",
+          name: "Wallet",
+          accounts: [
+            { name: "BTC", balance: { amount: "1", currency: "BTC" } },
+            { name: "Empty", balance: { amount: "0", currency: "ETH" } },
+            { balance: { amount: "2", currency: "DOGE" } },
+            { name: "USD", balance: { amount: "3" } },
+            { balance: undefined, currency: undefined },
+          ],
+        },
+        account,
+        service.getAuthContext(user),
+        user,
+      );
+      expect(initial.holdings).toHaveLength(3);
+      expect(initial.holdings.map((holding: { symbol: string }) => holding.symbol)).toContain("DOGE");
     });
   });
 });

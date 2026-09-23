@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 
 setupTests();
 
-import { OIDCIntrospectionResult, OIDCIDTokenIntrospectionResult } from "./oidc.introspection.js";
 import { Configuration } from "@backend/config/core.js";
 import { UnauthorizedException } from "@nestjs/common";
+import { OIDCIDTokenIntrospectionResult, OIDCIntrospectionResult } from "./oidc.introspection.js";
 
 describe("OIDCIntrospection", () => {
   it("should check expiration and client state", () => {
@@ -37,6 +37,17 @@ describe("OIDCIntrospection", () => {
     expect(() => idTokenRes.checkIssuedState()).not.toThrow();
 
     idTokenRes.issuer = "wrong-issuer";
-    expect(() => idTokenRes.checkIssuedState()).toThrow(UnauthorizedException);
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token issuer."));
+  });
+
+  it("should throw UnauthorizedException when authorizedParty does not match clientId", () => {
+    const idTokenRes = new OIDCIDTokenIntrospectionResult();
+    idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.authorizedParty = "wrong-client";
+
+    Configuration.server.auth.oidc.issuer = "https://issuer.com";
+    Configuration.server.auth.oidc.clientId = "client-123";
+
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token audience."));
   });
 });

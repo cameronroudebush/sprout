@@ -180,6 +180,24 @@ describe("PostSyncProcessingJob", () => {
       expect(notificationService.notifyUser).toHaveBeenCalledWith(user, expect.stringContaining("Unknown error"), "Connection Error", expect.any(String));
     });
 
+    it("should notify success when scheduled syncs complete without failures", async () => {
+      const user = TestEntities.user;
+      const syncSuccess = Sync.fromPlain({
+        id: "success-only",
+        status: "complete",
+        provider: ProviderType.plaid,
+        triggerType: SyncTriggerType.SCHEDULED,
+        user,
+      });
+
+      vi.spyOn(Sync, "count").mockResolvedValue(0);
+      Configuration.providers.syncNotifications.enabled = true;
+
+      await job.sendDigest(user, [syncSuccess]);
+
+      expect(notificationService.notifyUser).toHaveBeenCalledWith(user, expect.any(String), expect.any(String), expect.any(String));
+    });
+
     it("should skip notification if notification already sent today", async () => {
       const user = TestEntities.user;
       const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
@@ -200,6 +218,17 @@ describe("PostSyncProcessingJob", () => {
       Configuration.providers.syncNotifications.enabled = false;
 
       await job.sendDigest(user, [syncSuccess]);
+
+      expect(notificationService.notifyUser).not.toHaveBeenCalled();
+    });
+
+    it("should not notify for scheduled syncs with neither success nor failure", async () => {
+      const user = TestEntities.user;
+      const pendingSync = Sync.fromPlain({ id: "pending", status: "pending", provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
+      vi.spyOn(Sync, "count").mockResolvedValue(0);
+      Configuration.providers.syncNotifications.enabled = true;
+
+      await job.sendDigest(user, [pendingSync]);
 
       expect(notificationService.notifyUser).not.toHaveBeenCalled();
     });
@@ -257,6 +286,16 @@ describe("PostSyncProcessingJob", () => {
       (Configuration.server as any).prompt = { enabled: true };
 
       await (job as any).regenerateOverviewsIfActive(user);
+    });
+
+    it("should skip overview generation when no active devices exist", async () => {
+      const user = TestEntities.user;
+      (Configuration.server as any).prompt = { enabled: true };
+      vi.spyOn(UserDevice, "count").mockResolvedValue(0);
+
+      await (job as any).regenerateOverviewsIfActive(user);
+
+      expect(chatService.getModel).not.toHaveBeenCalled();
     });
   });
 });

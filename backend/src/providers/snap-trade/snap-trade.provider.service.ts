@@ -1,5 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
-import { AccountType, AccountTypeIsLiability } from "@backend/account/model/account.type";
+import { AccountType } from "@backend/account/model/account.type";
 import { Configuration } from "@backend/config/core";
 import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
@@ -189,7 +189,6 @@ export class SnapTradeProviderService extends ProviderBase<SnapTradeLinkOptions,
     const availableBalance = parseFloat(`${balanceObj?.cash || 0}`);
     const balance = rawAccount.balance.total.amount;
     const accType = AccountType.investment;
-    const isLiability = AccountTypeIsLiability(accType);
 
     return new Account(
       rawAccount.name || rawAccount.number || "Brokerage Account",
@@ -197,8 +196,8 @@ export class SnapTradeProviderService extends ProviderBase<SnapTradeLinkOptions,
       rawAccount.id,
       user,
       institution,
-      balance * (isLiability ? -1 : 1),
-      availableBalance * (isLiability ? -1 : 1),
+       balance,
+       availableBalance,
       accType,
       rawAccount.balance?.total?.currency || "USD",
       this.determineAccountSubType(rawAccount.raw_type),

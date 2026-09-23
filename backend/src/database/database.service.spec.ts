@@ -143,4 +143,35 @@ describe("DatabaseService", () => {
     (service.source.driver as any).databaseConnection = null;
     expect(() => (service as any).injectSQLiteRegexFunctions()).not.toThrow();
   });
+
+  it("should initialize when the database is not SQLite", async () => {
+    (Configuration.database as any).isSqlite = false;
+    vi.spyOn(service, "databaseExists").mockResolvedValue(true);
+    vi.spyOn(service, "executeMigrations").mockResolvedValue([]);
+
+    await service.init();
+    expect(service.source.initialize).toHaveBeenCalled();
+  });
+
+  it("should check databaseExists for SQLite databases", async () => {
+    (Configuration.database as any).isSqlite = true;
+    vi.spyOn(service.source, "query").mockResolvedValue([{ name: "users" }] as any);
+
+    const exists = await service.databaseExists("sprout", service.source);
+    expect(exists).toBe(true);
+    expect(service.source.query).toHaveBeenCalledWith("SELECT name FROM sqlite_master WHERE type='table'");
+  });
+
+  it("should throw when validating a null source", () => {
+    expect(() => service.validateSource(null as any)).toThrow("Database not initialized. Did you forget to call `init`?");
+  });
+
+  it("should execute migrations against the default source", async () => {
+    const runSpy = vi.spyOn(service.source, "runMigrations").mockResolvedValue(["m1"] as any);
+    vi.spyOn(service.source, "query").mockResolvedValue([] as any);
+
+    const result = await service.executeMigrations();
+    expect(result).toEqual(["m1"]);
+    expect(runSpy).toHaveBeenCalledWith({ transaction: "all" });
+  });
 });

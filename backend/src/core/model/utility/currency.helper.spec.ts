@@ -47,6 +47,24 @@ describe("CurrencyHelper", () => {
       const converted = CurrencyHelper.convertList(items, "balance", "currency", user);
       expect(converted[0]!.balance).toBe(118);
     });
+
+    it("should convert multiple properties and use fallback currencies", () => {
+      ExchangeRateJob.exchangeRates = { USD: { EUR: 0.85 } };
+      const items = [{ balance: 100, income: 200 }];
+      const converted = CurrencyHelper.convertList(items, ["balance", "income"], "missingCurrency", {
+        config: { currency: "EUR" },
+      } as any);
+      expect(converted[0]).toEqual({ balance: 85, income: 170 });
+    });
+
+    it("should fall back to the default currency when source and target are unset", () => {
+      ExchangeRateJob.exchangeRates = {};
+      const items = [{ balance: 100 }];
+
+      const converted = CurrencyHelper.convertList(items, "balance", "missingCurrency", { config: {} } as any);
+
+      expect(converted[0]!.balance).toBe(100);
+    });
   });
 
   describe("ExposeCurrencyFields decorator", () => {
@@ -74,6 +92,24 @@ describe("CurrencyHelper", () => {
       const nullInstance = new TestClass(null, "EUR");
       const nullPlain = instanceToPlain(nullInstance, { context: { user } } as any);
       expect(nullPlain.balance).toBeNull();
+    });
+
+    it("should fall back to the default currency when source and user currencies are unset", () => {
+      vi.spyOn(CurrencyHelper, "ExposeCurrencyFields").mockRestore();
+
+      class FallbackClass {
+        balance!: number;
+        currency?: string;
+      }
+
+      (CurrencyHelper.ExposeCurrencyFields as any)("balance", "currency")(FallbackClass);
+
+      const instance = new FallbackClass();
+      instance.balance = 100;
+
+      const plain = instanceToPlain(instance, { context: { user: { config: {} } } } as any);
+
+      expect((plain as any).balance).toBe(100);
     });
   });
 });
