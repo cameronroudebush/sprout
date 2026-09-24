@@ -60,14 +60,42 @@ When working with backend unit tests:
 
 To re-generate the Dart API client for the frontend after changing backend controllers or DTOs:
 
-1. Export the OpenAPI specification:
+1. Export the OpenAPI specification from the backend:
     ```bash
     npm run export:api:spec --prefix backend
     ```
-2. Generate the Dart code:
+2. Generate the Dart API client code from the repository root:
     ```bash
     npm run api:generate:dart
     ```
+
+### Frontend Build & Verification
+
+To verify and build the Flutter frontend client:
+
+1. **Analyze / Format Check**:
+    ```bash
+    cd frontend && flutter analyze
+    ```
+2. **Build Web Output**:
+    ```bash
+    cd frontend && flutter build web
+    ```
+3. **Run Frontend Tests**:
+    ```bash
+    cd frontend && flutter test
+    ```
+
+### Database Migrations
+
+To generate a database migration:
+
+```bash
+npm run migrate --prefix backend -- --name=MY-NAME-HERE
+```
+
+- **Note**: For PRs, you may only have one migration and it must be named relevantly.
+- **Note**: Due to Webpack compilation, you need to restart the backend after running the migration command so it recognizes the newly generated migration file.
 
 ### Code Formatting & Quality
 

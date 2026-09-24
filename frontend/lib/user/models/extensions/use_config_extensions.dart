@@ -11,6 +11,7 @@ extension UserConfigExtensions on UserConfig {
     bool? secureMode,
     bool? allowWidgets,
     bool? includeAICapabilities,
+    bool? enableBudgeting,
     CurrencyOptionsEnum? currency,
     EmailUpdateFrequencyEnum? emailUpdateFrequency,
     String? simpleFinToken,
@@ -29,6 +30,7 @@ extension UserConfigExtensions on UserConfig {
         simpleFinToken: simpleFinToken ?? this.simpleFinToken,
         coinbaseApiKey: coinbaseApiKey ?? this.coinbaseApiKey,
         coinbaseApiKeyName: coinbaseApiKeyName ?? this.coinbaseApiKeyName,
-        includeAICapabilities: includeAICapabilities ?? this.includeAICapabilities);
+        includeAICapabilities: includeAICapabilities ?? this.includeAICapabilities,
+        enableBudgeting: enableBudgeting ?? this.enableBudgeting);
   }
 }

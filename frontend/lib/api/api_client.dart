@@ -194,6 +194,12 @@ class ApiClient {
           return AccountSubTypeEnumTypeTransformer().decode(value);
         case 'AccountTypeEnum':
           return AccountTypeEnumTypeTransformer().decode(value);
+        case 'Budget':
+          return Budget.fromJson(value);
+        case 'BudgetHistoryResponseDto':
+          return BudgetHistoryResponseDto.fromJson(value);
+        case 'BudgetOverviewResponseDto':
+          return BudgetOverviewResponseDto.fromJson(value);
         case 'CashFlowComparisonDTO':
           return CashFlowComparisonDTO.fromJson(value);
         case 'CashFlowSpending':
@@ -204,6 +210,8 @@ class ApiClient {
           return CashFlowTrendStats.fromJson(value);
         case 'Category':
           return Category.fromJson(value);
+        case 'CategoryBudgetOverviewItem':
+          return CategoryBudgetOverviewItem.fromJson(value);
         case 'CategoryStats':
           return CategoryStats.fromJson(value);
         case 'ChartRangeEnum':
@@ -216,6 +224,8 @@ class ApiClient {
           return ChatOverviewTypeEnumTypeTransformer().decode(value);
         case 'ChatRequestDTO':
           return ChatRequestDTO.fromJson(value);
+        case 'CreateBudgetDto':
+          return CreateBudgetDto.fromJson(value);
         case 'CurrencyOptionsEnum':
           return CurrencyOptionsEnumTypeTransformer().decode(value);
         case 'DailySpendingCalendarResponseDTO':
@@ -254,6 +264,8 @@ class ApiClient {
           return MarketIndexDto.fromJson(value);
         case 'MobileTokenExchangeDto':
           return MobileTokenExchangeDto.fromJson(value);
+        case 'MonthlyCategoryBudgetPerformance':
+          return MonthlyCategoryBudgetPerformance.fromJson(value);
         case 'MonthlyCategoryData':
           return MonthlyCategoryData.fromJson(value);
         case 'MonthlySpendingStats':
@@ -308,6 +320,8 @@ class ApiClient {
           return TransactionSubscription.fromJson(value);
         case 'UnsecureAppConfiguration':
           return UnsecureAppConfiguration.fromJson(value);
+        case 'UpdateBudgetDto':
+          return UpdateBudgetDto.fromJson(value);
         case 'UpdateInstitutionRequest':
           return UpdateInstitutionRequest.fromJson(value);
         case 'UpdateUserDto':

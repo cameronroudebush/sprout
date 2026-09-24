@@ -18,6 +18,7 @@ class Institution {
     required this.url,
     required this.name,
     required this.hasError,
+    this.extra = const {},
   });
 
   String id;
@@ -33,13 +34,17 @@ class Institution {
   /// If this institution has connection errors and needs fixed
   bool hasError;
 
+  /// Any extra data that we want to store as JSON
+  Map<String, Object> extra;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is Institution &&
     other.id == id &&
     other.iconType == iconType &&
     other.url == url &&
     other.name == name &&
-    other.hasError == hasError;
+    other.hasError == hasError &&
+    _deepEquality.equals(other.extra, extra);
 
   @override
   int get hashCode =>
@@ -48,10 +53,11 @@ class Institution {
     (iconType.hashCode) +
     (url.hashCode) +
     (name.hashCode) +
-    (hasError.hashCode);
+    (hasError.hashCode) +
+    (extra.hashCode);
 
   @override
-  String toString() => 'Institution[id=$id, iconType=$iconType, url=$url, name=$name, hasError=$hasError]';
+  String toString() => 'Institution[id=$id, iconType=$iconType, url=$url, name=$name, hasError=$hasError, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -60,6 +66,7 @@ class Institution {
       json[r'url'] = this.url;
       json[r'name'] = this.name;
       json[r'hasError'] = this.hasError;
+      json[r'extra'] = this.extra;
     return json;
   }
 
@@ -93,6 +100,7 @@ class Institution {
         url: mapValueOfType<String>(json, r'url')!,
         name: mapValueOfType<String>(json, r'name')!,
         hasError: mapValueOfType<bool>(json, r'hasError')!,
+        extra: mapCastOfType<String, Object>(json, r'extra') ?? const {},
       );
     }
     return null;

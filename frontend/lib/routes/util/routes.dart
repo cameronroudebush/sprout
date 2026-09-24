@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/routes/account_details.dart';
 import 'package:sprout/routes/accounts.dart';
+import 'package:sprout/routes/budget.dart';
 import 'package:sprout/routes/categories.dart';
 import 'package:sprout/routes/chat.dart';
 import 'package:sprout/routes/dashboard.dart';
@@ -78,6 +79,14 @@ final List<SproutRoute> authenticatedRoutes = [
     bottomNavPriority: 5,
     category: 'Investments',
     builder: (context, state) => const HoldingsPage(),
+  ),
+  SproutRoute(
+    path: '/budget',
+    label: 'Budgeting',
+    icon: Icons.pie_chart_rounded,
+    bottomNavPriority: 1,
+    builder: (context, state) => const BudgetPage(),
+    enabled: (secureConfig, unsecureConfig, userConfig) => userConfig?.enableBudgeting ?? true,
   ),
   SproutRoute(
     path: '/categories',
