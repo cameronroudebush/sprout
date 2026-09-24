@@ -112,9 +112,10 @@ describe("ChatPromptService", () => {
 
   describe("getTimeframeDate, cleanupUserMax, and formatCleanHistory", () => {
     it("should omit the professional-advice disclaimer when CYA instructions are disabled", () => {
-      const instructions = (
-        service as unknown as { getSharedSystemInstructions: (u: User, includeCYA?: boolean) => string[] }
-      ).getSharedSystemInstructions(user, false);
+      const instructions = (service as unknown as { getSharedSystemInstructions: (u: User, includeCYA?: boolean) => string[] }).getSharedSystemInstructions(
+        user,
+        false,
+      );
 
       expect(instructions).toContain("");
       expect(instructions).not.toContain(expect.stringContaining("educational information"));
