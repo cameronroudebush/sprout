@@ -176,7 +176,7 @@ describe("AccountController", () => {
 
       expect(mockAccount.name).toBe("Brand New Name");
       expect(mockAccount.type).toBe(AccountType.credit);
-      expect(mockAccount.subType).toBe("checking");
+      expect(mockAccount.subType).toBeFalsy();
       expect(mockAccount.interestRate).toBe(4.5);
       expect(mockAccount.update).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(mockUser, SSEEventType.FORCE_UPDATE);
@@ -201,6 +201,25 @@ describe("AccountController", () => {
       expect(mockAccount.type).toBe(AccountType.depository);
       expect(mockAccount.subType).toBe("savings");
       expect(mockAccount.interestRate).toBe(1.2);
+    });
+
+    it("should clear the existing subtype when the account type changes", async () => {
+      const mockAccount = Account.fromPlain({
+        id: "acc-1",
+        type: AccountType.investment,
+        subType: "brokerage" as any,
+      });
+      mockAccount.update = vi.fn().mockResolvedValue({ id: "acc-1", subType: null });
+      vi.spyOn(Account, "findOne").mockResolvedValue(mockAccount);
+
+      await controller.edit("acc-1", mockUser, {
+        type: AccountType.depository,
+        subType: "brokerage" as any,
+      });
+
+      expect(mockAccount.type).toBe(AccountType.depository);
+      expect(mockAccount.subType).toBeNull();
+      expect(mockAccount.update).toHaveBeenCalled();
     });
   });
 

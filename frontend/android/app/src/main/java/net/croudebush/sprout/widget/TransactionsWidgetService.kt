@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.util.Base64
-import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.core.content.ContextCompat
@@ -83,11 +82,9 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
 
         // Apply Pending Highlight vs Default Row background
         if (isPending) {
-            views.setViewVisibility(R.id.item_pending, View.VISIBLE)
             val highlightOverlay = Color.argb(0x1A, 0xFF, 0xFF, 0xFF) // ~10% white overlay
             views.setInt(R.id.transaction_item_root, "setBackgroundColor", highlightOverlay)
         } else {
-            views.setViewVisibility(R.id.item_pending, View.GONE)
             views.setInt(R.id.transaction_item_root, "setBackgroundColor", Color.TRANSPARENT)
         }
 
@@ -98,7 +95,6 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
         if (txtMuted != null) {
             views.setTextColor(R.id.item_account, txtMuted)
             views.setTextColor(R.id.item_date, txtMuted)
-            views.setTextColor(R.id.item_pending, txtMuted)
         }
 
         // Fill-in Intent for list item taps

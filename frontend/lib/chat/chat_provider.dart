@@ -54,14 +54,42 @@ class Chat extends _$Chat {
 
   /// Sends a message to the backend
   Future<void> sendMessage(String message,
-      {ChatRequestDTOTimeframeEnum timeframe = ChatRequestDTOTimeframeEnum.threeMonths}) async {
+      {ChatRequestDTOTimeframeEnum timeframe =
+          ChatRequestDTOTimeframeEnum.threeMonths}) async {
     final api = await ref.read(chatApiProvider.future);
 
     try {
-      await api.chatControllerNew(ChatRequestDTO(message: message, timeframe: timeframe));
+      await api.chatControllerNew(
+          ChatRequestDTO(message: message, timeframe: timeframe));
+      // SSE updates can arrive while chat history is still loading. Reload once
+      // generation completes so persisted metadata, including model name, is present.
+      try {
+        final history = await api.chatControllerHistory() ?? [];
+        history.sort((a, b) => b.time.compareTo(a.time));
+        state = AsyncData(history);
+      } catch (_) {
+        // Keep live SSE state when the post-request refresh is unavailable.
+      }
     } catch (e) {
+      _clearPendingMessages();
       rethrow;
     }
+  }
+
+  /// Marks any messages that are still pending as failed so the UI doesn't hang.
+  void _clearPendingMessages() {
+    if (state.value == null) return;
+
+    final messages = state.value!.map((m) {
+      if (!m.isThinking) return m;
+      m.isThinking = false;
+      if (m.text.trim().isEmpty) {
+        m.text = "The assistant could not respond. Please try again.";
+      }
+      return m;
+    }).toList();
+
+    state = AsyncData(messages);
   }
 
   /// Clears chat state

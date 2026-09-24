@@ -7,7 +7,7 @@ import 'package:sprout/shared/widgets/charts/models/legend_position.dart';
 import 'package:sprout/shared/widgets/charts/pie_chart.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 
-/// Renders a pie chart displaying the aggregated asset allocation across ALL investment accounts.
+/// Renders a pie chart displaying aggregated asset allocation across accounts with holdings.
 class HoldingPieChart extends ConsumerWidget {
   final List<Account> investmentAccounts;
   final int? topN;

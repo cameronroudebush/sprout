@@ -199,7 +199,9 @@ describe("ProviderSyncService", () => {
         { account: incomingAccount as any, providerAccountId: "p-existing" },
         { account: incomingAccount as any },
       ]);
-      vi.spyOn(Account, "findOne").mockResolvedValueOnce(null).mockResolvedValueOnce(dbAccount as any);
+      vi.spyOn(Account, "findOne")
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(dbAccount as any);
       vi.spyOn(Institution, "findOne").mockResolvedValue(existingInstitution as any);
 
       await service.syncForProvider(mockUser, mockProvider);
@@ -265,6 +267,27 @@ describe("ProviderSyncService", () => {
       ]);
 
       vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
+
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
+
+      expect(mockHoldingToInsert.insert).toHaveBeenCalledWith(false);
+    });
+
+    it("should sync holdings returned for a cash account", async () => {
+      mockAccountInDb.type = AccountType.depository;
+      mockAccountInDb.isInvestment = false;
+      const account = { ...TestEntities.account, isInvestment: false };
+
+      const mockHoldingToInsert = { insert: vi.fn().mockResolvedValue({}) };
+      vi.spyOn(Holding, "fromPlain").mockReturnValue(mockHoldingToInsert as any);
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
+      mockProvider.get.mockResolvedValue([
+        {
+          account: account as any,
+          providerAccountId: "p-test-1",
+          holdings: [TestEntities.holding],
+        },
+      ]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 

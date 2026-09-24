@@ -98,8 +98,10 @@ export class AccountController {
 
     // Update only the allowed fields
     matchingAccount.name = updatedAccount.name?.trim() ?? matchingAccount.name;
+    const accountTypeChanged = updatedAccount.type != null && updatedAccount.type !== matchingAccount.type;
     matchingAccount.type = updatedAccount.type ?? matchingAccount.type;
-    matchingAccount.subType = updatedAccount.subType ?? matchingAccount.subType;
+    // Subtypes are specific to account types. Clear stale values when the type changes.
+    matchingAccount.subType = accountTypeChanged ? (null as any) : (updatedAccount.subType ?? matchingAccount.subType);
     matchingAccount.interestRate = updatedAccount.interestRate ?? matchingAccount.interestRate;
     // Perform the update, return the result.
     const result = await matchingAccount.update();

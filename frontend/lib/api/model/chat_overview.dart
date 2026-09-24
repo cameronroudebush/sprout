@@ -17,6 +17,7 @@ class ChatOverview {
     required this.type,
     required this.time,
     required this.text,
+    this.model,
   });
 
   String id;
@@ -27,30 +28,41 @@ class ChatOverview {
 
   String text;
 
+  /// The model used to generate this overview.
+  String? model;
+
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ChatOverview &&
-    other.id == id &&
-    other.type == type &&
-    other.time == time &&
-    other.text == text;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChatOverview &&
+          other.id == id &&
+          other.type == type &&
+          other.time == time &&
+          other.text == text &&
+          other.model == model;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (type.hashCode) +
-    (time.hashCode) +
-    (text.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (type.hashCode) +
+      (time.hashCode) +
+      (text.hashCode) +
+      (model == null ? 0 : model!.hashCode);
 
   @override
-  String toString() => 'ChatOverview[id=$id, type=$type, time=$time, text=$text]';
+  String toString() =>
+      'ChatOverview[id=$id, type=$type, time=$time, text=$text, model=$model]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'type'] = this.type;
-      json[r'time'] = this.time.toUtc().toIso8601String();
-      json[r'text'] = this.text;
+    json[r'id'] = this.id;
+    json[r'type'] = this.type;
+    json[r'time'] = this.time.toUtc().toIso8601String();
+    json[r'text'] = this.text;
+    if (this.model != null) {
+      json[r'model'] = this.model;
+    }
     return json;
   }
 
@@ -65,14 +77,22 @@ class ChatOverview {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "ChatOverview[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "ChatOverview[id]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "ChatOverview[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "ChatOverview[type]" has a null value in JSON.');
-        assert(json.containsKey(r'time'), 'Required key "ChatOverview[time]" is missing from JSON.');
-        assert(json[r'time'] != null, 'Required key "ChatOverview[time]" has a null value in JSON.');
-        assert(json.containsKey(r'text'), 'Required key "ChatOverview[text]" is missing from JSON.');
-        assert(json[r'text'] != null, 'Required key "ChatOverview[text]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "ChatOverview[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "ChatOverview[id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "ChatOverview[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "ChatOverview[type]" has a null value in JSON.');
+        assert(json.containsKey(r'time'),
+            'Required key "ChatOverview[time]" is missing from JSON.');
+        assert(json[r'time'] != null,
+            'Required key "ChatOverview[time]" has a null value in JSON.');
+        assert(json.containsKey(r'text'),
+            'Required key "ChatOverview[text]" is missing from JSON.');
+        assert(json[r'text'] != null,
+            'Required key "ChatOverview[text]" has a null value in JSON.');
         return true;
       }());
 
@@ -81,12 +101,16 @@ class ChatOverview {
         type: ChatOverviewTypeEnum.fromJson(json[r'type'])!,
         time: mapDateTime(json, r'time', r'')!,
         text: mapValueOfType<String>(json, r'text')!,
+        model: mapValueOfType<String>(json, r'model'),
       );
     }
     return null;
   }
 
-  static List<ChatOverview> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ChatOverview> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ChatOverview>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -114,13 +138,19 @@ class ChatOverview {
   }
 
   // maps a json object with a list of ChatOverview-objects as value to a dart map
-  static Map<String, List<ChatOverview>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ChatOverview>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ChatOverview>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ChatOverview.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ChatOverview.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -134,4 +164,3 @@ class ChatOverview {
     'text',
   };
 }
-

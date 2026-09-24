@@ -4,7 +4,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
-import { IsEnum } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 import { JoinColumn, ManyToOne } from "typeorm";
 
 /** This class provides a way of tracking chat overviews based on the requested content tye. */
@@ -28,11 +28,19 @@ export class ChatOverview extends DatabaseBase {
   @ApiProperty({ enum: ChatOverviewType, enumName: "ChatOverviewTypeEnum", required: true })
   type: ChatOverviewType;
 
-  constructor(user: User, text: string, type: ChatOverviewType, time = new Date()) {
+  /** The provider model that generated this overview. */
+  @DatabaseDecorators.column({ nullable: true, type: "varchar" })
+  @ApiProperty({ required: false, nullable: true, description: "The model used to generate this overview." })
+  @IsOptional()
+  @IsString()
+  model?: string;
+
+  constructor(user: User, text: string, type: ChatOverviewType, time = new Date(), model?: string) {
     super();
     this.user = user;
     this.time = time;
     this.text = text;
     this.type = type;
+    this.model = model;
   }
 }

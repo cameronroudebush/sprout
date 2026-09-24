@@ -32,5 +32,11 @@ describe("Colors", () => {
       const c2 = Colors.getColorForFeature("Test");
       expect(c1).toBe(c2);
     });
+
+    it("should skip colors excluded by the consuming surface", () => {
+      const excluded = Colors.colors[0]!;
+
+      expect(Colors.getColorForFeature("ChatChart", [excluded])).not.toBe(excluded);
+    });
   });
 });

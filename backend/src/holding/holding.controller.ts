@@ -1,5 +1,4 @@
 import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { HoldingService } from "@backend/holding/holding.service";
@@ -51,7 +50,7 @@ export class HoldingController {
   })
   @ApiOkResponse({ description: "Holding history found successfully.", type: [EntityHistory] })
   async getHoldingHistory(@CurrentUser() user: User, @Query("accountId") accountId: string) {
-    const account = await Account.findOne({ where: { id: accountId, user: { id: user.id }, type: AccountType.investment } });
+    const account = await Account.findOne({ where: { id: accountId, user: { id: user.id } } });
     if (!account) throw new NotFoundException(`Failed to find account with id ${accountId}`);
     return (await this.netWorthService.getHistoryForHoldings(account)).map((x) => x.history);
   }
