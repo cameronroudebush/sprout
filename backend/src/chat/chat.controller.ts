@@ -51,6 +51,8 @@ export class ChatController {
       // Acquire the model inside the guarded block so misconfiguration (e.g. a missing
       // API key, which throws a BadRequestException) still clears the pending state.
       const model = await this.chatService.getModel(user, "chat");
+      chat.model = model.modelName;
+      if (chat.isThinking) await chat.update();
 
       // Race the generation against the timeout
       return await Promise.race([model.generateChatContent(chat, data.timeframe, data.allowCharts ?? true), timeoutPromise]);

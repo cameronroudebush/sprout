@@ -141,17 +141,21 @@ export abstract class ChatProvider {
    */
   async generateChatContent(chat: ChatHistory, timeframe: ChatTimeframe, allowCharts: boolean, stream = true): Promise<string> {
     try {
+      chat.model = this.modelName;
       const { contents, idMap } = await this.promptBuilder.buildChatPrompt(this.user, timeframe, allowCharts);
       await this.logTokens(contents, "chat response");
 
       let rawAccumulatedText = "";
+      let lastStreamUpdate = 0;
+      const streamUpdateIntervalMs = 50;
       for await (const chunkText of this.generateContentStreamRequest(contents)) {
         if (chunkText) {
           rawAccumulatedText += chunkText;
           chat.text = this.transformText(rawAccumulatedText, idMap);
-          if (stream) {
+          if (stream && Date.now() - lastStreamUpdate >= streamUpdateIntervalMs) {
             chat.isThinking = false;
             this.sseService.sendToUser(this.user, SSEEventType.CHAT, chat);
+            lastStreamUpdate = Date.now();
           }
         }
       }
@@ -188,9 +192,10 @@ export abstract class ChatProvider {
     if (status) {
       status.text = text;
       status.time = new Date();
+      status.model = this.modelName;
       await status.update();
     } else {
-      status = await new ChatOverview(this.user, text, type).insert();
+      status = await new ChatOverview(this.user, text, type, new Date(), this.modelName).insert();
     }
     return status;
   }
@@ -204,12 +209,12 @@ export abstract class ChatProvider {
         if (chartData && chartData.type === "line" && Array.isArray(chartData.series)) {
           chartData.series = chartData.series.map((series: any) => ({
             ...series,
-            color: Colors.getColorForFeature(series.label || "Default"),
+            color: Colors.getColorForFeature(series.label || "Default", [Colors.chatCardBackgroundColor]),
           }));
         } else if (chartData && chartData.type === "pie" && chartData.data) {
           const colorMapping: Record<string, string> = {};
           for (const key of Object.keys(chartData.data)) {
-            colorMapping[key] = Colors.getColorForFeature(key);
+            colorMapping[key] = Colors.getColorForFeature(key, [Colors.chatCardBackgroundColor]);
           }
           chartData.colors = colorMapping;
         }

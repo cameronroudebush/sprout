@@ -5,6 +5,9 @@
  *  so they are consistent across usage.
  */
 export class Colors {
+  /** Chat card background; chart colors must remain distinguishable from it. */
+  static readonly chatCardBackgroundColor = "#116383";
+
   /** The color to use for deficits */
   static deficitColor = "#E31A1C";
   /** Color to use only for income main column */
@@ -33,13 +36,25 @@ export class Colors {
    * Returns a consistent color for a given feature name.
    * If the feature has been seen before, it returns the same color.
    * @param feature - The unique string key (e.g., "Housing", "Salary")
+   * @param excludedColors - Colors that should not be assigned to this feature
    */
-  static getColorForFeature(feature: string): string {
-    if (this.featureColorMap.has(feature)) return this.featureColorMap.get(feature)!;
+  static getColorForFeature(feature: string, excludedColors: readonly string[] = []): string {
+    const excluded = new Set(excludedColors.map((color) => color.toUpperCase()));
+    const existingColor = this.featureColorMap.get(feature);
+    if (existingColor && !excluded.has(existingColor.toUpperCase())) return existingColor;
 
-    // Assign a new color based on the current number of mapped features
-    const colorIndex = this.featureColorMap.size % this.colors.length;
-    const selectedColor = this.colors[colorIndex]!;
+    // Assign a new color while skipping colors that have poor contrast in the
+    // consuming surface. Start at the current position to retain stable mapping.
+    let selectedColor: string | undefined;
+    for (let offset = 0; offset < this.colors.length; offset++) {
+      const colorIndex = (this.featureColorMap.size + offset) % this.colors.length;
+      const candidate = this.colors[colorIndex]!;
+      if (!excluded.has(candidate.toUpperCase())) {
+        selectedColor = candidate;
+        break;
+      }
+    }
+    selectedColor ??= this.colors[this.featureColorMap.size % this.colors.length]!;
 
     // Store and return
     this.featureColorMap.set(feature, selectedColor);

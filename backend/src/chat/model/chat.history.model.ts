@@ -3,7 +3,7 @@ import { DatabaseBase } from "@backend/database/model/database.base";
 import { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { ManyToOne } from "typeorm";
 
 /** This class provides history to LLM chats. We only keep a certain amount per user. */
@@ -38,13 +38,21 @@ export class ChatHistory extends DatabaseBase {
   @IsString()
   role: "user" | "model";
 
-  constructor(user: User, text: string, role: ChatHistory["role"], time = new Date(), isThinking = false) {
+  /** The provider model that generated this response. */
+  @DatabaseDecorators.column({ nullable: true, type: "varchar" })
+  @ApiProperty({ required: false, nullable: true, description: "The model used to generate this response." })
+  @IsOptional()
+  @IsString()
+  model?: string;
+
+  constructor(user: User, text: string, role: ChatHistory["role"], time = new Date(), isThinking = false, model?: string) {
     super();
     this.user = user;
     this.time = time;
     this.text = text;
     this.role = role;
     this.isThinking = isThinking;
+    this.model = model;
   }
 
   /** Helper to swap real identifiers with generic IDs based on the current content of the text */

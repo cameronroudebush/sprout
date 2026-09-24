@@ -2,6 +2,7 @@ import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
 import { ChatPromptService } from "@backend/chat/chat.prompt.service.js";
+import { Colors } from "@backend/cash-flow/model/colors.js";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model.js";
@@ -136,7 +137,9 @@ describe("ChatProvider", () => {
     expect(transformed).toBe("Hello User Checking and Transaction");
 
     const lineChart = '```chart\n{"type":"line","series":[{"label":"Checking"}]}\n```';
-    expect(provider.runInject(lineChart)).toContain('"color"');
+    const coloredLineChart = provider.runInject(lineChart);
+    expect(coloredLineChart).toContain('"color"');
+    expect(coloredLineChart).not.toContain(Colors.chatCardBackgroundColor);
 
     const unlabeledLine = '```chart\n{"type":"line","series":[{}]}\n```';
     expect(provider.runInject(unlabeledLine)).toContain('"color"');
@@ -213,6 +216,7 @@ describe("ChatProvider", () => {
 
     await expect(provider.generateChatContent(chat, ChatTimeframe.threeMonths, false, true)).resolves.toBe("Hello User Checking");
     expect(chat.text).toBe("Hello User Checking");
+    expect(chat.model).toBe("test-model");
     expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, chat);
   });
 
@@ -226,6 +230,18 @@ describe("ChatProvider", () => {
     expect(chat.text).toBe("chunk");
     // Only the final update inside `finally` should notify.
     expect(sseService.sendToUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("should throttle streamed SSE updates while preserving the final response", async () => {
+    provider.streamChunks = ["one", "two", "three"];
+
+    const chat = new ChatHistory(user, "question", "user");
+    chat.update = vi.fn().mockResolvedValue(chat);
+
+    await provider.generateChatContent(chat, ChatTimeframe.threeMonths, false, true);
+
+    expect(chat.text).toBe("onetwothree");
+    expect(sseService.sendToUser).toHaveBeenCalledTimes(2);
   });
 
   it("should notify and rethrow when streaming fails", async () => {
@@ -248,6 +264,7 @@ describe("ChatProvider", () => {
 
     const overview = await provider.generateOverview(ChatOverviewType.accounts);
     expect(overview.type).toBe(ChatOverviewType.accounts);
+    expect(overview.model).toBe("test-model");
     expect(promptBuilder.buildDailyOverviewPrompt).toHaveBeenCalledWith(user);
   });
 
@@ -259,6 +276,7 @@ describe("ChatProvider", () => {
     const overview = await provider.generateOverview(ChatOverviewType.holdings);
     expect(promptBuilder.buildHoldingsOverviewPrompt).toHaveBeenCalledWith(user);
     expect(overview.text).toBe("Hello Acc_0");
+    expect(existing.model).toBe("test-model");
     expect(existing.update).toHaveBeenCalled();
   });
 });

@@ -59,6 +59,7 @@ describe("ChatController", () => {
       vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
 
       const mockModel = {
+        modelName: "test-model",
         generateChatContent: vi.fn().mockResolvedValue("AI Response"),
       };
       chatService.getModel.mockResolvedValue(mockModel as any);
@@ -66,6 +67,7 @@ describe("ChatController", () => {
       const res = await controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths, allowCharts: true });
 
       expect(mockModel.generateChatContent).toHaveBeenCalledWith(modelChat, ChatTimeframe.threeMonths, true);
+      expect(modelChat.model).toBe("test-model");
       expect(res).toBe("AI Response");
     });
 

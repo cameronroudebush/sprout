@@ -142,9 +142,7 @@ export class ChatPromptService {
            - Label incomplete or partial history when relevant.
            - Validate dates and numeric values before emitting chart syntax.`
         : `If the user asks for a chart or visual breakdown, politely inform them that chart generation is currently disabled/unavailable and present the financial insights cleanly using Markdown text or bullet points instead.`,
-      includeCYA
-        ? `Always include: "This is educational information, not individualized financial, tax, legal, or investment advice. Consider consulting a qualified professional before making material decisions."`
-        : "",
+      includeCYA ? `Always include: "Consult a financial advisor before making decisions."` : "",
     ];
   }
 
