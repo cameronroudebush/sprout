@@ -12,6 +12,7 @@ import { Holding } from "@backend/holding/model/holding.model.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { TransactionService } from "@backend/transaction/transaction.service.js";
+import { User } from "@backend/user/model/user.model.js";
 import { Mocked } from "vitest";
 
 describe("ChatPromptService", () => {
@@ -60,6 +61,7 @@ describe("ChatPromptService", () => {
       const payload = await service.buildChatPrompt(user, ChatTimeframe.sixMonths, true);
       expect(payload.contents).toBeDefined();
       expect(payload.idMap).toBeDefined();
+      expect(payload.contents[0]!.parts[0]!.text).toContain("NEVER use Markdown tables");
     });
 
     it("should deduplicate daily and monthly account/holding history and preserve current snapshots", async () => {
@@ -109,6 +111,16 @@ describe("ChatPromptService", () => {
   });
 
   describe("getTimeframeDate, cleanupUserMax, and formatCleanHistory", () => {
+    it("should omit the professional-advice disclaimer when CYA instructions are disabled", () => {
+      const instructions = (service as unknown as { getSharedSystemInstructions: (u: User, includeCYA?: boolean) => string[] }).getSharedSystemInstructions(
+        user,
+        false,
+      );
+
+      expect(instructions).toContain("");
+      expect(instructions).not.toContain(expect.stringContaining("educational information"));
+    });
+
     it("should compute timeframe dates correctly", () => {
       expect((service as unknown as { getTimeframeDate: (t: ChatTimeframe) => Date }).getTimeframeDate(ChatTimeframe.oneDay)).toBeDefined();
       expect((service as unknown as { getTimeframeDate: (t: ChatTimeframe) => Date }).getTimeframeDate(ChatTimeframe.sixMonths)).toBeDefined();
@@ -145,9 +157,9 @@ describe("ChatPromptService", () => {
 
       expect(formatted.length).toBe(2);
       expect(formatted[0]?.role).toBe("user");
-      expect(formatted[0]?.parts[0]?.text).toBe("Hello 2");
+      expect(formatted[0]?.parts[0]?.text).toBe("Hello 1\nHello 2");
       expect(formatted[1]?.role).toBe("model");
-      expect(formatted[1]?.parts[0]?.text).toBe("Second answer");
+      expect(formatted[1]?.parts[0]?.text).toBe("Rate limit hit\nSecond answer");
 
       const whitespace = new ChatHistory(user, "   ", "user");
       expect(

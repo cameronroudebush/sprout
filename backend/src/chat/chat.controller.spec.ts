@@ -59,6 +59,7 @@ describe("ChatController", () => {
       vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
 
       const mockModel = {
+        modelName: "test-model",
         generateChatContent: vi.fn().mockResolvedValue("AI Response"),
       };
       chatService.getModel.mockResolvedValue(mockModel as any);
@@ -66,6 +67,7 @@ describe("ChatController", () => {
       const res = await controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths, allowCharts: true });
 
       expect(mockModel.generateChatContent).toHaveBeenCalledWith(modelChat, ChatTimeframe.threeMonths, true);
+      expect(modelChat.model).toBe("test-model");
       expect(res).toBe("AI Response");
     });
 
@@ -113,6 +115,27 @@ describe("ChatController", () => {
       await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow("Generation failed");
       expect(modelChat.isThinking).toBe(false);
       expect(modelChat.text).toBe("Generation failed");
+      expect(modelChat.update).toHaveBeenCalled();
+      expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
+    });
+
+    it("should clean up the pending chat when the model cannot be acquired", async () => {
+      vi.spyOn(ChatHistory, "count").mockResolvedValue(0);
+
+      const userChat = ChatHistory.fromPlain({ id: "user-msg", text: "Hello", user });
+      userChat.insert = vi.fn().mockResolvedValue(userChat);
+
+      const modelChat = ChatHistory.fromPlain({ id: "model-msg", text: "...", isThinking: true, user });
+      modelChat.insert = vi.fn().mockResolvedValue(modelChat);
+      modelChat.update = vi.fn().mockResolvedValue(modelChat);
+
+      vi.spyOn(ChatHistory.prototype, "insert").mockResolvedValueOnce(userChat).mockResolvedValueOnce(modelChat);
+
+      chatService.getModel.mockRejectedValue(new BadRequestException("No API key configured. Please set an API key in settings"));
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow(BadRequestException);
+      expect(modelChat.isThinking).toBe(false);
+      expect(modelChat.text).toBe("No API key configured. Please set an API key in settings");
       expect(modelChat.update).toHaveBeenCalled();
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.CHAT, modelChat);
     });

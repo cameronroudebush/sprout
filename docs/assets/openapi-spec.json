@@ -4146,6 +4146,11 @@
             "enum": ["user", "model"],
             "type": "string"
           },
+          "model": {
+            "type": "string",
+            "description": "The model used to generate this response.",
+            "nullable": true
+          },
           "time": {
             "format": "date-time",
             "type": "string",
@@ -4178,6 +4183,11 @@
                 "$ref": "#/components/schemas/ChatOverviewTypeEnum"
               }
             ]
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used to generate this overview.",
+            "nullable": true
           },
           "time": {
             "format": "date-time",

@@ -62,6 +62,8 @@ nav:
       - Currency Support: getting-started/currency.md
   - Developer:
       - Overview: developer/index.md
+      - Architecture & Layout: developer/architecture.md
+      - UI & Design System: developer/design.md
       - Configuration: developer/configuration.md
       - Known Issues: developer/known-issues.md
       - API Docs: developer/api.md

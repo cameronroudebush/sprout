@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/chat/widgets/chat_message_content.dart';
+import 'package:sprout/chat/widgets/chat_model_indicator.dart';
 import 'package:sprout/chat/widgets/chat_typing_indicator.dart';
 import 'package:sprout/shared/widgets/icon.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -62,16 +63,32 @@ class ChatBubble extends ConsumerWidget {
                         bottomRight: isAi ? const Radius.circular(15) : Radius.zero,
                       ),
                     ),
-                    child: message.isThinking
-                        ? displayThinking
-                            ? const TypingIndicator()
-                            : const SizedBox.shrink()
-                        : ChatMessageContent(
-                            key: ValueKey(message.id),
-                            text: message.text,
-                            isAi: isAi,
-                            textColor: Colors.white,
-                          ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        message.isThinking
+                            ? displayThinking
+                                ? const TypingIndicator()
+                                : const SizedBox.shrink()
+                            : ChatMessageContent(
+                                key: ValueKey(message.id),
+                                text: message.text,
+                                isAi: isAi,
+                                textColor: Colors.white,
+                              ),
+                        if (isAi && !message.isThinking && message.model != null) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ChatModelIndicator(
+                                model: message.model,
+                                textAfter: false,
+                              ),
+                            ],
+                          )
+                        ],
+                      ],
+                    ),
                   ),
                 ),
               ),

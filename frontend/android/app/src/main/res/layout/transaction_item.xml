@@ -17,7 +17,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="12dp">
 
         <ImageView
             android:id="@+id/item_merchant_icon"
@@ -67,17 +67,6 @@
                     android:textSize="10sp"
                     tools:text="Checking" />
 
-                <TextView
-                    android:id="@+id/item_pending"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text="PENDING"
-                    android:textColor="@color/sprout_text_secondary"
-                    android:textSize="9sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
             </LinearLayout>
         </LinearLayout>
 

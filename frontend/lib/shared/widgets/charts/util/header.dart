@@ -62,7 +62,7 @@ class SproutChartHeader extends StatelessWidget {
                   Text(
                     subheader!,
                     textAlign: TextAlign.center,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.hintColor,

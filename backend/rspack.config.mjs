@@ -29,7 +29,7 @@ export default defineConfig((options) => {
       __filename: false,
     },
     // Keep native modules external
-    externals: ["better-sqlite3", "bcrypt"],
+    externals: ["better-sqlite3", "bcrypt", "@fastify/static"],
     externalsPresets: {
       node: true,
     },
