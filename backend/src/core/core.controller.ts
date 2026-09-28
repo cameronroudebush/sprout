@@ -1,9 +1,13 @@
 import { AdminGuard } from "@backend/auth/guard/admin.guard";
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
+import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { PublicURL } from "@backend/core/decorator/public.url.decorator";
 import { DatabaseBackupJob } from "@backend/core/jobs/backup";
-import { Controller, Get } from "@nestjs/common";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { CoreService } from "@backend/core/core.service";
+import { User } from "@backend/user/model/user.model";
+import { Controller, Get, Header } from "@nestjs/common";
+import { ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { startCase } from "lodash-es";
 import pkg from "../../package.json" with { type: "json" };
 const { name } = pkg;
@@ -12,7 +16,10 @@ const { name } = pkg;
 @Controller("core")
 @ApiTags("Core")
 export class CoreController {
-  constructor(private readonly databaseBackupJob: DatabaseBackupJob) {}
+  constructor(
+    private readonly databaseBackupJob: DatabaseBackupJob,
+    private readonly coreService: CoreService,
+  ) {}
 
   @Get("heartbeat")
   @ApiOperation({
@@ -22,6 +29,15 @@ export class CoreController {
   @ApiOkResponse({ description: "Application status retrieved successfully.", type: String })
   async heartbeat() {
     return `${startCase(name)} is alive!`;
+  }
+
+  @Get("admin")
+  @AdminGuard.attach()
+  @Header("Content-Type", "text/html; charset=utf-8")
+  @Header("Cache-Control", "no-store")
+  @ApiExcludeEndpoint()
+  adminDashboard(@CurrentUser() user: User, @PublicURL() publicUrl = "") {
+    return this.coreService.getAdminDashboard(user, publicUrl);
   }
 
   @Get("backups")

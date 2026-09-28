@@ -3,14 +3,26 @@ import { ChatService } from "@backend/chat/chat.service";
 import { ChatRequestDTO } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model";
-import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
+import { ChatOverviewPeriod, ChatOverviewType, isFutureChatOverviewPeriod, resolveChatOverviewPeriod } from "@backend/chat/model/chat.overview.type";
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { BadRequestException, Body, ConflictException, Controller, Get, Logger, Post, Query, RequestTimeoutException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  Logger,
+  ParseEnumPipe,
+  ParseIntPipe,
+  Post,
+  Query,
+  RequestTimeoutException,
+} from "@nestjs/common";
 import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { CronExpressionParser } from "cron-parser";
 import { startCase } from "lodash-es";
@@ -85,17 +97,27 @@ export class ChatController {
     required: false,
     description: "The type of overview to retrieve (defaults to 'accounts').",
   })
+  @ApiQuery({ name: "year", required: false, type: Number, description: "Year for monthly budget overviews." })
+  @ApiQuery({ name: "month", required: false, type: Number, description: "Month (1-12) for monthly budget overviews." })
   @ApiOkResponse({ description: "Returns the requested chat overview.", type: ChatOverview })
-  async getOverview(@CurrentUser() user: User, @Query("type") type: ChatOverviewType = ChatOverviewType.accounts) {
-    let status = await ChatOverview.findOne({ where: { user: { id: user.id }, type } });
+  async getOverview(
+    @CurrentUser() user: User,
+    @Query("type", new ParseEnumPipe(ChatOverviewType, { optional: true })) type: ChatOverviewType = ChatOverviewType.accounts,
+    @Query("year", new ParseIntPipe({ optional: true })) year?: number,
+    @Query("month", new ParseIntPipe({ optional: true })) month?: number,
+  ) {
+    const requestedPeriod = this.getRequestedPeriod(type, year, month);
+    const period = resolveChatOverviewPeriod(type, requestedPeriod);
+    const periodKey = period ?? { year: 0, month: 0 };
+    const status = await ChatOverview.findOne({ where: { user: { id: user.id }, type, ...periodKey } });
 
     if (status) {
+      const now = new Date();
       // Find the last scheduled sync time before NOW using the configured cron schedule
       const cron = Configuration.providers.simpleFIN.syncFrequency;
-      const interval = CronExpressionParser.parse(cron, { currentDate: new Date() });
+      const interval = CronExpressionParser.parse(cron, { currentDate: now });
       const lastScheduledSyncTime = interval.prev().toDate();
 
-      // If status was generated AFTER the last scheduled sync execution, it is still fresh
       const isFresh = new Date(status.time).getTime() >= lastScheduledSyncTime.getTime();
       if (isFresh) return status;
     }
@@ -103,6 +125,17 @@ export class ChatController {
     // Generate a fresh overview if status doesn't exist or is stale
     this.logger.debug(`${startCase(type)} overview out of date, regenerating for user ${user.username}`);
     const model = await this.chatService.getModel(user, "overview");
-    return await model.generateOverview(type);
+    return await model.generateOverview(type, period);
+  }
+
+  /** Validates chat overview requested periods */
+  private getRequestedPeriod(type: ChatOverviewType, year?: number, month?: number): ChatOverviewPeriod | undefined {
+    if (year == null && month == null) return undefined;
+    if (year == null || month == null || year < 1 || month < 1 || month > 12)
+      throw new BadRequestException("A valid year and month (1-12) are required for budget overviews.");
+    const period = { year, month };
+    if (!resolveChatOverviewPeriod(type, period)) throw new BadRequestException(`Overview type ${type} does not support a year or month.`);
+    if (isFutureChatOverviewPeriod(period)) throw new BadRequestException("Budget overviews cannot be requested for a future month.");
+    return period;
   }
 }

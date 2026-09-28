@@ -1,5 +1,6 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
+import { Budget } from "@backend/budget/model/budget.model";
 import { Category } from "@backend/category/model/category.model";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
@@ -27,6 +28,7 @@ export const TestEntities = {
       allowWidgets: true,
       simpleFinToken: "encrypted-token",
       geminiKey: "encrypted-key",
+      enableBudgeting: true,
     });
   },
 
@@ -49,6 +51,7 @@ export const TestEntities = {
         allowWidgets: true,
         simpleFinToken: "encrypted-token",
         geminiKey: "encrypted-key",
+        enableBudgeting: true,
       },
     });
   },
@@ -191,5 +194,16 @@ export const TestEntities = {
 
   get plaidInstitutionAsset() {
     return PlaidInstitutionAsset.fromPlain({ accessToken: "at-test", itemId: "test", institution: this.institution });
+  },
+
+  get budget() {
+    return Budget.fromPlain({
+      id: "budget-default-id",
+      userId: "user-default-id",
+      categoryId: "category-default-id",
+      amount: 500.0,
+      user: this.user,
+      category: this.category,
+    });
   },
 };

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class SproutChartHeader extends StatelessWidget {
   final String? title;
   final String? subheader;
+  final Widget? subheaderWidget;
 
   /// Placed to the left of the center title
   final Widget? left;
@@ -15,6 +16,7 @@ class SproutChartHeader extends StatelessWidget {
     super.key,
     this.title,
     this.subheader,
+    this.subheaderWidget,
     this.left,
     this.right,
   });
@@ -58,7 +60,9 @@ class SproutChartHeader extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                if (subheader != null)
+                if (subheaderWidget != null)
+                  subheaderWidget!
+                else if (subheader != null)
                   Text(
                     subheader!,
                     textAlign: TextAlign.center,

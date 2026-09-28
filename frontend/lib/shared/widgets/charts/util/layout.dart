@@ -29,7 +29,7 @@ class SproutChartLayoutFrame extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

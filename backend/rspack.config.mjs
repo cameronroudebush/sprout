@@ -106,6 +106,10 @@ export default defineConfig((options) => {
           test: /\.sql$/,
           type: "asset/source",
         },
+        {
+          test: /\.html$/,
+          type: "asset/source",
+        },
       ],
     },
     optimization: {

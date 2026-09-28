@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/shared/widgets/layout.dart';
+import 'package:sprout/shared/widgets/month_navigation.dart';
+import 'package:sprout/shared/widgets/period_picker_dialog.dart';
 
 /// A widget for selecting the view (monthly/yearly), year, and navigating months for cash flow.
 class CashFlowSelector extends StatelessWidget {
@@ -20,12 +22,35 @@ class CashFlowSelector extends StatelessWidget {
     required this.onYearChanged,
   });
 
+  Future<void> _pickMonth(BuildContext context) async {
+    final selectedMonth = MonthNavigation.normalize(selectedDate);
+    final pickedMonth = await showMonthPickerDialog(
+      context: context,
+      selectedMonth: selectedMonth,
+      maxMonth: MonthNavigation.currentMonth(),
+    );
+    if (pickedMonth != null) {
+      onMonthIncrementChanged(
+          MonthNavigation.differenceInMonths(selectedMonth, pickedMonth));
+    }
+  }
+
+  Future<void> _pickYear(BuildContext context) async {
+    final pickedYear = await showYearPickerDialog(
+      context: context,
+      selectedYear: selectedDate.year,
+    );
+    if (pickedYear != null && pickedYear != selectedDate.year) {
+      onYearChanged(pickedYear);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SproutLayoutBuilder((isDesktop, context, constraints) {
       final theme = Theme.of(context);
       final now = DateTime.now();
-      final currentMonthEnd = DateTime(now.year, now.month + 1, 0);
+      final currentMonth = MonthNavigation.currentMonth(now: now);
       final isMonthly = currentView == CashFlowView.monthly;
 
       return Padding(
@@ -69,17 +94,25 @@ class CashFlowSelector extends StatelessWidget {
                     ],
                   ),
                   if (currentView == CashFlowView.monthly) ...[
-                    Text(
-                      isDesktop
-                          ? DateFormat('MMMM yyyy').format(selectedDate)
-                          : DateFormat('MMM yyyy').format(selectedDate),
-                      style: theme.textTheme.titleMedium,
+                    TextButton.icon(
+                      onPressed: () => _pickMonth(context),
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: Text(
+                        isDesktop
+                            ? DateFormat('MMMM yyyy').format(selectedDate)
+                            : DateFormat('MMM yyyy').format(selectedDate),
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ),
                   ],
                   if (currentView == CashFlowView.yearly)
-                    Text(
-                      selectedDate.year.toString(),
-                      style: theme.textTheme.titleMedium,
+                    TextButton.icon(
+                      onPressed: () => _pickYear(context),
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: Text(
+                        selectedDate.year.toString(),
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ),
                 ],
               ),
@@ -94,8 +127,13 @@ class CashFlowSelector extends StatelessWidget {
                     child: IconButton(
                       icon: const Icon(Icons.chevron_right),
                       onPressed: isMonthly
-                          ? (selectedDate.isBefore(currentMonthEnd) ? () => onMonthIncrementChanged(1) : null)
-                          : (selectedDate.year < now.year ? () => onYearChanged(selectedDate.year + 1) : null),
+                          ? (MonthNavigation.canAdvance(selectedDate,
+                                  maxMonth: currentMonth)
+                              ? () => onMonthIncrementChanged(1)
+                              : null)
+                          : (selectedDate.year < now.year
+                              ? () => onYearChanged(selectedDate.year + 1)
+                              : null),
                     ),
                   ),
                   Tooltip(
@@ -103,17 +141,15 @@ class CashFlowSelector extends StatelessWidget {
                     child: IconButton(
                       icon: const Icon(Icons.keyboard_double_arrow_right),
                       onPressed: isMonthly
-                          ? (selectedDate.month != currentMonthEnd.month || selectedDate.year != currentMonthEnd.year
-                              ? () {
-                                  var month = currentMonthEnd.month - selectedDate.month;
-                                  if (currentMonthEnd.year != selectedDate.year) {
-                                    month += (currentMonthEnd.year - selectedDate.year) * 12;
-                                  }
-
-                                  onMonthIncrementChanged(month);
-                                }
+                          ? (!MonthNavigation.isSameMonth(
+                                  selectedDate, currentMonth)
+                              ? () => onMonthIncrementChanged(
+                                  MonthNavigation.differenceInMonths(
+                                      selectedDate, currentMonth))
                               : null)
-                          : (selectedDate.year != now.year ? () => onYearChanged(now.year) : null),
+                          : (selectedDate.year != now.year
+                              ? () => onYearChanged(now.year)
+                              : null),
                     ),
                   ),
                 ],

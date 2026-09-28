@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Sprout Admin Overview</title>
+    <link id="sprout-favicon" rel="icon" type="image/svg+xml" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --sprout-primary: #6b9ac4;
+        --sprout-secondary: #116383;
+        --sprout-primary-container: #001e2c;
+        --sprout-secondary-container: #c2e8ff;
+        --sprout-tertiary: #d6bee4;
+        --sprout-tertiary-container: #523f5f;
+        --sprout-error: #ba1a1a;
+        --sprout-background: #111418;
+        --sprout-surface: #191c20;
+      }
+
+      .sprout-page {
+        background-color: var(--sprout-background);
+      }
+
+      .sprout-header {
+        border-bottom: 1px solid color-mix(in srgb, var(--sprout-secondary) 30%, transparent);
+        background-color: var(--sprout-surface);
+      }
+
+      .sprout-card {
+        border: 1px solid color-mix(in srgb, var(--sprout-secondary) 30%, transparent);
+        background-color: var(--sprout-surface);
+      }
+
+      .sprout-inset-card {
+        border: 1px solid color-mix(in srgb, var(--sprout-secondary) 25%, transparent);
+        background-color: var(--sprout-background);
+      }
+
+      .sprout-primary-text {
+        color: var(--sprout-primary);
+      }
+
+      .sprout-table-head {
+        border-bottom: 1px solid color-mix(in srgb, var(--sprout-secondary) 20%, transparent);
+      }
+
+      .sprout-table-rows > tr:not(:last-child) {
+        border-bottom: 1px solid color-mix(in srgb, var(--sprout-secondary) 20%, transparent);
+      }
+
+      .sprout-button {
+        border: 1px solid color-mix(in srgb, var(--sprout-secondary) 60%, transparent);
+        background-color: var(--sprout-surface);
+        color: #f1f5f9;
+      }
+
+      .sprout-button:hover {
+        border-color: var(--sprout-primary);
+        background-color: var(--sprout-primary-container);
+      }
+
+      .sprout-button:focus-visible {
+        outline: 2px solid var(--sprout-primary);
+        outline-offset: 2px;
+      }
+
+      .sprout-error-indicator {
+        background-color: var(--sprout-error);
+      }
+
+      .provider-enabled {
+        border: 1px solid color-mix(in srgb, var(--sprout-primary) 40%, transparent);
+        background-color: var(--sprout-primary-container);
+        color: var(--sprout-secondary-container);
+      }
+
+      .provider-disabled,
+      .provider-missing {
+        border: 1px solid color-mix(in srgb, var(--sprout-error) 35%, transparent);
+        background-color: color-mix(in srgb, var(--sprout-error) 12%, transparent);
+        color: #fecaca;
+      }
+
+      .provider-informational {
+        border: 1px solid color-mix(in srgb, var(--sprout-secondary) 45%, transparent);
+        background-color: color-mix(in srgb, var(--sprout-secondary) 15%, transparent);
+        color: var(--sprout-secondary-container);
+      }
+
+      .tier-daily {
+        border-color: color-mix(in srgb, var(--sprout-primary) 40%, transparent);
+        background-color: var(--sprout-primary-container);
+        color: var(--sprout-secondary-container);
+      }
+
+      .tier-weekly {
+        border-color: color-mix(in srgb, var(--sprout-secondary) 50%, transparent);
+        background-color: color-mix(in srgb, var(--sprout-secondary) 20%, transparent);
+        color: var(--sprout-secondary-container);
+      }
+
+      .tier-monthly {
+        border-color: color-mix(in srgb, var(--sprout-tertiary) 40%, transparent);
+        background-color: color-mix(in srgb, var(--sprout-tertiary-container) 40%, transparent);
+        color: var(--sprout-tertiary);
+      }
+
+      .tier-long-term {
+        border-color: rgb(100 116 139 / 30%);
+        background-color: rgb(100 116 139 / 10%);
+        color: #cbd5e1;
+      }
+    </style>
+  </head>
+  <body class="sprout-page min-h-screen text-slate-100 antialiased">
+    <header class="sprout-header">
+      <div class="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
+        <div class="flex min-w-0 items-center gap-2">
+          <h1 class="truncate text-base font-semibold tracking-tight sm:text-2xl">Admin Overview</h1>
+          <span
+            id="server-indicator"
+            class="h-2.5 w-2.5 shrink-0 cursor-help rounded-full bg-slate-600"
+            title="Checking server status"
+            aria-label="Checking server status"
+            role="status"
+          ></span>
+        </div>
+        <img id="sprout-logo" alt="Sprout" class="h-auto w-24 sm:w-40" />
+        <div class="flex items-center justify-self-end gap-3 sm:gap-4">
+          <span id="last-updated" class="hidden text-sm text-slate-500 sm:inline">Waiting for first check</span>
+          <button id="refresh-button" type="button" class="sprout-button rounded-xl px-4 py-2 text-sm font-medium transition">Refresh</button>
+        </div>
+      </div>
+    </header>
+
+    <header class="mt-6 text-center text-xs text-slate-600">Automatically refreshed every 30 seconds</header>
+
+    <main class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:py-6">
+      <section aria-label="Server configuration" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Server Details</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Key</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Value</th>
+              </tr>
+            </thead>
+            <tbody id="configuration-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Cleanup jobs" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Cleanup schedules</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Job</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Configuration</th>
+              </tr>
+            </thead>
+            <tbody id="cleanup-job-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Background jobs" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Background jobs</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Job</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Configuration</th>
+              </tr>
+            </thead>
+            <tbody id="background-job-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Rate limits" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Rate limits</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Setting</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Value</th>
+              </tr>
+            </thead>
+            <tbody id="rate-limit-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Email configuration" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Email</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Setting</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Value</th>
+              </tr>
+            </thead>
+            <tbody id="email-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Prompt configuration" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Prompt and models</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Setting</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Value</th>
+              </tr>
+            </thead>
+            <tbody id="prompt-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="oidc-section" aria-label="OpenID Connect configuration" class="hidden sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">OpenID Connect</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Setting</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Value</th>
+              </tr>
+            </thead>
+            <tbody id="oidc-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Provider configuration" class="sprout-card mb-4 rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4">
+          <p class="sprout-primary-text text-sm font-medium tracking-wide">Integrations</p>
+          <p class="mt-1 text-sm text-slate-400">Setup status reflects the current admin. Account totals include all users.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[620px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-medium">Provider</th>
+                <th scope="col" class="py-2 px-4 font-medium">Enabled</th>
+                <th scope="col" class="py-2 px-4 font-medium">Setup for current admin</th>
+                <th scope="col" class="py-2 px-4 font-medium">Accounts, all users</th>
+                <th scope="col" class="py-2 pl-4 font-medium">Sync schedule</th>
+              </tr>
+            </thead>
+            <tbody id="provider-rows" class="sprout-table-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-label="Database backups" class="sprout-card rounded-2xl p-4 shadow-xl shadow-black/10 sm:p-5">
+        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="sprout-primary-text text-sm font-medium tracking-wide">Database backups</p>
+          </div>
+          <p id="backup-status" class="text-sm text-slate-400">Loading backup information…</p>
+        </div>
+
+        <div class="mb-5 grid gap-3 sm:grid-cols-3">
+          <article class="sprout-inset-card rounded-xl p-4">
+            <p class="text-sm text-slate-400">Backup files</p>
+            <p id="backup-count" class="mt-2 text-2xl font-semibold">—</p>
+          </article>
+          <article class="sprout-inset-card rounded-xl p-4">
+            <p class="text-sm text-slate-400">Total storage</p>
+            <p id="backup-size" class="mt-2 text-2xl font-semibold">—</p>
+          </article>
+          <article class="sprout-inset-card rounded-xl p-4">
+            <p class="text-sm text-slate-400">Most recent backup</p>
+            <p id="latest-backup" class="mt-2 text-base font-semibold">—</p>
+          </article>
+        </div>
+
+        <div class="mb-5">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[420px] text-left text-sm">
+              <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+                <tr>
+                  <th scope="col" class="py-2 pr-4 font-medium">Setting</th>
+                  <th scope="col" class="py-2 pl-4 font-medium">Value</th>
+                </tr>
+              </thead>
+              <tbody id="backup-settings-rows" class="sprout-table-rows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[620px] text-left text-sm">
+            <thead class="sprout-table-head text-xs tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="pb-3 pr-4 font-medium">Backup file</th>
+                <th scope="col" class="pb-3 pr-4 font-medium">Created</th>
+                <th scope="col" class="pb-3 pr-4 font-medium">Size</th>
+                <th scope="col" class="pb-3 font-medium">Retention tiers</th>
+              </tr>
+            </thead>
+            <tbody id="backup-rows" class="sprout-table-rows"></tbody>
+          </table>
+          <p id="empty-backups" class="hidden py-8 text-center text-sm text-slate-500">No database backups found.</p>
+        </div>
+      </section>
+    </main>
+
+    <script id="dashboard-data" type="application/json">
+      {{DASHBOARD_DATA}}
+    </script>
+    <script>
+      const apiRoot = `${window.location.pathname.replace(/\/core\/admin\/?$/, "").replace(/\/$/, "")}/core`;
+      const el = (id) => document.getElementById(id);
+      const dashboardData = JSON.parse(el("dashboard-data").textContent);
+      const publicUrl = dashboardData.publicUrl || window.location.origin;
+      const backupsEnabled = dashboardData.backups.enabled;
+      const setText = (id, text) => {
+        el(id).textContent = text;
+      };
+      const renderKeyValueRows = (elementId, options) => {
+        const rows = el(elementId);
+        const badgeClasses = {
+          enabled: "provider-enabled",
+          disabled: "provider-disabled",
+          missing: "provider-missing",
+          informational: "provider-informational",
+        };
+        for (const option of options) {
+          const row = document.createElement("tr");
+          const keyCell = document.createElement("th");
+          keyCell.scope = "row";
+          keyCell.className = "py-3 pr-4 text-left font-medium text-slate-400";
+          keyCell.textContent = option.key;
+          const valueCell = document.createElement("td");
+          valueCell.className = "break-all py-3 pl-4 text-slate-200";
+          if (option.badge) {
+            const badge = document.createElement("span");
+            badge.className = `rounded-lg px-2.5 py-1 text-xs font-medium ${badgeClasses[option.badge] ?? "provider-informational"}`;
+            badge.textContent = option.value;
+            valueCell.append(badge);
+          } else {
+            valueCell.textContent = option.value;
+          }
+          row.append(keyCell, valueCell);
+          rows.append(row);
+        }
+      };
+      renderKeyValueRows("configuration-rows", dashboardData.serverDetails);
+      renderKeyValueRows("cleanup-job-rows", dashboardData.cleanupJobs);
+      renderKeyValueRows("background-job-rows", dashboardData.backgroundJobs);
+      renderKeyValueRows("rate-limit-rows", dashboardData.rateLimits);
+      renderKeyValueRows("email-rows", dashboardData.email);
+      renderKeyValueRows("prompt-rows", dashboardData.prompt);
+      if (dashboardData.oidc) {
+        el("oidc-section").classList.remove("hidden");
+        renderKeyValueRows("oidc-rows", dashboardData.oidc);
+      }
+      renderKeyValueRows("backup-settings-rows", dashboardData.backups.settings);
+      const providerStatuses = dashboardData.providers;
+      for (const provider of providerStatuses) {
+        const row = document.createElement("tr");
+        const nameCell = document.createElement("th");
+        nameCell.scope = "row";
+        nameCell.className = "py-3 pr-4 text-left font-medium text-slate-200";
+        nameCell.textContent = provider.name;
+        row.append(nameCell);
+
+        const enabledCell = document.createElement("td");
+        enabledCell.className = "px-4 py-3";
+        const enabledBadge = document.createElement("span");
+        enabledBadge.className = `rounded-lg px-2.5 py-1 text-xs font-medium ${provider.enabled ? "provider-enabled" : "provider-disabled"}`;
+        enabledBadge.textContent = provider.enabled ? "Enabled" : "Disabled";
+        enabledCell.append(enabledBadge);
+        row.append(enabledCell);
+
+        const setupCell = document.createElement("td");
+        setupCell.className = "px-4 py-3";
+        const setupBadge = document.createElement("span");
+        setupBadge.className = `rounded-lg px-2.5 py-1 text-xs font-medium ${provider.setupStatus === "No credentials required" ? "provider-informational" : provider.configured ? "provider-enabled" : "provider-missing"}`;
+        setupBadge.textContent = provider.setupStatus;
+        setupCell.append(setupBadge);
+        row.append(setupCell);
+
+        const connectionsCell = document.createElement("td");
+        connectionsCell.className = "px-4 py-3 text-slate-300";
+        connectionsCell.textContent = String(provider.connections);
+        row.append(connectionsCell);
+
+        const scheduleCell = document.createElement("td");
+        scheduleCell.className = "py-3 pl-4 text-slate-300";
+        scheduleCell.textContent = provider.syncFrequency;
+        row.append(scheduleCell);
+        el("provider-rows").append(row);
+      }
+      const loadBrandAsset = (id, property, assetPath, githubUrl) => {
+        const asset = el(id);
+        const primaryUrl = new URL(assetPath, `${publicUrl}/`).href;
+        let usingFallback = false;
+        const useFallback = () => {
+          if (usingFallback) return;
+          usingFallback = true;
+          if (property === "href") asset.type = "image/png";
+          asset[property] = githubUrl;
+        };
+
+        asset.addEventListener("error", useFallback, { once: true });
+        asset[property] = primaryUrl;
+
+        // Link elements do not consistently fire error events for favicons, so probe URL with an image too.
+        if (property === "href") {
+          const probe = new Image();
+          probe.onerror = useFallback;
+          probe.src = primaryUrl;
+        }
+      };
+      loadBrandAsset(
+        "sprout-logo",
+        "src",
+        "logo/color-transparent-no-tag.png",
+        "https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent-no-tag.png",
+      );
+      loadBrandAsset(
+        "sprout-favicon",
+        "href",
+        "icon/favicon-color.svg",
+        "https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/icon/favicon-bg.png",
+      );
+      const formatSize = (bytes) => {
+        if (!bytes) return "0 B";
+        const units = ["B", "KB", "MB", "GB", "TB"];
+        const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+        return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+      };
+      const formatDate = (value) =>
+        new Intl.DateTimeFormat(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(new Date(value));
+      const requestJson = async (url) => {
+        const response = await fetch(url, { cache: "no-store", credentials: "same-origin" });
+        if (!response.ok) throw new Error(`Request failed (${response.status})`);
+        return response.json();
+      };
+      const setBackupError = (message) => {
+        setText("backup-status", message);
+        setText("backup-count", "—");
+        setText("backup-size", "—");
+        setText("latest-backup", "—");
+        el("backup-rows").replaceChildren();
+        el("empty-backups").classList.add("hidden");
+      };
+
+      const setHeartbeatStatus = (isOnline, details) => {
+        const indicator = el("server-indicator");
+        const tooltip = isOnline ? "Server is online" : `Server is offline${details ? `: ${details}` : ""}`;
+        indicator.className = `h-2.5 w-2.5 shrink-0 cursor-help rounded-full ${isOnline ? "bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.55)]" : "sprout-error-indicator"}`;
+        indicator.title = tooltip;
+        indicator.setAttribute("aria-label", tooltip);
+      };
+
+      async function refreshDashboard() {
+        const button = el("refresh-button");
+        button.disabled = true;
+        button.classList.add("cursor-wait", "opacity-60");
+        const checkedAt = new Date();
+
+        try {
+          const response = await fetch(`${apiRoot}/heartbeat`, { cache: "no-store", credentials: "same-origin" });
+          if (!response.ok) throw new Error(`Request failed (${response.status})`);
+          setHeartbeatStatus(true);
+        } catch (error) {
+          setHeartbeatStatus(false, error instanceof Error ? error.message : "Heartbeat request failed");
+        }
+
+        if (!backupsEnabled) {
+          setBackupError("Backup job is disabled in server configuration.");
+        } else {
+          try {
+            const summary = await requestJson(`${apiRoot}/backups`);
+            const backups = Array.isArray(summary.backups) ? summary.backups : [];
+            setText("backup-status", "");
+            setText("backup-count", String(summary.totalCount ?? backups.length));
+            setText("backup-size", formatSize(summary.totalSizeBytes ?? 0));
+            setText("latest-backup", backups.length ? formatDate(backups[0].date) : "No backups yet");
+            const rows = el("backup-rows");
+            rows.replaceChildren();
+            el("empty-backups").classList.toggle("hidden", backups.length !== 0);
+            for (const backup of backups) {
+              const row = document.createElement("tr");
+              row.className = "text-slate-300";
+              const fileName =
+                String(backup.fileName ?? "")
+                  .split(/[\\/]/)
+                  .pop() || "Unknown backup";
+              const values = [fileName, formatDate(backup.date), formatSize(backup.sizeBytes)];
+              for (const value of values) {
+                const cell = document.createElement("td");
+                cell.className = "py-3 pr-4";
+                cell.textContent = value;
+                row.append(cell);
+              }
+              const tiersCell = document.createElement("td");
+              tiersCell.className = "py-3";
+              const tiers = Array.isArray(backup.tiers) ? backup.tiers : [];
+              if (tiers.length) {
+                const tierBadges = document.createElement("div");
+                tierBadges.className = "flex flex-wrap gap-1.5";
+                const tierStyles = {
+                  daily: "tier-daily",
+                  weekly: "tier-weekly",
+                  monthly: "tier-monthly",
+                  quarterly: "tier-long-term",
+                  yearly: "tier-long-term",
+                };
+                for (const tier of tiers) {
+                  const badge = document.createElement("span");
+                  badge.className = `rounded-lg border px-2 py-1 text-xs font-medium capitalize ${tierStyles[tier] ?? "tier-long-term"}`;
+                  badge.textContent = tier;
+                  tierBadges.append(badge);
+                }
+                tiersCell.append(tierBadges);
+              } else {
+                tiersCell.textContent = "Not retained";
+                tiersCell.classList.add("text-slate-500");
+              }
+              row.append(tiersCell);
+              rows.append(row);
+            }
+          } catch (error) {
+            setBackupError(error instanceof Error ? `Backup information unavailable: ${error.message}` : "Backup information unavailable.");
+          }
+        }
+
+        setText("last-updated", `Last checked ${checkedAt.toLocaleTimeString()}`);
+        button.disabled = false;
+        button.classList.remove("cursor-wait", "opacity-60");
+      }
+
+      el("refresh-button").addEventListener("click", refreshDashboard);
+      refreshDashboard();
+      window.setInterval(refreshDashboard, 30000);
+    </script>
+  </body>
+</html>

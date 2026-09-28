@@ -15,16 +15,19 @@ class ChatHistory {
   ChatHistory({
     required this.id,
     required this.role,
+    this.model,
     required this.time,
     required this.text,
     required this.isThinking,
-    this.model,
   });
 
   String id;
 
   /// Who said the message, either the LLM (AI) or the user.
   ChatHistoryRoleEnum role;
+
+  /// The model used to generate this response.
+  String? model;
 
   /// The time the chat occurred on
   DateTime time;
@@ -35,44 +38,40 @@ class ChatHistory {
   /// If the model is still thinking of a response for this one
   bool isThinking;
 
-  /// The model used to generate this response.
-  String? model;
-
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChatHistory &&
-          other.id == id &&
-          other.role == role &&
-          other.time == time &&
-          other.text == text &&
-          other.isThinking == isThinking &&
-          other.model == model;
+  bool operator ==(Object other) => identical(this, other) || other is ChatHistory &&
+    other.id == id &&
+    other.role == role &&
+    other.model == model &&
+    other.time == time &&
+    other.text == text &&
+    other.isThinking == isThinking;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (id.hashCode) +
-      (role.hashCode) +
-      (time.hashCode) +
-      (text.hashCode) +
-      (isThinking.hashCode) +
-      (model == null ? 0 : model!.hashCode);
+    // ignore: unnecessary_parenthesis
+    (id.hashCode) +
+    (role.hashCode) +
+    (model == null ? 0 : model!.hashCode) +
+    (time.hashCode) +
+    (text.hashCode) +
+    (isThinking.hashCode);
 
   @override
-  String toString() =>
-      'ChatHistory[id=$id, role=$role, time=$time, text=$text, isThinking=$isThinking, model=$model]';
+  String toString() => 'ChatHistory[id=$id, role=$role, model=$model, time=$time, text=$text, isThinking=$isThinking]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'id'] = this.id;
-    json[r'role'] = this.role;
-    json[r'time'] = this.time.toUtc().toIso8601String();
-    json[r'text'] = this.text;
-    json[r'isThinking'] = this.isThinking;
+      json[r'id'] = this.id;
+      json[r'role'] = this.role;
     if (this.model != null) {
       json[r'model'] = this.model;
+    } else {
+      json[r'model'] = null;
     }
+      json[r'time'] = this.time.toUtc().toIso8601String();
+      json[r'text'] = this.text;
+      json[r'isThinking'] = this.isThinking;
     return json;
   }
 
@@ -87,45 +86,32 @@ class ChatHistory {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'),
-            'Required key "ChatHistory[id]" is missing from JSON.');
-        assert(json[r'id'] != null,
-            'Required key "ChatHistory[id]" has a null value in JSON.');
-        assert(json.containsKey(r'role'),
-            'Required key "ChatHistory[role]" is missing from JSON.');
-        assert(json[r'role'] != null,
-            'Required key "ChatHistory[role]" has a null value in JSON.');
-        assert(json.containsKey(r'time'),
-            'Required key "ChatHistory[time]" is missing from JSON.');
-        assert(json[r'time'] != null,
-            'Required key "ChatHistory[time]" has a null value in JSON.');
-        assert(json.containsKey(r'text'),
-            'Required key "ChatHistory[text]" is missing from JSON.');
-        assert(json[r'text'] != null,
-            'Required key "ChatHistory[text]" has a null value in JSON.');
-        assert(json.containsKey(r'isThinking'),
-            'Required key "ChatHistory[isThinking]" is missing from JSON.');
-        assert(json[r'isThinking'] != null,
-            'Required key "ChatHistory[isThinking]" has a null value in JSON.');
+        assert(json.containsKey(r'id'), 'Required key "ChatHistory[id]" is missing from JSON.');
+        assert(json[r'id'] != null, 'Required key "ChatHistory[id]" has a null value in JSON.');
+        assert(json.containsKey(r'role'), 'Required key "ChatHistory[role]" is missing from JSON.');
+        assert(json[r'role'] != null, 'Required key "ChatHistory[role]" has a null value in JSON.');
+        assert(json.containsKey(r'time'), 'Required key "ChatHistory[time]" is missing from JSON.');
+        assert(json[r'time'] != null, 'Required key "ChatHistory[time]" has a null value in JSON.');
+        assert(json.containsKey(r'text'), 'Required key "ChatHistory[text]" is missing from JSON.');
+        assert(json[r'text'] != null, 'Required key "ChatHistory[text]" has a null value in JSON.');
+        assert(json.containsKey(r'isThinking'), 'Required key "ChatHistory[isThinking]" is missing from JSON.');
+        assert(json[r'isThinking'] != null, 'Required key "ChatHistory[isThinking]" has a null value in JSON.');
         return true;
       }());
 
       return ChatHistory(
         id: mapValueOfType<String>(json, r'id')!,
         role: ChatHistoryRoleEnum.fromJson(json[r'role'])!,
+        model: mapValueOfType<String>(json, r'model'),
         time: mapDateTime(json, r'time', r'')!,
         text: mapValueOfType<String>(json, r'text')!,
         isThinking: mapValueOfType<bool>(json, r'isThinking')!,
-        model: mapValueOfType<String>(json, r'model'),
       );
     }
     return null;
   }
 
-  static List<ChatHistory> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<ChatHistory> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChatHistory>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -153,19 +139,13 @@ class ChatHistory {
   }
 
   // maps a json object with a list of ChatHistory-objects as value to a dart map
-  static Map<String, List<ChatHistory>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<ChatHistory>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ChatHistory>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ChatHistory.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        map[entry.key] = ChatHistory.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -203,13 +183,9 @@ class ChatHistoryRoleEnum {
     model,
   ];
 
-  static ChatHistoryRoleEnum? fromJson(dynamic value) =>
-      ChatHistoryRoleEnumTypeTransformer().decode(value);
+  static ChatHistoryRoleEnum? fromJson(dynamic value) => ChatHistoryRoleEnumTypeTransformer().decode(value);
 
-  static List<ChatHistoryRoleEnum> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<ChatHistoryRoleEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ChatHistoryRoleEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -226,8 +202,7 @@ class ChatHistoryRoleEnum {
 /// Transformation class that can [encode] an instance of [ChatHistoryRoleEnum] to String,
 /// and [decode] dynamic data back to [ChatHistoryRoleEnum].
 class ChatHistoryRoleEnumTypeTransformer {
-  factory ChatHistoryRoleEnumTypeTransformer() =>
-      _instance ??= const ChatHistoryRoleEnumTypeTransformer._();
+  factory ChatHistoryRoleEnumTypeTransformer() => _instance ??= const ChatHistoryRoleEnumTypeTransformer._();
 
   const ChatHistoryRoleEnumTypeTransformer._();
 
@@ -244,10 +219,8 @@ class ChatHistoryRoleEnumTypeTransformer {
   ChatHistoryRoleEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'user':
-          return ChatHistoryRoleEnum.user;
-        case r'model':
-          return ChatHistoryRoleEnum.model;
+        case r'user': return ChatHistoryRoleEnum.user;
+        case r'model': return ChatHistoryRoleEnum.model;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -260,3 +233,5 @@ class ChatHistoryRoleEnumTypeTransformer {
   /// Singleton [ChatHistoryRoleEnumTypeTransformer] instance.
   static ChatHistoryRoleEnumTypeTransformer? _instance;
 }
+
+

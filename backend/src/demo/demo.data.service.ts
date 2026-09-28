@@ -2,6 +2,7 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountSubType } from "@backend/account/model/account.sub.type";
 import { AccountType } from "@backend/account/model/account.type";
+import { Budget } from "@backend/budget/model/budget.model";
 import { Category } from "@backend/category/model/category.model";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model";
@@ -107,6 +108,7 @@ export class DemoDataService {
     const accounts = await this.createAccounts(user);
     const accountHistory = await this.createAccountHistory(accounts, daysToGenerate);
     await this.createTransactions(user, accounts, daysToGenerate);
+    await this.populateBudgets(user);
     await this.populateTransactionRules(user);
     const holdings = await this.createHoldings(accounts);
     await this.createHoldingHistory(holdings, daysToGenerate);
@@ -603,6 +605,35 @@ export class DemoDataService {
     ]);
   }
 
+  /** Creates sample monthly targets for the demo user's spending categories. */
+  private async populateBudgets(user: User) {
+    const logger = new Logger("demo:budget");
+    logger.log("Inserting sample monthly budget targets.");
+
+    const categoryTargets = [
+      { categoryName: DEMO_CATEGORIES.EXPENSE.HOME.MORTGAGE, amount: 1800 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.HOME.UTILITIES, amount: 200 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.TRANSPORTATION.CAR_PAYMENT, amount: 450 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.TRANSPORTATION.GAS, amount: 180 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.FOOD.GROCERIES, amount: 600 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.FOOD.RESTAURANTS, amount: 250 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.PERSONAL.SHOPPING, amount: 300 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.PERSONAL.SUBSCRIPTIONS, amount: 75 },
+      { categoryName: DEMO_CATEGORIES.EXPENSE.ENTERTAINMENT, amount: 150 },
+    ];
+
+    const categories = await Category.find({ where: { user: { id: user.id } } });
+    const categoriesByName = new Map(categories.map((category) => [category.name, category]));
+    const budgets = categoryTargets.flatMap(({ categoryName, amount }) => {
+      const category = categoriesByName.get(categoryName);
+      return category ? [new Budget(user, category, amount)] : [];
+    });
+
+    if (budgets.length > 0) await Budget.insertMany(budgets);
+    logger.log(`Inserted ${budgets.length} sample budget targets.`);
+    return budgets;
+  }
+
   /** Populates some sample chat data */
   private async populateChat(user: User) {
     const logger = new Logger("demo:chat");
@@ -670,7 +701,10 @@ export class DemoDataService {
     logger.log(`Inserting sample AI overviews based on passed 1-day history changes.`);
 
     // Set generation time to next year so background syncs won't overwrite demo overviews
-    const fakeDate = addYears(new Date(), 1);
+    const now = new Date();
+    const fakeDate = addYears(now, 1);
+    const currentBudgetYear = now.getFullYear();
+    const currentBudgetMonth = now.getMonth() + 1;
 
     // Identify target accounts
     const investmentAccounts = accounts.filter((acc) => acc.type === AccountType.investment);
@@ -724,6 +758,15 @@ These changes reflect daily account transactions alongside recent balance fluctu
         - **@${dCheck.id}**: Net shift of ${dCheck.changeStr} (${dCheck.percentStr}).`,
         ChatOverviewType.holdings,
         fakeDate,
+      ),
+      new ChatOverview(
+        user,
+        "Your monthly plan includes limits for housing, utilities, transportation, food, subscriptions, shopping, and entertainment. Check category progress to spot spending nearing its target, then adjust limits as your priorities change.",
+        ChatOverviewType.budgets,
+        fakeDate,
+        "Demo AI",
+        currentBudgetYear,
+        currentBudgetMonth,
       ),
     ]);
   }

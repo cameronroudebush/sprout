@@ -90,6 +90,11 @@ export class UserConfig extends DatabaseBase {
   @IsBoolean()
   includeAICapabilities: boolean;
 
+  /** If the user wants to see budgeting information and features. */
+  @DatabaseDecorators.column({ nullable: false, default: true })
+  @IsBoolean()
+  enableBudgeting: boolean = true;
+
   @OneToOne("User", (user: User) => user.config, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   @ApiHideProperty()
@@ -116,12 +121,20 @@ export class UserConfig extends DatabaseBase {
   @IsString()
   coinbaseApiKeyName?: string;
 
-  constructor(privateMode: boolean, netWorthRange: UserConfig["netWorthRange"], secureMode: boolean, allowWidgets: boolean, includeAICapabilities: boolean) {
+  constructor(
+    privateMode: boolean,
+    netWorthRange: UserConfig["netWorthRange"],
+    secureMode: boolean,
+    allowWidgets: boolean,
+    includeAICapabilities: boolean,
+    enableBudgeting = true,
+  ) {
     super();
     this.privateMode = privateMode;
     this.netWorthRange = netWorthRange;
     this.secureMode = secureMode;
     this.allowWidgets = allowWidgets;
     this.includeAICapabilities = includeAICapabilities;
+    this.enableBudgeting = enableBudgeting;
   }
 }

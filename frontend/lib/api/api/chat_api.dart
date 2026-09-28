@@ -24,7 +24,13 @@ class ChatApi {
   ///
   /// * [String] type:
   ///   The type of overview to retrieve (defaults to 'accounts').
-  Future<Response> chatControllerGetOverviewWithHttpInfo({ String? type, }) async {
+  ///
+  /// * [num] year:
+  ///   Year for monthly budget overviews.
+  ///
+  /// * [num] month:
+  ///   Month (1-12) for monthly budget overviews.
+  Future<Response> chatControllerGetOverviewWithHttpInfo({ String? type, num? year, num? month, }) async {
     // ignore: prefer_const_declarations
     final path = r'/chat/overview';
 
@@ -37,6 +43,12 @@ class ChatApi {
 
     if (type != null) {
       queryParams.addAll(_queryParams('', 'type', type));
+    }
+    if (year != null) {
+      queryParams.addAll(_queryParams('', 'year', year));
+    }
+    if (month != null) {
+      queryParams.addAll(_queryParams('', 'month', month));
     }
 
     const contentTypes = <String>[];
@@ -59,8 +71,14 @@ class ChatApi {
   ///
   /// * [String] type:
   ///   The type of overview to retrieve (defaults to 'accounts').
-  Future<ChatOverview?> chatControllerGetOverview({ String? type, }) async {
-    final response = await chatControllerGetOverviewWithHttpInfo( type: type, );
+  ///
+  /// * [num] year:
+  ///   Year for monthly budget overviews.
+  ///
+  /// * [num] month:
+  ///   Month (1-12) for monthly budget overviews.
+  Future<ChatOverview?> chatControllerGetOverview({ String? type, num? year, num? month, }) async {
+    final response = await chatControllerGetOverviewWithHttpInfo( type: type, year: year, month: month, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

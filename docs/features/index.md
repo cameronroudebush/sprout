@@ -9,7 +9,7 @@ description: Learn about what Sprout can do
     <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png" width="50%">
 </p>
 
-Sprout offers a robust set of tools designed to help you visualize your financial picture at a glance. While not strictly a budgeting app, Sprout focuses on **Net Worth Tracking**—helping you understand exactly where your money is parked, where it is going, and how it grows over time.
+Sprout offers tools to help you understand and manage your financial picture. Track **net worth** over time, see where your money is going, and set monthly category budgets to keep spending visible.
 
 Here are the core features available to help you manage your wealth:
 
@@ -37,6 +37,15 @@ Understanding _how_ your money moves is just as important as knowing _how much_ 
 - **Trend Analysis:** View line and bar charts to spot spending trends month-over-month.
 - **Category Breakdown:** Pie charts help you identify which categories are consuming the largest portion of your budget.
 - **Sankey Diagram:** A powerful visualization that maps the flow of every dollar from income source to final expense category, giving you unmatched clarity on your spending efficiency.
+
+## Budgeting
+
+Set monthly spending limits by category and compare each target with actual spending. Review remaining amounts, over-limit categories, and recent monthly performance from the Budgeting page. A compact budget summary also appears on the dashboard.
+
+- **Category Limits:** Create, edit, or remove a monthly target for each category.
+- **Monthly Overview:** Select a month to review total limits, spending, and category-by-category progress. Cash Flow categories with spending but no limit are also shown.
+- **History:** Compare spending with configured limits across recent months.
+- **AI Insights:** When AI chat is enabled, see an AI-generated summary for the selected month.
 
 ## AI Assistant (Chat)
 

@@ -1,6 +1,7 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
+import { BudgetService } from "@backend/budget/budget.service";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatPromptResult } from "@backend/chat/provider/chat.provider";
@@ -18,7 +19,10 @@ import { FindOptionsWhere, In, MoreThan } from "typeorm";
 /** A service focused entirely around generating prompts for various capabilities */
 @Injectable()
 export class ChatPromptService {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly budgetService: BudgetService,
+  ) {}
 
   /** Generates the system instruction and prompt content to pass to the LLM for standard chatting. */
   async buildChatPrompt(user: User, timeframe: ChatTimeframe, allowCharts: boolean): Promise<ChatPromptResult> {
@@ -71,6 +75,35 @@ export class ChatPromptService {
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto]);
+  }
+
+  /** Builds a concise AI overview from the requested month's budget performance. */
+  async buildBudgetOverviewPrompt(user: User, year = new Date().getFullYear(), monthNumber = new Date().getMonth() + 1): Promise<ChatPromptResult> {
+    const overview = await this.budgetService.getBudgetOverview(user, year, monthNumber);
+    const month = formatDate(new Date(overview.year, overview.month - 1), "MMMM yyyy");
+    const data = {
+      month,
+      totalBudgeted: overview.totalBudgeted,
+      totalSpent: overview.totalSpent,
+      categories: overview.items.map((item) => ({
+        category: item.category.name,
+        hasLimit: item.budgetId != null,
+        limit: item.budgetedAmount,
+        spent: item.actualSpent,
+        remaining: item.remaining,
+        overLimit: item.budgetId != null && item.isOverBudget,
+      })),
+    };
+    const instructions = [
+      ...this.getSharedSystemInstructions(user),
+      `Write a concise, supportive overview of the user's budget performance for ${month}.`,
+      `Analyze the full budget month, not only the last 24 hours.`,
+      `Use only the supplied budget data. Distinguish categories with a spending limit from categories with spending but no limit. Never describe unbudgeted spending as over budget.`,
+      `Highlight the most useful overall takeaway, categories approaching or exceeding limits, and notable unbudgeted spending. Do not invent forecasts, transactions, or reasons for spending.`,
+      `Keep the response to a short paragraph followed by up to three brief bullets. Use supplied currency values where they make the insight clearer, and avoid generic financial advice.`,
+    ];
+
+    return this.createStandalonePrompt(instructions, data);
   }
 
   /**
@@ -144,6 +177,25 @@ export class ChatPromptService {
         : `If the user asks for a chart or visual breakdown, politely inform them that chart generation is currently disabled/unavailable and present the financial insights cleanly using Markdown text or bullet points instead.`,
       includeCYA ? `Always include: "Consult a financial advisor before making decisions."` : "",
     ];
+  }
+
+  /** Builds a one-message prompt for an overview that doesn't need account or chat history context. */
+  private createStandalonePrompt(instructions: string[], data: unknown): ChatPromptResult {
+    const formattedInstructions = instructions.map((inst, index) => `${index + 1}. ${inst}`).join("\n              ");
+
+    return {
+      idMap: new Map(),
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `SYSTEM INSTRUCTIONS:\n${formattedInstructions}\n\nCONTEXTUAL DATA:\n${JSON.stringify(data)}`,
+            },
+          ],
+        },
+      ],
+    };
   }
 
   /** Assembles context, sanitizes chat history, and returns ready prompt contents. */

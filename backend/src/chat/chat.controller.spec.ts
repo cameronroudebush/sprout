@@ -204,6 +204,13 @@ describe("ChatController", () => {
       expect(res).toBe(freshOverview);
     });
 
+    it("should apply sync freshness to holding overviews", async () => {
+      const freshOverview = ChatOverview.fromPlain({ user, type: ChatOverviewType.holdings, time: new Date() });
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(freshOverview);
+
+      await expect(controller.getOverview(user, ChatOverviewType.holdings)).resolves.toBe(freshOverview);
+    });
+
     it("should regenerate overview if missing or stale", async () => {
       vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
 
@@ -215,7 +222,7 @@ describe("ChatController", () => {
 
       const res = await controller.getOverview(user, ChatOverviewType.accounts);
 
-      expect(mockModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.accounts);
+      expect(mockModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.accounts, undefined);
       expect(res).toBe(newOverview);
     });
 
@@ -226,6 +233,93 @@ describe("ChatController", () => {
       chatService.getModel.mockResolvedValue({ generateOverview: vi.fn().mockResolvedValue(newOverview) } as any);
 
       await expect(controller.getOverview(user, ChatOverviewType.accounts)).resolves.toBe(newOverview);
+    });
+
+    it("should return the cached budget overview for the requested month", async () => {
+      const requestedMonth = ChatOverview.fromPlain({
+        user,
+        type: ChatOverviewType.budgets,
+        time: new Date(),
+      });
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(requestedMonth);
+
+      await expect(controller.getOverview(user, ChatOverviewType.budgets, 2025, 4)).resolves.toBe(requestedMonth);
+      expect(ChatOverview.findOne).toHaveBeenCalledWith({
+        where: { user: { id: user.id }, type: ChatOverviewType.budgets, year: 2025, month: 4 },
+      });
+    });
+
+    it("should refresh a historical budget overview on request after a sync", async () => {
+      const historicalOverview = ChatOverview.fromPlain({
+        user,
+        type: ChatOverviewType.budgets,
+        time: new Date(2025, 0, 10),
+      });
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(historicalOverview);
+      const refreshedOverview = ChatOverview.fromPlain({ user, type: ChatOverviewType.budgets });
+      const mockModel = { generateOverview: vi.fn().mockResolvedValue(refreshedOverview) };
+      chatService.getModel.mockResolvedValue(mockModel as any);
+
+      await expect(controller.getOverview(user, ChatOverviewType.budgets, 2025, 1)).resolves.toBe(refreshedOverview);
+      expect(mockModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.budgets, { year: 2025, month: 1 });
+    });
+
+    it("should refresh the current budget overview after a later sync", async () => {
+      const staleOverview = ChatOverview.fromPlain({
+        user,
+        type: ChatOverviewType.budgets,
+        time: new Date(2000, 0, 1),
+      });
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(staleOverview);
+      const refreshedOverview = ChatOverview.fromPlain({ user, type: ChatOverviewType.budgets });
+      const mockModel = { generateOverview: vi.fn().mockResolvedValue(refreshedOverview) };
+      chatService.getModel.mockResolvedValue(mockModel as any);
+      const now = new Date();
+
+      await expect(controller.getOverview(user, ChatOverviewType.budgets, now.getFullYear(), now.getMonth() + 1)).resolves.toBe(refreshedOverview);
+      expect(mockModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.budgets, {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+      });
+    });
+
+    it("should generate a missing budget overview for the requested month", async () => {
+      vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
+      const newOverview = ChatOverview.fromPlain({ user, type: ChatOverviewType.budgets });
+      const mockModel = { generateOverview: vi.fn().mockResolvedValue(newOverview) };
+      chatService.getModel.mockResolvedValue(mockModel as any);
+
+      await expect(controller.getOverview(user, ChatOverviewType.budgets, 2024, 11)).resolves.toBe(newOverview);
+      expect(mockModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.budgets, { year: 2024, month: 11 });
+    });
+
+    it("should reject incomplete or invalid monthly overview periods", async () => {
+      const invalidPeriods: Array<[number | undefined, number | undefined]> = [
+        [2025, undefined],
+        [undefined, 6],
+        [0, 6],
+        [2025, 0],
+        [2025, 13],
+      ];
+
+      for (const [year, month] of invalidPeriods) {
+        await expect(controller.getOverview(user, ChatOverviewType.budgets, year, month)).rejects.toThrow(BadRequestException);
+      }
+    });
+
+    it("should reject future budget overview periods without looking up or generating an overview", async () => {
+      const nextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+      const findOne = vi.spyOn(ChatOverview, "findOne");
+
+      await expect(controller.getOverview(user, ChatOverviewType.budgets, nextMonth.getFullYear(), nextMonth.getMonth() + 1)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(findOne).not.toHaveBeenCalled();
+      expect(chatService.getModel).not.toHaveBeenCalled();
+    });
+
+    it("should reject period parameters for non-monthly overviews", async () => {
+      await expect(controller.getOverview(user, ChatOverviewType.accounts, 2025, 6)).rejects.toThrow(BadRequestException);
     });
   });
 });

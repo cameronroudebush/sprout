@@ -9,7 +9,7 @@ import { JoinColumn, ManyToOne } from "typeorm";
 
 /** This class provides a way of tracking chat overviews based on the requested content tye. */
 @DatabaseDecorators.entity()
-@DatabaseDecorators.compositeUnique<ChatOverview>("user", "type")
+@DatabaseDecorators.compositeUnique<ChatOverview>("user", "type", "year", "month")
 export class ChatOverview extends DatabaseBase {
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn()
@@ -28,6 +28,17 @@ export class ChatOverview extends DatabaseBase {
   @ApiProperty({ enum: ChatOverviewType, enumName: "ChatOverviewTypeEnum", required: true })
   type: ChatOverviewType;
 
+  /** Period key for monthly overviews; zero values identify non-periodic overviews. */
+  @DatabaseDecorators.column({ nullable: false, type: "integer", default: 0 })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
+  year: number;
+
+  @DatabaseDecorators.column({ nullable: false, type: "integer", default: 0 })
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
+  month: number;
+
   /** The provider model that generated this overview. */
   @DatabaseDecorators.column({ nullable: true, type: "varchar" })
   @ApiProperty({ required: false, nullable: true, description: "The model used to generate this overview." })
@@ -35,12 +46,14 @@ export class ChatOverview extends DatabaseBase {
   @IsString()
   model?: string;
 
-  constructor(user: User, text: string, type: ChatOverviewType, time = new Date(), model?: string) {
+  constructor(user: User, text: string, type: ChatOverviewType, time = new Date(), model?: string, year = 0, month = 0) {
     super();
     this.user = user;
     this.time = time;
     this.text = text;
     this.type = type;
     this.model = model;
+    this.year = year;
+    this.month = month;
   }
 }

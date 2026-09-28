@@ -84,6 +84,11 @@ Sprout supports three theme variants configured in `frontend/lib/theme/`:
 - **Mobile Navigation**: Bottom navigation bar (`BottomNavigationBar`) for key sections (Dashboard/Net Worth, Accounts, Transactions, Cash Flow).
 - **Desktop Navigation**: Navigation rail / sidebar (`NavigationRail`) with top-level section routing.
 
+### Layout Spacing
+
+- Prefer `Row` and `Column`'s `spacing` property to set consistent gaps between children.
+- Avoid gap-only `SizedBox` widgets when parent `spacing` can express the same layout. Keep `SizedBox` for intentional dimensions, constraints, or gaps that need different sizing or conditional placement.
+
 ---
 
 ## 5. Data Visualization & Charts (`fl_chart`)

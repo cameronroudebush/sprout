@@ -3,12 +3,12 @@ import { ChatPromptService } from "@backend/chat/chat.prompt.service";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model";
-import { ChatOverviewType } from "@backend/chat/model/chat.overview.type";
+import { ChatOverviewPeriod, ChatOverviewType, isFutureChatOverviewPeriod, resolveChatOverviewPeriod } from "@backend/chat/model/chat.overview.type";
 import { ChatProviderType } from "@backend/chat/model/chat.config.model";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, InternalServerErrorException, Logger } from "@nestjs/common";
 import { ThrottlerException } from "@nestjs/throttler";
 
 /** The kind of generation that is being requested from a provider. */
@@ -33,6 +33,12 @@ export interface ChatPromptResult {
  */
 export abstract class ChatProvider {
   protected readonly logger: Logger;
+
+  private readonly overviewPromptBuilders: Record<ChatOverviewType, (period?: ChatOverviewPeriod) => Promise<ChatPromptResult>> = {
+    [ChatOverviewType.accounts]: () => this.promptBuilder.buildDailyOverviewPrompt(this.user),
+    [ChatOverviewType.holdings]: () => this.promptBuilder.buildHoldingsOverviewPrompt(this.user),
+    [ChatOverviewType.budgets]: (period) => this.promptBuilder.buildBudgetOverviewPrompt(this.user, period?.year, period?.month),
+  };
 
   constructor(
     protected readonly sseService: SSEService,
@@ -175,27 +181,28 @@ export abstract class ChatProvider {
   }
 
   /** Single consolidated overview generator that routes prompt building by type. */
-  async generateOverview(overviewType: ChatOverviewType): Promise<ChatOverview> {
-    const promptResult =
-      overviewType === ChatOverviewType.holdings
-        ? await this.promptBuilder.buildHoldingsOverviewPrompt(this.user)
-        : await this.promptBuilder.buildDailyOverviewPrompt(this.user);
+  async generateOverview(overviewType: ChatOverviewType, requestedPeriod?: ChatOverviewPeriod): Promise<ChatOverview> {
+    const period = resolveChatOverviewPeriod(overviewType, requestedPeriod);
+    if (period && isFutureChatOverviewPeriod(period)) throw new BadRequestException("Budget overviews cannot be requested for a future month.");
+    const promptResult = await this.overviewPromptBuilders[overviewType](period);
 
     await this.logTokens(promptResult.contents, `${overviewType} overview`);
     const text = await this.generateContent(promptResult.contents, promptResult.idMap);
-    return this.saveOverview(text, overviewType);
+    return this.saveOverview(text, overviewType, period);
   }
 
   /** Helper to upsert a chat overview by type. */
-  private async saveOverview(text: string, type: ChatOverviewType): Promise<ChatOverview> {
-    let status = await ChatOverview.findOne({ where: { user: { id: this.user.id }, type } });
+  private async saveOverview(text: string, type: ChatOverviewType, period?: ChatOverviewPeriod): Promise<ChatOverview> {
+    const year = period?.year ?? 0;
+    const month = period?.month ?? 0;
+    let status = await ChatOverview.findOne({ where: { user: { id: this.user.id }, type, year, month } });
     if (status) {
       status.text = text;
       status.time = new Date();
       status.model = this.modelName;
       await status.update();
     } else {
-      status = await new ChatOverview(this.user, text, type, new Date(), this.modelName).insert();
+      status = await new ChatOverview(this.user, text, type, new Date(), this.modelName, year, month).insert();
     }
     return status;
   }

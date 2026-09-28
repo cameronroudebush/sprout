@@ -141,6 +141,13 @@ class SettingsPage extends ConsumerWidget {
             value: userConfig.includeAICapabilities,
             onChanged: (val) => _update(ref, (c) => c.copyWith(includeAICapabilities: val)),
           ),
+        SwitchSettingTile(
+          title: "Enable Budgeting",
+          subtitle: "If we should display budgeting features and targets.",
+          icon: Icons.pie_chart_rounded,
+          value: userConfig.enableBudgeting,
+          onChanged: (val) => _update(ref, (c) => c.copyWith(enableBudgeting: val)),
+        ),
       ],
       "Appearance": [
         ThemePicker(
