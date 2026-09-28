@@ -18,21 +18,80 @@ final allBudgetsProvider = FutureProvider<List<Budget>>((ref) async {
 });
 
 /// Provider fetching monthly budget overview breakdown
-final budgetOverviewProvider = FutureProvider.family<BudgetOverviewResponseDto?, ({int? year, int? month})>((ref, args) async {
+final budgetOverviewProvider = FutureProvider.family<BudgetOverviewResponseDto?,
+    ({int? year, int? month})>((ref, args) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(budgetApiProvider.future);
-  return await api.budgetControllerGetBudgetOverview(year: args.year, month: args.month);
+  return await api.budgetControllerGetBudgetOverview(
+      year: args.year, month: args.month);
+});
+
+/// Shared month totals and overall budget status derived from category totals.
+class BudgetSummary {
+  final double totalBudgeted;
+  final double totalSpent;
+  final bool hasLimits;
+
+  const BudgetSummary({
+    required this.totalBudgeted,
+    required this.totalSpent,
+    required this.hasLimits,
+  });
+
+  factory BudgetSummary.fromOverview(BudgetOverviewResponseDto overview) {
+    return BudgetSummary(
+      totalBudgeted: overview.items.fold<double>(
+        0,
+        (total, item) => total + item.budgetedAmount.toDouble(),
+      ),
+      totalSpent: overview.items.fold<double>(
+        0,
+        (total, item) => total + item.actualSpent.toDouble(),
+      ),
+      hasLimits: overview.items.any((item) => item.budgetId != null),
+    );
+  }
+
+  bool get isOverBudget => hasLimits && totalSpent > totalBudgeted;
+
+  double get totalRemaining => totalBudgeted - totalSpent;
+
+  double get totalOverBudgetAmount =>
+      isOverBudget ? totalSpent - totalBudgeted : 0;
+
+  double get progress => totalBudgeted > 0
+      ? (totalSpent / totalBudgeted).clamp(0.0, 1.0)
+      : (hasLimits && totalSpent > 0 ? 1.0 : 0.0);
+}
+
+final budgetSummaryProvider =
+    Provider.family<BudgetSummary?, ({int? year, int? month})>((ref, args) {
+  final overview = ref.watch(budgetOverviewProvider(args)).value;
+  return overview == null ? null : BudgetSummary.fromOverview(overview);
 });
 
 /// Provider fetching historical budget performance
-final budgetHistoryProvider = FutureProvider.family<BudgetHistoryResponseDto?, ({int months, String? categoryId})>((ref, args) async {
+final budgetHistoryProvider = FutureProvider.family<
+    BudgetHistoryResponseDto?,
+    ({
+      int months,
+      String? categoryId,
+      int? year,
+      int? month
+    })>((ref, args) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(budgetApiProvider.future);
-  return await api.budgetControllerGetBudgetHistory(months: args.months, categoryId: args.categoryId);
+  return await api.budgetControllerGetBudgetHistory(
+    months: args.months,
+    categoryId: args.categoryId,
+    year: args.year,
+    month: args.month,
+  );
 });
 
 /// Provider for budget actions
-final budgetActionsProvider = Provider<BudgetActions>((ref) => BudgetActions(ref));
+final budgetActionsProvider =
+    Provider<BudgetActions>((ref) => BudgetActions(ref));
 
 class BudgetActions {
   final Ref ref;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/budget/provider/budget_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
@@ -10,23 +11,28 @@ import 'package:sprout/shared/widgets/info_card.dart';
 void showBudgetEditDialog({
   required BuildContext context,
   CategoryBudgetOverviewItem? item,
+  Category? category,
 }) {
   showSproutPopup(
     context: context,
-    builder: (innerContext) => BudgetEditDialogWidget(item: item),
+    builder: (innerContext) =>
+        BudgetEditDialogWidget(item: item, category: category),
   );
 }
 
 class BudgetEditDialogWidget extends ConsumerStatefulWidget {
   final CategoryBudgetOverviewItem? item;
+  final Category? category;
 
-  const BudgetEditDialogWidget({super.key, this.item});
+  const BudgetEditDialogWidget({super.key, this.item, this.category});
 
   @override
-  ConsumerState<BudgetEditDialogWidget> createState() => _BudgetEditDialogWidgetState();
+  ConsumerState<BudgetEditDialogWidget> createState() =>
+      _BudgetEditDialogWidgetState();
 }
 
-class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget> {
+class _BudgetEditDialogWidgetState
+    extends ConsumerState<BudgetEditDialogWidget> {
   late final TextEditingController _amountController;
   Category? _selectedCategory;
   bool _isLoading = false;
@@ -39,7 +45,7 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
           ? widget.item!.budgetedAmount.toStringAsFixed(2)
           : '',
     );
-    _selectedCategory = widget.item?.category;
+    _selectedCategory = widget.item?.category ?? widget.category;
   }
 
   @override
@@ -99,10 +105,15 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Budget Target?'),
-        content: Text('Are you sure you want to delete the budget for "${widget.item!.category.name}"?'),
+        content: Text(
+            'Are you sure you want to delete the budget for "${widget.item!.category.name}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Delete')),
         ],
       ),
     );
@@ -111,7 +122,9 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(budgetActionsProvider).deleteBudget(widget.item!.budgetId!);
+      await ref
+          .read(budgetActionsProvider)
+          .deleteBudget(widget.item!.budgetId!);
       if (mounted) {
         Navigator.of(context).pop();
       }
@@ -131,20 +144,40 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.item?.budgetId != null;
+    final now = DateTime.now();
+    final currentMonthOverview = isEditing
+        ? null
+        : ref
+            .watch(
+              budgetOverviewProvider((year: now.year, month: now.month)),
+            )
+            .value;
+    final selectedCategoryId = _selectedCategory?.id;
+    double? currentSpending;
+    if (!isEditing && selectedCategoryId != null) {
+      for (final item
+          in currentMonthOverview?.items ?? <CategoryBudgetOverviewItem>[]) {
+        if (item.category.id == selectedCategoryId && item.actualSpent > 0) {
+          currentSpending = item.actualSpent.toDouble();
+          break;
+        }
+      }
+    }
+    final suggestedSpending = currentSpending;
 
     return SproutBaseDialogWidget(
       isEditing ? "Edit Budget Target" : "Add Budget Target",
       child: Column(
+        spacing: 4,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 12),
           InfoCard(
             text: isEditing
                 ? "Adjust your target monthly spending limit for this category. Sprout tracks actual spending against this limit."
                 : "Set a monthly target spending limit for a category to track spending and get notified if you go over budget.",
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           CategoryDropdown(
             _selectedCategory?.id,
             (cat) => setState(() => _selectedCategory = cat),
@@ -153,7 +186,7 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
             displayUnknownCategoryButton: false,
             label: "Category",
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -165,7 +198,23 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
               border: OutlineInputBorder(),
             ),
           ),
-          const SizedBox(height: 24),
+          if (suggestedSpending != null)
+            Padding(
+                padding: EdgeInsetsGeometry.symmetric(vertical: 4),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: _isLoading
+                        ? null
+                        : () => _amountController.text =
+                            suggestedSpending.toStringAsFixed(2),
+                    icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                    label: Text(
+                      'Use current spending '
+                      '(${NumberFormat.simpleCurrency().format(suggestedSpending)})',
+                    ),
+                  ),
+                )),
           Row(
             children: [
               if (isEditing) ...[
@@ -178,7 +227,8 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
               ],
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                  onPressed:
+                      _isLoading ? null : () => Navigator.of(context).pop(),
                   child: const Text("Cancel"),
                 ),
               ),
@@ -190,7 +240,8 @@ class _BudgetEditDialogWidgetState extends ConsumerState<BudgetEditDialogWidget>
                       ? const SizedBox(
                           height: 18,
                           width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : Text(isEditing ? "Update" : "Save"),
                 ),

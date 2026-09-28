@@ -249,6 +249,7 @@ describe("PostSyncProcessingJob", () => {
       await (job as any).regenerateOverviewsIfActive(user);
 
       expect(mockOverviewModel.generateOverview).toHaveBeenCalledTimes(Object.keys(ChatOverviewType).length);
+      expect(mockOverviewModel.generateOverview).toHaveBeenCalledWith(ChatOverviewType.budgets);
     });
 
     it("should catch individual overview generation errors and continue generating other overviews", async () => {

@@ -9,6 +9,12 @@ Sprout is a full-stack personal finance application. Use these canonical referen
 
 Keep this file focused on agent-specific constraints, workflows, and validation commands. Update the referenced documents when architecture or design guidance changes.
 
+- **Flutter layout spacing**: Prefer `Row`/`Column` `spacing` over gap-only `SizedBox` widgets where possible; follow detailed guidance in [UI and design guidelines](docs/developer/design.md#layout-spacing).
+
+## Backend Data Access
+
+- **User scoping in database queries**: Always scope queries for user-owned data to the associated user wherever possible. In `find`, `findOne`, and QueryBuilder queries, specify `user: { id: user.id }` or `userId: user.id` as supported by the query API.
+
 ---
 
 ## Developer Workflows & Commands
@@ -81,10 +87,8 @@ To verify and build the Flutter frontend client:
     ```bash
     cd frontend && flutter build web
     ```
-3. **Run Frontend Tests**:
-    ```bash
-    cd frontend && flutter test
-    ```
+
+Do not create test cases for the frontend.
 
 ### Database Migrations
 

@@ -78,8 +78,8 @@ describe("BudgetController", () => {
     const historyDto = { history: [] } as any;
     service.getBudgetHistory.mockResolvedValue(historyDto);
 
-    const result = await controller.getBudgetHistory(user, 6, "cat-1");
+    const result = await controller.getBudgetHistory(user, 6, "cat-1", 2025, 3);
     expect(result).toBe(historyDto);
-    expect(service.getBudgetHistory).toHaveBeenCalledWith(user, 6, "cat-1");
+    expect(service.getBudgetHistory).toHaveBeenCalledWith(user, 6, "cat-1", 2025, 3);
   });
 });

@@ -213,6 +213,23 @@ describe("BudgetService", () => {
       expect(overview.isOverBudget).toBe(false);
       expect(overview.totalOverBudgetAmount).toBe(0);
     });
+
+    it("should reject future months before calculating cash flow", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+      const nextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+
+      await expect(service.getBudgetOverview(user, nextMonth.getFullYear(), nextMonth.getMonth() + 1)).rejects.toThrow(BadRequestException);
+      expect(cashFlowService.calculateFlows).not.toHaveBeenCalled();
+    });
+
+    it("should reject invalid months", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+
+      await expect(service.getBudgetOverview(user, new Date().getFullYear(), 13)).rejects.toThrow(BadRequestException);
+      expect(cashFlowService.calculateFlows).not.toHaveBeenCalled();
+    });
   });
 
   describe("getBudgetHistory", () => {
@@ -229,7 +246,22 @@ describe("BudgetService", () => {
 
       vi.spyOn(Budget, "find").mockResolvedValue([budget]);
 
-      const categoryStats = new Map<string, any>([[budget.category.id, { category: budget.category, outflow: 200 }]]);
+      const unbudgetedCategory = Category.fromPlain({
+        ...TestEntities.category,
+        id: "unbudgeted-category-id",
+        name: "Transit",
+      });
+      const excludedCategory = Category.fromPlain({
+        ...TestEntities.category,
+        id: "excluded-category-id",
+        name: "Excluded",
+        excludeFromCashFlow: true,
+      });
+      const categoryStats = new Map<string, any>([
+        [budget.category.id, { category: budget.category, outflow: 200 }],
+        [unbudgetedCategory.id, { category: unbudgetedCategory, outflow: 125 }],
+        [excludedCategory.id, { category: excludedCategory, outflow: 75 }],
+      ]);
       cashFlowService.calculateFlows.mockResolvedValue({ categoryStats } as any);
 
       const result = await service.getBudgetHistory(user, 3);
@@ -237,10 +269,64 @@ describe("BudgetService", () => {
       expect(result.history).toHaveLength(3);
       result.history.forEach((h) => {
         expect(h.budgetedAmount).toBe(500);
-        expect(h.actualSpent).toBe(200);
-        expect(h.remaining).toBe(300);
+        expect(h.actualSpent).toBe(325);
+        expect(h.remaining).toBe(175);
         expect(h.isOverBudget).toBe(false);
       });
+    });
+
+    it("should anchor historical performance to the selected month", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+      vi.spyOn(Budget, "find").mockResolvedValue([]);
+      cashFlowService.calculateFlows.mockResolvedValue({ categoryStats: new Map() } as any);
+
+      const result = await service.getBudgetHistory(user, 3, undefined, 2025, 3);
+
+      expect(result.history.map(({ year, month }) => [year, month])).toEqual([
+        [2025, 1],
+        [2025, 2],
+        [2025, 3],
+      ]);
+      expect(cashFlowService.calculateFlows).toHaveBeenNthCalledWith(1, user, 2025, 3);
+      expect(cashFlowService.calculateFlows).toHaveBeenNthCalledWith(2, user, 2025, 2);
+      expect(cashFlowService.calculateFlows).toHaveBeenNthCalledWith(3, user, 2025, 1);
+    });
+
+    it("should reject incomplete, invalid, or future history periods", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+      const nextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+
+      await expect(service.getBudgetHistory(user, 6, undefined, 2025)).rejects.toThrow(BadRequestException);
+      await expect(service.getBudgetHistory(user, 6, undefined, 2025, 13)).rejects.toThrow(BadRequestException);
+      await expect(service.getBudgetHistory(user, 6, undefined, nextMonth.getFullYear(), nextMonth.getMonth() + 1)).rejects.toThrow(BadRequestException);
+      expect(cashFlowService.calculateFlows).not.toHaveBeenCalled();
+    });
+
+    it("should include unbudgeted spending when checking overall historical limits", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+      const budget = TestEntities.budget;
+      const unbudgetedCategory = Category.fromPlain({
+        ...TestEntities.category,
+        id: "unbudgeted-category-id",
+        name: "Transit",
+      });
+
+      vi.spyOn(Budget, "find").mockResolvedValue([budget]);
+      const categoryStats = new Map<string, any>([
+        [budget.category.id, { category: budget.category, outflow: 200 }],
+        [unbudgetedCategory.id, { category: unbudgetedCategory, outflow: 400 }],
+      ]);
+      cashFlowService.calculateFlows.mockResolvedValue({ categoryStats } as any);
+
+      const result = await service.getBudgetHistory(user, 1);
+
+      expect(result.history[0]?.budgetedAmount).toBe(500);
+      expect(result.history[0]?.actualSpent).toBe(600);
+      expect(result.history[0]?.remaining).toBe(-100);
+      expect(result.history[0]?.isOverBudget).toBe(true);
     });
 
     it("should calculate category-specific budget history when categoryId is specified", async () => {
@@ -280,7 +366,7 @@ describe("BudgetService", () => {
       });
     });
 
-    it("should fall back to general outflow when targetBudgets list is empty", async () => {
+    it("should show general outflow without marking it over budget when no limits exist", async () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
 
@@ -291,7 +377,7 @@ describe("BudgetService", () => {
 
       const result = await service.getBudgetHistory(user, 1);
       expect(result.history[0]?.actualSpent).toBe(100);
-      expect(result.history[0]?.isOverBudget).toBe(true);
+      expect(result.history[0]?.isOverBudget).toBe(false);
     });
   });
 });

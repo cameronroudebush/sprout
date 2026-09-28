@@ -25,11 +25,13 @@ class ChatOverviewTypeEnum {
 
   static const accounts = ChatOverviewTypeEnum._(r'accounts');
   static const holdings = ChatOverviewTypeEnum._(r'holdings');
+  static const budgets = ChatOverviewTypeEnum._(r'budgets');
 
   /// List of all possible values in this [enum][ChatOverviewTypeEnum].
   static const values = <ChatOverviewTypeEnum>[
     accounts,
     holdings,
+    budgets,
   ];
 
   static ChatOverviewTypeEnum? fromJson(dynamic value) => ChatOverviewTypeEnumTypeTransformer().decode(value);
@@ -70,6 +72,7 @@ class ChatOverviewTypeEnumTypeTransformer {
       switch (data) {
         case r'accounts': return ChatOverviewTypeEnum.accounts;
         case r'holdings': return ChatOverviewTypeEnum.holdings;
+        case r'budgets': return ChatOverviewTypeEnum.budgets;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

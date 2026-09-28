@@ -174,7 +174,7 @@ class BudgetApi {
 
   /// Get historical budget performance.
   ///
-  /// Retrieves historical monthly performance looking backwards in time.
+  /// Retrieves historical monthly performance ending at the requested month. Defaults to the current month.
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -183,9 +183,15 @@ class BudgetApi {
   /// * [String] categoryId:
   ///   Filter history to a specific category.
   ///
+  /// * [num] year:
+  ///   Year of the latest month in the history window.
+  ///
+  /// * [num] month:
+  ///   Month (1-12) of the latest month in the history window.
+  ///
   /// * [num] months:
   ///   Number of months to look back (default 6).
-  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({ String? categoryId, num? months, }) async {
+  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({ String? categoryId, num? year, num? month, num? months, }) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/history';
 
@@ -198,6 +204,12 @@ class BudgetApi {
 
     if (categoryId != null) {
       queryParams.addAll(_queryParams('', 'categoryId', categoryId));
+    }
+    if (year != null) {
+      queryParams.addAll(_queryParams('', 'year', year));
+    }
+    if (month != null) {
+      queryParams.addAll(_queryParams('', 'month', month));
     }
     if (months != null) {
       queryParams.addAll(_queryParams('', 'months', months));
@@ -219,17 +231,23 @@ class BudgetApi {
 
   /// Get historical budget performance.
   ///
-  /// Retrieves historical monthly performance looking backwards in time.
+  /// Retrieves historical monthly performance ending at the requested month. Defaults to the current month.
   ///
   /// Parameters:
   ///
   /// * [String] categoryId:
   ///   Filter history to a specific category.
   ///
+  /// * [num] year:
+  ///   Year of the latest month in the history window.
+  ///
+  /// * [num] month:
+  ///   Month (1-12) of the latest month in the history window.
+  ///
   /// * [num] months:
   ///   Number of months to look back (default 6).
-  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({ String? categoryId, num? months, }) async {
-    final response = await budgetControllerGetBudgetHistoryWithHttpInfo( categoryId: categoryId, months: months, );
+  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({ String? categoryId, num? year, num? month, num? months, }) async {
+    final response = await budgetControllerGetBudgetHistoryWithHttpInfo( categoryId: categoryId, year: year, month: month, months: months, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

@@ -1684,8 +1684,26 @@
             "in": "query",
             "description": "The type of overview to retrieve (defaults to 'accounts').",
             "schema": {
-              "enum": ["accounts", "holdings"],
+              "enum": ["accounts", "holdings", "budgets"],
               "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "description": "Year for monthly budget overviews.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "Month (1-12) for monthly budget overviews.",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -1711,6 +1729,621 @@
         ],
         "summary": "Returns the financial overview for the user based on the specified overview type.",
         "tags": ["Chat"]
+      }
+    },
+    "/budget": {
+      "get": {
+        "description": "Retrieves all configured budget targets for the current user.",
+        "operationId": "BudgetController_getAllBudgets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Budgets retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Budget"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all user budgets.",
+        "tags": ["Budget"]
+      },
+      "post": {
+        "description": "Creates a new monthly budget target for a category.",
+        "operationId": "BudgetController_createBudget",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBudgetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Budget created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Budget"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new category budget.",
+        "tags": ["Budget"]
+      }
+    },
+    "/budget/{id}": {
+      "patch": {
+        "description": "Updates an existing budget target's monthly amount.",
+        "operationId": "BudgetController_updateBudget",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBudgetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Budget updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Budget"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a budget target.",
+        "tags": ["Budget"]
+      },
+      "delete": {
+        "description": "Deletes an existing category budget target.",
+        "operationId": "BudgetController_deleteBudget",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Budget deleted successfully."
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a budget target.",
+        "tags": ["Budget"]
+      }
+    },
+    "/budget/overview": {
+      "get": {
+        "description": "Retrieves budget targets vs actual spending breakdown for a given month and year.",
+        "operationId": "BudgetController_getBudgetOverview",
+        "parameters": [
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Budget overview generated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetOverviewResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get budget overview.",
+        "tags": ["Budget"]
+      }
+    },
+    "/budget/history": {
+      "get": {
+        "description": "Retrieves historical monthly performance ending at the requested month. Defaults to the current month.",
+        "operationId": "BudgetController_getBudgetHistory",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "description": "Filter history to a specific category.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "description": "Year of the latest month in the history window.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "Month (1-12) of the latest month in the history window.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "months",
+            "required": false,
+            "in": "query",
+            "description": "Number of months to look back (default 6).",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Budget history generated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetHistoryResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get historical budget performance.",
+        "tags": ["Budget"]
+      }
+    },
+    "/cash-flow/sankey": {
+      "get": {
+        "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
+        "operationId": "CashFlowController_getSankey",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "description": "The year we want the cash flow data for.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sankey built successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SankeyData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get sankey data by query.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/stats": {
+      "get": {
+        "description": "Retrieves stats for the users cash flow in more basic terms. Tracking how much went out and how much came in.",
+        "operationId": "CashFlowController_getStats",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "description": "The year we want the cash flow data for.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "day",
+            "required": false,
+            "in": "query",
+            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "The ID of the account to retrieve transactions from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cash flow calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow stats data by query.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/trend": {
+      "get": {
+        "description": "Returns monthly trend breakdown for the requested look-back period.",
+        "operationId": "CashFlowController_getTrend",
+        "parameters": [
+          {
+            "name": "months",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CashFlowTrendStats"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow trend by month.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/spending": {
+      "get": {
+        "description": "Returns monthly spending breakdown for the requested look-back period, isolating top N categories.",
+        "operationId": "CashFlowController_getSpending",
+        "parameters": [
+          {
+            "name": "months",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "categories",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Spending calculated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowSpending"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get cash flow spending stats per month.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/comparison-timeline": {
+      "get": {
+        "operationId": "CashFlowController_getComparisonTimeline",
+        "parameters": [
+          {
+            "name": "baselineYear",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "targetYear",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "baselineMonth",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "targetMonth",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowComparisonDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get spending progression over time for comparison.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/daily-calendar-spending": {
+      "get": {
+        "operationId": "CashFlowController_getDailyCalendarSpending",
+        "parameters": [
+          {
+            "name": "year",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Map of days to spending amounts returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailySpendingCalendarResponseDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get discrete daily spending totals for a target month canvas calendar widget view.",
+        "tags": ["Cash Flow"]
+      }
+    },
+    "/cash-flow/amortization": {
+      "get": {
+        "description": "Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.",
+        "operationId": "CashFlowController_getAmortization",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LoanAmortizationSeries"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get loan amortization projections.",
+        "tags": ["Cash Flow"]
       }
     },
     "/holding": {
@@ -2272,363 +2905,6 @@
         "tags": ["Email"]
       }
     },
-    "/cash-flow/sankey": {
-      "get": {
-        "description": "Retrieves a model that can be used to render a sankey diagram based on the current authenticated users cash flow.",
-        "operationId": "CashFlowController_getSankey",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "description": "The year we want the cash flow data for.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "month",
-            "required": false,
-            "in": "query",
-            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "day",
-            "required": false,
-            "in": "query",
-            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "accountId",
-            "required": false,
-            "in": "query",
-            "description": "The ID of the account to retrieve transactions from.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sankey built successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SankeyData"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get sankey data by query.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/stats": {
-      "get": {
-        "description": "Retrieves stats for the users cash flow in more basic terms. Tracking how much went out and how much came in.",
-        "operationId": "CashFlowController_getStats",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "description": "The year we want the cash flow data for.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "month",
-            "required": false,
-            "in": "query",
-            "description": "The month we want the cash flow data for. If not given, assumes we want the whole year.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "day",
-            "required": false,
-            "in": "query",
-            "description": "The day we want the cash flow data for. If not given, assumes to include the entire month. If the month is not included in your query, this is ignored.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "accountId",
-            "required": false,
-            "in": "query",
-            "description": "The ID of the account to retrieve transactions from.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Cash flow calculated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CashFlowStats"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get cash flow stats data by query.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/trend": {
-      "get": {
-        "description": "Returns monthly trend breakdown for the requested look-back period.",
-        "operationId": "CashFlowController_getTrend",
-        "parameters": [
-          {
-            "name": "months",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CashFlowTrendStats"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get cash flow trend by month.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/spending": {
-      "get": {
-        "description": "Returns monthly spending breakdown for the requested look-back period, isolating top N categories.",
-        "operationId": "CashFlowController_getSpending",
-        "parameters": [
-          {
-            "name": "months",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "categories",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Spending calculated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CashFlowSpending"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get cash flow spending stats per month.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/comparison-timeline": {
-      "get": {
-        "operationId": "CashFlowController_getComparisonTimeline",
-        "parameters": [
-          {
-            "name": "baselineYear",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "targetYear",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "baselineMonth",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "targetMonth",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CashFlowComparisonDTO"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get spending progression over time for comparison.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/daily-calendar-spending": {
-      "get": {
-        "operationId": "CashFlowController_getDailyCalendarSpending",
-        "parameters": [
-          {
-            "name": "year",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "month",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Map of days to spending amounts returned successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DailySpendingCalendarResponseDTO"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get discrete daily spending totals for a target month canvas calendar widget view.",
-        "tags": ["Cash Flow"]
-      }
-    },
-    "/cash-flow/amortization": {
-      "get": {
-        "description": "Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.",
-        "operationId": "CashFlowController_getAmortization",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LoanAmortizationSeries"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get loan amortization projections.",
-        "tags": ["Cash Flow"]
-      }
-    },
     "/account/{id}": {
       "get": {
         "description": "Retrieves an account by the given ID.",
@@ -3144,246 +3420,6 @@
         ],
         "summary": "Edit category.",
         "tags": ["Category"]
-      }
-    },
-    "/budget": {
-      "get": {
-        "description": "Retrieves all configured budget targets for the current user.",
-        "operationId": "BudgetController_getAllBudgets",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Budgets retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Budget"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get all user budgets.",
-        "tags": ["Budget"]
-      },
-      "post": {
-        "description": "Creates a new monthly budget target for a category.",
-        "operationId": "BudgetController_createBudget",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBudgetDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Budget created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Budget"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new category budget.",
-        "tags": ["Budget"]
-      }
-    },
-    "/budget/{id}": {
-      "patch": {
-        "description": "Updates an existing budget target's monthly amount.",
-        "operationId": "BudgetController_updateBudget",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBudgetDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Budget updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Budget"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update a budget target.",
-        "tags": ["Budget"]
-      },
-      "delete": {
-        "description": "Deletes an existing category budget target.",
-        "operationId": "BudgetController_deleteBudget",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Budget deleted successfully."
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a budget target.",
-        "tags": ["Budget"]
-      }
-    },
-    "/budget/overview": {
-      "get": {
-        "description": "Retrieves budget targets vs actual spending breakdown for a given month and year.",
-        "operationId": "BudgetController_getBudgetOverview",
-        "parameters": [
-          {
-            "name": "year",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "month",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Budget overview generated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BudgetOverviewResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get budget overview.",
-        "tags": ["Budget"]
-      }
-    },
-    "/budget/history": {
-      "get": {
-        "description": "Retrieves historical monthly performance looking backwards in time.",
-        "operationId": "BudgetController_getBudgetHistory",
-        "parameters": [
-          {
-            "name": "categoryId",
-            "required": false,
-            "in": "query",
-            "description": "Filter history to a specific category.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "months",
-            "required": false,
-            "in": "query",
-            "description": "Number of months to look back (default 6).",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Budget history generated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BudgetHistoryResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication is required."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get historical budget performance.",
-        "tags": ["Budget"]
       }
     }
   },
@@ -4415,7 +4451,7 @@
       },
       "ChatOverviewTypeEnum": {
         "type": "string",
-        "enum": ["accounts", "holdings"]
+        "enum": ["accounts", "holdings", "budgets"]
       },
       "ChatOverview": {
         "type": "object",
@@ -4444,6 +4480,468 @@
           }
         },
         "required": ["id", "type", "time", "text"]
+      },
+      "Budget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "The ID of the category for this budget."
+          },
+          "amount": {
+            "type": "number",
+            "description": "The numeric value converted to the user's preferred currency format. This overrides the original amount property.",
+            "minimum": 0,
+            "example": 500,
+            "nullable": false
+          }
+        },
+        "required": ["id", "categoryId", "amount"]
+      },
+      "CreateBudgetDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "The ID of the category for this budget."
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "The target monthly budget amount.",
+            "example": 500
+          }
+        },
+        "required": ["categoryId", "amount"]
+      },
+      "UpdateBudgetDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "The updated target monthly budget amount.",
+            "example": 600
+          }
+        },
+        "required": ["amount"]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the category",
+            "example": "Groceries"
+          },
+          "parentCategoryId": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string",
+            "description": "The icon to use for this category. If one is not given, we'll use the default."
+          },
+          "excludeFromCashFlow": {
+            "type": "boolean",
+            "description": "If true, drops this category from the cash flow calculation engine entirely.\nUse this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.",
+            "default": false
+          },
+          "increasedSubVariance": {
+            "type": "boolean",
+            "description": "If true, increases the variance supported by the subscription algorithm so it can better determine this to be included\n in monthly costs. This defaults to false.",
+            "default": false
+          }
+        },
+        "required": ["id", "name", "excludeFromCashFlow", "increasedSubVariance"]
+      },
+      "CategoryBudgetOverviewItem": {
+        "type": "object",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "description": "The ID of the budget, if configured for this category."
+          },
+          "category": {
+            "description": "The category for this budget line item.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ]
+          },
+          "budgetedAmount": {
+            "type": "number",
+            "description": "The target budgeted amount for the month."
+          },
+          "actualSpent": {
+            "type": "number",
+            "description": "The actual spent amount for the month."
+          },
+          "remaining": {
+            "type": "number",
+            "description": "The remaining budget amount for the month (budgetedAmount - actualSpent)."
+          },
+          "percentageUsed": {
+            "type": "number",
+            "description": "The percentage of budget used (0 to 100+)."
+          },
+          "isOverBudget": {
+            "type": "boolean",
+            "description": "Indicates whether actual spending exceeded the budget target for this category."
+          }
+        },
+        "required": ["category", "budgetedAmount", "actualSpent", "remaining", "percentageUsed", "isOverBudget"]
+      },
+      "BudgetOverviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number",
+            "description": "The year of this budget overview."
+          },
+          "month": {
+            "type": "number",
+            "description": "The month of this budget overview (1-12)."
+          },
+          "totalBudgeted": {
+            "type": "number",
+            "description": "Total budgeted amount across all categories for the month."
+          },
+          "totalSpent": {
+            "type": "number",
+            "description": "Total actual spent amount across budgeted categories for the month."
+          },
+          "totalRemaining": {
+            "type": "number",
+            "description": "Total remaining budget amount across all categories."
+          },
+          "isOverBudget": {
+            "type": "boolean",
+            "description": "Indicates whether total spending across budgeted categories exceeded the total budget limit."
+          },
+          "totalOverBudgetAmount": {
+            "type": "number",
+            "description": "Total amount by which spending exceeded budget limits."
+          },
+          "items": {
+            "description": "List of category budget overview items.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryBudgetOverviewItem"
+            }
+          }
+        },
+        "required": ["year", "month", "totalBudgeted", "totalSpent", "totalRemaining", "isOverBudget", "totalOverBudgetAmount", "items"]
+      },
+      "MonthlyCategoryBudgetPerformance": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number",
+            "description": "Year of performance snapshot."
+          },
+          "month": {
+            "type": "number",
+            "description": "Month of performance snapshot (1-12)."
+          },
+          "budgetedAmount": {
+            "type": "number",
+            "description": "Target budgeted amount."
+          },
+          "actualSpent": {
+            "type": "number",
+            "description": "Actual spent amount."
+          },
+          "remaining": {
+            "type": "number",
+            "description": "Remaining amount."
+          },
+          "isOverBudget": {
+            "type": "boolean",
+            "description": "Indicates whether actual spending exceeded the target budget."
+          }
+        },
+        "required": ["year", "month", "budgetedAmount", "actualSpent", "remaining", "isOverBudget"]
+      },
+      "BudgetHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "history": {
+            "description": "Historical monthly performance data points.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyCategoryBudgetPerformance"
+            }
+          }
+        },
+        "required": ["history"]
+      },
+      "SankeyLink": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string",
+            "description": "A way to help describe what this link is"
+          }
+        },
+        "required": ["source", "target", "value"]
+      },
+      "SankeyData": {
+        "type": "object",
+        "properties": {
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SankeyLink"
+            }
+          }
+        },
+        "required": ["colors", "nodes", "links"]
+      },
+      "CashFlowStats": {
+        "type": "object",
+        "properties": {
+          "totalExpense": {
+            "type": "number"
+          },
+          "totalIncome": {
+            "type": "number"
+          },
+          "count": {
+            "type": "number",
+            "description": "How many total transactions we have for this query"
+          },
+          "largestExpense": {
+            "description": "The largest expense we had for this time period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transaction"
+              }
+            ]
+          }
+        },
+        "required": ["totalExpense", "totalIncome", "count"]
+      },
+      "CashFlowTrendStats": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The label for the X-axis (e.g., 'Jan', 'Feb')"
+          },
+          "topValue": {
+            "type": "number",
+            "description": "Total income for the month (top bar)"
+          },
+          "bottomValue": {
+            "type": "number",
+            "description": "Total expense for the month as an absolute value (bottom bar)"
+          },
+          "trendValue": {
+            "type": "number",
+            "description": "Net cash flow (Income - Expense) for the trend line"
+          }
+        },
+        "required": ["label", "topValue", "bottomValue", "trendValue"]
+      },
+      "MonthlyCategoryData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Total amount spent in this category for this month"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color for the category. Will be a hex code."
+          }
+        },
+        "required": ["name", "amount", "color"]
+      },
+      "MonthlySpendingStats": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "description": "A breakdown of the top categories for the month based on the request",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyCategoryData"
+            }
+          },
+          "monthLabel": {
+            "type": "string",
+            "description": "Month label"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date, just used for sorting"
+          },
+          "totalSpending": {
+            "type": "number",
+            "description": "Total spending for the month"
+          },
+          "periodAverage": {
+            "type": "number",
+            "description": "Average spending across the requested period (for the trend line)"
+          }
+        },
+        "required": ["categories", "monthLabel", "date", "totalSpending", "periodAverage"]
+      },
+      "CashFlowSpending": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlySpendingStats"
+            }
+          },
+          "topCategoryNames": {
+            "description": "The list of top categories identified across the months.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["data", "topCategoryNames"]
+      },
+      "HistoricalDataPoint": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The date of the record"
+          },
+          "value": {
+            "type": "number",
+            "description": "The numerical currency value"
+          }
+        },
+        "required": ["date", "value"]
+      },
+      "CashFlowComparisonDTO": {
+        "type": "object",
+        "properties": {
+          "currentMonthData": {
+            "description": "Daily cumulative spending for the current month",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          },
+          "targetMonthData": {
+            "description": "Daily cumulative spending for the target comparison month",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          },
+          "currentMonthLabel": {
+            "type": "string",
+            "description": "Label for the current month (e.g., 'May 2026')"
+          },
+          "targetMonthLabel": {
+            "type": "string",
+            "description": "Label for the target comparison month (e.g., 'Apr 2026')"
+          }
+        },
+        "required": ["currentMonthData", "targetMonthData", "currentMonthLabel", "targetMonthLabel"]
+      },
+      "DailySpendingItem": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "number",
+            "description": "The day of the month (1-31).",
+            "example": 15
+          },
+          "amount": {
+            "type": "number",
+            "description": "The total spending amount for this specific day.",
+            "example": 1450
+          }
+        },
+        "required": ["day", "amount"]
+      },
+      "DailySpendingCalendarResponseDTO": {
+        "type": "object",
+        "properties": {
+          "spending": {
+            "description": "List of days containing spending metrics for the target month.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailySpendingItem"
+            }
+          }
+        },
+        "required": ["spending"]
+      },
+      "LoanAmortizationSeries": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "The ID of the loan account."
+          },
+          "accountName": {
+            "type": "string",
+            "description": "The name of the loan account."
+          },
+          "monthsToPayOff": {
+            "type": "number",
+            "description": "The projected months until the loan is fully paid off."
+          },
+          "monthlyPayment": {
+            "type": "number",
+            "description": "The estimated monthly payment based on the transactions."
+          },
+          "color": {
+            "type": "string",
+            "description": "Color to display with this line series"
+          },
+          "dataPoints": {
+            "description": "The monthly balance projection data points.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          }
+        },
+        "required": ["accountId", "accountName", "monthsToPayOff", "monthlyPayment", "color", "dataPoints"]
       },
       "Holding": {
         "type": "object",
@@ -4641,21 +5139,6 @@
         },
         "required": ["symbol", "name", "color", "timeline"]
       },
-      "HistoricalDataPoint": {
-        "type": "object",
-        "properties": {
-          "date": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date of the record"
-          },
-          "value": {
-            "type": "number",
-            "description": "The numerical currency value"
-          }
-        },
-        "required": ["date", "value"]
-      },
       "TotalNetWorthDTO": {
         "type": "object",
         "properties": {
@@ -4698,252 +5181,6 @@
           }
         },
         "required": ["code", "appVerifier"]
-      },
-      "SankeyLink": {
-        "type": "object",
-        "properties": {
-          "source": {
-            "type": "string"
-          },
-          "target": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number"
-          },
-          "description": {
-            "type": "string",
-            "description": "A way to help describe what this link is"
-          }
-        },
-        "required": ["source", "target", "value"]
-      },
-      "SankeyData": {
-        "type": "object",
-        "properties": {
-          "colors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "nodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SankeyLink"
-            }
-          }
-        },
-        "required": ["colors", "nodes", "links"]
-      },
-      "CashFlowStats": {
-        "type": "object",
-        "properties": {
-          "totalExpense": {
-            "type": "number"
-          },
-          "totalIncome": {
-            "type": "number"
-          },
-          "count": {
-            "type": "number",
-            "description": "How many total transactions we have for this query"
-          },
-          "largestExpense": {
-            "description": "The largest expense we had for this time period",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Transaction"
-              }
-            ]
-          }
-        },
-        "required": ["totalExpense", "totalIncome", "count"]
-      },
-      "CashFlowTrendStats": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string",
-            "description": "The label for the X-axis (e.g., 'Jan', 'Feb')"
-          },
-          "topValue": {
-            "type": "number",
-            "description": "Total income for the month (top bar)"
-          },
-          "bottomValue": {
-            "type": "number",
-            "description": "Total expense for the month as an absolute value (bottom bar)"
-          },
-          "trendValue": {
-            "type": "number",
-            "description": "Net cash flow (Income - Expense) for the trend line"
-          }
-        },
-        "required": ["label", "topValue", "bottomValue", "trendValue"]
-      },
-      "MonthlyCategoryData": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the category"
-          },
-          "amount": {
-            "type": "number",
-            "description": "Total amount spent in this category for this month"
-          },
-          "color": {
-            "type": "string",
-            "description": "Color for the category. Will be a hex code."
-          }
-        },
-        "required": ["name", "amount", "color"]
-      },
-      "MonthlySpendingStats": {
-        "type": "object",
-        "properties": {
-          "categories": {
-            "description": "A breakdown of the top categories for the month based on the request",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlyCategoryData"
-            }
-          },
-          "monthLabel": {
-            "type": "string",
-            "description": "Month label"
-          },
-          "date": {
-            "format": "date-time",
-            "type": "string",
-            "description": "The date, just used for sorting"
-          },
-          "totalSpending": {
-            "type": "number",
-            "description": "Total spending for the month"
-          },
-          "periodAverage": {
-            "type": "number",
-            "description": "Average spending across the requested period (for the trend line)"
-          }
-        },
-        "required": ["categories", "monthLabel", "date", "totalSpending", "periodAverage"]
-      },
-      "CashFlowSpending": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlySpendingStats"
-            }
-          },
-          "topCategoryNames": {
-            "description": "The list of top categories identified across the months.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": ["data", "topCategoryNames"]
-      },
-      "CashFlowComparisonDTO": {
-        "type": "object",
-        "properties": {
-          "currentMonthData": {
-            "description": "Daily cumulative spending for the current month",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HistoricalDataPoint"
-            }
-          },
-          "targetMonthData": {
-            "description": "Daily cumulative spending for the target comparison month",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HistoricalDataPoint"
-            }
-          },
-          "currentMonthLabel": {
-            "type": "string",
-            "description": "Label for the current month (e.g., 'May 2026')"
-          },
-          "targetMonthLabel": {
-            "type": "string",
-            "description": "Label for the target comparison month (e.g., 'Apr 2026')"
-          }
-        },
-        "required": ["currentMonthData", "targetMonthData", "currentMonthLabel", "targetMonthLabel"]
-      },
-      "DailySpendingItem": {
-        "type": "object",
-        "properties": {
-          "day": {
-            "type": "number",
-            "description": "The day of the month (1-31).",
-            "example": 15
-          },
-          "amount": {
-            "type": "number",
-            "description": "The total spending amount for this specific day.",
-            "example": 1450
-          }
-        },
-        "required": ["day", "amount"]
-      },
-      "DailySpendingCalendarResponseDTO": {
-        "type": "object",
-        "properties": {
-          "spending": {
-            "description": "List of days containing spending metrics for the target month.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DailySpendingItem"
-            }
-          }
-        },
-        "required": ["spending"]
-      },
-      "LoanAmortizationSeries": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "string",
-            "description": "The ID of the loan account."
-          },
-          "accountName": {
-            "type": "string",
-            "description": "The name of the loan account."
-          },
-          "monthsToPayOff": {
-            "type": "number",
-            "description": "The projected months until the loan is fully paid off."
-          },
-          "monthlyPayment": {
-            "type": "number",
-            "description": "The estimated monthly payment based on the transactions."
-          },
-          "color": {
-            "type": "string",
-            "description": "Color to display with this line series"
-          },
-          "dataPoints": {
-            "description": "The monthly balance projection data points.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HistoricalDataPoint"
-            }
-          }
-        },
-        "required": ["accountId", "accountName", "monthsToPayOff", "monthlyPayment", "color", "dataPoints"]
       },
       "AccountEditRequest": {
         "type": "object",
@@ -4995,37 +5232,6 @@
         },
         "required": ["iconType"]
       },
-      "Category": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "description": "The name of the category",
-            "example": "Groceries"
-          },
-          "parentCategoryId": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string",
-            "description": "The icon to use for this category. If one is not given, we'll use the default."
-          },
-          "excludeFromCashFlow": {
-            "type": "boolean",
-            "description": "If true, drops this category from the cash flow calculation engine entirely.\nUse this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.",
-            "default": false
-          },
-          "increasedSubVariance": {
-            "type": "boolean",
-            "description": "If true, increases the variance supported by the subscription algorithm so it can better determine this to be included\n in monthly costs. This defaults to false.",
-            "default": false
-          }
-        },
-        "required": ["id", "name", "excludeFromCashFlow", "increasedSubVariance"]
-      },
       "CategoryStats": {
         "type": "object",
         "properties": {
@@ -5045,176 +5251,6 @@
           }
         },
         "required": ["categoryCount", "colorMapping"]
-      },
-      "Budget": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "categoryId": {
-            "type": "string",
-            "description": "The ID of the category for this budget."
-          },
-          "amount": {
-            "type": "number",
-            "description": "The numeric value converted to the user's preferred currency format. This overrides the original amount property.",
-            "minimum": 0,
-            "example": 500,
-            "nullable": false
-          }
-        },
-        "required": ["id", "categoryId", "amount"]
-      },
-      "CreateBudgetDto": {
-        "type": "object",
-        "properties": {
-          "categoryId": {
-            "type": "string",
-            "description": "The ID of the category for this budget."
-          },
-          "amount": {
-            "type": "number",
-            "minimum": 0,
-            "description": "The target monthly budget amount.",
-            "example": 500
-          }
-        },
-        "required": ["categoryId", "amount"]
-      },
-      "UpdateBudgetDto": {
-        "type": "object",
-        "properties": {
-          "amount": {
-            "type": "number",
-            "minimum": 0,
-            "description": "The updated target monthly budget amount.",
-            "example": 600
-          }
-        },
-        "required": ["amount"]
-      },
-      "CategoryBudgetOverviewItem": {
-        "type": "object",
-        "properties": {
-          "budgetId": {
-            "type": "string",
-            "description": "The ID of the budget, if configured for this category."
-          },
-          "category": {
-            "description": "The category for this budget line item.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Category"
-              }
-            ]
-          },
-          "budgetedAmount": {
-            "type": "number",
-            "description": "The target budgeted amount for the month."
-          },
-          "actualSpent": {
-            "type": "number",
-            "description": "The actual spent amount for the month."
-          },
-          "remaining": {
-            "type": "number",
-            "description": "The remaining budget amount for the month (budgetedAmount - actualSpent)."
-          },
-          "percentageUsed": {
-            "type": "number",
-            "description": "The percentage of budget used (0 to 100+)."
-          },
-          "isOverBudget": {
-            "type": "boolean",
-            "description": "Indicates whether actual spending exceeded the budget target for this category."
-          }
-        },
-        "required": ["category", "budgetedAmount", "actualSpent", "remaining", "percentageUsed", "isOverBudget"]
-      },
-      "BudgetOverviewResponseDto": {
-        "type": "object",
-        "properties": {
-          "year": {
-            "type": "number",
-            "description": "The year of this budget overview."
-          },
-          "month": {
-            "type": "number",
-            "description": "The month of this budget overview (1-12)."
-          },
-          "totalBudgeted": {
-            "type": "number",
-            "description": "Total budgeted amount across all categories for the month."
-          },
-          "totalSpent": {
-            "type": "number",
-            "description": "Total actual spent amount across budgeted categories for the month."
-          },
-          "totalRemaining": {
-            "type": "number",
-            "description": "Total remaining budget amount across all categories."
-          },
-          "isOverBudget": {
-            "type": "boolean",
-            "description": "Indicates whether total spending across budgeted categories exceeded the total budget limit."
-          },
-          "totalOverBudgetAmount": {
-            "type": "number",
-            "description": "Total amount by which spending exceeded budget limits."
-          },
-          "items": {
-            "description": "List of category budget overview items.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CategoryBudgetOverviewItem"
-            }
-          }
-        },
-        "required": ["year", "month", "totalBudgeted", "totalSpent", "totalRemaining", "isOverBudget", "totalOverBudgetAmount", "items"]
-      },
-      "MonthlyCategoryBudgetPerformance": {
-        "type": "object",
-        "properties": {
-          "year": {
-            "type": "number",
-            "description": "Year of performance snapshot."
-          },
-          "month": {
-            "type": "number",
-            "description": "Month of performance snapshot (1-12)."
-          },
-          "budgetedAmount": {
-            "type": "number",
-            "description": "Target budgeted amount."
-          },
-          "actualSpent": {
-            "type": "number",
-            "description": "Actual spent amount."
-          },
-          "remaining": {
-            "type": "number",
-            "description": "Remaining amount."
-          },
-          "isOverBudget": {
-            "type": "boolean",
-            "description": "Indicates whether actual spending exceeded the target budget."
-          }
-        },
-        "required": ["year", "month", "budgetedAmount", "actualSpent", "remaining", "isOverBudget"]
-      },
-      "BudgetHistoryResponseDto": {
-        "type": "object",
-        "properties": {
-          "history": {
-            "description": "Historical monthly performance data points.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MonthlyCategoryBudgetPerformance"
-            }
-          }
-        },
-        "required": ["history"]
       }
     }
   }

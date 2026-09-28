@@ -188,9 +188,8 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
 
       this.logger.debug(`Background generating fresh overviews for active user ${user.username}.`);
       const model = await this.chatService.getModel(user, "overview");
-      const overviewTypes = Object.values(ChatOverviewType) as ChatOverviewType[];
       // Sequentially generate overviews to avoid bursting the API
-      for (const type of overviewTypes) {
+      for (const type of Object.values(ChatOverviewType) as ChatOverviewType[]) {
         try {
           await model.generateOverview(type);
         } catch (e) {

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/config/config_provider.dart';
@@ -102,6 +103,19 @@ Future<ChatOverview?> chatStatus(Ref ref, ChatOverviewTypeEnum type) async {
   final api = await ref.watch(chatApiProvider.future);
   return await api.chatControllerGetOverview(type: type.toString());
 }
+
+/// Fetches a budget overview cached for the requested month.
+final budgetChatStatusProvider =
+    FutureProvider.family<ChatOverview?, ({int year, int month})>(
+  (ref, period) async {
+    final api = await ref.watch(chatApiProvider.future);
+    return api.chatControllerGetOverview(
+      type: ChatOverviewTypeEnum.budgets.toString(),
+      year: period.year,
+      month: period.month,
+    );
+  },
+);
 
 /// Provides whether AI Chat capabilities are enabled based on both
 /// secure server configuration and user settings.

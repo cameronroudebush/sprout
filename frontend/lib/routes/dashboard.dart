@@ -69,10 +69,7 @@ class DashboardPage extends ConsumerWidget {
               const Flexible(
                 flex: 1,
                 child: SproutCard(
-                  child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SpendingCompareChart(),
-                  ),
+                  child: SpendingCompareChart(),
                 ),
               ),
               if (isBudgetEnabled)

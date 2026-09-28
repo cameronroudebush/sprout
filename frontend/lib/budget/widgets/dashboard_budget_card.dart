@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/budget/provider/budget_provider.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// A dashboard widget providing a snapshot of the current month's budget status.
 class DashboardBudgetCard extends ConsumerWidget {
@@ -19,93 +19,38 @@ class DashboardBudgetCard extends ConsumerWidget {
     final monthName = DateFormat('MMMM yyyy').format(now);
 
     final overviewAsync = ref.watch(budgetOverviewProvider((year: now.year, month: now.month)));
+    final summary = ref.watch(budgetSummaryProvider((year: now.year, month: now.month)));
 
     return SproutCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.pie_chart_rounded,
-                      color: theme.colorScheme.primary,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Monthly Budget',
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                  tooltip: 'View Budget Details',
-                  onPressed: () => context.go('/budget'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            overviewAsync.whenDefault(
-              data: (overview) {
-                if (overview == null) {
-                  return const SizedBox.shrink();
-                }
-
-                final totalBudgeted = overview.totalBudgeted.toDouble();
-                final totalSpent = overview.totalSpent.toDouble();
-                final totalRemaining = overview.totalRemaining.toDouble();
-                final isOver = overview.isOverBudget;
-                final totalOverAmount = overview.totalOverBudgetAmount.toDouble();
-                final progress = totalBudgeted > 0 ? (totalSpent / totalBudgeted).clamp(0.0, 1.0) : 1.0;
-
-                final budgetedItems = overview.items.where((i) => i.budgetedAmount > 0).toList();
-
-                return Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          SproutChartHeader(
+            title: 'Budget',
+            subheader: monthName,
+            left: const SizedBox.shrink(),
+            right: summary == null ? null : _buildStatusBadge(theme, summary),
+          ),
+          overviewAsync.whenDefault(
+            data: (overview) {
+              if (overview == null || summary == null) {
+                return const SizedBox.shrink();
+              }
+              final isOver = summary.isOverBudget;
+              final budgetedItems = overview.items.where((i) => i.budgetedAmount > 0).toList();
+              return Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          monthName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: isOver ? theme.colorScheme.errorContainer : theme.colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            isOver ? 'Over Budget' : 'On Track',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: isOver ? theme.colorScheme.onErrorContainer : theme.colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
                     // Metrics Row
                     Row(
                       children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
                                 'Budgeted',
@@ -113,7 +58,7 @@ class DashboardBudgetCard extends ConsumerWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                currencyFormatter.format(totalBudgeted),
+                                currencyFormatter.format(summary.totalBudgeted),
                                 style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -121,7 +66,7 @@ class DashboardBudgetCard extends ConsumerWidget {
                         ),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
                                 'Spent',
@@ -129,7 +74,7 @@ class DashboardBudgetCard extends ConsumerWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                currencyFormatter.format(totalSpent),
+                                currencyFormatter.format(summary.totalSpent),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isOver ? theme.colorScheme.error : theme.colorScheme.onSurface,
@@ -140,18 +85,23 @@ class DashboardBudgetCard extends ConsumerWidget {
                         ),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                isOver ? 'Over By' : 'Remaining',
+                                !summary.hasLimits ? 'Next step' : (isOver ? 'Over By' : 'Remaining'),
                                 style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                isOver ? currencyFormatter.format(totalOverAmount) : currencyFormatter.format(totalRemaining),
+                                !summary.hasLimits
+                                    ? 'Set a limit'
+                                    : currencyFormatter
+                                        .format(isOver ? summary.totalOverBudgetAmount : summary.totalRemaining),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: isOver ? theme.colorScheme.error : theme.colorScheme.primary,
+                                  color: !summary.hasLimits
+                                      ? theme.colorScheme.primary
+                                      : (isOver ? theme.colorScheme.error : theme.colorScheme.primary),
                                 ),
                               ),
                             ],
@@ -165,7 +115,7 @@ class DashboardBudgetCard extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                        value: progress,
+                        value: summary.progress,
                         minHeight: 8,
                         backgroundColor: theme.colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
@@ -177,12 +127,13 @@ class DashboardBudgetCard extends ConsumerWidget {
                     if (budgetedItems.isEmpty) ...[
                       const SizedBox(height: 12),
                       Center(
-                        child: TextButton.icon(
-                          onPressed: () => context.go('/budget'),
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Set up category budgets'),
+                          child: Text(
+                        'Set category limits to track your monthly spending here.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                      ),
+                      )),
                     ] else ...[
                       const SizedBox(height: 12),
                       // Top 2 Category Budget Items
@@ -233,10 +184,35 @@ class DashboardBudgetCard extends ConsumerWidget {
                       }),
                     ],
                   ],
-                );
-              },
-            ),
-          ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(ThemeData theme, BudgetSummary summary) {
+    final backgroundColor = !summary.hasLimits
+        ? theme.colorScheme.surfaceContainerHighest
+        : (summary.isOverBudget ? theme.colorScheme.errorContainer : theme.colorScheme.primaryContainer);
+    final foregroundColor = !summary.hasLimits
+        ? theme.colorScheme.onSurfaceVariant
+        : (summary.isOverBudget ? theme.colorScheme.onErrorContainer : theme.colorScheme.onPrimaryContainer);
+    final label = !summary.hasLimits ? 'No limits yet' : (summary.isOverBudget ? 'Over limit' : 'On track');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: foregroundColor,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

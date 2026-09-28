@@ -19,13 +19,13 @@ export class MonthlyCategoryBudgetPerformance {
   @ApiProperty({ description: "Indicates whether actual spending exceeded the target budget." })
   isOverBudget: boolean;
 
-  constructor(year: number, month: number, budgetedAmount: number, actualSpent: number) {
+  constructor(year: number, month: number, budgetedAmount: number, actualSpent: number, hasBudget: boolean) {
     this.year = year;
     this.month = month;
     this.budgetedAmount = budgetedAmount;
     this.actualSpent = actualSpent;
     this.remaining = budgetedAmount - actualSpent;
-    this.isOverBudget = budgetedAmount > 0 ? actualSpent > budgetedAmount : actualSpent > 0;
+    this.isOverBudget = hasBudget && actualSpent > budgetedAmount;
   }
 }
 

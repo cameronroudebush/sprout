@@ -34,6 +34,7 @@ const routes = [
   new ScreenshotRoute("/chat", { title: "AI Assistant", desc: "Ask questions, get financial answers" }),
   new ScreenshotRoute("/categories"),
   new ScreenshotRoute("/rules"),
+  new ScreenshotRoute("/budget"),
 ];
 
 /** The display sizes we want to take pictures of */
@@ -410,7 +411,7 @@ async function buildStoreScreenshots() {
   // Generate marketing banner
   console.log(`--- Generating Marketing Banner ---`);
   const mainBuffer = getScreenshotByPath("/");
-  const extraBuffers = [getScreenshotByPath("/chat"), getScreenshotByPath("/transactions")];
+  const extraBuffers = [getScreenshotByPath("/chat"), getScreenshotByPath("/reports")];
 
   fs.writeFileSync(
     path.join("docs", "images", "store", "horizontal.png"),

@@ -85,6 +85,12 @@ export class BudgetService {
     const now = new Date();
     const targetYear = year ?? now.getFullYear();
     const targetMonth = month ?? now.getMonth() + 1;
+    if (!Number.isInteger(targetYear) || targetYear < 1 || !Number.isInteger(targetMonth) || targetMonth < 1 || targetMonth > 12) {
+      throw new BadRequestException("A valid year and month (1-12) are required for budget overviews.");
+    }
+    if (targetYear > now.getFullYear() || (targetYear === now.getFullYear() && targetMonth > now.getMonth() + 1)) {
+      throw new BadRequestException("Budget overviews cannot be requested for a future month.");
+    }
 
     const budgets = await Budget.find({
       where: { user: { id: user.id } },
@@ -141,11 +147,25 @@ export class BudgetService {
   }
 
   /**
-   * Retrieves historical monthly budget performance looking backwards in time.
+   * Retrieves historical monthly budget performance ending at the requested month.
    */
-  async getBudgetHistory(user: User, months = 6, categoryId?: string): Promise<BudgetHistoryResponseDto> {
+  async getBudgetHistory(user: User, months = 6, categoryId?: string, year?: number, month?: number): Promise<BudgetHistoryResponseDto> {
     this.checkBudgetingEnabled(user);
-    const today = new Date();
+    const now = new Date();
+    if ((year == null) !== (month == null)) {
+      throw new BadRequestException("Year and month must be provided together for budget history.");
+    }
+
+    const targetYear = year ?? now.getFullYear();
+    const targetMonth = month ?? now.getMonth() + 1;
+    if (!Number.isInteger(targetYear) || targetYear < 1 || !Number.isInteger(targetMonth) || targetMonth < 1 || targetMonth > 12) {
+      throw new BadRequestException("A valid year and month (1-12) are required for budget history.");
+    }
+    if (targetYear > now.getFullYear() || (targetYear === now.getFullYear() && targetMonth > now.getMonth() + 1)) {
+      throw new BadRequestException("Budget history cannot be requested for a future month.");
+    }
+
+    const targetDate = new Date(targetYear, targetMonth, 0);
     const history: MonthlyCategoryBudgetPerformance[] = [];
 
     let targetBudgets: Budget[] = [];
@@ -166,11 +186,11 @@ export class BudgetService {
     const totalTargetBudget = targetBudgets.reduce((sum, b) => sum + b.amount, 0);
 
     for (let i = 0; i < months; i++) {
-      const targetDate = subMonths(today, i);
-      const year = targetDate.getFullYear();
-      const month = targetDate.getMonth() + 1;
+      const historyDate = subMonths(targetDate, i);
+      const historyYear = historyDate.getFullYear();
+      const historyMonth = historyDate.getMonth() + 1;
 
-      const { categoryStats } = await this.cashFlowService.calculateFlows(user, year, month);
+      const { categoryStats } = await this.cashFlowService.calculateFlows(user, historyYear, historyMonth);
 
       let actualSpent = 0;
       if (categoryId) {
@@ -179,15 +199,11 @@ export class BudgetService {
       } else {
         const budgetedCatIds = new Set(targetBudgets.map((b) => b.category?.id).filter(Boolean));
         for (const [catId, stats] of categoryStats.entries()) {
-          if (budgetedCatIds.size > 0) {
-            if (budgetedCatIds.has(catId)) actualSpent += stats.outflow;
-          } else if (!stats.category.excludeFromCashFlow) {
-            actualSpent += stats.outflow;
-          }
+          if (budgetedCatIds.has(catId) || !stats.category.excludeFromCashFlow) actualSpent += stats.outflow;
         }
       }
 
-      history.push(new MonthlyCategoryBudgetPerformance(year, month, totalTargetBudget, actualSpent));
+      history.push(new MonthlyCategoryBudgetPerformance(historyYear, historyMonth, totalTargetBudget, actualSpent, targetBudgets.length > 0));
     }
 
     history.sort((a, b) => {

@@ -3,6 +3,7 @@ setupTests();
 
 import { AccountHistory } from "@backend/account/model/account.history.model.js";
 import { Account } from "@backend/account/model/account.model.js";
+import { BudgetService } from "@backend/budget/budget.service.js";
 import { ChatPromptService } from "@backend/chat/chat.prompt.service.js";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
@@ -18,6 +19,7 @@ import { Mocked } from "vitest";
 describe("ChatPromptService", () => {
   let service: ChatPromptService;
   let transactionService: Mocked<TransactionService>;
+  let budgetService: Mocked<BudgetService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
@@ -35,7 +37,34 @@ describe("ChatPromptService", () => {
       ]),
     } as unknown as Mocked<TransactionService>;
 
-    service = new ChatPromptService(transactionService);
+    budgetService = {
+      getBudgetOverview: vi.fn().mockResolvedValue({
+        year: 2026,
+        month: 6,
+        totalBudgeted: 500,
+        totalSpent: 175,
+        items: [
+          {
+            category: { name: "Groceries" },
+            budgetId: "budget-1",
+            budgetedAmount: 300,
+            actualSpent: 125,
+            remaining: 175,
+            isOverBudget: false,
+          },
+          {
+            category: { name: "Dining" },
+            budgetId: undefined,
+            budgetedAmount: 0,
+            actualSpent: 50,
+            remaining: -50,
+            isOverBudget: true,
+          },
+        ],
+      }),
+    } as unknown as Mocked<BudgetService>;
+
+    service = new ChatPromptService(transactionService, budgetService);
 
     vi.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
     vi.spyOn(Account, "convertListToTargetCurrency").mockImplementation((list: any) => list);
@@ -107,6 +136,19 @@ describe("ChatPromptService", () => {
     it("should build holdings overview prompt", async () => {
       const payload = await service.buildHoldingsOverviewPrompt(user);
       expect(payload.contents).toBeDefined();
+    });
+
+    it("should build budget overview prompt with budget performance context", async () => {
+      const payload = await service.buildBudgetOverviewPrompt(user, 2025, 2);
+      const promptText = payload.contents[0]!.parts[0]!.text;
+
+      expect(budgetService.getBudgetOverview).toHaveBeenCalledWith(user, 2025, 2);
+      expect(payload.idMap.size).toBe(0);
+      expect(promptText).toContain("Groceries");
+      expect(promptText).toContain("Dining");
+      expect(promptText).toContain('"hasLimit":false');
+      expect(promptText).toContain("Analyze the full budget month, not only the last 24 hours.");
+      expect(promptText).toContain("Never describe unbudgeted spending as over budget.");
     });
   });
 

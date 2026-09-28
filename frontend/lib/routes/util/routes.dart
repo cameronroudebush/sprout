@@ -81,14 +81,6 @@ final List<SproutRoute> authenticatedRoutes = [
     builder: (context, state) => const HoldingsPage(),
   ),
   SproutRoute(
-    path: '/budget',
-    label: 'Budgeting',
-    icon: Icons.pie_chart_rounded,
-    bottomNavPriority: 1,
-    builder: (context, state) => const BudgetPage(),
-    enabled: (secureConfig, unsecureConfig, userConfig) => userConfig?.enableBudgeting ?? true,
-  ),
-  SproutRoute(
     path: '/categories',
     label: 'Categories',
     icon: Icons.category,
@@ -115,6 +107,13 @@ final List<SproutRoute> authenticatedRoutes = [
     icon: Icons.bar_chart,
     bottomNavPriority: 4,
     builder: (context, state) => const ReportsPage(),
+  ),
+  SproutRoute(
+    path: '/budget',
+    label: 'Budgeting',
+    icon: Icons.pie_chart_rounded,
+    builder: (context, state) => const BudgetPage(),
+    enabled: (secureConfig, unsecureConfig, userConfig) => userConfig?.enableBudgeting ?? true,
   ),
   SproutRoute(
     path: '/settings',

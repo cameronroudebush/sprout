@@ -82,16 +82,20 @@ export class BudgetController {
   @Get("history")
   @ApiOperation({
     summary: "Get historical budget performance.",
-    description: "Retrieves historical monthly performance looking backwards in time.",
+    description: "Retrieves historical monthly performance ending at the requested month. Defaults to the current month.",
   })
   @ApiQuery({ name: "months", required: false, type: Number, description: "Number of months to look back (default 6)." })
   @ApiQuery({ name: "categoryId", required: false, type: String, description: "Filter history to a specific category." })
+  @ApiQuery({ name: "year", required: false, type: Number, description: "Year of the latest month in the history window." })
+  @ApiQuery({ name: "month", required: false, type: Number, description: "Month (1-12) of the latest month in the history window." })
   @ApiOkResponse({ description: "Budget history generated successfully.", type: BudgetHistoryResponseDto })
   async getBudgetHistory(
     @CurrentUser() user: User,
     @Query("months", new ParseIntPipe({ optional: true })) months = 6,
     @Query("categoryId") categoryId?: string,
+    @Query("year", new ParseIntPipe({ optional: true })) year?: number,
+    @Query("month", new ParseIntPipe({ optional: true })) month?: number,
   ) {
-    return await this.budgetService.getBudgetHistory(user, months, categoryId);
+    return await this.budgetService.getBudgetHistory(user, months, categoryId, year, month);
   }
 }

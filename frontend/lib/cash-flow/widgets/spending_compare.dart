@@ -95,8 +95,9 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
           createSeries(dto.targetMonthData, dto.targetMonthLabel, Colors.grey, true),
         ];
 
-        final String subheaderText =
-            isMonthly ? DateFormat('MMMM yyyy').format(baselineDate) : DateFormat('yyyy').format(baselineDate);
+        final String subheaderText = isMonthly
+            ? "${DateFormat('MMM yy').format(baselineDate)} vs ${DateFormat('MMM yy').format(_customTargetDate!)}"
+            : "${DateFormat('yyyy').format(baselineDate)} vs ${DateFormat('yyyy').format(_customTargetDate!)}";
 
         return SproutLineChart(
           series: series,
@@ -112,30 +113,23 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
             subheader: subheaderText,
             right: Align(
               alignment: Alignment.centerRight,
-              child: SizedBox(
-                width: 100,
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<DateTime>(
-                    isDense: true,
-                    isExpanded: true,
-                    padding: EdgeInsets.zero,
-                    value: _customTargetDate,
-                    items: availableTargets
-                        .map((date) => DropdownMenuItem(
-                              value: date,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  isMonthly
-                                      ? "vs ${DateFormat('MMM yyyy').format(date)}"
-                                      : "vs ${DateFormat('yyyy').format(date)}",
-                                ),
-                              ),
-                            ))
-                        .toList(),
-                    onChanged: (val) => setState(() => _customTargetDate = val!),
-                  ),
-                ),
+              child: PopupMenuButton<DateTime>(
+                icon: const Icon(Icons.calendar_month, size: 22),
+                padding: EdgeInsets.zero,
+                initialValue: _customTargetDate,
+                tooltip: 'Select comparison date',
+                position: PopupMenuPosition.under,
+                onSelected: (val) => setState(() => _customTargetDate = val),
+                itemBuilder: (BuildContext context) {
+                  return availableTargets.map((date) {
+                    return PopupMenuItem<DateTime>(
+                      value: date,
+                      child: Text(
+                        isMonthly ? "vs ${DateFormat('MMM yy').format(date)}" : "vs ${DateFormat('yyyy').format(date)}",
+                      ),
+                    );
+                  }).toList();
+                },
               ),
             ),
           ),

@@ -12,7 +12,7 @@ import { ChatProviderType } from "@backend/chat/model/chat.config.model.js";
 import { SSEEventType } from "@backend/sse/model/event.model.js";
 import { SSEService } from "@backend/sse/sse.service.js";
 import { TestEntities } from "@backend/test/entities.js";
-import { InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { ThrottlerException } from "@nestjs/throttler";
 import { Mocked } from "vitest";
 
@@ -92,6 +92,7 @@ describe("ChatProvider", () => {
       buildChatPrompt: vi.fn().mockResolvedValue({ contents, idMap: new Map([["User Checking", "Acc_0"]]) }),
       buildDailyOverviewPrompt: vi.fn().mockResolvedValue({ contents, idMap: new Map() }),
       buildHoldingsOverviewPrompt: vi.fn().mockResolvedValue({ contents, idMap: new Map() }),
+      buildBudgetOverviewPrompt: vi.fn().mockResolvedValue({ contents, idMap: new Map() }),
     } as unknown as Mocked<ChatPromptService>;
 
     provider = new TestChatProvider(sseService, promptBuilder, user);
@@ -278,5 +279,43 @@ describe("ChatProvider", () => {
     expect(overview.text).toBe("Hello Acc_0");
     expect(existing.model).toBe("test-model");
     expect(existing.update).toHaveBeenCalled();
+  });
+
+  it("should use the budget-specific overview prompt", async () => {
+    vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
+    vi.spyOn(ChatOverview.prototype, "insert").mockImplementation(async function (this: ChatOverview) {
+      return this;
+    });
+
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth() + 1;
+    const overview = await provider.generateOverview(ChatOverviewType.budgets, { year, month });
+
+    expect(promptBuilder.buildBudgetOverviewPrompt).toHaveBeenCalledWith(user, year, month);
+    expect(ChatOverview.findOne).toHaveBeenCalledWith({
+      where: { user: { id: user.id }, type: ChatOverviewType.budgets, year, month },
+    });
+    expect(overview.type).toBe(ChatOverviewType.budgets);
+  });
+
+  it("should default budget overviews to current month", async () => {
+    vi.spyOn(ChatOverview, "findOne").mockResolvedValue(null);
+    vi.spyOn(ChatOverview.prototype, "insert").mockImplementation(async function (this: ChatOverview) {
+      return this;
+    });
+
+    const now = new Date();
+    await provider.generateOverview(ChatOverviewType.budgets);
+
+    expect(promptBuilder.buildBudgetOverviewPrompt).toHaveBeenCalledWith(user, now.getFullYear(), now.getMonth() + 1);
+  });
+
+  it("should reject future budget overview periods before building a prompt", async () => {
+    const nextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+
+    await expect(provider.generateOverview(ChatOverviewType.budgets, { year: nextMonth.getFullYear(), month: nextMonth.getMonth() + 1 })).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(promptBuilder.buildBudgetOverviewPrompt).not.toHaveBeenCalled();
   });
 });

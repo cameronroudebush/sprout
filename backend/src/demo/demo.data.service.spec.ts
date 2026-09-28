@@ -5,9 +5,11 @@ import { AccountHistory } from "@backend/account/model/account.history.model.js"
 import { Account } from "@backend/account/model/account.model.js";
 import { AccountSubType } from "@backend/account/model/account.sub.type.js";
 import { AccountType } from "@backend/account/model/account.type.js";
+import { Budget } from "@backend/budget/model/budget.model.js";
 import { Category } from "@backend/category/model/category.model.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model.js";
+import { ChatOverviewType } from "@backend/chat/model/chat.overview.type.js";
 import { Configuration } from "@backend/config/core.js";
 import { DatabaseService } from "@backend/database/database.service.js";
 import { DemoDataService, DEMO_CATEGORIES } from "@backend/demo/demo.data.service.js";
@@ -88,6 +90,7 @@ describe("DemoDataService", () => {
       vi.spyOn(Category, "find").mockResolvedValue([parentCat, childCat]);
       vi.spyOn(Category, "insertMany").mockImplementation(async (cats: any) => cats);
       vi.spyOn(Transaction, "insertMany").mockResolvedValue([]);
+      vi.spyOn(Budget, "insertMany").mockImplementation(async (budgets: any) => budgets);
       vi.spyOn(TransactionRule, "insertMany").mockResolvedValue([]);
       vi.spyOn(Holding, "insertMany").mockResolvedValue([TestEntities.holding] as any);
       vi.spyOn(HoldingHistory, "insertMany").mockResolvedValue([]);
@@ -98,6 +101,7 @@ describe("DemoDataService", () => {
 
       expect(databaseService.source.dropDatabase).toHaveBeenCalled();
       expect(databaseService.executeMigrations).toHaveBeenCalled();
+      expect(Budget.insertMany).toHaveBeenCalledWith([expect.objectContaining({ category: childCat, amount: 1800 })]);
 
       // 2. Second run when user is new and created
       vi.spyOn(User, "findOne")
@@ -114,6 +118,29 @@ describe("DemoDataService", () => {
       expect(mockUserConfig.update).toHaveBeenCalled();
 
       Configuration.isDemoMode = originalIsDemo;
+    });
+  });
+
+  describe("populateBudgets", () => {
+    it("creates targets only for demo categories owned by the user", async () => {
+      const groceries = Category.fromPlain({ id: "groceries-id", name: DEMO_CATEGORIES.EXPENSE.FOOD.GROCERIES, user: TestEntities.user });
+      const paycheck = Category.fromPlain({ id: "paycheck-id", name: DEMO_CATEGORIES.INCOME.PAYCHECK, user: TestEntities.user });
+      vi.spyOn(Category, "find").mockResolvedValue([groceries, paycheck]);
+      vi.spyOn(Budget, "insertMany").mockImplementation(async (budgets: any) => budgets);
+
+      await (service as any).populateBudgets(TestEntities.user);
+
+      expect(Category.find).toHaveBeenCalledWith({ where: { user: { id: TestEntities.user.id } } });
+      expect(Budget.insertMany).toHaveBeenCalledWith([expect.objectContaining({ user: TestEntities.user, category: groceries, amount: 600 })]);
+    });
+
+    it("skips inserting budgets when no demo categories are present", async () => {
+      vi.spyOn(Category, "find").mockResolvedValue([]);
+      const insertMany = vi.spyOn(Budget, "insertMany");
+
+      await (service as any).populateBudgets(TestEntities.user);
+
+      expect(insertMany).not.toHaveBeenCalled();
     });
   });
 
@@ -198,7 +225,7 @@ describe("DemoDataService", () => {
   });
 
   describe("populateChatOverviews fallbacks", () => {
-    it("should compute overviews without investment accounts or history", async () => {
+    it("should seed account, holdings, and current-month budget overviews without investment accounts or history", async () => {
       vi.spyOn(ChatOverview, "insertMany").mockResolvedValue([]);
 
       const accounts = [
@@ -209,7 +236,16 @@ describe("DemoDataService", () => {
 
       await (service as any).populateChatOverviews(TestEntities.user, accounts, []);
 
-      expect(ChatOverview.insertMany).toHaveBeenCalled();
+      const now = new Date();
+      expect(ChatOverview.insertMany).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: ChatOverviewType.budgets,
+            year: now.getFullYear(),
+            month: now.getMonth() + 1,
+          }),
+        ]),
+      );
     });
   });
 });
