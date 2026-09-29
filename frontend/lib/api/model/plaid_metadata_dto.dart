@@ -25,26 +25,27 @@ class PlaidMetadataDTO {
   String linkSessionId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PlaidMetadataDTO &&
-    other.institution == institution &&
-    _deepEquality.equals(other.accounts, accounts) &&
-    other.linkSessionId == linkSessionId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlaidMetadataDTO &&
+          other.institution == institution &&
+          _deepEquality.equals(other.accounts, accounts) &&
+          other.linkSessionId == linkSessionId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (institution.hashCode) +
-    (accounts.hashCode) +
-    (linkSessionId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (institution.hashCode) + (accounts.hashCode) + (linkSessionId.hashCode);
 
   @override
-  String toString() => 'PlaidMetadataDTO[institution=$institution, accounts=$accounts, linkSessionId=$linkSessionId]';
+  String toString() =>
+      'PlaidMetadataDTO[institution=$institution, accounts=$accounts, linkSessionId=$linkSessionId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'institution'] = this.institution;
-      json[r'accounts'] = this.accounts;
-      json[r'link_session_id'] = this.linkSessionId;
+    json[r'institution'] = this.institution;
+    json[r'accounts'] = this.accounts;
+    json[r'link_session_id'] = this.linkSessionId;
     return json;
   }
 
@@ -59,12 +60,18 @@ class PlaidMetadataDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'institution'), 'Required key "PlaidMetadataDTO[institution]" is missing from JSON.');
-        assert(json[r'institution'] != null, 'Required key "PlaidMetadataDTO[institution]" has a null value in JSON.');
-        assert(json.containsKey(r'accounts'), 'Required key "PlaidMetadataDTO[accounts]" is missing from JSON.');
-        assert(json[r'accounts'] != null, 'Required key "PlaidMetadataDTO[accounts]" has a null value in JSON.');
-        assert(json.containsKey(r'link_session_id'), 'Required key "PlaidMetadataDTO[link_session_id]" is missing from JSON.');
-        assert(json[r'link_session_id'] != null, 'Required key "PlaidMetadataDTO[link_session_id]" has a null value in JSON.');
+        assert(json.containsKey(r'institution'),
+            'Required key "PlaidMetadataDTO[institution]" is missing from JSON.');
+        assert(json[r'institution'] != null,
+            'Required key "PlaidMetadataDTO[institution]" has a null value in JSON.');
+        assert(json.containsKey(r'accounts'),
+            'Required key "PlaidMetadataDTO[accounts]" is missing from JSON.');
+        assert(json[r'accounts'] != null,
+            'Required key "PlaidMetadataDTO[accounts]" has a null value in JSON.');
+        assert(json.containsKey(r'link_session_id'),
+            'Required key "PlaidMetadataDTO[link_session_id]" is missing from JSON.');
+        assert(json[r'link_session_id'] != null,
+            'Required key "PlaidMetadataDTO[link_session_id]" has a null value in JSON.');
         return true;
       }());
 
@@ -77,7 +84,10 @@ class PlaidMetadataDTO {
     return null;
   }
 
-  static List<PlaidMetadataDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PlaidMetadataDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PlaidMetadataDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -105,13 +115,19 @@ class PlaidMetadataDTO {
   }
 
   // maps a json object with a list of PlaidMetadataDTO-objects as value to a dart map
-  static Map<String, List<PlaidMetadataDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PlaidMetadataDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PlaidMetadataDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PlaidMetadataDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PlaidMetadataDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -124,4 +140,3 @@ class PlaidMetadataDTO {
     'link_session_id',
   };
 }
-

@@ -29,7 +29,8 @@ class ActionSettingTile extends ConsumerWidget {
     required this.icon,
     this.trailing,
     this.onTap,
-  }) : assert(icon is IconData || icon is Widget, 'icon must be either IconData or Widget');
+  }) : assert(icon is IconData || icon is Widget,
+            'icon must be either IconData or Widget');
 
   Widget _buildLeading() {
     if (icon is Widget) {
@@ -47,7 +48,8 @@ class ActionSettingTile extends ConsumerWidget {
       leading: _buildLeading(),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing ?? (isDemoMode ? null : const Icon(Icons.chevron_right, size: 16)),
+      trailing: trailing ??
+          (isDemoMode ? null : const Icon(Icons.chevron_right, size: 16)),
       onTap: isDemoMode ? null : onTap,
     );
   }

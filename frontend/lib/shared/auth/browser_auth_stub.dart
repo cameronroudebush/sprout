@@ -1,3 +1,4 @@
 import 'browser_auth.dart';
 
-BrowserAuth getBrowserAuth() => throw UnimplementedError('Unsupported platform');
+BrowserAuth getBrowserAuth() =>
+    throw UnimplementedError('Unsupported platform');

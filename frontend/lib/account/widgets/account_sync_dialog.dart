@@ -29,7 +29,8 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
     });
   }
 
-  void _toggleProvider(ProviderTypeEnum provider, bool selected, int totalActive) {
+  void _toggleProvider(
+      ProviderTypeEnum provider, bool selected, int totalActive) {
     setState(() {
       if (selected) {
         _selectedProviders.add(provider);
@@ -54,7 +55,10 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
     final accounts = ref.watch(accountsProvider).value?.accounts ?? [];
 
     // Filter down to a unique list of providers currently in use
-    final activeProviders = accounts.map((account) => account.provider).toSet().toList()
+    final activeProviders = accounts
+        .map((account) => account.provider)
+        .toSet()
+        .toList()
       ..sort((a, b) => a.value.compareTo(b.value));
 
     // Handle case where user has no accounts to sync
@@ -106,14 +110,18 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
               borderRadius: BorderRadius.circular(10),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: _isAllSelected
                       ? theme.colorScheme.primaryContainer
-                      : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                      : theme.colorScheme.surfaceContainerHighest
+                          .withOpacity(0.3),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: _isAllSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withOpacity(0.2),
+                    color: _isAllSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline.withOpacity(0.2),
                     width: _isAllSelected ? 1.5 : 1,
                   ),
                 ),
@@ -121,15 +129,21 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
                   spacing: 10,
                   children: [
                     Icon(
-                      _isAllSelected ? Icons.check_circle : Icons.circle_outlined,
+                      _isAllSelected
+                          ? Icons.check_circle
+                          : Icons.circle_outlined,
                       size: 18,
-                      color: _isAllSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                      color: _isAllSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
                     ),
                     Text(
                       "All Providers",
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: _isAllSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface,
+                        color: _isAllSelected
+                            ? theme.colorScheme.onPrimaryContainer
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -153,18 +167,23 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
                 final isSelected = _selectedProviders.contains(provider);
 
                 return InkWell(
-                  onTap: () => _toggleProvider(provider, !isSelected, activeProviders.length),
+                  onTap: () => _toggleProvider(
+                      provider, !isSelected, activeProviders.length),
                   borderRadius: BorderRadius.circular(10),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? theme.colorScheme.primaryContainer.withOpacity(0.6)
-                          : theme.colorScheme.surfaceContainerHighest.withOpacity(0.2),
+                          : theme.colorScheme.surfaceContainerHighest
+                              .withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withOpacity(0.2),
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outline.withOpacity(0.2),
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -174,11 +193,14 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
                           top: 0,
                           right: 0,
                           child: Icon(
-                            isSelected ? Icons.check_circle : Icons.circle_outlined,
+                            isSelected
+                                ? Icons.check_circle
+                                : Icons.circle_outlined,
                             size: 14,
                             color: isSelected
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                                : theme.colorScheme.onSurfaceVariant
+                                    .withOpacity(0.4),
                           ),
                         ),
                         Center(
@@ -189,7 +211,9 @@ class _AccountSyncDialogState extends ConsumerState<AccountSyncDialog> {
                             spacing: 4,
                             style: theme.textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface,
+                              color: isSelected
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : theme.colorScheme.onSurface,
                             ),
                           ),
                         ),

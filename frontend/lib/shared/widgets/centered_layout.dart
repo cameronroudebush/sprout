@@ -35,7 +35,8 @@ class SproutCenteredLayout extends StatelessWidget {
     final theme = Theme.of(context);
 
     final double iconSize = 96;
-    final Color iconBgColor = theme.colorScheme.primaryContainer.withValues(alpha: 0.5);
+    final Color iconBgColor =
+        theme.colorScheme.primaryContainer.withValues(alpha: 0.5);
 
     final content = SafeArea(
       child: Center(
@@ -52,7 +53,8 @@ class SproutCenteredLayout extends StatelessWidget {
                   children: [
                     Container(
                       padding: EdgeInsets.all(iconSize * 0.25),
-                      decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+                      decoration: BoxDecoration(
+                          color: iconBgColor, shape: BoxShape.circle),
                       child: SproutIcon(iconSize),
                     ),
                     if (type == SproutLayoutType.error) _buildErrorBadge(theme),
@@ -107,7 +109,8 @@ class SproutCenteredLayout extends StatelessWidget {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(color: theme.scaffoldBackgroundColor.withValues(alpha: 0.8)),
+              child: Container(
+                  color: theme.scaffoldBackgroundColor.withValues(alpha: 0.8)),
             ),
           ),
           content,
@@ -124,7 +127,8 @@ class SproutCenteredLayout extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: theme.scaffoldBackgroundColor, width: 3),
       ),
-      child: Icon(Icons.cloud_off_rounded, size: 20, color: theme.colorScheme.onError),
+      child: Icon(Icons.cloud_off_rounded,
+          size: 20, color: theme.colorScheme.onError),
     );
   }
 }

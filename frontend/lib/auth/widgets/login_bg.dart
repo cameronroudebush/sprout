@@ -77,7 +77,8 @@ class LoginBackgroundWidget extends StatefulWidget {
   State<LoginBackgroundWidget> createState() => _LoginBackgroundWidgetState();
 }
 
-class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with SingleTickerProviderStateMixin {
+class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final List<Particle> _particles = [];
   final List<FloatingTextItem> _texts = [];
@@ -104,7 +105,8 @@ class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with Sing
   void _initElements(Size size, Color primaryColor, bool isDesktop) {
     _particles.clear();
     _texts.clear();
-    int particleCount = ((size.width * size.height) / (isDesktop ? 10000 : 8000)).floor();
+    int particleCount =
+        ((size.width * size.height) / (isDesktop ? 10000 : 8000)).floor();
     for (int i = 0; i < particleCount; i++) {
       _particles.add(
         Particle(
@@ -121,7 +123,8 @@ class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with Sing
     if (widget.textOptions.isEmpty || !widget.showText) return;
     int textCount = ((size.width * size.height) / 80000).floor();
     // Create a unique, shuffled list from textOptions
-    final List<String> uniquePool = List.from(widget.textOptions)..shuffle(_random);
+    final List<String> uniquePool = List.from(widget.textOptions)
+      ..shuffle(_random);
     // Ensure we don't try to pull more unique items than available in the pool
     final int maxUniqueCount = min(textCount, uniquePool.length);
 
@@ -233,7 +236,8 @@ class _LoginBackgroundWidgetState extends State<LoginBackgroundWidget> with Sing
           color: bgColor,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              Size currentSize = Size(constraints.maxWidth, constraints.maxHeight);
+              Size currentSize =
+                  Size(constraints.maxWidth, constraints.maxHeight);
               if (_lastSize != currentSize) {
                 _lastSize = currentSize;
                 _initElements(currentSize, primaryColor, isDesktop);

@@ -27,7 +27,8 @@ class TransactionMapWidget extends ConsumerWidget {
     final secureConfig = ref.watch(secureConfigProvider).value;
     final isDarkMode = ref.watch(userConfigProvider.notifier).isDarkMode();
     if (secureConfig == null) return const SizedBox.shrink();
-    final styleUrl = isDarkMode ? secureConfig.tiles.dark : secureConfig.tiles.light;
+    final styleUrl =
+        isDarkMode ? secureConfig.tiles.dark : secureConfig.tiles.light;
 
     return MapLibreMap(
       options: MapOptions(

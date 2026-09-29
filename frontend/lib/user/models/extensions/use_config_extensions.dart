@@ -30,7 +30,8 @@ extension UserConfigExtensions on UserConfig {
         simpleFinToken: simpleFinToken ?? this.simpleFinToken,
         coinbaseApiKey: coinbaseApiKey ?? this.coinbaseApiKey,
         coinbaseApiKeyName: coinbaseApiKeyName ?? this.coinbaseApiKeyName,
-        includeAICapabilities: includeAICapabilities ?? this.includeAICapabilities,
+        includeAICapabilities:
+            includeAICapabilities ?? this.includeAICapabilities,
         enableBudgeting: enableBudgeting ?? this.enableBudgeting);
   }
 }

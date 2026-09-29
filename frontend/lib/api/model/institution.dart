@@ -38,35 +38,38 @@ class Institution {
   Map<String, Object> extra;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Institution &&
-    other.id == id &&
-    other.iconType == iconType &&
-    other.url == url &&
-    other.name == name &&
-    other.hasError == hasError &&
-    _deepEquality.equals(other.extra, extra);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Institution &&
+          other.id == id &&
+          other.iconType == iconType &&
+          other.url == url &&
+          other.name == name &&
+          other.hasError == hasError &&
+          _deepEquality.equals(other.extra, extra);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (iconType.hashCode) +
-    (url.hashCode) +
-    (name.hashCode) +
-    (hasError.hashCode) +
-    (extra.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (iconType.hashCode) +
+      (url.hashCode) +
+      (name.hashCode) +
+      (hasError.hashCode) +
+      (extra.hashCode);
 
   @override
-  String toString() => 'Institution[id=$id, iconType=$iconType, url=$url, name=$name, hasError=$hasError, extra=$extra]';
+  String toString() =>
+      'Institution[id=$id, iconType=$iconType, url=$url, name=$name, hasError=$hasError, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'iconType'] = this.iconType;
-      json[r'url'] = this.url;
-      json[r'name'] = this.name;
-      json[r'hasError'] = this.hasError;
-      json[r'extra'] = this.extra;
+    json[r'id'] = this.id;
+    json[r'iconType'] = this.iconType;
+    json[r'url'] = this.url;
+    json[r'name'] = this.name;
+    json[r'hasError'] = this.hasError;
+    json[r'extra'] = this.extra;
     return json;
   }
 
@@ -81,16 +84,26 @@ class Institution {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Institution[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Institution[id]" has a null value in JSON.');
-        assert(json.containsKey(r'iconType'), 'Required key "Institution[iconType]" is missing from JSON.');
-        assert(json[r'iconType'] != null, 'Required key "Institution[iconType]" has a null value in JSON.');
-        assert(json.containsKey(r'url'), 'Required key "Institution[url]" is missing from JSON.');
-        assert(json[r'url'] != null, 'Required key "Institution[url]" has a null value in JSON.');
-        assert(json.containsKey(r'name'), 'Required key "Institution[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "Institution[name]" has a null value in JSON.');
-        assert(json.containsKey(r'hasError'), 'Required key "Institution[hasError]" is missing from JSON.');
-        assert(json[r'hasError'] != null, 'Required key "Institution[hasError]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Institution[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Institution[id]" has a null value in JSON.');
+        assert(json.containsKey(r'iconType'),
+            'Required key "Institution[iconType]" is missing from JSON.');
+        assert(json[r'iconType'] != null,
+            'Required key "Institution[iconType]" has a null value in JSON.');
+        assert(json.containsKey(r'url'),
+            'Required key "Institution[url]" is missing from JSON.');
+        assert(json[r'url'] != null,
+            'Required key "Institution[url]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "Institution[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "Institution[name]" has a null value in JSON.');
+        assert(json.containsKey(r'hasError'),
+            'Required key "Institution[hasError]" is missing from JSON.');
+        assert(json[r'hasError'] != null,
+            'Required key "Institution[hasError]" has a null value in JSON.');
         return true;
       }());
 
@@ -106,7 +119,10 @@ class Institution {
     return null;
   }
 
-  static List<Institution> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Institution> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Institution>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -134,13 +150,19 @@ class Institution {
   }
 
   // maps a json object with a list of Institution-objects as value to a dart map
-  static Map<String, List<Institution>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Institution>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Institution>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Institution.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Institution.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -155,4 +177,3 @@ class Institution {
     'hasError',
   };
 }
-

@@ -44,38 +44,41 @@ class TransactionSubscription {
   DateTime startDate;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TransactionSubscription &&
-    other.account == account &&
-    other.transaction == transaction &&
-    other.amount == amount &&
-    other.description == description &&
-    other.count == count &&
-    other.period == period &&
-    other.startDate == startDate;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TransactionSubscription &&
+          other.account == account &&
+          other.transaction == transaction &&
+          other.amount == amount &&
+          other.description == description &&
+          other.count == count &&
+          other.period == period &&
+          other.startDate == startDate;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (account.hashCode) +
-    (transaction.hashCode) +
-    (amount.hashCode) +
-    (description.hashCode) +
-    (count.hashCode) +
-    (period.hashCode) +
-    (startDate.hashCode);
+      // ignore: unnecessary_parenthesis
+      (account.hashCode) +
+      (transaction.hashCode) +
+      (amount.hashCode) +
+      (description.hashCode) +
+      (count.hashCode) +
+      (period.hashCode) +
+      (startDate.hashCode);
 
   @override
-  String toString() => 'TransactionSubscription[account=$account, transaction=$transaction, amount=$amount, description=$description, count=$count, period=$period, startDate=$startDate]';
+  String toString() =>
+      'TransactionSubscription[account=$account, transaction=$transaction, amount=$amount, description=$description, count=$count, period=$period, startDate=$startDate]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'account'] = this.account;
-      json[r'transaction'] = this.transaction;
-      json[r'amount'] = this.amount;
-      json[r'description'] = this.description;
-      json[r'count'] = this.count;
-      json[r'period'] = this.period;
-      json[r'startDate'] = this.startDate.toUtc().toIso8601String();
+    json[r'account'] = this.account;
+    json[r'transaction'] = this.transaction;
+    json[r'amount'] = this.amount;
+    json[r'description'] = this.description;
+    json[r'count'] = this.count;
+    json[r'period'] = this.period;
+    json[r'startDate'] = this.startDate.toUtc().toIso8601String();
     return json;
   }
 
@@ -90,20 +93,34 @@ class TransactionSubscription {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'account'), 'Required key "TransactionSubscription[account]" is missing from JSON.');
-        assert(json[r'account'] != null, 'Required key "TransactionSubscription[account]" has a null value in JSON.');
-        assert(json.containsKey(r'transaction'), 'Required key "TransactionSubscription[transaction]" is missing from JSON.');
-        assert(json[r'transaction'] != null, 'Required key "TransactionSubscription[transaction]" has a null value in JSON.');
-        assert(json.containsKey(r'amount'), 'Required key "TransactionSubscription[amount]" is missing from JSON.');
-        assert(json[r'amount'] != null, 'Required key "TransactionSubscription[amount]" has a null value in JSON.');
-        assert(json.containsKey(r'description'), 'Required key "TransactionSubscription[description]" is missing from JSON.');
-        assert(json[r'description'] != null, 'Required key "TransactionSubscription[description]" has a null value in JSON.');
-        assert(json.containsKey(r'count'), 'Required key "TransactionSubscription[count]" is missing from JSON.');
-        assert(json[r'count'] != null, 'Required key "TransactionSubscription[count]" has a null value in JSON.');
-        assert(json.containsKey(r'period'), 'Required key "TransactionSubscription[period]" is missing from JSON.');
-        assert(json[r'period'] != null, 'Required key "TransactionSubscription[period]" has a null value in JSON.');
-        assert(json.containsKey(r'startDate'), 'Required key "TransactionSubscription[startDate]" is missing from JSON.');
-        assert(json[r'startDate'] != null, 'Required key "TransactionSubscription[startDate]" has a null value in JSON.');
+        assert(json.containsKey(r'account'),
+            'Required key "TransactionSubscription[account]" is missing from JSON.');
+        assert(json[r'account'] != null,
+            'Required key "TransactionSubscription[account]" has a null value in JSON.');
+        assert(json.containsKey(r'transaction'),
+            'Required key "TransactionSubscription[transaction]" is missing from JSON.');
+        assert(json[r'transaction'] != null,
+            'Required key "TransactionSubscription[transaction]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'),
+            'Required key "TransactionSubscription[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null,
+            'Required key "TransactionSubscription[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'description'),
+            'Required key "TransactionSubscription[description]" is missing from JSON.');
+        assert(json[r'description'] != null,
+            'Required key "TransactionSubscription[description]" has a null value in JSON.');
+        assert(json.containsKey(r'count'),
+            'Required key "TransactionSubscription[count]" is missing from JSON.');
+        assert(json[r'count'] != null,
+            'Required key "TransactionSubscription[count]" has a null value in JSON.');
+        assert(json.containsKey(r'period'),
+            'Required key "TransactionSubscription[period]" is missing from JSON.');
+        assert(json[r'period'] != null,
+            'Required key "TransactionSubscription[period]" has a null value in JSON.');
+        assert(json.containsKey(r'startDate'),
+            'Required key "TransactionSubscription[startDate]" is missing from JSON.');
+        assert(json[r'startDate'] != null,
+            'Required key "TransactionSubscription[startDate]" has a null value in JSON.');
         return true;
       }());
 
@@ -120,7 +137,10 @@ class TransactionSubscription {
     return null;
   }
 
-  static List<TransactionSubscription> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TransactionSubscription> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TransactionSubscription>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -148,13 +168,19 @@ class TransactionSubscription {
   }
 
   // maps a json object with a list of TransactionSubscription-objects as value to a dart map
-  static Map<String, List<TransactionSubscription>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TransactionSubscription>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TransactionSubscription>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TransactionSubscription.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TransactionSubscription.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -189,7 +215,8 @@ class TransactionSubscriptionPeriodEnum {
   static const biWeekly = TransactionSubscriptionPeriodEnum._(r'bi-weekly');
   static const monthly = TransactionSubscriptionPeriodEnum._(r'monthly');
   static const quarterly = TransactionSubscriptionPeriodEnum._(r'quarterly');
-  static const semiAnnually = TransactionSubscriptionPeriodEnum._(r'semi-annually');
+  static const semiAnnually =
+      TransactionSubscriptionPeriodEnum._(r'semi-annually');
   static const yearly = TransactionSubscriptionPeriodEnum._(r'yearly');
   static const unknown = TransactionSubscriptionPeriodEnum._(r'unknown');
 
@@ -204,9 +231,13 @@ class TransactionSubscriptionPeriodEnum {
     unknown,
   ];
 
-  static TransactionSubscriptionPeriodEnum? fromJson(dynamic value) => TransactionSubscriptionPeriodEnumTypeTransformer().decode(value);
+  static TransactionSubscriptionPeriodEnum? fromJson(dynamic value) =>
+      TransactionSubscriptionPeriodEnumTypeTransformer().decode(value);
 
-  static List<TransactionSubscriptionPeriodEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TransactionSubscriptionPeriodEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TransactionSubscriptionPeriodEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -223,7 +254,8 @@ class TransactionSubscriptionPeriodEnum {
 /// Transformation class that can [encode] an instance of [TransactionSubscriptionPeriodEnum] to String,
 /// and [decode] dynamic data back to [TransactionSubscriptionPeriodEnum].
 class TransactionSubscriptionPeriodEnumTypeTransformer {
-  factory TransactionSubscriptionPeriodEnumTypeTransformer() => _instance ??= const TransactionSubscriptionPeriodEnumTypeTransformer._();
+  factory TransactionSubscriptionPeriodEnumTypeTransformer() =>
+      _instance ??= const TransactionSubscriptionPeriodEnumTypeTransformer._();
 
   const TransactionSubscriptionPeriodEnumTypeTransformer._();
 
@@ -237,16 +269,24 @@ class TransactionSubscriptionPeriodEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  TransactionSubscriptionPeriodEnum? decode(dynamic data, {bool allowNull = true}) {
+  TransactionSubscriptionPeriodEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'weekly': return TransactionSubscriptionPeriodEnum.weekly;
-        case r'bi-weekly': return TransactionSubscriptionPeriodEnum.biWeekly;
-        case r'monthly': return TransactionSubscriptionPeriodEnum.monthly;
-        case r'quarterly': return TransactionSubscriptionPeriodEnum.quarterly;
-        case r'semi-annually': return TransactionSubscriptionPeriodEnum.semiAnnually;
-        case r'yearly': return TransactionSubscriptionPeriodEnum.yearly;
-        case r'unknown': return TransactionSubscriptionPeriodEnum.unknown;
+        case r'weekly':
+          return TransactionSubscriptionPeriodEnum.weekly;
+        case r'bi-weekly':
+          return TransactionSubscriptionPeriodEnum.biWeekly;
+        case r'monthly':
+          return TransactionSubscriptionPeriodEnum.monthly;
+        case r'quarterly':
+          return TransactionSubscriptionPeriodEnum.quarterly;
+        case r'semi-annually':
+          return TransactionSubscriptionPeriodEnum.semiAnnually;
+        case r'yearly':
+          return TransactionSubscriptionPeriodEnum.yearly;
+        case r'unknown':
+          return TransactionSubscriptionPeriodEnum.unknown;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -259,5 +299,3 @@ class TransactionSubscriptionPeriodEnumTypeTransformer {
   /// Singleton [TransactionSubscriptionPeriodEnumTypeTransformer] instance.
   static TransactionSubscriptionPeriodEnumTypeTransformer? _instance;
 }
-
-

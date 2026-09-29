@@ -17,9 +17,12 @@ class LineChartDataProcessor {
     if (historicalData == null) {
       return {};
     }
-    final cutoffDate = DateTime.now().subtract(ChartRangeUtility.getDurationForRange(selectedChartRange));
+    final cutoffDate = DateTime.now()
+        .subtract(ChartRangeUtility.getDurationForRange(selectedChartRange));
     return historicalData.entries
-        .where((entry) => entry.key.isAfter(cutoffDate) || entry.key.isAtSameMomentAs(cutoffDate))
+        .where((entry) =>
+            entry.key.isAfter(cutoffDate) ||
+            entry.key.isAtSameMomentAs(cutoffDate))
         .map((entry) => MapEntry(entry.key, entry.value))
         .toList()
         .cast<MapEntry<DateTime, num>>()
@@ -31,14 +34,18 @@ class LineChartDataProcessor {
 
   /// Takes the filtered historical data from @filterHistoricalData and converts it
   ///   into the expected type for the fl_chart library
-  static SproutLineChartData prepareChartData(Map<DateTime, num> filteredHistoricalData) {
-    final sortedChartEntries = filteredHistoricalData.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+  static SproutLineChartData prepareChartData(
+      Map<DateTime, num> filteredHistoricalData) {
+    final sortedChartEntries = filteredHistoricalData.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
     final chartSpots = sortedChartEntries
         .asMap()
         .entries
-        .map((entry) => FlSpot(entry.key.toDouble(), entry.value.value.toDouble()))
+        .map((entry) =>
+            FlSpot(entry.key.toDouble(), entry.value.value.toDouble()))
         .toList();
-    return SproutLineChartData(spots: chartSpots, sortedEntries: sortedChartEntries);
+    return SproutLineChartData(
+        spots: chartSpots, sortedEntries: sortedChartEntries);
   }
 
   /// Calculates how many chart intervals to display based on the difference in given y values
@@ -61,11 +68,13 @@ class LineChartDataProcessor {
   }
 
   /// Computes a chart data set for an average series
-  static SproutChartSeries computeAverageData(SproutLineChartData processedData) {
+  static SproutChartSeries computeAverageData(
+      SproutLineChartData processedData) {
     final spots = processedData.spots;
     SproutLineChartData data;
     if (spots.isEmpty) {
-      data = SproutLineChartData(spots: [], sortedEntries: processedData.sortedEntries);
+      data = SproutLineChartData(
+          spots: [], sortedEntries: processedData.sortedEntries);
     }
     {
       final double totalSum = spots.fold(0.0, (sum, spot) => sum + spot.y);
@@ -86,7 +95,11 @@ class LineChartDataProcessor {
       data: data,
       label: "Average",
       config: LineSeriesConfig(
-          color: Colors.grey.withOpacity(0.5), isDashed: true, width: 2.0, showInTooltip: false, showArea: false),
+          color: Colors.grey.withOpacity(0.5),
+          isDashed: true,
+          width: 2.0,
+          showInTooltip: false,
+          showArea: false),
     );
   }
 }

@@ -35,28 +35,31 @@ class SankeyLink {
   String? description;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SankeyLink &&
-    other.source_ == source_ &&
-    other.target == target &&
-    other.value == value &&
-    other.description == description;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SankeyLink &&
+          other.source_ == source_ &&
+          other.target == target &&
+          other.value == value &&
+          other.description == description;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (source_.hashCode) +
-    (target.hashCode) +
-    (value.hashCode) +
-    (description == null ? 0 : description!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (source_.hashCode) +
+      (target.hashCode) +
+      (value.hashCode) +
+      (description == null ? 0 : description!.hashCode);
 
   @override
-  String toString() => 'SankeyLink[source_=$source_, target=$target, value=$value, description=$description]';
+  String toString() =>
+      'SankeyLink[source_=$source_, target=$target, value=$value, description=$description]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'source'] = this.source_;
-      json[r'target'] = this.target;
-      json[r'value'] = this.value;
+    json[r'source'] = this.source_;
+    json[r'target'] = this.target;
+    json[r'value'] = this.value;
     if (this.description != null) {
       json[r'description'] = this.description;
     } else {
@@ -76,12 +79,18 @@ class SankeyLink {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'source'), 'Required key "SankeyLink[source]" is missing from JSON.');
-        assert(json[r'source'] != null, 'Required key "SankeyLink[source]" has a null value in JSON.');
-        assert(json.containsKey(r'target'), 'Required key "SankeyLink[target]" is missing from JSON.');
-        assert(json[r'target'] != null, 'Required key "SankeyLink[target]" has a null value in JSON.');
-        assert(json.containsKey(r'value'), 'Required key "SankeyLink[value]" is missing from JSON.');
-        assert(json[r'value'] != null, 'Required key "SankeyLink[value]" has a null value in JSON.');
+        assert(json.containsKey(r'source'),
+            'Required key "SankeyLink[source]" is missing from JSON.');
+        assert(json[r'source'] != null,
+            'Required key "SankeyLink[source]" has a null value in JSON.');
+        assert(json.containsKey(r'target'),
+            'Required key "SankeyLink[target]" is missing from JSON.');
+        assert(json[r'target'] != null,
+            'Required key "SankeyLink[target]" has a null value in JSON.');
+        assert(json.containsKey(r'value'),
+            'Required key "SankeyLink[value]" is missing from JSON.');
+        assert(json[r'value'] != null,
+            'Required key "SankeyLink[value]" has a null value in JSON.');
         return true;
       }());
 
@@ -95,7 +104,10 @@ class SankeyLink {
     return null;
   }
 
-  static List<SankeyLink> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SankeyLink> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <SankeyLink>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -123,13 +135,19 @@ class SankeyLink {
   }
 
   // maps a json object with a list of SankeyLink-objects as value to a dart map
-  static Map<String, List<SankeyLink>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<SankeyLink>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<SankeyLink>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SankeyLink.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = SankeyLink.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -142,4 +160,3 @@ class SankeyLink {
     'value',
   };
 }
-

@@ -14,7 +14,8 @@ class ChatBubble extends ConsumerWidget {
   final ChatHistory message;
   final bool displayThinking;
 
-  const ChatBubble({super.key, required this.message, this.displayThinking = true});
+  const ChatBubble(
+      {super.key, required this.message, this.displayThinking = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,17 +51,23 @@ class ChatBubble extends ConsumerWidget {
               Flexible(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: isDesktop ? (constraints.maxWidth * 0.7).clamp(0.0, 800.0) : constraints.maxWidth * 0.75,
+                    maxWidth: isDesktop
+                        ? (constraints.maxWidth * 0.7).clamp(0.0, 800.0)
+                        : constraints.maxWidth * 0.75,
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isAi ? theme.colorScheme.secondary : theme.colorScheme.primary,
+                      color: isAi
+                          ? theme.colorScheme.secondary
+                          : theme.colorScheme.primary,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(15),
                         topRight: const Radius.circular(15),
-                        bottomLeft: isAi ? Radius.zero : const Radius.circular(15),
-                        bottomRight: isAi ? const Radius.circular(15) : Radius.zero,
+                        bottomLeft:
+                            isAi ? Radius.zero : const Radius.circular(15),
+                        bottomRight:
+                            isAi ? const Radius.circular(15) : Radius.zero,
                       ),
                     ),
                     child: Column(
@@ -76,7 +83,9 @@ class ChatBubble extends ConsumerWidget {
                                 isAi: isAi,
                                 textColor: Colors.white,
                               ),
-                        if (isAi && !message.isThinking && message.model != null) ...[
+                        if (isAi &&
+                            !message.isThinking &&
+                            message.model != null) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [

@@ -56,14 +56,16 @@ final ThemeData absoluteDarkTheme = FlexThemeData.dark(
       padding: WidgetStateProperty.all(EdgeInsets.zero),
     ),
   ),
-  dividerTheme: DividerThemeData(color: const Color(0xff116383).withOpacity(.40)),
+  dividerTheme:
+      DividerThemeData(color: const Color(0xff116383).withOpacity(.40)),
   chipTheme: ChipThemeData(
     backgroundColor: const Color(0xff080808),
     disabledColor: const Color(0xff080808).withOpacity(0.4),
     labelStyle: const TextStyle(fontSize: 13, color: Colors.white),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
-      side: BorderSide(color: const Color(0xff116383).withOpacity(0.3), width: 1),
+      side:
+          BorderSide(color: const Color(0xff116383).withOpacity(0.3), width: 1),
     ),
   ),
   cardTheme: const CardThemeData(color: Color(0xff080808)),
@@ -82,7 +84,9 @@ final ThemeData absoluteDarkTheme = FlexThemeData.dark(
   canvasColor: const Color(0xff080808),
   dividerColor: const Color(0xff116383),
   tooltipTheme: TooltipThemeData(
-    decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
+    decoration: BoxDecoration(
+        color: const Color(0xff116383),
+        borderRadius: BorderRadius.circular(12)),
     textStyle: const TextStyle(color: Colors.white, fontSize: 12),
     waitDuration: const Duration(milliseconds: 500),
     showDuration: const Duration(seconds: 2),

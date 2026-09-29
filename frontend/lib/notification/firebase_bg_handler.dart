@@ -10,12 +10,14 @@ import 'package:sprout/shared/providers/logger_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// Global plugin instance for the background isolate.
-final FlutterLocalNotificationsPlugin _bgLocalNotifications = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin _bgLocalNotifications =
+    FlutterLocalNotificationsPlugin();
 
 /// Entry point for Firebase messages when the app is in the background or terminated.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  final (container, user) = await BackgroundJobProvider.entry("Firebase-Handler");
+  final (container, user) =
+      await BackgroundJobProvider.entry("Firebase-Handler");
   Notification? notification;
   Importance importance = Importance.defaultImportance;
 
@@ -29,7 +31,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     // Attempt to fetch full notification details from backend
     final api = await container.read(notificationApiProvider.future);
-    notification = await api.notificationControllerGetById(payload.notificationId);
+    notification =
+        await api.notificationControllerGetById(payload.notificationId);
   } catch (e) {
     LoggerProvider.error(e);
     // Fallback if network fails or token is expired
@@ -49,7 +52,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     body: notification.message,
     payload: notification.id,
     notificationDetails: NotificationDetails(
-      android: AndroidNotificationDetails('secure_channel', 'Secure Notifications',
+      android: AndroidNotificationDetails(
+          'secure_channel', 'Secure Notifications',
           importance: importance, color: Color(0xFF141A1F), colorized: true),
     ),
   );

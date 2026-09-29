@@ -26,7 +26,8 @@ class ChatSproutLineChart extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final rawTitle = chartData['title'] as String?;
-    final title = ChatChartUtility.sanitizeChartText(rawTitle, defaultValue: 'Trend Chart');
+    final title = ChatChartUtility.sanitizeChartText(rawTitle,
+        defaultValue: 'Trend Chart');
     final rawSeriesList = chartData['series'] as List<dynamic>? ?? [];
     final chartSeries = parseChartSeries(rawSeriesList, theme);
 
@@ -61,7 +62,8 @@ class ChatSproutLineChart extends ConsumerWidget {
       if (rawSeries == null) continue;
 
       final rawLabel = rawSeries['label'] as String?;
-      final label = ChatChartUtility.sanitizeChartText(rawLabel, defaultValue: 'Series ${i + 1}');
+      final label = ChatChartUtility.sanitizeChartText(rawLabel,
+          defaultValue: 'Series ${i + 1}');
       final dataPoints = rawSeries['data'] as List<dynamic>? ?? [];
 
       final rawColorStr = rawSeries['color'] as String?;

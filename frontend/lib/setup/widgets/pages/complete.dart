@@ -11,7 +11,8 @@ class CompleteSetupPage extends StatefulWidget {
   State<CompleteSetupPage> createState() => _CompleteSetupPageState();
 }
 
-class _CompleteSetupPageState extends State<CompleteSetupPage> with TickerProviderStateMixin {
+class _CompleteSetupPageState extends State<CompleteSetupPage>
+    with TickerProviderStateMixin {
   late AnimationController _entryController;
   late AnimationController _pulseController;
 
@@ -82,7 +83,9 @@ class _CompleteSetupPageState extends State<CompleteSetupPage> with TickerProvid
           ),
           Text(
             'Setup Complete!',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 48 : 36),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: widget.isDesktop ? 48 : 36),
             textAlign: TextAlign.center,
           ),
           Text(

@@ -55,32 +55,35 @@ class User {
   UserConfig config;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is User &&
-    other.id == id &&
-    other.email == email &&
-    other.firstName == firstName &&
-    other.lastName == lastName &&
-    other.username == username &&
-    other.admin == admin &&
-    other.config == config;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is User &&
+          other.id == id &&
+          other.email == email &&
+          other.firstName == firstName &&
+          other.lastName == lastName &&
+          other.username == username &&
+          other.admin == admin &&
+          other.config == config;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (email == null ? 0 : email!.hashCode) +
-    (firstName == null ? 0 : firstName!.hashCode) +
-    (lastName == null ? 0 : lastName!.hashCode) +
-    (username.hashCode) +
-    (admin.hashCode) +
-    (config.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (email == null ? 0 : email!.hashCode) +
+      (firstName == null ? 0 : firstName!.hashCode) +
+      (lastName == null ? 0 : lastName!.hashCode) +
+      (username.hashCode) +
+      (admin.hashCode) +
+      (config.hashCode);
 
   @override
-  String toString() => 'User[id=$id, email=$email, firstName=$firstName, lastName=$lastName, username=$username, admin=$admin, config=$config]';
+  String toString() =>
+      'User[id=$id, email=$email, firstName=$firstName, lastName=$lastName, username=$username, admin=$admin, config=$config]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
+    json[r'id'] = this.id;
     if (this.email != null) {
       json[r'email'] = this.email;
     } else {
@@ -96,9 +99,9 @@ class User {
     } else {
       json[r'lastName'] = null;
     }
-      json[r'username'] = this.username;
-      json[r'admin'] = this.admin;
-      json[r'config'] = this.config;
+    json[r'username'] = this.username;
+    json[r'admin'] = this.admin;
+    json[r'config'] = this.config;
     return json;
   }
 
@@ -113,14 +116,22 @@ class User {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "User[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "User[id]" has a null value in JSON.');
-        assert(json.containsKey(r'username'), 'Required key "User[username]" is missing from JSON.');
-        assert(json[r'username'] != null, 'Required key "User[username]" has a null value in JSON.');
-        assert(json.containsKey(r'admin'), 'Required key "User[admin]" is missing from JSON.');
-        assert(json[r'admin'] != null, 'Required key "User[admin]" has a null value in JSON.');
-        assert(json.containsKey(r'config'), 'Required key "User[config]" is missing from JSON.');
-        assert(json[r'config'] != null, 'Required key "User[config]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "User[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "User[id]" has a null value in JSON.');
+        assert(json.containsKey(r'username'),
+            'Required key "User[username]" is missing from JSON.');
+        assert(json[r'username'] != null,
+            'Required key "User[username]" has a null value in JSON.');
+        assert(json.containsKey(r'admin'),
+            'Required key "User[admin]" is missing from JSON.');
+        assert(json[r'admin'] != null,
+            'Required key "User[admin]" has a null value in JSON.');
+        assert(json.containsKey(r'config'),
+            'Required key "User[config]" is missing from JSON.');
+        assert(json[r'config'] != null,
+            'Required key "User[config]" has a null value in JSON.');
         return true;
       }());
 
@@ -137,7 +148,10 @@ class User {
     return null;
   }
 
-  static List<User> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<User> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <User>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -165,13 +179,19 @@ class User {
   }
 
   // maps a json object with a list of User-objects as value to a dart map
-  static Map<String, List<User>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<User>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<User>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = User.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = User.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -185,4 +205,3 @@ class User {
     'config',
   };
 }
-

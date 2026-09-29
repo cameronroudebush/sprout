@@ -18,8 +18,10 @@ class DashboardBudgetCard extends ConsumerWidget {
     final now = DateTime.now();
     final monthName = DateFormat('MMMM yyyy').format(now);
 
-    final overviewAsync = ref.watch(budgetOverviewProvider((year: now.year, month: now.month)));
-    final summary = ref.watch(budgetSummaryProvider((year: now.year, month: now.month)));
+    final overviewAsync =
+        ref.watch(budgetOverviewProvider((year: now.year, month: now.month)));
+    final summary =
+        ref.watch(budgetSummaryProvider((year: now.year, month: now.month)));
 
     return SproutCard(
       child: Column(
@@ -39,7 +41,8 @@ class DashboardBudgetCard extends ConsumerWidget {
                 return const SizedBox.shrink();
               }
               final isOver = summary.isOverBudget;
-              final budgetedItems = overview.items.where((i) => i.budgetedAmount > 0).toList();
+              final budgetedItems =
+                  overview.items.where((i) => i.budgetedAmount > 0).toList();
               return Padding(
                 padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Column(
@@ -54,12 +57,14 @@ class DashboardBudgetCard extends ConsumerWidget {
                             children: [
                               Text(
                                 'Budgeted',
-                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 currencyFormatter.format(summary.totalBudgeted),
-                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -70,14 +75,17 @@ class DashboardBudgetCard extends ConsumerWidget {
                             children: [
                               Text(
                                 'Spent',
-                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 currencyFormatter.format(summary.totalSpent),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: isOver ? theme.colorScheme.error : theme.colorScheme.onSurface,
+                                  color: isOver
+                                      ? theme.colorScheme.error
+                                      : theme.colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -88,20 +96,26 @@ class DashboardBudgetCard extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                !summary.hasLimits ? 'Next step' : (isOver ? 'Over By' : 'Remaining'),
-                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                                !summary.hasLimits
+                                    ? 'Next step'
+                                    : (isOver ? 'Over By' : 'Remaining'),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 !summary.hasLimits
                                     ? 'Set a limit'
-                                    : currencyFormatter
-                                        .format(isOver ? summary.totalOverBudgetAmount : summary.totalRemaining),
+                                    : currencyFormatter.format(isOver
+                                        ? summary.totalOverBudgetAmount
+                                        : summary.totalRemaining),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: !summary.hasLimits
                                       ? theme.colorScheme.primary
-                                      : (isOver ? theme.colorScheme.error : theme.colorScheme.primary),
+                                      : (isOver
+                                          ? theme.colorScheme.error
+                                          : theme.colorScheme.primary),
                                 ),
                               ),
                             ],
@@ -117,9 +131,12 @@ class DashboardBudgetCard extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: summary.progress,
                         minHeight: 8,
-                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                        backgroundColor:
+                            theme.colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isOver ? theme.colorScheme.error : theme.colorScheme.primary,
+                          isOver
+                              ? theme.colorScheme.error
+                              : theme.colorScheme.primary,
                         ),
                       ),
                     ),
@@ -138,7 +155,8 @@ class DashboardBudgetCard extends ConsumerWidget {
                       const SizedBox(height: 12),
                       // Top 2 Category Budget Items
                       ...budgetedItems.take(2).map((item) {
-                        final itemProgress = (item.percentageUsed / 100.0).clamp(0.0, 1.0);
+                        final itemProgress =
+                            (item.percentageUsed / 100.0).clamp(0.0, 1.0);
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Row(
@@ -149,7 +167,8 @@ class DashboardBudgetCard extends ConsumerWidget {
                                 flex: 3,
                                 child: Text(
                                   item.category.name,
-                                  style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                                  style: theme.textTheme.labelSmall
+                                      ?.copyWith(fontWeight: FontWeight.w600),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -161,11 +180,14 @@ class DashboardBudgetCard extends ConsumerWidget {
                                   child: LinearProgressIndicator(
                                     value: itemProgress,
                                     minHeight: 6,
-                                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                                    backgroundColor: theme
+                                        .colorScheme.surfaceContainerHighest,
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                       item.isOverBudget
                                           ? theme.colorScheme.error
-                                          : (item.percentageUsed > 85 ? Colors.orange : theme.colorScheme.primary),
+                                          : (item.percentageUsed > 85
+                                              ? Colors.orange
+                                              : theme.colorScheme.primary),
                                     ),
                                   ),
                                 ),
@@ -196,11 +218,17 @@ class DashboardBudgetCard extends ConsumerWidget {
   Widget _buildStatusBadge(ThemeData theme, BudgetSummary summary) {
     final backgroundColor = !summary.hasLimits
         ? theme.colorScheme.surfaceContainerHighest
-        : (summary.isOverBudget ? theme.colorScheme.errorContainer : theme.colorScheme.primaryContainer);
+        : (summary.isOverBudget
+            ? theme.colorScheme.errorContainer
+            : theme.colorScheme.primaryContainer);
     final foregroundColor = !summary.hasLimits
         ? theme.colorScheme.onSurfaceVariant
-        : (summary.isOverBudget ? theme.colorScheme.onErrorContainer : theme.colorScheme.onPrimaryContainer);
-    final label = !summary.hasLimits ? 'No limits yet' : (summary.isOverBudget ? 'Over limit' : 'On track');
+        : (summary.isOverBudget
+            ? theme.colorScheme.onErrorContainer
+            : theme.colorScheme.onPrimaryContainer);
+    final label = !summary.hasLimits
+        ? 'No limits yet'
+        : (summary.isOverBudget ? 'Over limit' : 'On track');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

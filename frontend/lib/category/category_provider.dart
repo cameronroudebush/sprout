@@ -37,7 +37,9 @@ class Categories extends _$Categories {
         newCategory,
       ]);
     }
-    ref.read(notificationsProvider.notifier).openFrontendOnly("Category added", type: NotificationTypeEnum.success);
+    ref
+        .read(notificationsProvider.notifier)
+        .openFrontendOnly("Category added", type: NotificationTypeEnum.success);
     return newCategory;
   }
 
@@ -70,7 +72,9 @@ class UnknownCategoryCount extends _$UnknownCategoryCount {
     });
 
     final api = await ref.watch(categoryApiProvider.future);
-    return await api.categoryControllerGetUnknownCategoryStats(accountId: accountId) ?? 0;
+    return await api.categoryControllerGetUnknownCategoryStats(
+            accountId: accountId) ??
+        0;
   }
 
   Future<void> refresh() async => ref.invalidateSelf();
@@ -78,7 +82,8 @@ class UnknownCategoryCount extends _$UnknownCategoryCount {
 
 /// Riverpod to get specific category stats given the query
 @riverpod
-Future<CategoryStats?> categoryStats(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+Future<CategoryStats?> categoryStats(Ref ref,
+    {required int year, int? month, int? day, String? accountId}) async {
   ref.listen(sseProvider, (prev, next) {
     if (next.latestData?.event == SSEDataEventEnum.forceUpdate) {
       ref.invalidateSelf();
@@ -86,5 +91,6 @@ Future<CategoryStats?> categoryStats(Ref ref, {required int year, int? month, in
   });
 
   final api = await ref.watch(categoryApiProvider.future);
-  return await api.categoryControllerGetCategoryStats(year, month: month, day: day, accountId: accountId);
+  return await api.categoryControllerGetCategoryStats(year,
+      month: month, day: day, accountId: accountId);
 }

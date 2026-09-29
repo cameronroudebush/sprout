@@ -75,7 +75,8 @@ class _HeightMatchedRowState extends State<HeightMatchedRow> {
         Expanded(
           flex: widget.followingFlex,
           child: SizedBox(
-            height: _leadHeight ?? 0, // Defaults to 0px for 16ms during the very first frame
+            height: _leadHeight ??
+                0, // Defaults to 0px for 16ms during the very first frame
             child: widget.followingChild,
           ),
         ),

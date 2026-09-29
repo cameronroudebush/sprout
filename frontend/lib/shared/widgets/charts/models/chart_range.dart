@@ -60,7 +60,8 @@ class ChartRangeUtility {
   /// Returns the given chart range as a pretty string
   ///
   /// @useExtendedPeriodString If we should display an extended version of the string (1 month vs 1M)
-  static String asPretty(ChartRangeEnum range, {bool useExtendedPeriodString = false}) {
+  static String asPretty(ChartRangeEnum range,
+      {bool useExtendedPeriodString = false}) {
     switch (range) {
       case ChartRangeEnum.oneDay:
         return useExtendedPeriodString ? "1 day" : "1D";

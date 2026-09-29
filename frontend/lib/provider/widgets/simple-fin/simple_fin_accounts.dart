@@ -37,14 +37,17 @@ class SimpleFinAccountSelector extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) {
-        final errorMessage = ref.read(notificationsProvider.notifier).parseOpenAPIException(error);
+        final errorMessage = ref
+            .read(notificationsProvider.notifier)
+            .parseOpenAPIException(error);
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: 12,
             children: [
-              Icon(Icons.warning_amber_rounded, color: theme.colorScheme.error, size: 40),
+              Icon(Icons.warning_amber_rounded,
+                  color: theme.colorScheme.error, size: 40),
               Text(
                 errorMessage,
                 textAlign: TextAlign.center,
@@ -102,7 +105,8 @@ class SimpleFinAccountSelector extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 20,
         children: [
-          Icon(Icons.account_balance_wallet_outlined, size: 48, color: theme.disabledColor),
+          Icon(Icons.account_balance_wallet_outlined,
+              size: 48, color: theme.disabledColor),
           const Text("No accounts available from this provider."),
           if (provider.accountFixUrl != null)
             FilledButton.icon(

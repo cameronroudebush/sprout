@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class BudgetApi {
   BudgetApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
@@ -25,7 +24,9 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [CreateBudgetDto] createBudgetDto (required):
-  Future<Response> budgetControllerCreateBudgetWithHttpInfo(CreateBudgetDto createBudgetDto,) async {
+  Future<Response> budgetControllerCreateBudgetWithHttpInfo(
+    CreateBudgetDto createBudgetDto,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/budget';
 
@@ -37,7 +38,6 @@ class BudgetApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -57,17 +57,24 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [CreateBudgetDto] createBudgetDto (required):
-  Future<Budget?> budgetControllerCreateBudget(CreateBudgetDto createBudgetDto,) async {
-    final response = await budgetControllerCreateBudgetWithHttpInfo(createBudgetDto,);
+  Future<Budget?> budgetControllerCreateBudget(
+    CreateBudgetDto createBudgetDto,
+  ) async {
+    final response = await budgetControllerCreateBudgetWithHttpInfo(
+      createBudgetDto,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Budget',) as Budget;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Budget',
+      ) as Budget;
     }
     return null;
   }
@@ -81,10 +88,11 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> budgetControllerDeleteBudgetWithHttpInfo(String id,) async {
+  Future<Response> budgetControllerDeleteBudgetWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/budget/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/budget/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -94,7 +102,6 @@ class BudgetApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -114,8 +121,12 @@ class BudgetApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> budgetControllerDeleteBudget(String id,) async {
-    final response = await budgetControllerDeleteBudgetWithHttpInfo(id,);
+  Future<void> budgetControllerDeleteBudget(
+    String id,
+  ) async {
+    final response = await budgetControllerDeleteBudgetWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -139,7 +150,6 @@ class BudgetApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -162,12 +172,13 @@ class BudgetApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Budget>') as List)
-        .cast<Budget>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Budget>')
+              as List)
+          .cast<Budget>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -191,7 +202,12 @@ class BudgetApi {
   ///
   /// * [num] months:
   ///   Number of months to look back (default 6).
-  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({ String? categoryId, num? year, num? month, num? months, }) async {
+  Future<Response> budgetControllerGetBudgetHistoryWithHttpInfo({
+    String? categoryId,
+    num? year,
+    num? month,
+    num? months,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/history';
 
@@ -217,7 +233,6 @@ class BudgetApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -246,17 +261,30 @@ class BudgetApi {
   ///
   /// * [num] months:
   ///   Number of months to look back (default 6).
-  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({ String? categoryId, num? year, num? month, num? months, }) async {
-    final response = await budgetControllerGetBudgetHistoryWithHttpInfo( categoryId: categoryId, year: year, month: month, months: months, );
+  Future<BudgetHistoryResponseDto?> budgetControllerGetBudgetHistory({
+    String? categoryId,
+    num? year,
+    num? month,
+    num? months,
+  }) async {
+    final response = await budgetControllerGetBudgetHistoryWithHttpInfo(
+      categoryId: categoryId,
+      year: year,
+      month: month,
+      months: months,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BudgetHistoryResponseDto',) as BudgetHistoryResponseDto;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'BudgetHistoryResponseDto',
+      ) as BudgetHistoryResponseDto;
     }
     return null;
   }
@@ -272,7 +300,10 @@ class BudgetApi {
   /// * [num] year:
   ///
   /// * [num] month:
-  Future<Response> budgetControllerGetBudgetOverviewWithHttpInfo({ num? year, num? month, }) async {
+  Future<Response> budgetControllerGetBudgetOverviewWithHttpInfo({
+    num? year,
+    num? month,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/budget/overview';
 
@@ -291,7 +322,6 @@ class BudgetApi {
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -313,17 +343,26 @@ class BudgetApi {
   /// * [num] year:
   ///
   /// * [num] month:
-  Future<BudgetOverviewResponseDto?> budgetControllerGetBudgetOverview({ num? year, num? month, }) async {
-    final response = await budgetControllerGetBudgetOverviewWithHttpInfo( year: year, month: month, );
+  Future<BudgetOverviewResponseDto?> budgetControllerGetBudgetOverview({
+    num? year,
+    num? month,
+  }) async {
+    final response = await budgetControllerGetBudgetOverviewWithHttpInfo(
+      year: year,
+      month: month,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BudgetOverviewResponseDto',) as BudgetOverviewResponseDto;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'BudgetOverviewResponseDto',
+      ) as BudgetOverviewResponseDto;
     }
     return null;
   }
@@ -339,10 +378,12 @@ class BudgetApi {
   /// * [String] id (required):
   ///
   /// * [UpdateBudgetDto] updateBudgetDto (required):
-  Future<Response> budgetControllerUpdateBudgetWithHttpInfo(String id, UpdateBudgetDto updateBudgetDto,) async {
+  Future<Response> budgetControllerUpdateBudgetWithHttpInfo(
+    String id,
+    UpdateBudgetDto updateBudgetDto,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/budget/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/budget/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = updateBudgetDto;
@@ -352,7 +393,6 @@ class BudgetApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -374,17 +414,26 @@ class BudgetApi {
   /// * [String] id (required):
   ///
   /// * [UpdateBudgetDto] updateBudgetDto (required):
-  Future<Budget?> budgetControllerUpdateBudget(String id, UpdateBudgetDto updateBudgetDto,) async {
-    final response = await budgetControllerUpdateBudgetWithHttpInfo(id, updateBudgetDto,);
+  Future<Budget?> budgetControllerUpdateBudget(
+    String id,
+    UpdateBudgetDto updateBudgetDto,
+  ) async {
+    final response = await budgetControllerUpdateBudgetWithHttpInfo(
+      id,
+      updateBudgetDto,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Budget',) as Budget;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Budget',
+      ) as Budget;
     }
     return null;
   }

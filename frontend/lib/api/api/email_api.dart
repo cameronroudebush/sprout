@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class EmailApi {
   EmailApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
@@ -33,7 +32,6 @@ class EmailApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -73,7 +71,6 @@ class EmailApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,

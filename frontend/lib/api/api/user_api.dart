@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class UserApi {
   UserApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
@@ -25,7 +24,9 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UserCreationRequest] userCreationRequest (required):
-  Future<Response> userControllerCreateWithHttpInfo(UserCreationRequest userCreationRequest,) async {
+  Future<Response> userControllerCreateWithHttpInfo(
+    UserCreationRequest userCreationRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/user/create';
 
@@ -37,7 +38,6 @@ class UserApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -57,17 +57,24 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UserCreationRequest] userCreationRequest (required):
-  Future<UserCreationResponse?> userControllerCreate(UserCreationRequest userCreationRequest,) async {
-    final response = await userControllerCreateWithHttpInfo(userCreationRequest,);
+  Future<UserCreationResponse?> userControllerCreate(
+    UserCreationRequest userCreationRequest,
+  ) async {
+    final response = await userControllerCreateWithHttpInfo(
+      userCreationRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserCreationResponse',) as UserCreationResponse;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UserCreationResponse',
+      ) as UserCreationResponse;
     }
     return null;
   }
@@ -81,10 +88,11 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> userControllerDeleteByIdWithHttpInfo(String id,) async {
+  Future<Response> userControllerDeleteByIdWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/user/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/user/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -94,7 +102,6 @@ class UserApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -114,8 +121,12 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> userControllerDeleteById(String id,) async {
-    final response = await userControllerDeleteByIdWithHttpInfo(id,);
+  Future<void> userControllerDeleteById(
+    String id,
+  ) async {
+    final response = await userControllerDeleteByIdWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -130,10 +141,11 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> userControllerGetByIdWithHttpInfo(String id,) async {
+  Future<Response> userControllerGetByIdWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/user/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/user/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -143,7 +155,6 @@ class UserApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -163,17 +174,24 @@ class UserApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<UserGetDTO?> userControllerGetById(String id,) async {
-    final response = await userControllerGetByIdWithHttpInfo(id,);
+  Future<UserGetDTO?> userControllerGetById(
+    String id,
+  ) async {
+    final response = await userControllerGetByIdWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserGetDTO',) as UserGetDTO;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UserGetDTO',
+      ) as UserGetDTO;
     }
     return null;
   }
@@ -195,7 +213,6 @@ class UserApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -219,9 +236,12 @@ class UserApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'User',
+      ) as User;
     }
     return null;
   }
@@ -235,7 +255,9 @@ class UserApi {
   /// Parameters:
   ///
   /// * [RegisterDeviceDto] registerDeviceDto (required):
-  Future<Response> userControllerRegisterDeviceWithHttpInfo(RegisterDeviceDto registerDeviceDto,) async {
+  Future<Response> userControllerRegisterDeviceWithHttpInfo(
+    RegisterDeviceDto registerDeviceDto,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/user/device/register';
 
@@ -247,7 +269,6 @@ class UserApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -267,8 +288,12 @@ class UserApi {
   /// Parameters:
   ///
   /// * [RegisterDeviceDto] registerDeviceDto (required):
-  Future<void> userControllerRegisterDevice(RegisterDeviceDto registerDeviceDto,) async {
-    final response = await userControllerRegisterDeviceWithHttpInfo(registerDeviceDto,);
+  Future<void> userControllerRegisterDevice(
+    RegisterDeviceDto registerDeviceDto,
+  ) async {
+    final response = await userControllerRegisterDeviceWithHttpInfo(
+      registerDeviceDto,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -283,7 +308,9 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UpdateUserDto] updateUserDto (required):
-  Future<Response> userControllerUpdateMeWithHttpInfo(UpdateUserDto updateUserDto,) async {
+  Future<Response> userControllerUpdateMeWithHttpInfo(
+    UpdateUserDto updateUserDto,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/user/me';
 
@@ -295,7 +322,6 @@ class UserApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -315,17 +341,24 @@ class UserApi {
   /// Parameters:
   ///
   /// * [UpdateUserDto] updateUserDto (required):
-  Future<User?> userControllerUpdateMe(UpdateUserDto updateUserDto,) async {
-    final response = await userControllerUpdateMeWithHttpInfo(updateUserDto,);
+  Future<User?> userControllerUpdateMe(
+    UpdateUserDto updateUserDto,
+  ) async {
+    final response = await userControllerUpdateMeWithHttpInfo(
+      updateUserDto,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'User',
+      ) as User;
     }
     return null;
   }

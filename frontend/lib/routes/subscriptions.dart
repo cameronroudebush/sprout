@@ -21,7 +21,9 @@ class SubscriptionsPage extends ConsumerWidget {
     final focusedMonth = ref.watch(selectedCalendarMonthProvider);
 
     final totalHeader = subsAsync.maybeWhen(
-      data: (subs) => subs.isEmpty ? const SizedBox.shrink() : _buildTotal(subs, focusedMonth, theme, formatter),
+      data: (subs) => subs.isEmpty
+          ? const SizedBox.shrink()
+          : _buildTotal(subs, focusedMonth, theme, formatter),
       orElse: () => const SizedBox.shrink(),
     );
 
@@ -62,13 +64,14 @@ class SubscriptionsPage extends ConsumerWidget {
   }
 
   /// Builds the total widget that shows how much our monthly cost of subscriptions are and how many of them we have
-  Widget _buildTotal(
-      List<TransactionSubscription> subs, DateTime focusedMonth, ThemeData theme, CurrencyFormatter formatter) {
+  Widget _buildTotal(List<TransactionSubscription> subs, DateTime focusedMonth,
+      ThemeData theme, CurrencyFormatter formatter) {
     double dynamicTotal = 0;
     int itemsBillingThisMonthCount = 0;
 
     // Determine target month boundary frames
-    final daysInMonth = DateUtils.getDaysInMonth(focusedMonth.year, focusedMonth.month);
+    final daysInMonth =
+        DateUtils.getDaysInMonth(focusedMonth.year, focusedMonth.month);
 
     for (final sub in subs) {
       int billingOccurrencesInMonth = 0;
@@ -91,8 +94,10 @@ class SubscriptionsPage extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStatColumn("Active Month Expenses", itemsBillingThisMonthCount.toString(), null),
-            _buildStatColumn("Estimated Cost This Month", formatter.format(dynamicTotal), theme.colorScheme.error),
+            _buildStatColumn("Active Month Expenses",
+                itemsBillingThisMonthCount.toString(), null),
+            _buildStatColumn("Estimated Cost This Month",
+                formatter.format(dynamicTotal), theme.colorScheme.error),
           ],
         ),
       ),
@@ -103,7 +108,8 @@ class SubscriptionsPage extends ConsumerWidget {
   Widget _buildStatColumn(String label, String value, Color? valueColor) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         Text(value, style: TextStyle(fontSize: 16, color: valueColor)),
       ],
     );

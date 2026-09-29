@@ -22,7 +22,8 @@ class SpendingCompareChart extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SpendingCompareChart> createState() => _SpendingCompareChartState();
+  ConsumerState<SpendingCompareChart> createState() =>
+      _SpendingCompareChartState();
 }
 
 class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
@@ -54,7 +55,10 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
     final bool viewChanged = _lastView != widget.view;
 
     final availableTargets = _getComparisonTargets(baselineDate, isMonthly);
-    if (viewChanged || rawDateChanged || _customTargetDate == null || !availableTargets.contains(_customTargetDate)) {
+    if (viewChanged ||
+        rawDateChanged ||
+        _customTargetDate == null ||
+        !availableTargets.contains(_customTargetDate)) {
       _customTargetDate = availableTargets.first;
       _lastView = widget.view;
       _lastRawSelectedDate = widget.selectedDate;
@@ -77,9 +81,10 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
       data: (dto) {
         if (dto == null) return const SizedBox.shrink();
 
-        SproutChartSeries createSeries(List<dynamic> rawData, String label, Color color, bool isDashed) {
-          final chartData =
-              LineChartDataProcessor.prepareChartData(Map.fromEntries(rawData.map((e) => MapEntry(e.date, e.value))));
+        SproutChartSeries createSeries(
+            List<dynamic> rawData, String label, Color color, bool isDashed) {
+          final chartData = LineChartDataProcessor.prepareChartData(
+              Map.fromEntries(rawData.map((e) => MapEntry(e.date, e.value))));
           return SproutChartSeries(
             data: chartData,
             label: label,
@@ -91,8 +96,10 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
         }
 
         final List<SproutChartSeries> series = [
-          createSeries(dto.currentMonthData, dto.currentMonthLabel, Colors.blue, false),
-          createSeries(dto.targetMonthData, dto.targetMonthLabel, Colors.grey, true),
+          createSeries(
+              dto.currentMonthData, dto.currentMonthLabel, Colors.blue, false),
+          createSeries(
+              dto.targetMonthData, dto.targetMonthLabel, Colors.grey, true),
         ];
 
         final String subheaderText = isMonthly
@@ -102,7 +109,8 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
         return SproutLineChart(
           series: series,
           showDateInTooltip: isMonthly ? false : true,
-          chartRange: isMonthly ? ChartRangeEnum.oneMonth : ChartRangeEnum.oneYear,
+          chartRange:
+              isMonthly ? ChartRangeEnum.oneMonth : ChartRangeEnum.oneYear,
           showXAxis: isMonthly ? false : true,
           showYAxis: true,
           showGrid: true,
@@ -125,7 +133,9 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
                     return PopupMenuItem<DateTime>(
                       value: date,
                       child: Text(
-                        isMonthly ? "vs ${DateFormat('MMM yy').format(date)}" : "vs ${DateFormat('yyyy').format(date)}",
+                        isMonthly
+                            ? "vs ${DateFormat('MMM yy').format(date)}"
+                            : "vs ${DateFormat('yyyy').format(date)}",
                       ),
                     );
                   }).toList();

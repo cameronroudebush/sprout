@@ -40,30 +40,33 @@ class TransactionLocation {
   String? storeNumber;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TransactionLocation &&
-    other.address == address &&
-    other.city == city &&
-    other.country == country &&
-    other.lat == lat &&
-    other.lon == lon &&
-    other.postalCode == postalCode &&
-    other.region == region &&
-    other.storeNumber == storeNumber;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TransactionLocation &&
+          other.address == address &&
+          other.city == city &&
+          other.country == country &&
+          other.lat == lat &&
+          other.lon == lon &&
+          other.postalCode == postalCode &&
+          other.region == region &&
+          other.storeNumber == storeNumber;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (address == null ? 0 : address!.hashCode) +
-    (city == null ? 0 : city!.hashCode) +
-    (country == null ? 0 : country!.hashCode) +
-    (lat == null ? 0 : lat!.hashCode) +
-    (lon == null ? 0 : lon!.hashCode) +
-    (postalCode == null ? 0 : postalCode!.hashCode) +
-    (region == null ? 0 : region!.hashCode) +
-    (storeNumber == null ? 0 : storeNumber!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (address == null ? 0 : address!.hashCode) +
+      (city == null ? 0 : city!.hashCode) +
+      (country == null ? 0 : country!.hashCode) +
+      (lat == null ? 0 : lat!.hashCode) +
+      (lon == null ? 0 : lon!.hashCode) +
+      (postalCode == null ? 0 : postalCode!.hashCode) +
+      (region == null ? 0 : region!.hashCode) +
+      (storeNumber == null ? 0 : storeNumber!.hashCode);
 
   @override
-  String toString() => 'TransactionLocation[address=$address, city=$city, country=$country, lat=$lat, lon=$lon, postalCode=$postalCode, region=$region, storeNumber=$storeNumber]';
+  String toString() =>
+      'TransactionLocation[address=$address, city=$city, country=$country, lat=$lat, lon=$lon, postalCode=$postalCode, region=$region, storeNumber=$storeNumber]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -128,12 +131,8 @@ class TransactionLocation {
         address: mapValueOfType<String>(json, r'address'),
         city: mapValueOfType<String>(json, r'city'),
         country: mapValueOfType<String>(json, r'country'),
-        lat: json[r'lat'] == null
-            ? null
-            : num.parse('${json[r'lat']}'),
-        lon: json[r'lon'] == null
-            ? null
-            : num.parse('${json[r'lon']}'),
+        lat: json[r'lat'] == null ? null : num.parse('${json[r'lat']}'),
+        lon: json[r'lon'] == null ? null : num.parse('${json[r'lon']}'),
         postalCode: mapValueOfType<String>(json, r'postal_code'),
         region: mapValueOfType<String>(json, r'region'),
         storeNumber: mapValueOfType<String>(json, r'store_number'),
@@ -142,7 +141,10 @@ class TransactionLocation {
     return null;
   }
 
-  static List<TransactionLocation> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TransactionLocation> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TransactionLocation>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -170,20 +172,24 @@ class TransactionLocation {
   }
 
   // maps a json object with a list of TransactionLocation-objects as value to a dart map
-  static Map<String, List<TransactionLocation>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TransactionLocation>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TransactionLocation>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TransactionLocation.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TransactionLocation.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

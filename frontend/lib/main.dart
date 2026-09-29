@@ -23,7 +23,8 @@ Future<void> main() async {
   container.read(widgetSyncProvider);
   container.read(userProvider);
 
-  runApp(UncontrolledProviderScope(container: container, child: const SproutApp()));
+  runApp(UncontrolledProviderScope(
+      container: container, child: const SproutApp()));
 }
 
 /// The main app entrypoint
@@ -36,11 +37,14 @@ class SproutApp extends ConsumerWidget {
     final splashAsync = ref.watch(sproutSplashManagerProvider);
     final authState = ref.watch(authProvider);
     final isLoggedIn = authState.value != null;
-    final hasError = (isLoggedIn && userConfigAsync.hasError) || splashAsync.hasError;
+    final hasError =
+        (isLoggedIn && userConfigAsync.hasError) || splashAsync.hasError;
 
     // Handle global initialization errors
     if (hasError) {
-      final error = userConfigAsync.error ?? splashAsync.error ?? 'Unknown initialization error';
+      final error = userConfigAsync.error ??
+          splashAsync.error ??
+          'Unknown initialization error';
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: absoluteDarkTheme,

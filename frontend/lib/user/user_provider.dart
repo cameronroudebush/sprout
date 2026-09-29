@@ -43,7 +43,8 @@ class UserNotifier extends _$UserNotifier {
     final deviceInfo = DeviceInfoPlugin();
     String deviceName = "Unknown Device";
     String uniqueHardwareId = "";
-    RegisterDeviceDtoPlatformEnum platform = RegisterDeviceDtoPlatformEnum.android;
+    RegisterDeviceDtoPlatformEnum platform =
+        RegisterDeviceDtoPlatformEnum.android;
 
     try {
       if (kIsWeb) {
@@ -109,7 +110,8 @@ class UserNotifier extends _$UserNotifier {
     }
 
     // Fallback: Persistent local UUID stored on device
-    String? storedId = await SecureStorageProvider.getValue(_deviceIdStorageKey);
+    String? storedId =
+        await SecureStorageProvider.getValue(_deviceIdStorageKey);
 
     if (storedId == null || storedId.isEmpty) {
       storedId = const Uuid().v4();

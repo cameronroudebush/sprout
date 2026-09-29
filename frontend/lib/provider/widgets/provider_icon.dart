@@ -9,7 +9,8 @@ class FinanceProviderIcon extends LogoBaseWidget<ProviderConfig> {
   const FinanceProviderIcon(super.logoClass, {super.key, super.size = 64});
 
   @override
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, ProviderConfig data, double size) {
+  ProviderListenable<AsyncValue<List<String>>> getProvider(
+      BuildContext context, ProviderConfig data, double size) {
     return providerIconProvider(logoClass, size);
   }
 

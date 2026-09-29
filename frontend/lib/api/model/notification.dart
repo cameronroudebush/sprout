@@ -48,37 +48,40 @@ class Notification {
   DateTime? readAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Notification &&
-    other.id == id &&
-    other.createdAt == createdAt &&
-    other.title == title &&
-    other.message == message &&
-    other.type == type &&
-    other.isRead == isRead &&
-    other.readAt == readAt;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Notification &&
+          other.id == id &&
+          other.createdAt == createdAt &&
+          other.title == title &&
+          other.message == message &&
+          other.type == type &&
+          other.isRead == isRead &&
+          other.readAt == readAt;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (createdAt.hashCode) +
-    (title.hashCode) +
-    (message.hashCode) +
-    (type.hashCode) +
-    (isRead.hashCode) +
-    (readAt == null ? 0 : readAt!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (createdAt.hashCode) +
+      (title.hashCode) +
+      (message.hashCode) +
+      (type.hashCode) +
+      (isRead.hashCode) +
+      (readAt == null ? 0 : readAt!.hashCode);
 
   @override
-  String toString() => 'Notification[id=$id, createdAt=$createdAt, title=$title, message=$message, type=$type, isRead=$isRead, readAt=$readAt]';
+  String toString() =>
+      'Notification[id=$id, createdAt=$createdAt, title=$title, message=$message, type=$type, isRead=$isRead, readAt=$readAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'createdAt'] = this.createdAt.toUtc().toIso8601String();
-      json[r'title'] = this.title;
-      json[r'message'] = this.message;
-      json[r'type'] = this.type;
-      json[r'isRead'] = this.isRead;
+    json[r'id'] = this.id;
+    json[r'createdAt'] = this.createdAt.toUtc().toIso8601String();
+    json[r'title'] = this.title;
+    json[r'message'] = this.message;
+    json[r'type'] = this.type;
+    json[r'isRead'] = this.isRead;
     if (this.readAt != null) {
       json[r'readAt'] = this.readAt!.toUtc().toIso8601String();
     } else {
@@ -98,18 +101,30 @@ class Notification {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Notification[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Notification[id]" has a null value in JSON.');
-        assert(json.containsKey(r'createdAt'), 'Required key "Notification[createdAt]" is missing from JSON.');
-        assert(json[r'createdAt'] != null, 'Required key "Notification[createdAt]" has a null value in JSON.');
-        assert(json.containsKey(r'title'), 'Required key "Notification[title]" is missing from JSON.');
-        assert(json[r'title'] != null, 'Required key "Notification[title]" has a null value in JSON.');
-        assert(json.containsKey(r'message'), 'Required key "Notification[message]" is missing from JSON.');
-        assert(json[r'message'] != null, 'Required key "Notification[message]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "Notification[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "Notification[type]" has a null value in JSON.');
-        assert(json.containsKey(r'isRead'), 'Required key "Notification[isRead]" is missing from JSON.');
-        assert(json[r'isRead'] != null, 'Required key "Notification[isRead]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Notification[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Notification[id]" has a null value in JSON.');
+        assert(json.containsKey(r'createdAt'),
+            'Required key "Notification[createdAt]" is missing from JSON.');
+        assert(json[r'createdAt'] != null,
+            'Required key "Notification[createdAt]" has a null value in JSON.');
+        assert(json.containsKey(r'title'),
+            'Required key "Notification[title]" is missing from JSON.');
+        assert(json[r'title'] != null,
+            'Required key "Notification[title]" has a null value in JSON.');
+        assert(json.containsKey(r'message'),
+            'Required key "Notification[message]" is missing from JSON.');
+        assert(json[r'message'] != null,
+            'Required key "Notification[message]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "Notification[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "Notification[type]" has a null value in JSON.');
+        assert(json.containsKey(r'isRead'),
+            'Required key "Notification[isRead]" is missing from JSON.');
+        assert(json[r'isRead'] != null,
+            'Required key "Notification[isRead]" has a null value in JSON.');
         return true;
       }());
 
@@ -126,7 +141,10 @@ class Notification {
     return null;
   }
 
-  static List<Notification> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Notification> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Notification>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -154,13 +172,19 @@ class Notification {
   }
 
   // maps a json object with a list of Notification-objects as value to a dart map
-  static Map<String, List<Notification>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Notification>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Notification>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Notification.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Notification.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -203,9 +227,13 @@ class NotificationTypeEnum {
     error,
   ];
 
-  static NotificationTypeEnum? fromJson(dynamic value) => NotificationTypeEnumTypeTransformer().decode(value);
+  static NotificationTypeEnum? fromJson(dynamic value) =>
+      NotificationTypeEnumTypeTransformer().decode(value);
 
-  static List<NotificationTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<NotificationTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <NotificationTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -222,7 +250,8 @@ class NotificationTypeEnum {
 /// Transformation class that can [encode] an instance of [NotificationTypeEnum] to String,
 /// and [decode] dynamic data back to [NotificationTypeEnum].
 class NotificationTypeEnumTypeTransformer {
-  factory NotificationTypeEnumTypeTransformer() => _instance ??= const NotificationTypeEnumTypeTransformer._();
+  factory NotificationTypeEnumTypeTransformer() =>
+      _instance ??= const NotificationTypeEnumTypeTransformer._();
 
   const NotificationTypeEnumTypeTransformer._();
 
@@ -239,10 +268,14 @@ class NotificationTypeEnumTypeTransformer {
   NotificationTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'info': return NotificationTypeEnum.info;
-        case r'success': return NotificationTypeEnum.success;
-        case r'warning': return NotificationTypeEnum.warning;
-        case r'error': return NotificationTypeEnum.error;
+        case r'info':
+          return NotificationTypeEnum.info;
+        case r'success':
+          return NotificationTypeEnum.success;
+        case r'warning':
+          return NotificationTypeEnum.warning;
+        case r'error':
+          return NotificationTypeEnum.error;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -255,5 +288,3 @@ class NotificationTypeEnumTypeTransformer {
   /// Singleton [NotificationTypeEnumTypeTransformer] instance.
   static NotificationTypeEnumTypeTransformer? _instance;
 }
-
-

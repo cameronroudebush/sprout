@@ -38,12 +38,16 @@ class TransactionRulesPage extends ConsumerWidget {
           FABAction(
             icon: Icons.add,
             label: 'Add New Rule',
-            onTap: (context) => showSproutPopup(context: context, builder: (_) => const TransactionRuleEdit(null)),
+            onTap: (context) => showSproutPopup(
+                context: context,
+                builder: (_) => const TransactionRuleEdit(null)),
           ),
           FABAction(
             icon: Icons.refresh,
             label: 'Re-run all rules',
-            onTap: (context) => ref.read(transactionRulesProvider.notifier).openManualRefreshDialog(context),
+            onTap: (context) => ref
+                .read(transactionRulesProvider.notifier)
+                .openManualRefreshDialog(context),
           ),
         ],
       ),
@@ -58,7 +62,8 @@ class TransactionRulesPage extends ConsumerWidget {
               child: Column(
                 spacing: 12,
                 children: [
-                  Icon(Icons.rule_folder_outlined, size: 64, color: theme.colorScheme.primary),
+                  Icon(Icons.rule_folder_outlined,
+                      size: 64, color: theme.colorScheme.primary),
                   const Text(
                     "No rules found. Add one to start organizing!",
                     textAlign: TextAlign.center,
@@ -96,7 +101,8 @@ class TransactionRulesPage extends ConsumerWidget {
                       itemCount: prov.rules.length,
                       separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (context, index) {
-                        return TransactionRuleRow(prov.rules[index], index: index);
+                        return TransactionRuleRow(prov.rules[index],
+                            index: index);
                       },
                     ),
                   ),

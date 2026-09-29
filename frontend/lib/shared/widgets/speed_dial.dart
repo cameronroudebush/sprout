@@ -9,7 +9,11 @@ class FABAction {
   final void Function(BuildContext context) onTap;
   final bool isLoading;
 
-  FABAction({required this.icon, required this.label, required this.onTap, this.isLoading = false});
+  FABAction(
+      {required this.icon,
+      required this.label,
+      required this.onTap,
+      this.isLoading = false});
 }
 
 /// This widget is a reusable component that is injected within the shell to provide floating action buttons based on the current route context.
@@ -67,15 +71,21 @@ class _SproutSpeedDialState extends ConsumerState<SproutSpeedDial> {
                       elevation: 2,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.floatingActionButtonTheme.backgroundColor,
+                          color:
+                              theme.floatingActionButtonTheme.backgroundColor,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
+                          border: Border.all(
+                              color: theme.dividerColor.withValues(alpha: 0.2)),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           child: Text(
                             action.label,
-                            style: TextStyle(fontSize: 12, color: theme.floatingActionButtonTheme.foregroundColor),
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: theme
+                                    .floatingActionButtonTheme.foregroundColor),
                           ),
                         ),
                       ),
@@ -91,7 +101,11 @@ class _SproutSpeedDialState extends ConsumerState<SproutSpeedDial> {
                     child: action.isLoading
                         ? const Padding(
                             padding: EdgeInsets.all(12.0),
-                            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                            child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2)),
                           )
                         : Icon(action.icon),
                   ),

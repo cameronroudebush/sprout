@@ -4,7 +4,8 @@ class AutoLogoutClient extends BaseClient {
   final Client _inner;
   final Future<void> Function() onLogout;
 
-  AutoLogoutClient({required Client innerClient, required this.onLogout}) : _inner = innerClient;
+  AutoLogoutClient({required Client innerClient, required this.onLogout})
+      : _inner = innerClient;
 
   @override
   Future<StreamedResponse> send(BaseRequest request) async {

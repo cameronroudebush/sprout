@@ -20,7 +20,11 @@ class ChatMessageContent extends ConsumerStatefulWidget {
   final bool showTypingWhenLoading;
 
   const ChatMessageContent(
-      {super.key, required this.text, this.isAi = true, this.textColor, this.showTypingWhenLoading = true});
+      {super.key,
+      required this.text,
+      this.isAi = true,
+      this.textColor,
+      this.showTypingWhenLoading = true});
 
   @override
   ConsumerState<ChatMessageContent> createState() => _ChatMessageContentState();
@@ -71,11 +75,13 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
             final closeFence = _targetText.indexOf('```', openFence + 3);
             if (closeFence != -1) {
               // Smoothly step through code blocks instead of jumping instantly
-              _displayedText = _targetText.substring(0, (_displayedText.length + 5).clamp(0, closeFence + 3));
+              _displayedText = _targetText.substring(
+                  0, (_displayedText.length + 5).clamp(0, closeFence + 3));
               return;
             } else {
               // Smoothly step towards end while fence remains unclosed
-              _displayedText = _targetText.substring(0, (_displayedText.length + 5).clamp(0, _targetText.length));
+              _displayedText = _targetText.substring(
+                  0, (_displayedText.length + 5).clamp(0, _targetText.length));
               return;
             }
           }
@@ -83,7 +89,8 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
           final diff = _targetText.length - _displayedText.length;
           // Capped maximum step size to prevent sudden text jumps
           final step = diff > 100 ? 2 : 1;
-          final nextLength = (_displayedText.length + step).clamp(0, _targetText.length);
+          final nextLength =
+              (_displayedText.length + step).clamp(0, _targetText.length);
           _displayedText = _targetText.substring(0, nextLength);
         });
       } else {
@@ -106,15 +113,21 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
 
     // If accounts are still loading, don't render the text yet to avoid flashing raw IDs
     return accountsAsync.when(
-      loading: () => widget.showTypingWhenLoading ? const TypingIndicator() : const SizedBox.shrink(),
-      error: (err, _) => Text("Error: $err", style: TextStyle(color: theme.colorScheme.error)),
+      loading: () => widget.showTypingWhenLoading
+          ? const TypingIndicator()
+          : const SizedBox.shrink(),
+      error: (err, _) =>
+          Text("Error: $err", style: TextStyle(color: theme.colorScheme.error)),
       data: (accountState) {
         final isPrivate = userConfigAsync.value?.privateMode ?? false;
         final accounts = accountState.accounts;
 
         String processedText = _displayedText.deIdentifyAccounts(accounts);
-        final finalText = isPrivate ? processedText.deIdentifyCurrency() : processedText;
-        final effectiveColor = widget.textColor ?? theme.textTheme.bodyMedium?.color ?? Colors.white;
+        final finalText =
+            isPrivate ? processedText.deIdentifyCurrency() : processedText;
+        final effectiveColor = widget.textColor ??
+            theme.textTheme.bodyMedium?.color ??
+            Colors.white;
         final markdownStyle = TextStyle(color: effectiveColor, fontSize: 14);
 
         return Theme(
@@ -138,13 +151,15 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
   /// Splits the LLM response into Markdown text and Chart widgets as necessary
   ///
   /// [parseCharts] If we should parse charts into their actual chart objects versus leaving them as JSON
-  List<Widget> _buildContentNodes(String text, TextStyle style, {bool parseCharts = true}) {
+  List<Widget> _buildContentNodes(String text, TextStyle style,
+      {bool parseCharts = true}) {
     // Detects ``` blocks early, including incomplete or partially typed opening tags
     final blockRegex = RegExp(r'```(?:chart)?\s*([\s\S]*?)(?:```|$)');
     final matches = blockRegex.allMatches(text);
 
     // No code/chart blocks so just return markdown
-    if (matches.isEmpty || !parseCharts) return [GptMarkdown(text, style: style)];
+    if (matches.isEmpty || !parseCharts)
+      return [GptMarkdown(text, style: style)];
 
     List<Widget> nodes = [];
     int lastMatchEnd = 0;
@@ -186,14 +201,16 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
               chartWidget = ChatSproutPieChart(chartData: chartData);
               break;
             default:
-              chartWidget = Text("Unsupported chart type: $chartType", style: TextStyle(color: Colors.red));
+              chartWidget = Text("Unsupported chart type: $chartType",
+                  style: TextStyle(color: Colors.red));
           }
 
           nodes.add(chartWidget);
         } catch (e) {
           // If JSON parsing fails on a closed block, check if it was intended as a chart
           if (fullMatchText.startsWith('```chart')) {
-            nodes.add(Text("Failed to load chart.", style: TextStyle(color: Colors.red)));
+            nodes.add(Text("Failed to load chart.",
+                style: TextStyle(color: Colors.red)));
           } else {
             // Standard non-chart markdown code block fallback
             nodes.add(GptMarkdown(fullMatchText, style: style));

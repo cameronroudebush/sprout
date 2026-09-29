@@ -7,7 +7,9 @@ class TransactionRuleState {
 
   TransactionRuleState({required this.rules, this.isRunning = false});
 
-  TransactionRuleState copyWith({List<TransactionRule>? rules, bool? isRunning}) {
-    return TransactionRuleState(rules: rules ?? this.rules, isRunning: isRunning ?? this.isRunning);
+  TransactionRuleState copyWith(
+      {List<TransactionRule>? rules, bool? isRunning}) {
+    return TransactionRuleState(
+        rules: rules ?? this.rules, isRunning: isRunning ?? this.isRunning);
   }
 }

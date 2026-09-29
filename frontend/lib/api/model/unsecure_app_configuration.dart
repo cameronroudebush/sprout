@@ -36,33 +36,36 @@ class UnsecureAppConfiguration {
   bool allowUserCreation;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UnsecureAppConfiguration &&
-    other.authMode == authMode &&
-    other.demoMode == demoMode &&
-    other.version == version &&
-    other.allowUserCreation == allowUserCreation;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnsecureAppConfiguration &&
+          other.authMode == authMode &&
+          other.demoMode == demoMode &&
+          other.version == version &&
+          other.allowUserCreation == allowUserCreation;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (authMode.hashCode) +
-    (demoMode == null ? 0 : demoMode!.hashCode) +
-    (version.hashCode) +
-    (allowUserCreation.hashCode);
+      // ignore: unnecessary_parenthesis
+      (authMode.hashCode) +
+      (demoMode == null ? 0 : demoMode!.hashCode) +
+      (version.hashCode) +
+      (allowUserCreation.hashCode);
 
   @override
-  String toString() => 'UnsecureAppConfiguration[authMode=$authMode, demoMode=$demoMode, version=$version, allowUserCreation=$allowUserCreation]';
+  String toString() =>
+      'UnsecureAppConfiguration[authMode=$authMode, demoMode=$demoMode, version=$version, allowUserCreation=$allowUserCreation]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'authMode'] = this.authMode;
+    json[r'authMode'] = this.authMode;
     if (this.demoMode != null) {
       json[r'demoMode'] = this.demoMode;
     } else {
       json[r'demoMode'] = null;
     }
-      json[r'version'] = this.version;
-      json[r'allowUserCreation'] = this.allowUserCreation;
+    json[r'version'] = this.version;
+    json[r'allowUserCreation'] = this.allowUserCreation;
     return json;
   }
 
@@ -77,17 +80,24 @@ class UnsecureAppConfiguration {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'authMode'), 'Required key "UnsecureAppConfiguration[authMode]" is missing from JSON.');
-        assert(json[r'authMode'] != null, 'Required key "UnsecureAppConfiguration[authMode]" has a null value in JSON.');
-        assert(json.containsKey(r'version'), 'Required key "UnsecureAppConfiguration[version]" is missing from JSON.');
-        assert(json[r'version'] != null, 'Required key "UnsecureAppConfiguration[version]" has a null value in JSON.');
-        assert(json.containsKey(r'allowUserCreation'), 'Required key "UnsecureAppConfiguration[allowUserCreation]" is missing from JSON.');
-        assert(json[r'allowUserCreation'] != null, 'Required key "UnsecureAppConfiguration[allowUserCreation]" has a null value in JSON.');
+        assert(json.containsKey(r'authMode'),
+            'Required key "UnsecureAppConfiguration[authMode]" is missing from JSON.');
+        assert(json[r'authMode'] != null,
+            'Required key "UnsecureAppConfiguration[authMode]" has a null value in JSON.');
+        assert(json.containsKey(r'version'),
+            'Required key "UnsecureAppConfiguration[version]" is missing from JSON.');
+        assert(json[r'version'] != null,
+            'Required key "UnsecureAppConfiguration[version]" has a null value in JSON.');
+        assert(json.containsKey(r'allowUserCreation'),
+            'Required key "UnsecureAppConfiguration[allowUserCreation]" is missing from JSON.');
+        assert(json[r'allowUserCreation'] != null,
+            'Required key "UnsecureAppConfiguration[allowUserCreation]" has a null value in JSON.');
         return true;
       }());
 
       return UnsecureAppConfiguration(
-        authMode: UnsecureAppConfigurationAuthModeEnum.fromJson(json[r'authMode'])!,
+        authMode:
+            UnsecureAppConfigurationAuthModeEnum.fromJson(json[r'authMode'])!,
         demoMode: DemoCredentials.fromJson(json[r'demoMode']),
         version: mapValueOfType<String>(json, r'version')!,
         allowUserCreation: mapValueOfType<bool>(json, r'allowUserCreation')!,
@@ -96,7 +106,10 @@ class UnsecureAppConfiguration {
     return null;
   }
 
-  static List<UnsecureAppConfiguration> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UnsecureAppConfiguration> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UnsecureAppConfiguration>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,13 +137,19 @@ class UnsecureAppConfiguration {
   }
 
   // maps a json object with a list of UnsecureAppConfiguration-objects as value to a dart map
-  static Map<String, List<UnsecureAppConfiguration>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UnsecureAppConfiguration>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UnsecureAppConfiguration>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UnsecureAppConfiguration.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UnsecureAppConfiguration.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -143,7 +162,6 @@ class UnsecureAppConfiguration {
     'allowUserCreation',
   };
 }
-
 
 class UnsecureAppConfigurationAuthModeEnum {
   /// Instantiate a new enum with the provided [value].
@@ -166,9 +184,13 @@ class UnsecureAppConfigurationAuthModeEnum {
     local,
   ];
 
-  static UnsecureAppConfigurationAuthModeEnum? fromJson(dynamic value) => UnsecureAppConfigurationAuthModeEnumTypeTransformer().decode(value);
+  static UnsecureAppConfigurationAuthModeEnum? fromJson(dynamic value) =>
+      UnsecureAppConfigurationAuthModeEnumTypeTransformer().decode(value);
 
-  static List<UnsecureAppConfigurationAuthModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UnsecureAppConfigurationAuthModeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UnsecureAppConfigurationAuthModeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -185,7 +207,8 @@ class UnsecureAppConfigurationAuthModeEnum {
 /// Transformation class that can [encode] an instance of [UnsecureAppConfigurationAuthModeEnum] to String,
 /// and [decode] dynamic data back to [UnsecureAppConfigurationAuthModeEnum].
 class UnsecureAppConfigurationAuthModeEnumTypeTransformer {
-  factory UnsecureAppConfigurationAuthModeEnumTypeTransformer() => _instance ??= const UnsecureAppConfigurationAuthModeEnumTypeTransformer._();
+  factory UnsecureAppConfigurationAuthModeEnumTypeTransformer() => _instance ??=
+      const UnsecureAppConfigurationAuthModeEnumTypeTransformer._();
 
   const UnsecureAppConfigurationAuthModeEnumTypeTransformer._();
 
@@ -199,11 +222,14 @@ class UnsecureAppConfigurationAuthModeEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  UnsecureAppConfigurationAuthModeEnum? decode(dynamic data, {bool allowNull = true}) {
+  UnsecureAppConfigurationAuthModeEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'oidc': return UnsecureAppConfigurationAuthModeEnum.oidc;
-        case r'local': return UnsecureAppConfigurationAuthModeEnum.local;
+        case r'oidc':
+          return UnsecureAppConfigurationAuthModeEnum.oidc;
+        case r'local':
+          return UnsecureAppConfigurationAuthModeEnum.local;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -216,5 +242,3 @@ class UnsecureAppConfigurationAuthModeEnumTypeTransformer {
   /// Singleton [UnsecureAppConfigurationAuthModeEnumTypeTransformer] instance.
   static UnsecureAppConfigurationAuthModeEnumTypeTransformer? _instance;
 }
-
-

@@ -38,33 +38,36 @@ class APIConfig {
   TileConfig tiles;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is APIConfig &&
-    other.chatEnabled == chatEnabled &&
-    other.emailEnabled == emailEnabled &&
-    other.brandFetchClientId == brandFetchClientId &&
-    other.tiles == tiles;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is APIConfig &&
+          other.chatEnabled == chatEnabled &&
+          other.emailEnabled == emailEnabled &&
+          other.brandFetchClientId == brandFetchClientId &&
+          other.tiles == tiles;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (chatEnabled.hashCode) +
-    (emailEnabled.hashCode) +
-    (brandFetchClientId == null ? 0 : brandFetchClientId!.hashCode) +
-    (tiles.hashCode);
+      // ignore: unnecessary_parenthesis
+      (chatEnabled.hashCode) +
+      (emailEnabled.hashCode) +
+      (brandFetchClientId == null ? 0 : brandFetchClientId!.hashCode) +
+      (tiles.hashCode);
 
   @override
-  String toString() => 'APIConfig[chatEnabled=$chatEnabled, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId, tiles=$tiles]';
+  String toString() =>
+      'APIConfig[chatEnabled=$chatEnabled, emailEnabled=$emailEnabled, brandFetchClientId=$brandFetchClientId, tiles=$tiles]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'chatEnabled'] = this.chatEnabled;
-      json[r'emailEnabled'] = this.emailEnabled;
+    json[r'chatEnabled'] = this.chatEnabled;
+    json[r'emailEnabled'] = this.emailEnabled;
     if (this.brandFetchClientId != null) {
       json[r'brandFetchClientId'] = this.brandFetchClientId;
     } else {
       json[r'brandFetchClientId'] = null;
     }
-      json[r'tiles'] = this.tiles;
+    json[r'tiles'] = this.tiles;
     return json;
   }
 
@@ -79,12 +82,18 @@ class APIConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'chatEnabled'), 'Required key "APIConfig[chatEnabled]" is missing from JSON.');
-        assert(json[r'chatEnabled'] != null, 'Required key "APIConfig[chatEnabled]" has a null value in JSON.');
-        assert(json.containsKey(r'emailEnabled'), 'Required key "APIConfig[emailEnabled]" is missing from JSON.');
-        assert(json[r'emailEnabled'] != null, 'Required key "APIConfig[emailEnabled]" has a null value in JSON.');
-        assert(json.containsKey(r'tiles'), 'Required key "APIConfig[tiles]" is missing from JSON.');
-        assert(json[r'tiles'] != null, 'Required key "APIConfig[tiles]" has a null value in JSON.');
+        assert(json.containsKey(r'chatEnabled'),
+            'Required key "APIConfig[chatEnabled]" is missing from JSON.');
+        assert(json[r'chatEnabled'] != null,
+            'Required key "APIConfig[chatEnabled]" has a null value in JSON.');
+        assert(json.containsKey(r'emailEnabled'),
+            'Required key "APIConfig[emailEnabled]" is missing from JSON.');
+        assert(json[r'emailEnabled'] != null,
+            'Required key "APIConfig[emailEnabled]" has a null value in JSON.');
+        assert(json.containsKey(r'tiles'),
+            'Required key "APIConfig[tiles]" is missing from JSON.');
+        assert(json[r'tiles'] != null,
+            'Required key "APIConfig[tiles]" has a null value in JSON.');
         return true;
       }());
 
@@ -98,7 +107,10 @@ class APIConfig {
     return null;
   }
 
-  static List<APIConfig> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<APIConfig> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <APIConfig>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -126,13 +138,19 @@ class APIConfig {
   }
 
   // maps a json object with a list of APIConfig-objects as value to a dart map
-  static Map<String, List<APIConfig>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<APIConfig>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<APIConfig>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = APIConfig.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = APIConfig.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -145,4 +163,3 @@ class APIConfig {
     'tiles',
   };
 }
-

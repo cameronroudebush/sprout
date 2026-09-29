@@ -46,7 +46,8 @@ class OIDCHelper {
       final uri = Uri.parse(result);
       final handoffCode = uri.queryParameters['code'];
 
-      if (handoffCode == null) throw Exception("Failed to parse handoff code from OIDC.");
+      if (handoffCode == null)
+        throw Exception("Failed to parse handoff code from OIDC.");
 
       final client = await ref.read(authApiProvider.future);
       await client.oIDCControllerExchange(

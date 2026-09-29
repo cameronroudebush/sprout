@@ -65,7 +65,9 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
     return SproutChartLayoutFrame(
       header: widget.header,
       data: {},
-      legendPosition: widget.showLegend ? SproutChartLegendPosition.bottom : SproutChartLegendPosition.none,
+      legendPosition: widget.showLegend
+          ? SproutChartLegendPosition.bottom
+          : SproutChartLegendPosition.none,
       colorResolver: const SproutChartColorResolver(colorMapping: {}),
       chartArea: Stack(
         children: [
@@ -78,19 +80,25 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
 
   /// Calculates the dynamic upper bound for the Y-axis.
   double _calculateMaxY() {
-    double maxVal = widget.data!.fold(0.0, (prev, e) => max(prev, max(e.topValue.toDouble(), e.trendValue.toDouble())));
+    double maxVal = widget.data!.fold(
+        0.0,
+        (prev, e) =>
+            max(prev, max(e.topValue.toDouble(), e.trendValue.toDouble())));
     return maxVal == 0 ? 100 : maxVal * 1.2;
   }
 
   /// Calculates the dynamic lower bound for the Y-axis.
   double _calculateMinY() {
-    double minVal =
-        widget.data!.fold(0.0, (prev, e) => min(prev, min(-e.bottomValue.toDouble(), e.trendValue.toDouble())));
+    double minVal = widget.data!.fold(
+        0.0,
+        (prev, e) =>
+            min(prev, min(-e.bottomValue.toDouble(), e.trendValue.toDouble())));
     return minVal == 0 ? -100 : minVal * 1.2;
   }
 
   /// Generates the shared titles configuration to ensure alignment between charts.
-  FlTitlesData _getSharedTitlesData(ThemeData theme, {required bool isOverlay}) {
+  FlTitlesData _getSharedTitlesData(ThemeData theme,
+      {required bool isOverlay}) {
     return FlTitlesData(
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -101,10 +109,12 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
             if (value == meta.max || value == meta.min) {
               return const SizedBox.shrink();
             }
-            final formatted = widget.formatValue?.call(value) ?? value.toStringAsFixed(0);
+            final formatted =
+                widget.formatValue?.call(value) ?? value.toStringAsFixed(0);
             return SideTitleWidget(
               meta: meta,
-              child: Text(formatted, style: TextStyle(fontSize: 10, color: theme.hintColor)),
+              child: Text(formatted,
+                  style: TextStyle(fontSize: 10, color: theme.hintColor)),
             );
           },
         ),
@@ -115,12 +125,16 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
           reservedSize: 30,
           getTitlesWidget: (value, meta) {
             final index = value.toInt();
-            if (index < 0 || index >= widget.data!.length) return const SizedBox();
-            if (isOverlay) return Text('', style: TextStyle(fontSize: 10, color: theme.hintColor));
+            if (index < 0 || index >= widget.data!.length)
+              return const SizedBox();
+            if (isOverlay)
+              return Text('',
+                  style: TextStyle(fontSize: 10, color: theme.hintColor));
 
             return SideTitleWidget(
               meta: meta,
-              child: Text(widget.data![index].label, style: TextStyle(fontSize: 10, color: theme.hintColor)),
+              child: Text(widget.data![index].label,
+                  style: TextStyle(fontSize: 10, color: theme.hintColor)),
             );
           },
         ),
@@ -142,7 +156,9 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
           show: true,
           drawVerticalLine: false,
           getDrawingHorizontalLine: (value) => FlLine(
-            color: value == 0 ? theme.dividerColor : theme.dividerColor.withOpacity(0.1),
+            color: value == 0
+                ? theme.dividerColor
+                : theme.dividerColor.withOpacity(0.1),
             strokeWidth: value == 0 ? 1.5 : 1,
           ),
         ),
@@ -160,8 +176,10 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
                 width: 16,
                 borderRadius: BorderRadius.circular(2),
                 rodStackItems: [
-                  BarChartRodStackItem(-d.bottomValue.toDouble(), 0, widget.bottomColor.withOpacity(0.8)),
-                  BarChartRodStackItem(0, d.topValue.toDouble(), widget.topColor.withOpacity(0.8)),
+                  BarChartRodStackItem(-d.bottomValue.toDouble(), 0,
+                      widget.bottomColor.withOpacity(0.8)),
+                  BarChartRodStackItem(0, d.topValue.toDouble(),
+                      widget.topColor.withOpacity(0.8)),
                 ],
               ),
             ],
@@ -186,7 +204,8 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
         lineBarsData: [
           LineChartBarData(
             spots: widget.data!.asMap().entries.map((entry) {
-              return FlSpot(entry.key.toDouble(), entry.value.trendValue.toDouble());
+              return FlSpot(
+                  entry.key.toDouble(), entry.value.trendValue.toDouble());
             }).toList(),
             isCurved: false,
             color: lineColor,
@@ -239,7 +258,9 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
                 ),
                 TextSpan(
                   text: "Net: ${format(d.trendValue)}",
-                  style: TextStyle(color: d.trendValue.toBalanceColor(theme), fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: d.trendValue.toBalanceColor(theme),
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),

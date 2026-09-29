@@ -32,9 +32,13 @@ class EmailUpdateFrequencyEnum {
     weekly,
   ];
 
-  static EmailUpdateFrequencyEnum? fromJson(dynamic value) => EmailUpdateFrequencyEnumTypeTransformer().decode(value);
+  static EmailUpdateFrequencyEnum? fromJson(dynamic value) =>
+      EmailUpdateFrequencyEnumTypeTransformer().decode(value);
 
-  static List<EmailUpdateFrequencyEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EmailUpdateFrequencyEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <EmailUpdateFrequencyEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -51,7 +55,8 @@ class EmailUpdateFrequencyEnum {
 /// Transformation class that can [encode] an instance of [EmailUpdateFrequencyEnum] to String,
 /// and [decode] dynamic data back to [EmailUpdateFrequencyEnum].
 class EmailUpdateFrequencyEnumTypeTransformer {
-  factory EmailUpdateFrequencyEnumTypeTransformer() => _instance ??= const EmailUpdateFrequencyEnumTypeTransformer._();
+  factory EmailUpdateFrequencyEnumTypeTransformer() =>
+      _instance ??= const EmailUpdateFrequencyEnumTypeTransformer._();
 
   const EmailUpdateFrequencyEnumTypeTransformer._();
 
@@ -68,8 +73,10 @@ class EmailUpdateFrequencyEnumTypeTransformer {
   EmailUpdateFrequencyEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'none': return EmailUpdateFrequencyEnum.none;
-        case r'weekly': return EmailUpdateFrequencyEnum.weekly;
+        case r'none':
+          return EmailUpdateFrequencyEnum.none;
+        case r'weekly':
+          return EmailUpdateFrequencyEnum.weekly;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -82,4 +89,3 @@ class EmailUpdateFrequencyEnumTypeTransformer {
   /// Singleton [EmailUpdateFrequencyEnumTypeTransformer] instance.
   static EmailUpdateFrequencyEnumTypeTransformer? _instance;
 }
-

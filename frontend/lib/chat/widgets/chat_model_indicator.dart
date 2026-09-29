@@ -11,7 +11,12 @@ class ChatModelIndicator extends StatelessWidget {
   /// False renders text before, true renders text after
   final bool textAfter;
 
-  const ChatModelIndicator({super.key, required this.model, this.color, this.compact = false, this.textAfter = true});
+  const ChatModelIndicator(
+      {super.key,
+      required this.model,
+      this.color,
+      this.compact = false,
+      this.textAfter = true});
 
   @override
   Widget build(BuildContext context) {

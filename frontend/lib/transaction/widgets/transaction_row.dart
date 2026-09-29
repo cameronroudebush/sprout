@@ -23,7 +23,8 @@ class TransactionRow extends ConsumerWidget {
   /// Content to render below the row
   final Widget? child;
 
-  const TransactionRow(this.transaction, {super.key, this.allowDialog = true, this.icon, this.child});
+  const TransactionRow(this.transaction,
+      {super.key, this.allowDialog = true, this.icon, this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,10 +53,14 @@ class TransactionRow extends ConsumerWidget {
         : (icon ?? CategoryIcon(cat, avatarSize: 16));
 
     return InkWell(
-      onTap: !allowDialog ? null : () => NavigationProvider.redirectToTransaction(transaction),
+      onTap: !allowDialog
+          ? null
+          : () => NavigationProvider.redirectToTransaction(transaction),
       child: Container(
         decoration: BoxDecoration(
-          color: transaction.pending ? theme.colorScheme.primary.withValues(alpha: 0.15) : Colors.transparent,
+          color: transaction.pending
+              ? theme.colorScheme.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -77,7 +82,8 @@ class TransactionRow extends ConsumerWidget {
                     ),
                     Text(
                       account?.name ?? "Unknown",
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.hintColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -97,7 +103,8 @@ class TransactionRow extends ConsumerWidget {
                       color: transaction.amount.toBalanceColor(theme),
                     ),
                   ),
-                  if (allowDialog) Icon(Icons.chevron_right, color: theme.disabledColor),
+                  if (allowDialog)
+                    Icon(Icons.chevron_right, color: theme.disabledColor),
                 ],
               ),
             ],

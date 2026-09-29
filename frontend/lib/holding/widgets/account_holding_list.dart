@@ -11,23 +11,31 @@ class AccountHoldingsList extends ConsumerWidget {
   final String? selectedId;
   final Function(Holding holding) onSelect;
 
-  const AccountHoldingsList({super.key, required this.accountId, this.selectedId, required this.onSelect});
+  const AccountHoldingsList(
+      {super.key,
+      required this.accountId,
+      this.selectedId,
+      required this.onSelect});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final holdingsAsync = ref.watch(accountHoldingsProvider(accountId));
     return holdingsAsync.when(
       loading: () => const Center(
-        child: Padding(padding: EdgeInsets.all(24.0), child: CircularProgressIndicator()),
+        child: Padding(
+            padding: EdgeInsets.all(24.0), child: CircularProgressIndicator()),
       ),
       error: (err, _) => Center(child: Text("Error loading holdings: $err")),
       data: (holdings) {
-        final sortedHoldings = holdings..sort((a, b) => b.marketValue.compareTo(a.marketValue));
+        final sortedHoldings = holdings
+          ..sort((a, b) => b.marketValue.compareTo(a.marketValue));
         if (holdings.isEmpty) {
           return SproutCard(
             child: Padding(
                 padding: EdgeInsetsGeometry.all(24),
-                child: Center(child: Text("This account does not contain any positions."))),
+                child: Center(
+                    child:
+                        Text("This account does not contain any positions."))),
           );
         }
 
@@ -43,7 +51,10 @@ class AccountHoldingsList extends ConsumerWidget {
               final holding = sortedHoldings[index];
               final isSelected = selectedId == holding.id;
 
-              return HoldingRow(holding: holding, isSelected: isSelected, onSelect: () => onSelect(holding));
+              return HoldingRow(
+                  holding: holding,
+                  isSelected: isSelected,
+                  onSelect: () => onSelect(holding));
             },
           ),
         );

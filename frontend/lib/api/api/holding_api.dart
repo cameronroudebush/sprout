@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class HoldingApi {
-  HoldingApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  HoldingApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -26,7 +26,9 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holding history for.
-  Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo(String accountId,) async {
+  Future<Response> holdingControllerGetHoldingHistoryWithHttpInfo(
+    String accountId,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/history';
 
@@ -37,10 +39,9 @@ class HoldingApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'accountId', accountId));
+    queryParams.addAll(_queryParams('', 'accountId', accountId));
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -61,20 +62,25 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holding history for.
-  Future<List<EntityHistory>?> holdingControllerGetHoldingHistory(String accountId,) async {
-    final response = await holdingControllerGetHoldingHistoryWithHttpInfo(accountId,);
+  Future<List<EntityHistory>?> holdingControllerGetHoldingHistory(
+    String accountId,
+  ) async {
+    final response = await holdingControllerGetHoldingHistoryWithHttpInfo(
+      accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<EntityHistory>') as List)
-        .cast<EntityHistory>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<EntityHistory>') as List)
+          .cast<EntityHistory>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -88,10 +94,11 @@ class HoldingApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> holdingControllerGetHoldingTimelineWithHttpInfo(String id,) async {
+  Future<Response> holdingControllerGetHoldingTimelineWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/holding/timeline/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/holding/timeline/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -101,7 +108,6 @@ class HoldingApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -121,20 +127,25 @@ class HoldingApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<List<HistoricalDataPoint>?> holdingControllerGetHoldingTimeline(String id,) async {
-    final response = await holdingControllerGetHoldingTimelineWithHttpInfo(id,);
+  Future<List<HistoricalDataPoint>?> holdingControllerGetHoldingTimeline(
+    String id,
+  ) async {
+    final response = await holdingControllerGetHoldingTimelineWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<HistoricalDataPoint>') as List)
-        .cast<HistoricalDataPoint>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<HistoricalDataPoint>') as List)
+          .cast<HistoricalDataPoint>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -149,7 +160,9 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holdings for.
-  Future<Response> holdingControllerGetHoldingsWithHttpInfo(String accountId,) async {
+  Future<Response> holdingControllerGetHoldingsWithHttpInfo(
+    String accountId,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/holding';
 
@@ -160,10 +173,9 @@ class HoldingApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'accountId', accountId));
+    queryParams.addAll(_queryParams('', 'accountId', accountId));
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -184,20 +196,25 @@ class HoldingApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to retrieve holdings for.
-  Future<List<Holding>?> holdingControllerGetHoldings(String accountId,) async {
-    final response = await holdingControllerGetHoldingsWithHttpInfo(accountId,);
+  Future<List<Holding>?> holdingControllerGetHoldings(
+    String accountId,
+  ) async {
+    final response = await holdingControllerGetHoldingsWithHttpInfo(
+      accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Holding>') as List)
-        .cast<Holding>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Holding>')
+              as List)
+          .cast<Holding>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -219,7 +236,6 @@ class HoldingApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -243,12 +259,13 @@ class HoldingApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<MarketIndexDto>') as List)
-        .cast<MarketIndexDto>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<MarketIndexDto>') as List)
+          .cast<MarketIndexDto>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -263,7 +280,9 @@ class HoldingApi {
   ///
   /// * [List<String>] symbols (required):
   ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
-  Future<Response> holdingControllerGetLivePricesWithHttpInfo(List<String> symbols,) async {
+  Future<Response> holdingControllerGetLivePricesWithHttpInfo(
+    List<String> symbols,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/holding/live';
 
@@ -274,10 +293,9 @@ class HoldingApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('multi', 'symbols', symbols));
+    queryParams.addAll(_queryParams('multi', 'symbols', symbols));
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -298,20 +316,25 @@ class HoldingApi {
   ///
   /// * [List<String>] symbols (required):
   ///   Comma-separated list of ticker symbols (e.g., AAPL,MSFT,TSLA)
-  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(List<String> symbols,) async {
-    final response = await holdingControllerGetLivePricesWithHttpInfo(symbols,);
+  Future<List<MarketIndexDto>?> holdingControllerGetLivePrices(
+    List<String> symbols,
+  ) async {
+    final response = await holdingControllerGetLivePricesWithHttpInfo(
+      symbols,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<MarketIndexDto>') as List)
-        .cast<MarketIndexDto>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<MarketIndexDto>') as List)
+          .cast<MarketIndexDto>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -321,7 +344,8 @@ class HoldingApi {
   /// Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> holdingControllerGetMajorIndicesTimelineWithHttpInfo() async {
+  Future<Response>
+      holdingControllerGetMajorIndicesTimelineWithHttpInfo() async {
     // ignore: prefer_const_declarations
     final path = r'/holding/timeline/major';
 
@@ -334,7 +358,6 @@ class HoldingApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -349,20 +372,23 @@ class HoldingApi {
   /// Get 7-day historical performance for major market indices.
   ///
   /// Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.
-  Future<List<MajorIndexTimelineDto>?> holdingControllerGetMajorIndicesTimeline() async {
-    final response = await holdingControllerGetMajorIndicesTimelineWithHttpInfo();
+  Future<List<MajorIndexTimelineDto>?>
+      holdingControllerGetMajorIndicesTimeline() async {
+    final response =
+        await holdingControllerGetMajorIndicesTimelineWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<MajorIndexTimelineDto>') as List)
-        .cast<MajorIndexTimelineDto>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<MajorIndexTimelineDto>') as List)
+          .cast<MajorIndexTimelineDto>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -377,10 +403,11 @@ class HoldingApi {
   ///
   /// * [String] id (required):
   ///   The ID of the specific holding.
-  Future<Response> holdingControllerGetSpecificHoldingHistoryWithHttpInfo(String id,) async {
+  Future<Response> holdingControllerGetSpecificHoldingHistoryWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/holding/history/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/holding/history/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -390,7 +417,6 @@ class HoldingApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -411,17 +437,25 @@ class HoldingApi {
   ///
   /// * [String] id (required):
   ///   The ID of the specific holding.
-  Future<EntityHistory?> holdingControllerGetSpecificHoldingHistory(String id,) async {
-    final response = await holdingControllerGetSpecificHoldingHistoryWithHttpInfo(id,);
+  Future<EntityHistory?> holdingControllerGetSpecificHoldingHistory(
+    String id,
+  ) async {
+    final response =
+        await holdingControllerGetSpecificHoldingHistoryWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'EntityHistory',) as EntityHistory;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'EntityHistory',
+      ) as EntityHistory;
     }
     return null;
   }

@@ -32,30 +32,33 @@ class EntityHistoryDataPoint {
   num valueChange;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is EntityHistoryDataPoint &&
-    other.start == start &&
-    other.percentChange == percentChange &&
-    other.valueChange == valueChange;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EntityHistoryDataPoint &&
+          other.start == start &&
+          other.percentChange == percentChange &&
+          other.valueChange == valueChange;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (start.hashCode) +
-    (percentChange == null ? 0 : percentChange!.hashCode) +
-    (valueChange.hashCode);
+      // ignore: unnecessary_parenthesis
+      (start.hashCode) +
+      (percentChange == null ? 0 : percentChange!.hashCode) +
+      (valueChange.hashCode);
 
   @override
-  String toString() => 'EntityHistoryDataPoint[start=$start, percentChange=$percentChange, valueChange=$valueChange]';
+  String toString() =>
+      'EntityHistoryDataPoint[start=$start, percentChange=$percentChange, valueChange=$valueChange]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'start'] = this.start.toUtc().toIso8601String();
+    json[r'start'] = this.start.toUtc().toIso8601String();
     if (this.percentChange != null) {
       json[r'percentChange'] = this.percentChange;
     } else {
       json[r'percentChange'] = null;
     }
-      json[r'valueChange'] = this.valueChange;
+    json[r'valueChange'] = this.valueChange;
     return json;
   }
 
@@ -70,10 +73,14 @@ class EntityHistoryDataPoint {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'start'), 'Required key "EntityHistoryDataPoint[start]" is missing from JSON.');
-        assert(json[r'start'] != null, 'Required key "EntityHistoryDataPoint[start]" has a null value in JSON.');
-        assert(json.containsKey(r'valueChange'), 'Required key "EntityHistoryDataPoint[valueChange]" is missing from JSON.');
-        assert(json[r'valueChange'] != null, 'Required key "EntityHistoryDataPoint[valueChange]" has a null value in JSON.');
+        assert(json.containsKey(r'start'),
+            'Required key "EntityHistoryDataPoint[start]" is missing from JSON.');
+        assert(json[r'start'] != null,
+            'Required key "EntityHistoryDataPoint[start]" has a null value in JSON.');
+        assert(json.containsKey(r'valueChange'),
+            'Required key "EntityHistoryDataPoint[valueChange]" is missing from JSON.');
+        assert(json[r'valueChange'] != null,
+            'Required key "EntityHistoryDataPoint[valueChange]" has a null value in JSON.');
         return true;
       }());
 
@@ -86,7 +93,10 @@ class EntityHistoryDataPoint {
     return null;
   }
 
-  static List<EntityHistoryDataPoint> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EntityHistoryDataPoint> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <EntityHistoryDataPoint>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -114,13 +124,19 @@ class EntityHistoryDataPoint {
   }
 
   // maps a json object with a list of EntityHistoryDataPoint-objects as value to a dart map
-  static Map<String, List<EntityHistoryDataPoint>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<EntityHistoryDataPoint>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<EntityHistoryDataPoint>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = EntityHistoryDataPoint.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = EntityHistoryDataPoint.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -132,4 +148,3 @@ class EntityHistoryDataPoint {
     'valueChange',
   };
 }
-

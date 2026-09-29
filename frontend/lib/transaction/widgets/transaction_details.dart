@@ -26,10 +26,12 @@ class TransactionDetailsView extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TransactionDetailsView> createState() => _TransactionDetailsViewState();
+  ConsumerState<TransactionDetailsView> createState() =>
+      _TransactionDetailsViewState();
 }
 
-class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView> {
+class _TransactionDetailsViewState
+    extends ConsumerState<TransactionDetailsView> {
   final _formKey = GlobalKey<FormState>();
   late String _description;
   String? _categoryId;
@@ -87,7 +89,10 @@ class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView>
 
       if (_valHasChanged()) {
         // Edit transaction via the default list provider instance
-        await ref.read(transactionsProvider(TransactionFilter.defaultFilter).notifier).editTransaction(newTransaction);
+        await ref
+            .read(
+                transactionsProvider(TransactionFilter.defaultFilter).notifier)
+            .editTransaction(newTransaction);
 
         // Invalidate all family instances of transactionsProvider to force fresh data everywhere
         ref.invalidate(transactionsProvider);
@@ -132,8 +137,11 @@ class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
-    final isEditable = !widget.disableNonEditable && !widget.transaction.pending;
-    final canSave = !isDemoMode && _valHasChanged() && (_formKey.currentState?.validate() ?? false);
+    final isEditable =
+        !widget.disableNonEditable && !widget.transaction.pending;
+    final canSave = !isDemoMode &&
+        _valHasChanged() &&
+        (_formKey.currentState?.validate() ?? false);
 
     return Form(
       key: _formKey,
@@ -158,14 +166,16 @@ class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView>
                 TransactionHeroCard(
                   transaction: widget.transaction,
                   description: _description,
-                  onDescriptionChanged: (val) => setState(() => _description = val),
+                  onDescriptionChanged: (val) =>
+                      setState(() => _description = val),
                 ),
                 TransactionConfigCard(
                   transaction: widget.transaction,
                   categoryId: _categoryId,
                   postedDate: _postedDate,
                   isEditable: isEditable,
-                  onCategoryChanged: (catId) => setState(() => _categoryId = catId),
+                  onCategoryChanged: (catId) =>
+                      setState(() => _categoryId = catId),
                   onDateChanged: (date) => setState(() => _postedDate = date),
                 ),
                 TransactionLocationCard(transaction: widget.transaction),
@@ -195,7 +205,8 @@ class _TransactionDetailsViewState extends ConsumerState<TransactionDetailsView>
               children: [
                 Expanded(
                   child: Tooltip(
-                    message: "Create a rule based on this transaction description",
+                    message:
+                        "Create a rule based on this transaction description",
                     child: FilledButton(
                       onPressed: () async {
                         showSproutPopup(

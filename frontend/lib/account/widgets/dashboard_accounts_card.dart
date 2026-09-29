@@ -22,7 +22,8 @@ class DashboardAccountsCard extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 4,
           children: [
-            if (state.accounts.isNotEmpty) TotalSummary(accounts: state.accounts),
+            if (state.accounts.isNotEmpty)
+              TotalSummary(accounts: state.accounts),
             Flexible(
               child: SingleChildScrollView(
                 child: AccountSummaryView(

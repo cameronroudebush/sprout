@@ -25,10 +25,12 @@ class ZillowPropertySelector extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<ZillowPropertySelector> createState() => _ZillowPropertySelectorState();
+  ConsumerState<ZillowPropertySelector> createState() =>
+      _ZillowPropertySelectorState();
 }
 
-class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector> {
+class _ZillowPropertySelectorState
+    extends ConsumerState<ZillowPropertySelector> {
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
@@ -64,7 +66,8 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
       setState(() => _lookupResult = result);
       widget.onPropertyFound(dto);
     } catch (e) {
-      setState(() => _errorMessage = ref.read(notificationsProvider.notifier).parseOpenAPIException(e));
+      setState(() => _errorMessage =
+          ref.read(notificationsProvider.notifier).parseOpenAPIException(e));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -84,7 +87,8 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
           Text("Find a property on Zillow", style: theme.textTheme.titleMedium),
           TextFormField(
             controller: _addressController,
-            decoration: const InputDecoration(labelText: "Street Address", border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: "Street Address", border: OutlineInputBorder()),
             validator: (v) => v!.isEmpty ? "Required" : null,
           ),
           Row(
@@ -94,7 +98,8 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
                 flex: 2,
                 child: TextFormField(
                   controller: _cityController,
-                  decoration: const InputDecoration(labelText: "City", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: "City", border: OutlineInputBorder()),
                   validator: (v) => v!.isEmpty ? "Required" : null,
                 ),
               ),
@@ -110,11 +115,13 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
           TextFormField(
             controller: _zipController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: "Zip Code", border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: "Zip Code", border: OutlineInputBorder()),
             validator: (v) => v!.isEmpty ? "Required" : null,
           ),
           if (_errorMessage != null) ...[
-            Icon(Icons.warning_amber_rounded, color: theme.colorScheme.error, size: 40),
+            Icon(Icons.warning_amber_rounded,
+                color: theme.colorScheme.error, size: 40),
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
@@ -145,7 +152,8 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
   Widget _buildResultCard(ThemeData theme) {
     final formatter = ref.watch(currencyFormatterProvider);
     final zestimate = formatter.format(_lookupResult?.zestimate);
-    final rentZestimate = "${formatter.format(_lookupResult?.rentZestimate)}/mo";
+    final rentZestimate =
+        "${formatter.format(_lookupResult?.rentZestimate)}/mo";
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -176,7 +184,10 @@ class _ZillowPropertySelectorState extends ConsumerState<ZillowPropertySelector>
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(label), Text(value, style: const TextStyle(fontWeight: FontWeight.bold))],
+        children: [
+          Text(label),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold))
+        ],
       ),
     );
   }

@@ -15,13 +15,15 @@ class CategoryOverviewPage extends ConsumerStatefulWidget {
   const CategoryOverviewPage({super.key});
 
   @override
-  ConsumerState<CategoryOverviewPage> createState() => _CategoryOverviewPageState();
+  ConsumerState<CategoryOverviewPage> createState() =>
+      _CategoryOverviewPageState();
 }
 
 class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
   /// Opens the edit dialog
   void _openEditSheet(Category? category) {
-    showSproutPopup(context: context, builder: (context) => CategoryEdit(category));
+    showSproutPopup(
+        context: context, builder: (context) => CategoryEdit(category));
   }
 
   /// Builds an individual category with indentation of depth
@@ -37,9 +39,12 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
   }
 
   /// Builds the overall category tree utilizing nesting capabilities
-  List<Widget> _buildCategoryTree(Category category, List<Category> all, int depth) {
+  List<Widget> _buildCategoryTree(
+      Category category, List<Category> all, int depth) {
     final List<Widget> widgets = [_buildCategoryTile(category, depth)];
-    final children = all.where((c) => c.parentCategoryId == category.id).toList()
+    final children = all
+        .where((c) => c.parentCategoryId == category.id)
+        .toList()
       ..sort((a, b) => a.name.compareTo(b.name));
 
     for (final child in children) {
@@ -54,11 +59,18 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
 
     return Scaffold(
       floatingActionButton: SproutSpeedDial(
-        actions: [FABAction(icon: Icons.add, label: 'New Category', onTap: (context) => _openEditSheet(null))],
+        actions: [
+          FABAction(
+              icon: Icons.add,
+              label: 'New Category',
+              onTap: (context) => _openEditSheet(null))
+        ],
       ),
       body: categoriesAsync.whenDefault(
         data: (categories) {
-          final topLevel = categories.where((c) => c.parentCategoryId == null).toList()
+          final topLevel = categories
+              .where((c) => c.parentCategoryId == null)
+              .toList()
             ..sort((a, b) => a.name.compareTo(b.name));
 
           final List<Widget> allTiles = [];
@@ -93,7 +105,8 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
                           for (int i = 0; i < allTiles.length; i++) ...[
                             allTiles[i],
                             // Render a divider line underneath every element except the absolute final item
-                            if (i < allTiles.length - 1) Divider(height: 1, thickness: 1),
+                            if (i < allTiles.length - 1)
+                              Divider(height: 1, thickness: 1),
                           ],
                         ],
                       ),

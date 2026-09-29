@@ -47,13 +47,20 @@ class NotificationItem extends StatelessWidget {
     final theme = Theme.of(context);
 
     final (icon, color) = switch (notification.type) {
-      NotificationTypeEnum.success => (Icons.check_circle_outline, Colors.green),
-      NotificationTypeEnum.warning => (Icons.warning_amber_rounded, Colors.orange),
+      NotificationTypeEnum.success => (
+          Icons.check_circle_outline,
+          Colors.green
+        ),
+      NotificationTypeEnum.warning => (
+          Icons.warning_amber_rounded,
+          Colors.orange
+        ),
       NotificationTypeEnum.error => (Icons.error_outline_rounded, Colors.red),
       _ => (Icons.info_outline_rounded, theme.colorScheme.primary),
     };
 
-    final borderRadius = isFloating ? BorderRadius.circular(12) : BorderRadius.zero;
+    final borderRadius =
+        isFloating ? BorderRadius.circular(12) : BorderRadius.zero;
 
     return Material(
       color: Colors.transparent,
@@ -73,7 +80,11 @@ class NotificationItem extends StatelessWidget {
                   top: 8,
                   bottom: 8,
                   left: 16,
-                  right: (isFloating && showUnreadIndicator && !notification.isRead) ? 28 : 16,
+                  right: (isFloating &&
+                          showUnreadIndicator &&
+                          !notification.isRead)
+                      ? 28
+                      : 16,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -107,7 +118,9 @@ class NotificationItem extends StatelessWidget {
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            mainAxisSize: isFloating ? MainAxisSize.min : MainAxisSize.max,
+                            mainAxisSize: isFloating
+                                ? MainAxisSize.min
+                                : MainAxisSize.max,
                             children: [
                               Flexible(
                                 child: Text(
@@ -117,7 +130,9 @@ class NotificationItem extends StatelessWidget {
                                   style: theme.textTheme.labelLarge,
                                 ),
                               ),
-                              if (!isFloating && showUnreadIndicator && !notification.isRead)
+                              if (!isFloating &&
+                                  showUnreadIndicator &&
+                                  !notification.isRead)
                                 Container(
                                   width: 8,
                                   height: 8,
@@ -139,7 +154,8 @@ class NotificationItem extends StatelessWidget {
                             ),
                           if (showDate)
                             Text(
-                              DateFormat('MM-dd-yyyy').format(notification.createdAt),
+                              DateFormat('MM-dd-yyyy')
+                                  .format(notification.createdAt),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.outline,
                               ),

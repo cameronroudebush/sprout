@@ -13,7 +13,8 @@ class ChartRangeSelector extends ConsumerWidget {
   /// If we want to render the large version of this
   final bool large;
 
-  const ChartRangeSelector({super.key, this.onRangeSelected, this.large = false});
+  const ChartRangeSelector(
+      {super.key, this.onRangeSelected, this.large = false});
 
   /// Centralized handler for range updates to keep providers and callbacks in sync
   void _handleRangeChange(WidgetRef ref, ChartRangeEnum range) async {
@@ -26,20 +27,24 @@ class ChartRangeSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userConfig = ref.watch(userConfigProvider);
-    final selectedRange = userConfig.value?.netWorthRange ?? ChartRangeEnum.oneMonth;
+    final selectedRange =
+        userConfig.value?.netWorthRange ?? ChartRangeEnum.oneMonth;
     final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
 
     return SproutLayoutBuilder(
       (isDesktop, context, constraints) {
-        if (large) return _buildLargeVersion(context, ref, selectedRange, isDemoMode, isDesktop);
-        return _buildCompactVersion(context, ref, selectedRange, isDemoMode, isDesktop);
+        if (large)
+          return _buildLargeVersion(
+              context, ref, selectedRange, isDemoMode, isDesktop);
+        return _buildCompactVersion(
+            context, ref, selectedRange, isDemoMode, isDesktop);
       },
     );
   }
 
   /// The compact popup menu version
-  Widget _buildCompactVersion(
-      BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode, bool isDesktop) {
+  Widget _buildCompactVersion(BuildContext context, WidgetRef ref,
+      ChartRangeEnum selectedRange, bool isDemoMode, bool isDesktop) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -51,19 +56,23 @@ class ChartRangeSelector extends ConsumerWidget {
         decoration: BoxDecoration(
           color: colorScheme.secondaryContainer,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1),
+          border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+              width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              ChartRangeUtility.asPretty(selectedRange, useExtendedPeriodString: isDesktop),
+              ChartRangeUtility.asPretty(selectedRange,
+                  useExtendedPeriodString: isDesktop),
               style: theme.textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSecondaryContainer,
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: colorScheme.onSecondaryContainer),
+            Icon(Icons.keyboard_arrow_down_rounded,
+                size: 14, color: colorScheme.onSecondaryContainer),
           ],
         ),
       ),
@@ -78,11 +87,16 @@ class ChartRangeSelector extends ConsumerWidget {
           child: Row(
             spacing: 12,
             children: [
-              if (isSelected) Icon(Icons.check, size: 16, color: colorScheme.primary) else const SizedBox(width: 16),
+              if (isSelected)
+                Icon(Icons.check, size: 16, color: colorScheme.primary)
+              else
+                const SizedBox(width: 16),
               Text(
-                ChartRangeUtility.asPretty(range, useExtendedPeriodString: isDesktop),
+                ChartRangeUtility.asPretty(range,
+                    useExtendedPeriodString: isDesktop),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                  color:
+                      isSelected ? colorScheme.primary : colorScheme.onSurface,
                 ),
               ),
             ],
@@ -93,8 +107,8 @@ class ChartRangeSelector extends ConsumerWidget {
   }
 
   /// Builds a large version of the selection range that acts as a row using SegmentedButton
-  Widget _buildLargeVersion(
-      BuildContext context, WidgetRef ref, ChartRangeEnum selectedRange, bool isDemoMode, bool isDesktop) {
+  Widget _buildLargeVersion(BuildContext context, WidgetRef ref,
+      ChartRangeEnum selectedRange, bool isDemoMode, bool isDesktop) {
     final theme = Theme.of(context);
 
     return SizedBox(
@@ -104,7 +118,9 @@ class ChartRangeSelector extends ConsumerWidget {
         segments: ChartRangeEnum.values.map((range) {
           return ButtonSegment<ChartRangeEnum>(
             value: range,
-            label: Text(ChartRangeUtility.asPretty(range, useExtendedPeriodString: isDesktop),
+            label: Text(
+                ChartRangeUtility.asPretty(range,
+                    useExtendedPeriodString: isDesktop),
                 style: const TextStyle(fontSize: 12)),
           );
         }).toList(),

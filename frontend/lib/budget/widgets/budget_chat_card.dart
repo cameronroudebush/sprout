@@ -25,7 +25,8 @@ class BudgetChatCard extends ConsumerWidget {
       loadingText: 'Reviewing your budget...',
       expanded: false,
       customErrorMessage: 'Failed to load budget overview',
-      emptyCondition: (overview) => overview == null || overview.text.trim().isEmpty,
+      emptyCondition: (overview) =>
+          overview == null || overview.text.trim().isEmpty,
       data: (overview) => Padding(
         padding: const EdgeInsets.all(8),
         child: ChatMessageContent(
@@ -44,7 +45,8 @@ class BudgetChatCard extends ConsumerWidget {
         children: [
           SproutChartHeader(
             title: 'Budget Overview',
-            subheader: 'Insights for ${DateFormat('MMMM yyyy').format(DateTime(year, month))}',
+            subheader:
+                'Insights for ${DateFormat('MMMM yyyy').format(DateTime(year, month))}',
             left: const Tooltip(
               message: 'Powered by AI',
               child: Icon(Icons.auto_awesome),

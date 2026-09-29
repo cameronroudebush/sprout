@@ -12,11 +12,11 @@ abstract class BrowserAuth {
   /// The current URL of the application (Web only). Throws on mobile.
   String get currentWebUrl;
 
-  /// Opens an auth window. 
+  /// Opens an auth window.
   /// - Mobile: Opens a Custom Tab and waits for the callback scheme. Returns the final redirect URL.
   /// - Web: Opens a centered popup and polls. If [webSuccessMessage] is provided, it waits for a postMessage matching it. Returns the message.
   Future<String> openPopup(String url, {String? webSuccessMessage});
 
-  /// Redirects the current tab to a new URL (Web only). 
+  /// Redirects the current tab to a new URL (Web only).
   Future<void> redirectTab(String url);
 }

@@ -38,7 +38,8 @@ class WelcomeSetupPage extends StatelessWidget {
               child: Text(
                 "Take control of your financial future.",
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
+                style: theme.textTheme.titleLarge
+                    ?.copyWith(color: theme.colorScheme.primary),
               ),
             ),
             const SizedBox(height: 8),
@@ -61,7 +62,8 @@ class WelcomeSetupPage extends StatelessWidget {
               alignment: WrapAlignment.center,
               children: [
                 _buildFeatureChip(context, Icons.lock_outline, "Private"),
-                _buildFeatureChip(context, Icons.analytics_outlined, "Insights"),
+                _buildFeatureChip(
+                    context, Icons.analytics_outlined, "Insights"),
                 _buildFeatureChip(context, Icons.cloud, "Self-Hosted"),
               ],
             ),

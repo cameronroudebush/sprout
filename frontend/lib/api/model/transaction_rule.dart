@@ -62,36 +62,39 @@ class TransactionRule {
   bool enabled;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TransactionRule &&
-    other.id == id &&
-    other.categoryId == categoryId &&
-    other.accountId == accountId &&
-    other.type == type &&
-    other.value == value &&
-    other.strict == strict &&
-    other.matches == matches &&
-    other.order == order &&
-    other.enabled == enabled;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TransactionRule &&
+          other.id == id &&
+          other.categoryId == categoryId &&
+          other.accountId == accountId &&
+          other.type == type &&
+          other.value == value &&
+          other.strict == strict &&
+          other.matches == matches &&
+          other.order == order &&
+          other.enabled == enabled;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (categoryId == null ? 0 : categoryId!.hashCode) +
-    (accountId == null ? 0 : accountId!.hashCode) +
-    (type.hashCode) +
-    (value.hashCode) +
-    (strict.hashCode) +
-    (matches.hashCode) +
-    (order.hashCode) +
-    (enabled.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (categoryId == null ? 0 : categoryId!.hashCode) +
+      (accountId == null ? 0 : accountId!.hashCode) +
+      (type.hashCode) +
+      (value.hashCode) +
+      (strict.hashCode) +
+      (matches.hashCode) +
+      (order.hashCode) +
+      (enabled.hashCode);
 
   @override
-  String toString() => 'TransactionRule[id=$id, categoryId=$categoryId, accountId=$accountId, type=$type, value=$value, strict=$strict, matches=$matches, order=$order, enabled=$enabled]';
+  String toString() =>
+      'TransactionRule[id=$id, categoryId=$categoryId, accountId=$accountId, type=$type, value=$value, strict=$strict, matches=$matches, order=$order, enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
+    json[r'id'] = this.id;
     if (this.categoryId != null) {
       json[r'categoryId'] = this.categoryId;
     } else {
@@ -102,12 +105,12 @@ class TransactionRule {
     } else {
       json[r'accountId'] = null;
     }
-      json[r'type'] = this.type;
-      json[r'value'] = this.value;
-      json[r'strict'] = this.strict;
-      json[r'matches'] = this.matches;
-      json[r'order'] = this.order;
-      json[r'enabled'] = this.enabled;
+    json[r'type'] = this.type;
+    json[r'value'] = this.value;
+    json[r'strict'] = this.strict;
+    json[r'matches'] = this.matches;
+    json[r'order'] = this.order;
+    json[r'enabled'] = this.enabled;
     return json;
   }
 
@@ -122,20 +125,34 @@ class TransactionRule {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "TransactionRule[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "TransactionRule[id]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "TransactionRule[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "TransactionRule[type]" has a null value in JSON.');
-        assert(json.containsKey(r'value'), 'Required key "TransactionRule[value]" is missing from JSON.');
-        assert(json[r'value'] != null, 'Required key "TransactionRule[value]" has a null value in JSON.');
-        assert(json.containsKey(r'strict'), 'Required key "TransactionRule[strict]" is missing from JSON.');
-        assert(json[r'strict'] != null, 'Required key "TransactionRule[strict]" has a null value in JSON.');
-        assert(json.containsKey(r'matches'), 'Required key "TransactionRule[matches]" is missing from JSON.');
-        assert(json[r'matches'] != null, 'Required key "TransactionRule[matches]" has a null value in JSON.');
-        assert(json.containsKey(r'order'), 'Required key "TransactionRule[order]" is missing from JSON.');
-        assert(json[r'order'] != null, 'Required key "TransactionRule[order]" has a null value in JSON.');
-        assert(json.containsKey(r'enabled'), 'Required key "TransactionRule[enabled]" is missing from JSON.');
-        assert(json[r'enabled'] != null, 'Required key "TransactionRule[enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "TransactionRule[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "TransactionRule[id]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "TransactionRule[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "TransactionRule[type]" has a null value in JSON.');
+        assert(json.containsKey(r'value'),
+            'Required key "TransactionRule[value]" is missing from JSON.');
+        assert(json[r'value'] != null,
+            'Required key "TransactionRule[value]" has a null value in JSON.');
+        assert(json.containsKey(r'strict'),
+            'Required key "TransactionRule[strict]" is missing from JSON.');
+        assert(json[r'strict'] != null,
+            'Required key "TransactionRule[strict]" has a null value in JSON.');
+        assert(json.containsKey(r'matches'),
+            'Required key "TransactionRule[matches]" is missing from JSON.');
+        assert(json[r'matches'] != null,
+            'Required key "TransactionRule[matches]" has a null value in JSON.');
+        assert(json.containsKey(r'order'),
+            'Required key "TransactionRule[order]" is missing from JSON.');
+        assert(json[r'order'] != null,
+            'Required key "TransactionRule[order]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'),
+            'Required key "TransactionRule[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "TransactionRule[enabled]" has a null value in JSON.');
         return true;
       }());
 
@@ -154,7 +171,10 @@ class TransactionRule {
     return null;
   }
 
-  static List<TransactionRule> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TransactionRule> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TransactionRule>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -182,13 +202,19 @@ class TransactionRule {
   }
 
   // maps a json object with a list of TransactionRule-objects as value to a dart map
-  static Map<String, List<TransactionRule>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TransactionRule>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TransactionRule>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TransactionRule.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TransactionRule.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -205,7 +231,6 @@ class TransactionRule {
     'enabled',
   };
 }
-
 
 class TransactionRuleTypeEnum {
   /// Instantiate a new enum with the provided [value].
@@ -228,9 +253,13 @@ class TransactionRuleTypeEnum {
     amount,
   ];
 
-  static TransactionRuleTypeEnum? fromJson(dynamic value) => TransactionRuleTypeEnumTypeTransformer().decode(value);
+  static TransactionRuleTypeEnum? fromJson(dynamic value) =>
+      TransactionRuleTypeEnumTypeTransformer().decode(value);
 
-  static List<TransactionRuleTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TransactionRuleTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TransactionRuleTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -247,7 +276,8 @@ class TransactionRuleTypeEnum {
 /// Transformation class that can [encode] an instance of [TransactionRuleTypeEnum] to String,
 /// and [decode] dynamic data back to [TransactionRuleTypeEnum].
 class TransactionRuleTypeEnumTypeTransformer {
-  factory TransactionRuleTypeEnumTypeTransformer() => _instance ??= const TransactionRuleTypeEnumTypeTransformer._();
+  factory TransactionRuleTypeEnumTypeTransformer() =>
+      _instance ??= const TransactionRuleTypeEnumTypeTransformer._();
 
   const TransactionRuleTypeEnumTypeTransformer._();
 
@@ -264,8 +294,10 @@ class TransactionRuleTypeEnumTypeTransformer {
   TransactionRuleTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'description': return TransactionRuleTypeEnum.description;
-        case r'amount': return TransactionRuleTypeEnum.amount;
+        case r'description':
+          return TransactionRuleTypeEnum.description;
+        case r'amount':
+          return TransactionRuleTypeEnum.amount;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -278,5 +310,3 @@ class TransactionRuleTypeEnumTypeTransformer {
   /// Singleton [TransactionRuleTypeEnumTypeTransformer] instance.
   static TransactionRuleTypeEnumTypeTransformer? _instance;
 }
-
-

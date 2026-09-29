@@ -33,13 +33,18 @@ class _SproutShellState extends ConsumerState<SproutShell> {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        systemNavigationBarColor: theme.bottomNavigationBarTheme.backgroundColor,
+        systemNavigationBarColor:
+            theme.bottomNavigationBarTheme.backgroundColor,
         systemNavigationBarIconBrightness:
-            theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white ? Brightness.light : Brightness.dark,
+            theme.bottomNavigationBarTheme.unselectedItemColor == Colors.white
+                ? Brightness.light
+                : Brightness.dark,
       ),
       child: SproutLayoutBuilder((isDesktop, context, constraints) {
         return Scaffold(
-          appBar: !isDesktop && !authNotifier.isSetupMode ? const SproutAppBar() : null,
+          appBar: !isDesktop && !authNotifier.isSetupMode
+              ? const SproutAppBar()
+              : null,
           body: Column(children: [
             if (isDemoMode && !kDebugMode)
               Padding(
@@ -71,7 +76,8 @@ class _SproutShellState extends ConsumerState<SproutShell> {
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: Column(children: [
-                                  if (!authNotifier.isSetupMode) const SproutDesktopHeader(),
+                                  if (!authNotifier.isSetupMode)
+                                    SproutDesktopHeader(state: widget.state),
                                   Expanded(child: widget.child)
                                 ]),
                               ),
@@ -83,8 +89,9 @@ class _SproutShellState extends ConsumerState<SproutShell> {
                   : widget.child,
             )
           ]),
-          bottomNavigationBar:
-              isDesktop || widget.state == null ? null : SproutBottomNav(currentPath: widget.state!.fullPath ?? ""),
+          bottomNavigationBar: isDesktop || widget.state == null
+              ? null
+              : SproutBottomNav(currentPath: widget.state!.fullPath ?? ""),
         );
       }),
     );

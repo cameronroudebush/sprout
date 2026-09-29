@@ -7,7 +7,8 @@ BrowserAuth getBrowserAuth() => BrowserAuthWeb();
 
 class BrowserAuthWeb implements BrowserAuth {
   @override
-  String get callbackUrl => '${html.window.location.origin}/provider-callback.html';
+  String get callbackUrl =>
+      '${html.window.location.origin}/provider-callback.html';
 
   @override
   String get currentWebUrl => html.window.location.href.split('#').first;
@@ -30,7 +31,8 @@ class BrowserAuthWeb implements BrowserAuth {
     final windowHeight = html.window.outerHeight;
     final left = windowLeft + ((windowWidth - width) ~/ 2);
     final top = windowTop + ((windowHeight - height) ~/ 2);
-    final windowFeatures = 'width=$width,height=$height,top=$top,left=$left,status=no,resizable=yes,scrollbars=yes';
+    final windowFeatures =
+        'width=$width,height=$height,top=$top,left=$left,status=no,resizable=yes,scrollbars=yes';
 
     final popupWindow = html.window.open(url, 'AuthWindow', windowFeatures);
 

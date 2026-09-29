@@ -13,7 +13,8 @@ class WebsiteIconWidget extends LogoBaseWidget<String> {
   });
 
   @override
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, String data, double size) {
+  ProviderListenable<AsyncValue<List<String>>> getProvider(
+      BuildContext context, String data, double size) {
     return websiteIconProvider(data, size);
   }
 

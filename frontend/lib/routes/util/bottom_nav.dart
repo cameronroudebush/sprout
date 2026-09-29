@@ -27,7 +27,8 @@ class SproutBottomNav extends ConsumerWidget {
     final userConfig = ref.watch(userConfigProvider).value;
     final unsecureConfig = ref.watch(unsecureConfigProvider).value!;
 
-    final filteredRoutes = getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
+    final filteredRoutes =
+        getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
     // Separate Dashboard from other candidate routes
     final dashboardRoute = authenticatedRoutes.firstWhere(
       (r) => r.path == '/',
@@ -36,7 +37,9 @@ class SproutBottomNav extends ConsumerWidget {
 
     //  Filter candidate routes that have bottom nav priority (bottomNavPriority >= 0)
     //    and sort them by priority (lowest number = highest priority)
-    final candidateRoutes = filteredRoutes.where((r) => r.path != '/' && r.bottomNavPriority >= 0).toList()
+    final candidateRoutes = filteredRoutes
+        .where((r) => r.path != '/' && r.bottomNavPriority >= 0)
+        .toList()
       ..sort((a, b) => a.bottomNavPriority.compareTo(b.bottomNavPriority));
 
     // Take the top 4 candidate routes to fill the 4 non-dashboard bottom slots
@@ -93,7 +96,9 @@ class SproutBottomNav extends ConsumerWidget {
             backgroundColor: Colors.transparent,
             type: BottomNavigationBarType.fixed,
             currentIndex: effectiveIndex,
-            selectedItemColor: hasMatch ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+            selectedItemColor: hasMatch
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
             unselectedItemColor: theme.colorScheme.onSurfaceVariant,
             showSelectedLabels: false,
             showUnselectedLabels: false,
@@ -110,9 +115,11 @@ class SproutBottomNav extends ConsumerWidget {
             },
             items: displayItems.map((item) {
               if (item is SproutRoute) {
-                return BottomNavigationBarItem(icon: Icon(item.icon), label: item.label);
+                return BottomNavigationBarItem(
+                    icon: Icon(item.icon), label: item.label);
               }
-              return const BottomNavigationBarItem(icon: Icon(Icons.menu_open_rounded), label: 'Menu');
+              return const BottomNavigationBarItem(
+                  icon: Icon(Icons.menu_open_rounded), label: 'Menu');
             }).toList(),
           ),
         ),
@@ -122,6 +129,7 @@ class SproutBottomNav extends ConsumerWidget {
 
   /// Opens the modal bottom sheet to allow seeing the rest of the pages
   void _showMoreSheet(BuildContext context) {
-    showSproutPopup(context: context, builder: (context) => const SproutMoreSheet());
+    showSproutPopup(
+        context: context, builder: (context) => const SproutMoreSheet());
   }
 }

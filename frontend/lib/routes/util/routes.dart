@@ -50,7 +50,9 @@ final List<SproutRoute> authenticatedRoutes = [
     bottomNavPriority: 2,
     builder: (context, state) => const ChatPage(),
     enabled: (secureConfig, unsecureConfig, userConfig) =>
-        unsecureConfig.demoMode != null || (secureConfig.chatEnabled && (userConfig?.includeAICapabilities ?? false)),
+        unsecureConfig.demoMode != null ||
+        (secureConfig.chatEnabled &&
+            (userConfig?.includeAICapabilities ?? false)),
   ),
   SproutRoute(
       path: '/transactions',
@@ -113,7 +115,8 @@ final List<SproutRoute> authenticatedRoutes = [
     label: 'Budgeting',
     icon: Icons.pie_chart_rounded,
     builder: (context, state) => const BudgetPage(),
-    enabled: (secureConfig, unsecureConfig, userConfig) => userConfig?.enableBudgeting ?? true,
+    enabled: (secureConfig, unsecureConfig, userConfig) =>
+        userConfig?.enableBudgeting ?? true,
   ),
   SproutRoute(
     path: '/settings',
@@ -126,8 +129,8 @@ final List<SproutRoute> authenticatedRoutes = [
 
 /// Returns the [authenticatedRoutes] but filtered considering the options
 /// [restrictToSidebar] If we should filter out routes that are only allowed in the sidebar.
-List<SproutRoute> getFilteredRoutes(
-    UnsecureAppConfiguration unsecureConfig, APIConfig? apiConfig, UserConfig? userConfig,
+List<SproutRoute> getFilteredRoutes(UnsecureAppConfiguration unsecureConfig,
+    APIConfig? apiConfig, UserConfig? userConfig,
     {List<SproutRoute>? routes, bool restrictToSidebar = true}) {
   return (routes ?? authenticatedRoutes).where((page) {
     if (restrictToSidebar && !page.showInSidebar) return false;
@@ -137,10 +140,12 @@ List<SproutRoute> getFilteredRoutes(
 }
 
 /// Helper function to check if a path exists within a route tree
-bool isPathInRoutes(String path, List<SproutRoute> routes, {String currentPrefix = ''}) {
+bool isPathInRoutes(String path, List<SproutRoute> routes,
+    {String currentPrefix = ''}) {
   for (final route in routes) {
-    final fullRoutePath =
-        route.path.startsWith('/') ? route.path : '${currentPrefix == '/' ? '' : currentPrefix}/${route.path}';
+    final fullRoutePath = route.path.startsWith('/')
+        ? route.path
+        : '${currentPrefix == '/' ? '' : currentPrefix}/${route.path}';
     if (path == fullRoutePath) return true;
     if (route.routes != null) {
       if (isPathInRoutes(path, route.routes!, currentPrefix: fullRoutePath)) {

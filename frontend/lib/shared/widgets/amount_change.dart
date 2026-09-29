@@ -36,7 +36,8 @@ class SproutChangeWidget extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
 
-    if (totalChange == null && percentageChange == null) return const SizedBox.shrink();
+    if (totalChange == null && percentageChange == null)
+      return const SizedBox.shrink();
 
     // Use our extension for semantic coloring
     final total = (totalChange ?? 0) * (invert ? -1 : 1);
@@ -63,12 +64,16 @@ class SproutChangeWidget extends ConsumerWidget {
               if (showPercentage && percentageChange != null)
                 Text(
                   _formatPercent(percent, showValue),
-                  style: TextStyle(color: changeColor, fontSize: showValue ? fontSize - 2 : fontSize),
+                  style: TextStyle(
+                      color: changeColor,
+                      fontSize: showValue ? fontSize - 2 : fontSize),
                 ),
               if (period != null)
                 Text(
-                  ChartRangeUtility.asPretty(period!, useExtendedPeriodString: useExtendedPeriodString),
-                  style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
+                  ChartRangeUtility.asPretty(period!,
+                      useExtendedPeriodString: useExtendedPeriodString),
+                  style:
+                      theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
                 ),
             ],
           ),

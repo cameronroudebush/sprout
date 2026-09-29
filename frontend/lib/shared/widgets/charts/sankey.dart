@@ -74,7 +74,9 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
       }
     }
 
-    if (newNode != _hoveredNode || newLink != _hoveredLink || _hoverPosition != position) {
+    if (newNode != _hoveredNode ||
+        newLink != _hoveredLink ||
+        _hoverPosition != position) {
       setState(() {
         _hoverPosition = position;
         _hoveredNode = newNode;
@@ -85,7 +87,8 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
 
   void _handleTap() {
     if (_hoveredNode != null && widget.onNodeTap != null) {
-      widget.onNodeTap!(_hoveredNode!, _layoutData!.nodeValues[_hoveredNode!] ?? 0);
+      widget.onNodeTap!(
+          _hoveredNode!, _layoutData!.nodeValues[_hoveredNode!] ?? 0);
     } else if (_hoveredLink != null && widget.onLinkTap != null) {
       widget.onLinkTap!(_hoveredLink!);
     }
@@ -121,8 +124,9 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
       nodeParents.putIfAbsent(link.target, () => []).add(link.source_);
     }
     final Map<String, int> nodeColumns = {};
-    List<String> currentColumnNodes =
-        nodeNames.where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty).toList();
+    List<String> currentColumnNodes = nodeNames
+        .where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty)
+        .toList();
     int column = 0;
     while (currentColumnNodes.isNotEmpty) {
       for (var node in currentColumnNodes) {
@@ -130,25 +134,31 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
       }
       final nextColumnNodes = <String>{};
       for (var node in currentColumnNodes) {
-        if (nodeChildren[node] != null) nextColumnNodes.addAll(nodeChildren[node]!);
+        if (nodeChildren[node] != null)
+          nextColumnNodes.addAll(nodeChildren[node]!);
       }
       currentColumnNodes = nextColumnNodes.where((n) {
         if (nodeColumns.containsKey(n)) return false;
         final parents = nodeParents[n];
-        return parents == null || parents.isEmpty || parents.every((p) => nodeColumns.containsKey(p));
+        return parents == null ||
+            parents.isEmpty ||
+            parents.every((p) => nodeColumns.containsKey(p));
       }).toList();
       column++;
     }
     for (var node in nodeNames.where((n) => !nodeColumns.containsKey(n))) {
       nodeColumns[node] = column > 0 ? column - 1 : 0;
     }
-    final int numColumns = nodeColumns.isEmpty ? 0 : nodeColumns.values.reduce(max) + 1;
+    final int numColumns =
+        nodeColumns.isEmpty ? 0 : nodeColumns.values.reduce(max) + 1;
     final List<int> columnCounts = List.generate(numColumns, (_) => 0);
     nodeColumns.forEach((node, col) => columnCounts[col]++);
-    final int maxNodesInAnyColumn = columnCounts.isEmpty ? 0 : columnCounts.reduce(max);
+    final int maxNodesInAnyColumn =
+        columnCounts.isEmpty ? 0 : columnCounts.reduce(max);
     const double minNodeHeight = 40.0;
     const double nodePadding = 16.0;
-    return (maxNodesInAnyColumn * minNodeHeight) + ((maxNodesInAnyColumn - 1) * nodePadding);
+    return (maxNodesInAnyColumn * minNodeHeight) +
+        ((maxNodesInAnyColumn - 1) * nodePadding);
   }
 
   @override
@@ -160,67 +170,96 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
     final theme = Theme.of(context);
     final double calculatedMinHeight = _calculateRequiredHeight(widget.data);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (widget.header != null) widget.header!,
-        if (widget.header != null) const SizedBox(height: 16),
-        // Removed Expanded here so it can size dynamically inside scroll views
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // Determine dynamic height accurately based on current bounded constraints
-            final double dynamicHeight = (constraints.maxHeight == double.infinity || constraints.maxHeight == 0)
-                ? calculatedMinHeight
-                : max(constraints.maxHeight, calculatedMinHeight);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight =
+            constraints.maxHeight.isFinite && constraints.maxHeight > 0;
+        return Column(
+          mainAxisSize: hasBoundedHeight ? MainAxisSize.max : MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (widget.header != null) widget.header!,
+            if (widget.header != null) const SizedBox(height: 16),
+            if (hasBoundedHeight)
+              Expanded(
+                child: _buildChartArea(theme, calculatedMinHeight),
+              )
+            else
+              _buildChartArea(theme, calculatedMinHeight),
+          ],
+        );
+      },
+    );
+  }
 
-            // Enforce a minimum width to prevent unreadable squishing on mobile
-            final isScrollableX = constraints.maxWidth < widget.minWidth;
-            final chartWidth = isScrollableX ? widget.minWidth : constraints.maxWidth;
-            final chartSize = Size(chartWidth, dynamicHeight);
+  /// Fills available height when possible and scrolls when Sankey needs more room.
+  Widget _buildChartArea(ThemeData theme, double calculatedMinHeight) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight =
+            constraints.maxHeight.isFinite && constraints.maxHeight > 0;
+        final dynamicHeight = hasBoundedHeight
+            ? max(constraints.maxHeight, calculatedMinHeight)
+            : calculatedMinHeight;
+        final needsVerticalScroll =
+            hasBoundedHeight && dynamicHeight > constraints.maxHeight;
 
-            // Memoize the heavy layout computation
-            if (_layoutData == null || _lastComputedSize != chartSize) {
-              _layoutData = _computeLayout(chartSize);
-              _lastComputedSize = chartSize;
-            }
+        // Keep chart labels readable on narrow screens by enabling horizontal scrolling.
+        final isScrollableX = constraints.maxWidth < widget.minWidth;
+        final chartWidth =
+            isScrollableX ? widget.minWidth : constraints.maxWidth;
+        final chartSize = Size(chartWidth, dynamicHeight);
 
-            Widget chartArea = MouseRegion(
-              onHover: (e) => _handleInteraction(e.localPosition),
-              onExit: (_) => _clearInteraction(),
-              child: GestureDetector(
-                onTapDown: (details) => _handleInteraction(details.localPosition),
-                onTapUp: (_) => _handleTap(),
-                onTapCancel: _clearInteraction,
-                onLongPressStart: (details) => _handleInteraction(details.localPosition),
-                onLongPressMoveUpdate: (details) => _handleInteraction(details.localPosition),
-                onLongPressEnd: (_) => _clearInteraction(),
-                child: CustomPaint(
-                  size: chartSize,
-                  painter: _SankeyPainter(
-                    layoutData: _layoutData!,
-                    sankeyData: widget.data,
-                    theme: theme,
-                    hoveredNode: _hoveredNode,
-                    hoveredLink: _hoveredLink,
-                    hoverPosition: _hoverPosition,
-                    formatter: widget.formatter,
-                  ),
-                ),
+        if (_layoutData == null || _lastComputedSize != chartSize) {
+          _layoutData = _computeLayout(chartSize);
+          _lastComputedSize = chartSize;
+        }
+
+        final chartArea = MouseRegion(
+          onHover: (event) => _handleInteraction(event.localPosition),
+          onExit: (_) => _clearInteraction(),
+          child: GestureDetector(
+            onTapDown: (details) => _handleInteraction(details.localPosition),
+            onTapUp: (_) => _handleTap(),
+            onTapCancel: _clearInteraction,
+            onLongPressStart: (details) =>
+                _handleInteraction(details.localPosition),
+            onLongPressMoveUpdate: (details) =>
+                _handleInteraction(details.localPosition),
+            onLongPressEnd: (_) => _clearInteraction(),
+            child: CustomPaint(
+              size: chartSize,
+              painter: _SankeyPainter(
+                layoutData: _layoutData!,
+                sankeyData: widget.data,
+                theme: theme,
+                hoveredNode: _hoveredNode,
+                hoveredLink: _hoveredLink,
+                hoverPosition: _hoverPosition,
+                formatter: widget.formatter,
               ),
-            );
+            ),
+          ),
+        );
 
-            if (isScrollableX) {
-              return SingleChildScrollView(
+        final horizontallyScrollableChart = isScrollableX
+            ? SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: chartArea,
-              );
-            }
+              )
+            : chartArea;
 
-            return chartArea;
-          },
-        ),
-      ],
+        if (needsVerticalScroll) {
+          return SingleChildScrollView(
+            child: SizedBox(
+              height: dynamicHeight,
+              child: horizontallyScrollableChart,
+            ),
+          );
+        }
+
+        return horizontallyScrollableChart;
+      },
     );
   }
 
@@ -235,7 +274,8 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
     for (var link in widget.data.links) {
       nodeNames.add(link.source_);
       nodeNames.add(link.target);
-      nodeOutgoing[link.source_] = (nodeOutgoing[link.source_] ?? 0) + link.value;
+      nodeOutgoing[link.source_] =
+          (nodeOutgoing[link.source_] ?? 0) + link.value;
       nodeIncoming[link.target] = (nodeIncoming[link.target] ?? 0) + link.value;
       nodeChildren.putIfAbsent(link.source_, () => []).add(link.target);
       nodeParents.putIfAbsent(link.target, () => []).add(link.source_);
@@ -243,13 +283,15 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
 
     final Map<String, double> nodeValues = {};
     for (var name in nodeNames) {
-      nodeValues[name] = max(nodeIncoming[name] ?? 0.0, nodeOutgoing[name] ?? 0.0);
+      nodeValues[name] =
+          max(nodeIncoming[name] ?? 0.0, nodeOutgoing[name] ?? 0.0);
     }
 
     // Layering Algorithm
     final Map<String, int> nodeColumns = {};
-    List<String> currentColumnNodes =
-        nodeNames.where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty).toList();
+    List<String> currentColumnNodes = nodeNames
+        .where((n) => nodeParents[n] == null || nodeParents[n]!.isEmpty)
+        .toList();
     int column = 0;
 
     while (currentColumnNodes.isNotEmpty) {
@@ -258,12 +300,15 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
       }
       final nextColumnNodes = <String>{};
       for (var node in currentColumnNodes) {
-        if (nodeChildren[node] != null) nextColumnNodes.addAll(nodeChildren[node]!);
+        if (nodeChildren[node] != null)
+          nextColumnNodes.addAll(nodeChildren[node]!);
       }
       currentColumnNodes = nextColumnNodes.where((n) {
         if (nodeColumns.containsKey(n)) return false;
         final parents = nodeParents[n];
-        return parents == null || parents.isEmpty || parents.every((p) => nodeColumns.containsKey(p));
+        return parents == null ||
+            parents.isEmpty ||
+            parents.every((p) => nodeColumns.containsKey(p));
       }).toList();
       column++;
     }
@@ -273,38 +318,45 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
       nodeColumns[node] = column > 0 ? column - 1 : 0;
     }
 
-    final int numColumns = nodeColumns.isEmpty ? 0 : nodeColumns.values.reduce(max) + 1;
+    final int numColumns =
+        nodeColumns.isEmpty ? 0 : nodeColumns.values.reduce(max) + 1;
     final List<List<String>> columns = List.generate(numColumns, (_) => []);
     nodeColumns.forEach((node, col) => columns[col].add(node));
 
     // Layout Nodes
     final Map<String, Rect> nodeRects = {};
     const double nodeThickness = 80.0;
-    const double nodePadding = 16.0;
-    final double gap = (numColumns > 1) ? (size.width - (numColumns * nodeThickness)) / (numColumns - 1) : 0;
+    final double gap = (numColumns > 1)
+        ? (size.width - (numColumns * nodeThickness)) / (numColumns - 1)
+        : 0;
     const double minNodeHeight = 40.0;
 
     for (int i = 0; i < columns.length; i++) {
       final List<String> nodesInColumn = columns[i];
       if (nodesInColumn.isEmpty) continue;
 
-      double totalColumnValue = nodesInColumn.fold(0.0, (sum, node) => sum + (nodeValues[node] ?? 0.0));
+      const double nodePadding = 16.0;
+
+      double totalColumnValue = nodesInColumn.fold(
+          0.0, (sum, node) => sum + (nodeValues[node] ?? 0.0));
       if (totalColumnValue == 0) totalColumnValue = 1.0;
 
-      final double availableSpace = size.height - (nodePadding * (nodesInColumn.length - 1));
+      final double availableSpace =
+          size.height - (nodePadding * (nodesInColumn.length - 1));
       final double totalMinHeight = minNodeHeight * nodesInColumn.length;
-      final double effectiveHeight = max(availableSpace, totalMinHeight);
-      final double distributableSpace = effectiveHeight - totalMinHeight;
+      final double distributableSpace = availableSpace - totalMinHeight;
 
       double currentPos = 0;
       final double fixedPos = i * (nodeThickness + gap);
 
       for (String nodeName in nodesInColumn) {
         final double nodeFlowValue = nodeValues[nodeName] ?? 0.0;
-        final double proportionalShare = (nodeFlowValue / totalColumnValue) * distributableSpace;
+        final double proportionalShare =
+            (nodeFlowValue / totalColumnValue) * distributableSpace;
         final double nodeSize = minNodeHeight + proportionalShare;
 
-        nodeRects[nodeName] = Rect.fromLTWH(fixedPos, currentPos, nodeThickness, nodeSize);
+        nodeRects[nodeName] =
+            Rect.fromLTWH(fixedPos, currentPos, nodeThickness, nodeSize);
         currentPos += nodeSize + nodePadding;
       }
     }
@@ -321,7 +373,8 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
         if (colA != colB) return colA.compareTo(colB);
         final targetRectA = nodeRects[a.target];
         final targetRectB = nodeRects[b.target];
-        if (targetRectA != null && targetRectB != null) return targetRectA.top.compareTo(targetRectB.top);
+        if (targetRectA != null && targetRectB != null)
+          return targetRectA.top.compareTo(targetRectB.top);
         return 0;
       });
 
@@ -333,36 +386,49 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
       final double sourceTotalFlow = nodeValues[link.source_] ?? 0.0;
       final double targetTotalFlow = nodeValues[link.target] ?? 0.0;
 
-      final double sourceLinkRelativeSize =
-          (sourceTotalFlow > 0) ? (link.value / sourceTotalFlow) * sourceRect.height : 0;
-      final double targetLinkRelativeSize =
-          (targetTotalFlow > 0) ? (link.value / targetTotalFlow) * targetRect.height : 0;
+      final double sourceLinkRelativeSize = (sourceTotalFlow > 0)
+          ? (link.value / sourceTotalFlow) * sourceRect.height
+          : 0;
+      final double targetLinkRelativeSize = (targetTotalFlow > 0)
+          ? (link.value / targetTotalFlow) * targetRect.height
+          : 0;
 
-      final double currentSourceOffset = currentOutgoingOffset.putIfAbsent(link.source_, () => 0.0);
-      final double currentTargetOffset = currentIncomingOffset.putIfAbsent(link.target, () => 0.0);
+      final double currentSourceOffset =
+          currentOutgoingOffset.putIfAbsent(link.source_, () => 0.0);
+      final double currentTargetOffset =
+          currentIncomingOffset.putIfAbsent(link.target, () => 0.0);
 
-      currentOutgoingOffset[link.source_] = currentSourceOffset + sourceLinkRelativeSize;
-      currentIncomingOffset[link.target] = currentTargetOffset + targetLinkRelativeSize;
+      currentOutgoingOffset[link.source_] =
+          currentSourceOffset + sourceLinkRelativeSize;
+      currentIncomingOffset[link.target] =
+          currentTargetOffset + targetLinkRelativeSize;
 
-      final Offset p1 = Offset(sourceRect.right, sourceRect.top + currentSourceOffset);
-      final Offset p2 = Offset(sourceRect.right, sourceRect.top + currentSourceOffset + sourceLinkRelativeSize);
-      final Offset p3 = Offset(targetRect.left, targetRect.top + currentTargetOffset + targetLinkRelativeSize);
-      final Offset p4 = Offset(targetRect.left, targetRect.top + currentTargetOffset);
+      final Offset p1 =
+          Offset(sourceRect.right, sourceRect.top + currentSourceOffset);
+      final Offset p2 = Offset(sourceRect.right,
+          sourceRect.top + currentSourceOffset + sourceLinkRelativeSize);
+      final Offset p3 = Offset(targetRect.left,
+          targetRect.top + currentTargetOffset + targetLinkRelativeSize);
+      final Offset p4 =
+          Offset(targetRect.left, targetRect.top + currentTargetOffset);
 
       final Offset controlPoint1 = Offset(p1.dx + (p4.dx - p1.dx) * 0.5, p1.dy);
       final Offset controlPoint2 = Offset(p4.dx - (p4.dx - p1.dx) * 0.5, p4.dy);
 
       final path = Path()
         ..moveTo(p1.dx, p1.dy)
-        ..cubicTo(controlPoint1.dx, controlPoint1.dy, controlPoint2.dx, controlPoint2.dy, p4.dx, p4.dy)
+        ..cubicTo(controlPoint1.dx, controlPoint1.dy, controlPoint2.dx,
+            controlPoint2.dy, p4.dx, p4.dy)
         ..lineTo(p3.dx, p3.dy)
-        ..cubicTo(controlPoint2.dx, p3.dy, controlPoint1.dx, p2.dy, p2.dx, p2.dy)
+        ..cubicTo(
+            controlPoint2.dx, p3.dy, controlPoint1.dx, p2.dy, p2.dx, p2.dy)
         ..close();
 
       linkPaths[link] = path;
     }
 
-    return _SankeyLayoutData(nodeRects: nodeRects, linkPaths: linkPaths, nodeValues: nodeValues);
+    return _SankeyLayoutData(
+        nodeRects: nodeRects, linkPaths: linkPaths, nodeValues: nodeValues);
   }
 }
 
@@ -396,7 +462,9 @@ class _SankeyPainter extends CustomPainter {
 
     for (var link in sankeyData.links) {
       if (layoutData.linkPaths[link] == null) continue;
-      bool isHighlighted = hoveredNode == link.source_ || hoveredNode == link.target || hoveredLink == link;
+      bool isHighlighted = hoveredNode == link.source_ ||
+          hoveredNode == link.target ||
+          hoveredLink == link;
       final color = _getColorForNode(link.source_);
 
       linkPaint.color = isAnythingHovered
@@ -406,11 +474,16 @@ class _SankeyPainter extends CustomPainter {
     }
 
     layoutData.nodeRects.forEach((name, rect) {
-      bool isHighlighted = hoveredNode == name || hoveredLink?.source_ == name || hoveredLink?.target == name;
+      bool isHighlighted = hoveredNode == name ||
+          hoveredLink?.source_ == name ||
+          hoveredLink?.target == name;
       final color = _getColorForNode(name);
 
-      nodePaint.color = isAnythingHovered ? (isHighlighted ? color : color.withOpacity(0.3)) : color;
-      canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(4)), nodePaint);
+      nodePaint.color = isAnythingHovered
+          ? (isHighlighted ? color : color.withOpacity(0.3))
+          : color;
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(4)), nodePaint);
 
       if (rect.height >= 30) {
         _paintLabel(canvas, name, rect);
@@ -434,16 +507,23 @@ class _SankeyPainter extends CustomPainter {
 
   void _paintLabel(Canvas canvas, String name, Rect rect) {
     double totalValue = layoutData.nodeValues[name] ?? 0.0;
-    String displayVal = formatter != null ? formatter!(totalValue) : totalValue.toStringAsFixed(0);
+    String displayVal = formatter != null
+        ? formatter!(totalValue)
+        : totalValue.toStringAsFixed(0);
 
     final textSpan = TextSpan(
       text: '$name\n$displayVal',
-      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
+      style: theme.textTheme.bodyMedium?.copyWith(
+          color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
     );
-    final textPainter = TextPainter(text: textSpan, textAlign: TextAlign.center, textDirection: ui.TextDirection.ltr)
+    final textPainter = TextPainter(
+        text: textSpan,
+        textAlign: TextAlign.center,
+        textDirection: ui.TextDirection.ltr)
       ..layout(maxWidth: rect.width);
 
-    final offset = Offset(rect.center.dx - textPainter.width / 2, rect.center.dy - textPainter.height / 2);
+    final offset = Offset(rect.center.dx - textPainter.width / 2,
+        rect.center.dy - textPainter.height / 2);
     textPainter.paint(canvas, offset);
   }
 
@@ -461,12 +541,16 @@ class _SankeyPainter extends CustomPainter {
 
       // Attempt to find a description from connected links
       try {
-        description =
-            sankeyData.links.firstWhereOrNull((e) => e.source_ == hoveredNode || e.target == hoveredNode)?.description;
+        description = sankeyData.links
+            .firstWhereOrNull(
+                (e) => e.source_ == hoveredNode || e.target == hoveredNode)
+            ?.description;
       } catch (_) {}
     } else if (hoveredLink != null) {
       title = '${hoveredLink!.source_} → ${hoveredLink!.target}';
-      value = formatter != null ? formatter!(hoveredLink!.value) : '\$${hoveredLink!.value.toStringAsFixed(2)}';
+      value = formatter != null
+          ? formatter!(hoveredLink!.value)
+          : '\$${hoveredLink!.value.toStringAsFixed(2)}';
 
       // Fallback to dynamic if your generated SankeyLink model doesn't officially expose description yet
       try {
@@ -476,21 +560,35 @@ class _SankeyPainter extends CustomPainter {
 
     if (title.isEmpty && value.isEmpty) return;
 
-    final titleSpan =
-        TextSpan(text: title, style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 14, height: 1.1));
+    final titleSpan = TextSpan(
+        text: title,
+        style: const TextStyle(
+            color: Color(0xFFE2E8F0), fontSize: 14, height: 1.1));
     final valueSpan = TextSpan(
         text: value,
-        style: const TextStyle(color: Color(0xFF68D391), fontSize: 14, fontWeight: FontWeight.bold, height: 1.1));
+        style: const TextStyle(
+            color: Color(0xFF68D391),
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            height: 1.1));
 
     final painters = [
-      TextPainter(text: titleSpan, textDirection: ui.TextDirection.ltr)..layout(),
-      TextPainter(text: valueSpan, textDirection: ui.TextDirection.ltr)..layout(),
+      TextPainter(text: titleSpan, textDirection: ui.TextDirection.ltr)
+        ..layout(),
+      TextPainter(text: valueSpan, textDirection: ui.TextDirection.ltr)
+        ..layout(),
     ];
 
     if (description != null && description.isNotEmpty) {
       final descSpan = TextSpan(
-          text: description, style: const TextStyle(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic));
-      painters.add(TextPainter(text: descSpan, textDirection: ui.TextDirection.ltr)..layout());
+          text: description,
+          style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontStyle: FontStyle.italic));
+      painters.add(
+          TextPainter(text: descSpan, textDirection: ui.TextDirection.ltr)
+            ..layout());
     }
 
     double maxContentWidth = 0;
@@ -508,12 +606,15 @@ class _SankeyPainter extends CustomPainter {
 
     double dx = hoverPosition!.dx + 15;
     double dy = hoverPosition!.dy + 15;
-    if (dx + tooltipWidth > size.width) dx = hoverPosition!.dx - tooltipWidth - 15;
-    if (dy + tooltipHeight > size.height) dy = hoverPosition!.dy - tooltipHeight - 15;
+    if (dx + tooltipWidth > size.width)
+      dx = hoverPosition!.dx - tooltipWidth - 15;
+    if (dy + tooltipHeight > size.height)
+      dy = hoverPosition!.dy - tooltipHeight - 15;
 
     // Draw Background
     final rect = Rect.fromLTWH(dx, dy, tooltipWidth, tooltipHeight);
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)), Paint()..color = theme.primaryColorDark);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(8)),
+        Paint()..color = theme.primaryColorDark);
 
     // Paint Text Stack Centered
     double currentDy = dy + 8.0;

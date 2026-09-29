@@ -42,9 +42,13 @@ class ChartRangeEnum {
     allTime,
   ];
 
-  static ChartRangeEnum? fromJson(dynamic value) => ChartRangeEnumTypeTransformer().decode(value);
+  static ChartRangeEnum? fromJson(dynamic value) =>
+      ChartRangeEnumTypeTransformer().decode(value);
 
-  static List<ChartRangeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ChartRangeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ChartRangeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -61,7 +65,8 @@ class ChartRangeEnum {
 /// Transformation class that can [encode] an instance of [ChartRangeEnum] to String,
 /// and [decode] dynamic data back to [ChartRangeEnum].
 class ChartRangeEnumTypeTransformer {
-  factory ChartRangeEnumTypeTransformer() => _instance ??= const ChartRangeEnumTypeTransformer._();
+  factory ChartRangeEnumTypeTransformer() =>
+      _instance ??= const ChartRangeEnumTypeTransformer._();
 
   const ChartRangeEnumTypeTransformer._();
 
@@ -78,13 +83,20 @@ class ChartRangeEnumTypeTransformer {
   ChartRangeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'oneDay': return ChartRangeEnum.oneDay;
-        case r'sevenDays': return ChartRangeEnum.sevenDays;
-        case r'oneMonth': return ChartRangeEnum.oneMonth;
-        case r'threeMonths': return ChartRangeEnum.threeMonths;
-        case r'sixMonths': return ChartRangeEnum.sixMonths;
-        case r'oneYear': return ChartRangeEnum.oneYear;
-        case r'allTime': return ChartRangeEnum.allTime;
+        case r'oneDay':
+          return ChartRangeEnum.oneDay;
+        case r'sevenDays':
+          return ChartRangeEnum.sevenDays;
+        case r'oneMonth':
+          return ChartRangeEnum.oneMonth;
+        case r'threeMonths':
+          return ChartRangeEnum.threeMonths;
+        case r'sixMonths':
+          return ChartRangeEnum.sixMonths;
+        case r'oneYear':
+          return ChartRangeEnum.oneYear;
+        case r'allTime':
+          return ChartRangeEnum.allTime;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -97,4 +109,3 @@ class ChartRangeEnumTypeTransformer {
   /// Singleton [ChartRangeEnumTypeTransformer] instance.
   static ChartRangeEnumTypeTransformer? _instance;
 }
-

@@ -8,10 +8,12 @@ class TransactionRuleManualDialog extends ConsumerStatefulWidget {
   const TransactionRuleManualDialog({super.key});
 
   @override
-  ConsumerState<TransactionRuleManualDialog> createState() => _TransactionRuleManualDialogState();
+  ConsumerState<TransactionRuleManualDialog> createState() =>
+      _TransactionRuleManualDialogState();
 }
 
-class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleManualDialog> {
+class _TransactionRuleManualDialogState
+    extends ConsumerState<TransactionRuleManualDialog> {
   /// Local state for the "Force" override toggle
   bool _force = false;
 
@@ -39,13 +41,17 @@ class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleMan
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Force Override", style: theme.textTheme.bodyLarge),
-                  Switch(value: _force, onChanged: (newValue) => setState(() => _force = newValue)),
+                  Switch(
+                      value: _force,
+                      onChanged: (newValue) =>
+                          setState(() => _force = newValue)),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 "Overrides all transaction categories, even ones manually edited by you.",
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.outline),
               ),
             ],
           ),
@@ -58,7 +64,8 @@ class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleMan
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // Watch if rules are already running to disable buttons
-    final isRunning = ref.watch(transactionRulesProvider.select((s) => s.value?.isRunning ?? false));
+    final isRunning = ref.watch(
+        transactionRulesProvider.select((s) => s.value?.isRunning ?? false));
 
     return SproutBaseDialogWidget(
       'Re-apply Transaction Rules',
@@ -72,7 +79,9 @@ class _TransactionRuleManualDialogState extends ConsumerState<TransactionRuleMan
           : () async {
               try {
                 // Trigger the manual refresh on our new Riverpod provider
-                await ref.read(transactionRulesProvider.notifier).manualRefresh(force: _force);
+                await ref
+                    .read(transactionRulesProvider.notifier)
+                    .manualRefresh(force: _force);
 
                 // Close the dialog upon successful trigger
                 if (mounted) Navigator.of(context).pop();

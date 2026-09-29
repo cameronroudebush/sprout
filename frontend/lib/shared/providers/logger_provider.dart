@@ -4,7 +4,9 @@ import 'package:logger/logger.dart';
 /// A provider used to log messages for the app
 class LoggerProvider {
   static final Logger _logger = kIsWeb
-      ? (kDebugMode ? Logger(printer: SimplePrinter(printTime: true, colors: true)) : Logger(level: Level.off))
+      ? (kDebugMode
+          ? Logger(printer: SimplePrinter(printTime: true, colors: true))
+          : Logger(level: Level.off))
       : Logger(
           filter: ProductionFilter(), // Show important logs
           printer: PrettyPrinter(

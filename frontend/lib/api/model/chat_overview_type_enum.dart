@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class ChatOverviewTypeEnum {
   /// Instantiate a new enum with the provided [value].
   const ChatOverviewTypeEnum._(this.value);
@@ -34,9 +33,13 @@ class ChatOverviewTypeEnum {
     budgets,
   ];
 
-  static ChatOverviewTypeEnum? fromJson(dynamic value) => ChatOverviewTypeEnumTypeTransformer().decode(value);
+  static ChatOverviewTypeEnum? fromJson(dynamic value) =>
+      ChatOverviewTypeEnumTypeTransformer().decode(value);
 
-  static List<ChatOverviewTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ChatOverviewTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ChatOverviewTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -53,7 +56,8 @@ class ChatOverviewTypeEnum {
 /// Transformation class that can [encode] an instance of [ChatOverviewTypeEnum] to String,
 /// and [decode] dynamic data back to [ChatOverviewTypeEnum].
 class ChatOverviewTypeEnumTypeTransformer {
-  factory ChatOverviewTypeEnumTypeTransformer() => _instance ??= const ChatOverviewTypeEnumTypeTransformer._();
+  factory ChatOverviewTypeEnumTypeTransformer() =>
+      _instance ??= const ChatOverviewTypeEnumTypeTransformer._();
 
   const ChatOverviewTypeEnumTypeTransformer._();
 
@@ -70,9 +74,12 @@ class ChatOverviewTypeEnumTypeTransformer {
   ChatOverviewTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'accounts': return ChatOverviewTypeEnum.accounts;
-        case r'holdings': return ChatOverviewTypeEnum.holdings;
-        case r'budgets': return ChatOverviewTypeEnum.budgets;
+        case r'accounts':
+          return ChatOverviewTypeEnum.accounts;
+        case r'holdings':
+          return ChatOverviewTypeEnum.holdings;
+        case r'budgets':
+          return ChatOverviewTypeEnum.budgets;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -85,4 +92,3 @@ class ChatOverviewTypeEnumTypeTransformer {
   /// Singleton [ChatOverviewTypeEnumTypeTransformer] instance.
   static ChatOverviewTypeEnumTypeTransformer? _instance;
 }
-

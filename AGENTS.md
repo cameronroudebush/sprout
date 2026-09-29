@@ -81,7 +81,7 @@ To verify and build the Flutter frontend client:
 
 1. **Analyze / Format Check**:
     ```bash
-    cd frontend && flutter analyze
+    cd frontend && dart format . && flutter analyze
     ```
 2. **Build Web Output**:
     ```bash

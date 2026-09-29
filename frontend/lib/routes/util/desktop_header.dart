@@ -3,16 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/widgets/notification_bell.dart';
+import 'package:sprout/routes/reports.dart';
 import 'package:sprout/routes/settings.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/mobile_more_sheet.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/tab_selector.dart';
 
 /// A widget that displays the header bar for desktop
 class SproutDesktopHeader extends ConsumerWidget {
-  const SproutDesktopHeader({super.key});
+  /// Current route state, including query parameters used to select header tabs.
+  final GoRouterState? state;
+
+  const SproutDesktopHeader({super.key, this.state});
 
   /// Returns the text to display on the header
   String _getText(WidgetRef ref) {
@@ -30,7 +35,8 @@ class SproutDesktopHeader extends ConsumerWidget {
     }
 
     // Default formatting for other paths
-    String cleanedPath = currentPath.startsWith('/') ? currentPath.substring(1) : currentPath;
+    String cleanedPath =
+        currentPath.startsWith('/') ? currentPath.substring(1) : currentPath;
     cleanedPath = cleanedPath.replaceAll("/", " ");
     return cleanedPath.toTitleCase;
   }
@@ -39,24 +45,30 @@ class SproutDesktopHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPath = ref.watch(currentRouteProvider);
     final theme = Theme.of(context);
+    final uri = state?.uri ?? GoRouterState.of(context).uri;
+    final pageTabs = _buildPageTabs(context, uri);
 
     // Calculate parent route fallback in case deep links bypass navigation history
     final pathSegments = Uri.parse(currentPath).pathSegments;
     final hasParentRoute = pathSegments.length > 1;
-    final parentPath = hasParentRoute ? '/${pathSegments.take(pathSegments.length - 1).join('/')}' : null;
+    final parentPath = hasParentRoute
+        ? '/${pathSegments.take(pathSegments.length - 1).join('/')}'
+        : null;
 
     // Show back button if GoRouter can pop history OR if we are on a nested sub-route
     final canPopHistory = context.canPop();
-    final canShowBackButton = (canPopHistory || hasParentRoute) && currentPath != "/";
+    final canShowBackButton =
+        (canPopHistory || hasParentRoute) && currentPath != "/";
 
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: SproutCard(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (canShowBackButton) ...[
                   // Back button
@@ -72,7 +84,8 @@ class SproutDesktopHeader extends ConsumerWidget {
                     child: Tooltip(
                       message: "Go back",
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 8),
                         child: Icon(
                           Icons.arrow_back,
                           size: 28,
@@ -91,6 +104,15 @@ class SproutDesktopHeader extends ConsumerWidget {
                 ),
               ],
             ),
+            if (pageTabs != null)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(child: pageTabs),
+                ),
+              )
+            else
+              const Spacer(),
             Row(
               children: [
                 // Help link to documentation
@@ -100,7 +122,8 @@ class SproutDesktopHeader extends ConsumerWidget {
                   child: Tooltip(
                     message: "View Sprout Documentation",
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       child: Icon(
                         Icons.help,
                         size: 28,
@@ -115,6 +138,46 @@ class SproutDesktopHeader extends ConsumerWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  /// Builds route-specific tabs and binds each choice to its deep-link query key.
+  Widget? _buildPageTabs(BuildContext context, Uri uri) {
+    final pathSegments = uri.pathSegments;
+    final List<SproutTabOption<String>>? options;
+    final String queryKey;
+    if (pathSegments.length == 2 && pathSegments.first == 'accounts') {
+      queryKey = 'tab';
+      options = const [
+        SproutTabOption(value: 'overview', label: 'Overview'),
+        SproutTabOption(value: 'activity', label: 'Activity'),
+      ];
+    } else if (uri.path == '/holdings') {
+      queryKey = 'tab';
+      options = const [
+        SproutTabOption(value: 'overview', label: 'Overview'),
+        SproutTabOption(value: 'holdings', label: 'Holdings'),
+      ];
+    } else if (uri.path == '/reports') {
+      queryKey = 'report';
+      options = ReportsPage.reportTabs;
+    } else {
+      return null;
+    }
+
+    final selected = uri.queryParameters[queryKey];
+    final selectedValue = options.any((option) => option.value == selected)
+        ? selected!
+        : options.first.value;
+
+    return SproutTabSelector<String>(
+      options: options,
+      selected: selectedValue,
+      onSelected: (value) => NavigationProvider.updateQueryParameters(
+        context,
+        {queryKey: value},
+        currentUri: uri,
       ),
     );
   }

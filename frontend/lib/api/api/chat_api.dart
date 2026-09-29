@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class ChatApi {
   ChatApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
@@ -30,7 +29,11 @@ class ChatApi {
   ///
   /// * [num] month:
   ///   Month (1-12) for monthly budget overviews.
-  Future<Response> chatControllerGetOverviewWithHttpInfo({ String? type, num? year, num? month, }) async {
+  Future<Response> chatControllerGetOverviewWithHttpInfo({
+    String? type,
+    num? year,
+    num? month,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/chat/overview';
 
@@ -53,7 +56,6 @@ class ChatApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -77,17 +79,28 @@ class ChatApi {
   ///
   /// * [num] month:
   ///   Month (1-12) for monthly budget overviews.
-  Future<ChatOverview?> chatControllerGetOverview({ String? type, num? year, num? month, }) async {
-    final response = await chatControllerGetOverviewWithHttpInfo( type: type, year: year, month: month, );
+  Future<ChatOverview?> chatControllerGetOverview({
+    String? type,
+    num? year,
+    num? month,
+  }) async {
+    final response = await chatControllerGetOverviewWithHttpInfo(
+      type: type,
+      year: year,
+      month: month,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ChatOverview',) as ChatOverview;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ChatOverview',
+      ) as ChatOverview;
     }
     return null;
   }
@@ -107,7 +120,6 @@ class ChatApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -129,12 +141,13 @@ class ChatApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<ChatHistory>') as List)
-        .cast<ChatHistory>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<ChatHistory>') as List)
+          .cast<ChatHistory>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -146,7 +159,9 @@ class ChatApi {
   /// Parameters:
   ///
   /// * [ChatRequestDTO] chatRequestDTO (required):
-  Future<Response> chatControllerNewWithHttpInfo(ChatRequestDTO chatRequestDTO,) async {
+  Future<Response> chatControllerNewWithHttpInfo(
+    ChatRequestDTO chatRequestDTO,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/chat/new';
 
@@ -158,7 +173,6 @@ class ChatApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -176,8 +190,12 @@ class ChatApi {
   /// Parameters:
   ///
   /// * [ChatRequestDTO] chatRequestDTO (required):
-  Future<void> chatControllerNew(ChatRequestDTO chatRequestDTO,) async {
-    final response = await chatControllerNewWithHttpInfo(chatRequestDTO,);
+  Future<void> chatControllerNew(
+    ChatRequestDTO chatRequestDTO,
+  ) async {
+    final response = await chatControllerNewWithHttpInfo(
+      chatRequestDTO,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

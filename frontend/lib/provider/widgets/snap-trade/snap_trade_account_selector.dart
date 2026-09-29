@@ -10,7 +10,8 @@ class SnapTradeAccountSelector extends ConsumerStatefulWidget {
   final ProviderConfig provider;
   final VoidCallback? onSuccess;
 
-  const SnapTradeAccountSelector({super.key, required this.provider, this.onSuccess});
+  const SnapTradeAccountSelector(
+      {super.key, required this.provider, this.onSuccess});
 
   /// Asks the recent data to auto link new accounts
   static Future<void> link(WidgetRef ref) async {
@@ -19,10 +20,12 @@ class SnapTradeAccountSelector extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<SnapTradeAccountSelector> createState() => _SnapTradeAccountSelectorState();
+  ConsumerState<SnapTradeAccountSelector> createState() =>
+      _SnapTradeAccountSelectorState();
 }
 
-class _SnapTradeAccountSelectorState extends ConsumerState<SnapTradeAccountSelector> {
+class _SnapTradeAccountSelectorState
+    extends ConsumerState<SnapTradeAccountSelector> {
   String? _error;
 
   @override
@@ -53,7 +56,8 @@ class _SnapTradeAccountSelectorState extends ConsumerState<SnapTradeAccountSelec
   @override
   Widget build(BuildContext context) {
     if (_error != null) {
-      return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
+      return Center(
+          child: Text(_error!, style: const TextStyle(color: Colors.red)));
     }
 
     return const SizedBox(

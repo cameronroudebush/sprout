@@ -32,29 +32,32 @@ class CashFlowTrendStats {
   num trendValue;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CashFlowTrendStats &&
-    other.label == label &&
-    other.topValue == topValue &&
-    other.bottomValue == bottomValue &&
-    other.trendValue == trendValue;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CashFlowTrendStats &&
+          other.label == label &&
+          other.topValue == topValue &&
+          other.bottomValue == bottomValue &&
+          other.trendValue == trendValue;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (label.hashCode) +
-    (topValue.hashCode) +
-    (bottomValue.hashCode) +
-    (trendValue.hashCode);
+      // ignore: unnecessary_parenthesis
+      (label.hashCode) +
+      (topValue.hashCode) +
+      (bottomValue.hashCode) +
+      (trendValue.hashCode);
 
   @override
-  String toString() => 'CashFlowTrendStats[label=$label, topValue=$topValue, bottomValue=$bottomValue, trendValue=$trendValue]';
+  String toString() =>
+      'CashFlowTrendStats[label=$label, topValue=$topValue, bottomValue=$bottomValue, trendValue=$trendValue]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'label'] = this.label;
-      json[r'topValue'] = this.topValue;
-      json[r'bottomValue'] = this.bottomValue;
-      json[r'trendValue'] = this.trendValue;
+    json[r'label'] = this.label;
+    json[r'topValue'] = this.topValue;
+    json[r'bottomValue'] = this.bottomValue;
+    json[r'trendValue'] = this.trendValue;
     return json;
   }
 
@@ -69,14 +72,22 @@ class CashFlowTrendStats {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'label'), 'Required key "CashFlowTrendStats[label]" is missing from JSON.');
-        assert(json[r'label'] != null, 'Required key "CashFlowTrendStats[label]" has a null value in JSON.');
-        assert(json.containsKey(r'topValue'), 'Required key "CashFlowTrendStats[topValue]" is missing from JSON.');
-        assert(json[r'topValue'] != null, 'Required key "CashFlowTrendStats[topValue]" has a null value in JSON.');
-        assert(json.containsKey(r'bottomValue'), 'Required key "CashFlowTrendStats[bottomValue]" is missing from JSON.');
-        assert(json[r'bottomValue'] != null, 'Required key "CashFlowTrendStats[bottomValue]" has a null value in JSON.');
-        assert(json.containsKey(r'trendValue'), 'Required key "CashFlowTrendStats[trendValue]" is missing from JSON.');
-        assert(json[r'trendValue'] != null, 'Required key "CashFlowTrendStats[trendValue]" has a null value in JSON.');
+        assert(json.containsKey(r'label'),
+            'Required key "CashFlowTrendStats[label]" is missing from JSON.');
+        assert(json[r'label'] != null,
+            'Required key "CashFlowTrendStats[label]" has a null value in JSON.');
+        assert(json.containsKey(r'topValue'),
+            'Required key "CashFlowTrendStats[topValue]" is missing from JSON.');
+        assert(json[r'topValue'] != null,
+            'Required key "CashFlowTrendStats[topValue]" has a null value in JSON.');
+        assert(json.containsKey(r'bottomValue'),
+            'Required key "CashFlowTrendStats[bottomValue]" is missing from JSON.');
+        assert(json[r'bottomValue'] != null,
+            'Required key "CashFlowTrendStats[bottomValue]" has a null value in JSON.');
+        assert(json.containsKey(r'trendValue'),
+            'Required key "CashFlowTrendStats[trendValue]" is missing from JSON.');
+        assert(json[r'trendValue'] != null,
+            'Required key "CashFlowTrendStats[trendValue]" has a null value in JSON.');
         return true;
       }());
 
@@ -90,7 +101,10 @@ class CashFlowTrendStats {
     return null;
   }
 
-  static List<CashFlowTrendStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CashFlowTrendStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CashFlowTrendStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -118,13 +132,19 @@ class CashFlowTrendStats {
   }
 
   // maps a json object with a list of CashFlowTrendStats-objects as value to a dart map
-  static Map<String, List<CashFlowTrendStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CashFlowTrendStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CashFlowTrendStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CashFlowTrendStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CashFlowTrendStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -138,4 +158,3 @@ class CashFlowTrendStats {
     'trendValue',
   };
 }
-

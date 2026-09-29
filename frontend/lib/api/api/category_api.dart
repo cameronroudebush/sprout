@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class CategoryApi {
-  CategoryApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  CategoryApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -25,7 +25,9 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [Category] category (required):
-  Future<Response> categoryControllerCreateWithHttpInfo(Category category,) async {
+  Future<Response> categoryControllerCreateWithHttpInfo(
+    Category category,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/category';
 
@@ -37,7 +39,6 @@ class CategoryApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -57,17 +58,24 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [Category] category (required):
-  Future<Category?> categoryControllerCreate(Category category,) async {
-    final response = await categoryControllerCreateWithHttpInfo(category,);
+  Future<Category?> categoryControllerCreate(
+    Category category,
+  ) async {
+    final response = await categoryControllerCreateWithHttpInfo(
+      category,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Category',) as Category;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Category',
+      ) as Category;
     }
     return null;
   }
@@ -81,10 +89,11 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> categoryControllerDeleteWithHttpInfo(String id,) async {
+  Future<Response> categoryControllerDeleteWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/category/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/category/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -94,7 +103,6 @@ class CategoryApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -114,8 +122,12 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> categoryControllerDelete(String id,) async {
-    final response = await categoryControllerDeleteWithHttpInfo(id,);
+  Future<void> categoryControllerDelete(
+    String id,
+  ) async {
+    final response = await categoryControllerDeleteWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -132,10 +144,12 @@ class CategoryApi {
   /// * [String] id (required):
   ///
   /// * [Category] category (required):
-  Future<Response> categoryControllerEditWithHttpInfo(String id, Category category,) async {
+  Future<Response> categoryControllerEditWithHttpInfo(
+    String id,
+    Category category,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/category/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/category/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = category;
@@ -145,7 +159,6 @@ class CategoryApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -167,17 +180,26 @@ class CategoryApi {
   /// * [String] id (required):
   ///
   /// * [Category] category (required):
-  Future<Category?> categoryControllerEdit(String id, Category category,) async {
-    final response = await categoryControllerEditWithHttpInfo(id, category,);
+  Future<Category?> categoryControllerEdit(
+    String id,
+    Category category,
+  ) async {
+    final response = await categoryControllerEditWithHttpInfo(
+      id,
+      category,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Category',) as Category;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Category',
+      ) as Category;
     }
     return null;
   }
@@ -199,7 +221,6 @@ class CategoryApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -223,12 +244,13 @@ class CategoryApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Category>') as List)
-        .cast<Category>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Category>')
+              as List)
+          .cast<Category>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -252,7 +274,12 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
+  Future<Response> categoryControllerGetCategoryStatsWithHttpInfo(
+    num year, {
+    num? month,
+    num? day,
+    String? accountId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/stats';
 
@@ -263,7 +290,7 @@ class CategoryApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'year', year));
+    queryParams.addAll(_queryParams('', 'year', year));
     if (month != null) {
       queryParams.addAll(_queryParams('', 'month', month));
     }
@@ -275,7 +302,6 @@ class CategoryApi {
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -305,17 +331,30 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<CategoryStats?> categoryControllerGetCategoryStats(num year, { num? month, num? day, String? accountId, }) async {
-    final response = await categoryControllerGetCategoryStatsWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
+  Future<CategoryStats?> categoryControllerGetCategoryStats(
+    num year, {
+    num? month,
+    num? day,
+    String? accountId,
+  }) async {
+    final response = await categoryControllerGetCategoryStatsWithHttpInfo(
+      year,
+      month: month,
+      day: day,
+      accountId: accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CategoryStats',) as CategoryStats;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'CategoryStats',
+      ) as CategoryStats;
     }
     return null;
   }
@@ -330,7 +369,9 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> categoryControllerGetUnknownCategoryStatsWithHttpInfo({ String? accountId, }) async {
+  Future<Response> categoryControllerGetUnknownCategoryStatsWithHttpInfo({
+    String? accountId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/category/stats/unknown';
 
@@ -347,7 +388,6 @@ class CategoryApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -367,17 +407,25 @@ class CategoryApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<int?> categoryControllerGetUnknownCategoryStats({ String? accountId, }) async {
-    final response = await categoryControllerGetUnknownCategoryStatsWithHttpInfo( accountId: accountId, );
+  Future<int?> categoryControllerGetUnknownCategoryStats({
+    String? accountId,
+  }) async {
+    final response =
+        await categoryControllerGetUnknownCategoryStatsWithHttpInfo(
+      accountId: accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'int',) as int;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'int',
+      ) as int;
     }
     return null;
   }

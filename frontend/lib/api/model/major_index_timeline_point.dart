@@ -27,26 +27,27 @@ class MajorIndexTimelinePoint {
   num changePercent;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MajorIndexTimelinePoint &&
-    other.date == date &&
-    other.value == value &&
-    other.changePercent == changePercent;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MajorIndexTimelinePoint &&
+          other.date == date &&
+          other.value == value &&
+          other.changePercent == changePercent;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (date.hashCode) +
-    (value.hashCode) +
-    (changePercent.hashCode);
+      // ignore: unnecessary_parenthesis
+      (date.hashCode) + (value.hashCode) + (changePercent.hashCode);
 
   @override
-  String toString() => 'MajorIndexTimelinePoint[date=$date, value=$value, changePercent=$changePercent]';
+  String toString() =>
+      'MajorIndexTimelinePoint[date=$date, value=$value, changePercent=$changePercent]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'date'] = this.date.toUtc().toIso8601String();
-      json[r'value'] = this.value;
-      json[r'changePercent'] = this.changePercent;
+    json[r'date'] = this.date.toUtc().toIso8601String();
+    json[r'value'] = this.value;
+    json[r'changePercent'] = this.changePercent;
     return json;
   }
 
@@ -61,12 +62,18 @@ class MajorIndexTimelinePoint {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'date'), 'Required key "MajorIndexTimelinePoint[date]" is missing from JSON.');
-        assert(json[r'date'] != null, 'Required key "MajorIndexTimelinePoint[date]" has a null value in JSON.');
-        assert(json.containsKey(r'value'), 'Required key "MajorIndexTimelinePoint[value]" is missing from JSON.');
-        assert(json[r'value'] != null, 'Required key "MajorIndexTimelinePoint[value]" has a null value in JSON.');
-        assert(json.containsKey(r'changePercent'), 'Required key "MajorIndexTimelinePoint[changePercent]" is missing from JSON.');
-        assert(json[r'changePercent'] != null, 'Required key "MajorIndexTimelinePoint[changePercent]" has a null value in JSON.');
+        assert(json.containsKey(r'date'),
+            'Required key "MajorIndexTimelinePoint[date]" is missing from JSON.');
+        assert(json[r'date'] != null,
+            'Required key "MajorIndexTimelinePoint[date]" has a null value in JSON.');
+        assert(json.containsKey(r'value'),
+            'Required key "MajorIndexTimelinePoint[value]" is missing from JSON.');
+        assert(json[r'value'] != null,
+            'Required key "MajorIndexTimelinePoint[value]" has a null value in JSON.');
+        assert(json.containsKey(r'changePercent'),
+            'Required key "MajorIndexTimelinePoint[changePercent]" is missing from JSON.');
+        assert(json[r'changePercent'] != null,
+            'Required key "MajorIndexTimelinePoint[changePercent]" has a null value in JSON.');
         return true;
       }());
 
@@ -79,7 +86,10 @@ class MajorIndexTimelinePoint {
     return null;
   }
 
-  static List<MajorIndexTimelinePoint> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MajorIndexTimelinePoint> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MajorIndexTimelinePoint>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -107,13 +117,19 @@ class MajorIndexTimelinePoint {
   }
 
   // maps a json object with a list of MajorIndexTimelinePoint-objects as value to a dart map
-  static Map<String, List<MajorIndexTimelinePoint>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MajorIndexTimelinePoint>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MajorIndexTimelinePoint>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MajorIndexTimelinePoint.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MajorIndexTimelinePoint.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -126,4 +142,3 @@ class MajorIndexTimelinePoint {
     'changePercent',
   };
 }
-

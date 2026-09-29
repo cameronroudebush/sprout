@@ -20,7 +20,8 @@ class AccountErrorNotificationWidget extends ConsumerWidget {
     final accountsData = ref.watch(accountsProvider).value;
     final accounts = accountsData?.accounts ?? [];
 
-    final brokenAccounts = accounts.where((account) => account.hasProblem).toList();
+    final brokenAccounts =
+        accounts.where((account) => account.hasProblem).toList();
 
     if (brokenAccounts.isEmpty) return const SizedBox.shrink();
 
@@ -40,7 +41,8 @@ class AccountErrorNotificationWidget extends ConsumerWidget {
         theme.colorScheme.errorContainer,
         theme.colorScheme.onErrorContainer,
         icon: Icons.error_outline,
-        onClick: allowClick ? () => NavigationProvider.redirect("/accounts") : null,
+        onClick:
+            allowClick ? () => NavigationProvider.redirect("/accounts") : null,
       ),
     );
   }

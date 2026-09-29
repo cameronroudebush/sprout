@@ -43,16 +43,23 @@ class SproutChartLegend extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(entry.key, style: const TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis),
+            Text(entry.key,
+                style: const TextStyle(fontSize: 11),
+                overflow: TextOverflow.ellipsis),
           ],
         ),
       );
     }).toList();
 
     if (position == SproutChartLegendPosition.bottom) {
-      return Wrap(alignment: WrapAlignment.center, spacing: 12, runSpacing: 6, children: legendItems);
+      return Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12,
+          runSpacing: 6,
+          children: legendItems);
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: legendItems);
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start, children: legendItems);
   }
 }

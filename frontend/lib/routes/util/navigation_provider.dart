@@ -32,17 +32,47 @@ class NavigationProvider {
     return location;
   }
 
+  /// Reads a query parameter from the current route.
+  static String? queryParameter(BuildContext context, String name) =>
+      GoRouterState.of(context).uri.queryParameters[name];
+
+  /// Updates or removes query parameters while preserving the current route and other values.
+  static void updateQueryParameters(
+    BuildContext context,
+    Map<String, String?> updates, {
+    Uri? currentUri,
+  }) {
+    final uri = currentUri ?? GoRouterState.of(context).uri;
+    final queryParameters = Map<String, String>.from(uri.queryParameters);
+    for (final entry in updates.entries) {
+      if (entry.value == null) {
+        queryParameters.remove(entry.key);
+      } else {
+        queryParameters[entry.key] = entry.value!;
+      }
+    }
+
+    final updatedUri = uri.replace(
+      queryParameters: queryParameters.isEmpty ? null : queryParameters,
+    );
+    if (updatedUri != uri) GoRouter.of(context).push(updatedUri.toString());
+  }
+
   /// Redirects (using push or go) to the given path or route name
-  static Future<void> redirect(String path, {Map<String, dynamic>? queryParameters}) async {
+  static Future<void> redirect(String path,
+      {Map<String, dynamic>? queryParameters}) async {
     final target = path.startsWith('/') ? path : '/$path';
-    final params = queryParameters?.map((k, v) => MapEntry(k, v.toString())) ?? {};
+    final params =
+        queryParameters?.map((k, v) => MapEntry(k, v.toString())) ?? {};
 
     // Don't allow same page navigation
     final currentPage = router.state.path;
     final bool isSamePath = currentPage == path || currentPage == '/$path';
     const MapEquality mapEquality = MapEquality();
-    final bool isSameParams = mapEquality.equals(router.state.pathParameters, queryParameters ?? {});
-    final bool isSameQuery = mapEquality.equals(router.state.uri.queryParameters, queryParameters ?? {});
+    final bool isSameParams =
+        mapEquality.equals(router.state.pathParameters, queryParameters ?? {});
+    final bool isSameQuery = mapEquality.equals(
+        router.state.uri.queryParameters, queryParameters ?? {});
     if (isSamePath && isSameParams && isSameQuery) {
       return;
     }
@@ -60,7 +90,8 @@ class NavigationProvider {
 
   /// Redirects to the transaction page with a category filter
   /// [navigateOnUnknown] If we should still navigate even if the category is unknown
-  static Future<void> redirectToCatFilter(WidgetRef ref, String cat, {bool navigateOnUnknown = false}) async {
+  static Future<void> redirectToCatFilter(WidgetRef ref, String cat,
+      {bool navigateOnUnknown = false}) async {
     final categoryName = cat.trim();
     final categories = ref.read(categoriesProvider).value ?? [];
 
@@ -72,7 +103,8 @@ class NavigationProvider {
     }
 
     if (id != null || navigateOnUnknown) {
-      redirect("/transactions", queryParameters: {'categoryId': id ?? 'unknown'});
+      redirect("/transactions",
+          queryParameters: {'categoryId': id ?? 'unknown'});
     }
   }
 

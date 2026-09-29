@@ -31,7 +31,8 @@ class _SproutLockWidgetState extends ConsumerState<SproutLockWidget> {
 
     return SproutCenteredLayout(
       title: "Sprout is Locked",
-      description: "Biometric authentication is required to access your financial data and account balances.",
+      description:
+          "Biometric authentication is required to access your financial data and account balances.",
       actions: Column(
         spacing: 8,
         children: [
@@ -42,18 +43,23 @@ class _SproutLockWidgetState extends ConsumerState<SproutLockWidget> {
               onPressed: bioState.isUnlocking
                   ? null
                   : () async {
-                      await ref.read(biometricsProvider.notifier).tryManualUnlock();
+                      await ref
+                          .read(biometricsProvider.notifier)
+                          .tryManualUnlock();
                     },
               icon: bioState.isUnlocking
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
                     )
                   : const Icon(Icons.fingerprint),
-              label: Text(bioState.isUnlocking ? "Verifying..." : "Unlock Sprout"),
+              label:
+                  Text(bioState.isUnlocking ? "Verifying..." : "Unlock Sprout"),
               style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),

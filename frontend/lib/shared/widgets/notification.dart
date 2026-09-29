@@ -10,7 +10,8 @@ class SproutNotificationWidget extends StatelessWidget {
   /// If we should be allowed to render this notification in more than one line
   final bool allowMultiLine;
 
-  const SproutNotificationWidget(this.notification, {super.key, this.allowMultiLine = false});
+  const SproutNotificationWidget(this.notification,
+      {super.key, this.allowMultiLine = false});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,8 @@ class SproutNotificationWidget extends StatelessWidget {
             child: Row(
               spacing: 8,
               children: [
-                if (notification.icon != null) Icon(notification.icon, color: notification.color),
+                if (notification.icon != null)
+                  Icon(notification.icon, color: notification.color),
                 Expanded(
                   child: Wrap(
                     alignment: WrapAlignment.center,
@@ -43,7 +45,8 @@ class SproutNotificationWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (notification.onClick != null) Icon(Icons.chevron_right, color: notification.color),
+                if (notification.onClick != null)
+                  Icon(Icons.chevron_right, color: notification.color),
               ],
             ),
           ),

@@ -125,7 +125,17 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
     override fun getViewTypeCount(): Int = 1
     override fun onCreate() {}
     override fun onDestroy() {}
-    override fun getItemId(position: Int): Long = position.toLong()
+
+    override fun getItemId(position: Int): Long {
+        val item = transactions.optJSONObject(position)
+        val id = item?.optString("id")
+        return if (!id.isNullOrEmpty()) {
+            id.hashCode().toLong()
+        } else {
+            position.toLong()
+        }
+    }
+    
     override fun hasStableIds(): Boolean = true
     override fun getLoadingView(): RemoteViews? = null
 }

@@ -29,8 +29,11 @@ class AccountNetWorthWidget extends ConsumerWidget {
     final formatter = ref.watch(currencyFormatterProvider);
 
     return combinedData.when(
-      loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
-      error: (e, _) => const SizedBox(height: 200, child: Center(child: Text("Error loading account chart data"))),
+      loading: () => const SizedBox(
+          height: 200, child: Center(child: CircularProgressIndicator())),
+      error: (e, _) => const SizedBox(
+          height: 200,
+          child: Center(child: Text("Error loading account chart data"))),
       data: (chartData) {
         final config = ref.watch(userConfigProvider).value;
         final selectedRange = config?.netWorthRange ?? ChartRangeEnum.oneDay;
@@ -40,22 +43,27 @@ class AccountNetWorthWidget extends ConsumerWidget {
         final frame = history?.getValueByFrame(selectedRange);
 
         final mappedData = HistoricalDataPointExtensions.toMap(timeline);
-        final filteredHistorical = LineChartDataProcessor.filterHistoricalData(mappedData, selectedRange);
-        final processedChartData = LineChartDataProcessor.prepareChartData(filteredHistorical);
+        final filteredHistorical = LineChartDataProcessor.filterHistoricalData(
+            mappedData, selectedRange);
+        final processedChartData =
+            LineChartDataProcessor.prepareChartData(filteredHistorical);
 
         final List<SproutChartSeries> chartSeriesList = [
           SproutChartSeries(
             data: processedChartData,
             label: account.name,
             config: LineSeriesConfig(
-              color: account.isDebt ? theme.colorScheme.error : theme.colorScheme.primary,
+              color: account.isDebt
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.primary,
               usePositiveNegativeColors: true,
             ),
           ),
         ];
 
         if (processedChartData.spots.isNotEmpty) {
-          chartSeriesList.add(LineChartDataProcessor.computeAverageData(processedChartData));
+          chartSeriesList.add(
+              LineChartDataProcessor.computeAverageData(processedChartData));
         }
 
         return Column(

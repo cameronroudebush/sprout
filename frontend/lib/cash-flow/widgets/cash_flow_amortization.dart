@@ -42,7 +42,8 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
           for (final dp in series.dataPoints) {
             entries[dp.date] = dp.value.abs().toDouble();
           }
-          final processedChartData = LineChartDataProcessor.prepareChartData(entries);
+          final processedChartData =
+              LineChartDataProcessor.prepareChartData(entries);
           return SproutChartSeries(
             label: series.accountName,
             data: processedChartData,
@@ -100,17 +101,24 @@ class _PayoffSummary extends ConsumerWidget {
     // Sort series by date so soonest payoff comes first
     final sortedSeries = List<LoanAmortizationSeries>.from(seriesList)
       ..sort((a, b) {
-        final dateA = a.dataPoints.isNotEmpty ? a.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
-        final dateB = b.dataPoints.isNotEmpty ? b.dataPoints.last.date : DateTime.fromMillisecondsSinceEpoch(0);
+        final dateA = a.dataPoints.isNotEmpty
+            ? a.dataPoints.last.date
+            : DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = b.dataPoints.isNotEmpty
+            ? b.dataPoints.last.date
+            : DateTime.fromMillisecondsSinceEpoch(0);
         return dateA.compareTo(dateB);
       });
 
     // Build card list items
     final cards = sortedSeries.map((series) {
       final color = series.color.toColor;
-      final DateTime? payoffDate = series.dataPoints.isNotEmpty ? series.dataPoints.last.date : null;
-      final String formattedDate = payoffDate != null ? dateFormat.format(payoffDate) : 'N/A';
-      final String formattedPayment = formatter.format(series.monthlyPayment.abs());
+      final DateTime? payoffDate =
+          series.dataPoints.isNotEmpty ? series.dataPoints.last.date : null;
+      final String formattedDate =
+          payoffDate != null ? dateFormat.format(payoffDate) : 'N/A';
+      final String formattedPayment =
+          formatter.format(series.monthlyPayment.abs());
 
       return Container(
         constraints: const BoxConstraints(minWidth: 160),

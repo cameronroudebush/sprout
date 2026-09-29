@@ -37,7 +37,8 @@ class SettingTile extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                child: Icon(icon,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               Expanded(
                 child: Column(
@@ -51,7 +52,9 @@ class SettingTile extends StatelessWidget {
                       Text(
                         subtitle!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                   ],

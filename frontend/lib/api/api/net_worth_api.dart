@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class NetWorthApi {
-  NetWorthApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  NetWorthApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -34,7 +34,6 @@ class NetWorthApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -50,19 +49,21 @@ class NetWorthApi {
   ///
   /// Retrieves the net worth overtime of each account associated to the current user. Does not include any timeline data.
   Future<List<EntityHistory>?> netWorthControllerGetNetWorthByAccounts() async {
-    final response = await netWorthControllerGetNetWorthByAccountsWithHttpInfo();
+    final response =
+        await netWorthControllerGetNetWorthByAccountsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<EntityHistory>') as List)
-        .cast<EntityHistory>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<EntityHistory>') as List)
+          .cast<EntityHistory>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -76,10 +77,11 @@ class NetWorthApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(String id,) async {
+  Future<Response> netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/net-worth/timeline/account/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/net-worth/timeline/account/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -89,7 +91,6 @@ class NetWorthApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -109,20 +110,27 @@ class NetWorthApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<List<HistoricalDataPoint>?> netWorthControllerGetNetWorthTimelineAccount(String id,) async {
-    final response = await netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(id,);
+  Future<List<HistoricalDataPoint>?>
+      netWorthControllerGetNetWorthTimelineAccount(
+    String id,
+  ) async {
+    final response =
+        await netWorthControllerGetNetWorthTimelineAccountWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<HistoricalDataPoint>') as List)
-        .cast<HistoricalDataPoint>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<HistoricalDataPoint>') as List)
+          .cast<HistoricalDataPoint>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -144,7 +152,6 @@ class NetWorthApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -168,9 +175,12 @@ class NetWorthApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'TotalNetWorthDTO',) as TotalNetWorthDTO;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'TotalNetWorthDTO',
+      ) as TotalNetWorthDTO;
     }
     return null;
   }

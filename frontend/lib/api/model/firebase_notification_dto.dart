@@ -26,26 +26,27 @@ class FirebaseNotificationDTO {
   FirebaseNotificationDTOImportanceEnum importance;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is FirebaseNotificationDTO &&
-    other.notificationId == notificationId &&
-    other.type == type &&
-    other.importance == importance;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FirebaseNotificationDTO &&
+          other.notificationId == notificationId &&
+          other.type == type &&
+          other.importance == importance;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (notificationId.hashCode) +
-    (type.hashCode) +
-    (importance.hashCode);
+      // ignore: unnecessary_parenthesis
+      (notificationId.hashCode) + (type.hashCode) + (importance.hashCode);
 
   @override
-  String toString() => 'FirebaseNotificationDTO[notificationId=$notificationId, type=$type, importance=$importance]';
+  String toString() =>
+      'FirebaseNotificationDTO[notificationId=$notificationId, type=$type, importance=$importance]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'notificationId'] = this.notificationId;
-      json[r'type'] = this.type;
-      json[r'importance'] = this.importance;
+    json[r'notificationId'] = this.notificationId;
+    json[r'type'] = this.type;
+    json[r'importance'] = this.importance;
     return json;
   }
 
@@ -60,25 +61,35 @@ class FirebaseNotificationDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'notificationId'), 'Required key "FirebaseNotificationDTO[notificationId]" is missing from JSON.');
-        assert(json[r'notificationId'] != null, 'Required key "FirebaseNotificationDTO[notificationId]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "FirebaseNotificationDTO[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "FirebaseNotificationDTO[type]" has a null value in JSON.');
-        assert(json.containsKey(r'importance'), 'Required key "FirebaseNotificationDTO[importance]" is missing from JSON.');
-        assert(json[r'importance'] != null, 'Required key "FirebaseNotificationDTO[importance]" has a null value in JSON.');
+        assert(json.containsKey(r'notificationId'),
+            'Required key "FirebaseNotificationDTO[notificationId]" is missing from JSON.');
+        assert(json[r'notificationId'] != null,
+            'Required key "FirebaseNotificationDTO[notificationId]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "FirebaseNotificationDTO[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "FirebaseNotificationDTO[type]" has a null value in JSON.');
+        assert(json.containsKey(r'importance'),
+            'Required key "FirebaseNotificationDTO[importance]" is missing from JSON.');
+        assert(json[r'importance'] != null,
+            'Required key "FirebaseNotificationDTO[importance]" has a null value in JSON.');
         return true;
       }());
 
       return FirebaseNotificationDTO(
         notificationId: mapValueOfType<String>(json, r'notificationId')!,
         type: mapValueOfType<String>(json, r'type')!,
-        importance: FirebaseNotificationDTOImportanceEnum.fromJson(json[r'importance'])!,
+        importance: FirebaseNotificationDTOImportanceEnum.fromJson(
+            json[r'importance'])!,
       );
     }
     return null;
   }
 
-  static List<FirebaseNotificationDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<FirebaseNotificationDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <FirebaseNotificationDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -106,13 +117,19 @@ class FirebaseNotificationDTO {
   }
 
   // maps a json object with a list of FirebaseNotificationDTO-objects as value to a dart map
-  static Map<String, List<FirebaseNotificationDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<FirebaseNotificationDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<FirebaseNotificationDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = FirebaseNotificationDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = FirebaseNotificationDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -152,9 +169,13 @@ class FirebaseNotificationDTOImportanceEnum {
     low,
   ];
 
-  static FirebaseNotificationDTOImportanceEnum? fromJson(dynamic value) => FirebaseNotificationDTOImportanceEnumTypeTransformer().decode(value);
+  static FirebaseNotificationDTOImportanceEnum? fromJson(dynamic value) =>
+      FirebaseNotificationDTOImportanceEnumTypeTransformer().decode(value);
 
-  static List<FirebaseNotificationDTOImportanceEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<FirebaseNotificationDTOImportanceEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <FirebaseNotificationDTOImportanceEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -171,7 +192,9 @@ class FirebaseNotificationDTOImportanceEnum {
 /// Transformation class that can [encode] an instance of [FirebaseNotificationDTOImportanceEnum] to String,
 /// and [decode] dynamic data back to [FirebaseNotificationDTOImportanceEnum].
 class FirebaseNotificationDTOImportanceEnumTypeTransformer {
-  factory FirebaseNotificationDTOImportanceEnumTypeTransformer() => _instance ??= const FirebaseNotificationDTOImportanceEnumTypeTransformer._();
+  factory FirebaseNotificationDTOImportanceEnumTypeTransformer() =>
+      _instance ??=
+          const FirebaseNotificationDTOImportanceEnumTypeTransformer._();
 
   const FirebaseNotificationDTOImportanceEnumTypeTransformer._();
 
@@ -185,13 +208,18 @@ class FirebaseNotificationDTOImportanceEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  FirebaseNotificationDTOImportanceEnum? decode(dynamic data, {bool allowNull = true}) {
+  FirebaseNotificationDTOImportanceEnum? decode(dynamic data,
+      {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'max': return FirebaseNotificationDTOImportanceEnum.max;
-        case r'high': return FirebaseNotificationDTOImportanceEnum.high;
-        case r'default': return FirebaseNotificationDTOImportanceEnum.default_;
-        case r'low': return FirebaseNotificationDTOImportanceEnum.low;
+        case r'max':
+          return FirebaseNotificationDTOImportanceEnum.max;
+        case r'high':
+          return FirebaseNotificationDTOImportanceEnum.high;
+        case r'default':
+          return FirebaseNotificationDTOImportanceEnum.default_;
+        case r'low':
+          return FirebaseNotificationDTOImportanceEnum.low;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -204,5 +232,3 @@ class FirebaseNotificationDTOImportanceEnumTypeTransformer {
   /// Singleton [FirebaseNotificationDTOImportanceEnumTypeTransformer] instance.
   static FirebaseNotificationDTOImportanceEnumTypeTransformer? _instance;
 }
-
-

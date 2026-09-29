@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class AccountApi {
-  AccountApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  AccountApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -25,10 +25,11 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> accountControllerDeleteWithHttpInfo(String id,) async {
+  Future<Response> accountControllerDeleteWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/account/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/account/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -38,7 +39,6 @@ class AccountApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -58,8 +58,12 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> accountControllerDelete(String id,) async {
-    final response = await accountControllerDeleteWithHttpInfo(id,);
+  Future<void> accountControllerDelete(
+    String id,
+  ) async {
+    final response = await accountControllerDeleteWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -76,10 +80,12 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountEditRequest] accountEditRequest (required):
-  Future<Response> accountControllerEditWithHttpInfo(String id, AccountEditRequest accountEditRequest,) async {
+  Future<Response> accountControllerEditWithHttpInfo(
+    String id,
+    AccountEditRequest accountEditRequest,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/account/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/account/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = accountEditRequest;
@@ -89,7 +95,6 @@ class AccountApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -111,17 +116,26 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountEditRequest] accountEditRequest (required):
-  Future<Account?> accountControllerEdit(String id, AccountEditRequest accountEditRequest,) async {
-    final response = await accountControllerEditWithHttpInfo(id, accountEditRequest,);
+  Future<Account?> accountControllerEdit(
+    String id,
+    AccountEditRequest accountEditRequest,
+  ) async {
+    final response = await accountControllerEditWithHttpInfo(
+      id,
+      accountEditRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Account',
+      ) as Account;
     }
     return null;
   }
@@ -143,7 +157,6 @@ class AccountApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -167,12 +180,13 @@ class AccountApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Account>')
+              as List)
+          .cast<Account>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -186,10 +200,11 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> accountControllerGetByIdWithHttpInfo(String id,) async {
+  Future<Response> accountControllerGetByIdWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/account/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/account/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -199,7 +214,6 @@ class AccountApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -219,17 +233,24 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Account?> accountControllerGetById(String id,) async {
-    final response = await accountControllerGetByIdWithHttpInfo(id,);
+  Future<Account?> accountControllerGetById(
+    String id,
+  ) async {
+    final response = await accountControllerGetByIdWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Account',
+      ) as Account;
     }
     return null;
   }
@@ -245,10 +266,12 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountMergeDTO] accountMergeDTO (required):
-  Future<Response> accountControllerMergeAccountsWithHttpInfo(String id, AccountMergeDTO accountMergeDTO,) async {
+  Future<Response> accountControllerMergeAccountsWithHttpInfo(
+    String id,
+    AccountMergeDTO accountMergeDTO,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/account/{id}/merge'
-      .replaceAll('{id}', id);
+    final path = r'/account/{id}/merge'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = accountMergeDTO;
@@ -258,7 +281,6 @@ class AccountApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -280,17 +302,26 @@ class AccountApi {
   /// * [String] id (required):
   ///
   /// * [AccountMergeDTO] accountMergeDTO (required):
-  Future<Account?> accountControllerMergeAccounts(String id, AccountMergeDTO accountMergeDTO,) async {
-    final response = await accountControllerMergeAccountsWithHttpInfo(id, accountMergeDTO,);
+  Future<Account?> accountControllerMergeAccounts(
+    String id,
+    AccountMergeDTO accountMergeDTO,
+  ) async {
+    final response = await accountControllerMergeAccountsWithHttpInfo(
+      id,
+      accountMergeDTO,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Account',
+      ) as Account;
     }
     return null;
   }

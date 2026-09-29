@@ -11,13 +11,17 @@ class AccountDropdown extends ConsumerWidget {
   final Function(Account? newValue) onChanged;
   final bool enabled;
 
-  const AccountDropdown(this.accountId, this.onChanged, {super.key, this.enabled = true});
+  const AccountDropdown(this.accountId, this.onChanged,
+      {super.key, this.enabled = true});
 
   /// Returns the display for the given account (Name + Formatted Balance)
-  Widget _getAccountDisplay(WidgetRef ref, ThemeData theme, Account account, CurrencyFormatter formatter) {
+  Widget _getAccountDisplay(WidgetRef ref, ThemeData theme, Account account,
+      CurrencyFormatter formatter) {
     return Row(
       children: [
-        Expanded(child: Text(account.name, overflow: TextOverflow.ellipsis, maxLines: 1)),
+        Expanded(
+            child: Text(account.name,
+                overflow: TextOverflow.ellipsis, maxLines: 1)),
         const SizedBox(width: 8),
         Text(formatter.format(account.balance)),
       ],
@@ -42,12 +46,14 @@ class AccountDropdown extends ConsumerWidget {
           ],
         ),
       ),
-      error: (err, stack) => const Center(child: Text("Error loading accounts")),
+      error: (err, stack) =>
+          const Center(child: Text("Error loading accounts")),
       data: (accountState) {
         final accounts = accountState.accounts;
 
         // Ensure we match the instance from the list to avoid Flutter's Dropdown equality errors
-        final selectedValue = accounts.firstWhereOrNull((a) => a.id == accountId);
+        final selectedValue =
+            accounts.firstWhereOrNull((a) => a.id == accountId);
 
         return DropdownButtonFormField<Account>(
           isExpanded: true,
@@ -63,13 +69,17 @@ class AccountDropdown extends ConsumerWidget {
           selectedItemBuilder: (BuildContext context) {
             return [
               const Text("No Account"),
-              ...accounts.map((acc) => _getAccountDisplay(ref, theme, acc, formatter)),
+              ...accounts
+                  .map((acc) => _getAccountDisplay(ref, theme, acc, formatter)),
             ];
           },
           items: [
-            const DropdownMenuItem<Account>(value: null, child: Text("No Account")),
+            const DropdownMenuItem<Account>(
+                value: null, child: Text("No Account")),
             ...accounts.map((acc) {
-              return DropdownMenuItem<Account>(value: acc, child: _getAccountDisplay(ref, theme, acc, formatter));
+              return DropdownMenuItem<Account>(
+                  value: acc,
+                  child: _getAccountDisplay(ref, theme, acc, formatter));
             }),
           ],
           onChanged: !enabled ? null : onChanged,

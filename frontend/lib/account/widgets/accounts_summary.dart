@@ -24,19 +24,27 @@ class AccountSummaryView extends ConsumerWidget {
   /// If each grouping should be rendered as it's own card. We use this heavily to determine if this is displayed on the dashboard vs it's own page
   final bool individualCards;
 
-  const AccountSummaryView({super.key, required this.accounts, this.individualCards = true, this.collapsible = true});
+  const AccountSummaryView(
+      {super.key,
+      required this.accounts,
+      this.individualCards = true,
+      this.collapsible = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = AccountExtensions.groupConfig;
     final historyAsync = ref.watch(historicalAccountDataProvider);
-    final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ?? ChartRangeEnum.oneDay;
+    final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ??
+        ChartRangeEnum.oneDay;
 
     // Handle empty state
-    if (accounts.isEmpty) return AccountsEmptyWidget(showRedirect: !individualCards);
+    if (accounts.isEmpty)
+      return AccountsEmptyWidget(showRedirect: !individualCards);
 
-    final groupedAccounts =
-        config.keys.where((type) => accounts.any((a) => a.type == type) && config[type] != null).map((type) {
+    final groupedAccounts = config.keys
+        .where((type) =>
+            accounts.any((a) => a.type == type) && config[type] != null)
+        .map((type) {
       final groupAccounts = accounts.where((a) => a.type == type).toList();
       final ui = config[type]!;
 
@@ -49,25 +57,30 @@ class AccountSummaryView extends ConsumerWidget {
         if (historyList == null) return;
 
         // Filter histories for accounts in this group
-        final groupHistories = historyList.where((h) => groupAccounts.any((a) => a.id == h.connectedId));
+        final groupHistories = historyList
+            .where((h) => groupAccounts.any((a) => a.id == h.connectedId));
 
         for (final h in groupHistories) {
           final dataPoint = h.getValueByFrame(selectedRange);
-          final account = groupAccounts.firstWhere((a) => a.id == h.connectedId);
+          final account =
+              groupAccounts.firstWhere((a) => a.id == h.connectedId);
           final multiplier = account.isDebt ? -1.0 : 1.0;
 
           final currentBalance = account.balance.abs();
           final changeAmount = dataPoint.valueChange.toDouble().abs();
           final weight = currentBalance > 0 ? currentBalance : changeAmount;
-          final percentChange = (dataPoint.percentChange?.toDouble() ?? 0) * multiplier;
+          final percentChange =
+              (dataPoint.percentChange?.toDouble() ?? 0) * multiplier;
 
-          totalGroupValueChange += dataPoint.valueChange.toDouble() * multiplier;
+          totalGroupValueChange +=
+              dataPoint.valueChange.toDouble() * multiplier;
           totalWeightedPercent += (percentChange * weight);
           totalBalance += weight;
         }
       });
 
-      final groupPercentChange = totalBalance > 0 ? (totalWeightedPercent / totalBalance) : 0.0;
+      final groupPercentChange =
+          totalBalance > 0 ? (totalWeightedPercent / totalBalance) : 0.0;
 
       return AccountGroupSection(
         title: ui.title,
@@ -108,7 +121,8 @@ class AccountSummaryView extends ConsumerWidget {
                   .mapIndexed(
                     (index, widget) => [
                       widget,
-                      if (index < groupedAccounts.length - 1) const Divider(height: 0.5, indent: 16, endIndent: 16),
+                      if (index < groupedAccounts.length - 1)
+                        const Divider(height: 0.5, indent: 16, endIndent: 16),
                     ],
                   )
                   .expand((widgets) => widgets),

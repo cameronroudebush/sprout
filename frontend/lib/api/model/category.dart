@@ -50,31 +50,34 @@ class Category {
   bool increasedSubVariance;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Category &&
-    other.id == id &&
-    other.name == name &&
-    other.parentCategoryId == parentCategoryId &&
-    other.icon == icon &&
-    other.excludeFromCashFlow == excludeFromCashFlow &&
-    other.increasedSubVariance == increasedSubVariance;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Category &&
+          other.id == id &&
+          other.name == name &&
+          other.parentCategoryId == parentCategoryId &&
+          other.icon == icon &&
+          other.excludeFromCashFlow == excludeFromCashFlow &&
+          other.increasedSubVariance == increasedSubVariance;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (name.hashCode) +
-    (parentCategoryId == null ? 0 : parentCategoryId!.hashCode) +
-    (icon == null ? 0 : icon!.hashCode) +
-    (excludeFromCashFlow.hashCode) +
-    (increasedSubVariance.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (name.hashCode) +
+      (parentCategoryId == null ? 0 : parentCategoryId!.hashCode) +
+      (icon == null ? 0 : icon!.hashCode) +
+      (excludeFromCashFlow.hashCode) +
+      (increasedSubVariance.hashCode);
 
   @override
-  String toString() => 'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, excludeFromCashFlow=$excludeFromCashFlow, increasedSubVariance=$increasedSubVariance]';
+  String toString() =>
+      'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, excludeFromCashFlow=$excludeFromCashFlow, increasedSubVariance=$increasedSubVariance]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'name'] = this.name;
+    json[r'id'] = this.id;
+    json[r'name'] = this.name;
     if (this.parentCategoryId != null) {
       json[r'parentCategoryId'] = this.parentCategoryId;
     } else {
@@ -85,8 +88,8 @@ class Category {
     } else {
       json[r'icon'] = null;
     }
-      json[r'excludeFromCashFlow'] = this.excludeFromCashFlow;
-      json[r'increasedSubVariance'] = this.increasedSubVariance;
+    json[r'excludeFromCashFlow'] = this.excludeFromCashFlow;
+    json[r'increasedSubVariance'] = this.increasedSubVariance;
     return json;
   }
 
@@ -101,14 +104,22 @@ class Category {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Category[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Category[id]" has a null value in JSON.');
-        assert(json.containsKey(r'name'), 'Required key "Category[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "Category[name]" has a null value in JSON.');
-        assert(json.containsKey(r'excludeFromCashFlow'), 'Required key "Category[excludeFromCashFlow]" is missing from JSON.');
-        assert(json[r'excludeFromCashFlow'] != null, 'Required key "Category[excludeFromCashFlow]" has a null value in JSON.');
-        assert(json.containsKey(r'increasedSubVariance'), 'Required key "Category[increasedSubVariance]" is missing from JSON.');
-        assert(json[r'increasedSubVariance'] != null, 'Required key "Category[increasedSubVariance]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Category[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Category[id]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "Category[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "Category[name]" has a null value in JSON.');
+        assert(json.containsKey(r'excludeFromCashFlow'),
+            'Required key "Category[excludeFromCashFlow]" is missing from JSON.');
+        assert(json[r'excludeFromCashFlow'] != null,
+            'Required key "Category[excludeFromCashFlow]" has a null value in JSON.');
+        assert(json.containsKey(r'increasedSubVariance'),
+            'Required key "Category[increasedSubVariance]" is missing from JSON.');
+        assert(json[r'increasedSubVariance'] != null,
+            'Required key "Category[increasedSubVariance]" has a null value in JSON.');
         return true;
       }());
 
@@ -117,14 +128,19 @@ class Category {
         name: mapValueOfType<String>(json, r'name')!,
         parentCategoryId: mapValueOfType<String>(json, r'parentCategoryId'),
         icon: mapValueOfType<String>(json, r'icon'),
-        excludeFromCashFlow: mapValueOfType<bool>(json, r'excludeFromCashFlow')!,
-        increasedSubVariance: mapValueOfType<bool>(json, r'increasedSubVariance')!,
+        excludeFromCashFlow:
+            mapValueOfType<bool>(json, r'excludeFromCashFlow')!,
+        increasedSubVariance:
+            mapValueOfType<bool>(json, r'increasedSubVariance')!,
       );
     }
     return null;
   }
 
-  static List<Category> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Category> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Category>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -152,13 +168,19 @@ class Category {
   }
 
   // maps a json object with a list of Category-objects as value to a dart map
-  static Map<String, List<Category>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Category>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Category>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Category.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Category.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -172,4 +194,3 @@ class Category {
     'increasedSubVariance',
   };
 }
-

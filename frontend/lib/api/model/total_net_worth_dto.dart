@@ -25,26 +25,27 @@ class TotalNetWorthDTO {
   List<HistoricalDataPoint> timeline;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TotalNetWorthDTO &&
-    other.value == value &&
-    other.history == history &&
-    _deepEquality.equals(other.timeline, timeline);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TotalNetWorthDTO &&
+          other.value == value &&
+          other.history == history &&
+          _deepEquality.equals(other.timeline, timeline);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (value.hashCode) +
-    (history.hashCode) +
-    (timeline.hashCode);
+      // ignore: unnecessary_parenthesis
+      (value.hashCode) + (history.hashCode) + (timeline.hashCode);
 
   @override
-  String toString() => 'TotalNetWorthDTO[value=$value, history=$history, timeline=$timeline]';
+  String toString() =>
+      'TotalNetWorthDTO[value=$value, history=$history, timeline=$timeline]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'value'] = this.value;
-      json[r'history'] = this.history;
-      json[r'timeline'] = this.timeline;
+    json[r'value'] = this.value;
+    json[r'history'] = this.history;
+    json[r'timeline'] = this.timeline;
     return json;
   }
 
@@ -59,12 +60,18 @@ class TotalNetWorthDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'value'), 'Required key "TotalNetWorthDTO[value]" is missing from JSON.');
-        assert(json[r'value'] != null, 'Required key "TotalNetWorthDTO[value]" has a null value in JSON.');
-        assert(json.containsKey(r'history'), 'Required key "TotalNetWorthDTO[history]" is missing from JSON.');
-        assert(json[r'history'] != null, 'Required key "TotalNetWorthDTO[history]" has a null value in JSON.');
-        assert(json.containsKey(r'timeline'), 'Required key "TotalNetWorthDTO[timeline]" is missing from JSON.');
-        assert(json[r'timeline'] != null, 'Required key "TotalNetWorthDTO[timeline]" has a null value in JSON.');
+        assert(json.containsKey(r'value'),
+            'Required key "TotalNetWorthDTO[value]" is missing from JSON.');
+        assert(json[r'value'] != null,
+            'Required key "TotalNetWorthDTO[value]" has a null value in JSON.');
+        assert(json.containsKey(r'history'),
+            'Required key "TotalNetWorthDTO[history]" is missing from JSON.');
+        assert(json[r'history'] != null,
+            'Required key "TotalNetWorthDTO[history]" has a null value in JSON.');
+        assert(json.containsKey(r'timeline'),
+            'Required key "TotalNetWorthDTO[timeline]" is missing from JSON.');
+        assert(json[r'timeline'] != null,
+            'Required key "TotalNetWorthDTO[timeline]" has a null value in JSON.');
         return true;
       }());
 
@@ -77,7 +84,10 @@ class TotalNetWorthDTO {
     return null;
   }
 
-  static List<TotalNetWorthDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TotalNetWorthDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TotalNetWorthDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -105,13 +115,19 @@ class TotalNetWorthDTO {
   }
 
   // maps a json object with a list of TotalNetWorthDTO-objects as value to a dart map
-  static Map<String, List<TotalNetWorthDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TotalNetWorthDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TotalNetWorthDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TotalNetWorthDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TotalNetWorthDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -124,4 +140,3 @@ class TotalNetWorthDTO {
     'timeline',
   };
 }
-

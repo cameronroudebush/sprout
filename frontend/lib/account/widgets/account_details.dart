@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/models/account_tab_item.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/account/widgets/account_merge_dialog.dart';
@@ -19,20 +18,24 @@ import 'package:sprout/provider/widgets/provider_display.dart';
 import 'package:sprout/provider/widgets/resync_dialog.dart';
 import 'package:sprout/provider/widgets/snap-trade/snap_trade_helper.dart';
 import 'package:sprout/routes/transactions.dart';
+import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/widgets/card.dart';
-import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
+import 'package:sprout/shared/widgets/tab_selector.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A simple record type to hold the combined data for our generic widget
-typedef AccountChartData = ({EntityHistory? history, List<HistoricalDataPoint>? timeline});
+typedef AccountChartData = ({
+  EntityHistory? history,
+  List<HistoricalDataPoint>? timeline
+});
 
 /// This page provides the overall account details view
 class AccountDetailsView extends ConsumerStatefulWidget {
@@ -44,10 +47,8 @@ class AccountDetailsView extends ConsumerStatefulWidget {
   ConsumerState<AccountDetailsView> createState() => _AccountDetailsViewState();
 }
 
-class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with WidgetsBindingObserver {
-  /// Selected tab index for bottom/top navigation
-  int _selectedIndex = 0;
-
+class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
+    with WidgetsBindingObserver {
   /// Track if we sent the user away to fix their institution connection
   bool _expectingReturnFromFix = false;
 
@@ -97,7 +98,9 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
             },
             onError: (errorMsg) {
               if (mounted) {
-                ref.read(notificationsProvider.notifier).parseOpenAPIException(errorMsg);
+                ref
+                    .read(notificationsProvider.notifier)
+                    .parseOpenAPIException(errorMsg);
               }
             },
           );
@@ -135,7 +138,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                 // Show sync popup whether it was a pure update or a full token exchange
                 if (mounted) _showReSyncPopup();
               } catch (e) {
-                if (mounted) ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+                if (mounted)
+                  ref
+                      .read(notificationsProvider.notifier)
+                      .parseOpenAPIException(e);
               }
             });
             PlaidLink.open();
@@ -147,7 +153,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
       case ProviderTypeEnum.simpleFin:
         // Handle SimpleFin which is just a simple URL
-        final Uri url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
+        final Uri url =
+            Uri.parse('https://beta-bridge.simplefin.org/my-account');
         _expectingReturnFromFix = true;
         if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
           _expectingReturnFromFix = false;
@@ -165,49 +172,31 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final List<AccountTabItem> tabs = [
-      AccountTabItem(label: "Overview", icon: Icons.settings, child: _buildOverviewSection(theme)),
-      AccountTabItem(label: "Activity", icon: Icons.receipt_long, child: _buildTransactionSection(context, ref)),
+    const tabs = <SproutTabOption<int>>[
+      SproutTabOption(value: 0, label: 'Overview'),
+      SproutTabOption(value: 1, label: 'Activity'),
     ];
+    final tabViews = [
+      _buildOverviewSection(theme),
+      _buildTransactionSection(context, ref),
+    ];
+    final selectedIndex =
+        NavigationProvider.queryParameter(context, 'tab') == 'activity' ? 1 : 0;
 
-    return SproutLayoutBuilder((isDesktop, context, constraints) {
-      final navWidget = Padding(
-        padding: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: isDesktop ? 12 : 0),
-        child: _buildNav(tabs, theme),
-      );
-
-      return Column(
-        children: [
-          if (isDesktop) navWidget,
-          Expanded(child: IndexedStack(index: _selectedIndex, children: tabs.map((tab) => tab.child).toList())),
-          if (!isDesktop) SafeArea(top: false, child: navWidget),
-        ],
-      );
-    });
-  }
-
-  /// Helper to build the SegmentedButton for navigation on this page
-  Widget _buildNav(List<AccountTabItem> tabs, ThemeData theme) {
-    return SizedBox(
-      width: double.infinity,
-      child: SegmentedButton<int>(
-        showSelectedIcon: false,
-        segments: tabs.asMap().entries.map((entry) {
-          return ButtonSegment(
-            value: entry.key,
-            label: Text(entry.value.label),
-            icon: Icon(entry.value.icon, size: 18),
-          );
-        }).toList(),
-        selected: {_selectedIndex},
-        onSelectionChanged: (Set<int> newSelection) {
-          setState(() => _selectedIndex = newSelection.first);
-        },
-        style: SegmentedButton.styleFrom(
-          visualDensity: VisualDensity.compact,
-          selectedForegroundColor: theme.colorScheme.onPrimary,
-          selectedBackgroundColor: theme.colorScheme.primary,
+    return SproutTabbedLayout(
+      mobileNavigation: SproutTabSelector<int>(
+        options: tabs,
+        selected: selectedIndex,
+        compact: true,
+        onSelected: (index) => NavigationProvider.updateQueryParameters(
+          context,
+          {'tab': index == 1 ? 'activity' : 'overview'},
         ),
+      ),
+      child: SproutRouteWrapper(
+        padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+        size: SproutRouteSize.large,
+        child: IndexedStack(index: selectedIndex, children: tabViews),
       ),
     );
   }
@@ -265,11 +254,18 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                                     onSave: (values) async {
                                       final oldName = widget.account.name;
                                       try {
-                                        setState(() => widget.account.name = values.first);
-                                        await ref.read(accountsProvider.notifier).edit(widget.account);
+                                        setState(() =>
+                                            widget.account.name = values.first);
+                                        await ref
+                                            .read(accountsProvider.notifier)
+                                            .edit(widget.account);
                                       } catch (e) {
-                                        setState(() => widget.account.name = oldName);
-                                        ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                                        setState(() =>
+                                            widget.account.name = oldName);
+                                        ref
+                                            .read(
+                                                notificationsProvider.notifier)
+                                            .openWithAPIException(e);
                                       }
                                     },
                                   ),
@@ -307,8 +303,11 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
     final institution = account.institution;
     final accountProvider = ref.read(accountsProvider.notifier);
     final providers = ref.watch(providerConfigProvider).value;
-    final provider = providers?.firstWhereOrNull((x) => x.dbType == account.provider);
-    final zpid = account.provider == ProviderTypeEnum.zillow ? ref.watch(zillowInfoProvider(account.id)).value : null;
+    final provider =
+        providers?.firstWhereOrNull((x) => x.dbType == account.provider);
+    final zpid = account.provider == ProviderTypeEnum.zillow
+        ? ref.watch(zillowInfoProvider(account.id)).value
+        : null;
 
     final allHistoryAsync = ref.watch(historicalAccountDataProvider);
     final timelineAsync = ref.watch(accountTimelineProvider(widget.account.id));
@@ -317,8 +316,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
       data: (historyList) {
         return timelineAsync.when(
           data: (timelineList) {
-            final accountHistory = historyList?.firstWhereOrNull((h) => h.connectedId == widget.account.id);
-            return AsyncValue.data((history: accountHistory, timeline: timelineList));
+            final accountHistory = historyList
+                ?.firstWhereOrNull((h) => h.connectedId == widget.account.id);
+            return AsyncValue.data(
+                (history: accountHistory, timeline: timelineList));
           },
           error: (err, stack) => AsyncValue.error(err, stack),
           loading: () => const AsyncValue.loading(),
@@ -348,7 +349,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                   spacing: 8,
                   children: [
                     Expanded(
-                      child: Text("Account Type", style: theme.textTheme.titleSmall),
+                      child: Text("Account Type",
+                          style: theme.textTheme.titleSmall),
                     ),
                     SizedBox(
                       width: 240,
@@ -357,13 +359,16 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         isDense: true,
                         decoration: InputDecoration(
                           isDense: true,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
                         ),
                         items: AccountTypeEnum.values.map((type) {
                           return DropdownMenuItem(
                             value: type,
-                            child: Text(type.value.toTitleCase, style: theme.textTheme.bodyMedium),
+                            child: Text(type.value.toTitleCase,
+                                style: theme.textTheme.bodyMedium),
                           );
                         }).toList(),
                         onChanged: (newType) {
@@ -401,7 +406,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                 ),
 
                 // Interest Rate Input (Only for Liabilities/Loans)
-                if (account.type == AccountTypeEnum.loan || account.type == AccountTypeEnum.credit)
+                if (account.type == AccountTypeEnum.loan ||
+                    account.type == AccountTypeEnum.credit)
                   Row(
                     spacing: 8,
                     children: [
@@ -414,15 +420,19 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                       SizedBox(
                         width: 160,
                         child: TextFormField(
-                          key: Key("${account.id}_rate_${account.interestRate}"),
+                          key:
+                              Key("${account.id}_rate_${account.interestRate}"),
                           initialValue: account.interestRate?.toString(),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
                           textAlign: TextAlign.end,
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.percent, size: 18),
                             isDense: true,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                           ),
                           onFieldSubmitted: (value) {
                             final newVal = double.tryParse(value);
@@ -445,7 +455,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Text("Institution Logo Style", style: theme.textTheme.titleSmall),
+                        child: Text("Institution Logo Style",
+                            style: theme.textTheme.titleSmall),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -458,21 +469,28 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                                 groupValue: institution.iconType,
                                 visualDensity: VisualDensity.compact,
                                 onChanged: (value) async {
-                                  if (value == null || institution.iconType == value) return;
+                                  if (value == null ||
+                                      institution.iconType == value) return;
                                   final oldType = institution.iconType;
                                   setState(() => institution.iconType = value);
                                   try {
-                                    await ref.read(institutionsProvider.notifier).updateIconType(
+                                    await ref
+                                        .read(institutionsProvider.notifier)
+                                        .updateIconType(
                                           institution.id,
                                           value,
                                         );
                                   } catch (e) {
-                                    setState(() => institution.iconType = oldType);
-                                    ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                                    setState(
+                                        () => institution.iconType = oldType);
+                                    ref
+                                        .read(notificationsProvider.notifier)
+                                        .openWithAPIException(e);
                                   }
                                 },
                               ),
-                              Text(type.value.toTitleCase, style: theme.textTheme.bodyMedium),
+                              Text(type.value.toTitleCase,
+                                  style: theme.textTheme.bodyMedium),
                             ],
                           );
                         }).toList(),
@@ -538,7 +556,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                               await ref
                                   .read(transactionApiProvider)
                                   .value
-                                  ?.transactionControllerRemoveDuplicates(accountId: account.id);
+                                  ?.transactionControllerRemoveDuplicates(
+                                      accountId: account.id);
                             },
                             child: Text(
                               "This will scan ${account.name} for duplicate transactions (those sharing the exact same date and amount) and permanently delete the duplicates.\n\nThis action cannot be undone.",
@@ -552,16 +571,20 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 8,
                         children: [
-                          Icon(Icons.delete_sweep), // Better conveys removing/sweeping away unnecessary items
+                          Icon(Icons
+                              .delete_sweep), // Better conveys removing/sweeping away unnecessary items
                           Text("Clean Duplicate Transactions")
                         ],
                       ),
                     ),
-                    if (account.provider == ProviderTypeEnum.zillow && zpid != null)
+                    if (account.provider == ProviderTypeEnum.zillow &&
+                        zpid != null)
                       FilledButton(
                         onPressed: () async {
-                          final Uri url = Uri.parse('https://www.zillow.com/homes/${zpid}_zpid/');
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                          final Uri url = Uri.parse(
+                              'https://www.zillow.com/homes/${zpid}_zpid/');
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
                         },
                         style: ThemeHelpers.primaryButton,
                         child: const Row(
@@ -585,8 +608,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
                             submitButtonStyle: ThemeHelpers.errorButton,
                             onSubmitClick: () async {
                               Navigator.of(ctx).pop();
-                              NavigationProvider.back(
-                                  context, ref); // Force pop the last route to not get us stuck in redirect land
+                              NavigationProvider.back(context,
+                                  ref); // Force pop the last route to not get us stuck in redirect land
                               await NavigationProvider.redirect("/accounts");
                               await accountProvider.delete(account.id);
                             },
@@ -639,7 +662,9 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
             message,
             theme.colorScheme.error,
             theme.colorScheme.onError,
-            icon: widget.account.institution.hasError ? Icons.warning_amber_rounded : Icons.archive_outlined,
+            icon: widget.account.institution.hasError
+                ? Icons.warning_amber_rounded
+                : Icons.archive_outlined,
             onClick: onTap,
           ),
           allowMultiLine: true,
@@ -652,7 +677,8 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
   /// Builds the transactions to display related to this account
   Widget _buildTransactionSection(BuildContext context, WidgetRef ref) {
-    return TransactionsPage(accountId: widget.account.id, padding: EdgeInsetsGeometry.zero);
+    return TransactionsPage(
+        accountId: widget.account.id, padding: EdgeInsetsGeometry.zero);
   }
 
   /// Returns a badge that displays what type of account this is
@@ -663,10 +689,13 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> with Wi
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: theme.colorScheme.secondary, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+          color: theme.colorScheme.secondary,
+          borderRadius: BorderRadius.circular(8)),
       child: Text(
         typeString.toTitleCase,
-        style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSecondary),
+        style: theme.textTheme.labelSmall
+            ?.copyWith(color: theme.colorScheme.onSecondary),
       ),
     );
   }

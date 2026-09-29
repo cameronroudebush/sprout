@@ -48,7 +48,8 @@ class _InternalSideNavContent extends ConsumerWidget {
 
     final navItems = getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
 
-    final groupedItems = groupBy<SproutRoute, String?>(navItems, (route) => route.category);
+    final groupedItems =
+        groupBy<SproutRoute, String?>(navItems, (route) => route.category);
     final navBackgroundColor = theme.cardTheme.color ?? theme.cardColor;
 
     return Material(
@@ -86,18 +87,22 @@ class _InternalSideNavContent extends ConsumerWidget {
                     // Render Category Header title if key value is defined
                     if (categoryName != null)
                       Padding(
-                        padding: const EdgeInsets.only(left: 2, bottom: 6, top: 6),
+                        padding:
+                            const EdgeInsets.only(left: 2, bottom: 6, top: 6),
                         child: Text(
                           categoryName,
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+                            color: theme.colorScheme.onSurfaceVariant
+                                .withOpacity(0.75),
                           ),
                         ),
                       ),
 
                     // Render the corresponding navigation tiles
                     ...routes.map((page) {
-                      final bool isSelected = page.path == '/' ? currentPath == '/' : currentPath.startsWith(page.path);
+                      final bool isSelected = page.path == '/'
+                          ? currentPath == '/'
+                          : currentPath.startsWith(page.path);
                       const borderRadius = 12.0;
 
                       return Padding(
@@ -107,9 +112,12 @@ class _InternalSideNavContent extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(borderRadius),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+                              color: isSelected
+                                  ? theme.colorScheme.secondaryContainer
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(borderRadius),
                             ),
                             child: Row(
@@ -127,7 +135,9 @@ class _InternalSideNavContent extends ConsumerWidget {
                                     color: isSelected
                                         ? theme.colorScheme.onSecondaryContainer
                                         : theme.colorScheme.onSurfaceVariant,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                   ),
                                 ),
                               ],
@@ -143,7 +153,10 @@ class _InternalSideNavContent extends ConsumerWidget {
           ),
 
           // User Profile Section
-          _UserProfileTile(authUser: authUser, onLogout: authNotifier.logout, currentPath: currentPath),
+          _UserProfileTile(
+              authUser: authUser,
+              onLogout: authNotifier.logout,
+              currentPath: currentPath),
         ],
       ),
     );
@@ -159,7 +172,10 @@ class _UserProfileTile extends StatelessWidget {
   final VoidCallback onLogout;
   final String currentPath;
 
-  const _UserProfileTile({required this.authUser, required this.onLogout, required this.currentPath});
+  const _UserProfileTile(
+      {required this.authUser,
+      required this.onLogout,
+      required this.currentPath});
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +191,8 @@ class _UserProfileTile extends StatelessWidget {
         ),
         builder: (context, controller, child) {
           return InkWell(
-            onTap: () => controller.isOpen ? controller.close() : controller.open(),
+            onTap: () =>
+                controller.isOpen ? controller.close() : controller.open(),
             borderRadius: BorderRadius.circular(16),
             hoverColor: theme.colorScheme.primary.withOpacity(0.15),
             child: Container(
@@ -198,7 +215,9 @@ class _UserProfileTile extends StatelessWidget {
                         Text(
                           authUser?.prettyName ?? "",
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: isSettings ? theme.colorScheme.onSecondaryContainer : null,
+                            color: isSettings
+                                ? theme.colorScheme.onSecondaryContainer
+                                : null,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -206,7 +225,9 @@ class _UserProfileTile extends StatelessWidget {
                         Text(
                           "Account Settings",
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: isSettings ? theme.colorScheme.onSecondaryContainer : null,
+                            color: isSettings
+                                ? theme.colorScheme.onSecondaryContainer
+                                : null,
                           ),
                         ),
                       ],
@@ -216,7 +237,9 @@ class _UserProfileTile extends StatelessWidget {
                   Icon(
                     Icons.more_vert,
                     size: 18,
-                    color: isSettings ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
+                    color: isSettings
+                        ? theme.colorScheme.onSecondaryContainer
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -231,19 +254,24 @@ class _UserProfileTile extends StatelessWidget {
                 isSettings ? theme.colorScheme.secondaryContainer : null,
               ),
               foregroundColor: WidgetStateProperty.all(
-                isSettings ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onBackground,
+                isSettings
+                    ? theme.colorScheme.onSecondaryContainer
+                    : theme.colorScheme.onBackground,
               ),
             ),
-            leadingIcon:
-                Icon(Icons.settings_outlined, color: isSettings ? theme.colorScheme.onSecondaryContainer : null),
+            leadingIcon: Icon(Icons.settings_outlined,
+                color:
+                    isSettings ? theme.colorScheme.onSecondaryContainer : null),
             onPressed: () => NavigationProvider.redirect("settings"),
             child: const Text('Settings'),
           ),
           MenuItemButton(
-            style: ButtonStyle(minimumSize: WidgetStateProperty.all(const Size(196, 52))),
+            style: ButtonStyle(
+                minimumSize: WidgetStateProperty.all(const Size(196, 52))),
             leadingIcon: Icon(Icons.logout, color: theme.colorScheme.error),
             onPressed: onLogout,
-            child: Text('Logout', style: TextStyle(color: theme.colorScheme.error)),
+            child: Text('Logout',
+                style: TextStyle(color: theme.colorScheme.error)),
           ),
         ],
       ),

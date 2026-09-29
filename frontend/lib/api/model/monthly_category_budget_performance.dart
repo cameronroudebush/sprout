@@ -40,35 +40,38 @@ class MonthlyCategoryBudgetPerformance {
   bool isOverBudget;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MonthlyCategoryBudgetPerformance &&
-    other.year == year &&
-    other.month == month &&
-    other.budgetedAmount == budgetedAmount &&
-    other.actualSpent == actualSpent &&
-    other.remaining == remaining &&
-    other.isOverBudget == isOverBudget;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MonthlyCategoryBudgetPerformance &&
+          other.year == year &&
+          other.month == month &&
+          other.budgetedAmount == budgetedAmount &&
+          other.actualSpent == actualSpent &&
+          other.remaining == remaining &&
+          other.isOverBudget == isOverBudget;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (year.hashCode) +
-    (month.hashCode) +
-    (budgetedAmount.hashCode) +
-    (actualSpent.hashCode) +
-    (remaining.hashCode) +
-    (isOverBudget.hashCode);
+      // ignore: unnecessary_parenthesis
+      (year.hashCode) +
+      (month.hashCode) +
+      (budgetedAmount.hashCode) +
+      (actualSpent.hashCode) +
+      (remaining.hashCode) +
+      (isOverBudget.hashCode);
 
   @override
-  String toString() => 'MonthlyCategoryBudgetPerformance[year=$year, month=$month, budgetedAmount=$budgetedAmount, actualSpent=$actualSpent, remaining=$remaining, isOverBudget=$isOverBudget]';
+  String toString() =>
+      'MonthlyCategoryBudgetPerformance[year=$year, month=$month, budgetedAmount=$budgetedAmount, actualSpent=$actualSpent, remaining=$remaining, isOverBudget=$isOverBudget]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'year'] = this.year;
-      json[r'month'] = this.month;
-      json[r'budgetedAmount'] = this.budgetedAmount;
-      json[r'actualSpent'] = this.actualSpent;
-      json[r'remaining'] = this.remaining;
-      json[r'isOverBudget'] = this.isOverBudget;
+    json[r'year'] = this.year;
+    json[r'month'] = this.month;
+    json[r'budgetedAmount'] = this.budgetedAmount;
+    json[r'actualSpent'] = this.actualSpent;
+    json[r'remaining'] = this.remaining;
+    json[r'isOverBudget'] = this.isOverBudget;
     return json;
   }
 
@@ -83,18 +86,30 @@ class MonthlyCategoryBudgetPerformance {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'year'), 'Required key "MonthlyCategoryBudgetPerformance[year]" is missing from JSON.');
-        assert(json[r'year'] != null, 'Required key "MonthlyCategoryBudgetPerformance[year]" has a null value in JSON.');
-        assert(json.containsKey(r'month'), 'Required key "MonthlyCategoryBudgetPerformance[month]" is missing from JSON.');
-        assert(json[r'month'] != null, 'Required key "MonthlyCategoryBudgetPerformance[month]" has a null value in JSON.');
-        assert(json.containsKey(r'budgetedAmount'), 'Required key "MonthlyCategoryBudgetPerformance[budgetedAmount]" is missing from JSON.');
-        assert(json[r'budgetedAmount'] != null, 'Required key "MonthlyCategoryBudgetPerformance[budgetedAmount]" has a null value in JSON.');
-        assert(json.containsKey(r'actualSpent'), 'Required key "MonthlyCategoryBudgetPerformance[actualSpent]" is missing from JSON.');
-        assert(json[r'actualSpent'] != null, 'Required key "MonthlyCategoryBudgetPerformance[actualSpent]" has a null value in JSON.');
-        assert(json.containsKey(r'remaining'), 'Required key "MonthlyCategoryBudgetPerformance[remaining]" is missing from JSON.');
-        assert(json[r'remaining'] != null, 'Required key "MonthlyCategoryBudgetPerformance[remaining]" has a null value in JSON.');
-        assert(json.containsKey(r'isOverBudget'), 'Required key "MonthlyCategoryBudgetPerformance[isOverBudget]" is missing from JSON.');
-        assert(json[r'isOverBudget'] != null, 'Required key "MonthlyCategoryBudgetPerformance[isOverBudget]" has a null value in JSON.');
+        assert(json.containsKey(r'year'),
+            'Required key "MonthlyCategoryBudgetPerformance[year]" is missing from JSON.');
+        assert(json[r'year'] != null,
+            'Required key "MonthlyCategoryBudgetPerformance[year]" has a null value in JSON.');
+        assert(json.containsKey(r'month'),
+            'Required key "MonthlyCategoryBudgetPerformance[month]" is missing from JSON.');
+        assert(json[r'month'] != null,
+            'Required key "MonthlyCategoryBudgetPerformance[month]" has a null value in JSON.');
+        assert(json.containsKey(r'budgetedAmount'),
+            'Required key "MonthlyCategoryBudgetPerformance[budgetedAmount]" is missing from JSON.');
+        assert(json[r'budgetedAmount'] != null,
+            'Required key "MonthlyCategoryBudgetPerformance[budgetedAmount]" has a null value in JSON.');
+        assert(json.containsKey(r'actualSpent'),
+            'Required key "MonthlyCategoryBudgetPerformance[actualSpent]" is missing from JSON.');
+        assert(json[r'actualSpent'] != null,
+            'Required key "MonthlyCategoryBudgetPerformance[actualSpent]" has a null value in JSON.');
+        assert(json.containsKey(r'remaining'),
+            'Required key "MonthlyCategoryBudgetPerformance[remaining]" is missing from JSON.');
+        assert(json[r'remaining'] != null,
+            'Required key "MonthlyCategoryBudgetPerformance[remaining]" has a null value in JSON.');
+        assert(json.containsKey(r'isOverBudget'),
+            'Required key "MonthlyCategoryBudgetPerformance[isOverBudget]" is missing from JSON.');
+        assert(json[r'isOverBudget'] != null,
+            'Required key "MonthlyCategoryBudgetPerformance[isOverBudget]" has a null value in JSON.');
         return true;
       }());
 
@@ -110,7 +125,10 @@ class MonthlyCategoryBudgetPerformance {
     return null;
   }
 
-  static List<MonthlyCategoryBudgetPerformance> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MonthlyCategoryBudgetPerformance> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MonthlyCategoryBudgetPerformance>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -123,7 +141,8 @@ class MonthlyCategoryBudgetPerformance {
     return result.toList(growable: growable);
   }
 
-  static Map<String, MonthlyCategoryBudgetPerformance> mapFromJson(dynamic json) {
+  static Map<String, MonthlyCategoryBudgetPerformance> mapFromJson(
+      dynamic json) {
     final map = <String, MonthlyCategoryBudgetPerformance>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
@@ -138,13 +157,19 @@ class MonthlyCategoryBudgetPerformance {
   }
 
   // maps a json object with a list of MonthlyCategoryBudgetPerformance-objects as value to a dart map
-  static Map<String, List<MonthlyCategoryBudgetPerformance>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MonthlyCategoryBudgetPerformance>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MonthlyCategoryBudgetPerformance>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MonthlyCategoryBudgetPerformance.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MonthlyCategoryBudgetPerformance.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -160,4 +185,3 @@ class MonthlyCategoryBudgetPerformance {
     'isOverBudget',
   };
 }
-

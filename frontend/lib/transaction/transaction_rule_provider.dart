@@ -43,11 +43,12 @@ class TransactionRules extends _$TransactionRules {
 
     if (addedRule != null && state.value != null) {
       final newList = [...state.value!.rules, addedRule];
-      state = AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
+      state =
+          AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
 
-      ref
-          .read(notificationsProvider.notifier)
-          .openFrontendOnly("Transaction Rule Added", type: NotificationTypeEnum.success);
+      ref.read(notificationsProvider.notifier).openFrontendOnly(
+          "Transaction Rule Added",
+          type: NotificationTypeEnum.success);
     } else {
       _setRunning(false);
     }
@@ -62,7 +63,8 @@ class TransactionRules extends _$TransactionRules {
 
     if (state.value != null) {
       final newList = state.value!.rules.where((r) => r.id != rule.id).toList();
-      state = AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
+      state =
+          AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
     }
   }
 
@@ -78,7 +80,8 @@ class TransactionRules extends _$TransactionRules {
       if (index != -1) {
         newList[index] = updatedRule;
       }
-      state = AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
+      state =
+          AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
     } else {
       _setRunning(false);
     }
@@ -112,6 +115,7 @@ class TransactionRules extends _$TransactionRules {
 
   /// Opens the manual refresh dialog.
   void openManualRefreshDialog(BuildContext context) {
-    showSproutPopup(context: context, builder: (_) => const TransactionRuleManualDialog());
+    showSproutPopup(
+        context: context, builder: (_) => const TransactionRuleManualDialog());
   }
 }

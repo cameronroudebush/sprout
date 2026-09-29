@@ -22,7 +22,8 @@ import 'package:sprout/shared/widgets/lock.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 /// Global RouteObserver instance.
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 /// Defines a notifier that allows us to subscribe to necessary configuration
 class RouterNotifier extends ChangeNotifier {
@@ -46,14 +47,20 @@ final routerProvider = Provider<GoRouter>((ref) {
   final notifier = RouterNotifier(ref);
 
   // Recursive mapper to automatically build nested GoRoute trees
-  List<GoRoute> mapRoutes(List<SproutRoute> sproutRoutes, {bool isRoot = true}) {
+  List<GoRoute> mapRoutes(List<SproutRoute> sproutRoutes,
+      {bool isRoot = true}) {
     return sproutRoutes.map((route) {
       // GoRouter children must have relative paths. Clean up leading slashes for sub-routes.
-      final cleanPath = !isRoot && route.path.startsWith('/') ? route.path.substring(1) : route.path;
+      final cleanPath = !isRoot && route.path.startsWith('/')
+          ? route.path.substring(1)
+          : route.path;
       return GoRoute(
         path: cleanPath,
-        pageBuilder: (context, state) => NoTransitionPage(child: route.builder(context, state)),
-        routes: route.routes != null ? mapRoutes(route.routes!, isRoot: false) : const [],
+        pageBuilder: (context, state) =>
+            NoTransitionPage(child: route.builder(context, state)),
+        routes: route.routes != null
+            ? mapRoutes(route.routes!, isRoot: false)
+            : const [],
       );
     }).toList();
   }
@@ -80,7 +87,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loading',
         pageBuilder: (context, state) {
-          final randomPhrase = loadingPhrases[Random().nextInt(loadingPhrases.length)];
+          final randomPhrase =
+              loadingPhrases[Random().nextInt(loadingPhrases.length)];
           return NoTransitionPage(
             child: Directionality(
               textDirection: TextDirection.ltr,
@@ -100,24 +108,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Routes that don't require Auth
       GoRoute(
         path: '/login',
-        pageBuilder: (context, state) => const NoTransitionPage(child: LoginPage()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: LoginPage()),
       ),
       GoRoute(
         path: '/setup',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: SproutShell(child: SproutRouteWrapper(child: SetupPage()))),
+        pageBuilder: (context, state) => const NoTransitionPage(
+            child: SproutShell(child: SproutRouteWrapper(child: SetupPage()))),
       ),
       GoRoute(
         path: '/connection/setup',
-        pageBuilder: (context, state) => const NoTransitionPage(child: ConnectionSetupPage()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: ConnectionSetupPage()),
       ),
       GoRoute(
         path: '/connection/failure',
-        pageBuilder: (context, state) => const NoTransitionPage(child: ConnectionFailurePage()),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: ConnectionFailurePage()),
       ),
       // Routes that do require auth
       ShellRoute(
-        builder: (context, state, child) => SproutShell(state: state, child: child),
+        builder: (context, state, child) =>
+            SproutShell(state: state, child: child),
         routes: mapRoutes(authenticatedRoutes),
       ),
     ],
@@ -126,7 +138,8 @@ final routerProvider = Provider<GoRouter>((ref) {
   NavigationProvider.router = router;
 
   router.routerDelegate.addListener(() {
-    final location = router.routerDelegate.currentConfiguration.last.matchedLocation;
+    final location =
+        router.routerDelegate.currentConfiguration.last.matchedLocation;
     Future.microtask(() {
       ref.read(currentRouteProvider.notifier).update(location);
     });
@@ -154,7 +167,9 @@ String? _authRedirect(Ref ref, GoRouterState state) {
     String? target;
 
     // Preserve existing redirect if it's a valid non-core target
-    if (existingRedirect != null && existingRedirect.isNotEmpty && existingRedirect != '/') {
+    if (existingRedirect != null &&
+        existingRedirect.isNotEmpty &&
+        existingRedirect != '/') {
       final existingPath = Uri.tryParse(existingRedirect)?.path;
       if (existingPath != null && !corePaths.contains(existingPath)) {
         target = existingRedirect;
@@ -162,7 +177,9 @@ String? _authRedirect(Ref ref, GoRouterState state) {
     }
 
     // Otherwise capture current path if it's a valid non-core target
-    if (target == null && currentPath != '/' && !corePaths.contains(currentPath)) {
+    if (target == null &&
+        currentPath != '/' &&
+        !corePaths.contains(currentPath)) {
       target = state.uri.toString();
     }
 
@@ -184,7 +201,8 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final isSetupMode = ref.read(authProvider.notifier).isSetupMode;
 
   // Determine if we are still waiting for core providers
-  final isCoreLoading = splashAsync.isLoading || authState.isLoading || connUrlState.isLoading;
+  final isCoreLoading =
+      splashAsync.isLoading || authState.isLoading || connUrlState.isLoading;
 
   // Determine if the user is logged in
   final isLoggedIn = authState.value != null;
@@ -208,13 +226,17 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   }
 
   if (connUrlState.value == null || connUrlState.value!.isEmpty) {
-    return currentPath == '/connection/setup' ? null : withRedirect('/connection/setup');
+    return currentPath == '/connection/setup'
+        ? null
+        : withRedirect('/connection/setup');
   }
 
   // Server Connection Check
   final configNotifier = ref.read(unsecureConfigProvider.notifier);
   if (configNotifier.failedToConnect) {
-    return currentPath == '/connection/failure' ? null : withRedirect('/connection/failure');
+    return currentPath == '/connection/failure'
+        ? null
+        : withRedirect('/connection/failure');
   }
 
   // Ensures that once in setup mode, the user STAYS in setup mode until completeSetup() is called.
@@ -260,7 +282,9 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   }
 
   // Resolve redirect parameter once all checks pass
-  if (existingRedirect != null && existingRedirect.isNotEmpty && existingRedirect != '/') {
+  if (existingRedirect != null &&
+      existingRedirect.isNotEmpty &&
+      existingRedirect != '/') {
     final targetUri = Uri.parse(existingRedirect);
     final targetPath = targetUri.path;
 

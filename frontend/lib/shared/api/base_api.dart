@@ -9,7 +9,8 @@ import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/api/auto_logout_client.dart';
 import 'package:sprout/shared/api/base_path_client.dart';
-import 'package:sprout/shared/api/browser_client.dart' if (dart.library.html) 'package:http/browser_client.dart';
+import 'package:sprout/shared/api/browser_client.dart'
+    if (dart.library.html) 'package:http/browser_client.dart';
 import 'package:sprout/shared/api/cookie_client.dart';
 import 'package:sprout/shared/api/header_client.dart';
 import 'package:sprout/shared/api/timeout_client.dart';
@@ -33,7 +34,8 @@ Future<http.Client> rootHttpClient(Ref ref) async {
   return RetryClient(
     client,
     retries: 2,
-    when: (response) => response.statusCode >= 500 && response.statusCode <= 599,
+    when: (response) =>
+        response.statusCode >= 500 && response.statusCode <= 599,
   );
 }
 
@@ -66,9 +68,10 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
 
       if (authState.value != null) {
         Future.microtask(() {
-          ref
-              .read(notificationsProvider.notifier)
-              .openFrontendOnly("Session Expired", type: NotificationTypeEnum.warning, duration: 7);
+          ref.read(notificationsProvider.notifier).openFrontendOnly(
+              "Session Expired",
+              type: NotificationTypeEnum.warning,
+              duration: 7);
         });
         await auth.logout();
       }

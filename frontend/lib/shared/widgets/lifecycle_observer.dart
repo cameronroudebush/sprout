@@ -10,10 +10,12 @@ class SproutLifecycleObserver extends ConsumerStatefulWidget {
   const SproutLifecycleObserver({super.key, required this.child});
 
   @override
-  ConsumerState<SproutLifecycleObserver> createState() => _SproutLifecycleObserverState();
+  ConsumerState<SproutLifecycleObserver> createState() =>
+      _SproutLifecycleObserverState();
 }
 
-class _SproutLifecycleObserverState extends ConsumerState<SproutLifecycleObserver> with WidgetsBindingObserver {
+class _SproutLifecycleObserverState
+    extends ConsumerState<SproutLifecycleObserver> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();

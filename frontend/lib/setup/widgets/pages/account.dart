@@ -24,11 +24,13 @@ class AccountSetupPage extends ConsumerStatefulWidget {
     VoidCallback? onSuccess,
   }) async {
     final unsecureConfig = ref.read(unsecureConfigProvider).value;
-    final isOIDC = unsecureConfig?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+    final isOIDC =
+        unsecureConfig?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
 
     // Validation Guard for non OIDC
     if (!isOIDC && ((username ?? '').isEmpty || (password ?? '').isEmpty)) {
-      onStatusChanged?.call('Username/password cannot be empty.', isError: true);
+      onStatusChanged?.call('Username/password cannot be empty.',
+          isError: true);
       return;
     }
 
@@ -39,7 +41,9 @@ class AccountSetupPage extends ConsumerStatefulWidget {
       );
 
       if (registered == null) {
-        onStatusChanged?.call('Failed to create account. Username might be taken.', isError: true);
+        onStatusChanged?.call(
+            'Failed to create account. Username might be taken.',
+            isError: true);
         return;
       }
 
@@ -48,17 +52,21 @@ class AccountSetupPage extends ConsumerStatefulWidget {
       final authNotifier = ref.read(authProvider.notifier);
 
       // Attempt Login
-      final loggedIn = await (isOIDC ? authNotifier.loginOIDC() : authNotifier.login(username!, password!));
+      final loggedIn = await (isOIDC
+          ? authNotifier.loginOIDC()
+          : authNotifier.login(username!, password!));
 
       if (loggedIn == null) {
-        onStatusChanged?.call('Account created but failed to get user.', isError: true);
+        onStatusChanged?.call('Account created but failed to get user.',
+            isError: true);
         return;
       }
 
       onStatusChanged?.call('Login successful!', isError: false);
       onSuccess?.call();
     } catch (e) {
-      final errorMsg = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+      final errorMsg =
+          ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
       onStatusChanged?.call(errorMsg, isError: true);
     }
   }
@@ -115,7 +123,9 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
     final theme = Theme.of(context);
 
     // Disable button if loading or fields empty
-    final bool canSubmit = !_isLoading && _usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty;
+    final bool canSubmit = !_isLoading &&
+        _usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty;
 
     return SetupPageWrapper(
       widget.isDesktop,
@@ -128,7 +138,9 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
           Text(
             'Create Your Admin Account',
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: widget.isDesktop ? 36 : 24),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: widget.isDesktop ? 36 : 24),
           ),
           Text(
             'This will be your primary account to manage Sprout.',
@@ -139,8 +151,12 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
             SproutNotificationWidget(
               SproutNotification(
                 _message,
-                _isFailureMessage ? theme.colorScheme.error : theme.colorScheme.secondary,
-                _isFailureMessage ? theme.colorScheme.onError : theme.colorScheme.onSecondary,
+                _isFailureMessage
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.secondary,
+                _isFailureMessage
+                    ? theme.colorScheme.onError
+                    : theme.colorScheme.onSecondary,
               ),
               allowMultiLine: true,
             ),
@@ -152,14 +168,18 @@ class _AccountSetupPageState extends ConsumerState<AccountSetupPage> {
                   controller: _usernameController,
                   autofillHints: [AutofillHints.newUsername],
                   onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(labelText: 'Choose Username', prefixIcon: Icon(Icons.person_add)),
+                  decoration: const InputDecoration(
+                      labelText: 'Choose Username',
+                      prefixIcon: Icon(Icons.person_add)),
                 ),
                 TextField(
                   controller: _passwordController,
                   autofillHints: [AutofillHints.newPassword],
                   onChanged: (_) => setState(() {}),
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Choose Password', prefixIcon: Icon(Icons.lock_open)),
+                  decoration: const InputDecoration(
+                      labelText: 'Choose Password',
+                      prefixIcon: Icon(Icons.lock_open)),
                   onSubmitted: (_) => canSubmit ? _handleCreateAccount() : null,
                 ),
               ],

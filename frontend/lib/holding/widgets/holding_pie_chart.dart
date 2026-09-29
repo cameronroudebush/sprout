@@ -30,21 +30,26 @@ class HoldingPieChart extends ConsumerWidget {
       for (var holding in list) {
         final symbol = (holding.symbol).toUpperCase().trim();
         if (symbol.isNotEmpty && holding.marketValue > 0) {
-          aggregatedHoldings[symbol] = (aggregatedHoldings[symbol] ?? 0.0) + holding.marketValue;
+          aggregatedHoldings[symbol] =
+              (aggregatedHoldings[symbol] ?? 0.0) + holding.marketValue;
         }
       }
     }
 
     if (aggregatedHoldings.isEmpty) {
-      return Center(child: Text("No valuation data found to calculate portfolio weights."));
+      return Center(
+          child:
+              Text("No valuation data found to calculate portfolio weights."));
     }
 
-    final sortedEntries = aggregatedHoldings.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final sortedEntries = aggregatedHoldings.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
     final Map<String, num> finalChartData = {};
     if (topN != null && sortedEntries.length > topN!) {
       final topPositions = sortedEntries.take(topN!);
       final overflowPositions = sortedEntries.skip(topN!);
-      final double overflowSum = overflowPositions.fold(0.0, (sum, item) => sum + item.value);
+      final double overflowSum =
+          overflowPositions.fold(0.0, (sum, item) => sum + item.value);
       for (var pos in topPositions) {
         finalChartData[pos.key] = pos.value;
       }

@@ -61,7 +61,8 @@ class Transactions extends _$Transactions {
   /// Fetches the next page of data matching the filter
   Future<void> fetchNextPage() async {
     final current = state.value;
-    if (current == null || current.isLoadingMore || current.hasReachedMax) return;
+    if (current == null || current.isLoadingMore || current.hasReachedMax)
+      return;
 
     state = AsyncData(current.copyWith(isLoadingMore: true));
 
@@ -73,7 +74,8 @@ class Transactions extends _$Transactions {
       final int startIndex = currentCount;
       final int endIndex = currentCount + pageSize;
 
-      String? apiCategory = filter.categoryId == "all" ? null : filter.categoryId;
+      String? apiCategory =
+          filter.categoryId == "all" ? null : filter.categoryId;
 
       final nextItems = await api.transactionControllerGetByQuery(
         startIndex: startIndex,
@@ -87,13 +89,15 @@ class Transactions extends _$Transactions {
       );
 
       if (nextItems == null || nextItems.isEmpty) {
-        state = AsyncData(current.copyWith(isLoadingMore: false, hasReachedMax: true));
+        state = AsyncData(
+            current.copyWith(isLoadingMore: false, hasReachedMax: true));
         return;
       }
 
       // Append without re-sorting to avoid shifting scroll offsets
       final existingIds = current.transactions.map((t) => t.id).toSet();
-      final newUnique = nextItems.where((t) => !existingIds.contains(t.id)).toList();
+      final newUnique =
+          nextItems.where((t) => !existingIds.contains(t.id)).toList();
 
       state = AsyncData(
         current.copyWith(
@@ -153,7 +157,8 @@ Future<List<Transaction>> transactionsForDay(Ref ref, DateTime day) async {
 }
 
 // Keep track of the active targeted calendar snapshot frame
-final selectedCalendarMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());
+final selectedCalendarMonthProvider =
+    StateProvider<DateTime>((ref) => DateTime.now());
 
 /// Fetches a single transaction by ID, checking existing default provider state first.
 @riverpod
@@ -168,8 +173,10 @@ Future<Transaction?> transactionById(Ref ref, String id) async {
   });
 
   // Check if we already have it loaded in the default filter state
-  final masterState = ref.read(transactionsProvider(TransactionFilter.defaultFilter)).value;
-  final localMatch = masterState?.transactions.firstWhereOrNull((t) => t.id == id);
+  final masterState =
+      ref.read(transactionsProvider(TransactionFilter.defaultFilter)).value;
+  final localMatch =
+      masterState?.transactions.firstWhereOrNull((t) => t.id == id);
   if (localMatch != null) return localMatch;
 
   // Otherwise, fetch directly from API

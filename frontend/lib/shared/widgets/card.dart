@@ -39,9 +39,14 @@ class SproutCard extends StatelessWidget {
       child: child,
     );
 
-    final content = clip ? ClipRRect(borderRadius: BorderRadius.circular(12), child: card) : card;
+    final content = clip
+        ? ClipRRect(borderRadius: BorderRadius.circular(12), child: card)
+        : card;
     return applySizedBox
-        ? SizedBox(width: mediaQuery.size.width * (widthMultiplier ?? 1), height: height, child: content)
+        ? SizedBox(
+            width: mediaQuery.size.width * (widthMultiplier ?? 1),
+            height: height,
+            child: content)
         : content;
   }
 }

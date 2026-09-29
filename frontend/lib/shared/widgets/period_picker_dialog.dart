@@ -33,9 +33,12 @@ Future<DateTime?> showMonthPickerDialog({
                       icon: const Icon(Icons.chevron_left),
                       tooltip: 'Previous year',
                     ),
-                    Text('$pickerYear', style: Theme.of(context).textTheme.titleMedium),
+                    Text('$pickerYear',
+                        style: Theme.of(context).textTheme.titleMedium),
                     IconButton(
-                      onPressed: pickerYear < latestMonth.year ? () => setDialogState(() => pickerYear++) : null,
+                      onPressed: pickerYear < latestMonth.year
+                          ? () => setDialogState(() => pickerYear++)
+                          : null,
                       icon: const Icon(Icons.chevron_right),
                       tooltip: 'Next year',
                     ),
@@ -50,13 +53,21 @@ Future<DateTime?> showMonthPickerDialog({
                   childAspectRatio: 2.2,
                   children: List.generate(12, (index) {
                     final targetMonth = DateTime(pickerYear, index + 1);
-                    final selected = MonthNavigation.isSameMonth(targetMonth, selectedMonth);
-                    final isFuture = MonthNavigation.isAfter(targetMonth, latestMonth);
+                    final selected =
+                        MonthNavigation.isSameMonth(targetMonth, selectedMonth);
+                    final isFuture =
+                        MonthNavigation.isAfter(targetMonth, latestMonth);
                     return FilledButton.tonal(
-                      onPressed: isFuture ? null : () => Navigator.of(dialogContext).pop(targetMonth),
+                      onPressed: isFuture
+                          ? null
+                          : () => Navigator.of(dialogContext).pop(targetMonth),
                       style: FilledButton.styleFrom(
-                        backgroundColor: selected ? Theme.of(context).colorScheme.primaryContainer : null,
-                        foregroundColor: selected ? Theme.of(context).colorScheme.onPrimaryContainer : null,
+                        backgroundColor: selected
+                            ? Theme.of(context).colorScheme.primaryContainer
+                            : null,
+                        foregroundColor: selected
+                            ? Theme.of(context).colorScheme.onPrimaryContainer
+                            : null,
                       ),
                       child: Text(DateFormat('MMM').format(targetMonth)),
                     );
@@ -68,7 +79,8 @@ Future<DateTime?> showMonthPickerDialog({
     ),
   );
 
-  if (pickedMonth != null && MonthNavigation.isAfter(pickedMonth, latestMonth)) {
+  if (pickedMonth != null &&
+      MonthNavigation.isAfter(pickedMonth, latestMonth)) {
     return null;
   }
   return pickedMonth;
@@ -102,7 +114,9 @@ Future<int?> showYearPickerDialog({
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: firstYear > 1 ? () => setDialogState(() => firstYear -= 12) : null,
+                    onPressed: firstYear > 1
+                        ? () => setDialogState(() => firstYear -= 12)
+                        : null,
                     icon: const Icon(Icons.chevron_left),
                     tooltip: 'Previous years',
                   ),
@@ -111,7 +125,9 @@ Future<int?> showYearPickerDialog({
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   IconButton(
-                    onPressed: firstYear + 12 <= lastPageFirstYear ? () => setDialogState(() => firstYear += 12) : null,
+                    onPressed: firstYear + 12 <= lastPageFirstYear
+                        ? () => setDialogState(() => firstYear += 12)
+                        : null,
                     icon: const Icon(Icons.chevron_right),
                     tooltip: 'Next years',
                   ),
@@ -129,10 +145,16 @@ Future<int?> showYearPickerDialog({
                   final selected = year == boundedSelectedYear;
                   final isFuture = year > latestYear;
                   return FilledButton.tonal(
-                    onPressed: isFuture ? null : () => Navigator.of(dialogContext).pop(year),
+                    onPressed: isFuture
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(year),
                     style: FilledButton.styleFrom(
-                      backgroundColor: selected ? Theme.of(context).colorScheme.primaryContainer : null,
-                      foregroundColor: selected ? Theme.of(context).colorScheme.onPrimaryContainer : null,
+                      backgroundColor: selected
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : null,
+                      foregroundColor: selected
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : null,
                     ),
                     child: Text('$year'),
                   );

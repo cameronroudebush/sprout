@@ -53,7 +53,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final params = routeState.uri.queryParameters;
 
     final search = params['search'] ?? '';
-    final categoryId = params['categoryId'] ?? CategoryDropdown.fakeAllCategory.id;
+    final categoryId =
+        params['categoryId'] ?? CategoryDropdown.fakeAllCategory.id;
     final accountId = params['accountId'] ?? widget.accountId;
 
     bool? pending;
@@ -88,8 +89,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     if (updateUrlParams) {
       final queryParams = <String, String>{};
       if (newFilter.search.isNotEmpty) queryParams['search'] = newFilter.search;
-      if (newFilter.accountId != null) queryParams['accountId'] = newFilter.accountId!;
-      if (newFilter.categoryId != null && newFilter.categoryId != CategoryDropdown.fakeAllCategory.id) {
+      if (newFilter.accountId != null)
+        queryParams['accountId'] = newFilter.accountId!;
+      if (newFilter.categoryId != null &&
+          newFilter.categoryId != CategoryDropdown.fakeAllCategory.id) {
         queryParams['categoryId'] = newFilter.categoryId!;
       }
       if (newFilter.pending != null) {
@@ -128,7 +131,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
     if (maxScroll - currentScroll <= 150) {
       _isFetching = true;
-      ref.read(transactionsProvider(filter).notifier).fetchNextPage().whenComplete(() {
+      ref
+          .read(transactionsProvider(filter).notifier)
+          .fetchNextPage()
+          .whenComplete(() {
         _isFetching = false;
       });
     }
@@ -163,7 +169,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, _) => Center(child: Text("Error: $err")),
                 data: (masterState) {
-                  if (masterState.transactions.isEmpty && !masterState.isLoadingMore) {
+                  if (masterState.transactions.isEmpty &&
+                      !masterState.isLoadingMore) {
                     return const Center(child: Text("No transactions found"));
                   }
 
@@ -188,17 +195,20 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               elevation: 4,
                               borderRadius: BorderRadius.circular(20),
                               child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     SizedBox(
                                       width: 16,
                                       height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
                                     ),
                                     SizedBox(width: 8),
-                                    Text("Loading transactions...", style: TextStyle(fontSize: 12)),
+                                    Text("Loading transactions...",
+                                        style: TextStyle(fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -218,7 +228,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
   /// Builds the grouped list using Slivers to maintain grouped card styling while fixing the scrollbar
   Widget _buildGroupedList(List<dynamic> transactions, ThemeData theme) {
-    final grouped = transactions.groupListsBy((t) => DateTime(t.posted.year, t.posted.month, t.posted.day));
+    final grouped = transactions.groupListsBy(
+        (t) => DateTime(t.posted.year, t.posted.month, t.posted.day));
 
     return CustomScrollView(
       controller: _scrollController,
@@ -233,21 +244,24 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, bottom: 4, top: 12),
-                    child: Text(entry.key.toShortMonth, style: theme.textTheme.titleSmall),
+                    child: Text(entry.key.toShortMonth,
+                        style: theme.textTheme.titleSmall),
                   ),
                 ),
               ),
               // Day Group Card Sliver
               SliverToBoxAdapter(
                 child: SproutRouteWrapper(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: SproutCard(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         for (int i = 0; i < entry.value.length; i++) ...[
                           TransactionRow(entry.value[i]),
-                          if (i < entry.value.length - 1) const Divider(height: 1),
+                          if (i < entry.value.length - 1)
+                            const Divider(height: 1),
                         ],
                       ],
                     ),

@@ -24,10 +24,12 @@ class SelectableAccountsWidget extends ConsumerStatefulWidget {
       this.showErrors = true});
 
   @override
-  ConsumerState<SelectableAccountsWidget> createState() => _SelectableAccountsWidgetState();
+  ConsumerState<SelectableAccountsWidget> createState() =>
+      _SelectableAccountsWidgetState();
 }
 
-class _SelectableAccountsWidgetState extends ConsumerState<SelectableAccountsWidget> {
+class _SelectableAccountsWidgetState
+    extends ConsumerState<SelectableAccountsWidget> {
   final Set<Account> _selectedAccounts = {};
 
   void _toggleSelection(Account account) {
@@ -45,10 +47,12 @@ class _SelectableAccountsWidgetState extends ConsumerState<SelectableAccountsWid
   Widget build(BuildContext context) {
     final config = AccountExtensions.groupConfig;
     final historyAsync = ref.watch(historicalAccountDataProvider);
-    final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ?? ChartRangeEnum.oneDay;
+    final selectedRange = ref.watch(userConfigProvider).value?.netWorthRange ??
+        ChartRangeEnum.oneDay;
 
     final groupedAccounts = config.keys.map((type) {
-      final groupAccounts = widget.accounts.where((a) => a.type == type).toList();
+      final groupAccounts =
+          widget.accounts.where((a) => a.type == type).toList();
       final ui = config[type];
 
       if (groupAccounts.isEmpty || ui == null) return const SizedBox.shrink();

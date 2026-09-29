@@ -44,9 +44,12 @@ class SproutBaseDialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDesktop = MediaQuery.sizeOf(context).width > SproutLayoutBuilder.desktopBreakpoint;
+    final isDesktop = MediaQuery.sizeOf(context).width >
+        SproutLayoutBuilder.desktopBreakpoint;
 
-    return isDesktop ? _buildDesktopDialog(context, theme) : _buildMobileSheet(context, theme);
+    return isDesktop
+        ? _buildDesktopDialog(context, theme)
+        : _buildMobileSheet(context, theme);
   }
 
   /// Responsive Header: Renders the Handle for Mobile or the Title for Desktop
@@ -69,12 +72,15 @@ class SproutBaseDialogWidget extends StatelessWidget {
             spacing: 24,
             children: [
               const Expanded(child: SizedBox.shrink()),
-              Text(dialogTitleText, style: titleStyle ?? theme.textTheme.headlineMedium),
+              Text(dialogTitleText,
+                  style: titleStyle ?? theme.textTheme.headlineMedium),
               if (!isMobile)
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                    child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop()),
                   ),
                 ),
               if (isMobile) const Expanded(child: SizedBox.shrink()),
@@ -88,12 +94,14 @@ class SproutBaseDialogWidget extends StatelessWidget {
 
   /// Builds the content to populate the
   Widget _buildContent(BuildContext context) {
-    return SingleChildScrollView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), child: child);
+    return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), child: child);
   }
 
   /// Builds the bottom row action buttons
   Widget _buildActions(BuildContext context) {
-    if (!showSubmitButton && !showCloseDialogButton) return const SizedBox.shrink();
+    if (!showSubmitButton && !showCloseDialogButton)
+      return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Row(
@@ -102,7 +110,9 @@ class SproutBaseDialogWidget extends StatelessWidget {
           if (extraButtons != null) extraButtons!,
           if (showCloseDialogButton)
             Expanded(
-              child: OutlinedButton(onPressed: () => Navigator.of(context).pop(), child: Text(closeButtonText)),
+              child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(closeButtonText)),
             ),
           if (showSubmitButton)
             Expanded(
@@ -166,7 +176,8 @@ Future<T?> showSproutPopup<T>({
   required WidgetBuilder builder,
   bool isDismissible = true,
 }) {
-  final bool isDesktop = MediaQuery.sizeOf(context).width > SproutLayoutBuilder.desktopBreakpoint;
+  final bool isDesktop =
+      MediaQuery.sizeOf(context).width > SproutLayoutBuilder.desktopBreakpoint;
 
   if (isDesktop) {
     return showDialog<T>(
@@ -175,7 +186,10 @@ Future<T?> showSproutPopup<T>({
       barrierDismissible: isDismissible,
       builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-        child: Dialog(backgroundColor: Colors.transparent, elevation: 0, child: builder(context)),
+        child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: builder(context)),
       ),
     );
   }
@@ -203,7 +217,8 @@ Future<T?> showSproutPopup<T>({
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(context).bottom),
               child: builder(context),
             ),
           ),

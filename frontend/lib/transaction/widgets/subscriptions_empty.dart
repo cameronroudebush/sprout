@@ -16,7 +16,8 @@ class SubscriptionsEmptyWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 12,
             children: [
-              Icon(Icons.calendar_month, size: 64, color: theme.colorScheme.primary),
+              Icon(Icons.calendar_month,
+                  size: 64, color: theme.colorScheme.primary),
               Text(
                 "No Subscriptions Found",
                 style: theme.textTheme.titleLarge,

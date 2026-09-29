@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class ProviderSubTypeEnum {
   /// Instantiate a new enum with the provided [value].
   const ProviderSubTypeEnum._(this.value);
@@ -34,9 +33,13 @@ class ProviderSubTypeEnum {
     crypto,
   ];
 
-  static ProviderSubTypeEnum? fromJson(dynamic value) => ProviderSubTypeEnumTypeTransformer().decode(value);
+  static ProviderSubTypeEnum? fromJson(dynamic value) =>
+      ProviderSubTypeEnumTypeTransformer().decode(value);
 
-  static List<ProviderSubTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ProviderSubTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ProviderSubTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -53,7 +56,8 @@ class ProviderSubTypeEnum {
 /// Transformation class that can [encode] an instance of [ProviderSubTypeEnum] to String,
 /// and [decode] dynamic data back to [ProviderSubTypeEnum].
 class ProviderSubTypeEnumTypeTransformer {
-  factory ProviderSubTypeEnumTypeTransformer() => _instance ??= const ProviderSubTypeEnumTypeTransformer._();
+  factory ProviderSubTypeEnumTypeTransformer() =>
+      _instance ??= const ProviderSubTypeEnumTypeTransformer._();
 
   const ProviderSubTypeEnumTypeTransformer._();
 
@@ -70,9 +74,12 @@ class ProviderSubTypeEnumTypeTransformer {
   ProviderSubTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'Bank Investments': return ProviderSubTypeEnum.bankInvestments;
-        case r'Real Estate': return ProviderSubTypeEnum.realEstate;
-        case r'Crypto': return ProviderSubTypeEnum.crypto;
+        case r'Bank Investments':
+          return ProviderSubTypeEnum.bankInvestments;
+        case r'Real Estate':
+          return ProviderSubTypeEnum.realEstate;
+        case r'Crypto':
+          return ProviderSubTypeEnum.crypto;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -85,4 +92,3 @@ class ProviderSubTypeEnumTypeTransformer {
   /// Singleton [ProviderSubTypeEnumTypeTransformer] instance.
   static ProviderSubTypeEnumTypeTransformer? _instance;
 }
-

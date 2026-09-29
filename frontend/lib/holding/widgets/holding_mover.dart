@@ -27,7 +27,10 @@ class HoldingMoverWidget extends ConsumerWidget {
   final int count;
 
   const HoldingMoverWidget(
-      {super.key, this.title = "Today's Top Movers", required this.investmentAccounts, this.count = 4});
+      {super.key,
+      this.title = "Today's Top Movers",
+      required this.investmentAccounts,
+      this.count = 4});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,13 +40,15 @@ class HoldingMoverWidget extends ConsumerWidget {
     final Map<String, _MergedMover> mergedHoldings = {};
 
     for (final account in investmentAccounts) {
-      final holdings = ref.watch(accountHoldingsProvider(account.id)).value ?? [];
+      final holdings =
+          ref.watch(accountHoldingsProvider(account.id)).value ?? [];
       for (final holding in holdings) {
         final state = ref.watch(expandedHoldingProvider(holding));
         final symbol = holding.symbol;
 
         final isMutualFund = state.type == MarketIndexDtoTypeEnum.MUTUALFUND;
-        final isMarketOpen = state.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
+        final isMarketOpen =
+            state.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
 
         if (isMutualFund && isMarketOpen) {
           continue; // Skip calculating daily moves for mutual funds until post-close updates land
@@ -51,10 +56,13 @@ class HoldingMoverWidget extends ConsumerWidget {
 
         if (mergedHoldings.containsKey(symbol)) {
           final existing = mergedHoldings[symbol]!;
-          final combinedMarketValue = existing.liveMarketValue + state.liveMarketValue;
+          final combinedMarketValue =
+              existing.liveMarketValue + state.liveMarketValue;
           final combinedDayChange = existing.dayChange + state.dayChange;
           final previousDayValue = combinedMarketValue - combinedDayChange;
-          final combinedDayPercent = previousDayValue != 0 ? (combinedDayChange / previousDayValue) * 100 : 0.0;
+          final combinedDayPercent = previousDayValue != 0
+              ? (combinedDayChange / previousDayValue) * 100
+              : 0.0;
 
           mergedHoldings[symbol] = _MergedMover(
             symbol: symbol,
@@ -76,8 +84,14 @@ class HoldingMoverWidget extends ConsumerWidget {
     final allStates = mergedHoldings.values.toList();
     allStates.sort((a, b) => b.dayPercent.compareTo(a.dayPercent));
 
-    final gainers = allStates.where((s) => s.dayPercent > 0).take(count).toList();
-    final losers = allStates.where((s) => s.dayPercent < 0).toList().reversed.take(count).toList();
+    final gainers =
+        allStates.where((s) => s.dayPercent > 0).take(count).toList();
+    final losers = allStates
+        .where((s) => s.dayPercent < 0)
+        .toList()
+        .reversed
+        .take(count)
+        .toList();
 
     if (gainers.isEmpty && losers.isEmpty) {
       return const SizedBox.shrink();
@@ -106,9 +120,15 @@ class HoldingMoverWidget extends ConsumerWidget {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (gainers.isNotEmpty) _buildMoverList(context, "Top Gainers", gainers, formatter, isGainer: true),
-                    if (gainers.isNotEmpty && losers.isNotEmpty) const Divider(height: 32),
-                    if (losers.isNotEmpty) _buildMoverList(context, "Top Losers", losers, formatter, isGainer: false),
+                    if (gainers.isNotEmpty)
+                      _buildMoverList(
+                          context, "Top Gainers", gainers, formatter,
+                          isGainer: true),
+                    if (gainers.isNotEmpty && losers.isNotEmpty)
+                      const Divider(height: 32),
+                    if (losers.isNotEmpty)
+                      _buildMoverList(context, "Top Losers", losers, formatter,
+                          isGainer: false),
                   ],
                 );
               }
@@ -117,10 +137,17 @@ class HoldingMoverWidget extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (gainers.isNotEmpty)
-                    Expanded(child: _buildMoverList(context, "Top Gainers", gainers, formatter, isGainer: true)),
-                  if (gainers.isNotEmpty && losers.isNotEmpty) const SizedBox(width: 32),
+                    Expanded(
+                        child: _buildMoverList(
+                            context, "Top Gainers", gainers, formatter,
+                            isGainer: true)),
+                  if (gainers.isNotEmpty && losers.isNotEmpty)
+                    const SizedBox(width: 32),
                   if (losers.isNotEmpty)
-                    Expanded(child: _buildMoverList(context, "Top Losers", losers, formatter, isGainer: false)),
+                    Expanded(
+                        child: _buildMoverList(
+                            context, "Top Losers", losers, formatter,
+                            isGainer: false)),
                 ],
               );
             },
@@ -131,7 +158,8 @@ class HoldingMoverWidget extends ConsumerWidget {
   }
 
   /// Builds the list of movers
-  Widget _buildMoverList(BuildContext context, String title, List<_MergedMover> movers, CurrencyFormatter formatter,
+  Widget _buildMoverList(BuildContext context, String title,
+      List<_MergedMover> movers, CurrencyFormatter formatter,
       {required bool isGainer}) {
     final theme = Theme.of(context);
     final sectionColor = isGainer ? Colors.green : Colors.redAccent;
@@ -173,10 +201,12 @@ class HoldingMoverWidget extends ConsumerWidget {
 
             return ListTile(
               dense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               title: Text(
                 mover.symbol,
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               trailing: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +215,8 @@ class HoldingMoverWidget extends ConsumerWidget {
                 children: [
                   Text(
                     formatter.format(mover.liveMarketValue),
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   SproutChangeWidget(
                     totalChange: mover.dayChange,

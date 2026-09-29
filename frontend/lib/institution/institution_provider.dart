@@ -20,7 +20,8 @@ class Institutions extends _$Institutions {
   }
 
   /// Patches an institution's logo style preference via the backend API
-  Future<Institution?> updateIconType(String id, InstitutionIconType type) async {
+  Future<Institution?> updateIconType(
+      String id, InstitutionIconType type) async {
     final notifications = ref.read(notificationsProvider.notifier);
     try {
       final api = await ref.read(institutionApiProvider.future);

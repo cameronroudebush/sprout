@@ -25,26 +25,26 @@ class SankeyData {
   List<SankeyLink> links;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SankeyData &&
-    _deepEquality.equals(other.colors, colors) &&
-    _deepEquality.equals(other.nodes, nodes) &&
-    _deepEquality.equals(other.links, links);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SankeyData &&
+          _deepEquality.equals(other.colors, colors) &&
+          _deepEquality.equals(other.nodes, nodes) &&
+          _deepEquality.equals(other.links, links);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (colors.hashCode) +
-    (nodes.hashCode) +
-    (links.hashCode);
+      // ignore: unnecessary_parenthesis
+      (colors.hashCode) + (nodes.hashCode) + (links.hashCode);
 
   @override
   String toString() => 'SankeyData[colors=$colors, nodes=$nodes, links=$links]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'colors'] = this.colors;
-      json[r'nodes'] = this.nodes;
-      json[r'links'] = this.links;
+    json[r'colors'] = this.colors;
+    json[r'nodes'] = this.nodes;
+    json[r'links'] = this.links;
     return json;
   }
 
@@ -59,19 +59,27 @@ class SankeyData {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'colors'), 'Required key "SankeyData[colors]" is missing from JSON.');
-        assert(json[r'colors'] != null, 'Required key "SankeyData[colors]" has a null value in JSON.');
-        assert(json.containsKey(r'nodes'), 'Required key "SankeyData[nodes]" is missing from JSON.');
-        assert(json[r'nodes'] != null, 'Required key "SankeyData[nodes]" has a null value in JSON.');
-        assert(json.containsKey(r'links'), 'Required key "SankeyData[links]" is missing from JSON.');
-        assert(json[r'links'] != null, 'Required key "SankeyData[links]" has a null value in JSON.');
+        assert(json.containsKey(r'colors'),
+            'Required key "SankeyData[colors]" is missing from JSON.');
+        assert(json[r'colors'] != null,
+            'Required key "SankeyData[colors]" has a null value in JSON.');
+        assert(json.containsKey(r'nodes'),
+            'Required key "SankeyData[nodes]" is missing from JSON.');
+        assert(json[r'nodes'] != null,
+            'Required key "SankeyData[nodes]" has a null value in JSON.');
+        assert(json.containsKey(r'links'),
+            'Required key "SankeyData[links]" is missing from JSON.');
+        assert(json[r'links'] != null,
+            'Required key "SankeyData[links]" has a null value in JSON.');
         return true;
       }());
 
       return SankeyData(
         colors: mapCastOfType<String, String>(json, r'colors')!,
         nodes: json[r'nodes'] is Iterable
-            ? (json[r'nodes'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'nodes'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
         links: SankeyLink.listFromJson(json[r'links']),
       );
@@ -79,7 +87,10 @@ class SankeyData {
     return null;
   }
 
-  static List<SankeyData> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SankeyData> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <SankeyData>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -107,13 +118,19 @@ class SankeyData {
   }
 
   // maps a json object with a list of SankeyData-objects as value to a dart map
-  static Map<String, List<SankeyData>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<SankeyData>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<SankeyData>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SankeyData.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = SankeyData.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -126,4 +143,3 @@ class SankeyData {
     'links',
   };
 }
-

@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class ProviderApi {
-  ProviderApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  ProviderApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -33,7 +33,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -57,12 +56,13 @@ class ProviderApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<ProviderConfig>') as List)
-        .cast<ProviderConfig>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<ProviderConfig>') as List)
+          .cast<ProviderConfig>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -76,7 +76,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ManualSyncDto] manualSyncDto (required):
-  Future<Response> baseProviderControllerManualSyncWithHttpInfo(ManualSyncDto manualSyncDto,) async {
+  Future<Response> baseProviderControllerManualSyncWithHttpInfo(
+    ManualSyncDto manualSyncDto,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/sync';
 
@@ -88,7 +90,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -108,8 +109,12 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ManualSyncDto] manualSyncDto (required):
-  Future<void> baseProviderControllerManualSync(ManualSyncDto manualSyncDto,) async {
-    final response = await baseProviderControllerManualSyncWithHttpInfo(manualSyncDto,);
+  Future<void> baseProviderControllerManualSync(
+    ManualSyncDto manualSyncDto,
+  ) async {
+    final response = await baseProviderControllerManualSyncWithHttpInfo(
+      manualSyncDto,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -133,7 +138,6 @@ class ProviderApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -156,9 +160,12 @@ class ProviderApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Account',
+      ) as Account;
     }
     return null;
   }
@@ -170,7 +177,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] institutionId:
-  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo({ String? institutionId, }) async {
+  Future<Response> plaidProviderControllerCreateLinkTokenWithHttpInfo({
+    String? institutionId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/plaid/create-link-token';
 
@@ -187,7 +196,6 @@ class ProviderApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -204,17 +212,24 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] institutionId:
-  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken({ String? institutionId, }) async {
-    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo( institutionId: institutionId, );
+  Future<PlaidLinkTokenDTO?> plaidProviderControllerCreateLinkToken({
+    String? institutionId,
+  }) async {
+    final response = await plaidProviderControllerCreateLinkTokenWithHttpInfo(
+      institutionId: institutionId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'PlaidLinkTokenDTO',) as PlaidLinkTokenDTO;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'PlaidLinkTokenDTO',
+      ) as PlaidLinkTokenDTO;
     }
     return null;
   }
@@ -228,7 +243,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [PlaidLinkDTO] plaidLinkDTO (required):
-  Future<Response> plaidProviderControllerExchangeAndLinkWithHttpInfo(PlaidLinkDTO plaidLinkDTO,) async {
+  Future<Response> plaidProviderControllerExchangeAndLinkWithHttpInfo(
+    PlaidLinkDTO plaidLinkDTO,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/plaid/exchange-token';
 
@@ -240,7 +257,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -260,20 +276,25 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [PlaidLinkDTO] plaidLinkDTO (required):
-  Future<List<Account>?> plaidProviderControllerExchangeAndLink(PlaidLinkDTO plaidLinkDTO,) async {
-    final response = await plaidProviderControllerExchangeAndLinkWithHttpInfo(plaidLinkDTO,);
+  Future<List<Account>?> plaidProviderControllerExchangeAndLink(
+    PlaidLinkDTO plaidLinkDTO,
+  ) async {
+    final response = await plaidProviderControllerExchangeAndLinkWithHttpInfo(
+      plaidLinkDTO,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Account>')
+              as List)
+          .cast<Account>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -295,7 +316,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -319,12 +339,13 @@ class ProviderApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Account>')
+              as List)
+          .cast<Account>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -338,7 +359,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [List<Account>] account (required):
-  Future<Response> simpleFinProviderControllerLinkAccountsWithHttpInfo(List<Account> account,) async {
+  Future<Response> simpleFinProviderControllerLinkAccountsWithHttpInfo(
+    List<Account> account,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/simple-fin/link';
 
@@ -350,7 +373,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -370,20 +392,25 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [List<Account>] account (required):
-  Future<List<Account>?> simpleFinProviderControllerLinkAccounts(List<Account> account,) async {
-    final response = await simpleFinProviderControllerLinkAccountsWithHttpInfo(account,);
+  Future<List<Account>?> simpleFinProviderControllerLinkAccounts(
+    List<Account> account,
+  ) async {
+    final response = await simpleFinProviderControllerLinkAccountsWithHttpInfo(
+      account,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Account>')
+              as List)
+          .cast<Account>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -397,7 +424,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] redirectUrl:
-  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo({ String? redirectUrl, }) async {
+  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo({
+    String? redirectUrl,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/snap-trade/link';
 
@@ -414,7 +443,6 @@ class ProviderApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -433,17 +461,24 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [String] redirectUrl:
-  Future<String?> snapTradeProviderControllerGenerateLink({ String? redirectUrl, }) async {
-    final response = await snapTradeProviderControllerGenerateLinkWithHttpInfo( redirectUrl: redirectUrl, );
+  Future<String?> snapTradeProviderControllerGenerateLink({
+    String? redirectUrl,
+  }) async {
+    final response = await snapTradeProviderControllerGenerateLinkWithHttpInfo(
+      redirectUrl: redirectUrl,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'String',) as String;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'String',
+      ) as String;
     }
     return null;
   }
@@ -463,7 +498,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -485,12 +519,13 @@ class ProviderApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Account>') as List)
-        .cast<Account>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(responseBody, 'List<Account>')
+              as List)
+          .cast<Account>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -505,10 +540,12 @@ class ProviderApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to lookup
-  Future<Response> zillowProviderControllerGetByAccountWithHttpInfo(String accountId,) async {
+  Future<Response> zillowProviderControllerGetByAccountWithHttpInfo(
+    String accountId,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/provider/zillow/{accountId}'
-      .replaceAll('{accountId}', accountId);
+    final path =
+        r'/provider/zillow/{accountId}'.replaceAll('{accountId}', accountId);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -518,7 +555,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -539,17 +575,24 @@ class ProviderApi {
   ///
   /// * [String] accountId (required):
   ///   The ID of the account to lookup
-  Future<String?> zillowProviderControllerGetByAccount(String accountId,) async {
-    final response = await zillowProviderControllerGetByAccountWithHttpInfo(accountId,);
+  Future<String?> zillowProviderControllerGetByAccount(
+    String accountId,
+  ) async {
+    final response = await zillowProviderControllerGetByAccountWithHttpInfo(
+      accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'String',) as String;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'String',
+      ) as String;
     }
     return null;
   }
@@ -563,7 +606,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<Response> zillowProviderControllerLinkWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO,) async {
+  Future<Response> zillowProviderControllerLinkWithHttpInfo(
+    ZillowPropertyDTO zillowPropertyDTO,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/zillow/link';
 
@@ -576,7 +621,6 @@ class ProviderApi {
 
     const contentTypes = <String>['application/json'];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -595,17 +639,24 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<Account?> zillowProviderControllerLink(ZillowPropertyDTO zillowPropertyDTO,) async {
-    final response = await zillowProviderControllerLinkWithHttpInfo(zillowPropertyDTO,);
+  Future<Account?> zillowProviderControllerLink(
+    ZillowPropertyDTO zillowPropertyDTO,
+  ) async {
+    final response = await zillowProviderControllerLinkWithHttpInfo(
+      zillowPropertyDTO,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Account',) as Account;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Account',
+      ) as Account;
     }
     return null;
   }
@@ -619,7 +670,9 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<Response> zillowProviderControllerLookupPropertyWithHttpInfo(ZillowPropertyDTO zillowPropertyDTO,) async {
+  Future<Response> zillowProviderControllerLookupPropertyWithHttpInfo(
+    ZillowPropertyDTO zillowPropertyDTO,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/zillow/lookup';
 
@@ -631,7 +684,6 @@ class ProviderApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -651,17 +703,24 @@ class ProviderApi {
   /// Parameters:
   ///
   /// * [ZillowPropertyDTO] zillowPropertyDTO (required):
-  Future<ZillowPropertyResultDto?> zillowProviderControllerLookupProperty(ZillowPropertyDTO zillowPropertyDTO,) async {
-    final response = await zillowProviderControllerLookupPropertyWithHttpInfo(zillowPropertyDTO,);
+  Future<ZillowPropertyResultDto?> zillowProviderControllerLookupProperty(
+    ZillowPropertyDTO zillowPropertyDTO,
+  ) async {
+    final response = await zillowProviderControllerLookupPropertyWithHttpInfo(
+      zillowPropertyDTO,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ZillowPropertyResultDto',) as ZillowPropertyResultDto;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'ZillowPropertyResultDto',
+      ) as ZillowPropertyResultDto;
     }
     return null;
   }

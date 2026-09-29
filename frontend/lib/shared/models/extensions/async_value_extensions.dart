@@ -76,7 +76,8 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
 
         return data(d);
       },
-      loading: () => expanded ? Expanded(child: buildLoading()) : buildLoading(),
+      loading: () =>
+          expanded ? Expanded(child: buildLoading()) : buildLoading(),
       error: (err, stack) {
         LoggerProvider.error(
           'SproutAsyncValueX caught an error',

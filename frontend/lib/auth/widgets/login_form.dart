@@ -50,7 +50,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
     // Check the config to see if we are in OIDC mode
     final config = ref.read(unsecureConfigProvider).value;
-    final isOIDC = config?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+    final isOIDC =
+        config?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
 
     // If no user was restored and we are OIDC, fire the login flow
     if (authState == null && !auth.isLoggingOut && isOIDC) {
@@ -66,13 +67,15 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     });
 
     final authNotifier = ref.read(authProvider.notifier);
-    if (authNotifier.isSetupMode) return; // Ignore login requests if we're moving to setup mode.
+    if (authNotifier.isSetupMode)
+      return; // Ignore login requests if we're moving to setup mode.
     final isOIDC = ref.read(unsecureConfigProvider.notifier).isOIDCAuthMode;
 
     try {
       final user = isOIDC
           ? await authNotifier.loginOIDC(manualLogin: true)
-          : await authNotifier.login(_usernameController.text.trim(), _passwordController.text.trim());
+          : await authNotifier.login(
+              _usernameController.text.trim(), _passwordController.text.trim());
 
       if (user == null) {
         setState(() {
@@ -84,7 +87,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         ref.invalidate(userConfigProvider);
       }
     } catch (e) {
-      final msg = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+      final msg =
+          ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
       setState(() {
         _errorMessage = msg;
         _isActionRunning = false;
@@ -111,7 +115,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
     // Determine all our possible loading states
     final isInitializing = authState.isLoading && !authState.hasValue;
-    final isConfigLoading = authState.value != null && (secureConfigState.isLoading || userConfigState.isLoading);
+    final isConfigLoading = authState.value != null &&
+        (secureConfigState.isLoading || userConfigState.isLoading);
     final isBusy = _isActionRunning || isInitializing || isConfigLoading;
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
@@ -130,7 +135,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               ),
             if (_errorMessage.isNotEmpty)
               SproutNotificationWidget(
-                SproutNotification(_errorMessage, theme.colorScheme.error, theme.colorScheme.onError),
+                SproutNotification(_errorMessage, theme.colorScheme.error,
+                    theme.colorScheme.onError),
               ),
 
             // Render loading or form
@@ -138,7 +144,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               loading: () => const CircularProgressIndicator(),
               error: (err, _) => Text('Configuration Error: $err'),
               data: (config) {
-                final isOIDC = config?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+                final isOIDC = config?.authMode ==
+                    UnsecureAppConfigurationAuthModeEnum.oidc;
 
                 return Column(
                   spacing: 12,
@@ -150,13 +157,18 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                           children: [
                             TextField(
                               controller: _usernameController,
-                              decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person)),
+                              decoration: const InputDecoration(
+                                  labelText: 'Username',
+                                  prefixIcon: Icon(Icons.person)),
                               autofillHints: const [AutofillHints.username],
-                              enabled: !isDemoMode && !isBusy, // Optional: disable inputs while loading
+                              enabled: !isDemoMode &&
+                                  !isBusy, // Optional: disable inputs while loading
                             ),
                             TextField(
                               controller: _passwordController,
-                              decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
+                              decoration: const InputDecoration(
+                                  labelText: 'Password',
+                                  prefixIcon: Icon(Icons.lock)),
                               obscureText: true,
                               autofillHints: const [AutofillHints.password],
                               onSubmitted: (_) {
@@ -177,7 +189,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                           spacing: 12,
                           children: [
                             if (isBusy)
-                              const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3)),
+                              const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 3)),
                             Text(
                               isInitializing
                                   ? "Checking Session..."

@@ -8,7 +8,8 @@ extension DateToStringFormatterExtension on DateTime {
   String get toShortMonth => DateFormat("MMM dd, yyyy").format(toLocal());
 
   /// MMM dd, h:mm a
-  String get toShortMonthWithTime => DateFormat("MMM dd, h:mm a").format(toLocal());
+  String get toShortMonthWithTime =>
+      DateFormat("MMM dd, h:mm a").format(toLocal());
 
   /// Returns true if the given date is on the same day as this date
   bool isSameDay(DateTime other) {

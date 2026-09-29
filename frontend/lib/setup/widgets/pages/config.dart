@@ -14,7 +14,8 @@ class UserConfigSetupPage extends ConsumerStatefulWidget {
   const UserConfigSetupPage(this.nextPage, this.isDesktop, {super.key});
 
   @override
-  ConsumerState<UserConfigSetupPage> createState() => _UserConfigSetupPageState();
+  ConsumerState<UserConfigSetupPage> createState() =>
+      _UserConfigSetupPageState();
 }
 
 class _UserConfigSetupPageState extends ConsumerState<UserConfigSetupPage> {
@@ -36,7 +37,8 @@ class _UserConfigSetupPageState extends ConsumerState<UserConfigSetupPage> {
         children: <Widget>[
           Text(
             'User Configuration',
-            style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.headlineLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           Text(
@@ -45,7 +47,8 @@ class _UserConfigSetupPageState extends ConsumerState<UserConfigSetupPage> {
             style: theme.textTheme.bodyLarge,
           ),
           if (_message.isNotEmpty)
-            SproutNotificationWidget(SproutNotification(_message, theme.colorScheme.error, theme.colorScheme.onError)),
+            SproutNotificationWidget(SproutNotification(
+                _message, theme.colorScheme.error, theme.colorScheme.onError)),
           SettingsPage(
             onlyShowSetup: true,
             onConfigChanged: () {

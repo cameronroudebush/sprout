@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class CashFlowApi {
-  CashFlowApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  CashFlowApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -34,7 +34,6 @@ class CashFlowApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -49,7 +48,8 @@ class CashFlowApi {
   /// Get loan amortization projections.
   ///
   /// Calculates future balance projections for loan accounts to visualize how long they will take to pay down at historical rate.
-  Future<List<LoanAmortizationSeries>?> cashFlowControllerGetAmortization() async {
+  Future<List<LoanAmortizationSeries>?>
+      cashFlowControllerGetAmortization() async {
     final response = await cashFlowControllerGetAmortizationWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -57,12 +57,13 @@ class CashFlowApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<LoanAmortizationSeries>') as List)
-        .cast<LoanAmortizationSeries>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<LoanAmortizationSeries>') as List)
+          .cast<LoanAmortizationSeries>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -80,7 +81,12 @@ class CashFlowApi {
   /// * [num] baselineMonth:
   ///
   /// * [num] targetMonth:
-  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, }) async {
+  Future<Response> cashFlowControllerGetComparisonTimelineWithHttpInfo(
+    num baselineYear,
+    num targetYear, {
+    num? baselineMonth,
+    num? targetMonth,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/comparison-timeline';
 
@@ -91,8 +97,8 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'baselineYear', baselineYear));
-      queryParams.addAll(_queryParams('', 'targetYear', targetYear));
+    queryParams.addAll(_queryParams('', 'baselineYear', baselineYear));
+    queryParams.addAll(_queryParams('', 'targetYear', targetYear));
     if (baselineMonth != null) {
       queryParams.addAll(_queryParams('', 'baselineMonth', baselineMonth));
     }
@@ -101,7 +107,6 @@ class CashFlowApi {
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -125,17 +130,30 @@ class CashFlowApi {
   /// * [num] baselineMonth:
   ///
   /// * [num] targetMonth:
-  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(num baselineYear, num targetYear, { num? baselineMonth, num? targetMonth, }) async {
-    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(baselineYear, targetYear,  baselineMonth: baselineMonth, targetMonth: targetMonth, );
+  Future<CashFlowComparisonDTO?> cashFlowControllerGetComparisonTimeline(
+    num baselineYear,
+    num targetYear, {
+    num? baselineMonth,
+    num? targetMonth,
+  }) async {
+    final response = await cashFlowControllerGetComparisonTimelineWithHttpInfo(
+      baselineYear,
+      targetYear,
+      baselineMonth: baselineMonth,
+      targetMonth: targetMonth,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CashFlowComparisonDTO',) as CashFlowComparisonDTO;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'CashFlowComparisonDTO',
+      ) as CashFlowComparisonDTO;
     }
     return null;
   }
@@ -149,7 +167,10 @@ class CashFlowApi {
   /// * [num] year (required):
   ///
   /// * [num] month (required):
-  Future<Response> cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(num year, num month,) async {
+  Future<Response> cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(
+    num year,
+    num month,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/daily-calendar-spending';
 
@@ -160,11 +181,10 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'year', year));
-      queryParams.addAll(_queryParams('', 'month', month));
+    queryParams.addAll(_queryParams('', 'year', year));
+    queryParams.addAll(_queryParams('', 'month', month));
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -184,17 +204,28 @@ class CashFlowApi {
   /// * [num] year (required):
   ///
   /// * [num] month (required):
-  Future<DailySpendingCalendarResponseDTO?> cashFlowControllerGetDailyCalendarSpending(num year, num month,) async {
-    final response = await cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(year, month,);
+  Future<DailySpendingCalendarResponseDTO?>
+      cashFlowControllerGetDailyCalendarSpending(
+    num year,
+    num month,
+  ) async {
+    final response =
+        await cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(
+      year,
+      month,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DailySpendingCalendarResponseDTO',) as DailySpendingCalendarResponseDTO;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DailySpendingCalendarResponseDTO',
+      ) as DailySpendingCalendarResponseDTO;
     }
     return null;
   }
@@ -218,7 +249,12 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> cashFlowControllerGetSankeyWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
+  Future<Response> cashFlowControllerGetSankeyWithHttpInfo(
+    num year, {
+    num? month,
+    num? day,
+    String? accountId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/sankey';
 
@@ -229,7 +265,7 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'year', year));
+    queryParams.addAll(_queryParams('', 'year', year));
     if (month != null) {
       queryParams.addAll(_queryParams('', 'month', month));
     }
@@ -242,7 +278,6 @@ class CashFlowApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -271,17 +306,30 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<SankeyData?> cashFlowControllerGetSankey(num year, { num? month, num? day, String? accountId, }) async {
-    final response = await cashFlowControllerGetSankeyWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
+  Future<SankeyData?> cashFlowControllerGetSankey(
+    num year, {
+    num? month,
+    num? day,
+    String? accountId,
+  }) async {
+    final response = await cashFlowControllerGetSankeyWithHttpInfo(
+      year,
+      month: month,
+      day: day,
+      accountId: accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SankeyData',) as SankeyData;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'SankeyData',
+      ) as SankeyData;
     }
     return null;
   }
@@ -297,7 +345,10 @@ class CashFlowApi {
   /// * [num] months:
   ///
   /// * [num] categories:
-  Future<Response> cashFlowControllerGetSpendingWithHttpInfo({ num? months, num? categories, }) async {
+  Future<Response> cashFlowControllerGetSpendingWithHttpInfo({
+    num? months,
+    num? categories,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/spending';
 
@@ -317,7 +368,6 @@ class CashFlowApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -338,17 +388,26 @@ class CashFlowApi {
   /// * [num] months:
   ///
   /// * [num] categories:
-  Future<CashFlowSpending?> cashFlowControllerGetSpending({ num? months, num? categories, }) async {
-    final response = await cashFlowControllerGetSpendingWithHttpInfo( months: months, categories: categories, );
+  Future<CashFlowSpending?> cashFlowControllerGetSpending({
+    num? months,
+    num? categories,
+  }) async {
+    final response = await cashFlowControllerGetSpendingWithHttpInfo(
+      months: months,
+      categories: categories,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CashFlowSpending',) as CashFlowSpending;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'CashFlowSpending',
+      ) as CashFlowSpending;
     }
     return null;
   }
@@ -372,7 +431,12 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<Response> cashFlowControllerGetStatsWithHttpInfo(num year, { num? month, num? day, String? accountId, }) async {
+  Future<Response> cashFlowControllerGetStatsWithHttpInfo(
+    num year, {
+    num? month,
+    num? day,
+    String? accountId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/stats';
 
@@ -383,7 +447,7 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'year', year));
+    queryParams.addAll(_queryParams('', 'year', year));
     if (month != null) {
       queryParams.addAll(_queryParams('', 'month', month));
     }
@@ -395,7 +459,6 @@ class CashFlowApi {
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -425,17 +488,30 @@ class CashFlowApi {
   ///
   /// * [String] accountId:
   ///   The ID of the account to retrieve transactions from.
-  Future<CashFlowStats?> cashFlowControllerGetStats(num year, { num? month, num? day, String? accountId, }) async {
-    final response = await cashFlowControllerGetStatsWithHttpInfo(year,  month: month, day: day, accountId: accountId, );
+  Future<CashFlowStats?> cashFlowControllerGetStats(
+    num year, {
+    num? month,
+    num? day,
+    String? accountId,
+  }) async {
+    final response = await cashFlowControllerGetStatsWithHttpInfo(
+      year,
+      month: month,
+      day: day,
+      accountId: accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CashFlowStats',) as CashFlowStats;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'CashFlowStats',
+      ) as CashFlowStats;
     }
     return null;
   }
@@ -449,7 +525,9 @@ class CashFlowApi {
   /// Parameters:
   ///
   /// * [num] months:
-  Future<Response> cashFlowControllerGetTrendWithHttpInfo({ num? months, }) async {
+  Future<Response> cashFlowControllerGetTrendWithHttpInfo({
+    num? months,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/trend';
 
@@ -466,7 +544,6 @@ class CashFlowApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -485,20 +562,25 @@ class CashFlowApi {
   /// Parameters:
   ///
   /// * [num] months:
-  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend({ num? months, }) async {
-    final response = await cashFlowControllerGetTrendWithHttpInfo( months: months, );
+  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend({
+    num? months,
+  }) async {
+    final response = await cashFlowControllerGetTrendWithHttpInfo(
+      months: months,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<CashFlowTrendStats>') as List)
-        .cast<CashFlowTrendStats>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<CashFlowTrendStats>') as List)
+          .cast<CashFlowTrendStats>()
+          .toList(growable: false);
     }
     return null;
   }

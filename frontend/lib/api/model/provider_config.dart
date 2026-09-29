@@ -44,39 +44,42 @@ class ProviderConfig {
   bool enabled;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ProviderConfig &&
-    other.dbType == dbType &&
-    other.subType == subType &&
-    other.name == name &&
-    other.url == url &&
-    other.accountFixUrl == accountFixUrl &&
-    other.enabled == enabled;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProviderConfig &&
+          other.dbType == dbType &&
+          other.subType == subType &&
+          other.name == name &&
+          other.url == url &&
+          other.accountFixUrl == accountFixUrl &&
+          other.enabled == enabled;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (dbType.hashCode) +
-    (subType.hashCode) +
-    (name.hashCode) +
-    (url.hashCode) +
-    (accountFixUrl == null ? 0 : accountFixUrl!.hashCode) +
-    (enabled.hashCode);
+      // ignore: unnecessary_parenthesis
+      (dbType.hashCode) +
+      (subType.hashCode) +
+      (name.hashCode) +
+      (url.hashCode) +
+      (accountFixUrl == null ? 0 : accountFixUrl!.hashCode) +
+      (enabled.hashCode);
 
   @override
-  String toString() => 'ProviderConfig[dbType=$dbType, subType=$subType, name=$name, url=$url, accountFixUrl=$accountFixUrl, enabled=$enabled]';
+  String toString() =>
+      'ProviderConfig[dbType=$dbType, subType=$subType, name=$name, url=$url, accountFixUrl=$accountFixUrl, enabled=$enabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'dbType'] = this.dbType;
-      json[r'subType'] = this.subType;
-      json[r'name'] = this.name;
-      json[r'url'] = this.url;
+    json[r'dbType'] = this.dbType;
+    json[r'subType'] = this.subType;
+    json[r'name'] = this.name;
+    json[r'url'] = this.url;
     if (this.accountFixUrl != null) {
       json[r'accountFixUrl'] = this.accountFixUrl;
     } else {
       json[r'accountFixUrl'] = null;
     }
-      json[r'enabled'] = this.enabled;
+    json[r'enabled'] = this.enabled;
     return json;
   }
 
@@ -91,16 +94,26 @@ class ProviderConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'dbType'), 'Required key "ProviderConfig[dbType]" is missing from JSON.');
-        assert(json[r'dbType'] != null, 'Required key "ProviderConfig[dbType]" has a null value in JSON.');
-        assert(json.containsKey(r'subType'), 'Required key "ProviderConfig[subType]" is missing from JSON.');
-        assert(json[r'subType'] != null, 'Required key "ProviderConfig[subType]" has a null value in JSON.');
-        assert(json.containsKey(r'name'), 'Required key "ProviderConfig[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "ProviderConfig[name]" has a null value in JSON.');
-        assert(json.containsKey(r'url'), 'Required key "ProviderConfig[url]" is missing from JSON.');
-        assert(json[r'url'] != null, 'Required key "ProviderConfig[url]" has a null value in JSON.');
-        assert(json.containsKey(r'enabled'), 'Required key "ProviderConfig[enabled]" is missing from JSON.');
-        assert(json[r'enabled'] != null, 'Required key "ProviderConfig[enabled]" has a null value in JSON.');
+        assert(json.containsKey(r'dbType'),
+            'Required key "ProviderConfig[dbType]" is missing from JSON.');
+        assert(json[r'dbType'] != null,
+            'Required key "ProviderConfig[dbType]" has a null value in JSON.');
+        assert(json.containsKey(r'subType'),
+            'Required key "ProviderConfig[subType]" is missing from JSON.');
+        assert(json[r'subType'] != null,
+            'Required key "ProviderConfig[subType]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "ProviderConfig[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "ProviderConfig[name]" has a null value in JSON.');
+        assert(json.containsKey(r'url'),
+            'Required key "ProviderConfig[url]" is missing from JSON.');
+        assert(json[r'url'] != null,
+            'Required key "ProviderConfig[url]" has a null value in JSON.');
+        assert(json.containsKey(r'enabled'),
+            'Required key "ProviderConfig[enabled]" is missing from JSON.');
+        assert(json[r'enabled'] != null,
+            'Required key "ProviderConfig[enabled]" has a null value in JSON.');
         return true;
       }());
 
@@ -116,7 +129,10 @@ class ProviderConfig {
     return null;
   }
 
-  static List<ProviderConfig> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ProviderConfig> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ProviderConfig>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -144,13 +160,19 @@ class ProviderConfig {
   }
 
   // maps a json object with a list of ProviderConfig-objects as value to a dart map
-  static Map<String, List<ProviderConfig>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ProviderConfig>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ProviderConfig>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ProviderConfig.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ProviderConfig.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -165,4 +187,3 @@ class ProviderConfig {
     'enabled',
   };
 }
-

@@ -44,7 +44,8 @@ class LoginPage extends ConsumerWidget {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 48.0, vertical: 24.0),
                     child: Column(
                       children: [
                         const Spacer(),

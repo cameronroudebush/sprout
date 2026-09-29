@@ -12,14 +12,17 @@ import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/month_selector.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
+import 'package:sprout/shared/widgets/tab_selector.dart';
 
-enum MobileBudgetTab { current, history }
+/// Budget page sections synchronized with the `tab` query parameter.
+enum BudgetTab { overview, history }
 
 class BudgetPage extends ConsumerStatefulWidget {
   const BudgetPage({super.key});
@@ -29,26 +32,36 @@ class BudgetPage extends ConsumerStatefulWidget {
 }
 
 class _BudgetPageState extends ConsumerState<BudgetPage> {
-  late DateTime _selectedDate;
-  MobileBudgetTab _currentTab = MobileBudgetTab.current;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate = DateTime.now();
+  void _selectMonth(DateTime month) {
+    NavigationProvider.updateQueryParameters(context, {
+      'year': month.year.toString(),
+      'month': month.month.toString(),
+    });
   }
 
-  void _selectMonth(DateTime month) {
-    if (!mounted) return;
-    setState(() => _selectedDate = DateTime(month.year, month.month));
+  DateTime _selectedMonthFromRoute(BuildContext context) {
+    final now = DateTime.now();
+    final year = int.tryParse(
+            NavigationProvider.queryParameter(context, 'year') ?? '') ??
+        now.year;
+    final month = int.tryParse(
+            NavigationProvider.queryParameter(context, 'month') ?? '') ??
+        now.month;
+    if (month < 1 || month > 12) return DateTime(now.year, now.month);
+    return DateTime(year, month);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isChatEnabled = ref.watch(chatEnabledProvider);
-    final year = _selectedDate.year;
-    final month = _selectedDate.month;
+    final selectedDate = _selectedMonthFromRoute(context);
+    final year = selectedDate.year;
+    final month = selectedDate.month;
+    final currentTab = NavigationProvider.queryParameter(context, 'tab') ==
+            BudgetTab.history.name
+        ? BudgetTab.history
+        : BudgetTab.overview;
 
     final overviewAsync =
         ref.watch(budgetOverviewProvider((year: year, month: month)));
@@ -76,133 +89,103 @@ class _BudgetPageState extends ConsumerState<BudgetPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: SproutRouteWrapper(
-          size: SproutRouteSize.large,
-          child: SproutLayoutBuilder(
-            (isDesktop, context, constraints) {
-              return overviewAsync.whenDefault(
+      body: SproutTabbedLayout(
+        mobileNavigation: SproutTabSelector<BudgetTab>(
+          compact: true,
+          options: const [
+            SproutTabOption(value: BudgetTab.overview, label: 'Overview'),
+            SproutTabOption(value: BudgetTab.history, label: 'History'),
+          ],
+          selected: currentTab,
+          onSelected: (tab) => NavigationProvider.updateQueryParameters(
+            context,
+            {'tab': tab.name},
+          ),
+        ),
+        child: SproutLayoutBuilder(
+          (isDesktop, context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SproutRouteWrapper(
+              size: SproutRouteSize.large,
+              child: overviewAsync.whenDefault(
                 data: (overview) {
                   if (overview == null || budgetSummary == null) {
                     return const SizedBox.shrink();
                   }
                   final visibleItems = _visibleItems(overview);
 
-                  if (isDesktop) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left Column: Month Selector, Summary, and History Chart
-                        Expanded(
-                          flex: 5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: isDesktop
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              MonthSelector(
-                                selectedMonth: _selectedDate,
-                                onMonthChanged: _selectMonth,
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    MonthSelector(
+                                      selectedMonth: selectedDate,
+                                      onMonthChanged: _selectMonth,
+                                    ),
+                                    BudgetSummaryCard(
+                                      summary: budgetSummary,
+                                      monthlyIncome: monthlyIncome,
+                                    ),
+                                    _buildHistorySection(
+                                      historyAsync: historyAsync,
+                                      year: year,
+                                      month: month,
+                                      isChatEnabled: isChatEnabled,
+                                      onMonthSelected: _selectMonth,
+                                      theme: theme,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              BudgetSummaryCard(
-                                summary: budgetSummary,
-                                monthlyIncome: monthlyIncome,
-                              ),
-                              _buildHistorySection(
-                                historyAsync: historyAsync,
-                                year: year,
-                                month: month,
-                                isChatEnabled: isChatEnabled,
-                                onMonthSelected: _selectMonth,
+                              Expanded(
+                                flex: 7,
+                                child: _buildOverviewSection(
+                                  theme: theme,
+                                  visibleItems: visibleItems,
+                                  categories: categories,
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                        // Right Column: Category Budgets Header & Grid
-                        Expanded(
-                          flex: 7,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildOverviewSection(
-                                theme: theme,
-                                visibleItems: visibleItems,
-                                categories: categories,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-
-                  // Mobile View
-                  return Column(
-                    children: [
-                      Padding(
-                          padding: EdgeInsetsGeometry.all(8),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: SegmentedButton<MobileBudgetTab>(
-                              style: SegmentedButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                              ),
-                              segments: const [
-                                ButtonSegment(
-                                  value: MobileBudgetTab.current,
-                                  label: Text('Overview'),
-                                  icon: Icon(Icons.pie_chart_outline),
-                                ),
-                                ButtonSegment(
-                                  value: MobileBudgetTab.history,
-                                  label: Text('History'),
-                                  icon: Icon(Icons.show_chart),
-                                ),
-                              ],
-                              selected: {_currentTab},
-                              onSelectionChanged:
-                                  (Set<MobileBudgetTab> newSelection) {
-                                setState(() {
-                                  _currentTab = newSelection.first;
-                                });
-                              },
-                            ),
-                          )),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (_currentTab == MobileBudgetTab.current) ...[
-                              MonthSelector(
-                                selectedMonth: _selectedDate,
-                                onMonthChanged: _selectMonth,
-                              ),
-                              BudgetSummaryCard(
-                                summary: budgetSummary,
-                                monthlyIncome: monthlyIncome,
-                              ),
-                              _buildOverviewSection(
-                                theme: theme,
-                                visibleItems: visibleItems,
-                                categories: categories,
-                              ),
-                            ] else
-                              _buildHistorySection(
+                          )
+                        : currentTab == BudgetTab.history
+                            ? _buildHistorySection(
                                 historyAsync: historyAsync,
                                 year: year,
                                 month: month,
                                 isChatEnabled: isChatEnabled,
                                 onMonthSelected: _selectMonth,
                                 theme: theme,
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  MonthSelector(
+                                    selectedMonth: selectedDate,
+                                    onMonthChanged: _selectMonth,
+                                  ),
+                                  BudgetSummaryCard(
+                                    summary: budgetSummary,
+                                    monthlyIncome: monthlyIncome,
+                                  ),
+                                  _buildOverviewSection(
+                                    theme: theme,
+                                    visibleItems: visibleItems,
+                                    categories: categories,
+                                  ),
+                                ],
                               ),
-                          ],
-                        ),
-                      ),
-                    ],
                   );
                 },
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
@@ -218,9 +201,6 @@ class _BudgetPageState extends ConsumerState<BudgetPage> {
               item.actualSpent > 0)
           .toList();
 
-  bool _hasUnbudgetedSpending(List<CategoryBudgetOverviewItem> items) =>
-      items.any((item) => item.budgetedAmount <= 0 && item.actualSpent > 0);
-
   Widget _buildOverviewSection({
     required ThemeData theme,
     required List<CategoryBudgetOverviewItem> visibleItems,
@@ -232,7 +212,6 @@ class _BudgetPageState extends ConsumerState<BudgetPage> {
         _buildCategoryHeader(
           theme,
           visibleItems.length,
-          showLimitHint: _hasUnbudgetedSpending(visibleItems),
         ),
         if (visibleItems.isEmpty && categories.isEmpty)
           _buildEmptyBudgetsCard(theme),
@@ -397,11 +376,7 @@ class _BudgetPageState extends ConsumerState<BudgetPage> {
     );
   }
 
-  Widget _buildCategoryHeader(
-    ThemeData theme,
-    int categoryCount, {
-    required bool showLimitHint,
-  }) {
+  Widget _buildCategoryHeader(ThemeData theme, int categoryCount) {
     return SproutCard(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -412,25 +387,6 @@ class _BudgetPageState extends ConsumerState<BudgetPage> {
             SproutChartHeader(
               title: "Spending by Category",
             ),
-            if (showLimitHint)
-              Row(
-                spacing: 4,
-                children: [
-                  Icon(Icons.info_outline_rounded,
-                      color: theme.colorScheme.primary, size: 20),
-                  Expanded(
-                    child: Text(
-                      'Set monthly limits to keep spending on track.',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => showBudgetEditDialog(context: context),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add limit'),
-                  ),
-                ],
-              ),
           ],
         ),
       ),

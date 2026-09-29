@@ -14,7 +14,8 @@ class HomeNotificationsWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
-    final unknownCatCount = ref.watch(unknownCategoryCountProvider()).value ?? 0;
+    final unknownCatCount =
+        ref.watch(unknownCategoryCountProvider()).value ?? 0;
 
     final List<Widget> notifications = [];
 
@@ -30,7 +31,8 @@ class HomeNotificationsWidget extends ConsumerWidget {
             theme.colorScheme.primary,
             theme.colorScheme.onPrimary,
             icon: Icons.category,
-            onClick: () => NavigationProvider.redirect("/transactions", queryParameters: {
+            onClick: () =>
+                NavigationProvider.redirect("/transactions", queryParameters: {
               'categoryId': "unknown",
               'pending': "false",
             }),
@@ -40,7 +42,8 @@ class HomeNotificationsWidget extends ConsumerWidget {
     }
 
     // Filter out empty shrink widgets if no notifications are active
-    final activeNotifications = notifications.where((w) => w is! SizedBox).toList();
+    final activeNotifications =
+        notifications.where((w) => w is! SizedBox).toList();
 
     if (activeNotifications.isEmpty) return const SizedBox.shrink();
     return Column(spacing: 0, children: activeNotifications);

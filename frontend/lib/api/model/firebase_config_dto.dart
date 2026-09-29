@@ -28,29 +28,32 @@ class FirebaseConfigDTO {
   String projectId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is FirebaseConfigDTO &&
-    other.apiKey == apiKey &&
-    other.appId == appId &&
-    other.projectNumber == projectNumber &&
-    other.projectId == projectId;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FirebaseConfigDTO &&
+          other.apiKey == apiKey &&
+          other.appId == appId &&
+          other.projectNumber == projectNumber &&
+          other.projectId == projectId;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (apiKey.hashCode) +
-    (appId.hashCode) +
-    (projectNumber.hashCode) +
-    (projectId.hashCode);
+      // ignore: unnecessary_parenthesis
+      (apiKey.hashCode) +
+      (appId.hashCode) +
+      (projectNumber.hashCode) +
+      (projectId.hashCode);
 
   @override
-  String toString() => 'FirebaseConfigDTO[apiKey=$apiKey, appId=$appId, projectNumber=$projectNumber, projectId=$projectId]';
+  String toString() =>
+      'FirebaseConfigDTO[apiKey=$apiKey, appId=$appId, projectNumber=$projectNumber, projectId=$projectId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'apiKey'] = this.apiKey;
-      json[r'appId'] = this.appId;
-      json[r'projectNumber'] = this.projectNumber;
-      json[r'projectId'] = this.projectId;
+    json[r'apiKey'] = this.apiKey;
+    json[r'appId'] = this.appId;
+    json[r'projectNumber'] = this.projectNumber;
+    json[r'projectId'] = this.projectId;
     return json;
   }
 
@@ -65,14 +68,22 @@ class FirebaseConfigDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'apiKey'), 'Required key "FirebaseConfigDTO[apiKey]" is missing from JSON.');
-        assert(json[r'apiKey'] != null, 'Required key "FirebaseConfigDTO[apiKey]" has a null value in JSON.');
-        assert(json.containsKey(r'appId'), 'Required key "FirebaseConfigDTO[appId]" is missing from JSON.');
-        assert(json[r'appId'] != null, 'Required key "FirebaseConfigDTO[appId]" has a null value in JSON.');
-        assert(json.containsKey(r'projectNumber'), 'Required key "FirebaseConfigDTO[projectNumber]" is missing from JSON.');
-        assert(json[r'projectNumber'] != null, 'Required key "FirebaseConfigDTO[projectNumber]" has a null value in JSON.');
-        assert(json.containsKey(r'projectId'), 'Required key "FirebaseConfigDTO[projectId]" is missing from JSON.');
-        assert(json[r'projectId'] != null, 'Required key "FirebaseConfigDTO[projectId]" has a null value in JSON.');
+        assert(json.containsKey(r'apiKey'),
+            'Required key "FirebaseConfigDTO[apiKey]" is missing from JSON.');
+        assert(json[r'apiKey'] != null,
+            'Required key "FirebaseConfigDTO[apiKey]" has a null value in JSON.');
+        assert(json.containsKey(r'appId'),
+            'Required key "FirebaseConfigDTO[appId]" is missing from JSON.');
+        assert(json[r'appId'] != null,
+            'Required key "FirebaseConfigDTO[appId]" has a null value in JSON.');
+        assert(json.containsKey(r'projectNumber'),
+            'Required key "FirebaseConfigDTO[projectNumber]" is missing from JSON.');
+        assert(json[r'projectNumber'] != null,
+            'Required key "FirebaseConfigDTO[projectNumber]" has a null value in JSON.');
+        assert(json.containsKey(r'projectId'),
+            'Required key "FirebaseConfigDTO[projectId]" is missing from JSON.');
+        assert(json[r'projectId'] != null,
+            'Required key "FirebaseConfigDTO[projectId]" has a null value in JSON.');
         return true;
       }());
 
@@ -86,7 +97,10 @@ class FirebaseConfigDTO {
     return null;
   }
 
-  static List<FirebaseConfigDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<FirebaseConfigDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <FirebaseConfigDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -114,13 +128,19 @@ class FirebaseConfigDTO {
   }
 
   // maps a json object with a list of FirebaseConfigDTO-objects as value to a dart map
-  static Map<String, List<FirebaseConfigDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<FirebaseConfigDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<FirebaseConfigDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = FirebaseConfigDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = FirebaseConfigDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -134,4 +154,3 @@ class FirebaseConfigDTO {
     'projectId',
   };
 }
-

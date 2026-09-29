@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class NotificationApi {
-  NotificationApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  NotificationApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -25,10 +25,11 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> notificationControllerGetByIdWithHttpInfo(String id,) async {
+  Future<Response> notificationControllerGetByIdWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/notification/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/notification/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -38,7 +39,6 @@ class NotificationApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -58,17 +58,24 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Notification?> notificationControllerGetById(String id,) async {
-    final response = await notificationControllerGetByIdWithHttpInfo(id,);
+  Future<Notification?> notificationControllerGetById(
+    String id,
+  ) async {
+    final response = await notificationControllerGetByIdWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Notification',) as Notification;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Notification',
+      ) as Notification;
     }
     return null;
   }
@@ -91,7 +98,6 @@ class NotificationApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -107,16 +113,20 @@ class NotificationApi {
   ///
   /// Since this is a self hosted app, if you want notifications you must configure them manually. This endpoint provides the config to the frontend's.
   Future<FirebaseConfigDTO?> notificationControllerGetFirebaseConfig() async {
-    final response = await notificationControllerGetFirebaseConfigWithHttpInfo();
+    final response =
+        await notificationControllerGetFirebaseConfigWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'FirebaseConfigDTO',) as FirebaseConfigDTO;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'FirebaseConfigDTO',
+      ) as FirebaseConfigDTO;
     }
     return null;
   }
@@ -138,7 +148,6 @@ class NotificationApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -162,12 +171,13 @@ class NotificationApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Notification>') as List)
-        .cast<Notification>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<Notification>') as List)
+          .cast<Notification>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -189,7 +199,6 @@ class NotificationApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -221,10 +230,11 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> notificationControllerMarkReadWithHttpInfo(String id,) async {
+  Future<Response> notificationControllerMarkReadWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/notification/read/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/notification/read/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -234,7 +244,6 @@ class NotificationApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -254,8 +263,12 @@ class NotificationApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> notificationControllerMarkRead(String id,) async {
-    final response = await notificationControllerMarkReadWithHttpInfo(id,);
+  Future<void> notificationControllerMarkRead(
+    String id,
+  ) async {
+    final response = await notificationControllerMarkReadWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -278,7 +291,6 @@ class NotificationApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,

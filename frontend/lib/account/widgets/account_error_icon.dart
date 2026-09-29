@@ -6,13 +6,15 @@ class SproutErrorIcon extends StatefulWidget {
   final double size;
   final String? message;
 
-  const SproutErrorIcon({super.key, required this.hasError, this.size = 18.0, this.message});
+  const SproutErrorIcon(
+      {super.key, required this.hasError, this.size = 18.0, this.message});
 
   @override
   State<SproutErrorIcon> createState() => _SproutErrorIconState();
 }
 
-class _SproutErrorIconState extends State<SproutErrorIcon> with SingleTickerProviderStateMixin {
+class _SproutErrorIconState extends State<SproutErrorIcon>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotationAnimation;
@@ -20,7 +22,8 @@ class _SproutErrorIconState extends State<SproutErrorIcon> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1200));
 
     // Creates a pulsing scale effect
     _scaleAnimation = Tween<double>(
@@ -73,7 +76,8 @@ class _SproutErrorIconState extends State<SproutErrorIcon> with SingleTickerProv
               scale: _scaleAnimation.value,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(Icons.error, color: theme.colorScheme.error, size: widget.size),
+                child: Icon(Icons.error,
+                    color: theme.colorScheme.error, size: widget.size),
               ),
             ),
           );

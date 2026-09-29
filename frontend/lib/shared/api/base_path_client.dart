@@ -6,9 +6,12 @@ class BasePathClient extends ApiClient {
   String _basePath;
   final http.Client _innerClient;
 
-  BasePathClient({required http.Client client, required super.basePath, super.authentication})
-    : _basePath = basePath,
-      _innerClient = client {
+  BasePathClient(
+      {required http.Client client,
+      required super.basePath,
+      super.authentication})
+      : _basePath = basePath,
+        _innerClient = client {
     this.client = _innerClient;
   }
 

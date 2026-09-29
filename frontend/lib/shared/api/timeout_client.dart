@@ -11,11 +11,10 @@ class TimeoutClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
-    return innerClient
-        .send(request)
-        .timeout(
+    return innerClient.send(request).timeout(
           Duration(seconds: timeout),
-          onTimeout: () => throw http.ClientException('Request timed out after $timeout seconds', request.url),
+          onTimeout: () => throw http.ClientException(
+              'Request timed out after $timeout seconds', request.url),
         );
   }
 }

@@ -17,7 +17,8 @@ class TransactionFilterBar extends ConsumerStatefulWidget {
 
   /// If we should utilize the URL params for tracking what is shown
   final bool updateUrlParams;
-  final void Function(TransactionFilter filter, bool updateUrlParams) onFilterChanged;
+  final void Function(TransactionFilter filter, bool updateUrlParams)
+      onFilterChanged;
 
   const TransactionFilterBar({
     super.key,
@@ -27,7 +28,8 @@ class TransactionFilterBar extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TransactionFilterBar> createState() => _TransactionFilterBarState();
+  ConsumerState<TransactionFilterBar> createState() =>
+      _TransactionFilterBarState();
 }
 
 class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
@@ -43,7 +45,8 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
   @override
   void didUpdateWidget(covariant TransactionFilterBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.filter.search != widget.filter.search && _searchController.text != widget.filter.search) {
+    if (oldWidget.filter.search != widget.filter.search &&
+        _searchController.text != widget.filter.search) {
       _searchController.text = widget.filter.search;
     }
   }
@@ -58,7 +61,8 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
   void _onSearchChanged(String val) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () {
-      widget.onFilterChanged(widget.filter.copyWith(search: val), widget.updateUrlParams);
+      widget.onFilterChanged(
+          widget.filter.copyWith(search: val), widget.updateUrlParams);
     });
   }
 
@@ -68,7 +72,8 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
 
     switch (preset) {
       case 'This Month':
-        range = DateTimeRange(start: DateTime(now.year, now.month, 1), end: now);
+        range =
+            DateTimeRange(start: DateTime(now.year, now.month, 1), end: now);
         break;
       case 'Last Month':
         range = DateTimeRange(
@@ -77,12 +82,14 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
         );
         break;
       case 'Last Week':
-        range = DateTimeRange(start: now.subtract(const Duration(days: 7)), end: now);
+        range = DateTimeRange(
+            start: now.subtract(const Duration(days: 7)), end: now);
         break;
       default:
         range = null;
     }
-    widget.onFilterChanged(widget.filter.copyWith(dateRange: range), widget.updateUrlParams);
+    widget.onFilterChanged(
+        widget.filter.copyWith(dateRange: range), widget.updateUrlParams);
   }
 
   @override
@@ -128,12 +135,20 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
             child: OutlinedButton.icon(
               onPressed: () {},
               style: OutlinedButton.styleFrom(
-                foregroundColor: filters.dateRange != null ? Colors.white : null,
-                backgroundColor: filters.dateRange != null ? theme.colorScheme.primary : null,
+                foregroundColor:
+                    filters.dateRange != null ? Colors.white : null,
+                backgroundColor: filters.dateRange != null
+                    ? theme.colorScheme.primary
+                    : null,
                 shape: RoundedRectangleBorder(borderRadius: radius),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               ),
-              icon: Icon(filters.dateRange != null ? Icons.date_range : Icons.calendar_month, size: 18),
+              icon: Icon(
+                  filters.dateRange != null
+                      ? Icons.date_range
+                      : Icons.calendar_month,
+                  size: 18),
               label: Text(filters.dateRange == null ? "Date" : "Filtered"),
             ),
           ),
@@ -229,10 +244,17 @@ class _TransactionFilterBarState extends ConsumerState<TransactionFilterBar> {
           return Column(
             spacing: 8,
             children: [
-              Row(spacing: 8, children: [Expanded(child: searchField), Expanded(child: categoryDropdown)]),
+              Row(spacing: 8, children: [
+                Expanded(child: searchField),
+                Expanded(child: categoryDropdown)
+              ]),
               Row(
                 spacing: 8,
-                children: [Expanded(child: dateMenu), Expanded(child: pendingChip), if (resetVisible) resetButton],
+                children: [
+                  Expanded(child: dateMenu),
+                  Expanded(child: pendingChip),
+                  if (resetVisible) resetButton
+                ],
               ),
             ],
           );

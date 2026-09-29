@@ -49,7 +49,10 @@ class AccountItemRow extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(account.name, style: theme.textTheme.labelLarge, overflow: TextOverflow.ellipsis, maxLines: 1),
+                  Text(account.name,
+                      style: theme.textTheme.labelLarge,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1),
                   Text(
                     account.institution.name,
                     style: theme.textTheme.labelSmall,
@@ -75,7 +78,9 @@ class AccountItemRow extends ConsumerWidget {
                     invert: account.isDebt),
               ],
             ),
-            Icon(Icons.chevron_right, size: 16, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3)),
+            Icon(Icons.chevron_right,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3)),
           ],
         ),
       ),

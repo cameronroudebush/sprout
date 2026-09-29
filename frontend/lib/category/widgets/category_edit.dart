@@ -61,7 +61,9 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
           Navigator.of(context).pop();
           Navigator.of(context).pop();
         },
-        child: const Text('This will set linked transactions to "Unknown". Continue?', textAlign: TextAlign.center),
+        child: const Text(
+            'This will set linked transactions to "Unknown". Continue?',
+            textAlign: TextAlign.center),
       ),
     );
   }
@@ -81,7 +83,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
     );
 
     if (widget.category == null) {
-      final added = await ref.read(categoriesProvider.notifier).add(categoryToSave);
+      final added =
+          await ref.read(categoriesProvider.notifier).add(categoryToSave);
       if (widget.onAdd != null) {
         widget.onAdd!(added!);
       }
@@ -126,7 +129,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
               TextField(
                 controller: _nameController,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: "Category Name", border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                    labelText: "Category Name", border: OutlineInputBorder()),
                 onSubmitted: (_) => canSave ? _handleSave(context) : null,
               ),
               CategoryIconDropdown(_selectedIcon, (newValue) {
@@ -147,14 +151,18 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Exclude from Cash Flow", style: theme.textTheme.titleMedium),
-                        Text("If we should exclude this category from cash flow calculations.", style: helpStyle),
+                        Text("Exclude from Cash Flow",
+                            style: theme.textTheme.titleMedium),
+                        Text(
+                            "If we should exclude this category from cash flow calculations.",
+                            style: helpStyle),
                       ],
                     ),
                   ),
                   Switch(
                     value: _excludeFromCashFlow,
-                    onChanged: (newValue) => setState(() => _excludeFromCashFlow = newValue),
+                    onChanged: (newValue) =>
+                        setState(() => _excludeFromCashFlow = newValue),
                   ),
                 ],
               ),
@@ -166,7 +174,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Increased subscription variance", style: theme.textTheme.titleMedium),
+                        Text("Increased subscription variance",
+                            style: theme.textTheme.titleMedium),
                         Text(
                             "If this category should allow for a wider variance when trying to auto determine subscriptions. You'll normally want to turn this on for things like utilities.",
                             style: helpStyle),
@@ -175,7 +184,8 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                   ),
                   Switch(
                     value: _increasedSubVariance,
-                    onChanged: (newValue) => setState(() => _increasedSubVariance = newValue),
+                    onChanged: (newValue) =>
+                        setState(() => _increasedSubVariance = newValue),
                   ),
                 ],
               ),

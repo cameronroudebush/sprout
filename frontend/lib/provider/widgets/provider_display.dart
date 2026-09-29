@@ -44,14 +44,19 @@ class ProviderDisplay extends ConsumerWidget {
     String providerName = config?.name ?? providerType.value.toTitleCase;
 
     final children = <Widget>[
-      if (showIcon && config != null) FinanceProviderIcon(config, size: iconSize),
+      if (showIcon && config != null)
+        FinanceProviderIcon(config, size: iconSize),
       if (showIcon && showTitle && config != null)
-        direction == ProviderDisplayDirection.horizontal ? SizedBox(width: spacing) : SizedBox(height: spacing),
+        direction == ProviderDisplayDirection.horizontal
+            ? SizedBox(width: spacing)
+            : SizedBox(height: spacing),
       if (showTitle)
         Text(
           providerName,
           style: style ?? theme.textTheme.bodyMedium,
-          textAlign: direction == ProviderDisplayDirection.vertical ? TextAlign.center : TextAlign.start,
+          textAlign: direction == ProviderDisplayDirection.vertical
+              ? TextAlign.center
+              : TextAlign.start,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),

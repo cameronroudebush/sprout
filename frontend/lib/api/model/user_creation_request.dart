@@ -22,23 +22,25 @@ class UserCreationRequest {
   String password;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserCreationRequest &&
-    other.username == username &&
-    other.password == password;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserCreationRequest &&
+          other.username == username &&
+          other.password == password;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (username.hashCode) +
-    (password.hashCode);
+      // ignore: unnecessary_parenthesis
+      (username.hashCode) + (password.hashCode);
 
   @override
-  String toString() => 'UserCreationRequest[username=$username, password=$password]';
+  String toString() =>
+      'UserCreationRequest[username=$username, password=$password]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'username'] = this.username;
-      json[r'password'] = this.password;
+    json[r'username'] = this.username;
+    json[r'password'] = this.password;
     return json;
   }
 
@@ -53,10 +55,14 @@ class UserCreationRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'username'), 'Required key "UserCreationRequest[username]" is missing from JSON.');
-        assert(json[r'username'] != null, 'Required key "UserCreationRequest[username]" has a null value in JSON.');
-        assert(json.containsKey(r'password'), 'Required key "UserCreationRequest[password]" is missing from JSON.');
-        assert(json[r'password'] != null, 'Required key "UserCreationRequest[password]" has a null value in JSON.');
+        assert(json.containsKey(r'username'),
+            'Required key "UserCreationRequest[username]" is missing from JSON.');
+        assert(json[r'username'] != null,
+            'Required key "UserCreationRequest[username]" has a null value in JSON.');
+        assert(json.containsKey(r'password'),
+            'Required key "UserCreationRequest[password]" is missing from JSON.');
+        assert(json[r'password'] != null,
+            'Required key "UserCreationRequest[password]" has a null value in JSON.');
         return true;
       }());
 
@@ -68,7 +74,10 @@ class UserCreationRequest {
     return null;
   }
 
-  static List<UserCreationRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserCreationRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserCreationRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +105,19 @@ class UserCreationRequest {
   }
 
   // maps a json object with a list of UserCreationRequest-objects as value to a dart map
-  static Map<String, List<UserCreationRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserCreationRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserCreationRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserCreationRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserCreationRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +129,3 @@ class UserCreationRequest {
     'password',
   };
 }
-

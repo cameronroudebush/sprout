@@ -41,26 +41,29 @@ class RegisterDeviceDto {
   String? deviceName;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is RegisterDeviceDto &&
-    other.deviceId == deviceId &&
-    other.token == token &&
-    other.platform == platform &&
-    other.deviceName == deviceName;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RegisterDeviceDto &&
+          other.deviceId == deviceId &&
+          other.token == token &&
+          other.platform == platform &&
+          other.deviceName == deviceName;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (deviceId.hashCode) +
-    (token == null ? 0 : token!.hashCode) +
-    (platform == null ? 0 : platform!.hashCode) +
-    (deviceName == null ? 0 : deviceName!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (deviceId.hashCode) +
+      (token == null ? 0 : token!.hashCode) +
+      (platform == null ? 0 : platform!.hashCode) +
+      (deviceName == null ? 0 : deviceName!.hashCode);
 
   @override
-  String toString() => 'RegisterDeviceDto[deviceId=$deviceId, token=$token, platform=$platform, deviceName=$deviceName]';
+  String toString() =>
+      'RegisterDeviceDto[deviceId=$deviceId, token=$token, platform=$platform, deviceName=$deviceName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'deviceId'] = this.deviceId;
+    json[r'deviceId'] = this.deviceId;
     if (this.token != null) {
       json[r'token'] = this.token;
     } else {
@@ -90,8 +93,10 @@ class RegisterDeviceDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'deviceId'), 'Required key "RegisterDeviceDto[deviceId]" is missing from JSON.');
-        assert(json[r'deviceId'] != null, 'Required key "RegisterDeviceDto[deviceId]" has a null value in JSON.');
+        assert(json.containsKey(r'deviceId'),
+            'Required key "RegisterDeviceDto[deviceId]" is missing from JSON.');
+        assert(json[r'deviceId'] != null,
+            'Required key "RegisterDeviceDto[deviceId]" has a null value in JSON.');
         return true;
       }());
 
@@ -105,7 +110,10 @@ class RegisterDeviceDto {
     return null;
   }
 
-  static List<RegisterDeviceDto> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RegisterDeviceDto> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RegisterDeviceDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -133,13 +141,19 @@ class RegisterDeviceDto {
   }
 
   // maps a json object with a list of RegisterDeviceDto-objects as value to a dart map
-  static Map<String, List<RegisterDeviceDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<RegisterDeviceDto>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<RegisterDeviceDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = RegisterDeviceDto.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = RegisterDeviceDto.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -150,7 +164,6 @@ class RegisterDeviceDto {
     'deviceId',
   };
 }
-
 
 class RegisterDeviceDtoPlatformEnum {
   /// Instantiate a new enum with the provided [value].
@@ -175,9 +188,13 @@ class RegisterDeviceDtoPlatformEnum {
     web,
   ];
 
-  static RegisterDeviceDtoPlatformEnum? fromJson(dynamic value) => RegisterDeviceDtoPlatformEnumTypeTransformer().decode(value);
+  static RegisterDeviceDtoPlatformEnum? fromJson(dynamic value) =>
+      RegisterDeviceDtoPlatformEnumTypeTransformer().decode(value);
 
-  static List<RegisterDeviceDtoPlatformEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RegisterDeviceDtoPlatformEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <RegisterDeviceDtoPlatformEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -194,7 +211,8 @@ class RegisterDeviceDtoPlatformEnum {
 /// Transformation class that can [encode] an instance of [RegisterDeviceDtoPlatformEnum] to String,
 /// and [decode] dynamic data back to [RegisterDeviceDtoPlatformEnum].
 class RegisterDeviceDtoPlatformEnumTypeTransformer {
-  factory RegisterDeviceDtoPlatformEnumTypeTransformer() => _instance ??= const RegisterDeviceDtoPlatformEnumTypeTransformer._();
+  factory RegisterDeviceDtoPlatformEnumTypeTransformer() =>
+      _instance ??= const RegisterDeviceDtoPlatformEnumTypeTransformer._();
 
   const RegisterDeviceDtoPlatformEnumTypeTransformer._();
 
@@ -211,9 +229,12 @@ class RegisterDeviceDtoPlatformEnumTypeTransformer {
   RegisterDeviceDtoPlatformEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'android': return RegisterDeviceDtoPlatformEnum.android;
-        case r'ios': return RegisterDeviceDtoPlatformEnum.ios;
-        case r'web': return RegisterDeviceDtoPlatformEnum.web;
+        case r'android':
+          return RegisterDeviceDtoPlatformEnum.android;
+        case r'ios':
+          return RegisterDeviceDtoPlatformEnum.ios;
+        case r'web':
+          return RegisterDeviceDtoPlatformEnum.web;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -226,5 +247,3 @@ class RegisterDeviceDtoPlatformEnumTypeTransformer {
   /// Singleton [RegisterDeviceDtoPlatformEnumTypeTransformer] instance.
   static RegisterDeviceDtoPlatformEnumTypeTransformer? _instance;
 }
-
-

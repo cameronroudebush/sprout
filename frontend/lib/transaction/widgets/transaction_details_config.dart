@@ -62,13 +62,16 @@ class TransactionConfigCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final accounts = ref.watch(accountsProvider).value?.accounts;
-    final account = accounts?.firstWhereOrNull((a) => a.id == transaction.accountId);
+    final account =
+        accounts?.firstWhereOrNull((a) => a.id == transaction.accountId);
     final websiteUrl = transaction.extra?.website;
 
     final Uri? parsedUri = websiteUrl != null && websiteUrl.isNotEmpty
-        ? Uri.tryParse(websiteUrl.startsWith('http') ? websiteUrl : 'https://$websiteUrl')
+        ? Uri.tryParse(
+            websiteUrl.startsWith('http') ? websiteUrl : 'https://$websiteUrl')
         : null;
-    final displayDomain = parsedUri?.host.replaceFirst(RegExp(r'^www\.'), '') ?? websiteUrl;
+    final displayDomain =
+        parsedUri?.host.replaceFirst(RegExp(r'^www\.'), '') ?? websiteUrl;
 
     return SproutLayoutBuilder(
       (isDesktop, context, constraints) {
@@ -84,14 +87,16 @@ class TransactionConfigCard extends ConsumerWidget {
                     children: [
                       Expanded(
                         flex: 1,
-                        child: Text("Account", style: theme.textTheme.titleSmall),
+                        child:
+                            Text("Account", style: theme.textTheme.titleSmall),
                       ),
                       Expanded(
                         flex: 2,
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: InkWell(
-                            onTap: () => NavigationProvider.redirectToAccount(account),
+                            onTap: () =>
+                                NavigationProvider.redirectToAccount(account),
                             borderRadius: BorderRadius.circular(8),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -112,7 +117,8 @@ class TransactionConfigCard extends ConsumerWidget {
                                       account.name,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -137,7 +143,8 @@ class TransactionConfigCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       flex: 1,
-                      child: Text("Category", style: theme.textTheme.titleSmall),
+                      child:
+                          Text("Category", style: theme.textTheme.titleSmall),
                     ),
                     Expanded(
                       flex: isDesktop ? 1 : 2,
@@ -155,7 +162,8 @@ class TransactionConfigCard extends ConsumerWidget {
                   spacing: 8,
                   children: [
                     Expanded(
-                      child: Text("Posted Date", style: theme.textTheme.titleSmall),
+                      child: Text("Posted Date",
+                          style: theme.textTheme.titleSmall),
                     ),
                     InkWell(
                       onTap: isEditable ? () => _selectDate(context) : null,
@@ -174,13 +182,16 @@ class TransactionConfigCard extends ConsumerWidget {
                           spacing: 8,
                           children: [
                             Text(
-                              DateFormat("MMM d, yyyy 'at' h:mm a").format(postedDate),
+                              DateFormat("MMM d, yyyy 'at' h:mm a")
+                                  .format(postedDate),
                               style: theme.textTheme.bodyMedium,
                             ),
                             Icon(
                               Icons.calendar_today,
                               size: 16,
-                              color: isEditable ? theme.colorScheme.primary : theme.disabledColor,
+                              color: isEditable
+                                  ? theme.colorScheme.primary
+                                  : theme.disabledColor,
                             ),
                           ],
                         ),
@@ -194,17 +205,20 @@ class TransactionConfigCard extends ConsumerWidget {
                     spacing: 8,
                     children: [
                       Expanded(
-                        child: Text("Website", style: theme.textTheme.titleSmall),
+                        child:
+                            Text("Website", style: theme.textTheme.titleSmall),
                       ),
                       InkWell(
                         onTap: () async {
                           if (parsedUri != null) {
-                            await launchUrl(parsedUri, mode: LaunchMode.externalApplication);
+                            await launchUrl(parsedUri,
+                                mode: LaunchMode.externalApplication);
                           }
                         },
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             border: Border.all(color: theme.dividerColor),
                             borderRadius: BorderRadius.circular(8),

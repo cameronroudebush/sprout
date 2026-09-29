@@ -37,36 +37,39 @@ class PlaidAccountDTO {
   String subtype;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PlaidAccountDTO &&
-    other.id == id &&
-    other.name == name &&
-    other.mask == mask &&
-    other.type == type &&
-    other.subtype == subtype;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlaidAccountDTO &&
+          other.id == id &&
+          other.name == name &&
+          other.mask == mask &&
+          other.type == type &&
+          other.subtype == subtype;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (name.hashCode) +
-    (mask == null ? 0 : mask!.hashCode) +
-    (type.hashCode) +
-    (subtype.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (name.hashCode) +
+      (mask == null ? 0 : mask!.hashCode) +
+      (type.hashCode) +
+      (subtype.hashCode);
 
   @override
-  String toString() => 'PlaidAccountDTO[id=$id, name=$name, mask=$mask, type=$type, subtype=$subtype]';
+  String toString() =>
+      'PlaidAccountDTO[id=$id, name=$name, mask=$mask, type=$type, subtype=$subtype]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'name'] = this.name;
+    json[r'id'] = this.id;
+    json[r'name'] = this.name;
     if (this.mask != null) {
       json[r'mask'] = this.mask;
     } else {
       json[r'mask'] = null;
     }
-      json[r'type'] = this.type;
-      json[r'subtype'] = this.subtype;
+    json[r'type'] = this.type;
+    json[r'subtype'] = this.subtype;
     return json;
   }
 
@@ -81,14 +84,22 @@ class PlaidAccountDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "PlaidAccountDTO[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "PlaidAccountDTO[id]" has a null value in JSON.');
-        assert(json.containsKey(r'name'), 'Required key "PlaidAccountDTO[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "PlaidAccountDTO[name]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "PlaidAccountDTO[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "PlaidAccountDTO[type]" has a null value in JSON.');
-        assert(json.containsKey(r'subtype'), 'Required key "PlaidAccountDTO[subtype]" is missing from JSON.');
-        assert(json[r'subtype'] != null, 'Required key "PlaidAccountDTO[subtype]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "PlaidAccountDTO[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "PlaidAccountDTO[id]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "PlaidAccountDTO[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "PlaidAccountDTO[name]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "PlaidAccountDTO[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "PlaidAccountDTO[type]" has a null value in JSON.');
+        assert(json.containsKey(r'subtype'),
+            'Required key "PlaidAccountDTO[subtype]" is missing from JSON.');
+        assert(json[r'subtype'] != null,
+            'Required key "PlaidAccountDTO[subtype]" has a null value in JSON.');
         return true;
       }());
 
@@ -103,7 +114,10 @@ class PlaidAccountDTO {
     return null;
   }
 
-  static List<PlaidAccountDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PlaidAccountDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PlaidAccountDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -131,13 +145,19 @@ class PlaidAccountDTO {
   }
 
   // maps a json object with a list of PlaidAccountDTO-objects as value to a dart map
-  static Map<String, List<PlaidAccountDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PlaidAccountDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PlaidAccountDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PlaidAccountDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PlaidAccountDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -151,4 +171,3 @@ class PlaidAccountDTO {
     'subtype',
   };
 }
-

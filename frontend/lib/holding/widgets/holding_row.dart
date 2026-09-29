@@ -25,7 +25,8 @@ class HoldingRow extends ConsumerWidget {
     final formatter = ref.watch(currencyFormatterProvider);
     final rowState = ref.watch(expandedHoldingProvider(holding));
     final int currentDay = DateTime.now().weekday;
-    final bool isWeekend = currentDay == DateTime.saturday || currentDay == DateTime.sunday;
+    final bool isWeekend =
+        currentDay == DateTime.saturday || currentDay == DateTime.sunday;
 
     return InkWell(
       onTap: onSelect,
@@ -33,12 +34,15 @@ class HoldingRow extends ConsumerWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
+              : Colors.transparent,
         ),
         child: Row(
           spacing: 12,
           children: [
-            if (rowState.account != null) HoldingIcon(holding, rowState.account!),
+            if (rowState.account != null)
+              HoldingIcon(holding, rowState.account!),
             // Market data column
             Expanded(
               child: Column(
@@ -60,7 +64,8 @@ class HoldingRow extends ConsumerWidget {
                   // Intraday Realtime Live Data Changes
                   if (!isWeekend &&
                       rowState.changePercent != 0 &&
-                      (rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND || !rowState.isLive))
+                      (rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND ||
+                          !rowState.isLive))
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -79,7 +84,8 @@ class HoldingRow extends ConsumerWidget {
                               child: Icon(
                                 Icons.info_outline,
                                 size: 14,
-                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
                               ),
                             ),
                           ],
@@ -93,7 +99,8 @@ class HoldingRow extends ConsumerWidget {
                     ),
 
                   // Historical Settled Brokerage Delta Values
-                  if (rowState.historicalFrame != null && rowState.historicalFrame!.valueChange != 0)
+                  if (rowState.historicalFrame != null &&
+                      rowState.historicalFrame!.valueChange != 0)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -103,7 +110,8 @@ class HoldingRow extends ConsumerWidget {
                             Text(
                               "Settled Value Change",
                               style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.6),
                               ),
                             ),
                             Tooltip(
@@ -113,7 +121,8 @@ class HoldingRow extends ConsumerWidget {
                               child: Icon(
                                 Icons.info_outline,
                                 size: 14,
-                                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
                               ),
                             ),
                           ],
@@ -121,7 +130,8 @@ class HoldingRow extends ConsumerWidget {
                         if (rowState.historicalFrame != null)
                           SproutChangeWidget(
                             totalChange: rowState.historicalFrame?.valueChange,
-                            percentageChange: rowState.historicalFrame?.percentChange,
+                            percentageChange:
+                                rowState.historicalFrame?.percentChange,
                             fontSize: theme.textTheme.labelMedium!.fontSize!,
                             useExtendedPeriodString: false,
                           ),
@@ -130,35 +140,40 @@ class HoldingRow extends ConsumerWidget {
 
                   // Total Value Change (Tracking Window)
                   if (rowState.totalGainPercent.round() != 0)
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      Row(
-                        spacing: 4,
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "Total Value Change",
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                            ),
+                          Row(
+                            spacing: 4,
+                            children: [
+                              Text(
+                                "Total Value Change",
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              Tooltip(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 280),
+                                message:
+                                    "Gains or losses recorded since tracking began via ${rowState.account?.provider ?? "your provider"}. Historical performance from before this account was linked may not be included.",
+                                child: Icon(
+                                  Icons.info_outline,
+                                  size: 14,
+                                  color: theme.colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ],
                           ),
-                          Tooltip(
-                            constraints: const BoxConstraints(maxWidth: 280),
-                            message:
-                                "Gains or losses recorded since tracking began via ${rowState.account?.provider ?? "your provider"}. Historical performance from before this account was linked may not be included.",
-                            child: Icon(
-                              Icons.info_outline,
-                              size: 14,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                            ),
+                          SproutChangeWidget(
+                            totalChange: rowState.totalGain,
+                            percentageChange: rowState.totalGainPercent,
+                            fontSize: theme.textTheme.labelMedium!.fontSize!,
+                            useExtendedPeriodString: false,
                           ),
-                        ],
-                      ),
-                      SproutChangeWidget(
-                        totalChange: rowState.totalGain,
-                        percentageChange: rowState.totalGainPercent,
-                        fontSize: theme.textTheme.labelMedium!.fontSize!,
-                        useExtendedPeriodString: false,
-                      ),
-                    ])
+                        ])
                 ],
               ),
             ),

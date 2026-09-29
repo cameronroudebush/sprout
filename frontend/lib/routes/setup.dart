@@ -57,7 +57,9 @@ class SetupPage extends ConsumerWidget {
               // Step 3: User Config Page
               UserConfigSetupPage(nextPage, isDesktop),
               // Step 4: Complete Page
-              CompleteSetupPage(() => ref.read(authProvider.notifier).completeSetup(), isDesktop),
+              CompleteSetupPage(
+                  () => ref.read(authProvider.notifier).completeSetup(),
+                  isDesktop),
             ],
           ),
         ),

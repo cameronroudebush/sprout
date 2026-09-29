@@ -47,7 +47,8 @@ class WidgetSync extends _$WidgetSync {
       }
     });
 
-    ref.listen(transactionsProvider(TransactionFilter.defaultFilter), (_, __) => updateData());
+    ref.listen(transactionsProvider(TransactionFilter.defaultFilter),
+        (_, __) => updateData());
     ref.listen(totalNetWorthProvider, (_, __) => updateData());
     ref.listen(userConfigProvider, (_, __) => updateData());
     ref.listen(accountsProvider, (_, __) => updateData());
@@ -105,20 +106,28 @@ class WidgetSync extends _$WidgetSync {
     if (userConfig != null && userConfig.allowWidgets) {
       try {
         final netWorth = ref.read(totalNetWorthProvider).value;
-        final transactions = ref.read(transactionsProvider(TransactionFilter.defaultFilter)).value?.transactions ?? [];
+        final transactions = ref
+                .read(transactionsProvider(TransactionFilter.defaultFilter))
+                .value
+                ?.transactions ??
+            [];
         if (netWorth == null) {
           data = null;
         } else {
-          final monthFrame = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+          final monthFrame =
+              netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
           final dayRange = ChartRangeEnum.oneMonth;
-          final pastValueRange = netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
+          final pastValueRange =
+              netWorth.history.getValueByFrame(ChartRangeEnum.oneMonth);
           pastNetWorthChange = pastValueRange.valueChange;
 
           // Map the 10 most recent transactions into a widget-friendly format asynchronously
           final recentFutures = transactions.take(10).map((t) async {
-            final category = categories.firstWhereOrNull((c) => c.id == t.categoryId);
+            final category =
+                categories.firstWhereOrNull((c) => c.id == t.categoryId);
             final categoryName = category?.name ?? "Unknown";
-            final account = accounts.firstWhereOrNull((a) => a.id == t.accountId);
+            final account =
+                accounts.firstWhereOrNull((a) => a.id == t.accountId);
             final accountName = account?.name ?? "Unknown";
             final websiteUrl = t.extra?.website;
             String? resolvedIconUrl;
@@ -126,13 +135,16 @@ class WidgetSync extends _$WidgetSync {
             if (websiteUrl != null && websiteUrl.isNotEmpty) {
               try {
                 // Use ref.read instead of ref.watch in asynchronous loops
-                final icon = await ref.read(websiteIconProvider(websiteUrl, 48, type: "png").future);
+                final icon = await ref.read(
+                    websiteIconProvider(websiteUrl, 48, type: "png").future);
                 if (icon.isNotEmpty) resolvedIconUrl = icon.first;
               } catch (e) {
-                LoggerProvider.warning("Failed to fetch website icon for $websiteUrl: $e");
+                LoggerProvider.warning(
+                    "Failed to fetch website icon for $websiteUrl: $e");
               }
             }
-            final fallbackIconData = CategoryIcon.iconLibrary[category?.icon] ?? Icons.question_mark_rounded;
+            final fallbackIconData = CategoryIcon.iconLibrary[category?.icon] ??
+                Icons.question_mark_rounded;
             final iconBase64 = await WidgetImageUtility.getSquircleBase64(
               imageUrl: resolvedIconUrl,
               fallbackIcon: fallbackIconData,
@@ -156,11 +168,15 @@ class WidgetSync extends _$WidgetSync {
 
           data = {
             "updateTime": DateTime.now().toShortMonthWithTime,
-            "netWorth": formatter.format(netWorth.value, handlePrivateMode: false),
-            "changeAmount": formatter.format(monthFrame.valueChange, handlePrivateMode: false),
-            "changePercent": "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
+            "netWorth":
+                formatter.format(netWorth.value, handlePrivateMode: false),
+            "changeAmount": formatter.format(monthFrame.valueChange,
+                handlePrivateMode: false),
+            "changePercent":
+                "${(monthFrame.percentChange ?? 0).toStringAsFixed(2)}%",
             "numericChange": pastNetWorthChange,
-            "dayRange": ChartRangeUtility.asPretty(dayRange, useExtendedPeriodString: true),
+            "dayRange": ChartRangeUtility.asPretty(dayRange,
+                useExtendedPeriodString: true),
             "recentTransactions": recent,
           };
         }
@@ -181,12 +197,14 @@ class WidgetSync extends _$WidgetSync {
         "bgColor": theme.appBarTheme.backgroundColor!.toHex(),
         "cardColor": theme.cardColor.toHex(),
         "txtColor": (theme.textTheme.bodyLarge?.color ?? Colors.white).toHex(),
-        "txtColorMuted": (theme.textTheme.bodySmall?.color ?? Colors.grey).toHex(),
+        "txtColorMuted":
+            (theme.textTheme.bodySmall?.color ?? Colors.grey).toHex(),
         "primaryColor": theme.primaryColor.toHex(),
         "accentColor": theme.colorScheme.secondary.toHex(),
-        "statusColor":
-            (pastNetWorthChange != null && pastNetWorthChange >= 0 ? Colors.greenAccent : theme.colorScheme.error)
-                .toHex(),
+        "statusColor": (pastNetWorthChange != null && pastNetWorthChange >= 0
+                ? Colors.greenAccent
+                : theme.colorScheme.error)
+            .toHex(),
         "dividerColor": theme.dividerColor.toHex(),
       }
     };
@@ -209,7 +227,8 @@ class WidgetSync extends _$WidgetSync {
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    final (container, user) = await BackgroundJobProvider.entry("Widget-Provider");
+    final (container, user) =
+        await BackgroundJobProvider.entry("Widget-Provider");
     if (user == null) {
       // No user? Update anyways. Since auth will be null, we'll just write session expired.
       await container.read(widgetSyncProvider.notifier).updateData();
@@ -219,7 +238,8 @@ void callbackDispatcher() {
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
-      await container.read(transactionsProvider(TransactionFilter.defaultFilter).future);
+      await container
+          .read(transactionsProvider(TransactionFilter.defaultFilter).future);
       await container.read(categoriesProvider.future);
       await container.read(accountsProvider.future);
       // Perform the native widget update

@@ -20,20 +20,22 @@ class BudgetHistoryResponseDto {
   List<MonthlyCategoryBudgetPerformance> history;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is BudgetHistoryResponseDto &&
-    _deepEquality.equals(other.history, history);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BudgetHistoryResponseDto &&
+          _deepEquality.equals(other.history, history);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (history.hashCode);
+      // ignore: unnecessary_parenthesis
+      (history.hashCode);
 
   @override
   String toString() => 'BudgetHistoryResponseDto[history=$history]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'history'] = this.history;
+    json[r'history'] = this.history;
     return json;
   }
 
@@ -48,19 +50,25 @@ class BudgetHistoryResponseDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'history'), 'Required key "BudgetHistoryResponseDto[history]" is missing from JSON.');
-        assert(json[r'history'] != null, 'Required key "BudgetHistoryResponseDto[history]" has a null value in JSON.');
+        assert(json.containsKey(r'history'),
+            'Required key "BudgetHistoryResponseDto[history]" is missing from JSON.');
+        assert(json[r'history'] != null,
+            'Required key "BudgetHistoryResponseDto[history]" has a null value in JSON.');
         return true;
       }());
 
       return BudgetHistoryResponseDto(
-        history: MonthlyCategoryBudgetPerformance.listFromJson(json[r'history']),
+        history:
+            MonthlyCategoryBudgetPerformance.listFromJson(json[r'history']),
       );
     }
     return null;
   }
 
-  static List<BudgetHistoryResponseDto> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BudgetHistoryResponseDto> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <BudgetHistoryResponseDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -88,13 +96,19 @@ class BudgetHistoryResponseDto {
   }
 
   // maps a json object with a list of BudgetHistoryResponseDto-objects as value to a dart map
-  static Map<String, List<BudgetHistoryResponseDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<BudgetHistoryResponseDto>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<BudgetHistoryResponseDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = BudgetHistoryResponseDto.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = BudgetHistoryResponseDto.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -105,4 +119,3 @@ class BudgetHistoryResponseDto {
     'history',
   };
 }
-

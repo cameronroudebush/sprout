@@ -17,5 +17,6 @@ class SproutNotification {
   /// The text color of this notification
   Color color;
 
-  SproutNotification(this.message, this.bgColor, this.color, {this.icon, this.onClick});
+  SproutNotification(this.message, this.bgColor, this.color,
+      {this.icon, this.onClick});
 }

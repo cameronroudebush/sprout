@@ -10,13 +10,15 @@ extension AccountListExtensions on List<Account> {
 
   /// Calculates the total of all non-debt accounts
   double get totalAssets {
-    return where((a) => AccountExtensions.groupConfig[a.type]?.isNegative == false)
+    return where(
+            (a) => AccountExtensions.groupConfig[a.type]?.isNegative == false)
         .fold(0.0, (sum, a) => sum + a.balance);
   }
 
   /// Calculates the total of all debt-based accounts
   double get totalDebts {
-    return where((a) => AccountExtensions.groupConfig[a.type]?.isNegative == true)
+    return where(
+            (a) => AccountExtensions.groupConfig[a.type]?.isNegative == true)
         .fold(0.0, (sum, a) => sum + a.balance.abs());
   }
 }

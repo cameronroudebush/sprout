@@ -62,9 +62,13 @@ class AccountSubTypeEnum {
     house,
   ];
 
-  static AccountSubTypeEnum? fromJson(dynamic value) => AccountSubTypeEnumTypeTransformer().decode(value);
+  static AccountSubTypeEnum? fromJson(dynamic value) =>
+      AccountSubTypeEnumTypeTransformer().decode(value);
 
-  static List<AccountSubTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AccountSubTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <AccountSubTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -81,7 +85,8 @@ class AccountSubTypeEnum {
 /// Transformation class that can [encode] an instance of [AccountSubTypeEnum] to String,
 /// and [decode] dynamic data back to [AccountSubTypeEnum].
 class AccountSubTypeEnumTypeTransformer {
-  factory AccountSubTypeEnumTypeTransformer() => _instance ??= const AccountSubTypeEnumTypeTransformer._();
+  factory AccountSubTypeEnumTypeTransformer() =>
+      _instance ??= const AccountSubTypeEnumTypeTransformer._();
 
   const AccountSubTypeEnumTypeTransformer._();
 
@@ -98,23 +103,40 @@ class AccountSubTypeEnumTypeTransformer {
   AccountSubTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'other': return AccountSubTypeEnum.other;
-        case r'Savings': return AccountSubTypeEnum.savings;
-        case r'Checking': return AccountSubTypeEnum.checking;
-        case r'HYSA': return AccountSubTypeEnum.HYSA;
-        case r'401K': return AccountSubTypeEnum.n401k;
-        case r'Brokerage': return AccountSubTypeEnum.brokerage;
-        case r'IRA': return AccountSubTypeEnum.IRA;
-        case r'HSA': return AccountSubTypeEnum.HSA;
-        case r'Student': return AccountSubTypeEnum.student;
-        case r'Mortgage': return AccountSubTypeEnum.mortgage;
-        case r'Personal': return AccountSubTypeEnum.personal;
-        case r'Auto': return AccountSubTypeEnum.auto;
-        case r'Travel': return AccountSubTypeEnum.travel;
-        case r'Cash Back': return AccountSubTypeEnum.cashBack;
-        case r'Wallet': return AccountSubTypeEnum.wallet;
-        case r'Staking': return AccountSubTypeEnum.staking;
-        case r'House': return AccountSubTypeEnum.house;
+        case r'other':
+          return AccountSubTypeEnum.other;
+        case r'Savings':
+          return AccountSubTypeEnum.savings;
+        case r'Checking':
+          return AccountSubTypeEnum.checking;
+        case r'HYSA':
+          return AccountSubTypeEnum.HYSA;
+        case r'401K':
+          return AccountSubTypeEnum.n401k;
+        case r'Brokerage':
+          return AccountSubTypeEnum.brokerage;
+        case r'IRA':
+          return AccountSubTypeEnum.IRA;
+        case r'HSA':
+          return AccountSubTypeEnum.HSA;
+        case r'Student':
+          return AccountSubTypeEnum.student;
+        case r'Mortgage':
+          return AccountSubTypeEnum.mortgage;
+        case r'Personal':
+          return AccountSubTypeEnum.personal;
+        case r'Auto':
+          return AccountSubTypeEnum.auto;
+        case r'Travel':
+          return AccountSubTypeEnum.travel;
+        case r'Cash Back':
+          return AccountSubTypeEnum.cashBack;
+        case r'Wallet':
+          return AccountSubTypeEnum.wallet;
+        case r'Staking':
+          return AccountSubTypeEnum.staking;
+        case r'House':
+          return AccountSubTypeEnum.house;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -127,4 +149,3 @@ class AccountSubTypeEnumTypeTransformer {
   /// Singleton [AccountSubTypeEnumTypeTransformer] instance.
   static AccountSubTypeEnumTypeTransformer? _instance;
 }
-

@@ -49,7 +49,9 @@ class AccountsPage extends ConsumerWidget {
                             ),
                             SproutCard(
                                 child: Padding(
-                                    padding: const EdgeInsets.all(12), child: TotalSummary(accounts: state.accounts))),
+                                    padding: const EdgeInsets.all(12),
+                                    child: TotalSummary(
+                                        accounts: state.accounts))),
                             AccountSummaryView(
                               accounts: state.accounts,
                               collapsible: false,
@@ -63,7 +65,8 @@ class AccountsPage extends ConsumerWidget {
               FABAction(
                 icon: Icons.add,
                 label: 'Add Account',
-                onTap: (context) => showSproutPopup(context: context, builder: (_) => const ProviderDialog()),
+                onTap: (context) => showSproutPopup(
+                    context: context, builder: (_) => const ProviderDialog()),
               ),
               FABAction(
                   icon: Icons.refresh,

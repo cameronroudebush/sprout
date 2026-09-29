@@ -24,23 +24,24 @@ class HistoricalDataPoint {
   num value;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is HistoricalDataPoint &&
-    other.date == date &&
-    other.value == value;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HistoricalDataPoint &&
+          other.date == date &&
+          other.value == value;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (date.hashCode) +
-    (value.hashCode);
+      // ignore: unnecessary_parenthesis
+      (date.hashCode) + (value.hashCode);
 
   @override
   String toString() => 'HistoricalDataPoint[date=$date, value=$value]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'date'] = this.date.toUtc().toIso8601String();
-      json[r'value'] = this.value;
+    json[r'date'] = this.date.toUtc().toIso8601String();
+    json[r'value'] = this.value;
     return json;
   }
 
@@ -55,10 +56,14 @@ class HistoricalDataPoint {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'date'), 'Required key "HistoricalDataPoint[date]" is missing from JSON.');
-        assert(json[r'date'] != null, 'Required key "HistoricalDataPoint[date]" has a null value in JSON.');
-        assert(json.containsKey(r'value'), 'Required key "HistoricalDataPoint[value]" is missing from JSON.');
-        assert(json[r'value'] != null, 'Required key "HistoricalDataPoint[value]" has a null value in JSON.');
+        assert(json.containsKey(r'date'),
+            'Required key "HistoricalDataPoint[date]" is missing from JSON.');
+        assert(json[r'date'] != null,
+            'Required key "HistoricalDataPoint[date]" has a null value in JSON.');
+        assert(json.containsKey(r'value'),
+            'Required key "HistoricalDataPoint[value]" is missing from JSON.');
+        assert(json[r'value'] != null,
+            'Required key "HistoricalDataPoint[value]" has a null value in JSON.');
         return true;
       }());
 
@@ -70,7 +75,10 @@ class HistoricalDataPoint {
     return null;
   }
 
-  static List<HistoricalDataPoint> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<HistoricalDataPoint> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <HistoricalDataPoint>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -98,13 +106,19 @@ class HistoricalDataPoint {
   }
 
   // maps a json object with a list of HistoricalDataPoint-objects as value to a dart map
-  static Map<String, List<HistoricalDataPoint>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<HistoricalDataPoint>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<HistoricalDataPoint>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = HistoricalDataPoint.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = HistoricalDataPoint.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -116,4 +130,3 @@ class HistoricalDataPoint {
     'value',
   };
 }
-

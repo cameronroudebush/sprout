@@ -14,7 +14,8 @@ Future<String?> connectionUrl(Ref ref) async {
     final leading = '${uri.scheme}://${uri.host}';
     return "${kDebugMode && leading.contains("localhost") ? '$leading:8001' : leading}/api";
   } else {
-    String? storedUrl = await SecureStorageProvider.getValue(SecureStorageProvider.connectionUrlKey);
+    String? storedUrl = await SecureStorageProvider.getValue(
+        SecureStorageProvider.connectionUrlKey);
     return (storedUrl == null || storedUrl.isEmpty) ? null : "$storedUrl/api";
   }
 }
@@ -39,7 +40,8 @@ Future<ConfigApi> secureConfigApi(Ref ref) async {
 class UnsecureConfig extends _$UnsecureConfig {
   bool _failedToConnect = false;
   bool get failedToConnect => _failedToConnect;
-  bool get isOIDCAuthMode => state.value?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
+  bool get isOIDCAuthMode =>
+      state.value?.authMode == UnsecureAppConfigurationAuthModeEnum.oidc;
 
   @override
   Future<UnsecureAppConfiguration?> build() async {
@@ -56,7 +58,8 @@ class UnsecureConfig extends _$UnsecureConfig {
   /// Sets the connection url, persists it, and triggers a full app-wide refresh
   Future<void> setConnectionUrl(String? url) async {
     // Persist the value for future app launches
-    await SecureStorageProvider.saveValue(SecureStorageProvider.connectionUrlKey, url);
+    await SecureStorageProvider.saveValue(
+        SecureStorageProvider.connectionUrlKey, url);
     // Update the provider that holds the URL.
     ref.invalidate(connectionUrlProvider);
     if (url != null) {

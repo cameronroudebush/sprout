@@ -6,7 +6,9 @@ import 'package:timeago/timeago.dart' as timeago;
 extension TransactionExtensions on Transaction {
   /// Returns time text either absolute or relative based on how old it is
   String get timeText {
-    return DateTime.now().difference(posted).inDays > 3 ? posted.toShort : timeago.format(posted);
+    return DateTime.now().difference(posted).inDays > 3
+        ? posted.toShort
+        : timeago.format(posted);
   }
 
   /// Calculates a human-readable relative time string for when this transaction occurred

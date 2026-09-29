@@ -20,7 +20,8 @@ extension SproutCurrencyFormatter on num {
 extension SproutStringFormatter on String {
   /// Obscures currency patterns within a string
   String deIdentifyCurrency() {
-    final currencyRegex = RegExp(r'([$€£¥¤])\s?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)');
+    final currencyRegex =
+        RegExp(r'([$€£¥¤])\s?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)');
     return replaceAllMapped(currencyRegex, (match) {
       final symbol = match.group(1);
       return '$symbol••••';

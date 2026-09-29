@@ -35,7 +35,8 @@ class TotalSummary extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _SummaryLabel(label: "Assets", amount: totalAssets, color: Colors.teal),
+            _SummaryLabel(
+                label: "Assets", amount: totalAssets, color: Colors.teal),
             _SummaryLabel(
               label: "Debts",
               amount: totalDebts,
@@ -44,13 +45,15 @@ class TotalSummary extends ConsumerWidget {
             ),
           ],
         ),
-        if (accounts.isNotEmpty) _buildProgressBar(theme, visualTotal, formatter),
+        if (accounts.isNotEmpty)
+          _buildProgressBar(theme, visualTotal, formatter),
       ],
     );
   }
 
   /// Builds the multi-segmented progress bar
-  Widget _buildProgressBar(ThemeData theme, num total, CurrencyFormatter formatter) {
+  Widget _buildProgressBar(
+      ThemeData theme, num total, CurrencyFormatter formatter) {
     final visibleSegments = AccountExtensions.groupConfig.entries
         .map((entry) => (entry: entry, amount: accounts.sumByType(entry.key)))
         .where((data) => data.amount > 0)
@@ -81,7 +84,8 @@ class TotalSummary extends ConsumerWidget {
   }
 
   /// Constructs an individual segment wrapped in a Tooltip
-  Widget _barSegment(num value, num total, Color color, String title, ThemeData theme) {
+  Widget _barSegment(
+      num value, num total, Color color, String title, ThemeData theme) {
     const int minFlex = 20;
 
     if (value <= 0 || total <= 0) return const SizedBox.shrink();
@@ -99,7 +103,8 @@ class TotalSummary extends ConsumerWidget {
         verticalOffset: 12,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final bool canFitText = showPercentages && constraints.maxWidth > 28;
+            final bool canFitText =
+                showPercentages && constraints.maxWidth > 28;
 
             return Container(
               decoration: BoxDecoration(
@@ -144,7 +149,8 @@ class _SummaryLabel extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
     return Column(
-      crossAxisAlignment: isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Text(
           label,
@@ -152,7 +158,9 @@ class _SummaryLabel extends ConsumerWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        Text(formatter.format(amount), style: theme.textTheme.headlineSmall?.copyWith(color: color, fontSize: 18)),
+        Text(formatter.format(amount),
+            style: theme.textTheme.headlineSmall
+                ?.copyWith(color: color, fontSize: 18)),
       ],
     );
   }

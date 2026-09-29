@@ -27,26 +27,27 @@ class ZillowPropertyResultDto {
   String zpid;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ZillowPropertyResultDto &&
-    other.zestimate == zestimate &&
-    other.rentZestimate == rentZestimate &&
-    other.zpid == zpid;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ZillowPropertyResultDto &&
+          other.zestimate == zestimate &&
+          other.rentZestimate == rentZestimate &&
+          other.zpid == zpid;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (zestimate.hashCode) +
-    (rentZestimate.hashCode) +
-    (zpid.hashCode);
+      // ignore: unnecessary_parenthesis
+      (zestimate.hashCode) + (rentZestimate.hashCode) + (zpid.hashCode);
 
   @override
-  String toString() => 'ZillowPropertyResultDto[zestimate=$zestimate, rentZestimate=$rentZestimate, zpid=$zpid]';
+  String toString() =>
+      'ZillowPropertyResultDto[zestimate=$zestimate, rentZestimate=$rentZestimate, zpid=$zpid]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'zestimate'] = this.zestimate;
-      json[r'rentZestimate'] = this.rentZestimate;
-      json[r'zpid'] = this.zpid;
+    json[r'zestimate'] = this.zestimate;
+    json[r'rentZestimate'] = this.rentZestimate;
+    json[r'zpid'] = this.zpid;
     return json;
   }
 
@@ -61,12 +62,18 @@ class ZillowPropertyResultDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'zestimate'), 'Required key "ZillowPropertyResultDto[zestimate]" is missing from JSON.');
-        assert(json[r'zestimate'] != null, 'Required key "ZillowPropertyResultDto[zestimate]" has a null value in JSON.');
-        assert(json.containsKey(r'rentZestimate'), 'Required key "ZillowPropertyResultDto[rentZestimate]" is missing from JSON.');
-        assert(json[r'rentZestimate'] != null, 'Required key "ZillowPropertyResultDto[rentZestimate]" has a null value in JSON.');
-        assert(json.containsKey(r'zpid'), 'Required key "ZillowPropertyResultDto[zpid]" is missing from JSON.');
-        assert(json[r'zpid'] != null, 'Required key "ZillowPropertyResultDto[zpid]" has a null value in JSON.');
+        assert(json.containsKey(r'zestimate'),
+            'Required key "ZillowPropertyResultDto[zestimate]" is missing from JSON.');
+        assert(json[r'zestimate'] != null,
+            'Required key "ZillowPropertyResultDto[zestimate]" has a null value in JSON.');
+        assert(json.containsKey(r'rentZestimate'),
+            'Required key "ZillowPropertyResultDto[rentZestimate]" is missing from JSON.');
+        assert(json[r'rentZestimate'] != null,
+            'Required key "ZillowPropertyResultDto[rentZestimate]" has a null value in JSON.');
+        assert(json.containsKey(r'zpid'),
+            'Required key "ZillowPropertyResultDto[zpid]" is missing from JSON.');
+        assert(json[r'zpid'] != null,
+            'Required key "ZillowPropertyResultDto[zpid]" has a null value in JSON.');
         return true;
       }());
 
@@ -79,7 +86,10 @@ class ZillowPropertyResultDto {
     return null;
   }
 
-  static List<ZillowPropertyResultDto> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ZillowPropertyResultDto> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ZillowPropertyResultDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -107,13 +117,19 @@ class ZillowPropertyResultDto {
   }
 
   // maps a json object with a list of ZillowPropertyResultDto-objects as value to a dart map
-  static Map<String, List<ZillowPropertyResultDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ZillowPropertyResultDto>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ZillowPropertyResultDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ZillowPropertyResultDto.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ZillowPropertyResultDto.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -126,4 +142,3 @@ class ZillowPropertyResultDto {
     'zpid',
   };
 }
-

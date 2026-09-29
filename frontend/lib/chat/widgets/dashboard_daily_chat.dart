@@ -17,7 +17,8 @@ class DashboardDailyChatCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chatStatusAsync = ref.watch(chatStatusProvider(ChatOverviewTypeEnum.accounts));
+    final chatStatusAsync =
+        ref.watch(chatStatusProvider(ChatOverviewTypeEnum.accounts));
 
     Widget content = chatStatusAsync.whenDefault(
       loadingText: "Asking Sprout for an overview...",
@@ -55,7 +56,8 @@ class DashboardDailyChatCard extends ConsumerWidget {
                 ),
               ]),
               right: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                ChatModelIndicator(model: chatStatusAsync.value?.model, compact: true),
+                ChatModelIndicator(
+                    model: chatStatusAsync.value?.model, compact: true),
               ])),
           mobile ? content : Expanded(child: content),
         ],

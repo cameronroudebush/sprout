@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class UserConfigApi {
-  UserConfigApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  UserConfigApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -25,7 +25,9 @@ class UserConfigApi {
   /// Parameters:
   ///
   /// * [UserConfig] userConfig (required):
-  Future<Response> userConfigControllerEditWithHttpInfo(UserConfig userConfig,) async {
+  Future<Response> userConfigControllerEditWithHttpInfo(
+    UserConfig userConfig,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/user-config';
 
@@ -37,7 +39,6 @@ class UserConfigApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -57,17 +58,24 @@ class UserConfigApi {
   /// Parameters:
   ///
   /// * [UserConfig] userConfig (required):
-  Future<UserConfig?> userConfigControllerEdit(UserConfig userConfig,) async {
-    final response = await userConfigControllerEditWithHttpInfo(userConfig,);
+  Future<UserConfig?> userConfigControllerEdit(
+    UserConfig userConfig,
+  ) async {
+    final response = await userConfigControllerEditWithHttpInfo(
+      userConfig,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserConfig',) as UserConfig;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UserConfig',
+      ) as UserConfig;
     }
     return null;
   }
@@ -89,7 +97,6 @@ class UserConfigApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -113,9 +120,12 @@ class UserConfigApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UserConfig',) as UserConfig;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'UserConfig',
+      ) as UserConfig;
     }
     return null;
   }

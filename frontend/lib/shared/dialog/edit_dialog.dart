@@ -44,7 +44,9 @@ void showSproutEditDialog({
         ),
       ];
 
-  final controllers = dialogFields.map((f) => TextEditingController(text: f.currentValue)).toList();
+  final controllers = dialogFields
+      .map((f) => TextEditingController(text: f.currentValue))
+      .toList();
 
   final initialValues = dialogFields.map((f) => f.currentValue ?? "").toList();
 
@@ -84,7 +86,8 @@ void showSproutEditDialog({
           if (description != null)
             Text(
               description,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ...List.generate(dialogFields.length, (index) {
@@ -94,8 +97,12 @@ void showSproutEditDialog({
               controller: controller,
               autofocus: index == 0,
               obscureText: field.obscureText,
-              textInputAction: index == dialogFields.length - 1 ? TextInputAction.done : TextInputAction.next,
-              onSubmitted: index == dialogFields.length - 1 ? (_) => submit(innerContext) : null,
+              textInputAction: index == dialogFields.length - 1
+                  ? TextInputAction.done
+                  : TextInputAction.next,
+              onSubmitted: index == dialogFields.length - 1
+                  ? (_) => submit(innerContext)
+                  : null,
               decoration: InputDecoration(
                 labelText: field.label,
                 prefixIcon: Icon(field.icon),

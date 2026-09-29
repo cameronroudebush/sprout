@@ -26,7 +26,11 @@ class BiometricState {
     this.hasInitialized = false,
   });
 
-  BiometricState copyWith({bool? isLocked, bool? isUnlocking, bool? isLoggingOut, bool? hasInitialized}) {
+  BiometricState copyWith(
+      {bool? isLocked,
+      bool? isUnlocking,
+      bool? isLoggingOut,
+      bool? hasInitialized}) {
     return BiometricState(
       isLocked: isLocked ?? this.isLocked,
       isUnlocking: isUnlocking ?? this.isUnlocking,
@@ -96,7 +100,11 @@ class Biometrics extends _$Biometrics {
     }
 
     final isLoggedIn = ref.read(authProvider).value != null;
-    if (!kIsWeb && isLoggedIn && !state.isLoggingOut && state.isLocked && !state.isUnlocking) {
+    if (!kIsWeb &&
+        isLoggedIn &&
+        !state.isLoggingOut &&
+        state.isLocked &&
+        !state.isUnlocking) {
       final success = await _internalUnlock();
       if (success) {
         if (!state.isLocked) await disableScreenPrivacy();
@@ -108,7 +116,8 @@ class Biometrics extends _$Biometrics {
   /// App Background-ed: Start grace period timer
   Future<void> lockBackground() async {
     final isLoggedIn = ref.read(authProvider).value != null;
-    if (kIsWeb || state.isUnlocking || state.isLoggingOut || !isLoggedIn) return;
+    if (kIsWeb || state.isUnlocking || state.isLoggingOut || !isLoggedIn)
+      return;
 
     final secureMode = ref.read(userConfigProvider).value?.secureMode ?? false;
     if (secureMode) {
@@ -134,11 +143,13 @@ class Biometrics extends _$Biometrics {
     if (!kIsWeb && secureMode) {
       final success = await requestBiometricAuth();
       if (!success) {
-        state = state.copyWith(isLoggingOut: true, isLocked: preLogout ? false : state.isLocked);
+        state = state.copyWith(
+            isLoggingOut: true, isLocked: preLogout ? false : state.isLocked);
         try {
           await ref.read(authProvider.notifier).logout();
         } finally {
-          state = BiometricState(isLocked: false, isLoggingOut: false, hasInitialized: true);
+          state = BiometricState(
+              isLocked: false, isLoggingOut: false, hasInitialized: true);
         }
         return false;
       }
@@ -193,11 +204,15 @@ class Biometrics extends _$Biometrics {
     if (enable) {
       final success = await requestBiometricAuth();
       if (success) {
-        await ref.read(userConfigProvider.notifier).updateConfig((c) => c.copyWith(secureMode: true));
+        await ref
+            .read(userConfigProvider.notifier)
+            .updateConfig((c) => c.copyWith(secureMode: true));
         await _syncNativePrivacy(true);
       }
     } else {
-      await ref.read(userConfigProvider.notifier).updateConfig((c) => c.copyWith(secureMode: false));
+      await ref
+          .read(userConfigProvider.notifier)
+          .updateConfig((c) => c.copyWith(secureMode: false));
       await reset();
       await _syncNativePrivacy(false);
     }

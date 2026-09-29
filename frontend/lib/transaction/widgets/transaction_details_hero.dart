@@ -93,7 +93,9 @@ class TransactionHeroCard extends ConsumerWidget {
                   formatter.format(transaction.amount),
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: transaction.amount < 0 ? theme.colorScheme.onSurface : theme.colorScheme.primary,
+                    color: transaction.amount < 0
+                        ? theme.colorScheme.onSurface
+                        : theme.colorScheme.primary,
                   ),
                 ),
               ],
@@ -108,13 +110,17 @@ class TransactionHeroCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isPending ? theme.colorScheme.errorContainer : theme.colorScheme.secondary,
+        color: isPending
+            ? theme.colorScheme.errorContainer
+            : theme.colorScheme.secondary,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         (isPending ? "Pending" : "Posted").toTitleCase,
         style: theme.textTheme.labelSmall?.copyWith(
-          color: isPending ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSecondary,
+          color: isPending
+              ? theme.colorScheme.onErrorContainer
+              : theme.colorScheme.onSecondary,
           fontWeight: FontWeight.bold,
         ),
       ),

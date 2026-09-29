@@ -51,44 +51,47 @@ class Holding {
   String symbol;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Holding &&
-    other.id == id &&
-    other.accountId == accountId &&
-    _deepEquality.equals(other.extra, extra) &&
-    other.purchasePrice == purchasePrice &&
-    other.costBasis == costBasis &&
-    other.marketValue == marketValue &&
-    other.description == description &&
-    other.shares == shares &&
-    other.symbol == symbol;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Holding &&
+          other.id == id &&
+          other.accountId == accountId &&
+          _deepEquality.equals(other.extra, extra) &&
+          other.purchasePrice == purchasePrice &&
+          other.costBasis == costBasis &&
+          other.marketValue == marketValue &&
+          other.description == description &&
+          other.shares == shares &&
+          other.symbol == symbol;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (accountId.hashCode) +
-    (extra.hashCode) +
-    (purchasePrice.hashCode) +
-    (costBasis.hashCode) +
-    (marketValue.hashCode) +
-    (description.hashCode) +
-    (shares.hashCode) +
-    (symbol.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (accountId.hashCode) +
+      (extra.hashCode) +
+      (purchasePrice.hashCode) +
+      (costBasis.hashCode) +
+      (marketValue.hashCode) +
+      (description.hashCode) +
+      (shares.hashCode) +
+      (symbol.hashCode);
 
   @override
-  String toString() => 'Holding[id=$id, accountId=$accountId, extra=$extra, purchasePrice=$purchasePrice, costBasis=$costBasis, marketValue=$marketValue, description=$description, shares=$shares, symbol=$symbol]';
+  String toString() =>
+      'Holding[id=$id, accountId=$accountId, extra=$extra, purchasePrice=$purchasePrice, costBasis=$costBasis, marketValue=$marketValue, description=$description, shares=$shares, symbol=$symbol]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'accountId'] = this.accountId;
-      json[r'extra'] = this.extra;
-      json[r'purchasePrice'] = this.purchasePrice;
-      json[r'costBasis'] = this.costBasis;
-      json[r'marketValue'] = this.marketValue;
-      json[r'description'] = this.description;
-      json[r'shares'] = this.shares;
-      json[r'symbol'] = this.symbol;
+    json[r'id'] = this.id;
+    json[r'accountId'] = this.accountId;
+    json[r'extra'] = this.extra;
+    json[r'purchasePrice'] = this.purchasePrice;
+    json[r'costBasis'] = this.costBasis;
+    json[r'marketValue'] = this.marketValue;
+    json[r'description'] = this.description;
+    json[r'shares'] = this.shares;
+    json[r'symbol'] = this.symbol;
     return json;
   }
 
@@ -103,22 +106,38 @@ class Holding {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Holding[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Holding[id]" has a null value in JSON.');
-        assert(json.containsKey(r'accountId'), 'Required key "Holding[accountId]" is missing from JSON.');
-        assert(json[r'accountId'] != null, 'Required key "Holding[accountId]" has a null value in JSON.');
-        assert(json.containsKey(r'purchasePrice'), 'Required key "Holding[purchasePrice]" is missing from JSON.');
-        assert(json[r'purchasePrice'] != null, 'Required key "Holding[purchasePrice]" has a null value in JSON.');
-        assert(json.containsKey(r'costBasis'), 'Required key "Holding[costBasis]" is missing from JSON.');
-        assert(json[r'costBasis'] != null, 'Required key "Holding[costBasis]" has a null value in JSON.');
-        assert(json.containsKey(r'marketValue'), 'Required key "Holding[marketValue]" is missing from JSON.');
-        assert(json[r'marketValue'] != null, 'Required key "Holding[marketValue]" has a null value in JSON.');
-        assert(json.containsKey(r'description'), 'Required key "Holding[description]" is missing from JSON.');
-        assert(json[r'description'] != null, 'Required key "Holding[description]" has a null value in JSON.');
-        assert(json.containsKey(r'shares'), 'Required key "Holding[shares]" is missing from JSON.');
-        assert(json[r'shares'] != null, 'Required key "Holding[shares]" has a null value in JSON.');
-        assert(json.containsKey(r'symbol'), 'Required key "Holding[symbol]" is missing from JSON.');
-        assert(json[r'symbol'] != null, 'Required key "Holding[symbol]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Holding[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Holding[id]" has a null value in JSON.');
+        assert(json.containsKey(r'accountId'),
+            'Required key "Holding[accountId]" is missing from JSON.');
+        assert(json[r'accountId'] != null,
+            'Required key "Holding[accountId]" has a null value in JSON.');
+        assert(json.containsKey(r'purchasePrice'),
+            'Required key "Holding[purchasePrice]" is missing from JSON.');
+        assert(json[r'purchasePrice'] != null,
+            'Required key "Holding[purchasePrice]" has a null value in JSON.');
+        assert(json.containsKey(r'costBasis'),
+            'Required key "Holding[costBasis]" is missing from JSON.');
+        assert(json[r'costBasis'] != null,
+            'Required key "Holding[costBasis]" has a null value in JSON.');
+        assert(json.containsKey(r'marketValue'),
+            'Required key "Holding[marketValue]" is missing from JSON.');
+        assert(json[r'marketValue'] != null,
+            'Required key "Holding[marketValue]" has a null value in JSON.');
+        assert(json.containsKey(r'description'),
+            'Required key "Holding[description]" is missing from JSON.');
+        assert(json[r'description'] != null,
+            'Required key "Holding[description]" has a null value in JSON.');
+        assert(json.containsKey(r'shares'),
+            'Required key "Holding[shares]" is missing from JSON.');
+        assert(json[r'shares'] != null,
+            'Required key "Holding[shares]" has a null value in JSON.');
+        assert(json.containsKey(r'symbol'),
+            'Required key "Holding[symbol]" is missing from JSON.');
+        assert(json[r'symbol'] != null,
+            'Required key "Holding[symbol]" has a null value in JSON.');
         return true;
       }());
 
@@ -137,7 +156,10 @@ class Holding {
     return null;
   }
 
-  static List<Holding> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Holding> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Holding>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -165,13 +187,19 @@ class Holding {
   }
 
   // maps a json object with a list of Holding-objects as value to a dart map
-  static Map<String, List<Holding>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Holding>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Holding>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Holding.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Holding.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -189,4 +217,3 @@ class Holding {
     'symbol',
   };
 }
-

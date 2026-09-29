@@ -7,8 +7,10 @@ import 'package:sprout/category/widgets/category_icon.dart';
 
 /// A re-usable dropdown that allows us to select a category
 class CategoryDropdown extends ConsumerWidget {
-  static final fakeAllCategory = Category(id: "all", name: "All Categories", icon: "category");
-  static final unknownCategory = Category(id: "unknown" as dynamic, name: "Unknown", icon: "unknown");
+  static final fakeAllCategory =
+      Category(id: "all", name: "All Categories", icon: "category");
+  static final unknownCategory =
+      Category(id: "unknown" as dynamic, name: "Unknown", icon: "unknown");
 
   final String? selectedParentId;
   final String? editingCategoryId;
@@ -63,18 +65,23 @@ class CategoryDropdown extends ConsumerWidget {
       DropdownMenuItem(
         value: currentItem,
         child: Padding(
-          padding: applyPadding ? EdgeInsets.only(left: indentation) : EdgeInsets.zero,
+          padding: applyPadding
+              ? EdgeInsets.only(left: indentation)
+              : EdgeInsets.zero,
           child: _getDisplay(currentItem),
         ),
       ),
     );
 
-    final children = allCategories.where((c) => c.parentCategoryId == currentItem.id).toList();
+    final children = allCategories
+        .where((c) => c.parentCategoryId == currentItem.id)
+        .toList();
     children.sort((a, b) => a.name.compareTo(b.name));
 
     for (final child in children) {
       items.addAll(
-        _buildCategoryItems(allCategories, child, depth + 1, applyPadding: applyPadding, excludeId: excludeId),
+        _buildCategoryItems(allCategories, child, depth + 1,
+            applyPadding: applyPadding, excludeId: excludeId),
       );
     }
     return items;
@@ -92,8 +99,10 @@ class CategoryDropdown extends ConsumerWidget {
         final categories = [...cats];
         if (displayUnknownCategoryButton) categories.insert(0, unknownCategory);
         if (displayAllCategoryButton) categories.insert(0, fakeAllCategory);
-        var selectedValue = categories.firstWhereOrNull((c) => c.id == selectedParentId);
-        if (displayAllCategoryButton && selectedValue == null) selectedValue = CategoryDropdown.fakeAllCategory;
+        var selectedValue =
+            categories.firstWhereOrNull((c) => c.id == selectedParentId);
+        if (displayAllCategoryButton && selectedValue == null)
+          selectedValue = CategoryDropdown.fakeAllCategory;
 
         final topLevel = cats
             .where(
@@ -124,13 +133,14 @@ class CategoryDropdown extends ConsumerWidget {
           selectedItemBuilder: (context) {
             return topLevel
                 .expand(
-                  (parent) =>
-                      _buildCategoryItems(categories, parent, 0, applyPadding: false, excludeId: editingCategoryId),
+                  (parent) => _buildCategoryItems(categories, parent, 0,
+                      applyPadding: false, excludeId: editingCategoryId),
                 )
                 .toList();
           },
           items: topLevel
-              .expand((parent) => _buildCategoryItems(categories, parent, 0, excludeId: editingCategoryId))
+              .expand((parent) => _buildCategoryItems(categories, parent, 0,
+                  excludeId: editingCategoryId))
               .toList(),
           onChanged: !enabled ? null : onChanged,
         );

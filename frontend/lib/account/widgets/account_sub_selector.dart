@@ -47,7 +47,11 @@ class AccountSubTypeSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Map<AccountTypeEnum, List<AccountSubTypeEnum>> typeToSubTypeMap = {
-      AccountTypeEnum.depository: [AccountSubTypeEnum.savings, AccountSubTypeEnum.checking, AccountSubTypeEnum.HYSA],
+      AccountTypeEnum.depository: [
+        AccountSubTypeEnum.savings,
+        AccountSubTypeEnum.checking,
+        AccountSubTypeEnum.HYSA
+      ],
       AccountTypeEnum.investment: [
         AccountSubTypeEnum.n401k,
         AccountSubTypeEnum.brokerage,
@@ -63,11 +67,19 @@ class AccountSubTypeSelect extends StatelessWidget {
       AccountTypeEnum.asset: [
         AccountSubTypeEnum.house,
       ],
-      AccountTypeEnum.credit: [AccountSubTypeEnum.travel, AccountSubTypeEnum.cashBack],
-      AccountTypeEnum.crypto: [AccountSubTypeEnum.wallet, AccountSubTypeEnum.staking],
+      AccountTypeEnum.credit: [
+        AccountSubTypeEnum.travel,
+        AccountSubTypeEnum.cashBack
+      ],
+      AccountTypeEnum.crypto: [
+        AccountSubTypeEnum.wallet,
+        AccountSubTypeEnum.staking
+      ],
     };
 
-    final List<AccountSubTypeEnum> items = [...typeToSubTypeMap[account.type] ?? []];
+    final List<AccountSubTypeEnum> items = [
+      ...typeToSubTypeMap[account.type] ?? []
+    ];
     items.add(AccountSubTypeEnum.other); // Everyone gets other as an option
     if (items.isEmpty) return const SizedBox.shrink();
 
@@ -84,7 +96,8 @@ class AccountSubTypeSelect extends StatelessWidget {
       items: items.map((AccountSubTypeEnum value) {
         return DropdownMenuItem<AccountSubTypeEnum>(
           value: value,
-          child: Row(mainAxisSize: MainAxisSize.min, children: [Text(value.value)]),
+          child: Row(
+              mainAxisSize: MainAxisSize.min, children: [Text(value.value)]),
         );
       }).toList(),
       onChanged: onChanged,

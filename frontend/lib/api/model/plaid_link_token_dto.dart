@@ -19,20 +19,21 @@ class PlaidLinkTokenDTO {
   String linkToken;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PlaidLinkTokenDTO &&
-    other.linkToken == linkToken;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlaidLinkTokenDTO && other.linkToken == linkToken;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (linkToken.hashCode);
+      // ignore: unnecessary_parenthesis
+      (linkToken.hashCode);
 
   @override
   String toString() => 'PlaidLinkTokenDTO[linkToken=$linkToken]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'linkToken'] = this.linkToken;
+    json[r'linkToken'] = this.linkToken;
     return json;
   }
 
@@ -47,8 +48,10 @@ class PlaidLinkTokenDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'linkToken'), 'Required key "PlaidLinkTokenDTO[linkToken]" is missing from JSON.');
-        assert(json[r'linkToken'] != null, 'Required key "PlaidLinkTokenDTO[linkToken]" has a null value in JSON.');
+        assert(json.containsKey(r'linkToken'),
+            'Required key "PlaidLinkTokenDTO[linkToken]" is missing from JSON.');
+        assert(json[r'linkToken'] != null,
+            'Required key "PlaidLinkTokenDTO[linkToken]" has a null value in JSON.');
         return true;
       }());
 
@@ -59,7 +62,10 @@ class PlaidLinkTokenDTO {
     return null;
   }
 
-  static List<PlaidLinkTokenDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PlaidLinkTokenDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PlaidLinkTokenDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -87,13 +93,19 @@ class PlaidLinkTokenDTO {
   }
 
   // maps a json object with a list of PlaidLinkTokenDTO-objects as value to a dart map
-  static Map<String, List<PlaidLinkTokenDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PlaidLinkTokenDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PlaidLinkTokenDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PlaidLinkTokenDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PlaidLinkTokenDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -104,4 +116,3 @@ class PlaidLinkTokenDTO {
     'linkToken',
   };
 }
-

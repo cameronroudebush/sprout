@@ -10,10 +10,12 @@ class SproutCalendar<T> extends StatefulWidget {
   final List<T> events;
 
   /// A function that allows decoration of specific day cells
-  final BoxDecoration? Function(BuildContext context, List<T> events)? cellDecorationBuilder;
+  final BoxDecoration? Function(BuildContext context, List<T> events)?
+      cellDecorationBuilder;
 
   /// On day selected callback
-  final void Function(DateTime day, List<T> events, bool wasAutomatic)? onDaySelected;
+  final void Function(DateTime day, List<T> events, bool wasAutomatic)?
+      onDaySelected;
 
   /// A callback used to determine what we display each day
   final Widget Function(BuildContext context, List<T> events)? dayDisplay;
@@ -85,7 +87,8 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
 
     var days = _getDaysInMonth(_focusedDate);
     if (!widget.displayOutsideDays) {
-      final lastDayOfMonthIndex = days.lastIndexWhere((d) => d.month == _focusedDate.month);
+      final lastDayOfMonthIndex =
+          days.lastIndexWhere((d) => d.month == _focusedDate.month);
       final weeksNeeded = (lastDayOfMonthIndex ~/ 7) + 1;
       days = days.take(weeksNeeded * 7).toList();
     }
@@ -94,14 +97,17 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
     final totalWeeks = days.length / 7;
 
     return SproutLayoutBuilder((isDesktop, context, constraints) {
-      final double dynamicAspectRatio = isDesktop ? (totalWeeks > 5 ? 2.1 : 1.75) : (totalWeeks > 5 ? 1.2 : 1.0);
+      final double dynamicAspectRatio = isDesktop
+          ? (totalWeeks > 5 ? 2.1 : 1.75)
+          : (totalWeeks > 5 ? 1.2 : 1.0);
 
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Month/Year - Navigation
           Padding(
-            padding: EdgeInsets.only(left: 8, right: 8, bottom: widget.allowSelection ? 0 : 6),
+            padding: EdgeInsets.only(
+                left: 8, right: 8, bottom: widget.allowSelection ? 0 : 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -114,8 +120,11 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                           message: "Go to today's date.",
                           child: IconButton(
                             icon: const Icon(Icons.today),
-                            onPressed: !DateUtils.isSameDay(_focusedDate, DateTime.now()) && widget.allowSelection
-                                ? () => _focusDay(DateTime.now(), wasAutomatic: true)
+                            onPressed: !DateUtils.isSameDay(
+                                        _focusedDate, DateTime.now()) &&
+                                    widget.allowSelection
+                                ? () => _focusDay(DateTime.now(),
+                                    wasAutomatic: true)
                                 : null,
                           ),
                         ),
@@ -136,11 +145,13 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurface),
+                          icon: Icon(Icons.chevron_left,
+                              color: theme.colorScheme.onSurface),
                           onPressed: _previousMonth,
                         ),
                         IconButton(
-                          icon: Icon(Icons.chevron_right, color: theme.colorScheme.onSurface),
+                          icon: Icon(Icons.chevron_right,
+                              color: theme.colorScheme.onSurface),
                           onPressed: _nextMonth,
                         ),
                       ],
@@ -177,7 +188,9 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
               itemCount: days.length,
               itemBuilder: (context, index) {
                 final date = days[index];
-                final eventsForDay = widget.events.where((e) => widget.isOnDay(date, e)).toList();
+                final eventsForDay = widget.events
+                    .where((e) => widget.isOnDay(date, e))
+                    .toList();
                 return _CalendarCell(
                   date: date,
                   focusedDate: _focusedDate,
@@ -200,8 +213,10 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
   List<DateTime> _getDaysInMonth(DateTime date) {
     final firstDayOfMonth = DateTime(date.year, date.month, 1);
     final firstWeekday = firstDayOfMonth.weekday % 7;
-    final startOfCalendar = DateUtils.addDaysToDate(firstDayOfMonth, -firstWeekday);
-    return List.generate(42, (index) => DateUtils.addDaysToDate(startOfCalendar, index));
+    final startOfCalendar =
+        DateUtils.addDaysToDate(firstDayOfMonth, -firstWeekday);
+    return List.generate(
+        42, (index) => DateUtils.addDaysToDate(startOfCalendar, index));
   }
 }
 
@@ -211,9 +226,11 @@ class _CalendarCell<T> extends StatelessWidget {
   final DateTime focusedDate;
   final List<T> events;
   final bool displayOutsideDays;
-  final Widget Function(BuildContext context, List<T> events)? eventMarkerBuilder;
+  final Widget Function(BuildContext context, List<T> events)?
+      eventMarkerBuilder;
   final void Function(DateTime day, List<T> events)? onDaySelected;
-  final BoxDecoration? Function(BuildContext context, List<T> events)? cellDecorationBuilder;
+  final BoxDecoration? Function(BuildContext context, List<T> events)?
+      cellDecorationBuilder;
 
   const _CalendarCell({
     super.key,
@@ -229,16 +246,21 @@ class _CalendarCell<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isToday =
-        date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final isToday = date.year == DateTime.now().year &&
+        date.month == DateTime.now().month &&
+        date.day == DateTime.now().day;
     final isThisMonth = date.month == focusedDate.month;
-    final isFocused = date.day == focusedDate.day && date.month == focusedDate.month && date.year == focusedDate.year;
+    final isFocused = date.day == focusedDate.day &&
+        date.month == focusedDate.month &&
+        date.year == focusedDate.year;
 
     // Hide the day if it's not in the current month and the flag is off
     if (!displayOutsideDays && !isThisMonth) return Container();
 
     final defaultDecoration = BoxDecoration(
-        color: isFocused ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
+        color: isFocused
+            ? theme.colorScheme.primary.withOpacity(0.3)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         border: isToday
             ? BoxBorder.all(color: theme.colorScheme.secondary)
@@ -254,9 +276,12 @@ class _CalendarCell<T> extends StatelessWidget {
         child: Column(
           children: [
             //  Day Number
-            Text('${date.day}', style: !isThisMonth ? const TextStyle(color: Colors.grey) : null),
+            Text('${date.day}',
+                style:
+                    !isThisMonth ? const TextStyle(color: Colors.grey) : null),
             // Event Marker
-            if (eventMarkerBuilder != null) Expanded(child: eventMarkerBuilder!(context, events)),
+            if (eventMarkerBuilder != null)
+              Expanded(child: eventMarkerBuilder!(context, events)),
           ],
         ),
       ),

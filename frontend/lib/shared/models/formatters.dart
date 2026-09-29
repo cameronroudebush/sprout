@@ -1,7 +1,4 @@
-
-
 // /// String formatters
-
 
 // /// Formats the given account type string to a prettier name
 // String formatAccountType(AccountTypeEnum accountType) {
@@ -16,7 +13,5 @@
 //       return accountType.value.toTitleCase;
 //   }
 // }
-
-
 
 // /// Date formatters

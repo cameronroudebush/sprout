@@ -34,9 +34,13 @@ class ThemeStyleEnum {
     colored,
   ];
 
-  static ThemeStyleEnum? fromJson(dynamic value) => ThemeStyleEnumTypeTransformer().decode(value);
+  static ThemeStyleEnum? fromJson(dynamic value) =>
+      ThemeStyleEnumTypeTransformer().decode(value);
 
-  static List<ThemeStyleEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ThemeStyleEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ThemeStyleEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -53,7 +57,8 @@ class ThemeStyleEnum {
 /// Transformation class that can [encode] an instance of [ThemeStyleEnum] to String,
 /// and [decode] dynamic data back to [ThemeStyleEnum].
 class ThemeStyleEnumTypeTransformer {
-  factory ThemeStyleEnumTypeTransformer() => _instance ??= const ThemeStyleEnumTypeTransformer._();
+  factory ThemeStyleEnumTypeTransformer() =>
+      _instance ??= const ThemeStyleEnumTypeTransformer._();
 
   const ThemeStyleEnumTypeTransformer._();
 
@@ -70,9 +75,12 @@ class ThemeStyleEnumTypeTransformer {
   ThemeStyleEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'bliss': return ThemeStyleEnum.bliss;
-        case r'absolute': return ThemeStyleEnum.absolute;
-        case r'colored': return ThemeStyleEnum.colored;
+        case r'bliss':
+          return ThemeStyleEnum.bliss;
+        case r'absolute':
+          return ThemeStyleEnum.absolute;
+        case r'colored':
+          return ThemeStyleEnum.colored;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -85,4 +93,3 @@ class ThemeStyleEnumTypeTransformer {
   /// Singleton [ThemeStyleEnumTypeTransformer] instance.
   static ThemeStyleEnumTypeTransformer? _instance;
 }
-

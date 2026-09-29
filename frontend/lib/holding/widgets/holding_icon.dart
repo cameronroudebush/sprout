@@ -15,7 +15,8 @@ class HoldingIcon extends LogoBaseWidget<Holding> {
   const HoldingIcon(super.logoClass, this.account, {super.key});
 
   @override
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, Holding data, double size) {
+  ProviderListenable<AsyncValue<List<String>>> getProvider(
+      BuildContext context, Holding data, double size) {
     return tickerIconProvider(logoClass, account.institution, size);
   }
 

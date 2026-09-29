@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class TransactionRuleApi {
-  TransactionRuleApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  TransactionRuleApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -29,7 +29,10 @@ class TransactionRuleApi {
   ///
   /// * [bool] resetCategories:
   ///   If true, resets categories to null for transactions that do not match any current rules.
-  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({ bool? force, bool? resetCategories, }) async {
+  Future<Response> transactionRuleControllerApplyRulesWithHttpInfo({
+    bool? force,
+    bool? resetCategories,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule/apply';
 
@@ -49,7 +52,6 @@ class TransactionRuleApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'POST',
@@ -72,8 +74,14 @@ class TransactionRuleApi {
   ///
   /// * [bool] resetCategories:
   ///   If true, resets categories to null for transactions that do not match any current rules.
-  Future<void> transactionRuleControllerApplyRules({ bool? force, bool? resetCategories, }) async {
-    final response = await transactionRuleControllerApplyRulesWithHttpInfo( force: force, resetCategories: resetCategories, );
+  Future<void> transactionRuleControllerApplyRules({
+    bool? force,
+    bool? resetCategories,
+  }) async {
+    final response = await transactionRuleControllerApplyRulesWithHttpInfo(
+      force: force,
+      resetCategories: resetCategories,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -88,7 +96,9 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<Response> transactionRuleControllerCreateWithHttpInfo(TransactionRule transactionRule,) async {
+  Future<Response> transactionRuleControllerCreateWithHttpInfo(
+    TransactionRule transactionRule,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction-rule';
 
@@ -100,7 +110,6 @@ class TransactionRuleApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -120,17 +129,24 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<TransactionRule?> transactionRuleControllerCreate(TransactionRule transactionRule,) async {
-    final response = await transactionRuleControllerCreateWithHttpInfo(transactionRule,);
+  Future<TransactionRule?> transactionRuleControllerCreate(
+    TransactionRule transactionRule,
+  ) async {
+    final response = await transactionRuleControllerCreateWithHttpInfo(
+      transactionRule,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'TransactionRule',) as TransactionRule;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'TransactionRule',
+      ) as TransactionRule;
     }
     return null;
   }
@@ -144,10 +160,11 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> transactionRuleControllerDeleteWithHttpInfo(String id,) async {
+  Future<Response> transactionRuleControllerDeleteWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/transaction-rule/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/transaction-rule/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -157,7 +174,6 @@ class TransactionRuleApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -177,8 +193,12 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> transactionRuleControllerDelete(String id,) async {
-    final response = await transactionRuleControllerDeleteWithHttpInfo(id,);
+  Future<void> transactionRuleControllerDelete(
+    String id,
+  ) async {
+    final response = await transactionRuleControllerDeleteWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -195,10 +215,12 @@ class TransactionRuleApi {
   /// * [String] id (required):
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<Response> transactionRuleControllerEditWithHttpInfo(String id, TransactionRule transactionRule,) async {
+  Future<Response> transactionRuleControllerEditWithHttpInfo(
+    String id,
+    TransactionRule transactionRule,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/transaction-rule/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/transaction-rule/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = transactionRule;
@@ -208,7 +230,6 @@ class TransactionRuleApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -230,17 +251,26 @@ class TransactionRuleApi {
   /// * [String] id (required):
   ///
   /// * [TransactionRule] transactionRule (required):
-  Future<TransactionRule?> transactionRuleControllerEdit(String id, TransactionRule transactionRule,) async {
-    final response = await transactionRuleControllerEditWithHttpInfo(id, transactionRule,);
+  Future<TransactionRule?> transactionRuleControllerEdit(
+    String id,
+    TransactionRule transactionRule,
+  ) async {
+    final response = await transactionRuleControllerEditWithHttpInfo(
+      id,
+      transactionRule,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'TransactionRule',) as TransactionRule;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'TransactionRule',
+      ) as TransactionRule;
     }
     return null;
   }
@@ -262,7 +292,6 @@ class TransactionRuleApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -286,12 +315,13 @@ class TransactionRuleApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<TransactionRule>') as List)
-        .cast<TransactionRule>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<TransactionRule>') as List)
+          .cast<TransactionRule>()
+          .toList(growable: false);
     }
     return null;
   }

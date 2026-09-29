@@ -25,13 +25,19 @@ class SubscriptionCalendarWidget extends ConsumerStatefulWidget {
   /// Target icon sizing
   final double? iconSize;
 
-  const SubscriptionCalendarWidget({super.key, this.showDetails = true, this.detailsPopup = true, this.iconSize});
+  const SubscriptionCalendarWidget(
+      {super.key,
+      this.showDetails = true,
+      this.detailsPopup = true,
+      this.iconSize});
 
   @override
-  ConsumerState<SubscriptionCalendarWidget> createState() => _SubscriptionCalendarWidgetState();
+  ConsumerState<SubscriptionCalendarWidget> createState() =>
+      _SubscriptionCalendarWidgetState();
 }
 
-class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalendarWidget> {
+class _SubscriptionCalendarWidgetState
+    extends ConsumerState<SubscriptionCalendarWidget> {
   DateTime _selectedDay = DateTime.now();
 
   @override
@@ -43,7 +49,8 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
       emptyCondition: (subs) => subs.isEmpty,
       emptyWidget: SubscriptionsEmptyWidget(),
       data: (subs) {
-        final eventsForCurrentDay = subs.where((s) => s.isBilledOn(_selectedDay)).toList();
+        final eventsForCurrentDay =
+            subs.where((s) => s.isBilledOn(_selectedDay)).toList();
 
         return SproutLayoutBuilder((isDesktop, context, constraints) {
           if (isDesktop) {
@@ -69,7 +76,8 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
             spacing: 6,
             children: [
               _buildCalendarCard(subs, theme, isDesktop),
-              if (widget.showDetails) _buildSelectedDayCard(eventsForCurrentDay, theme),
+              if (widget.showDetails)
+                _buildSelectedDayCard(eventsForCurrentDay, theme),
             ],
           );
         });
@@ -78,7 +86,8 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
   }
 
   /// Builds the calendar card to display in a calendar format of when the subs are
-  Widget _buildCalendarCard(List<TransactionSubscription> subs, ThemeData theme, bool isDesktop) {
+  Widget _buildCalendarCard(
+      List<TransactionSubscription> subs, ThemeData theme, bool isDesktop) {
     return SproutCard(
       child: SproutCalendar(
         subs,
@@ -89,7 +98,10 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
           ref.read(selectedCalendarMonthProvider.notifier).state = day;
 
           // Open the popup if details are hidden, popups are active, and there are actual events
-          if (!wasAutomatic && !widget.showDetails && widget.detailsPopup && events.isNotEmpty) {
+          if (!wasAutomatic &&
+              !widget.showDetails &&
+              widget.detailsPopup &&
+              events.isNotEmpty) {
             final typedEvents = events.cast<TransactionSubscription>().toList();
             _openDetailsPopup(typedEvents, day, theme);
           }
@@ -100,11 +112,14 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
             final iconSize = widget.iconSize ?? (isDesktop ? 28 : 12);
             const spacing = 4;
 
-            final double maxAvailableWidth = events.length * (iconSize + spacing) > constraints.maxWidth
-                ? constraints.maxWidth - 16
-                : constraints.maxWidth;
+            final double maxAvailableWidth =
+                events.length * (iconSize + spacing) > constraints.maxWidth
+                    ? constraints.maxWidth - 16
+                    : constraints.maxWidth;
 
-            final maxLogos = (maxAvailableWidth / (iconSize + spacing)).floor().clamp(0, events.length);
+            final maxLogos = (maxAvailableWidth / (iconSize + spacing))
+                .floor()
+                .clamp(0, events.length);
             final displayedEvents = events.take(maxLogos).toList();
             final remainingCount = events.length - displayedEvents.length;
 
@@ -115,7 +130,9 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                 ...displayedEvents.map(
                   (e) => AccountIcon(e.account, size: iconSize.toDouble()),
                 ),
-                if (remainingCount > 0) Text("+$remainingCount", style: TextStyle(fontSize: iconSize * 0.8)),
+                if (remainingCount > 0)
+                  Text("+$remainingCount",
+                      style: TextStyle(fontSize: iconSize * 0.8)),
               ],
             );
           });
@@ -125,23 +142,30 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
   }
 
   /// Builds the card that shows what transaction subscriptions are available for the current day.
-  Widget _buildSelectedDayCard(List<TransactionSubscription> events, ThemeData theme, {bool isInPopup = false}) {
+  Widget _buildSelectedDayCard(
+      List<TransactionSubscription> events, ThemeData theme,
+      {bool isInPopup = false}) {
     final cardContent = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (!isInPopup)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(DateFormat.yMMMMd().format(_selectedDay), style: const TextStyle(fontSize: 16)),
+            child: Text(DateFormat.yMMMMd().format(_selectedDay),
+                style: const TextStyle(fontSize: 16)),
           ),
         if (!isInPopup) const Divider(height: 1),
         if (events.isEmpty)
-          const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Text("No subscriptions billed today"))
+          const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Text("No subscriptions billed today"))
         else
           Flexible(
             child: ListView.separated(
               shrinkWrap: true,
-              physics: isInPopup ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
+              physics: isInPopup
+                  ? const ClampingScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               itemCount: events.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, i) {
@@ -156,11 +180,13 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
                     size: 24,
                   ),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: theme.colorScheme.outlineVariant, width: 0.5),
+                      border: Border.all(
+                          color: theme.colorScheme.outlineVariant, width: 0.5),
                     ),
                     child: Text(
                       displayPeriod,
@@ -189,7 +215,8 @@ class _SubscriptionCalendarWidgetState extends ConsumerState<SubscriptionCalenda
   }
 
   /// Used to show a popup of subscription details instead of rendering below the calendar.
-  void _openDetailsPopup(List<TransactionSubscription> events, DateTime date, ThemeData theme) {
+  void _openDetailsPopup(
+      List<TransactionSubscription> events, DateTime date, ThemeData theme) {
     showSproutPopup(
       context: context,
       builder: (ctx) => SproutBaseDialogWidget(

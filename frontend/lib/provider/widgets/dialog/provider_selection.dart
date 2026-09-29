@@ -51,7 +51,8 @@ class ProviderSelectionList extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Center(
-          child: Text("No providers configured.", style: theme.textTheme.bodyLarge),
+          child: Text("No providers configured.",
+              style: theme.textTheme.bodyLarge),
         ),
       );
     }
@@ -71,7 +72,8 @@ class ProviderSelectionList extends StatelessWidget {
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         elevation: 0,
-        color: theme.colorScheme.secondary.withOpacity(!provider.enabled ? .4 : 1),
+        color:
+            theme.colorScheme.secondary.withOpacity(!provider.enabled ? .4 : 1),
         shape: RoundedRectangleBorder(
           side: BorderSide(color: theme.dividerColor.withOpacity(0.15)),
           borderRadius: BorderRadius.circular(16),
@@ -79,7 +81,8 @@ class ProviderSelectionList extends StatelessWidget {
         child: InkWell(
           onTap: !provider.enabled ? null : () => onProviderSelected(provider),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 8,
@@ -136,7 +139,8 @@ class ProviderSelectionList extends StatelessWidget {
                 final categoryProviders = entry.value;
 
                 final categoryTitle = _getCategoryTitle(categoryEnum);
-                final categoryDescription = _getCategoryDescription(categoryEnum);
+                final categoryDescription =
+                    _getCategoryDescription(categoryEnum);
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -160,7 +164,8 @@ class ProviderSelectionList extends StatelessWidget {
                             Text(
                               categoryDescription,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withOpacity(0.8),
                               ),
                             ),
                           ],

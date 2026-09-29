@@ -36,28 +36,31 @@ class CashFlowStats {
   Transaction? largestExpense;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CashFlowStats &&
-    other.totalExpense == totalExpense &&
-    other.totalIncome == totalIncome &&
-    other.count == count &&
-    other.largestExpense == largestExpense;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CashFlowStats &&
+          other.totalExpense == totalExpense &&
+          other.totalIncome == totalIncome &&
+          other.count == count &&
+          other.largestExpense == largestExpense;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (totalExpense.hashCode) +
-    (totalIncome.hashCode) +
-    (count.hashCode) +
-    (largestExpense == null ? 0 : largestExpense!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (totalExpense.hashCode) +
+      (totalIncome.hashCode) +
+      (count.hashCode) +
+      (largestExpense == null ? 0 : largestExpense!.hashCode);
 
   @override
-  String toString() => 'CashFlowStats[totalExpense=$totalExpense, totalIncome=$totalIncome, count=$count, largestExpense=$largestExpense]';
+  String toString() =>
+      'CashFlowStats[totalExpense=$totalExpense, totalIncome=$totalIncome, count=$count, largestExpense=$largestExpense]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'totalExpense'] = this.totalExpense;
-      json[r'totalIncome'] = this.totalIncome;
-      json[r'count'] = this.count;
+    json[r'totalExpense'] = this.totalExpense;
+    json[r'totalIncome'] = this.totalIncome;
+    json[r'count'] = this.count;
     if (this.largestExpense != null) {
       json[r'largestExpense'] = this.largestExpense;
     } else {
@@ -77,12 +80,18 @@ class CashFlowStats {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'totalExpense'), 'Required key "CashFlowStats[totalExpense]" is missing from JSON.');
-        assert(json[r'totalExpense'] != null, 'Required key "CashFlowStats[totalExpense]" has a null value in JSON.');
-        assert(json.containsKey(r'totalIncome'), 'Required key "CashFlowStats[totalIncome]" is missing from JSON.');
-        assert(json[r'totalIncome'] != null, 'Required key "CashFlowStats[totalIncome]" has a null value in JSON.');
-        assert(json.containsKey(r'count'), 'Required key "CashFlowStats[count]" is missing from JSON.');
-        assert(json[r'count'] != null, 'Required key "CashFlowStats[count]" has a null value in JSON.');
+        assert(json.containsKey(r'totalExpense'),
+            'Required key "CashFlowStats[totalExpense]" is missing from JSON.');
+        assert(json[r'totalExpense'] != null,
+            'Required key "CashFlowStats[totalExpense]" has a null value in JSON.');
+        assert(json.containsKey(r'totalIncome'),
+            'Required key "CashFlowStats[totalIncome]" is missing from JSON.');
+        assert(json[r'totalIncome'] != null,
+            'Required key "CashFlowStats[totalIncome]" has a null value in JSON.');
+        assert(json.containsKey(r'count'),
+            'Required key "CashFlowStats[count]" is missing from JSON.');
+        assert(json[r'count'] != null,
+            'Required key "CashFlowStats[count]" has a null value in JSON.');
         return true;
       }());
 
@@ -96,7 +105,10 @@ class CashFlowStats {
     return null;
   }
 
-  static List<CashFlowStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CashFlowStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CashFlowStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,13 +136,19 @@ class CashFlowStats {
   }
 
   // maps a json object with a list of CashFlowStats-objects as value to a dart map
-  static Map<String, List<CashFlowStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CashFlowStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CashFlowStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CashFlowStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CashFlowStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -143,4 +161,3 @@ class CashFlowStats {
     'count',
   };
 }
-

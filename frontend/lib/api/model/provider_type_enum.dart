@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class ProviderTypeEnum {
   /// Instantiate a new enum with the provided [value].
   const ProviderTypeEnum._(this.value);
@@ -38,9 +37,13 @@ class ProviderTypeEnum {
     coinbase,
   ];
 
-  static ProviderTypeEnum? fromJson(dynamic value) => ProviderTypeEnumTypeTransformer().decode(value);
+  static ProviderTypeEnum? fromJson(dynamic value) =>
+      ProviderTypeEnumTypeTransformer().decode(value);
 
-  static List<ProviderTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ProviderTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ProviderTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -57,7 +60,8 @@ class ProviderTypeEnum {
 /// Transformation class that can [encode] an instance of [ProviderTypeEnum] to String,
 /// and [decode] dynamic data back to [ProviderTypeEnum].
 class ProviderTypeEnumTypeTransformer {
-  factory ProviderTypeEnumTypeTransformer() => _instance ??= const ProviderTypeEnumTypeTransformer._();
+  factory ProviderTypeEnumTypeTransformer() =>
+      _instance ??= const ProviderTypeEnumTypeTransformer._();
 
   const ProviderTypeEnumTypeTransformer._();
 
@@ -74,11 +78,16 @@ class ProviderTypeEnumTypeTransformer {
   ProviderTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'simple-fin': return ProviderTypeEnum.simpleFin;
-        case r'zillow': return ProviderTypeEnum.zillow;
-        case r'plaid': return ProviderTypeEnum.plaid;
-        case r'snapTrade': return ProviderTypeEnum.snapTrade;
-        case r'coinbase': return ProviderTypeEnum.coinbase;
+        case r'simple-fin':
+          return ProviderTypeEnum.simpleFin;
+        case r'zillow':
+          return ProviderTypeEnum.zillow;
+        case r'plaid':
+          return ProviderTypeEnum.plaid;
+        case r'snapTrade':
+          return ProviderTypeEnum.snapTrade;
+        case r'coinbase':
+          return ProviderTypeEnum.coinbase;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -91,4 +100,3 @@ class ProviderTypeEnumTypeTransformer {
   /// Singleton [ProviderTypeEnumTypeTransformer] instance.
   static ProviderTypeEnumTypeTransformer? _instance;
 }
-

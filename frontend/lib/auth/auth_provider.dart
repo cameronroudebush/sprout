@@ -64,7 +64,8 @@ class Auth extends _$Auth {
     final config = ref.read(unsecureConfigProvider).value;
     if (config != null && config.allowUserCreation) {
       isSetupMode = true;
-      LoggerProvider.debug("Initiating setup for new user with strategy ${config.authMode.toString()}.");
+      LoggerProvider.debug(
+          "Initiating setup for new user with strategy ${config.authMode.toString()}.");
       NavigationProvider.redirect("setup");
     }
   }
@@ -107,7 +108,8 @@ class Auth extends _$Auth {
     try {
       return await _applyAuth();
     } catch (e) {
-      LoggerProvider.debug("Cookie restoration failed, proceeding to OIDC redirect.");
+      LoggerProvider.debug(
+          "Cookie restoration failed, proceeding to OIDC redirect.");
     }
 
     // Full OIDC Authentication

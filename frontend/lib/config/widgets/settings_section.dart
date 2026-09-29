@@ -13,7 +13,8 @@ class SettingSection extends StatelessWidget {
 
   final double? elevation;
 
-  const SettingSection({super.key, required this.title, required this.children, this.elevation});
+  const SettingSection(
+      {super.key, required this.title, required this.children, this.elevation});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,9 @@ class SettingSection extends StatelessWidget {
               children: [
                 for (int i = 0; i < children.length; i++) ...[
                   children[i],
-                  if (i < children.length - 1) const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+                  if (i < children.length - 1)
+                    const Divider(
+                        height: 1, thickness: 1, indent: 16, endIndent: 16),
                 ],
               ],
             ),

@@ -17,7 +17,8 @@ abstract class LogoBaseWidget<T> extends ConsumerWidget {
   });
 
   /// Returns the watchable provider instance for the specific model type.
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, T data, double size);
+  ProviderListenable<AsyncValue<List<String>>> getProvider(
+      BuildContext context, T data, double size);
 
   /// Returns the icon to display if the image fails to load.
   Icon getFallbackIcon(BuildContext context) {
@@ -35,7 +36,8 @@ abstract class LogoBaseWidget<T> extends ConsumerWidget {
       urls[index],
       fit: BoxFit.contain,
       filterQuality: FilterQuality.medium,
-      errorBuilder: (context, error, stackTrace) => _buildImage(context, urls, index + 1),
+      errorBuilder: (context, error, stackTrace) =>
+          _buildImage(context, urls, index + 1),
     );
   }
 
@@ -58,7 +60,9 @@ abstract class LogoBaseWidget<T> extends ConsumerWidget {
             child: CircularProgressIndicator(strokeWidth: 2.0),
           ),
           error: (_, __) => Center(child: getFallbackIcon(context)),
-          data: (urls) => urls.isEmpty ? Center(child: getFallbackIcon(context)) : _buildImage(context, urls, 0),
+          data: (urls) => urls.isEmpty
+              ? Center(child: getFallbackIcon(context))
+              : _buildImage(context, urls, 0),
         ),
       ),
     );

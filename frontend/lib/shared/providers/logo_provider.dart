@@ -19,7 +19,8 @@ String _cleanDomain(String inputUrl) {
 
 /// Provides the institutions icon
 @Riverpod(keepAlive: true)
-Future<List<String>> institutionIcon(Ref ref, Institution institution, double size) async {
+Future<List<String>> institutionIcon(
+    Ref ref, Institution institution, double size) async {
   final clientId = ref.watch(secureConfigProvider).value?.brandFetchClientId;
   if (clientId == null) return [];
 
@@ -34,7 +35,8 @@ Future<List<String>> institutionIcon(Ref ref, Institution institution, double si
 
 /// Provides the institutions full logo
 @Riverpod(keepAlive: true)
-Future<List<String>> institutionLogo(Ref ref, Institution institution, double width) async {
+Future<List<String>> institutionLogo(
+    Ref ref, Institution institution, double width) async {
   final clientId = ref.watch(secureConfigProvider).value?.brandFetchClientId;
   if (clientId == null) return [];
 
@@ -47,7 +49,8 @@ Future<List<String>> institutionLogo(Ref ref, Institution institution, double wi
 
 /// Provides the ticker icon
 @Riverpod(keepAlive: true)
-Future<List<String>> tickerIcon(Ref ref, Holding holding, Institution institution, double size) async {
+Future<List<String>> tickerIcon(
+    Ref ref, Holding holding, Institution institution, double size) async {
   final clientId = ref.watch(secureConfigProvider).value?.brandFetchClientId;
   if (clientId == null) return [];
 
@@ -62,7 +65,8 @@ Future<List<String>> tickerIcon(Ref ref, Holding holding, Institution institutio
 
 /// Provides the account provider icon
 @Riverpod(keepAlive: true)
-Future<List<String>> providerIcon(Ref ref, ProviderConfig provider, double size) async {
+Future<List<String>> providerIcon(
+    Ref ref, ProviderConfig provider, double size) async {
   final clientId = ref.watch(secureConfigProvider).value?.brandFetchClientId;
   if (clientId == null) return [];
 

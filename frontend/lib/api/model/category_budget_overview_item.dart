@@ -50,28 +50,31 @@ class CategoryBudgetOverviewItem {
   bool isOverBudget;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CategoryBudgetOverviewItem &&
-    other.budgetId == budgetId &&
-    other.category == category &&
-    other.budgetedAmount == budgetedAmount &&
-    other.actualSpent == actualSpent &&
-    other.remaining == remaining &&
-    other.percentageUsed == percentageUsed &&
-    other.isOverBudget == isOverBudget;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CategoryBudgetOverviewItem &&
+          other.budgetId == budgetId &&
+          other.category == category &&
+          other.budgetedAmount == budgetedAmount &&
+          other.actualSpent == actualSpent &&
+          other.remaining == remaining &&
+          other.percentageUsed == percentageUsed &&
+          other.isOverBudget == isOverBudget;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (budgetId == null ? 0 : budgetId!.hashCode) +
-    (category.hashCode) +
-    (budgetedAmount.hashCode) +
-    (actualSpent.hashCode) +
-    (remaining.hashCode) +
-    (percentageUsed.hashCode) +
-    (isOverBudget.hashCode);
+      // ignore: unnecessary_parenthesis
+      (budgetId == null ? 0 : budgetId!.hashCode) +
+      (category.hashCode) +
+      (budgetedAmount.hashCode) +
+      (actualSpent.hashCode) +
+      (remaining.hashCode) +
+      (percentageUsed.hashCode) +
+      (isOverBudget.hashCode);
 
   @override
-  String toString() => 'CategoryBudgetOverviewItem[budgetId=$budgetId, category=$category, budgetedAmount=$budgetedAmount, actualSpent=$actualSpent, remaining=$remaining, percentageUsed=$percentageUsed, isOverBudget=$isOverBudget]';
+  String toString() =>
+      'CategoryBudgetOverviewItem[budgetId=$budgetId, category=$category, budgetedAmount=$budgetedAmount, actualSpent=$actualSpent, remaining=$remaining, percentageUsed=$percentageUsed, isOverBudget=$isOverBudget]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -80,12 +83,12 @@ class CategoryBudgetOverviewItem {
     } else {
       json[r'budgetId'] = null;
     }
-      json[r'category'] = this.category;
-      json[r'budgetedAmount'] = this.budgetedAmount;
-      json[r'actualSpent'] = this.actualSpent;
-      json[r'remaining'] = this.remaining;
-      json[r'percentageUsed'] = this.percentageUsed;
-      json[r'isOverBudget'] = this.isOverBudget;
+    json[r'category'] = this.category;
+    json[r'budgetedAmount'] = this.budgetedAmount;
+    json[r'actualSpent'] = this.actualSpent;
+    json[r'remaining'] = this.remaining;
+    json[r'percentageUsed'] = this.percentageUsed;
+    json[r'isOverBudget'] = this.isOverBudget;
     return json;
   }
 
@@ -100,18 +103,30 @@ class CategoryBudgetOverviewItem {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'category'), 'Required key "CategoryBudgetOverviewItem[category]" is missing from JSON.');
-        assert(json[r'category'] != null, 'Required key "CategoryBudgetOverviewItem[category]" has a null value in JSON.');
-        assert(json.containsKey(r'budgetedAmount'), 'Required key "CategoryBudgetOverviewItem[budgetedAmount]" is missing from JSON.');
-        assert(json[r'budgetedAmount'] != null, 'Required key "CategoryBudgetOverviewItem[budgetedAmount]" has a null value in JSON.');
-        assert(json.containsKey(r'actualSpent'), 'Required key "CategoryBudgetOverviewItem[actualSpent]" is missing from JSON.');
-        assert(json[r'actualSpent'] != null, 'Required key "CategoryBudgetOverviewItem[actualSpent]" has a null value in JSON.');
-        assert(json.containsKey(r'remaining'), 'Required key "CategoryBudgetOverviewItem[remaining]" is missing from JSON.');
-        assert(json[r'remaining'] != null, 'Required key "CategoryBudgetOverviewItem[remaining]" has a null value in JSON.');
-        assert(json.containsKey(r'percentageUsed'), 'Required key "CategoryBudgetOverviewItem[percentageUsed]" is missing from JSON.');
-        assert(json[r'percentageUsed'] != null, 'Required key "CategoryBudgetOverviewItem[percentageUsed]" has a null value in JSON.');
-        assert(json.containsKey(r'isOverBudget'), 'Required key "CategoryBudgetOverviewItem[isOverBudget]" is missing from JSON.');
-        assert(json[r'isOverBudget'] != null, 'Required key "CategoryBudgetOverviewItem[isOverBudget]" has a null value in JSON.');
+        assert(json.containsKey(r'category'),
+            'Required key "CategoryBudgetOverviewItem[category]" is missing from JSON.');
+        assert(json[r'category'] != null,
+            'Required key "CategoryBudgetOverviewItem[category]" has a null value in JSON.');
+        assert(json.containsKey(r'budgetedAmount'),
+            'Required key "CategoryBudgetOverviewItem[budgetedAmount]" is missing from JSON.');
+        assert(json[r'budgetedAmount'] != null,
+            'Required key "CategoryBudgetOverviewItem[budgetedAmount]" has a null value in JSON.');
+        assert(json.containsKey(r'actualSpent'),
+            'Required key "CategoryBudgetOverviewItem[actualSpent]" is missing from JSON.');
+        assert(json[r'actualSpent'] != null,
+            'Required key "CategoryBudgetOverviewItem[actualSpent]" has a null value in JSON.');
+        assert(json.containsKey(r'remaining'),
+            'Required key "CategoryBudgetOverviewItem[remaining]" is missing from JSON.');
+        assert(json[r'remaining'] != null,
+            'Required key "CategoryBudgetOverviewItem[remaining]" has a null value in JSON.');
+        assert(json.containsKey(r'percentageUsed'),
+            'Required key "CategoryBudgetOverviewItem[percentageUsed]" is missing from JSON.');
+        assert(json[r'percentageUsed'] != null,
+            'Required key "CategoryBudgetOverviewItem[percentageUsed]" has a null value in JSON.');
+        assert(json.containsKey(r'isOverBudget'),
+            'Required key "CategoryBudgetOverviewItem[isOverBudget]" is missing from JSON.');
+        assert(json[r'isOverBudget'] != null,
+            'Required key "CategoryBudgetOverviewItem[isOverBudget]" has a null value in JSON.');
         return true;
       }());
 
@@ -128,7 +143,10 @@ class CategoryBudgetOverviewItem {
     return null;
   }
 
-  static List<CategoryBudgetOverviewItem> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CategoryBudgetOverviewItem> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CategoryBudgetOverviewItem>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -156,13 +174,19 @@ class CategoryBudgetOverviewItem {
   }
 
   // maps a json object with a list of CategoryBudgetOverviewItem-objects as value to a dart map
-  static Map<String, List<CategoryBudgetOverviewItem>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CategoryBudgetOverviewItem>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CategoryBudgetOverviewItem>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CategoryBudgetOverviewItem.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CategoryBudgetOverviewItem.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -178,4 +202,3 @@ class CategoryBudgetOverviewItem {
     'isOverBudget',
   };
 }
-

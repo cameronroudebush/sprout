@@ -38,7 +38,8 @@ class ProviderGenericAccountSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final accountsAsync = ref.watch(accountsProvider as ProviderListenable<AsyncValue<List<Account>?>>);
+    final accountsAsync = ref.watch(
+        accountsProvider as ProviderListenable<AsyncValue<List<Account>?>>);
 
     return accountsAsync.when(
       loading: () => const SizedBox(
@@ -46,14 +47,17 @@ class ProviderGenericAccountSelector extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) {
-        final errorMessage = ref.read(notificationsProvider.notifier).parseOpenAPIException(error);
+        final errorMessage = ref
+            .read(notificationsProvider.notifier)
+            .parseOpenAPIException(error);
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: 12,
             children: [
-              Icon(Icons.warning_amber_rounded, color: theme.colorScheme.error, size: 40),
+              Icon(Icons.warning_amber_rounded,
+                  color: theme.colorScheme.error, size: 40),
               Text(
                 errorMessage,
                 textAlign: TextAlign.center,
@@ -85,7 +89,8 @@ class ProviderGenericAccountSelector extends ConsumerWidget {
         Padding(
             padding: EdgeInsetsGeometry.only(bottom: 8),
             child: InfoCard(
-              text: "Select accounts from ${provider.name} that you would like linked.",
+              text:
+                  "Select accounts from ${provider.name} that you would like linked.",
             )),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
@@ -107,7 +112,8 @@ class ProviderGenericAccountSelector extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 20,
         children: [
-          Icon(Icons.account_balance_wallet_outlined, size: 48, color: theme.disabledColor),
+          Icon(Icons.account_balance_wallet_outlined,
+              size: 48, color: theme.disabledColor),
           Text("No accounts available from ${provider.name}."),
           if (provider.accountFixUrl != null)
             FilledButton.icon(

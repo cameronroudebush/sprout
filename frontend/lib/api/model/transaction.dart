@@ -61,52 +61,55 @@ class Transaction {
   bool manuallyEdited;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Transaction &&
-    other.id == id &&
-    other.categoryId == categoryId &&
-    other.accountId == accountId &&
-    other.extra == extra &&
-    other.amount == amount &&
-    other.description == description &&
-    other.pending == pending &&
-    other.posted == posted &&
-    other.manuallyEdited == manuallyEdited;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Transaction &&
+          other.id == id &&
+          other.categoryId == categoryId &&
+          other.accountId == accountId &&
+          other.extra == extra &&
+          other.amount == amount &&
+          other.description == description &&
+          other.pending == pending &&
+          other.posted == posted &&
+          other.manuallyEdited == manuallyEdited;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (categoryId == null ? 0 : categoryId!.hashCode) +
-    (accountId.hashCode) +
-    (extra == null ? 0 : extra!.hashCode) +
-    (amount.hashCode) +
-    (description.hashCode) +
-    (pending.hashCode) +
-    (posted.hashCode) +
-    (manuallyEdited.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (categoryId == null ? 0 : categoryId!.hashCode) +
+      (accountId.hashCode) +
+      (extra == null ? 0 : extra!.hashCode) +
+      (amount.hashCode) +
+      (description.hashCode) +
+      (pending.hashCode) +
+      (posted.hashCode) +
+      (manuallyEdited.hashCode);
 
   @override
-  String toString() => 'Transaction[id=$id, categoryId=$categoryId, accountId=$accountId, extra=$extra, amount=$amount, description=$description, pending=$pending, posted=$posted, manuallyEdited=$manuallyEdited]';
+  String toString() =>
+      'Transaction[id=$id, categoryId=$categoryId, accountId=$accountId, extra=$extra, amount=$amount, description=$description, pending=$pending, posted=$posted, manuallyEdited=$manuallyEdited]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
+    json[r'id'] = this.id;
     if (this.categoryId != null) {
       json[r'categoryId'] = this.categoryId;
     } else {
       json[r'categoryId'] = null;
     }
-      json[r'accountId'] = this.accountId;
+    json[r'accountId'] = this.accountId;
     if (this.extra != null) {
       json[r'extra'] = this.extra;
     } else {
       json[r'extra'] = null;
     }
-      json[r'amount'] = this.amount;
-      json[r'description'] = this.description;
-      json[r'pending'] = this.pending;
-      json[r'posted'] = this.posted.toUtc().toIso8601String();
-      json[r'manuallyEdited'] = this.manuallyEdited;
+    json[r'amount'] = this.amount;
+    json[r'description'] = this.description;
+    json[r'pending'] = this.pending;
+    json[r'posted'] = this.posted.toUtc().toIso8601String();
+    json[r'manuallyEdited'] = this.manuallyEdited;
     return json;
   }
 
@@ -121,18 +124,30 @@ class Transaction {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Transaction[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Transaction[id]" has a null value in JSON.');
-        assert(json.containsKey(r'accountId'), 'Required key "Transaction[accountId]" is missing from JSON.');
-        assert(json[r'accountId'] != null, 'Required key "Transaction[accountId]" has a null value in JSON.');
-        assert(json.containsKey(r'amount'), 'Required key "Transaction[amount]" is missing from JSON.');
-        assert(json[r'amount'] != null, 'Required key "Transaction[amount]" has a null value in JSON.');
-        assert(json.containsKey(r'description'), 'Required key "Transaction[description]" is missing from JSON.');
-        assert(json[r'description'] != null, 'Required key "Transaction[description]" has a null value in JSON.');
-        assert(json.containsKey(r'pending'), 'Required key "Transaction[pending]" is missing from JSON.');
-        assert(json[r'pending'] != null, 'Required key "Transaction[pending]" has a null value in JSON.');
-        assert(json.containsKey(r'posted'), 'Required key "Transaction[posted]" is missing from JSON.');
-        assert(json[r'posted'] != null, 'Required key "Transaction[posted]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Transaction[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Transaction[id]" has a null value in JSON.');
+        assert(json.containsKey(r'accountId'),
+            'Required key "Transaction[accountId]" is missing from JSON.');
+        assert(json[r'accountId'] != null,
+            'Required key "Transaction[accountId]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'),
+            'Required key "Transaction[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null,
+            'Required key "Transaction[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'description'),
+            'Required key "Transaction[description]" is missing from JSON.');
+        assert(json[r'description'] != null,
+            'Required key "Transaction[description]" has a null value in JSON.');
+        assert(json.containsKey(r'pending'),
+            'Required key "Transaction[pending]" is missing from JSON.');
+        assert(json[r'pending'] != null,
+            'Required key "Transaction[pending]" has a null value in JSON.');
+        assert(json.containsKey(r'posted'),
+            'Required key "Transaction[posted]" is missing from JSON.');
+        assert(json[r'posted'] != null,
+            'Required key "Transaction[posted]" has a null value in JSON.');
         return true;
       }());
 
@@ -151,7 +166,10 @@ class Transaction {
     return null;
   }
 
-  static List<Transaction> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Transaction> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Transaction>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -179,13 +197,19 @@ class Transaction {
   }
 
   // maps a json object with a list of Transaction-objects as value to a dart map
-  static Map<String, List<Transaction>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Transaction>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Transaction>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Transaction.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Transaction.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -201,4 +225,3 @@ class Transaction {
     'posted',
   };
 }
-

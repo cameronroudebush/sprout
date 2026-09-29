@@ -24,22 +24,23 @@ class ManualSyncDto {
   List<ProviderTypeEnum>? providers;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ManualSyncDto &&
-    other.force == force &&
-    _deepEquality.equals(other.providers, providers);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ManualSyncDto &&
+          other.force == force &&
+          _deepEquality.equals(other.providers, providers);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (force.hashCode) +
-    (providers == null ? 0 : providers!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (force.hashCode) + (providers == null ? 0 : providers!.hashCode);
 
   @override
   String toString() => 'ManualSyncDto[force=$force, providers=$providers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'force'] = this.force;
+    json[r'force'] = this.force;
     if (this.providers != null) {
       json[r'providers'] = this.providers;
     } else {
@@ -70,7 +71,10 @@ class ManualSyncDto {
     return null;
   }
 
-  static List<ManualSyncDto> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ManualSyncDto> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ManualSyncDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -98,20 +102,24 @@ class ManualSyncDto {
   }
 
   // maps a json object with a list of ManualSyncDto-objects as value to a dart map
-  static Map<String, List<ManualSyncDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ManualSyncDto>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ManualSyncDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ManualSyncDto.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ManualSyncDto.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

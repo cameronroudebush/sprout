@@ -23,23 +23,25 @@ class CashFlowSpending {
   List<String> topCategoryNames;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CashFlowSpending &&
-    _deepEquality.equals(other.data, data) &&
-    _deepEquality.equals(other.topCategoryNames, topCategoryNames);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CashFlowSpending &&
+          _deepEquality.equals(other.data, data) &&
+          _deepEquality.equals(other.topCategoryNames, topCategoryNames);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (data.hashCode) +
-    (topCategoryNames.hashCode);
+      // ignore: unnecessary_parenthesis
+      (data.hashCode) + (topCategoryNames.hashCode);
 
   @override
-  String toString() => 'CashFlowSpending[data=$data, topCategoryNames=$topCategoryNames]';
+  String toString() =>
+      'CashFlowSpending[data=$data, topCategoryNames=$topCategoryNames]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'data'] = this.data;
-      json[r'topCategoryNames'] = this.topCategoryNames;
+    json[r'data'] = this.data;
+    json[r'topCategoryNames'] = this.topCategoryNames;
     return json;
   }
 
@@ -54,24 +56,33 @@ class CashFlowSpending {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'data'), 'Required key "CashFlowSpending[data]" is missing from JSON.');
-        assert(json[r'data'] != null, 'Required key "CashFlowSpending[data]" has a null value in JSON.');
-        assert(json.containsKey(r'topCategoryNames'), 'Required key "CashFlowSpending[topCategoryNames]" is missing from JSON.');
-        assert(json[r'topCategoryNames'] != null, 'Required key "CashFlowSpending[topCategoryNames]" has a null value in JSON.');
+        assert(json.containsKey(r'data'),
+            'Required key "CashFlowSpending[data]" is missing from JSON.');
+        assert(json[r'data'] != null,
+            'Required key "CashFlowSpending[data]" has a null value in JSON.');
+        assert(json.containsKey(r'topCategoryNames'),
+            'Required key "CashFlowSpending[topCategoryNames]" is missing from JSON.');
+        assert(json[r'topCategoryNames'] != null,
+            'Required key "CashFlowSpending[topCategoryNames]" has a null value in JSON.');
         return true;
       }());
 
       return CashFlowSpending(
         data: MonthlySpendingStats.listFromJson(json[r'data']),
         topCategoryNames: json[r'topCategoryNames'] is Iterable
-            ? (json[r'topCategoryNames'] as Iterable).cast<String>().toList(growable: false)
+            ? (json[r'topCategoryNames'] as Iterable)
+                .cast<String>()
+                .toList(growable: false)
             : const [],
       );
     }
     return null;
   }
 
-  static List<CashFlowSpending> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CashFlowSpending> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CashFlowSpending>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -99,13 +110,19 @@ class CashFlowSpending {
   }
 
   // maps a json object with a list of CashFlowSpending-objects as value to a dart map
-  static Map<String, List<CashFlowSpending>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CashFlowSpending>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CashFlowSpending>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CashFlowSpending.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CashFlowSpending.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -117,4 +134,3 @@ class CashFlowSpending {
     'topCategoryNames',
   };
 }
-

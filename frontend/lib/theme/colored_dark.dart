@@ -73,7 +73,9 @@ final ThemeData coloredDarkTheme = FlexThemeData.dark(
   canvasColor: const Color(0xff191c20),
   dividerColor: Color(0xff116383),
   tooltipTheme: TooltipThemeData(
-    decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
+    decoration: BoxDecoration(
+        color: const Color(0xff116383),
+        borderRadius: BorderRadius.circular(12)),
     textStyle: const TextStyle(color: Colors.white, fontSize: 12),
     waitDuration: const Duration(milliseconds: 500),
     showDuration: const Duration(seconds: 2),

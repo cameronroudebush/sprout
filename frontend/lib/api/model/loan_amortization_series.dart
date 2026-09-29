@@ -40,35 +40,38 @@ class LoanAmortizationSeries {
   List<HistoricalDataPoint> dataPoints;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is LoanAmortizationSeries &&
-    other.accountId == accountId &&
-    other.accountName == accountName &&
-    other.monthsToPayOff == monthsToPayOff &&
-    other.monthlyPayment == monthlyPayment &&
-    other.color == color &&
-    _deepEquality.equals(other.dataPoints, dataPoints);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LoanAmortizationSeries &&
+          other.accountId == accountId &&
+          other.accountName == accountName &&
+          other.monthsToPayOff == monthsToPayOff &&
+          other.monthlyPayment == monthlyPayment &&
+          other.color == color &&
+          _deepEquality.equals(other.dataPoints, dataPoints);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (accountId.hashCode) +
-    (accountName.hashCode) +
-    (monthsToPayOff.hashCode) +
-    (monthlyPayment.hashCode) +
-    (color.hashCode) +
-    (dataPoints.hashCode);
+      // ignore: unnecessary_parenthesis
+      (accountId.hashCode) +
+      (accountName.hashCode) +
+      (monthsToPayOff.hashCode) +
+      (monthlyPayment.hashCode) +
+      (color.hashCode) +
+      (dataPoints.hashCode);
 
   @override
-  String toString() => 'LoanAmortizationSeries[accountId=$accountId, accountName=$accountName, monthsToPayOff=$monthsToPayOff, monthlyPayment=$monthlyPayment, color=$color, dataPoints=$dataPoints]';
+  String toString() =>
+      'LoanAmortizationSeries[accountId=$accountId, accountName=$accountName, monthsToPayOff=$monthsToPayOff, monthlyPayment=$monthlyPayment, color=$color, dataPoints=$dataPoints]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'accountId'] = this.accountId;
-      json[r'accountName'] = this.accountName;
-      json[r'monthsToPayOff'] = this.monthsToPayOff;
-      json[r'monthlyPayment'] = this.monthlyPayment;
-      json[r'color'] = this.color;
-      json[r'dataPoints'] = this.dataPoints;
+    json[r'accountId'] = this.accountId;
+    json[r'accountName'] = this.accountName;
+    json[r'monthsToPayOff'] = this.monthsToPayOff;
+    json[r'monthlyPayment'] = this.monthlyPayment;
+    json[r'color'] = this.color;
+    json[r'dataPoints'] = this.dataPoints;
     return json;
   }
 
@@ -83,18 +86,30 @@ class LoanAmortizationSeries {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'accountId'), 'Required key "LoanAmortizationSeries[accountId]" is missing from JSON.');
-        assert(json[r'accountId'] != null, 'Required key "LoanAmortizationSeries[accountId]" has a null value in JSON.');
-        assert(json.containsKey(r'accountName'), 'Required key "LoanAmortizationSeries[accountName]" is missing from JSON.');
-        assert(json[r'accountName'] != null, 'Required key "LoanAmortizationSeries[accountName]" has a null value in JSON.');
-        assert(json.containsKey(r'monthsToPayOff'), 'Required key "LoanAmortizationSeries[monthsToPayOff]" is missing from JSON.');
-        assert(json[r'monthsToPayOff'] != null, 'Required key "LoanAmortizationSeries[monthsToPayOff]" has a null value in JSON.');
-        assert(json.containsKey(r'monthlyPayment'), 'Required key "LoanAmortizationSeries[monthlyPayment]" is missing from JSON.');
-        assert(json[r'monthlyPayment'] != null, 'Required key "LoanAmortizationSeries[monthlyPayment]" has a null value in JSON.');
-        assert(json.containsKey(r'color'), 'Required key "LoanAmortizationSeries[color]" is missing from JSON.');
-        assert(json[r'color'] != null, 'Required key "LoanAmortizationSeries[color]" has a null value in JSON.');
-        assert(json.containsKey(r'dataPoints'), 'Required key "LoanAmortizationSeries[dataPoints]" is missing from JSON.');
-        assert(json[r'dataPoints'] != null, 'Required key "LoanAmortizationSeries[dataPoints]" has a null value in JSON.');
+        assert(json.containsKey(r'accountId'),
+            'Required key "LoanAmortizationSeries[accountId]" is missing from JSON.');
+        assert(json[r'accountId'] != null,
+            'Required key "LoanAmortizationSeries[accountId]" has a null value in JSON.');
+        assert(json.containsKey(r'accountName'),
+            'Required key "LoanAmortizationSeries[accountName]" is missing from JSON.');
+        assert(json[r'accountName'] != null,
+            'Required key "LoanAmortizationSeries[accountName]" has a null value in JSON.');
+        assert(json.containsKey(r'monthsToPayOff'),
+            'Required key "LoanAmortizationSeries[monthsToPayOff]" is missing from JSON.');
+        assert(json[r'monthsToPayOff'] != null,
+            'Required key "LoanAmortizationSeries[monthsToPayOff]" has a null value in JSON.');
+        assert(json.containsKey(r'monthlyPayment'),
+            'Required key "LoanAmortizationSeries[monthlyPayment]" is missing from JSON.');
+        assert(json[r'monthlyPayment'] != null,
+            'Required key "LoanAmortizationSeries[monthlyPayment]" has a null value in JSON.');
+        assert(json.containsKey(r'color'),
+            'Required key "LoanAmortizationSeries[color]" is missing from JSON.');
+        assert(json[r'color'] != null,
+            'Required key "LoanAmortizationSeries[color]" has a null value in JSON.');
+        assert(json.containsKey(r'dataPoints'),
+            'Required key "LoanAmortizationSeries[dataPoints]" is missing from JSON.');
+        assert(json[r'dataPoints'] != null,
+            'Required key "LoanAmortizationSeries[dataPoints]" has a null value in JSON.');
         return true;
       }());
 
@@ -110,7 +125,10 @@ class LoanAmortizationSeries {
     return null;
   }
 
-  static List<LoanAmortizationSeries> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<LoanAmortizationSeries> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <LoanAmortizationSeries>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -138,13 +156,19 @@ class LoanAmortizationSeries {
   }
 
   // maps a json object with a list of LoanAmortizationSeries-objects as value to a dart map
-  static Map<String, List<LoanAmortizationSeries>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<LoanAmortizationSeries>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<LoanAmortizationSeries>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = LoanAmortizationSeries.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = LoanAmortizationSeries.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -160,4 +184,3 @@ class LoanAmortizationSeries {
     'dataPoints',
   };
 }
-

@@ -170,7 +170,8 @@ class CategoryIcon extends LogoBaseWidget<Category?> {
   }
 
   @override
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, Category? data, double size) {
+  ProviderListenable<AsyncValue<List<String>>> getProvider(
+      BuildContext context, Category? data, double size) {
     // Categories do not fetch remote network URLs; return an empty list data provider
     return Provider((_) => const AsyncValue.data([]));
   }

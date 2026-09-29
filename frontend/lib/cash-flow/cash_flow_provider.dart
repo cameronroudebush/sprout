@@ -15,10 +15,12 @@ Future<CashFlowApi> cashFlowApi(Ref ref) async {
 
 /// Sankey data based on time
 @Riverpod(keepAlive: true)
-Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+Future<SankeyData> sankeyData(Ref ref,
+    {required int year, int? month, int? day, String? accountId}) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
-  final data = await api.cashFlowControllerGetSankey(year, month: month, day: day, accountId: accountId);
+  final data = await api.cashFlowControllerGetSankey(year,
+      month: month, day: day, accountId: accountId);
 
   if (data == null) throw Exception("Failed to load Sankey data");
 
@@ -26,17 +28,23 @@ Future<SankeyData> sankeyData(Ref ref, {required int year, int? month, int? day,
     nodes: data.nodes,
     colors: data.colors as dynamic,
     links: data.links
-        .map((e) => SankeyLink(source_: e.source_, target: e.target, value: e.value, description: e.description))
+        .map((e) => SankeyLink(
+            source_: e.source_,
+            target: e.target,
+            value: e.value,
+            description: e.description))
         .toList(),
   );
 }
 
 /// State for cash flow stats
 @Riverpod(keepAlive: true)
-Future<CashFlowStats?> cashFlowStats(Ref ref, {required int year, int? month, int? day, String? accountId}) async {
+Future<CashFlowStats?> cashFlowStats(Ref ref,
+    {required int year, int? month, int? day, String? accountId}) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
-  return await api.cashFlowControllerGetStats(year, month: month, day: day, accountId: accountId);
+  return await api.cashFlowControllerGetStats(year,
+      month: month, day: day, accountId: accountId);
 }
 
 /// State for cash flow trends
@@ -56,7 +64,8 @@ class MonthlySpending extends _$MonthlySpending {
     final categoryCount = categories ?? (kIsWeb ? 5 : 2);
 
     final api = await ref.watch(cashFlowApiProvider.future);
-    return await api.cashFlowControllerGetSpending(months: months, categories: categoryCount);
+    return await api.cashFlowControllerGetSpending(
+        months: months, categories: categoryCount);
   }
 
   /// Explicitly trigger a refresh if needed
@@ -86,20 +95,26 @@ class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
 
 /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
 @Riverpod(keepAlive: true)
-Future<Map<int, double>> dailySpending(Ref ref, {required int month, required int year}) async {
+Future<Map<int, double>> dailySpending(Ref ref,
+    {required int month, required int year}) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
-  final DailySpendingCalendarResponseDTO? response = await api.cashFlowControllerGetDailyCalendarSpending(
+  final DailySpendingCalendarResponseDTO? response =
+      await api.cashFlowControllerGetDailyCalendarSpending(
     year,
     month,
   );
   if (response == null || response.spending.isEmpty) return {};
-  return {for (final item in response.spending) item.day.toInt(): item.amount.toDouble()};
+  return {
+    for (final item in response.spending)
+      item.day.toInt(): item.amount.toDouble()
+  };
 }
 
 /// Provides loan amortization for loan accounts
 @Riverpod(keepAlive: true)
-Future<List<LoanAmortizationSeries>?> loanAmortizationProjections(Ref ref) async {
+Future<List<LoanAmortizationSeries>?> loanAmortizationProjections(
+    Ref ref) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
   return await api.cashFlowControllerGetAmortization();

@@ -32,9 +32,13 @@ class InstitutionIconType {
     symbol,
   ];
 
-  static InstitutionIconType? fromJson(dynamic value) => InstitutionIconTypeTypeTransformer().decode(value);
+  static InstitutionIconType? fromJson(dynamic value) =>
+      InstitutionIconTypeTypeTransformer().decode(value);
 
-  static List<InstitutionIconType> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<InstitutionIconType> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <InstitutionIconType>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -51,7 +55,8 @@ class InstitutionIconType {
 /// Transformation class that can [encode] an instance of [InstitutionIconType] to String,
 /// and [decode] dynamic data back to [InstitutionIconType].
 class InstitutionIconTypeTypeTransformer {
-  factory InstitutionIconTypeTypeTransformer() => _instance ??= const InstitutionIconTypeTypeTransformer._();
+  factory InstitutionIconTypeTypeTransformer() =>
+      _instance ??= const InstitutionIconTypeTypeTransformer._();
 
   const InstitutionIconTypeTypeTransformer._();
 
@@ -68,8 +73,10 @@ class InstitutionIconTypeTypeTransformer {
   InstitutionIconType? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'icon': return InstitutionIconType.icon;
-        case r'symbol': return InstitutionIconType.symbol;
+        case r'icon':
+          return InstitutionIconType.icon;
+        case r'symbol':
+          return InstitutionIconType.symbol;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -82,4 +89,3 @@ class InstitutionIconTypeTypeTransformer {
   /// Singleton [InstitutionIconTypeTypeTransformer] instance.
   static InstitutionIconTypeTypeTransformer? _instance;
 }
-

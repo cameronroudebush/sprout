@@ -48,7 +48,8 @@ class Accounts extends _$Accounts {
   }
 
   /// Runs a manual sync via the backend
-  Future<void> manualSync({bool force = false, List<ProviderTypeEnum>? providers}) async {
+  Future<void> manualSync(
+      {bool force = false, List<ProviderTypeEnum>? providers}) async {
     if (state.value == null) return;
 
     final notifications = ref.read(notificationsProvider.notifier);
@@ -56,10 +57,14 @@ class Accounts extends _$Accounts {
 
     try {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: true));
-      notificationId = notifications.openFrontendOnly("Account sync is running.", showSpinner: true, duration: 3600);
+      notificationId = notifications.openFrontendOnly(
+          "Account sync is running.",
+          showSpinner: true,
+          duration: 3600);
 
       final api = await ref.read(providerApiProvider.future);
-      await api.baseProviderControllerManualSync(ManualSyncDto(force: force, providers: providers));
+      await api.baseProviderControllerManualSync(
+          ManualSyncDto(force: force, providers: providers));
     } catch (e) {
       state = AsyncData(state.value!.copyWith(manualSyncIsRunning: false));
       notifications.openWithAPIException(e);
@@ -73,7 +78,11 @@ class Accounts extends _$Accounts {
     final api = await ref.read(accountApiProvider.future);
     final updated = await api.accountControllerEdit(
       a.id,
-      AccountEditRequest(name: a.name, type: a.type, subType: a.subType, interestRate: a.interestRate),
+      AccountEditRequest(
+          name: a.name,
+          type: a.type,
+          subType: a.subType,
+          interestRate: a.interestRate),
     );
 
     if (updated != null && state.value != null) {
@@ -94,7 +103,8 @@ class Accounts extends _$Accounts {
       final api = await ref.read(accountApiProvider.future);
       await api.accountControllerDelete(accountId);
       if (state.value != null) {
-        final newList = state.value!.accounts.where((a) => a.id != accountId).toList();
+        final newList =
+            state.value!.accounts.where((a) => a.id != accountId).toList();
         state = AsyncData(state.value!.copyWith(accounts: newList));
       }
       notifications.openFrontendOnly("Account deleted successfully.");

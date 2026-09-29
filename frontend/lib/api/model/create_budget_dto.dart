@@ -26,23 +26,25 @@ class CreateBudgetDto {
   num amount;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CreateBudgetDto &&
-    other.categoryId == categoryId &&
-    other.amount == amount;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateBudgetDto &&
+          other.categoryId == categoryId &&
+          other.amount == amount;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (categoryId.hashCode) +
-    (amount.hashCode);
+      // ignore: unnecessary_parenthesis
+      (categoryId.hashCode) + (amount.hashCode);
 
   @override
-  String toString() => 'CreateBudgetDto[categoryId=$categoryId, amount=$amount]';
+  String toString() =>
+      'CreateBudgetDto[categoryId=$categoryId, amount=$amount]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'categoryId'] = this.categoryId;
-      json[r'amount'] = this.amount;
+    json[r'categoryId'] = this.categoryId;
+    json[r'amount'] = this.amount;
     return json;
   }
 
@@ -57,10 +59,14 @@ class CreateBudgetDto {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'categoryId'), 'Required key "CreateBudgetDto[categoryId]" is missing from JSON.');
-        assert(json[r'categoryId'] != null, 'Required key "CreateBudgetDto[categoryId]" has a null value in JSON.');
-        assert(json.containsKey(r'amount'), 'Required key "CreateBudgetDto[amount]" is missing from JSON.');
-        assert(json[r'amount'] != null, 'Required key "CreateBudgetDto[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'categoryId'),
+            'Required key "CreateBudgetDto[categoryId]" is missing from JSON.');
+        assert(json[r'categoryId'] != null,
+            'Required key "CreateBudgetDto[categoryId]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'),
+            'Required key "CreateBudgetDto[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null,
+            'Required key "CreateBudgetDto[amount]" has a null value in JSON.');
         return true;
       }());
 
@@ -72,7 +78,10 @@ class CreateBudgetDto {
     return null;
   }
 
-  static List<CreateBudgetDto> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateBudgetDto> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CreateBudgetDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -100,13 +109,19 @@ class CreateBudgetDto {
   }
 
   // maps a json object with a list of CreateBudgetDto-objects as value to a dart map
-  static Map<String, List<CreateBudgetDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CreateBudgetDto>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CreateBudgetDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CreateBudgetDto.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CreateBudgetDto.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -118,4 +133,3 @@ class CreateBudgetDto {
     'amount',
   };
 }
-

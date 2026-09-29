@@ -35,10 +35,12 @@ class DashboardPage extends ConsumerWidget {
           if (isDesktop) {
             return SproutRouteWrapper(
               size: SproutRouteSize.large,
-              child: _buildDesktop(context, ref, isChatEnabled, isBudgetEnabled),
+              child:
+                  _buildDesktop(context, ref, isChatEnabled, isBudgetEnabled),
             );
           } else {
-            return SproutRouteWrapper(child: _buildMobile(ref, isChatEnabled, isBudgetEnabled));
+            return SproutRouteWrapper(
+                child: _buildMobile(ref, isChatEnabled, isBudgetEnabled));
           }
         },
       ),
@@ -46,7 +48,8 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// Desktop gets a robust 2-column masonry display utilizing flex factors
-  Widget _buildDesktop(BuildContext context, WidgetRef ref, bool chatEnabled, bool isBudgetEnabled) {
+  Widget _buildDesktop(BuildContext context, WidgetRef ref, bool chatEnabled,
+      bool isBudgetEnabled) {
     final topCategoryCount = 10;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,8 +119,10 @@ class DashboardPage extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(flex: 1, child: SproutCard(child: CashFlowCalendarWidget())),
-              Expanded(flex: 1, child: DashboardRecentTransactionsCard(count: 9)),
+              Expanded(
+                  flex: 1, child: SproutCard(child: CashFlowCalendarWidget())),
+              Expanded(
+                  flex: 1, child: DashboardRecentTransactionsCard(count: 9)),
               Expanded(
                 child: SproutCard(
                     child: SubscriptionCalendarWidget(

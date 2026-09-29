@@ -24,23 +24,22 @@ class TileConfig {
   String dark;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TileConfig &&
-    other.light == light &&
-    other.dark == dark;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TileConfig && other.light == light && other.dark == dark;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (light.hashCode) +
-    (dark.hashCode);
+      // ignore: unnecessary_parenthesis
+      (light.hashCode) + (dark.hashCode);
 
   @override
   String toString() => 'TileConfig[light=$light, dark=$dark]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'light'] = this.light;
-      json[r'dark'] = this.dark;
+    json[r'light'] = this.light;
+    json[r'dark'] = this.dark;
     return json;
   }
 
@@ -55,10 +54,14 @@ class TileConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'light'), 'Required key "TileConfig[light]" is missing from JSON.');
-        assert(json[r'light'] != null, 'Required key "TileConfig[light]" has a null value in JSON.');
-        assert(json.containsKey(r'dark'), 'Required key "TileConfig[dark]" is missing from JSON.');
-        assert(json[r'dark'] != null, 'Required key "TileConfig[dark]" has a null value in JSON.');
+        assert(json.containsKey(r'light'),
+            'Required key "TileConfig[light]" is missing from JSON.');
+        assert(json[r'light'] != null,
+            'Required key "TileConfig[light]" has a null value in JSON.');
+        assert(json.containsKey(r'dark'),
+            'Required key "TileConfig[dark]" is missing from JSON.');
+        assert(json[r'dark'] != null,
+            'Required key "TileConfig[dark]" has a null value in JSON.');
         return true;
       }());
 
@@ -70,7 +73,10 @@ class TileConfig {
     return null;
   }
 
-  static List<TileConfig> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TileConfig> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TileConfig>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -98,13 +104,19 @@ class TileConfig {
   }
 
   // maps a json object with a list of TileConfig-objects as value to a dart map
-  static Map<String, List<TileConfig>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TileConfig>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TileConfig>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TileConfig.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TileConfig.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -116,4 +128,3 @@ class TileConfig {
     'dark',
   };
 }
-

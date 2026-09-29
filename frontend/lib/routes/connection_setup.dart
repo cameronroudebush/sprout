@@ -9,7 +9,8 @@ class ConnectionSetupPage extends ConsumerStatefulWidget {
   const ConnectionSetupPage({super.key});
 
   @override
-  ConsumerState<ConnectionSetupPage> createState() => _ConnectionSetupPageState();
+  ConsumerState<ConnectionSetupPage> createState() =>
+      _ConnectionSetupPageState();
 }
 
 class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
@@ -44,7 +45,8 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
       await ref.read(unsecureConfigProvider.notifier).setConnectionUrl(url);
       NavigationProvider.redirect("/login");
     } catch (e) {
-      setState(() => _error = "Could not reach server. Verify the URL and try again.");
+      setState(() =>
+          _error = "Could not reach server. Verify the URL and try again.");
     } finally {
       if (mounted) setState(() => _isConnecting = false);
     }
@@ -56,7 +58,8 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
 
     return SproutCenteredLayout(
       title: 'Server Configuration',
-      description: 'As a self-hosted platform, Sprout needs to know where your private instance is located. '
+      description:
+          'As a self-hosted platform, Sprout needs to know where your private instance is located. '
           'Enter your server address below to sync your data. You can update this at any time.',
       body: Form(
         key: _formKey,
@@ -78,7 +81,8 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) return 'URL is required';
-            if (!value.startsWith('http')) return 'Must start with http:// or https://';
+            if (!value.startsWith('http'))
+              return 'Must start with http:// or https://';
             return null;
           },
         ),
@@ -88,15 +92,18 @@ class _ConnectionSetupPageState extends ConsumerState<ConnectionSetupPage> {
         child: FilledButton(
           onPressed: _isConnecting ? null : _handleConnect,
           style: FilledButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           child: _isConnecting
               ? const SizedBox(
                   height: 24,
                   width: 24,
-                  child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 3, color: Colors.white),
                 )
-              : const Text('Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              : const Text('Connect',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ),
       ),
     );

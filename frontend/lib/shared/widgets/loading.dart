@@ -16,10 +16,12 @@ class SproutLoadingIndicator extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SproutLoadingIndicator> createState() => _SproutLoadingIndicatorState();
+  ConsumerState<SproutLoadingIndicator> createState() =>
+      _SproutLoadingIndicatorState();
 }
 
-class _SproutLoadingIndicatorState extends ConsumerState<SproutLoadingIndicator> with SingleTickerProviderStateMixin {
+class _SproutLoadingIndicatorState extends ConsumerState<SproutLoadingIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
   // Custom precise animations mapped to the CSS timeline
@@ -58,30 +60,47 @@ class _SproutLoadingIndicatorState extends ConsumerState<SproutLoadingIndicator>
 
     // Timeline percentages calculated precisely from CSS intervals:
     _drawAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.0, 0.516, curve: Curves.easeInOutCubic)),
+      CurvedAnimation(
+          parent: _animationController,
+          curve: const Interval(0.0, 0.516, curve: Curves.easeInOutCubic)),
     );
 
     _fillAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.258, 0.387, curve: Curves.easeInOut)),
+      CurvedAnimation(
+          parent: _animationController,
+          curve: const Interval(0.258, 0.387, curve: Curves.easeInOut)),
     );
 
     _flowerTranslateAnimation = Tween<double>(begin: 55.0, end: 135.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.516, 0.677, curve: Curves.easeInOutCubic)),
+      CurvedAnimation(
+          parent: _animationController,
+          curve: const Interval(0.516, 0.677, curve: Curves.easeInOutCubic)),
     );
 
     _popAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.18).chain(CurveTween(curve: Curves.easeOutCubic)), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0).chain(CurveTween(curve: Curves.easeInCubic)), weight: 50),
+      TweenSequenceItem(
+          tween: Tween(begin: 1.0, end: 1.18)
+              .chain(CurveTween(curve: Curves.easeOutCubic)),
+          weight: 50),
+      TweenSequenceItem(
+          tween: Tween(begin: 1.18, end: 1.0)
+              .chain(CurveTween(curve: Curves.easeInCubic)),
+          weight: 50),
     ]).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.677, 0.935)),
+      CurvedAnimation(
+          parent: _animationController, curve: const Interval(0.677, 0.935)),
     );
 
     _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.677, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+          parent: _animationController,
+          curve: const Interval(0.677, 1.0, curve: Curves.easeOut)),
     );
 
     _textTranslateAnimation = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.677, 1.0, curve: Curves.easeOutBack)),
+      CurvedAnimation(
+          parent: _animationController,
+          curve: const Interval(0.677, 1.0, curve: Curves.easeOutBack)),
     );
 
     _animationController.addStatusListener((status) {
@@ -145,10 +164,12 @@ class _SproutLoadingIndicatorState extends ConsumerState<SproutLoadingIndicator>
                     painter: SproutAnimatedPainter(
                       drawProgress: animate ? _drawAnimation.value : 1.0,
                       fillProgress: animate ? _fillAnimation.value : 1.0,
-                      flowerTranslateX: animate ? _flowerTranslateAnimation.value : 135.0,
+                      flowerTranslateX:
+                          animate ? _flowerTranslateAnimation.value : 135.0,
                       popScale: animate ? _popAnimation.value : 1.0,
                       textOpacity: animate ? _textOpacityAnimation.value : 1.0,
-                      textTranslateY: animate ? _textTranslateAnimation.value : 0.0,
+                      textTranslateY:
+                          animate ? _textTranslateAnimation.value : 0.0,
                       flowerPath1: _flowerPath1,
                       flowerPath2: _flowerPath2,
                       textPath: _textPath,
@@ -172,15 +193,18 @@ class _SproutLoadingIndicatorState extends ConsumerState<SproutLoadingIndicator>
                           child: Column(
                             children: [
                               LinearProgressIndicator(
-                                backgroundColor: currentTheme.colorScheme.surfaceContainerHighest,
+                                backgroundColor: currentTheme
+                                    .colorScheme.surfaceContainerHighest,
                                 color: currentTheme.colorScheme.primary,
                               ),
                               if (widget.message != null) ...[
                                 const SizedBox(height: 16),
                                 Text(
                                   widget.message!,
-                                  style: currentTheme.textTheme.titleMedium?.copyWith(
-                                    color: currentTheme.colorScheme.onSurfaceVariant,
+                                  style: currentTheme.textTheme.titleMedium
+                                      ?.copyWith(
+                                    color: currentTheme
+                                        .colorScheme.onSurfaceVariant,
                                     letterSpacing: 1.5,
                                   ),
                                   textAlign: TextAlign.center,
@@ -244,7 +268,8 @@ class SproutAnimatedPainter extends CustomPainter {
     canvas.scale(2.3);
 
     // Handle Transform Origin -> "Center Box"
-    final Rect flowerBounds = flowerPath1.getBounds().expandToInclude(flowerPath2.getBounds());
+    final Rect flowerBounds =
+        flowerPath1.getBounds().expandToInclude(flowerPath2.getBounds());
     final Offset flowerCenter = flowerBounds.center;
 
     // Apply "Pop" scale locally to the center of the flower
@@ -254,7 +279,8 @@ class SproutAnimatedPainter extends CustomPainter {
 
     final Paint strokePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..color = const Color(0xFF38bdf8).withOpacity((1.0 - fillProgress).clamp(0.0, 1.0))
+      ..color = const Color(0xFF38bdf8)
+          .withOpacity((1.0 - fillProgress).clamp(0.0, 1.0))
       ..strokeWidth = 0.4;
 
     final Paint fillPaint = Paint()

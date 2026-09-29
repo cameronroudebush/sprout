@@ -25,20 +25,23 @@ class TransactionExtraData {
   TransactionLocation? location;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TransactionExtraData &&
-    other.code == code &&
-    other.website == website &&
-    other.location == location;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TransactionExtraData &&
+          other.code == code &&
+          other.website == website &&
+          other.location == location;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (code == null ? 0 : code!.hashCode) +
-    (website == null ? 0 : website!.hashCode) +
-    (location == null ? 0 : location!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (code == null ? 0 : code!.hashCode) +
+      (website == null ? 0 : website!.hashCode) +
+      (location == null ? 0 : location!.hashCode);
 
   @override
-  String toString() => 'TransactionExtraData[code=$code, website=$website, location=$location]';
+  String toString() =>
+      'TransactionExtraData[code=$code, website=$website, location=$location]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -83,7 +86,10 @@ class TransactionExtraData {
     return null;
   }
 
-  static List<TransactionExtraData> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TransactionExtraData> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <TransactionExtraData>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,20 +117,24 @@ class TransactionExtraData {
   }
 
   // maps a json object with a list of TransactionExtraData-objects as value to a dart map
-  static Map<String, List<TransactionExtraData>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<TransactionExtraData>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<TransactionExtraData>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = TransactionExtraData.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = TransactionExtraData.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

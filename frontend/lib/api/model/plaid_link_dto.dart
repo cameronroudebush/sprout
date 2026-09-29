@@ -22,23 +22,25 @@ class PlaidLinkDTO {
   PlaidMetadataDTO metadata;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PlaidLinkDTO &&
-    other.publicToken == publicToken &&
-    other.metadata == metadata;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlaidLinkDTO &&
+          other.publicToken == publicToken &&
+          other.metadata == metadata;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (publicToken.hashCode) +
-    (metadata.hashCode);
+      // ignore: unnecessary_parenthesis
+      (publicToken.hashCode) + (metadata.hashCode);
 
   @override
-  String toString() => 'PlaidLinkDTO[publicToken=$publicToken, metadata=$metadata]';
+  String toString() =>
+      'PlaidLinkDTO[publicToken=$publicToken, metadata=$metadata]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'publicToken'] = this.publicToken;
-      json[r'metadata'] = this.metadata;
+    json[r'publicToken'] = this.publicToken;
+    json[r'metadata'] = this.metadata;
     return json;
   }
 
@@ -53,10 +55,14 @@ class PlaidLinkDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'publicToken'), 'Required key "PlaidLinkDTO[publicToken]" is missing from JSON.');
-        assert(json[r'publicToken'] != null, 'Required key "PlaidLinkDTO[publicToken]" has a null value in JSON.');
-        assert(json.containsKey(r'metadata'), 'Required key "PlaidLinkDTO[metadata]" is missing from JSON.');
-        assert(json[r'metadata'] != null, 'Required key "PlaidLinkDTO[metadata]" has a null value in JSON.');
+        assert(json.containsKey(r'publicToken'),
+            'Required key "PlaidLinkDTO[publicToken]" is missing from JSON.');
+        assert(json[r'publicToken'] != null,
+            'Required key "PlaidLinkDTO[publicToken]" has a null value in JSON.');
+        assert(json.containsKey(r'metadata'),
+            'Required key "PlaidLinkDTO[metadata]" is missing from JSON.');
+        assert(json[r'metadata'] != null,
+            'Required key "PlaidLinkDTO[metadata]" has a null value in JSON.');
         return true;
       }());
 
@@ -68,7 +74,10 @@ class PlaidLinkDTO {
     return null;
   }
 
-  static List<PlaidLinkDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PlaidLinkDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PlaidLinkDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,13 +105,19 @@ class PlaidLinkDTO {
   }
 
   // maps a json object with a list of PlaidLinkDTO-objects as value to a dart map
-  static Map<String, List<PlaidLinkDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<PlaidLinkDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<PlaidLinkDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PlaidLinkDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = PlaidLinkDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -114,4 +129,3 @@ class PlaidLinkDTO {
     'metadata',
   };
 }
-

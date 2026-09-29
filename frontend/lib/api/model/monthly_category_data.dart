@@ -28,26 +28,27 @@ class MonthlyCategoryData {
   String color;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MonthlyCategoryData &&
-    other.name == name &&
-    other.amount == amount &&
-    other.color == color;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MonthlyCategoryData &&
+          other.name == name &&
+          other.amount == amount &&
+          other.color == color;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (name.hashCode) +
-    (amount.hashCode) +
-    (color.hashCode);
+      // ignore: unnecessary_parenthesis
+      (name.hashCode) + (amount.hashCode) + (color.hashCode);
 
   @override
-  String toString() => 'MonthlyCategoryData[name=$name, amount=$amount, color=$color]';
+  String toString() =>
+      'MonthlyCategoryData[name=$name, amount=$amount, color=$color]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'name'] = this.name;
-      json[r'amount'] = this.amount;
-      json[r'color'] = this.color;
+    json[r'name'] = this.name;
+    json[r'amount'] = this.amount;
+    json[r'color'] = this.color;
     return json;
   }
 
@@ -62,12 +63,18 @@ class MonthlyCategoryData {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'name'), 'Required key "MonthlyCategoryData[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "MonthlyCategoryData[name]" has a null value in JSON.');
-        assert(json.containsKey(r'amount'), 'Required key "MonthlyCategoryData[amount]" is missing from JSON.');
-        assert(json[r'amount'] != null, 'Required key "MonthlyCategoryData[amount]" has a null value in JSON.');
-        assert(json.containsKey(r'color'), 'Required key "MonthlyCategoryData[color]" is missing from JSON.');
-        assert(json[r'color'] != null, 'Required key "MonthlyCategoryData[color]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "MonthlyCategoryData[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "MonthlyCategoryData[name]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'),
+            'Required key "MonthlyCategoryData[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null,
+            'Required key "MonthlyCategoryData[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'color'),
+            'Required key "MonthlyCategoryData[color]" is missing from JSON.');
+        assert(json[r'color'] != null,
+            'Required key "MonthlyCategoryData[color]" has a null value in JSON.');
         return true;
       }());
 
@@ -80,7 +87,10 @@ class MonthlyCategoryData {
     return null;
   }
 
-  static List<MonthlyCategoryData> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MonthlyCategoryData> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MonthlyCategoryData>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -108,13 +118,19 @@ class MonthlyCategoryData {
   }
 
   // maps a json object with a list of MonthlyCategoryData-objects as value to a dart map
-  static Map<String, List<MonthlyCategoryData>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MonthlyCategoryData>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MonthlyCategoryData>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MonthlyCategoryData.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MonthlyCategoryData.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -127,4 +143,3 @@ class MonthlyCategoryData {
     'color',
   };
 }
-

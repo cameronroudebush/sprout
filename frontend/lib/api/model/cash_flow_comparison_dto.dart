@@ -32,29 +32,32 @@ class CashFlowComparisonDTO {
   String targetMonthLabel;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CashFlowComparisonDTO &&
-    _deepEquality.equals(other.currentMonthData, currentMonthData) &&
-    _deepEquality.equals(other.targetMonthData, targetMonthData) &&
-    other.currentMonthLabel == currentMonthLabel &&
-    other.targetMonthLabel == targetMonthLabel;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CashFlowComparisonDTO &&
+          _deepEquality.equals(other.currentMonthData, currentMonthData) &&
+          _deepEquality.equals(other.targetMonthData, targetMonthData) &&
+          other.currentMonthLabel == currentMonthLabel &&
+          other.targetMonthLabel == targetMonthLabel;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (currentMonthData.hashCode) +
-    (targetMonthData.hashCode) +
-    (currentMonthLabel.hashCode) +
-    (targetMonthLabel.hashCode);
+      // ignore: unnecessary_parenthesis
+      (currentMonthData.hashCode) +
+      (targetMonthData.hashCode) +
+      (currentMonthLabel.hashCode) +
+      (targetMonthLabel.hashCode);
 
   @override
-  String toString() => 'CashFlowComparisonDTO[currentMonthData=$currentMonthData, targetMonthData=$targetMonthData, currentMonthLabel=$currentMonthLabel, targetMonthLabel=$targetMonthLabel]';
+  String toString() =>
+      'CashFlowComparisonDTO[currentMonthData=$currentMonthData, targetMonthData=$targetMonthData, currentMonthLabel=$currentMonthLabel, targetMonthLabel=$targetMonthLabel]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'currentMonthData'] = this.currentMonthData;
-      json[r'targetMonthData'] = this.targetMonthData;
-      json[r'currentMonthLabel'] = this.currentMonthLabel;
-      json[r'targetMonthLabel'] = this.targetMonthLabel;
+    json[r'currentMonthData'] = this.currentMonthData;
+    json[r'targetMonthData'] = this.targetMonthData;
+    json[r'currentMonthLabel'] = this.currentMonthLabel;
+    json[r'targetMonthLabel'] = this.targetMonthLabel;
     return json;
   }
 
@@ -69,20 +72,30 @@ class CashFlowComparisonDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'currentMonthData'), 'Required key "CashFlowComparisonDTO[currentMonthData]" is missing from JSON.');
-        assert(json[r'currentMonthData'] != null, 'Required key "CashFlowComparisonDTO[currentMonthData]" has a null value in JSON.');
-        assert(json.containsKey(r'targetMonthData'), 'Required key "CashFlowComparisonDTO[targetMonthData]" is missing from JSON.');
-        assert(json[r'targetMonthData'] != null, 'Required key "CashFlowComparisonDTO[targetMonthData]" has a null value in JSON.');
-        assert(json.containsKey(r'currentMonthLabel'), 'Required key "CashFlowComparisonDTO[currentMonthLabel]" is missing from JSON.');
-        assert(json[r'currentMonthLabel'] != null, 'Required key "CashFlowComparisonDTO[currentMonthLabel]" has a null value in JSON.');
-        assert(json.containsKey(r'targetMonthLabel'), 'Required key "CashFlowComparisonDTO[targetMonthLabel]" is missing from JSON.');
-        assert(json[r'targetMonthLabel'] != null, 'Required key "CashFlowComparisonDTO[targetMonthLabel]" has a null value in JSON.');
+        assert(json.containsKey(r'currentMonthData'),
+            'Required key "CashFlowComparisonDTO[currentMonthData]" is missing from JSON.');
+        assert(json[r'currentMonthData'] != null,
+            'Required key "CashFlowComparisonDTO[currentMonthData]" has a null value in JSON.');
+        assert(json.containsKey(r'targetMonthData'),
+            'Required key "CashFlowComparisonDTO[targetMonthData]" is missing from JSON.');
+        assert(json[r'targetMonthData'] != null,
+            'Required key "CashFlowComparisonDTO[targetMonthData]" has a null value in JSON.');
+        assert(json.containsKey(r'currentMonthLabel'),
+            'Required key "CashFlowComparisonDTO[currentMonthLabel]" is missing from JSON.');
+        assert(json[r'currentMonthLabel'] != null,
+            'Required key "CashFlowComparisonDTO[currentMonthLabel]" has a null value in JSON.');
+        assert(json.containsKey(r'targetMonthLabel'),
+            'Required key "CashFlowComparisonDTO[targetMonthLabel]" is missing from JSON.');
+        assert(json[r'targetMonthLabel'] != null,
+            'Required key "CashFlowComparisonDTO[targetMonthLabel]" has a null value in JSON.');
         return true;
       }());
 
       return CashFlowComparisonDTO(
-        currentMonthData: HistoricalDataPoint.listFromJson(json[r'currentMonthData']),
-        targetMonthData: HistoricalDataPoint.listFromJson(json[r'targetMonthData']),
+        currentMonthData:
+            HistoricalDataPoint.listFromJson(json[r'currentMonthData']),
+        targetMonthData:
+            HistoricalDataPoint.listFromJson(json[r'targetMonthData']),
         currentMonthLabel: mapValueOfType<String>(json, r'currentMonthLabel')!,
         targetMonthLabel: mapValueOfType<String>(json, r'targetMonthLabel')!,
       );
@@ -90,7 +103,10 @@ class CashFlowComparisonDTO {
     return null;
   }
 
-  static List<CashFlowComparisonDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CashFlowComparisonDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CashFlowComparisonDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -118,13 +134,19 @@ class CashFlowComparisonDTO {
   }
 
   // maps a json object with a list of CashFlowComparisonDTO-objects as value to a dart map
-  static Map<String, List<CashFlowComparisonDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CashFlowComparisonDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CashFlowComparisonDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CashFlowComparisonDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CashFlowComparisonDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -138,4 +160,3 @@ class CashFlowComparisonDTO {
     'targetMonthLabel',
   };
 }
-

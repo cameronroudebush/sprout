@@ -6,7 +6,8 @@ class SproutLayoutBuilder extends StatelessWidget {
   static final desktopBreakpoint = 950;
 
   /// Function to call with our information
-  final Widget Function(bool isDesktop, BuildContext context, BoxConstraints constraints) builder;
+  final Widget Function(
+      bool isDesktop, BuildContext context, BoxConstraints constraints) builder;
 
   const SproutLayoutBuilder(this.builder, {super.key});
 

@@ -20,10 +20,6 @@ class BudgetSummaryCard extends StatelessWidget {
 
     final hasLimits = summary.hasLimits;
     final isOver = summary.isOverBudget;
-    final income = monthlyIncome;
-    final spendingColor = income == null
-        ? theme.colorScheme.onSurface
-        : (summary.totalSpent > income ? theme.colorScheme.error : Colors.green);
 
     return SproutCard(
       child: Padding(
@@ -71,19 +67,21 @@ class BudgetSummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     spacing: 8,
                     children: [
                       Text(
                         'Spent this month',
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant),
                       ),
                       Text(
                         currencyFormatter.format(summary.totalSpent),
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: spendingColor,
+                          color: theme.colorScheme.error,
                         ),
                       ),
                     ],
@@ -91,16 +89,18 @@ class BudgetSummaryCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     spacing: 8,
                     children: [
                       Text(
                         'Monthly limits',
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant),
                       ),
                       Text(
                         currencyFormatter.format(summary.totalBudgeted),
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.onSurface,
@@ -111,13 +111,14 @@ class BudgetSummaryCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     spacing: 8,
                     children: [
                       Text(
                         hasLimits
                             ? (isOver ? 'Over limits by' : 'Still available')
                             : 'Next step',
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant),
                       ),
@@ -127,6 +128,7 @@ class BudgetSummaryCard extends StatelessWidget {
                                 ? summary.totalOverBudgetAmount
                                 : summary.totalRemaining)
                             : 'Set a limit',
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: !hasLimits

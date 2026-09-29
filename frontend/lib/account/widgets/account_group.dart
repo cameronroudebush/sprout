@@ -81,7 +81,8 @@ class AccountGroupSection extends ConsumerWidget {
               initiallyExpanded: initiallyExpanded,
               enabled: allowExpansion,
               visualDensity: VisualDensity.compact,
-              tilePadding: EdgeInsets.symmetric(horizontal: renderAsCard ? 12 : 0),
+              tilePadding:
+                  EdgeInsets.symmetric(horizontal: renderAsCard ? 12 : 0),
               childrenPadding: EdgeInsets.zero,
               leading: Icon(Icons.circle, color: accentColor, size: 12),
               title: Row(
@@ -96,7 +97,8 @@ class AccountGroupSection extends ConsumerWidget {
                     ),
                   ),
                   // Error indicator for the group
-                  if (showErrors) SproutErrorIcon(hasError: groupHasError, size: 14),
+                  if (showErrors)
+                    SproutErrorIcon(hasError: groupHasError, size: 14),
                 ],
               ),
               trailing: Column(
@@ -123,11 +125,14 @@ class AccountGroupSection extends ConsumerWidget {
                 const Divider(height: 1, indent: 16, endIndent: 16),
                 ...(accounts
                       ..sort((a, b) {
-                        return isNegative ? a.balance.compareTo(b.balance) : b.balance.compareTo(a.balance);
+                        return isNegative
+                            ? a.balance.compareTo(b.balance)
+                            : b.balance.compareTo(a.balance);
                       }))
                     .map((acc) {
                   // Find history for this specific account
-                  final history = historyList?.firstWhereOrNull((h) => h.connectedId == acc.id);
+                  final history = historyList
+                      ?.firstWhereOrNull((h) => h.connectedId == acc.id);
                   final dataPoint = history?.getValueByFrame(selectedRange);
                   final isSelected = selectedAccounts?.contains(acc) ?? false;
                   final hasError = acc.hasProblem;
@@ -143,11 +148,17 @@ class AccountGroupSection extends ConsumerWidget {
                           percentChange: dataPoint?.percentChange?.toDouble(),
                           valueChange: dataPoint?.valueChange.toDouble(),
                           period: selectedRange,
-                          onAccountClick: onAccountClick != null ? () => onAccountClick!(acc) : null,
+                          onAccountClick: onAccountClick != null
+                              ? () => onAccountClick!(acc)
+                              : null,
                         ),
                         if (showErrors)
                           // Display the error badge if the institution has an error
-                          Positioned(left: -4, top: 2, child: SproutErrorIcon(hasError: hasError, size: 14)),
+                          Positioned(
+                              left: -4,
+                              top: 2,
+                              child: SproutErrorIcon(
+                                  hasError: hasError, size: 14)),
                       ],
                     ),
                   );
@@ -160,7 +171,8 @@ class AccountGroupSection extends ConsumerWidget {
                           if (isSelected)
                             SizedBox(
                               width: 24,
-                              child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+                              child: Icon(Icons.check_circle,
+                                  color: theme.colorScheme.primary, size: 20),
                             ),
                           Expanded(child: row),
                         ],

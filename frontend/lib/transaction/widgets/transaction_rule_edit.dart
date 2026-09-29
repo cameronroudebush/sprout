@@ -20,7 +20,8 @@ class TransactionRuleEdit extends ConsumerStatefulWidget {
   const TransactionRuleEdit(this.rule, {super.key, this.initialValue});
 
   @override
-  ConsumerState<TransactionRuleEdit> createState() => _TransactionRuleInfoState();
+  ConsumerState<TransactionRuleEdit> createState() =>
+      _TransactionRuleInfoState();
 }
 
 class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
@@ -58,8 +59,10 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
       _enabled = rule.enabled;
     } else {
       // Initialize for a new rule
-      _valueController.text = widget.initialValue == null ? "" : widget.initialValue.toString();
-      _priorityController.text = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
+      _valueController.text =
+          widget.initialValue == null ? "" : widget.initialValue.toString();
+      _priorityController.text =
+          lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
       _type = TransactionRuleTypeEnum.description;
       _categoryId = null;
       _accountId = null;
@@ -145,7 +148,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
           Navigator.of(context).pop();
           Navigator.of(context).pop();
         },
-        child: const Text('Removing this transaction rule cannot be undone.', textAlign: TextAlign.center),
+        child: const Text('Removing this transaction rule cannot be undone.',
+            textAlign: TextAlign.center),
       ),
     );
   }
@@ -167,7 +171,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
       if (rules == null) return;
 
       final lastRuleOrder = rules.lastOrNull?.order;
-      final priority = lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
+      final priority =
+          lastRuleOrder == null ? "1" : (lastRuleOrder + 1).toString();
       if (_priorityController.text != priority) {
         _priorityController.text = priority;
       }
@@ -193,11 +198,13 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
   /// Builds the form for display based on type and editing capability
   Widget _getForm(bool isEdit, ThemeData theme) {
     String valueHintText = "e.g., 'Starbucks' or '15.50'";
-    String valueHelpText = "Enter the specific text or numerical value to match.";
+    String valueHelpText =
+        "Enter the specific text or numerical value to match.";
 
     if (_type == TransactionRuleTypeEnum.description) {
       if (_strict) {
-        valueHelpText = "Enter the exact text to match the transaction's description.";
+        valueHelpText =
+            "Enter the exact text to match the transaction's description.";
         valueHintText = "e.g., 'Starbucks Coffee' for an exact match";
       } else {
         valueHelpText =
@@ -206,10 +213,12 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
       }
     } else if (_type == TransactionRuleTypeEnum.amount) {
       if (_strict) {
-        valueHelpText = "Enter the exact amount to match the transaction's value.";
+        valueHelpText =
+            "Enter the exact amount to match the transaction's value.";
         valueHintText = "e.g., '25.50' for an exact match";
       } else {
-        valueHelpText = "Enter a partial amount to match the transaction's value.";
+        valueHelpText =
+            "Enter a partial amount to match the transaction's value.";
         valueHintText = "e.g., '10' to match amounts like 10.50";
       }
     }
@@ -234,16 +243,19 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                   TextFormField(
                     keyboardType: TextInputType.number,
                     controller: _priorityController,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     onFieldSubmitted: (value) => _submit(),
                     onChanged: (value) {
                       _priorityEdited = true;
                       setState(() {});
                     },
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Please enter a value";
+                      if (value == null || value.isEmpty)
+                        return "Please enter a value";
                       final parsed = int.tryParse(value);
-                      if (parsed == null) return "This value must be an integer";
+                      if (parsed == null)
+                        return "This value must be an integer";
                       return null;
                     },
                   ),
@@ -260,18 +272,22 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                 children: [
                   Text("Rule Type", style: theme.textTheme.titleMedium),
                   DropdownButtonFormField<TransactionRuleTypeEnum>(
-                    dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    dropdownColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     value: _type,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     items: TransactionRuleTypeEnum.values.map((type) {
-                      return DropdownMenuItem(value: type, child: Text(type.value));
+                      return DropdownMenuItem(
+                          value: type, child: Text(type.value));
                     }).toList(),
                     onChanged: (newValue) {
                       if (newValue != null) {
                         setState(() => _type = newValue);
                       }
                     },
-                    validator: (value) => value == null ? "Please select a rule type" : null,
+                    validator: (value) =>
+                        value == null ? "Please select a rule type" : null,
                   ),
                   Text(
                     "Choose whether the rule should apply to the transaction's description or amount.",
@@ -290,14 +306,18 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                         ? const TextInputType.numberWithOptions(decimal: true)
                         : TextInputType.text,
                     controller: _valueController,
-                    decoration: InputDecoration(hintText: valueHintText, border: const OutlineInputBorder()),
+                    decoration: InputDecoration(
+                        hintText: valueHintText,
+                        border: const OutlineInputBorder()),
                     onFieldSubmitted: (value) => _submit(),
                     onChanged: (value) => setState(() {}),
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Please enter a value";
+                      if (value == null || value.isEmpty)
+                        return "Please enter a value";
                       if (_type == TransactionRuleTypeEnum.amount) {
                         final parsed = double.tryParse(value);
-                        if (parsed == null) return "This value must be numerical";
+                        if (parsed == null)
+                          return "This value must be numerical";
                       }
                       return null;
                     },
@@ -336,7 +356,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                   CategoryDropdown(_categoryId, (cat) {
                     setState(() => _categoryId = cat?.id);
                   }),
-                  Text("The category applied when the rule is met.", style: helpStyle),
+                  Text("The category applied when the rule is met.",
+                      style: helpStyle),
                 ],
               ),
               // Account to assign
@@ -348,7 +369,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                   AccountDropdown(_accountId, (acc) {
                     setState(() => _accountId = acc?.id);
                   }),
-                  Text("The account affected by this rule if selected.", style: helpStyle),
+                  Text("The account affected by this rule if selected.",
+                      style: helpStyle),
                 ],
               ),
               // Strict matching
@@ -359,12 +381,18 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Strict Match", style: theme.textTheme.titleMedium),
-                        Text("Enables an exact match, rather than a partial match.", style: helpStyle),
+                        Text("Strict Match",
+                            style: theme.textTheme.titleMedium),
+                        Text(
+                            "Enables an exact match, rather than a partial match.",
+                            style: helpStyle),
                       ],
                     ),
                   ),
-                  Switch(value: _strict, onChanged: (newValue) => setState(() => _strict = newValue)),
+                  Switch(
+                      value: _strict,
+                      onChanged: (newValue) =>
+                          setState(() => _strict = newValue)),
                 ],
               ),
               // Enabled status
@@ -376,11 +404,15 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("Enabled", style: theme.textTheme.titleMedium),
-                        Text("Toggle to enable or disable this rule.", style: helpStyle),
+                        Text("Toggle to enable or disable this rule.",
+                            style: helpStyle),
                       ],
                     ),
                   ),
-                  Switch(value: _enabled, onChanged: (newValue) => setState(() => _enabled = newValue)),
+                  Switch(
+                      value: _enabled,
+                      onChanged: (newValue) =>
+                          setState(() => _enabled = newValue)),
                 ],
               ),
             ],

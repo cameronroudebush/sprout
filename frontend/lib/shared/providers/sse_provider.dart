@@ -73,17 +73,22 @@ class Sse extends _$Sse {
         _reconnectAttempts = 0;
         state = state.copyWith(isConnected: true, isConnecting: false);
 
-        final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
+        final stream = response.stream
+            .transform(utf8.decoder)
+            .transform(const LineSplitter());
 
         await for (var line in stream) {
           if (line.startsWith('data: ') && line.length > 6) {
             final sseData = SSEData.fromJson(json.decode(line.substring(6)));
             if (sseData != null) {
               // Update state reactively
-              final newEvents = Map<SSEDataEventEnum, ({SSEData data, DateTime timestamp})>.from(state.lastEvents);
-              newEvents[sseData.event] = (data: sseData, timestamp: DateTime.now());
+              final newEvents = Map<SSEDataEventEnum,
+                  ({SSEData data, DateTime timestamp})>.from(state.lastEvents);
+              newEvents[sseData.event] =
+                  (data: sseData, timestamp: DateTime.now());
 
-              state = state.copyWith(latestData: sseData, lastEvents: newEvents);
+              state =
+                  state.copyWith(latestData: sseData, lastEvents: newEvents);
             }
           }
         }

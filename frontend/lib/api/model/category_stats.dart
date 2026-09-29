@@ -24,23 +24,25 @@ class CategoryStats {
   Map<String, String> colorMapping;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CategoryStats &&
-    _deepEquality.equals(other.categoryCount, categoryCount) &&
-    _deepEquality.equals(other.colorMapping, colorMapping);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CategoryStats &&
+          _deepEquality.equals(other.categoryCount, categoryCount) &&
+          _deepEquality.equals(other.colorMapping, colorMapping);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (categoryCount.hashCode) +
-    (colorMapping.hashCode);
+      // ignore: unnecessary_parenthesis
+      (categoryCount.hashCode) + (colorMapping.hashCode);
 
   @override
-  String toString() => 'CategoryStats[categoryCount=$categoryCount, colorMapping=$colorMapping]';
+  String toString() =>
+      'CategoryStats[categoryCount=$categoryCount, colorMapping=$colorMapping]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'categoryCount'] = this.categoryCount;
-      json[r'colorMapping'] = this.colorMapping;
+    json[r'categoryCount'] = this.categoryCount;
+    json[r'colorMapping'] = this.colorMapping;
     return json;
   }
 
@@ -55,10 +57,14 @@ class CategoryStats {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'categoryCount'), 'Required key "CategoryStats[categoryCount]" is missing from JSON.');
-        assert(json[r'categoryCount'] != null, 'Required key "CategoryStats[categoryCount]" has a null value in JSON.');
-        assert(json.containsKey(r'colorMapping'), 'Required key "CategoryStats[colorMapping]" is missing from JSON.');
-        assert(json[r'colorMapping'] != null, 'Required key "CategoryStats[colorMapping]" has a null value in JSON.');
+        assert(json.containsKey(r'categoryCount'),
+            'Required key "CategoryStats[categoryCount]" is missing from JSON.');
+        assert(json[r'categoryCount'] != null,
+            'Required key "CategoryStats[categoryCount]" has a null value in JSON.');
+        assert(json.containsKey(r'colorMapping'),
+            'Required key "CategoryStats[colorMapping]" is missing from JSON.');
+        assert(json[r'colorMapping'] != null,
+            'Required key "CategoryStats[colorMapping]" has a null value in JSON.');
         return true;
       }());
 
@@ -70,7 +76,10 @@ class CategoryStats {
     return null;
   }
 
-  static List<CategoryStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CategoryStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CategoryStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -98,13 +107,19 @@ class CategoryStats {
   }
 
   // maps a json object with a list of CategoryStats-objects as value to a dart map
-  static Map<String, List<CategoryStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CategoryStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CategoryStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CategoryStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CategoryStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -116,4 +131,3 @@ class CategoryStats {
     'colorMapping',
   };
 }
-

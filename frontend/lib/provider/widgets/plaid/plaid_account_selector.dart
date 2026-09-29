@@ -22,7 +22,8 @@ class PlaidAccountSelector extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PlaidAccountSelector> createState() => _PlaidAccountSelectorState();
+  ConsumerState<PlaidAccountSelector> createState() =>
+      _PlaidAccountSelectorState();
 }
 
 class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
@@ -37,9 +38,9 @@ class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
       if (exit.error != null) {
         LoggerProvider.error("Plaid Exit Error: ${exit.error}");
       } else {
-        ref
-            .read(notificationsProvider.notifier)
-            .openFrontendOnly("Plaid link cancelled", type: NotificationTypeEnum.warning);
+        ref.read(notificationsProvider.notifier).openFrontendOnly(
+            "Plaid link cancelled",
+            type: NotificationTypeEnum.warning);
       }
       Navigator.of(context).pop();
     });
@@ -58,16 +59,19 @@ class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
       final api = await ref.read(providerApiProvider.future);
       final response = await api.plaidProviderControllerCreateLinkToken();
       final linkToken = response?.linkToken;
-      if (linkToken == null) throw Exception("No link token returned from backend");
+      if (linkToken == null)
+        throw Exception("No link token returned from backend");
 
-      LinkTokenConfiguration configuration = LinkTokenConfiguration(token: linkToken);
+      LinkTokenConfiguration configuration =
+          LinkTokenConfiguration(token: linkToken);
       // Create and Open
       await PlaidLink.create(configuration: configuration);
       PlaidLink.open();
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+          _error =
+              ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
         });
       }
     }
@@ -85,7 +89,8 @@ class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+          _error =
+              ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
         });
       }
     }
@@ -93,7 +98,8 @@ class _PlaidAccountSelectorState extends ConsumerState<PlaidAccountSelector> {
 
   @override
   Widget build(BuildContext context) {
-    if (_error != null) return Center(child: Text(_error!, style: TextStyle(color: Colors.red)));
+    if (_error != null)
+      return Center(child: Text(_error!, style: TextStyle(color: Colors.red)));
 
     return const SizedBox(
       height: 200,

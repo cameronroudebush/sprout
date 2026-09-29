@@ -17,16 +17,23 @@ class CurrencyFormatter {
 
   /// Given a formatted currency, returns it's actual display value, considering the private mode.
   ///   We assume the given number is already in the proper currency.
-  String format(num? n, {bool compact = false, bool round = false, bool handlePrivateMode = true}) {
+  String format(num? n,
+      {bool compact = false,
+      bool round = false,
+      bool handlePrivateMode = true}) {
     if (n == null) {
       return "Unknown";
     } else {
-      return _format(n, compact: compact, round: round, handlePrivateMode: handlePrivateMode);
+      return _format(n,
+          compact: compact, round: round, handlePrivateMode: handlePrivateMode);
     }
   }
 
   /// Formats the given number to a string, assuming the currency code is applied by the user's config to these values already.
-  String _format(num amount, {bool compact = false, bool round = false, bool handlePrivateMode = true}) {
+  String _format(num amount,
+      {bool compact = false,
+      bool round = false,
+      bool handlePrivateMode = true}) {
     if (handlePrivateMode && privateMode) return "***";
     double value = amount == -0.0 ? 0.0 : amount.toDouble();
     final currencyCode = displayCurrency.toString();
@@ -50,5 +57,6 @@ CurrencyFormatter currencyFormatter(Ref ref) {
   final config = ref.watch(userConfigProvider);
   final isPrivate = config.value?.privateMode ?? false;
   final displayCurrency = config.value?.currency ?? CurrencyOptionsEnum.USD;
-  return CurrencyFormatter(privateMode: isPrivate, displayCurrency: displayCurrency);
+  return CurrencyFormatter(
+      privateMode: isPrivate, displayCurrency: displayCurrency);
 }

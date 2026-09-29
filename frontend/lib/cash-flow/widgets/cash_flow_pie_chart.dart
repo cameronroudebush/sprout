@@ -28,29 +28,39 @@ class CashFlowPieChart extends ConsumerWidget {
     final theme = Theme.of(context);
     final year = selectedDate.year;
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
-    final statsAsync = ref.watch(cashFlowStatsProvider(year: year, month: month));
+    final statsAsync =
+        ref.watch(cashFlowStatsProvider(year: year, month: month));
     final formatter = ref.watch(currencyFormatterProvider);
 
     return statsAsync.whenDefault(
-      emptyWidget: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
+      emptyWidget: Center(
+          child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
       data: (stats) {
         final totalIncome = stats!.totalIncome;
         final totalExpense = stats.totalExpense;
 
         // Create mapping or handle zero state
         final bool hasData = totalIncome != 0 || totalExpense != 0;
-        final Map<String, double>? data =
-            hasData ? {"Income": totalIncome.toDouble(), "Expense": totalExpense.abs().toDouble()} : null;
+        final Map<String, double>? data = hasData
+            ? {
+                "Income": totalIncome.toDouble(),
+                "Expense": totalExpense.abs().toDouble()
+              }
+            : null;
 
         if (data == null) {
           return Center(
-            child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)),
+            child:
+                Text(CashFlowViewFormatter.getNoDataText(view, selectedDate)),
           );
         }
 
         return SproutPieChart(
           data: data,
-          colorMapping: {"Income": Colors.green, "Expense": theme.colorScheme.error},
+          colorMapping: {
+            "Income": Colors.green,
+            "Expense": theme.colorScheme.error
+          },
           header: header,
           legendPosition: legendPosition,
           showPieValue: true,

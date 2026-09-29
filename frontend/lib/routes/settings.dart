@@ -34,10 +34,15 @@ class SettingsPage extends ConsumerWidget {
   /// Called whenever a configuration change fails
   final void Function(dynamic error)? onConfigFailure;
 
-  const SettingsPage({super.key, this.onlyShowSetup = false, this.onConfigChanged, this.onConfigFailure});
+  const SettingsPage(
+      {super.key,
+      this.onlyShowSetup = false,
+      this.onConfigChanged,
+      this.onConfigFailure});
 
   /// Central function to handle config updates
-  Future<void> _update(WidgetRef ref, UserConfig Function(UserConfig) callback) async {
+  Future<void> _update(
+      WidgetRef ref, UserConfig Function(UserConfig) callback) async {
     try {
       await ref.read(userConfigProvider.notifier).updateConfig(callback);
       ref.invalidate(providerConfigProvider);
@@ -66,15 +71,19 @@ class SettingsPage extends ConsumerWidget {
     final unsecureConfig = ref.watch(unsecureConfigProvider).value;
     final packageInfo = ref.watch(packageInfoProvider).value;
     final providers = ref.watch(providerConfigProvider).value;
-    final backendUrl = ref.watch(secureConfigApiProvider).value?.apiClient.basePath;
-    final simpleFinConfig = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin);
-    final coinbaseConfig = providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.coinbase);
+    final backendUrl =
+        ref.watch(secureConfigApiProvider).value?.apiClient.basePath;
+    final simpleFinConfig = providers
+        ?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin);
+    final coinbaseConfig = providers
+        ?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.coinbase);
 
     if (userConfig == null || config == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final userHasEmail = user != null && user.email != null && user.email!.isNotEmpty;
+    final userHasEmail =
+        user != null && user.email != null && user.email!.isNotEmpty;
     final settingElevation = onlyShowSetup ? 0.0 : null;
 
 // Sections, defined by a map for easier modification
@@ -98,9 +107,13 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.email,
             onSave: (values) async {
               try {
-                await ref.read(authProvider.notifier).updateUser(UpdateUserDto(email: values.first));
+                await ref
+                    .read(authProvider.notifier)
+                    .updateUser(UpdateUserDto(email: values.first));
               } catch (e) {
-                ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                ref
+                    .read(notificationsProvider.notifier)
+                    .openWithAPIException(e);
                 onConfigFailure?.call(e);
               }
             },
@@ -121,7 +134,10 @@ class SettingsPage extends ConsumerWidget {
                     ? null
                     : (EmailUpdateFrequencyEnum? newValue) {
                         if (newValue != null) {
-                          _update(ref, (c) => c.copyWith(emailUpdateFrequency: newValue));
+                          _update(
+                              ref,
+                              (c) =>
+                                  c.copyWith(emailUpdateFrequency: newValue));
                         }
                       },
                 items: EmailUpdateFrequencyEnum.values
@@ -139,14 +155,16 @@ class SettingsPage extends ConsumerWidget {
             subtitle: "If we should display cards/pages related to AI.",
             icon: Icons.auto_awesome,
             value: userConfig.includeAICapabilities,
-            onChanged: (val) => _update(ref, (c) => c.copyWith(includeAICapabilities: val)),
+            onChanged: (val) =>
+                _update(ref, (c) => c.copyWith(includeAICapabilities: val)),
           ),
         SwitchSettingTile(
           title: "Enable Budgeting",
           subtitle: "If we should display budgeting features and targets.",
           icon: Icons.pie_chart_rounded,
           value: userConfig.enableBudgeting,
-          onChanged: (val) => _update(ref, (c) => c.copyWith(enableBudgeting: val)),
+          onChanged: (val) =>
+              _update(ref, (c) => c.copyWith(enableBudgeting: val)),
         ),
       ],
       "Appearance": [
@@ -186,7 +204,8 @@ class SettingsPage extends ConsumerWidget {
             subtitle: "Hide balances across the app",
             icon: Icons.visibility_off_outlined,
             value: userConfig.privateMode,
-            onChanged: (val) => _update(ref, (c) => c.copyWith(privateMode: val)),
+            onChanged: (val) =>
+                _update(ref, (c) => c.copyWith(privateMode: val)),
           ),
         if (!kIsWeb)
           SwitchSettingTile(
@@ -207,10 +226,14 @@ class SettingsPage extends ConsumerWidget {
             value: userConfig.secureMode,
             onChanged: (val) async {
               try {
-                await ref.read(biometricsProvider.notifier).toggleSecureMode(val);
+                await ref
+                    .read(biometricsProvider.notifier)
+                    .toggleSecureMode(val);
                 onConfigChanged?.call();
               } catch (e) {
-                ref.read(notificationsProvider.notifier).openWithAPIException(e);
+                ref
+                    .read(notificationsProvider.notifier)
+                    .openWithAPIException(e);
                 onConfigFailure?.call(e);
               }
             },
@@ -220,7 +243,9 @@ class SettingsPage extends ConsumerWidget {
         if (simpleFinConfig != null)
           ActionSettingTile(
             title: "SimpleFIN Token",
-            subtitle: userConfig.simpleFinToken?.isNotEmpty == true ? "Token Set" : "Configure Token",
+            subtitle: userConfig.simpleFinToken?.isNotEmpty == true
+                ? "Token Set"
+                : "Configure Token",
             icon: FinanceProviderIcon(
               simpleFinConfig,
               size: 32,
@@ -232,17 +257,19 @@ class SettingsPage extends ConsumerWidget {
               currentValue: userConfig.simpleFinToken,
               icon: Icons.key,
               obscureText: true,
-              description: "Enter your new token below. This will be encrypted and stored securely.",
-              onSave: (values) => _update(ref, (c) => c.copyWith(simpleFinToken: values.first)),
+              description:
+                  "Enter your new token below. This will be encrypted and stored securely.",
+              onSave: (values) =>
+                  _update(ref, (c) => c.copyWith(simpleFinToken: values.first)),
             ),
           ),
         if (coinbaseConfig != null)
           ActionSettingTile(
             title: "Coinbase API Key",
-            subtitle:
-                (userConfig.coinbaseApiKey?.isNotEmpty == true && userConfig.coinbaseApiKeyName?.isNotEmpty == true)
-                    ? "Key Configured"
-                    : "Configure Key",
+            subtitle: (userConfig.coinbaseApiKey?.isNotEmpty == true &&
+                    userConfig.coinbaseApiKeyName?.isNotEmpty == true)
+                ? "Key Configured"
+                : "Configure Key",
             icon: FinanceProviderIcon(coinbaseConfig, size: 32),
             onTap: () => showSproutEditDialog(
               context: context,
@@ -279,7 +306,8 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.sync,
             trailing: Padding(
               padding: const EdgeInsets.only(right: 14),
-              child: Icon(Icons.circle, color: sseConnected ? Colors.green : Colors.red, size: 12),
+              child: Icon(Icons.circle,
+                  color: sseConnected ? Colors.green : Colors.red, size: 12),
             ),
           ),
           ActionSettingTile(
@@ -292,7 +320,8 @@ class SettingsPage extends ConsumerWidget {
             title: "Connection Url",
             subtitle: "The server Url",
             icon: Icons.http,
-            trailing: Text(backendUrl?.replaceAll("/api", "") ?? "", style: theme.textTheme.labelMedium),
+            trailing: Text(backendUrl?.replaceAll("/api", "") ?? "",
+                style: theme.textTheme.labelMedium),
           ),
           ActionSettingTile(
             title: "Version",
@@ -301,8 +330,10 @@ class SettingsPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Frontend: ${packageInfo?.version ?? ""}", style: theme.textTheme.labelMedium),
-                Text("Backend: ${unsecureConfig?.version ?? ""}", style: theme.textTheme.labelMedium),
+                Text("Frontend: ${packageInfo?.version ?? ""}",
+                    style: theme.textTheme.labelMedium),
+                Text("Backend: ${unsecureConfig?.version ?? ""}",
+                    style: theme.textTheme.labelMedium),
               ],
             ),
           ),

@@ -42,9 +42,13 @@ class CurrencyOptionsEnum {
     CNY,
   ];
 
-  static CurrencyOptionsEnum? fromJson(dynamic value) => CurrencyOptionsEnumTypeTransformer().decode(value);
+  static CurrencyOptionsEnum? fromJson(dynamic value) =>
+      CurrencyOptionsEnumTypeTransformer().decode(value);
 
-  static List<CurrencyOptionsEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CurrencyOptionsEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CurrencyOptionsEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -61,7 +65,8 @@ class CurrencyOptionsEnum {
 /// Transformation class that can [encode] an instance of [CurrencyOptionsEnum] to String,
 /// and [decode] dynamic data back to [CurrencyOptionsEnum].
 class CurrencyOptionsEnumTypeTransformer {
-  factory CurrencyOptionsEnumTypeTransformer() => _instance ??= const CurrencyOptionsEnumTypeTransformer._();
+  factory CurrencyOptionsEnumTypeTransformer() =>
+      _instance ??= const CurrencyOptionsEnumTypeTransformer._();
 
   const CurrencyOptionsEnumTypeTransformer._();
 
@@ -78,13 +83,20 @@ class CurrencyOptionsEnumTypeTransformer {
   CurrencyOptionsEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'USD': return CurrencyOptionsEnum.USD;
-        case r'EUR': return CurrencyOptionsEnum.EUR;
-        case r'GBP': return CurrencyOptionsEnum.GBP;
-        case r'CAD': return CurrencyOptionsEnum.CAD;
-        case r'AUD': return CurrencyOptionsEnum.AUD;
-        case r'JPY': return CurrencyOptionsEnum.JPY;
-        case r'CNY': return CurrencyOptionsEnum.CNY;
+        case r'USD':
+          return CurrencyOptionsEnum.USD;
+        case r'EUR':
+          return CurrencyOptionsEnum.EUR;
+        case r'GBP':
+          return CurrencyOptionsEnum.GBP;
+        case r'CAD':
+          return CurrencyOptionsEnum.CAD;
+        case r'AUD':
+          return CurrencyOptionsEnum.AUD;
+        case r'JPY':
+          return CurrencyOptionsEnum.JPY;
+        case r'CNY':
+          return CurrencyOptionsEnum.CNY;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -97,4 +109,3 @@ class CurrencyOptionsEnumTypeTransformer {
   /// Singleton [CurrencyOptionsEnumTypeTransformer] instance.
   static CurrencyOptionsEnumTypeTransformer? _instance;
 }
-

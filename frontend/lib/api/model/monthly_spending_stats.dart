@@ -36,32 +36,35 @@ class MonthlySpendingStats {
   num periodAverage;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is MonthlySpendingStats &&
-    _deepEquality.equals(other.categories, categories) &&
-    other.monthLabel == monthLabel &&
-    other.date == date &&
-    other.totalSpending == totalSpending &&
-    other.periodAverage == periodAverage;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MonthlySpendingStats &&
+          _deepEquality.equals(other.categories, categories) &&
+          other.monthLabel == monthLabel &&
+          other.date == date &&
+          other.totalSpending == totalSpending &&
+          other.periodAverage == periodAverage;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (categories.hashCode) +
-    (monthLabel.hashCode) +
-    (date.hashCode) +
-    (totalSpending.hashCode) +
-    (periodAverage.hashCode);
+      // ignore: unnecessary_parenthesis
+      (categories.hashCode) +
+      (monthLabel.hashCode) +
+      (date.hashCode) +
+      (totalSpending.hashCode) +
+      (periodAverage.hashCode);
 
   @override
-  String toString() => 'MonthlySpendingStats[categories=$categories, monthLabel=$monthLabel, date=$date, totalSpending=$totalSpending, periodAverage=$periodAverage]';
+  String toString() =>
+      'MonthlySpendingStats[categories=$categories, monthLabel=$monthLabel, date=$date, totalSpending=$totalSpending, periodAverage=$periodAverage]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'categories'] = this.categories;
-      json[r'monthLabel'] = this.monthLabel;
-      json[r'date'] = this.date.toUtc().toIso8601String();
-      json[r'totalSpending'] = this.totalSpending;
-      json[r'periodAverage'] = this.periodAverage;
+    json[r'categories'] = this.categories;
+    json[r'monthLabel'] = this.monthLabel;
+    json[r'date'] = this.date.toUtc().toIso8601String();
+    json[r'totalSpending'] = this.totalSpending;
+    json[r'periodAverage'] = this.periodAverage;
     return json;
   }
 
@@ -76,16 +79,26 @@ class MonthlySpendingStats {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'categories'), 'Required key "MonthlySpendingStats[categories]" is missing from JSON.');
-        assert(json[r'categories'] != null, 'Required key "MonthlySpendingStats[categories]" has a null value in JSON.');
-        assert(json.containsKey(r'monthLabel'), 'Required key "MonthlySpendingStats[monthLabel]" is missing from JSON.');
-        assert(json[r'monthLabel'] != null, 'Required key "MonthlySpendingStats[monthLabel]" has a null value in JSON.');
-        assert(json.containsKey(r'date'), 'Required key "MonthlySpendingStats[date]" is missing from JSON.');
-        assert(json[r'date'] != null, 'Required key "MonthlySpendingStats[date]" has a null value in JSON.');
-        assert(json.containsKey(r'totalSpending'), 'Required key "MonthlySpendingStats[totalSpending]" is missing from JSON.');
-        assert(json[r'totalSpending'] != null, 'Required key "MonthlySpendingStats[totalSpending]" has a null value in JSON.');
-        assert(json.containsKey(r'periodAverage'), 'Required key "MonthlySpendingStats[periodAverage]" is missing from JSON.');
-        assert(json[r'periodAverage'] != null, 'Required key "MonthlySpendingStats[periodAverage]" has a null value in JSON.');
+        assert(json.containsKey(r'categories'),
+            'Required key "MonthlySpendingStats[categories]" is missing from JSON.');
+        assert(json[r'categories'] != null,
+            'Required key "MonthlySpendingStats[categories]" has a null value in JSON.');
+        assert(json.containsKey(r'monthLabel'),
+            'Required key "MonthlySpendingStats[monthLabel]" is missing from JSON.');
+        assert(json[r'monthLabel'] != null,
+            'Required key "MonthlySpendingStats[monthLabel]" has a null value in JSON.');
+        assert(json.containsKey(r'date'),
+            'Required key "MonthlySpendingStats[date]" is missing from JSON.');
+        assert(json[r'date'] != null,
+            'Required key "MonthlySpendingStats[date]" has a null value in JSON.');
+        assert(json.containsKey(r'totalSpending'),
+            'Required key "MonthlySpendingStats[totalSpending]" is missing from JSON.');
+        assert(json[r'totalSpending'] != null,
+            'Required key "MonthlySpendingStats[totalSpending]" has a null value in JSON.');
+        assert(json.containsKey(r'periodAverage'),
+            'Required key "MonthlySpendingStats[periodAverage]" is missing from JSON.');
+        assert(json[r'periodAverage'] != null,
+            'Required key "MonthlySpendingStats[periodAverage]" has a null value in JSON.');
         return true;
       }());
 
@@ -100,7 +113,10 @@ class MonthlySpendingStats {
     return null;
   }
 
-  static List<MonthlySpendingStats> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MonthlySpendingStats> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <MonthlySpendingStats>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -128,13 +144,19 @@ class MonthlySpendingStats {
   }
 
   // maps a json object with a list of MonthlySpendingStats-objects as value to a dart map
-  static Map<String, List<MonthlySpendingStats>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<MonthlySpendingStats>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<MonthlySpendingStats>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = MonthlySpendingStats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = MonthlySpendingStats.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -149,4 +171,3 @@ class MonthlySpendingStats {
     'periodAverage',
   };
 }
-

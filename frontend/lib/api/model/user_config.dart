@@ -84,53 +84,56 @@ class UserConfig {
   String? coinbaseApiKeyName;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UserConfig &&
-    other.id == id &&
-    other.netWorthRange == netWorthRange &&
-    other.emailUpdateFrequency == emailUpdateFrequency &&
-    other.themeStyle == themeStyle &&
-    other.currency == currency &&
-    other.privateMode == privateMode &&
-    other.secureMode == secureMode &&
-    other.allowWidgets == allowWidgets &&
-    other.includeAICapabilities == includeAICapabilities &&
-    other.enableBudgeting == enableBudgeting &&
-    other.simpleFinToken == simpleFinToken &&
-    other.coinbaseApiKey == coinbaseApiKey &&
-    other.coinbaseApiKeyName == coinbaseApiKeyName;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserConfig &&
+          other.id == id &&
+          other.netWorthRange == netWorthRange &&
+          other.emailUpdateFrequency == emailUpdateFrequency &&
+          other.themeStyle == themeStyle &&
+          other.currency == currency &&
+          other.privateMode == privateMode &&
+          other.secureMode == secureMode &&
+          other.allowWidgets == allowWidgets &&
+          other.includeAICapabilities == includeAICapabilities &&
+          other.enableBudgeting == enableBudgeting &&
+          other.simpleFinToken == simpleFinToken &&
+          other.coinbaseApiKey == coinbaseApiKey &&
+          other.coinbaseApiKeyName == coinbaseApiKeyName;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (netWorthRange.hashCode) +
-    (emailUpdateFrequency.hashCode) +
-    (themeStyle.hashCode) +
-    (currency.hashCode) +
-    (privateMode.hashCode) +
-    (secureMode.hashCode) +
-    (allowWidgets.hashCode) +
-    (includeAICapabilities.hashCode) +
-    (enableBudgeting.hashCode) +
-    (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
-    (coinbaseApiKey == null ? 0 : coinbaseApiKey!.hashCode) +
-    (coinbaseApiKeyName == null ? 0 : coinbaseApiKeyName!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (netWorthRange.hashCode) +
+      (emailUpdateFrequency.hashCode) +
+      (themeStyle.hashCode) +
+      (currency.hashCode) +
+      (privateMode.hashCode) +
+      (secureMode.hashCode) +
+      (allowWidgets.hashCode) +
+      (includeAICapabilities.hashCode) +
+      (enableBudgeting.hashCode) +
+      (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
+      (coinbaseApiKey == null ? 0 : coinbaseApiKey!.hashCode) +
+      (coinbaseApiKeyName == null ? 0 : coinbaseApiKeyName!.hashCode);
 
   @override
-  String toString() => 'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, enableBudgeting=$enableBudgeting, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName]';
+  String toString() =>
+      'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, enableBudgeting=$enableBudgeting, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'netWorthRange'] = this.netWorthRange;
-      json[r'emailUpdateFrequency'] = this.emailUpdateFrequency;
-      json[r'themeStyle'] = this.themeStyle;
-      json[r'currency'] = this.currency;
-      json[r'privateMode'] = this.privateMode;
-      json[r'secureMode'] = this.secureMode;
-      json[r'allowWidgets'] = this.allowWidgets;
-      json[r'includeAICapabilities'] = this.includeAICapabilities;
-      json[r'enableBudgeting'] = this.enableBudgeting;
+    json[r'id'] = this.id;
+    json[r'netWorthRange'] = this.netWorthRange;
+    json[r'emailUpdateFrequency'] = this.emailUpdateFrequency;
+    json[r'themeStyle'] = this.themeStyle;
+    json[r'currency'] = this.currency;
+    json[r'privateMode'] = this.privateMode;
+    json[r'secureMode'] = this.secureMode;
+    json[r'allowWidgets'] = this.allowWidgets;
+    json[r'includeAICapabilities'] = this.includeAICapabilities;
+    json[r'enableBudgeting'] = this.enableBudgeting;
     if (this.simpleFinToken != null) {
       json[r'simpleFinToken'] = this.simpleFinToken;
     } else {
@@ -160,39 +163,61 @@ class UserConfig {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "UserConfig[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "UserConfig[id]" has a null value in JSON.');
-        assert(json.containsKey(r'netWorthRange'), 'Required key "UserConfig[netWorthRange]" is missing from JSON.');
-        assert(json[r'netWorthRange'] != null, 'Required key "UserConfig[netWorthRange]" has a null value in JSON.');
-        assert(json.containsKey(r'emailUpdateFrequency'), 'Required key "UserConfig[emailUpdateFrequency]" is missing from JSON.');
-        assert(json[r'emailUpdateFrequency'] != null, 'Required key "UserConfig[emailUpdateFrequency]" has a null value in JSON.');
-        assert(json.containsKey(r'themeStyle'), 'Required key "UserConfig[themeStyle]" is missing from JSON.');
-        assert(json[r'themeStyle'] != null, 'Required key "UserConfig[themeStyle]" has a null value in JSON.');
-        assert(json.containsKey(r'currency'), 'Required key "UserConfig[currency]" is missing from JSON.');
-        assert(json[r'currency'] != null, 'Required key "UserConfig[currency]" has a null value in JSON.');
-        assert(json.containsKey(r'privateMode'), 'Required key "UserConfig[privateMode]" is missing from JSON.');
-        assert(json[r'privateMode'] != null, 'Required key "UserConfig[privateMode]" has a null value in JSON.');
-        assert(json.containsKey(r'secureMode'), 'Required key "UserConfig[secureMode]" is missing from JSON.');
-        assert(json[r'secureMode'] != null, 'Required key "UserConfig[secureMode]" has a null value in JSON.');
-        assert(json.containsKey(r'allowWidgets'), 'Required key "UserConfig[allowWidgets]" is missing from JSON.');
-        assert(json[r'allowWidgets'] != null, 'Required key "UserConfig[allowWidgets]" has a null value in JSON.');
-        assert(json.containsKey(r'includeAICapabilities'), 'Required key "UserConfig[includeAICapabilities]" is missing from JSON.');
-        assert(json[r'includeAICapabilities'] != null, 'Required key "UserConfig[includeAICapabilities]" has a null value in JSON.');
-        assert(json.containsKey(r'enableBudgeting'), 'Required key "UserConfig[enableBudgeting]" is missing from JSON.');
-        assert(json[r'enableBudgeting'] != null, 'Required key "UserConfig[enableBudgeting]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "UserConfig[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "UserConfig[id]" has a null value in JSON.');
+        assert(json.containsKey(r'netWorthRange'),
+            'Required key "UserConfig[netWorthRange]" is missing from JSON.');
+        assert(json[r'netWorthRange'] != null,
+            'Required key "UserConfig[netWorthRange]" has a null value in JSON.');
+        assert(json.containsKey(r'emailUpdateFrequency'),
+            'Required key "UserConfig[emailUpdateFrequency]" is missing from JSON.');
+        assert(json[r'emailUpdateFrequency'] != null,
+            'Required key "UserConfig[emailUpdateFrequency]" has a null value in JSON.');
+        assert(json.containsKey(r'themeStyle'),
+            'Required key "UserConfig[themeStyle]" is missing from JSON.');
+        assert(json[r'themeStyle'] != null,
+            'Required key "UserConfig[themeStyle]" has a null value in JSON.');
+        assert(json.containsKey(r'currency'),
+            'Required key "UserConfig[currency]" is missing from JSON.');
+        assert(json[r'currency'] != null,
+            'Required key "UserConfig[currency]" has a null value in JSON.');
+        assert(json.containsKey(r'privateMode'),
+            'Required key "UserConfig[privateMode]" is missing from JSON.');
+        assert(json[r'privateMode'] != null,
+            'Required key "UserConfig[privateMode]" has a null value in JSON.');
+        assert(json.containsKey(r'secureMode'),
+            'Required key "UserConfig[secureMode]" is missing from JSON.');
+        assert(json[r'secureMode'] != null,
+            'Required key "UserConfig[secureMode]" has a null value in JSON.');
+        assert(json.containsKey(r'allowWidgets'),
+            'Required key "UserConfig[allowWidgets]" is missing from JSON.');
+        assert(json[r'allowWidgets'] != null,
+            'Required key "UserConfig[allowWidgets]" has a null value in JSON.');
+        assert(json.containsKey(r'includeAICapabilities'),
+            'Required key "UserConfig[includeAICapabilities]" is missing from JSON.');
+        assert(json[r'includeAICapabilities'] != null,
+            'Required key "UserConfig[includeAICapabilities]" has a null value in JSON.');
+        assert(json.containsKey(r'enableBudgeting'),
+            'Required key "UserConfig[enableBudgeting]" is missing from JSON.');
+        assert(json[r'enableBudgeting'] != null,
+            'Required key "UserConfig[enableBudgeting]" has a null value in JSON.');
         return true;
       }());
 
       return UserConfig(
         id: mapValueOfType<String>(json, r'id')!,
         netWorthRange: ChartRangeEnum.fromJson(json[r'netWorthRange'])!,
-        emailUpdateFrequency: EmailUpdateFrequencyEnum.fromJson(json[r'emailUpdateFrequency'])!,
+        emailUpdateFrequency:
+            EmailUpdateFrequencyEnum.fromJson(json[r'emailUpdateFrequency'])!,
         themeStyle: ThemeStyleEnum.fromJson(json[r'themeStyle'])!,
         currency: CurrencyOptionsEnum.fromJson(json[r'currency'])!,
         privateMode: mapValueOfType<bool>(json, r'privateMode')!,
         secureMode: mapValueOfType<bool>(json, r'secureMode')!,
         allowWidgets: mapValueOfType<bool>(json, r'allowWidgets')!,
-        includeAICapabilities: mapValueOfType<bool>(json, r'includeAICapabilities')!,
+        includeAICapabilities:
+            mapValueOfType<bool>(json, r'includeAICapabilities')!,
         enableBudgeting: mapValueOfType<bool>(json, r'enableBudgeting')!,
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         coinbaseApiKey: mapValueOfType<String>(json, r'coinbaseApiKey'),
@@ -202,7 +227,10 @@ class UserConfig {
     return null;
   }
 
-  static List<UserConfig> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserConfig> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UserConfig>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -230,13 +258,19 @@ class UserConfig {
   }
 
   // maps a json object with a list of UserConfig-objects as value to a dart map
-  static Map<String, List<UserConfig>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UserConfig>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UserConfig>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UserConfig.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UserConfig.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -256,4 +290,3 @@ class UserConfig {
     'enableBudgeting',
   };
 }
-

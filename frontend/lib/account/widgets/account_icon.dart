@@ -14,7 +14,8 @@ class AccountIcon extends LogoBaseWidget<Account> {
   });
 
   @override
-  ProviderListenable<AsyncValue<List<String>>> getProvider(BuildContext context, Account data, double size) {
+  ProviderListenable<AsyncValue<List<String>>> getProvider(
+      BuildContext context, Account data, double size) {
     return institutionIconProvider(data.institution, size);
   }
 }

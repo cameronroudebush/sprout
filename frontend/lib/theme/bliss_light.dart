@@ -52,19 +52,22 @@ final ThemeData blissLightTheme = FlexThemeData.light(
       padding: WidgetStateProperty.all(EdgeInsets.zero),
     ),
   ),
-  dividerTheme: DividerThemeData(color: const Color(0xff116383).withOpacity(.20)),
+  dividerTheme:
+      DividerThemeData(color: const Color(0xff116383).withOpacity(.20)),
   chipTheme: ChipThemeData(
     backgroundColor: const Color(0xfff5f8fc),
     disabledColor: const Color(0xfff5f8fc).withOpacity(0.5),
     labelStyle: const TextStyle(fontSize: 13, color: Color(0xff001d36)),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
-      side: BorderSide(color: const Color(0xff116383).withOpacity(0.15), width: 1),
+      side: BorderSide(
+          color: const Color(0xff116383).withOpacity(0.15), width: 1),
     ),
   ),
   cardTheme: const CardThemeData(color: Color(0xfff5f8fc)),
   dialogTheme: const DialogThemeData(backgroundColor: Color(0xfff5f8fc)),
-  appBarTheme: const AppBarTheme(backgroundColor: Colors.white, foregroundColor: Color(0xff001d36)),
+  appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white, foregroundColor: Color(0xff001d36)),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Colors.white,
     selectedItemColor: ThemeHelpers.primaryBlue,
@@ -73,7 +76,9 @@ final ThemeData blissLightTheme = FlexThemeData.light(
   canvasColor: const Color(0xfff5f8fc),
   dividerColor: const Color(0xff116383),
   tooltipTheme: TooltipThemeData(
-    decoration: BoxDecoration(color: const Color(0xff116383), borderRadius: BorderRadius.circular(12)),
+    decoration: BoxDecoration(
+        color: const Color(0xff116383),
+        borderRadius: BorderRadius.circular(12)),
     textStyle: const TextStyle(color: Colors.white, fontSize: 12),
     waitDuration: const Duration(milliseconds: 500),
     showDuration: const Duration(seconds: 2),

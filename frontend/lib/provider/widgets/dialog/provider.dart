@@ -73,7 +73,8 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
             return ProviderGenericAccountSelector(
               provider: _selectedProvider!,
               accountsProvider: simpleFinAccountsProvider,
-              onSelectionChanged: (accounts) => setState(() => _selectedAccounts = accounts),
+              onSelectionChanged: (accounts) =>
+                  setState(() => _selectedAccounts = accounts),
             );
           case ProviderTypeEnum.coinbase:
             return SizedBox(
@@ -109,19 +110,26 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
     );
 
     return SproutBaseDialogWidget(
-      _selectedProvider?.dbType == ProviderTypeEnum.zillow ? "Add Asset" : "Add Accounts",
+      _selectedProvider?.dbType == ProviderTypeEnum.zillow
+          ? "Add Asset"
+          : "Add Accounts",
       showCloseDialogButton: !_isSubmitting,
-      showSubmitButton: _selectedProvider != null && !_selectedProvider!.dbType.isDirectLinking,
-      allowSubmitClick: (_selectedAccounts.isNotEmpty || _zillowPayload != null) && !_isSubmitting,
+      showSubmitButton: _selectedProvider != null &&
+          !_selectedProvider!.dbType.isDirectLinking,
+      allowSubmitClick:
+          (_selectedAccounts.isNotEmpty || _zillowPayload != null) &&
+              !_isSubmitting,
       onSubmitClick: _handleSubmit,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Offstage(
-            offstage: _isSubmitting && !(_selectedProvider?.dbType.isDirectLinking ?? false),
+            offstage: _isSubmitting &&
+                !(_selectedProvider?.dbType.isDirectLinking ?? false),
             child: content,
           ),
-          if (_isSubmitting && !(_selectedProvider?.dbType.isDirectLinking ?? false))
+          if (_isSubmitting &&
+              !(_selectedProvider?.dbType.isDirectLinking ?? false))
             const SizedBox(
               height: 100,
               child: Center(child: CircularProgressIndicator()),
@@ -143,7 +151,8 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
           await ProviderGenericAccountSelector.link(
             ref,
             _selectedAccounts,
-            (api, accounts) => api.simpleFinProviderControllerLinkAccounts(accounts),
+            (api, accounts) =>
+                api.simpleFinProviderControllerLinkAccounts(accounts),
           );
           break;
         case ProviderTypeEnum.coinbase:
@@ -180,7 +189,9 @@ class _ProviderDialogState extends ConsumerState<ProviderDialog> {
       }
     } catch (e) {
       notificationProvider.openWithAPIException(e);
-      if (mounted && _selectedProvider != null && _selectedProvider!.dbType.isDirectLinking) {
+      if (mounted &&
+          _selectedProvider != null &&
+          _selectedProvider!.dbType.isDirectLinking) {
         isClosing = true;
         Navigator.of(context).pop();
       }

@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-
 class TransactionApi {
-  TransactionApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+  TransactionApi([ApiClient? apiClient])
+      : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
@@ -25,10 +25,11 @@ class TransactionApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<Response> transactionControllerDeleteWithHttpInfo(String id,) async {
+  Future<Response> transactionControllerDeleteWithHttpInfo(
+    String id,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/transaction/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/transaction/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -38,7 +39,6 @@ class TransactionApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -58,8 +58,12 @@ class TransactionApi {
   /// Parameters:
   ///
   /// * [String] id (required):
-  Future<void> transactionControllerDelete(String id,) async {
-    final response = await transactionControllerDeleteWithHttpInfo(id,);
+  Future<void> transactionControllerDelete(
+    String id,
+  ) async {
+    final response = await transactionControllerDeleteWithHttpInfo(
+      id,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -76,10 +80,12 @@ class TransactionApi {
   /// * [String] id (required):
   ///
   /// * [Transaction] transaction (required):
-  Future<Response> transactionControllerEditWithHttpInfo(String id, Transaction transaction,) async {
+  Future<Response> transactionControllerEditWithHttpInfo(
+    String id,
+    Transaction transaction,
+  ) async {
     // ignore: prefer_const_declarations
-    final path = r'/transaction/{id}'
-      .replaceAll('{id}', id);
+    final path = r'/transaction/{id}'.replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
     Object? postBody = transaction;
@@ -89,7 +95,6 @@ class TransactionApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -111,17 +116,26 @@ class TransactionApi {
   /// * [String] id (required):
   ///
   /// * [Transaction] transaction (required):
-  Future<Transaction?> transactionControllerEdit(String id, Transaction transaction,) async {
-    final response = await transactionControllerEditWithHttpInfo(id, transaction,);
+  Future<Transaction?> transactionControllerEdit(
+    String id,
+    Transaction transaction,
+  ) async {
+    final response = await transactionControllerEditWithHttpInfo(
+      id,
+      transaction,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Transaction',) as Transaction;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'Transaction',
+      ) as Transaction;
     }
     return null;
   }
@@ -160,7 +174,18 @@ class TransactionApi {
   /// * [DateTime] endDate:
   ///
   /// * [bool] pending:
-  Future<Response> transactionControllerGetByQueryWithHttpInfo({ String? id, num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, }) async {
+  Future<Response> transactionControllerGetByQueryWithHttpInfo({
+    String? id,
+    num? startIndex,
+    num? endIndex,
+    String? accountId,
+    String? category,
+    String? description,
+    DateTime? date,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? pending,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction';
 
@@ -204,7 +229,6 @@ class TransactionApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -248,20 +272,43 @@ class TransactionApi {
   /// * [DateTime] endDate:
   ///
   /// * [bool] pending:
-  Future<List<Transaction>?> transactionControllerGetByQuery({ String? id, num? startIndex, num? endIndex, String? accountId, String? category, String? description, DateTime? date, DateTime? startDate, DateTime? endDate, bool? pending, }) async {
-    final response = await transactionControllerGetByQueryWithHttpInfo( id: id, startIndex: startIndex, endIndex: endIndex, accountId: accountId, category: category, description: description, date: date, startDate: startDate, endDate: endDate, pending: pending, );
+  Future<List<Transaction>?> transactionControllerGetByQuery({
+    String? id,
+    num? startIndex,
+    num? endIndex,
+    String? accountId,
+    String? category,
+    String? description,
+    DateTime? date,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? pending,
+  }) async {
+    final response = await transactionControllerGetByQueryWithHttpInfo(
+      id: id,
+      startIndex: startIndex,
+      endIndex: endIndex,
+      accountId: accountId,
+      category: category,
+      description: description,
+      date: date,
+      startDate: startDate,
+      endDate: endDate,
+      pending: pending,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Transaction>') as List)
-        .cast<Transaction>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<Transaction>') as List)
+          .cast<Transaction>()
+          .toList(growable: false);
     }
     return null;
   }
@@ -279,7 +326,11 @@ class TransactionApi {
   /// * [String] category:
   ///
   /// * [String] description:
-  Future<Response> transactionControllerGetTotalWithHttpInfo({ String? accountId, String? category, String? description, }) async {
+  Future<Response> transactionControllerGetTotalWithHttpInfo({
+    String? accountId,
+    String? category,
+    String? description,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/count';
 
@@ -301,7 +352,6 @@ class TransactionApi {
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -325,17 +375,28 @@ class TransactionApi {
   /// * [String] category:
   ///
   /// * [String] description:
-  Future<TotalTransactions?> transactionControllerGetTotal({ String? accountId, String? category, String? description, }) async {
-    final response = await transactionControllerGetTotalWithHttpInfo( accountId: accountId, category: category, description: description, );
+  Future<TotalTransactions?> transactionControllerGetTotal({
+    String? accountId,
+    String? category,
+    String? description,
+  }) async {
+    final response = await transactionControllerGetTotalWithHttpInfo(
+      accountId: accountId,
+      category: category,
+      description: description,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'TotalTransactions',) as TotalTransactions;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'TotalTransactions',
+      ) as TotalTransactions;
     }
     return null;
   }
@@ -350,7 +411,9 @@ class TransactionApi {
   ///
   /// * [String] accountId:
   ///   Optional. Scopes the deduplication to a specific account.
-  Future<Response> transactionControllerRemoveDuplicatesWithHttpInfo({ String? accountId, }) async {
+  Future<Response> transactionControllerRemoveDuplicatesWithHttpInfo({
+    String? accountId,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction/duplicates/remove';
 
@@ -366,7 +429,6 @@ class TransactionApi {
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -387,8 +449,12 @@ class TransactionApi {
   ///
   /// * [String] accountId:
   ///   Optional. Scopes the deduplication to a specific account.
-  Future<void> transactionControllerRemoveDuplicates({ String? accountId, }) async {
-    final response = await transactionControllerRemoveDuplicatesWithHttpInfo( accountId: accountId, );
+  Future<void> transactionControllerRemoveDuplicates({
+    String? accountId,
+  }) async {
+    final response = await transactionControllerRemoveDuplicatesWithHttpInfo(
+      accountId: accountId,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -412,7 +478,6 @@ class TransactionApi {
 
     const contentTypes = <String>[];
 
-
     return apiClient.invokeAPI(
       path,
       'GET',
@@ -427,7 +492,8 @@ class TransactionApi {
   /// Get's subscriptions.
   ///
   /// Retrieves subscriptions based on historical transactions by guessing if they are reoccurring or not.
-  Future<List<TransactionSubscription>?> transactionControllerSubscriptions() async {
+  Future<List<TransactionSubscription>?>
+      transactionControllerSubscriptions() async {
     final response = await transactionControllerSubscriptionsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -435,12 +501,13 @@ class TransactionApi {
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
       final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<TransactionSubscription>') as List)
-        .cast<TransactionSubscription>()
-        .toList(growable: false);
-
+      return (await apiClient.deserializeAsync(
+              responseBody, 'List<TransactionSubscription>') as List)
+          .cast<TransactionSubscription>()
+          .toList(growable: false);
     }
     return null;
   }

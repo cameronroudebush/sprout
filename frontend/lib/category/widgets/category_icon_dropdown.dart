@@ -27,7 +27,10 @@ class CategoryIconDropdown extends StatelessWidget {
         padding: EdgeInsetsGeometry.directional(start: 18, end: 4),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [CategoryIcon(Category(id: "", name: "", icon: icon ?? "help"), avatarSize: 14)],
+          children: [
+            CategoryIcon(Category(id: "", name: "", icon: icon ?? "help"),
+                avatarSize: 14)
+          ],
         ),
       ),
       onSelected: (String? value) {
@@ -36,7 +39,8 @@ class CategoryIconDropdown extends StatelessWidget {
         }
       },
       dropdownMenuEntries: sortedIconEntries.map((entry) {
-        return DropdownMenuEntry<String>(value: entry.key, label: entry.key, leadingIcon: Icon(entry.value));
+        return DropdownMenuEntry<String>(
+            value: entry.key, label: entry.key, leadingIcon: Icon(entry.value));
       }).toList(),
     );
   }

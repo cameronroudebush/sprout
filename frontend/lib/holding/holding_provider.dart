@@ -59,7 +59,8 @@ class MajorIndices extends _$MajorIndices {
   @override
   Future<List<MarketIndexDto>> build() async {
     // Refresh every 5 minutes. Anything less than that will be the same as the backend caches in 5 minute increments
-    _timer = Timer.periodic(const Duration(minutes: 5), (_) => ref.invalidateSelf());
+    _timer =
+        Timer.periodic(const Duration(minutes: 5), (_) => ref.invalidateSelf());
 
     ref.onDispose(() => _timer?.cancel());
 
@@ -78,7 +79,8 @@ class BatchedLivePrices extends _$BatchedLivePrices {
   @override
   Map<String, MarketIndexDto> build() {
     // Refresh all currently known symbols every 5 minutes
-    _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) => _refreshAll());
+    _refreshTimer =
+        Timer.periodic(const Duration(minutes: 5), (_) => _refreshAll());
     ref.onDispose(() => _refreshTimer?.cancel());
     return {};
   }
@@ -108,7 +110,8 @@ class BatchedLivePrices extends _$BatchedLivePrices {
       try {
         // Use ref.read to prevent reactive rebuilds!
         final api = await ref.read(holdingApiProvider.future);
-        final results = await api.holdingControllerGetLivePrices(symbolsToFetch);
+        final results =
+            await api.holdingControllerGetLivePrices(symbolsToFetch);
 
         if (results != null) {
           final newState = Map<String, MarketIndexDto>.from(state);
@@ -179,30 +182,39 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
     final fetchedData = livePrices[holding.symbol];
 
     // Only use liveData if it's resolved and not marked as UNKNOWN
-    if (fetchedData != null && fetchedData.type != MarketIndexDtoTypeEnum.INVALID) {
+    if (fetchedData != null &&
+        fetchedData.type != MarketIndexDtoTypeEnum.INVALID) {
       liveData = fetchedData;
     }
   }
 
-  final holdingHistory = ref.watch(accountHoldingHistoryProvider(holding.id)).value;
+  final holdingHistory =
+      ref.watch(accountHoldingHistoryProvider(holding.id)).value;
 
-  final livePrice = liveData?.price ?? (holding.shares > 0 ? holding.marketValue / holding.shares : 0.0);
-  final liveMarketValue = isCrypto ? holding.marketValue.toDouble() : livePrice * holding.shares;
+  final livePrice = liveData?.price ??
+      (holding.shares > 0 ? holding.marketValue / holding.shares : 0.0);
+  final liveMarketValue =
+      isCrypto ? holding.marketValue.toDouble() : livePrice * holding.shares;
 
   final priceChangePerShare = liveData?.change ?? 0.0;
   final dayChange = priceChangePerShare * holding.shares;
   final previousClosePrice = livePrice - priceChangePerShare;
   final previousMarketValue = previousClosePrice * holding.shares;
-  final dayPercent = previousMarketValue > 0 ? (dayChange / previousMarketValue) * 100 : 0.0;
+  final dayPercent =
+      previousMarketValue > 0 ? (dayChange / previousMarketValue) * 100 : 0.0;
 
   var frame = holdingHistory?.getValueByFrame(ChartRangeEnum.oneDay);
   if (frame == null || frame.valueChange == 0) {
-    final double? closePrice = (holding.extra as Map<String, dynamic>?)?['closePrice']?.toDouble();
+    final double? closePrice =
+        (holding.extra as Map<String, dynamic>?)?['closePrice']?.toDouble();
     if (closePrice != null && closePrice > 0) {
-      final double currentPrice = holding.purchasePrice > 0 ? (holding.marketValue / holding.shares) : closePrice;
+      final double currentPrice = holding.purchasePrice > 0
+          ? (holding.marketValue / holding.shares)
+          : closePrice;
       final double settledPerShareChange = currentPrice - closePrice;
       final double settledValueChange = settledPerShareChange * holding.shares;
-      final double settledPercentChange = (settledPerShareChange / closePrice) * 100;
+      final double settledPercentChange =
+          (settledPerShareChange / closePrice) * 100;
 
       // Use EntityHistoryDataPoint instead of HistoricalDataPoint
       frame = EntityHistoryDataPoint(
@@ -219,8 +231,10 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
       ? holding.costBasis.toDouble()
       : (holding.shares.toDouble() * holding.purchasePrice.toDouble());
 
-  final double totalGain = initialCost > 0 ? (currentValuation - initialCost) : 0.0;
-  final double totalGainPercent = initialCost > 0 ? (totalGain / initialCost) * 100 : 0.0;
+  final double totalGain =
+      initialCost > 0 ? (currentValuation - initialCost) : 0.0;
+  final double totalGainPercent =
+      initialCost > 0 ? (totalGain / initialCost) * 100 : 0.0;
 
   return ExpandedHolding(
     holding: holding,
@@ -230,7 +244,9 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
     dayChange: dayChange,
     dayPercent: dayPercent,
     historicalFrame: frame,
-    isLive: !isCrypto && liveData != null && liveData.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
+    isLive: !isCrypto &&
+        liveData != null &&
+        liveData.marketState == MarketIndexDtoMarketStateEnum.REGULAR,
     previousClose: liveData?.previousClose,
     dayLow: liveData?.dayLow,
     dayHigh: liveData?.dayHigh,
@@ -271,10 +287,12 @@ AsyncValue<Map<String, num>> aggregatedAccountDividends(
 
           final expanded = ref.watch(expandedHoldingProvider(holding));
           final double dividendYield = (expanded.dividendYield ?? 0) / 100;
-          final double estimatedDividendIncome = expanded.liveMarketValue * dividendYield;
+          final double estimatedDividendIncome =
+              expanded.liveMarketValue * dividendYield;
 
           if (estimatedDividendIncome > 0) {
-            aggregatedDividends[symbol] = (aggregatedDividends[symbol] ?? 0.0) + estimatedDividendIncome;
+            aggregatedDividends[symbol] =
+                (aggregatedDividends[symbol] ?? 0.0) + estimatedDividendIncome;
           }
         }
       },
@@ -288,20 +306,23 @@ AsyncValue<Map<String, num>> aggregatedAccountDividends(
 
   // Propagate upstream loading or error states safely to the widget
   if (caughtError != null) {
-    return AsyncValue.error(caughtError!, caughtStackTrace ?? StackTrace.current);
+    return AsyncValue.error(
+        caughtError!, caughtStackTrace ?? StackTrace.current);
   }
   if (anyLoading) {
     return const AsyncValue.loading();
   }
 
   // Once all assets are resolved, process sorting and grouping constraints
-  final sortedEntries = aggregatedDividends.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  final sortedEntries = aggregatedDividends.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
   final Map<String, num> finalChartData = {};
 
   if (topN != null && sortedEntries.length > topN) {
     final topPositions = sortedEntries.take(topN);
     final overflowPositions = sortedEntries.skip(topN);
-    final double overflowSum = overflowPositions.fold(0.0, (sum, item) => sum + item.value);
+    final double overflowSum =
+        overflowPositions.fold(0.0, (sum, item) => sum + item.value);
 
     for (var pos in topPositions) {
       finalChartData[pos.key] = pos.value;

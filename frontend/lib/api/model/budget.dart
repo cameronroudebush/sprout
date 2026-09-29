@@ -29,26 +29,26 @@ class Budget {
   num amount;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Budget &&
-    other.id == id &&
-    other.categoryId == categoryId &&
-    other.amount == amount;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Budget &&
+          other.id == id &&
+          other.categoryId == categoryId &&
+          other.amount == amount;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (categoryId.hashCode) +
-    (amount.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) + (categoryId.hashCode) + (amount.hashCode);
 
   @override
   String toString() => 'Budget[id=$id, categoryId=$categoryId, amount=$amount]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'categoryId'] = this.categoryId;
-      json[r'amount'] = this.amount;
+    json[r'id'] = this.id;
+    json[r'categoryId'] = this.categoryId;
+    json[r'amount'] = this.amount;
     return json;
   }
 
@@ -63,12 +63,18 @@ class Budget {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Budget[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Budget[id]" has a null value in JSON.');
-        assert(json.containsKey(r'categoryId'), 'Required key "Budget[categoryId]" is missing from JSON.');
-        assert(json[r'categoryId'] != null, 'Required key "Budget[categoryId]" has a null value in JSON.');
-        assert(json.containsKey(r'amount'), 'Required key "Budget[amount]" is missing from JSON.');
-        assert(json[r'amount'] != null, 'Required key "Budget[amount]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Budget[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Budget[id]" has a null value in JSON.');
+        assert(json.containsKey(r'categoryId'),
+            'Required key "Budget[categoryId]" is missing from JSON.');
+        assert(json[r'categoryId'] != null,
+            'Required key "Budget[categoryId]" has a null value in JSON.');
+        assert(json.containsKey(r'amount'),
+            'Required key "Budget[amount]" is missing from JSON.');
+        assert(json[r'amount'] != null,
+            'Required key "Budget[amount]" has a null value in JSON.');
         return true;
       }());
 
@@ -81,7 +87,10 @@ class Budget {
     return null;
   }
 
-  static List<Budget> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Budget> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Budget>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -109,13 +118,19 @@ class Budget {
   }
 
   // maps a json object with a list of Budget-objects as value to a dart map
-  static Map<String, List<Budget>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Budget>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Budget>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Budget.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Budget.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -128,4 +143,3 @@ class Budget {
     'amount',
   };
 }
-

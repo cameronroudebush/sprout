@@ -65,7 +65,8 @@ class WidgetImageUtility {
         rect: rect,
         image: networkImage,
         fit: BoxFit.cover, // Fill completely without leaving background edges
-        filterQuality: FilterQuality.medium, // Improves crispness on low-res rendering
+        filterQuality:
+            FilterQuality.medium, // Improves crispness on low-res rendering
       );
     } else if (fallbackIcon != null) {
       final double targetContentSize = size * 0.65;
@@ -91,6 +92,9 @@ class WidgetImageUtility {
     final picture = recorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
-    return base64Encode(pngBytes!.buffer.asUint8List()).replaceAll('\n', '').replaceAll('\r', '').trim();
+    return base64Encode(pngBytes!.buffer.asUint8List())
+        .replaceAll('\n', '')
+        .replaceAll('\r', '')
+        .trim();
   }
 }

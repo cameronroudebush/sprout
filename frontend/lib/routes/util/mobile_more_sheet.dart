@@ -28,11 +28,14 @@ class SproutMoreSheet extends ConsumerWidget {
     final unsecureConfig = ref.watch(unsecureConfigProvider).value!;
     final userConfig = ref.watch(userConfigProvider).value;
 
-    final filteredRoutes = getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
+    final filteredRoutes =
+        getFilteredRoutes(unsecureConfig, apiConfig, userConfig);
     final candidateRoutes = filteredRoutes.where((r) => r.path != '/').toList()
       ..sort((a, b) {
-        final aPrio = a.bottomNavPriority >= 0 ? a.bottomNavPriority : double.infinity;
-        final bPrio = b.bottomNavPriority >= 0 ? b.bottomNavPriority : double.infinity;
+        final aPrio =
+            a.bottomNavPriority >= 0 ? a.bottomNavPriority : double.infinity;
+        final bPrio =
+            b.bottomNavPriority >= 0 ? b.bottomNavPriority : double.infinity;
         return aPrio.compareTo(bPrio);
       });
     final moreRoutes = candidateRoutes.skip(3).toList();
@@ -47,7 +50,8 @@ class SproutMoreSheet extends ConsumerWidget {
           // Sub-header text
           Text(
             "Where are we headed today?",
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
             textAlign: TextAlign.center,
           ),
 
@@ -61,7 +65,9 @@ class SproutMoreSheet extends ConsumerWidget {
                 runSpacing: 16,
                 children: moreRoutes.map((route) {
                   final currentPath = NavigationProvider.currentRoute;
-                  final bool isSelected = route.path == '/' ? currentPath == '/' : currentPath.startsWith(route.path);
+                  final bool isSelected = route.path == '/'
+                      ? currentPath == '/'
+                      : currentPath.startsWith(route.path);
 
                   return SizedBox(
                     width: itemWidth,
@@ -116,9 +122,12 @@ class SproutMoreSheet extends ConsumerWidget {
                 Navigator.pop(context);
                 NavigationProvider.redirect('/settings');
               },
-              icon: Icon(isSettings ? Icons.settings : Icons.settings_outlined, size: 20),
+              icon: Icon(isSettings ? Icons.settings : Icons.settings_outlined,
+                  size: 20),
               label: const Text("Settings"),
-              style: isSettings ? ThemeHelpers.primaryButton : ThemeHelpers.secondaryButton,
+              style: isSettings
+                  ? ThemeHelpers.primaryButton
+                  : ThemeHelpers.secondaryButton,
             ),
           ),
         ],
@@ -134,7 +143,11 @@ class _MoreGridTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _MoreGridTile({required this.icon, required this.label, required this.isSelected, required this.onTap});
+  const _MoreGridTile(
+      {required this.icon,
+      required this.label,
+      required this.isSelected,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -152,10 +165,14 @@ class _MoreGridTile extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               // Squircle shape using dynamic colors
-              color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerHigh,
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(icon, color: isSelected ? colorScheme.onPrimary : colorScheme.primary, size: 28),
+            child: Icon(icon,
+                color: isSelected ? colorScheme.onPrimary : colorScheme.primary,
+                size: 28),
           ),
           const SizedBox(height: 10),
           Text(

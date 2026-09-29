@@ -28,26 +28,27 @@ class ChatRequestDTO {
   bool allowCharts;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is ChatRequestDTO &&
-    other.message == message &&
-    other.timeframe == timeframe &&
-    other.allowCharts == allowCharts;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChatRequestDTO &&
+          other.message == message &&
+          other.timeframe == timeframe &&
+          other.allowCharts == allowCharts;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (message.hashCode) +
-    (timeframe.hashCode) +
-    (allowCharts.hashCode);
+      // ignore: unnecessary_parenthesis
+      (message.hashCode) + (timeframe.hashCode) + (allowCharts.hashCode);
 
   @override
-  String toString() => 'ChatRequestDTO[message=$message, timeframe=$timeframe, allowCharts=$allowCharts]';
+  String toString() =>
+      'ChatRequestDTO[message=$message, timeframe=$timeframe, allowCharts=$allowCharts]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'message'] = this.message;
-      json[r'timeframe'] = this.timeframe;
-      json[r'allowCharts'] = this.allowCharts;
+    json[r'message'] = this.message;
+    json[r'timeframe'] = this.timeframe;
+    json[r'allowCharts'] = this.allowCharts;
     return json;
   }
 
@@ -62,10 +63,14 @@ class ChatRequestDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'message'), 'Required key "ChatRequestDTO[message]" is missing from JSON.');
-        assert(json[r'message'] != null, 'Required key "ChatRequestDTO[message]" has a null value in JSON.');
-        assert(json.containsKey(r'timeframe'), 'Required key "ChatRequestDTO[timeframe]" is missing from JSON.');
-        assert(json[r'timeframe'] != null, 'Required key "ChatRequestDTO[timeframe]" has a null value in JSON.');
+        assert(json.containsKey(r'message'),
+            'Required key "ChatRequestDTO[message]" is missing from JSON.');
+        assert(json[r'message'] != null,
+            'Required key "ChatRequestDTO[message]" has a null value in JSON.');
+        assert(json.containsKey(r'timeframe'),
+            'Required key "ChatRequestDTO[timeframe]" is missing from JSON.');
+        assert(json[r'timeframe'] != null,
+            'Required key "ChatRequestDTO[timeframe]" has a null value in JSON.');
         return true;
       }());
 
@@ -78,7 +83,10 @@ class ChatRequestDTO {
     return null;
   }
 
-  static List<ChatRequestDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ChatRequestDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ChatRequestDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -106,13 +114,19 @@ class ChatRequestDTO {
   }
 
   // maps a json object with a list of ChatRequestDTO-objects as value to a dart map
-  static Map<String, List<ChatRequestDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<ChatRequestDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<ChatRequestDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = ChatRequestDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = ChatRequestDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -151,9 +165,13 @@ class ChatRequestDTOTimeframeEnum {
     oneYear,
   ];
 
-  static ChatRequestDTOTimeframeEnum? fromJson(dynamic value) => ChatRequestDTOTimeframeEnumTypeTransformer().decode(value);
+  static ChatRequestDTOTimeframeEnum? fromJson(dynamic value) =>
+      ChatRequestDTOTimeframeEnumTypeTransformer().decode(value);
 
-  static List<ChatRequestDTOTimeframeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ChatRequestDTOTimeframeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <ChatRequestDTOTimeframeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -170,7 +188,8 @@ class ChatRequestDTOTimeframeEnum {
 /// Transformation class that can [encode] an instance of [ChatRequestDTOTimeframeEnum] to String,
 /// and [decode] dynamic data back to [ChatRequestDTOTimeframeEnum].
 class ChatRequestDTOTimeframeEnumTypeTransformer {
-  factory ChatRequestDTOTimeframeEnumTypeTransformer() => _instance ??= const ChatRequestDTOTimeframeEnumTypeTransformer._();
+  factory ChatRequestDTOTimeframeEnumTypeTransformer() =>
+      _instance ??= const ChatRequestDTOTimeframeEnumTypeTransformer._();
 
   const ChatRequestDTOTimeframeEnumTypeTransformer._();
 
@@ -187,10 +206,14 @@ class ChatRequestDTOTimeframeEnumTypeTransformer {
   ChatRequestDTOTimeframeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'oneDay': return ChatRequestDTOTimeframeEnum.oneDay;
-        case r'threeMonths': return ChatRequestDTOTimeframeEnum.threeMonths;
-        case r'sixMonths': return ChatRequestDTOTimeframeEnum.sixMonths;
-        case r'oneYear': return ChatRequestDTOTimeframeEnum.oneYear;
+        case r'oneDay':
+          return ChatRequestDTOTimeframeEnum.oneDay;
+        case r'threeMonths':
+          return ChatRequestDTOTimeframeEnum.threeMonths;
+        case r'sixMonths':
+          return ChatRequestDTOTimeframeEnum.sixMonths;
+        case r'oneYear':
+          return ChatRequestDTOTimeframeEnum.oneYear;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -203,5 +226,3 @@ class ChatRequestDTOTimeframeEnumTypeTransformer {
   /// Singleton [ChatRequestDTOTimeframeEnumTypeTransformer] instance.
   static ChatRequestDTOTimeframeEnumTypeTransformer? _instance;
 }
-
-

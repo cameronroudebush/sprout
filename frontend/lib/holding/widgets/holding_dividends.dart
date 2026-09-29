@@ -32,16 +32,21 @@ class HoldingDividendsWidget extends ConsumerWidget {
     );
 
     return chartDataAsync.whenDefault(
-      emptyWidget: const Text("No dividend income found to calculate distribution metrics."),
+      emptyWidget: const Text(
+          "No dividend income found to calculate distribution metrics."),
       data: (finalChartData) {
-        final double totalEstimatedDividendIncome = finalChartData.values.fold(0.0, (sum, val) => sum + val);
-        final String formattedTotal = formatter.format(totalEstimatedDividendIncome);
+        final double totalEstimatedDividendIncome =
+            finalChartData.values.fold(0.0, (sum, val) => sum + val);
+        final String formattedTotal =
+            formatter.format(totalEstimatedDividendIncome);
 
         return SizedBox(
           height: 300,
           child: SproutBarChart(
             data: finalChartData,
-            legendPosition: isDesktop ? SproutChartLegendPosition.none : SproutChartLegendPosition.bottom,
+            legendPosition: isDesktop
+                ? SproutChartLegendPosition.none
+                : SproutChartLegendPosition.bottom,
             showBarTitle: isDesktop,
             header: SproutChartHeader(
               title: "Dividend Income",

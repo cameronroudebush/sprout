@@ -37,7 +37,8 @@ class SproutErrorPage extends ConsumerWidget {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: theme.colorScheme.error,
-                    child: Icon(Icons.priority_high_rounded, size: 20, color: theme.colorScheme.onError),
+                    child: Icon(Icons.priority_high_rounded,
+                        size: 20, color: theme.colorScheme.onError),
                   ),
                 ],
               ),
@@ -46,7 +47,8 @@ class SproutErrorPage extends ConsumerWidget {
               // Title
               Text(
                 "Critical Error",
-                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
 
@@ -54,7 +56,8 @@ class SproutErrorPage extends ConsumerWidget {
               Text(
                 "Sprout encountered a critical error while in use.",
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 24),
 
@@ -86,7 +89,8 @@ class SproutErrorPage extends ConsumerWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                              color: theme.colorScheme.surfaceContainerHighest
+                                  .withOpacity(0.5),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(

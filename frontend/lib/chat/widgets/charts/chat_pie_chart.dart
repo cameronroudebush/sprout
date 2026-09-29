@@ -18,7 +18,8 @@ class ChatSproutPieChart extends ConsumerWidget {
     final formatter = ref.watch(currencyFormatterProvider);
 
     final rawTitle = chartData['title'] as String?;
-    final title = ChatChartUtility.sanitizeChartText(rawTitle, defaultValue: 'Breakdown');
+    final title =
+        ChatChartUtility.sanitizeChartText(rawTitle, defaultValue: 'Breakdown');
 
     final rawData = chartData['data'] as Map<String, dynamic>? ?? {};
     final rawColors = chartData['colors'] as Map<String, dynamic>? ?? {};
@@ -30,12 +31,14 @@ class ChatSproutPieChart extends ConsumerWidget {
 
     int index = 0;
     rawData.forEach((key, value) {
-      final cleanKey = ChatChartUtility.sanitizeChartText(key, defaultValue: 'Item ${index + 1}');
+      final cleanKey = ChatChartUtility.sanitizeChartText(key,
+          defaultValue: 'Item ${index + 1}');
       final doubleVal = (value as num?)?.toDouble().abs() ?? 0.0;
 
       if (doubleVal > 0) {
         parsedData[cleanKey] = doubleVal;
-        final colorStr = rawColors[key] as String? ?? rawColors[cleanKey] as String?;
+        final colorStr =
+            rawColors[key] as String? ?? rawColors[cleanKey] as String?;
         colorMapping[cleanKey] = colorStr?.toColor ?? Colors.grey;
       }
       index++;
@@ -44,7 +47,8 @@ class ChatSproutPieChart extends ConsumerWidget {
     if (parsedData.isEmpty) return const SizedBox.shrink();
 
     final itemCount = parsedData.length;
-    final double computedHeight = (200.0 + (itemCount * 24.0)).clamp(220.0, 450.0);
+    final double computedHeight =
+        (200.0 + (itemCount * 24.0)).clamp(220.0, 450.0);
 
     return SizedBox(
       height: computedHeight,

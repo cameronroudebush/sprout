@@ -22,8 +22,10 @@ class MentionController extends TextEditingController {
 
       if (idToNameMap.containsKey(id)) {
         // Check if the cursor is attempting to land inside the @id
-        if (newSelection.baseOffset > match.start && newSelection.baseOffset < match.end) {
-          final isMovingBackward = newSelection.baseOffset < selection.baseOffset;
+        if (newSelection.baseOffset > match.start &&
+            newSelection.baseOffset < match.end) {
+          final isMovingBackward =
+              newSelection.baseOffset < selection.baseOffset;
 
           if (isMovingBackward) {
             super.selection = TextSelection.collapsed(offset: match.start);
@@ -39,7 +41,10 @@ class MentionController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+  TextSpan buildTextSpan(
+      {required BuildContext context,
+      TextStyle? style,
+      required bool withComposing}) {
     final List<InlineSpan> children = [];
     final pattern = RegExp(r'@(\S+)');
     final theme = Theme.of(context);

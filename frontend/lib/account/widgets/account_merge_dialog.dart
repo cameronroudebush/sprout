@@ -35,11 +35,12 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
 
       try {
         final api = await ref.read(accountApiProvider.future);
-        await api.accountControllerMergeAccounts(widget.targetAccount.id, AccountMergeDTO(sourceId: _sourceAccountId!));
+        await api.accountControllerMergeAccounts(widget.targetAccount.id,
+            AccountMergeDTO(sourceId: _sourceAccountId!));
 
-        ref
-            .read(notificationsProvider.notifier)
-            .openFrontendOnly("Success", type: NotificationTypeEnum.success, message: "Account merged successfully");
+        ref.read(notificationsProvider.notifier).openFrontendOnly("Success",
+            type: NotificationTypeEnum.success,
+            message: "Account merged successfully");
         if (mounted) Navigator.of(context).pop();
       } catch (e) {
         ref.read(notificationsProvider.notifier).openWithAPIException(e);
@@ -69,18 +70,23 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
 
   /// Builds the form that allows selecting the source account and warns the user
   Widget _getForm(BuildContext context, ThemeData theme) {
-    final helpStyle = const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4);
+    final helpStyle =
+        const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4);
 
     // Watch the accounts provider to get the current list of accounts
     final allAccounts = ref.watch(accountsProvider).value?.accounts ?? [];
 
     // Filter accounts: Must be the same type, and cannot be the target account itself
     final validSourceAccounts = allAccounts
-        .where((account) => account.id != widget.targetAccount.id && account.type == widget.targetAccount.type)
+        .where((account) =>
+            account.id != widget.targetAccount.id &&
+            account.type == widget.targetAccount.type)
         .toList();
 
     // Determine a "success/keep" color based on the theme
-    final keepColor = theme.brightness == Brightness.dark ? Colors.greenAccent : Colors.green.shade700;
+    final keepColor = theme.brightness == Brightness.dark
+        ? Colors.greenAccent
+        : Colors.green.shade700;
 
     return Form(
       key: _formKey,
@@ -128,7 +134,9 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                               const TextSpan(text: "Target Account "),
                               TextSpan(
                                 text: "(Will Remain)",
-                                style: TextStyle(color: keepColor, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    color: keepColor,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -148,9 +156,11 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: .5),
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: .5),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: keepColor.withValues(alpha: .5), width: 1.5),
+                      border: Border.all(
+                          color: keepColor.withValues(alpha: .5), width: 1.5),
                     ),
                     child: Text(
                       widget.targetAccount.name,
@@ -167,7 +177,8 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.delete_forever, color: theme.colorScheme.error, size: 20),
+                      Icon(Icons.delete_forever,
+                          color: theme.colorScheme.error, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: RichText(
@@ -177,7 +188,9 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                               const TextSpan(text: "Source Account "),
                               TextSpan(
                                 text: "(Will Be Deleted)",
-                                style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    color: theme.colorScheme.error,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -198,7 +211,8 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                       border: const OutlineInputBorder(),
                       hintText: "Select an account to migrate from",
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: theme.colorScheme.error, width: 2.0),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.error, width: 2.0),
                       ),
                     ),
                     initialValue: _sourceAccountId,
@@ -213,7 +227,8 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                         _sourceAccountId = value;
                       });
                     },
-                    validator: (value) => value == null ? "Please select a source account" : null,
+                    validator: (value) =>
+                        value == null ? "Please select a source account" : null,
                   ),
                 ],
               ),

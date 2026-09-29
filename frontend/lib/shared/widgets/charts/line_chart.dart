@@ -50,7 +50,8 @@ class SproutLineChart extends StatefulWidget {
       this.showDateInTooltip = true,
       this.showBorder = true,
       EdgeInsets? padding})
-      : padding = padding ?? EdgeInsets.symmetric(horizontal: showXAxis ? 12 : 8);
+      : padding =
+            padding ?? EdgeInsets.symmetric(horizontal: showXAxis ? 12 : 8);
 
   @override
   State<SproutLineChart> createState() => _SproutLineChartState();
@@ -70,14 +71,16 @@ class _SproutLineChartState extends State<SproutLineChart> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.series.isEmpty || widget.series.every((s) => s.data.spots.isEmpty)) {
+    if (widget.series.isEmpty ||
+        widget.series.every((s) => s.data.spots.isEmpty)) {
       return const SizedBox.shrink();
     }
 
     final theme = Theme.of(context);
 
     final Map<String, num> dummyData = {
-      for (final s in widget.series) s.label: s.data.spots.isNotEmpty ? s.data.spots.first.y : 0
+      for (final s in widget.series)
+        s.label: s.data.spots.isNotEmpty ? s.data.spots.first.y : 0
     };
 
     final Map<String, Color> dummyMapping = {
@@ -111,13 +114,17 @@ class _SproutLineChartState extends State<SproutLineChart> {
     final colorScheme = theme.colorScheme;
     final allSpots = widget.series.expand((s) => s.data.spots).toList();
     final yAxisBounds = _calculateYAxisBounds(allSpots);
-    final maxPoints = widget.series.fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
+    final maxPoints = widget.series
+        .fold<int>(0, (maxLen, s) => math.max(maxLen, s.data.spots.length));
 
     final double yRange = yAxisBounds.maxY - yAxisBounds.minY;
-    final double safeYInterval = yRange > 0.001 ? math.max(0.01, yRange / 4) : 1.0;
+    final double safeYInterval =
+        yRange > 0.001 ? math.max(0.01, yRange / 4) : 1.0;
     final double safeXInterval = math.max(1.0, (maxPoints / 5).floorToDouble());
 
-    final baseChartData = widget.series.reduce((a, b) => a.data.spots.length > b.data.spots.length ? a : b).data;
+    final baseChartData = widget.series
+        .reduce((a, b) => a.data.spots.length > b.data.spots.length ? a : b)
+        .data;
 
     final List<LineChartBarData> lines = [];
     final bool isAllPositive = yAxisBounds.minY >= 0;
@@ -125,9 +132,14 @@ class _SproutLineChartState extends State<SproutLineChart> {
 
     for (final s in widget.series) {
       final bool isSplitColor = s.config.usePositiveNegativeColors;
-      final double lineMaxY = s.data.spots.isEmpty ? 0 : s.data.spots.map((e) => e.y).reduce(math.max);
-      final double lineMinY = s.data.spots.isEmpty ? 0 : s.data.spots.map((e) => e.y).reduce(math.min);
-      final bool isSeriesFlatZero = s.data.spots.isNotEmpty && lineMaxY == 0 && lineMinY == 0;
+      final double lineMaxY = s.data.spots.isEmpty
+          ? 0
+          : s.data.spots.map((e) => e.y).reduce(math.max);
+      final double lineMinY = s.data.spots.isEmpty
+          ? 0
+          : s.data.spots.map((e) => e.y).reduce(math.min);
+      final bool isSeriesFlatZero =
+          s.data.spots.isNotEmpty && lineMaxY == 0 && lineMinY == 0;
 
       final Color baseColor = s.config.color ?? colorScheme.primary;
       final Color posColor = isSplitColor ? Colors.green : baseColor;
@@ -161,7 +173,11 @@ class _SproutLineChartState extends State<SproutLineChart> {
             lineGradient = LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.white, theme.colorScheme.error, theme.colorScheme.error],
+              colors: [
+                Colors.white,
+                theme.colorScheme.error,
+                theme.colorScheme.error
+              ],
               stops: [0.0, 0.05, 1.0],
             );
           } else {
@@ -206,7 +222,10 @@ class _SproutLineChartState extends State<SproutLineChart> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(bottomRange)],
+            colors: [
+              posColor.withOpacity(areaOpacity),
+              posColor.withOpacity(bottomRange)
+            ],
           ),
         );
       } else if (isAllNegative) {
@@ -215,7 +234,10 @@ class _SproutLineChartState extends State<SproutLineChart> {
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [negColor.withOpacity(bottomRange), negColor.withOpacity(areaOpacity)],
+            colors: [
+              negColor.withOpacity(bottomRange),
+              negColor.withOpacity(areaOpacity)
+            ],
           ),
         );
       } else {
@@ -226,7 +248,10 @@ class _SproutLineChartState extends State<SproutLineChart> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [posColor.withOpacity(areaOpacity), posColor.withOpacity(bottomRange)],
+            colors: [
+              posColor.withOpacity(areaOpacity),
+              posColor.withOpacity(bottomRange)
+            ],
           ),
         );
 
@@ -237,7 +262,10 @@ class _SproutLineChartState extends State<SproutLineChart> {
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [negColor.withOpacity(areaOpacity), negColor.withOpacity(0.00)],
+            colors: [
+              negColor.withOpacity(areaOpacity),
+              negColor.withOpacity(0.00)
+            ],
           ),
         );
       }
@@ -262,7 +290,8 @@ class _SproutLineChartState extends State<SproutLineChart> {
       maxY: yAxisBounds.maxY,
       minX: 0,
       maxX: maxPoints > 1 ? (maxPoints - 1).toDouble() : 1.0,
-      titlesData: _buildTitlesData(theme, safeYInterval, safeXInterval, baseChartData, chartWidth),
+      titlesData: _buildTitlesData(
+          theme, safeYInterval, safeXInterval, baseChartData, chartWidth),
       borderData: FlBorderData(
         show: widget.showBorder,
         border: Border.all(
@@ -297,11 +326,13 @@ class _SproutLineChartState extends State<SproutLineChart> {
     );
   }
 
-  FlTitlesData _buildTitlesData(
-      ThemeData theme, double yInterval, double xInterval, SproutLineChartData baseChartData, double chartWidth) {
+  FlTitlesData _buildTitlesData(ThemeData theme, double yInterval,
+      double xInterval, SproutLineChartData baseChartData, double chartWidth) {
     final int maxPoints = baseChartData.sortedEntries.length;
-    final int visibleLabels = maxPoints > 1 ? ((maxPoints - 1) / xInterval).floor() + 1 : 1;
-    final double availableWidthPerLabel = chartWidth / math.max(1, visibleLabels);
+    final int visibleLabels =
+        maxPoints > 1 ? ((maxPoints - 1) / xInterval).floor() + 1 : 1;
+    final double availableWidthPerLabel =
+        chartWidth / math.max(1, visibleLabels);
 
     final String format = ChartRangeUtility.getDateFormat(widget.chartRange);
     final String sampleText = baseChartData.sortedEntries.isNotEmpty
@@ -340,7 +371,8 @@ class _SproutLineChartState extends State<SproutLineChart> {
               angle: rotationAngle,
               child: Text(
                 DateFormat(format).format(date),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 10),
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.hintColor, fontSize: 10),
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -368,7 +400,8 @@ class _SproutLineChartState extends State<SproutLineChart> {
                     : widget.formatValue != null
                         ? widget.formatValue!(value)
                         : value.toStringAsFixed(0),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 10),
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.hintColor, fontSize: 10),
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.visible,
@@ -394,30 +427,37 @@ class _SproutLineChartState extends State<SproutLineChart> {
         }
         final touchX = event.localPosition?.dx ?? 0;
         const requiredSpace = 230.0;
-        final newAlignment =
-            (chartWidth - touchX < requiredSpace) ? FLHorizontalAlignment.left : FLHorizontalAlignment.right;
+        final newAlignment = (chartWidth - touchX < requiredSpace)
+            ? FLHorizontalAlignment.left
+            : FLHorizontalAlignment.right;
         if (_tooltipAlignment != newAlignment) {
           setState(() {
             _tooltipAlignment = newAlignment;
           });
         }
       },
-      getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndices) {
-        final int seriesIndex = widget.series.indexWhere((s) => s.data.spots == barData.spots);
-        final currentSeries = seriesIndex != -1 ? widget.series[seriesIndex] : widget.series.first;
+      getTouchedSpotIndicator:
+          (LineChartBarData barData, List<int> spotIndices) {
+        final int seriesIndex =
+            widget.series.indexWhere((s) => s.data.spots == barData.spots);
+        final currentSeries = seriesIndex != -1
+            ? widget.series[seriesIndex]
+            : widget.series.first;
 
         final bool shouldShowBubble = currentSeries.config.showInTooltip;
 
         return spotIndices.map((index) {
           return TouchedSpotIndicatorData(
             FlLine(
-              color: shouldShowBubble ? colorScheme.outline : Colors.transparent,
+              color:
+                  shouldShowBubble ? colorScheme.outline : Colors.transparent,
               strokeWidth: shouldShowBubble ? 1 : 0,
             ),
             FlDotData(
               show: shouldShowBubble,
               getDotPainter: (spot, percent, barData, index) {
-                final Color activeHoverColor = _resolveSpotColor(spot.y, currentSeries, theme);
+                final Color activeHoverColor =
+                    _resolveSpotColor(spot.y, currentSeries, theme);
                 return FlDotCirclePainter(
                   radius: 5,
                   color: activeHoverColor,
@@ -433,7 +473,8 @@ class _SproutLineChartState extends State<SproutLineChart> {
         fitInsideHorizontally: true,
         fitInsideVertically: true,
         tooltipHorizontalAlignment: _tooltipAlignment,
-        tooltipHorizontalOffset: _tooltipAlignment == FLHorizontalAlignment.left ? -20 : 20,
+        tooltipHorizontalOffset:
+            _tooltipAlignment == FLHorizontalAlignment.left ? -20 : 20,
         tooltipPadding: EdgeInsets.all(8),
         maxContentWidth: 200,
         getTooltipColor: (LineBarSpot touchedSpot) {
@@ -441,7 +482,8 @@ class _SproutLineChartState extends State<SproutLineChart> {
         },
         getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
           // Sort spots by barIndex to keep the tooltip layout rendering cleanly
-          final sortedSpots = List<LineBarSpot>.from(touchedBarSpots)..sort((a, b) => a.barIndex.compareTo(b.barIndex));
+          final sortedSpots = List<LineBarSpot>.from(touchedBarSpots)
+            ..sort((a, b) => a.barIndex.compareTo(b.barIndex));
 
           // Track displayed series to avoid duplicate entries when crossing the zero boundary
           final Set<String> seenLabels = {};
@@ -450,14 +492,19 @@ class _SproutLineChartState extends State<SproutLineChart> {
             final currentSeries = widget.series.firstWhereOrNull((s) {
                   if (s.config.usePositiveNegativeColors) {
                     // If it's a split line, the bar color will match either Green or the Error theme color
-                    return barSpot.bar.color == Colors.green || barSpot.bar.color == theme.colorScheme.error;
+                    return barSpot.bar.color == Colors.green ||
+                        barSpot.bar.color == theme.colorScheme.error;
                   }
                   // For standard lines, match the explicit configuration color
-                  return (s.config.color ?? theme.colorScheme.primary) == barSpot.bar.color;
+                  return (s.config.color ?? theme.colorScheme.primary) ==
+                      barSpot.bar.color;
                 }) ??
-                (barSpot.barIndex < widget.series.length ? widget.series[barSpot.barIndex] : widget.series.first);
+                (barSpot.barIndex < widget.series.length
+                    ? widget.series[barSpot.barIndex]
+                    : widget.series.first);
 
-            if (currentSeries.config.showInTooltip == false || seenLabels.contains(currentSeries.label)) {
+            if (currentSeries.config.showInTooltip == false ||
+                seenLabels.contains(currentSeries.label)) {
               return const LineTooltipItem(
                 '',
                 TextStyle(fontSize: 0, color: Colors.transparent),
@@ -469,7 +516,8 @@ class _SproutLineChartState extends State<SproutLineChart> {
 
             if (barSpot.x.toInt() < chartData.sortedEntries.length) {
               final date = chartData.sortedEntries[barSpot.x.toInt()].key;
-              final Color lineColor = _resolveSpotColor(barSpot.y, currentSeries, theme);
+              final Color lineColor =
+                  _resolveSpotColor(barSpot.y, currentSeries, theme);
               final dateHeader = !widget.showDateInTooltip
                   ? ""
                   : barSpot == sortedSpots.first
@@ -478,11 +526,16 @@ class _SproutLineChartState extends State<SproutLineChart> {
 
               // Ensure long titles receive an ellipsis so they do not wrap vertically
               final rawLabel = currentSeries.label;
-              final displayLabel = rawLabel.length > 15 ? '${rawLabel.substring(0, 12)}...' : rawLabel;
+              final displayLabel = rawLabel.length > 15
+                  ? '${rawLabel.substring(0, 12)}...'
+                  : rawLabel;
               final seriesLabel = '$displayLabel: ';
 
-              final rawValue = widget.formatValue != null ? widget.formatValue!(barSpot.y) : barSpot.y.toString();
-              final formattedValue = rawValue.replaceAll('-', '\u2011').replaceAll(' ', '\u00A0');
+              final rawValue = widget.formatValue != null
+                  ? widget.formatValue!(barSpot.y)
+                  : barSpot.y.toString();
+              final formattedValue =
+                  rawValue.replaceAll('-', '\u2011').replaceAll(' ', '\u00A0');
               final tooltipTextStyle = theme.textTheme.labelLarge?.copyWith(
                 color: Colors.white,
               );
@@ -515,8 +568,10 @@ class _SproutLineChartState extends State<SproutLineChart> {
   _YAxisBounds _calculateYAxisBounds(List<FlSpot> spots) {
     if (spots.isEmpty) return (minY: 0.0, maxY: 1.0);
 
-    final double actualMinY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
-    final double actualMaxY = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    final double actualMinY =
+        spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
+    final double actualMaxY =
+        spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
 
     if (actualMinY == 0 && actualMaxY == 0) {
       return (minY: 0.0, maxY: 1.0);

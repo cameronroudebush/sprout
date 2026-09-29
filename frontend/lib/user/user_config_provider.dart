@@ -62,7 +62,8 @@ class UserConfigNotifier extends _$UserConfigNotifier {
   /// Returns if we're actively in a dark mode theme
   bool isDarkMode() {
     if (config?.themeStyle == null) return false;
-    return config!.themeStyle == ThemeStyleEnum.absolute || config!.themeStyle == ThemeStyleEnum.colored;
+    return config!.themeStyle == ThemeStyleEnum.absolute ||
+        config!.themeStyle == ThemeStyleEnum.colored;
   }
 
   /// Returns the theme considering config, cache, then default

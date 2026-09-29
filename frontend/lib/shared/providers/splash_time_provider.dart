@@ -12,7 +12,8 @@ class SproutSplashManager extends _$SproutSplashManager {
     final now = DateTime.now();
 
     // If it's been less than 15 minutes since the last show, bypass the 3s delay
-    if (_lastShownTime != null && now.difference(_lastShownTime!) < const Duration(minutes: 15)) {
+    if (_lastShownTime != null &&
+        now.difference(_lastShownTime!) < const Duration(minutes: 15)) {
       return false;
     }
 

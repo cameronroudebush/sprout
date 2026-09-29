@@ -52,22 +52,25 @@ class AccountEditRequest {
   num? interestRate;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is AccountEditRequest &&
-    other.subType == subType &&
-    other.type == type &&
-    other.name == name &&
-    other.interestRate == interestRate;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccountEditRequest &&
+          other.subType == subType &&
+          other.type == type &&
+          other.name == name &&
+          other.interestRate == interestRate;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (subType == null ? 0 : subType!.hashCode) +
-    (type == null ? 0 : type!.hashCode) +
-    (name == null ? 0 : name!.hashCode) +
-    (interestRate == null ? 0 : interestRate!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (subType == null ? 0 : subType!.hashCode) +
+      (type == null ? 0 : type!.hashCode) +
+      (name == null ? 0 : name!.hashCode) +
+      (interestRate == null ? 0 : interestRate!.hashCode);
 
   @override
-  String toString() => 'AccountEditRequest[subType=$subType, type=$type, name=$name, interestRate=$interestRate]';
+  String toString() =>
+      'AccountEditRequest[subType=$subType, type=$type, name=$name, interestRate=$interestRate]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -118,7 +121,10 @@ class AccountEditRequest {
     return null;
   }
 
-  static List<AccountEditRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AccountEditRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <AccountEditRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -146,20 +152,24 @@ class AccountEditRequest {
   }
 
   // maps a json object with a list of AccountEditRequest-objects as value to a dart map
-  static Map<String, List<AccountEditRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<AccountEditRequest>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<AccountEditRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = AccountEditRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = AccountEditRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

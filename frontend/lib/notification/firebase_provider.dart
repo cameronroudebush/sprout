@@ -46,7 +46,8 @@ class FirebaseNotifier extends _$FirebaseNotifier {
 
     if (config != null) {
       // Persist the config for background isolate/offline use
-      await SecureStorageProvider.saveValue(_firebaseConfigKey, jsonEncode(config.toJson()));
+      await SecureStorageProvider.saveValue(
+          _firebaseConfigKey, jsonEncode(config.toJson()));
 
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp(
@@ -80,13 +81,15 @@ class FirebaseNotifier extends _$FirebaseNotifier {
 
   /// Requests permissions and registers the background messaging handler.
   Future<void> _setupPushNotifications() async {
-    final settings = await FirebaseMessaging.instance.requestPermission(alert: true, badge: true, sound: true);
+    final settings = await FirebaseMessaging.instance
+        .requestPermission(alert: true, badge: true, sound: true);
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
       // Initialize local settings for tap handling
-      const initSettings = InitializationSettings(android: AndroidInitializationSettings('ic_notification'));
+      const initSettings = InitializationSettings(
+          android: AndroidInitializationSettings('ic_notification'));
 
       await _localNotifications.initialize(
         settings: initSettings,

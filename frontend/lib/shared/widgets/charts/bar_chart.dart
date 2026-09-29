@@ -40,14 +40,16 @@ class _SproutBarChartState extends State<SproutBarChart> {
   @override
   void initState() {
     super.initState();
-    _colorResolver = SproutChartColorResolver(colorMapping: widget.colorMapping);
+    _colorResolver =
+        SproutChartColorResolver(colorMapping: widget.colorMapping);
   }
 
   @override
   void didUpdateWidget(covariant SproutBarChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.colorMapping != widget.colorMapping) {
-      _colorResolver = SproutChartColorResolver(colorMapping: widget.colorMapping);
+      _colorResolver =
+          SproutChartColorResolver(colorMapping: widget.colorMapping);
     }
   }
 
@@ -58,7 +60,10 @@ class _SproutBarChartState extends State<SproutBarChart> {
       return const Center(child: Text("No chart data available"));
     }
 
-    final sortedEntries = chartData.entries.where((e) => e.value > 0).sortedBy((e) => -e.value).toList();
+    final sortedEntries = chartData.entries
+        .where((e) => e.value > 0)
+        .sortedBy((e) => -e.value)
+        .toList();
 
     return SproutChartLayoutFrame(
       header: widget.header,
@@ -68,29 +73,37 @@ class _SproutBarChartState extends State<SproutBarChart> {
       chartArea: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceEvenly,
-          maxY: sortedEntries.isEmpty ? 10 : sortedEntries.map((e) => e.value.toDouble()).max * 1.15,
+          maxY: sortedEntries.isEmpty
+              ? 10
+              : sortedEntries.map((e) => e.value.toDouble()).max * 1.15,
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
               getTooltipColor: (group) => Colors.blueGrey.shade800,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 final entry = sortedEntries[groupIndex];
-                final displayValue = widget.formatValue?.call(entry.value) ?? entry.value.toString();
+                final displayValue = widget.formatValue?.call(entry.value) ??
+                    entry.value.toString();
                 return BarTooltipItem(
                   '${entry.key}\n$displayValue',
-                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 );
               },
             ),
             touchCallback: (FlTouchEvent event, barTouchResponse) {
               setState(() {
-                if (!event.isInterestedForInteractions || barTouchResponse?.toString() == null) {
+                if (!event.isInterestedForInteractions ||
+                    barTouchResponse?.toString() == null) {
                   touchedIndex = -1;
                   return;
                 }
-                touchedIndex = barTouchResponse?.spot?.touchedBarGroupIndex ?? -1;
+                touchedIndex =
+                    barTouchResponse?.spot?.touchedBarGroupIndex ?? -1;
               });
 
-              if (event is FlTapUpEvent && barTouchResponse != null && barTouchResponse.spot != null) {
+              if (event is FlTapUpEvent &&
+                  barTouchResponse != null &&
+                  barTouchResponse.spot != null) {
                 if (touchedIndex >= 0 && touchedIndex < sortedEntries.length) {
                   final entry = sortedEntries[touchedIndex];
                   widget.onBarTap?.call(entry.key, entry.value.toDouble());
@@ -100,8 +113,10 @@ class _SproutBarChartState extends State<SproutBarChart> {
           ),
           titlesData: FlTitlesData(
             show: true,
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -120,12 +135,14 @@ class _SproutBarChartState extends State<SproutBarChart> {
                 showTitles: widget.showBarTitle,
                 getTitlesWidget: (value, meta) {
                   final int idx = value.toInt();
-                  if (idx < 0 || idx >= sortedEntries.length) return const SizedBox();
+                  if (idx < 0 || idx >= sortedEntries.length)
+                    return const SizedBox();
                   return SideTitleWidget(
                     meta: meta,
                     child: Text(
                       sortedEntries[idx].key,
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   );
                 },
@@ -143,10 +160,12 @@ class _SproutBarChartState extends State<SproutBarChart> {
                   toY: entry.value.toDouble(),
                   color: _colorResolver.resolve(entry.key),
                   width: isTouched ? 22 : 16,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(4)),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,
-                    toY: sortedEntries.map((e) => e.value.toDouble()).max * 1.15,
+                    toY:
+                        sortedEntries.map((e) => e.value.toDouble()).max * 1.15,
                     color: Colors.grey.withOpacity(0.08),
                   ),
                 ),

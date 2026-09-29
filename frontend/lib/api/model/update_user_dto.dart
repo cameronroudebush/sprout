@@ -26,13 +26,13 @@ class UpdateUserDto {
   String? email;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UpdateUserDto &&
-    other.email == email;
+  bool operator ==(Object other) =>
+      identical(this, other) || other is UpdateUserDto && other.email == email;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (email == null ? 0 : email!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (email == null ? 0 : email!.hashCode);
 
   @override
   String toString() => 'UpdateUserDto[email=$email]';
@@ -68,7 +68,10 @@ class UpdateUserDto {
     return null;
   }
 
-  static List<UpdateUserDto> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateUserDto> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <UpdateUserDto>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -96,20 +99,24 @@ class UpdateUserDto {
   }
 
   // maps a json object with a list of UpdateUserDto-objects as value to a dart map
-  static Map<String, List<UpdateUserDto>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<UpdateUserDto>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<UpdateUserDto>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = UpdateUserDto.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = UpdateUserDto.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
   }
 
   /// The list of required keys that must be present in a JSON.
-  static const requiredKeys = <String>{
-  };
+  static const requiredKeys = <String>{};
 }
-

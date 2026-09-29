@@ -15,12 +15,14 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
   /// Whether the widget is rendering on a mobile screen context
   final bool mobile;
 
-  const DashboardRecentTransactionsCard({super.key, this.count = 10, this.mobile = false});
+  const DashboardRecentTransactionsCard(
+      {super.key, this.count = 10, this.mobile = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Queries the baseline/unfiltered transaction stream specifically for the dashboard
-    final transactionsAsync = ref.watch(transactionsProvider(TransactionFilter.defaultFilter));
+    final transactionsAsync =
+        ref.watch(transactionsProvider(TransactionFilter.defaultFilter));
 
     Widget content = transactionsAsync.whenDefault(
       expanded: false,
@@ -32,7 +34,9 @@ class DashboardRecentTransactionsCard extends ConsumerWidget {
         return Material(
           child: ListView.separated(
             shrinkWrap: mobile,
-            physics: mobile ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+            physics: mobile
+                ? const NeverScrollableScrollPhysics()
+                : const AlwaysScrollableScrollPhysics(),
             itemCount: recent.length,
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {

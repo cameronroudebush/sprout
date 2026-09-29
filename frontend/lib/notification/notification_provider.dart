@@ -53,7 +53,8 @@ class Notifications extends _$Notifications {
 
         // Wait for refresh to complete to find the new one for the popup
         if (msg != null && msg.popupLatest) {
-          final notification = newList.firstWhere((n) => !oldIds.contains(n.id), orElse: () => newList.first);
+          final notification = newList.firstWhere((n) => !oldIds.contains(n.id),
+              orElse: () => newList.first);
           _showInAppNotification(notification);
         }
       }
@@ -92,7 +93,8 @@ class Notifications extends _$Notifications {
                   direction: DismissDirection.horizontal,
                   onDismissed: (_) async {
                     if (!frontendOnly) {
-                      final api = await ref.read(notificationApiProvider.future);
+                      final api =
+                          await ref.read(notificationApiProvider.future);
                       await api.notificationControllerMarkRead(notification.id);
                     }
                     entry.remove();
@@ -104,7 +106,8 @@ class Notifications extends _$Notifications {
                     color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: 120, maxWidth: isDesktop ? 520 : 340),
+                      constraints: BoxConstraints(
+                          maxHeight: 120, maxWidth: isDesktop ? 520 : 340),
                       child: NotificationItem(
                         notification,
                         showDate: showDate,
@@ -203,6 +206,7 @@ class Notifications extends _$Notifications {
 
   /// Opens a frontend only notification with the OpenAPI exception info
   String openWithAPIException(dynamic e) {
-    return openFrontendOnly(parseOpenAPIException(e), type: NotificationTypeEnum.error);
+    return openFrontendOnly(parseOpenAPIException(e),
+        type: NotificationTypeEnum.error);
   }
 }

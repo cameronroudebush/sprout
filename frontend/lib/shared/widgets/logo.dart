@@ -14,14 +14,17 @@ class SproutLogo extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final userConfig = ref.watch(userConfigProvider).value;
-    final currentStyle = ref.read(userConfigProvider.notifier).getTheme(userConfig);
+    final currentStyle =
+        ref.read(userConfigProvider.notifier).getTheme(userConfig);
 
     final bool shouldApplyColor = currentStyle == ThemeStyleEnum.bliss;
 
     return SvgPicture.asset(
       'assets/logo/color-transparent-no-tag.svg',
       width: width,
-      colorFilter: shouldApplyColor ? ColorFilter.mode(theme.colorScheme.secondary, BlendMode.srcIn) : null,
+      colorFilter: shouldApplyColor
+          ? ColorFilter.mode(theme.colorScheme.secondary, BlendMode.srcIn)
+          : null,
       fit: BoxFit.contain,
     );
   }

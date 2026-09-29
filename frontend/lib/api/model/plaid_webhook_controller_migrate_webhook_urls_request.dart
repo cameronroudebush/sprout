@@ -19,27 +19,31 @@ class PlaidWebhookControllerMigrateWebhookUrlsRequest {
   String baseUrl;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is PlaidWebhookControllerMigrateWebhookUrlsRequest &&
-    other.baseUrl == baseUrl;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlaidWebhookControllerMigrateWebhookUrlsRequest &&
+          other.baseUrl == baseUrl;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (baseUrl.hashCode);
+      // ignore: unnecessary_parenthesis
+      (baseUrl.hashCode);
 
   @override
-  String toString() => 'PlaidWebhookControllerMigrateWebhookUrlsRequest[baseUrl=$baseUrl]';
+  String toString() =>
+      'PlaidWebhookControllerMigrateWebhookUrlsRequest[baseUrl=$baseUrl]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'baseUrl'] = this.baseUrl;
+    json[r'baseUrl'] = this.baseUrl;
     return json;
   }
 
   /// Returns a new [PlaidWebhookControllerMigrateWebhookUrlsRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static PlaidWebhookControllerMigrateWebhookUrlsRequest? fromJson(dynamic value) {
+  static PlaidWebhookControllerMigrateWebhookUrlsRequest? fromJson(
+      dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -47,8 +51,10 @@ class PlaidWebhookControllerMigrateWebhookUrlsRequest {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'baseUrl'), 'Required key "PlaidWebhookControllerMigrateWebhookUrlsRequest[baseUrl]" is missing from JSON.');
-        assert(json[r'baseUrl'] != null, 'Required key "PlaidWebhookControllerMigrateWebhookUrlsRequest[baseUrl]" has a null value in JSON.');
+        assert(json.containsKey(r'baseUrl'),
+            'Required key "PlaidWebhookControllerMigrateWebhookUrlsRequest[baseUrl]" is missing from JSON.');
+        assert(json[r'baseUrl'] != null,
+            'Required key "PlaidWebhookControllerMigrateWebhookUrlsRequest[baseUrl]" has a null value in JSON.');
         return true;
       }());
 
@@ -59,11 +65,15 @@ class PlaidWebhookControllerMigrateWebhookUrlsRequest {
     return null;
   }
 
-  static List<PlaidWebhookControllerMigrateWebhookUrlsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<PlaidWebhookControllerMigrateWebhookUrlsRequest> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <PlaidWebhookControllerMigrateWebhookUrlsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = PlaidWebhookControllerMigrateWebhookUrlsRequest.fromJson(row);
+        final value =
+            PlaidWebhookControllerMigrateWebhookUrlsRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -72,12 +82,14 @@ class PlaidWebhookControllerMigrateWebhookUrlsRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, PlaidWebhookControllerMigrateWebhookUrlsRequest> mapFromJson(dynamic json) {
+  static Map<String, PlaidWebhookControllerMigrateWebhookUrlsRequest>
+      mapFromJson(dynamic json) {
     final map = <String, PlaidWebhookControllerMigrateWebhookUrlsRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = PlaidWebhookControllerMigrateWebhookUrlsRequest.fromJson(entry.value);
+        final value = PlaidWebhookControllerMigrateWebhookUrlsRequest.fromJson(
+            entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -87,13 +99,22 @@ class PlaidWebhookControllerMigrateWebhookUrlsRequest {
   }
 
   // maps a json object with a list of PlaidWebhookControllerMigrateWebhookUrlsRequest-objects as value to a dart map
-  static Map<String, List<PlaidWebhookControllerMigrateWebhookUrlsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<PlaidWebhookControllerMigrateWebhookUrlsRequest>>{};
+  static Map<String, List<PlaidWebhookControllerMigrateWebhookUrlsRequest>>
+      mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final map =
+        <String, List<PlaidWebhookControllerMigrateWebhookUrlsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = PlaidWebhookControllerMigrateWebhookUrlsRequest.listFromJson(entry.value, growable: growable,);
+        map[entry.key] =
+            PlaidWebhookControllerMigrateWebhookUrlsRequest.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -104,4 +125,3 @@ class PlaidWebhookControllerMigrateWebhookUrlsRequest {
     'baseUrl',
   };
 }
-

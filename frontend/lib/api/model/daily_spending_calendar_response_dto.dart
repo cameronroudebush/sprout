@@ -20,20 +20,22 @@ class DailySpendingCalendarResponseDTO {
   List<DailySpendingItem> spending;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is DailySpendingCalendarResponseDTO &&
-    _deepEquality.equals(other.spending, spending);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DailySpendingCalendarResponseDTO &&
+          _deepEquality.equals(other.spending, spending);
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (spending.hashCode);
+      // ignore: unnecessary_parenthesis
+      (spending.hashCode);
 
   @override
   String toString() => 'DailySpendingCalendarResponseDTO[spending=$spending]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'spending'] = this.spending;
+    json[r'spending'] = this.spending;
     return json;
   }
 
@@ -48,8 +50,10 @@ class DailySpendingCalendarResponseDTO {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'spending'), 'Required key "DailySpendingCalendarResponseDTO[spending]" is missing from JSON.');
-        assert(json[r'spending'] != null, 'Required key "DailySpendingCalendarResponseDTO[spending]" has a null value in JSON.');
+        assert(json.containsKey(r'spending'),
+            'Required key "DailySpendingCalendarResponseDTO[spending]" is missing from JSON.');
+        assert(json[r'spending'] != null,
+            'Required key "DailySpendingCalendarResponseDTO[spending]" has a null value in JSON.');
         return true;
       }());
 
@@ -60,7 +64,10 @@ class DailySpendingCalendarResponseDTO {
     return null;
   }
 
-  static List<DailySpendingCalendarResponseDTO> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DailySpendingCalendarResponseDTO> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <DailySpendingCalendarResponseDTO>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -73,7 +80,8 @@ class DailySpendingCalendarResponseDTO {
     return result.toList(growable: growable);
   }
 
-  static Map<String, DailySpendingCalendarResponseDTO> mapFromJson(dynamic json) {
+  static Map<String, DailySpendingCalendarResponseDTO> mapFromJson(
+      dynamic json) {
     final map = <String, DailySpendingCalendarResponseDTO>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
@@ -88,13 +96,19 @@ class DailySpendingCalendarResponseDTO {
   }
 
   // maps a json object with a list of DailySpendingCalendarResponseDTO-objects as value to a dart map
-  static Map<String, List<DailySpendingCalendarResponseDTO>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DailySpendingCalendarResponseDTO>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DailySpendingCalendarResponseDTO>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = DailySpendingCalendarResponseDTO.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = DailySpendingCalendarResponseDTO.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -105,4 +119,3 @@ class DailySpendingCalendarResponseDTO {
     'spending',
   };
 }
-

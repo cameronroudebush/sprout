@@ -66,7 +66,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                             itemCount: messages.length,
                             itemBuilder: (context, index) {
                               return SproutRouteWrapper(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
                                 child: ChatBubble(message: messages[index]),
                               );
                             },
@@ -104,7 +105,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               mainAxisSize: MainAxisSize.min,
               spacing: 16,
               children: [
-                Icon(Icons.auto_awesome_outlined, size: 48, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.auto_awesome_outlined,
+                    size: 48, color: Theme.of(context).colorScheme.primary),
                 Text(
                   "AI Assistant Not Configured",
                   style: theme.textTheme.headlineMedium,

@@ -17,7 +17,8 @@ class HoldingsChatCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chatStatusAsync = ref.watch(chatStatusProvider(ChatOverviewTypeEnum.holdings));
+    final chatStatusAsync =
+        ref.watch(chatStatusProvider(ChatOverviewTypeEnum.holdings));
 
     Widget content = chatStatusAsync.whenDefault(
       loadingText: "Analyzing holdings & portfolio...",
@@ -57,7 +58,10 @@ class HoldingsChatCard extends ConsumerWidget {
               ),
               right: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [ChatModelIndicator(model: chatStatusAsync.value?.model, compact: true)],
+                children: [
+                  ChatModelIndicator(
+                      model: chatStatusAsync.value?.model, compact: true)
+                ],
               )),
           mobile ? content : Expanded(child: content),
         ],

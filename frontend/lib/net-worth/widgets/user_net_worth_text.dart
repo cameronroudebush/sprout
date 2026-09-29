@@ -42,8 +42,9 @@ class UserNetWorthText extends ConsumerWidget {
             if (title != null)
               Text(
                 title!,
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
+                style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold),
               ),
             Text(
               formatter.format(value),

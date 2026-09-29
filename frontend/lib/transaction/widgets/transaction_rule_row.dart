@@ -24,12 +24,14 @@ class TransactionRuleRow extends ConsumerWidget {
 
     final disabledColor = theme.disabledColor;
     final defaultStyle = textTheme.bodyMedium;
-    final disabledStyle = defaultStyle?.copyWith(color: disabledColor, fontStyle: FontStyle.italic);
+    final disabledStyle = defaultStyle?.copyWith(
+        color: disabledColor, fontStyle: FontStyle.italic);
     final effectiveStyle = rule.enabled ? defaultStyle : disabledStyle;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      onTap: () => showSproutPopup(context: context, builder: (_) => TransactionRuleEdit(rule)),
+      onTap: () => showSproutPopup(
+          context: context, builder: (_) => TransactionRuleEdit(rule)),
       leading: CircleAvatar(
         radius: 15,
         backgroundColor: theme.colorScheme.primaryContainer,
@@ -43,7 +45,8 @@ class TransactionRuleRow extends ConsumerWidget {
       title: _buildMatchText(ref, effectiveStyle, theme),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 4.0),
-        child: _buildCatRow(ref, disabledStyle, effectiveStyle, textTheme, disabledColor),
+        child: _buildCatRow(
+            ref, disabledStyle, effectiveStyle, textTheme, disabledColor),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -57,8 +60,8 @@ class TransactionRuleRow extends ConsumerWidget {
   }
 
   /// Builds the category row to display who we're matching to
-  Widget _buildCatRow(
-      WidgetRef ref, TextStyle? disabledStyle, TextStyle? effectiveStyle, TextTheme textTheme, Color disabledColor) {
+  Widget _buildCatRow(WidgetRef ref, TextStyle? disabledStyle,
+      TextStyle? effectiveStyle, TextTheme textTheme, Color disabledColor) {
     final cat = ref.watch(
       categoriesProvider.select((state) => state.value?.firstWhereOrNull(
             (a) => a.id == rule.categoryId,
@@ -73,7 +76,8 @@ class TransactionRuleRow extends ConsumerWidget {
         if (rule.categoryId != null && cat != null) ...[
           CategoryIcon(cat, avatarSize: 16),
           Flexible(
-            child: Text(cat.name, style: effectiveStyle, overflow: TextOverflow.ellipsis),
+            child: Text(cat.name,
+                style: effectiveStyle, overflow: TextOverflow.ellipsis),
           ),
         ] else
           Text('Uncategorized', style: disabledStyle),
@@ -82,7 +86,8 @@ class TransactionRuleRow extends ConsumerWidget {
   }
 
   /// Builds the text to display how we're matching our content
-  Widget _buildMatchText(WidgetRef ref, TextStyle? effectiveStyle, ThemeData theme) {
+  Widget _buildMatchText(
+      WidgetRef ref, TextStyle? effectiveStyle, ThemeData theme) {
     final value = rule.value.replaceAll('|', ' OR ');
     final String condition = rule.strict ? 'is' : 'contains';
     final String type = rule.type.value;
@@ -105,7 +110,8 @@ class TransactionRuleRow extends ConsumerWidget {
             const TextSpan(text: 'account is '),
             TextSpan(
               text: account.name,
-              style: theme.textTheme.labelMedium?.copyWith(decoration: TextDecoration.underline),
+              style: theme.textTheme.labelMedium
+                  ?.copyWith(decoration: TextDecoration.underline),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   NavigationProvider.redirectToAccount(account);
@@ -113,7 +119,8 @@ class TransactionRuleRow extends ConsumerWidget {
             ),
             const TextSpan(text: ' and '),
           ],
-          TextSpan(text: '$type $condition ', style: theme.textTheme.labelMedium),
+          TextSpan(
+              text: '$type $condition ', style: theme.textTheme.labelMedium),
           TextSpan(
             text: '"$value"',
             style: theme.textTheme.labelMedium,

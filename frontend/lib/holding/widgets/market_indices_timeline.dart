@@ -12,7 +12,8 @@ import 'package:sprout/shared/widgets/charts/util/header.dart';
 class MajorIndicesTimelineWidget extends ConsumerWidget {
   final String? title;
 
-  const MajorIndicesTimelineWidget({super.key, this.title = "Market Performance"});
+  const MajorIndicesTimelineWidget(
+      {super.key, this.title = "Market Performance"});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,7 +21,8 @@ class MajorIndicesTimelineWidget extends ConsumerWidget {
 
     return timelineDataAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text("Error loading market timelines: $e")),
+      error: (e, _) =>
+          Center(child: Text("Error loading market timelines: $e")),
       data: (indexList) {
         if (indexList.isEmpty) {
           return const Center(child: Text("No market data available"));
@@ -32,9 +34,11 @@ class MajorIndicesTimelineWidget extends ConsumerWidget {
           final timeline = indexDto.timeline;
           if (timeline.isEmpty) continue;
           final Map<DateTime, double> percentageMappedData = {
-            for (final point in timeline) point.date: point.changePercent.toDouble(),
+            for (final point in timeline)
+              point.date: point.changePercent.toDouble(),
           };
-          final processedChartData = LineChartDataProcessor.prepareChartData(percentageMappedData);
+          final processedChartData =
+              LineChartDataProcessor.prepareChartData(percentageMappedData);
           final lineColor = indexDto.color.toColor;
 
           chartSeriesList.add(

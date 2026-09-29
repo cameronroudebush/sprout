@@ -4,6 +4,7 @@ import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/month_navigation.dart';
 import 'package:sprout/shared/widgets/period_picker_dialog.dart';
+import 'package:sprout/shared/widgets/tab_selector.dart';
 
 /// A widget for selecting the view (monthly/yearly), year, and navigating months for cash flow.
 class CashFlowSelector extends StatelessWidget {
@@ -30,8 +31,7 @@ class CashFlowSelector extends StatelessWidget {
       maxMonth: MonthNavigation.currentMonth(),
     );
     if (pickedMonth != null) {
-      onMonthIncrementChanged(
-          MonthNavigation.differenceInMonths(selectedMonth, pickedMonth));
+      onMonthIncrementChanged(MonthNavigation.differenceInMonths(selectedMonth, pickedMonth));
     }
   }
 
@@ -52,107 +52,72 @@ class CashFlowSelector extends StatelessWidget {
       final now = DateTime.now();
       final currentMonth = MonthNavigation.currentMonth(now: now);
       final isMonthly = currentView == CashFlowView.monthly;
+      final previousButton = Tooltip(
+        message: isMonthly ? "Previous Month" : "Previous Year",
+        child: IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () => isMonthly ? onMonthIncrementChanged(-1) : onYearChanged(selectedDate.year - 1),
+        ),
+      );
+      final nextButton = Tooltip(
+        message: isMonthly ? "Next Month" : "Next Year",
+        child: IconButton(
+          icon: const Icon(Icons.chevron_right),
+          onPressed: isMonthly
+              ? (MonthNavigation.canAdvance(selectedDate, maxMonth: currentMonth)
+                  ? () => onMonthIncrementChanged(1)
+                  : null)
+              : (selectedDate.year < now.year ? () => onYearChanged(selectedDate.year + 1) : null),
+        ),
+      );
+      final currentPeriodButton = Tooltip(
+        message: isMonthly ? "This Month" : "This Year",
+        child: IconButton(
+          icon: const Icon(Icons.keyboard_double_arrow_right),
+          onPressed: isMonthly
+              ? (!MonthNavigation.isSameMonth(selectedDate, currentMonth)
+                  ? () => onMonthIncrementChanged(MonthNavigation.differenceInMonths(selectedDate, currentMonth))
+                  : null)
+              : (selectedDate.year != now.year ? () => onYearChanged(now.year) : null),
+        ),
+      );
+      final periodTabs = SproutTabSelector<CashFlowView>(
+        options: const [
+          SproutTabOption(value: CashFlowView.monthly, label: 'Monthly'),
+          SproutTabOption(value: CashFlowView.yearly, label: 'Yearly'),
+        ],
+        selected: currentView,
+        onSelected: onViewChanged,
+        compact: !isDesktop,
+      );
+      final periodPicker = TextButton.icon(
+        onPressed: () => isMonthly ? _pickMonth(context) : _pickYear(context),
+        icon: const Icon(Icons.calendar_month_outlined),
+        label: Text(
+          isMonthly
+              ? DateFormat(isDesktop ? 'MMMM yyyy' : 'MMM yy').format(selectedDate)
+              : selectedDate.year.toString(),
+          style: theme.textTheme.titleMedium,
+        ),
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 12 : 4),
+        ),
+      );
 
       return Padding(
-        padding: EdgeInsetsGeometry.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Back button
+            Expanded(child: Center(child: previousButton)),
+            Row(
+              spacing: isDesktop ? 8 : 2,
+              children: [periodTabs, periodPicker],
+            ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Tooltip(
-                    message: isMonthly ? "Previous Month" : "Previous Year",
-                    child: IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () => isMonthly ? onMonthIncrementChanged(-1) : onYearChanged(selectedDate.year - 1),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Current value display
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 8,
-                children: [
-                  ToggleButtons(
-                    constraints: const BoxConstraints(
-                      minHeight: 28.0,
-                    ),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Disables material margin padding
-                    isSelected: [currentView == CashFlowView.monthly, currentView == CashFlowView.yearly],
-                    onPressed: (index) {
-                      onViewChanged(index == 0 ? CashFlowView.monthly : CashFlowView.yearly);
-                    },
-                    children: const [
-                      Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 6), child: Text('Monthly')),
-                      Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 6), child: Text('Yearly')),
-                    ],
-                  ),
-                  if (currentView == CashFlowView.monthly) ...[
-                    TextButton.icon(
-                      onPressed: () => _pickMonth(context),
-                      icon: const Icon(Icons.calendar_month_outlined),
-                      label: Text(
-                        isDesktop
-                            ? DateFormat('MMMM yyyy').format(selectedDate)
-                            : DateFormat('MMM yyyy').format(selectedDate),
-                        style: theme.textTheme.titleMedium,
-                      ),
-                    ),
-                  ],
-                  if (currentView == CashFlowView.yearly)
-                    TextButton.icon(
-                      onPressed: () => _pickYear(context),
-                      icon: const Icon(Icons.calendar_month_outlined),
-                      label: Text(
-                        selectedDate.year.toString(),
-                        style: theme.textTheme.titleMedium,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            // Next button
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Tooltip(
-                    message: isMonthly ? "Next Month" : "Next Year",
-                    child: IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: isMonthly
-                          ? (MonthNavigation.canAdvance(selectedDate,
-                                  maxMonth: currentMonth)
-                              ? () => onMonthIncrementChanged(1)
-                              : null)
-                          : (selectedDate.year < now.year
-                              ? () => onYearChanged(selectedDate.year + 1)
-                              : null),
-                    ),
-                  ),
-                  Tooltip(
-                    message: isMonthly ? "This Month" : "This Year",
-                    child: IconButton(
-                      icon: const Icon(Icons.keyboard_double_arrow_right),
-                      onPressed: isMonthly
-                          ? (!MonthNavigation.isSameMonth(
-                                  selectedDate, currentMonth)
-                              ? () => onMonthIncrementChanged(
-                                  MonthNavigation.differenceInMonths(
-                                      selectedDate, currentMonth))
-                              : null)
-                          : (selectedDate.year != now.year
-                              ? () => onYearChanged(now.year)
-                              : null),
-                    ),
-                  ),
-                ],
+                children: [nextButton, currentPeriodButton],
               ),
             ),
           ],

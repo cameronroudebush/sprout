@@ -9,7 +9,10 @@ class TransactionState {
   final bool hasReachedMax;
 
   TransactionState(
-      {required this.transactions, required this.totalCount, this.isLoadingMore = false, this.hasReachedMax = false});
+      {required this.transactions,
+      required this.totalCount,
+      this.isLoadingMore = false,
+      this.hasReachedMax = false});
 
   TransactionState copyWith({
     List<Transaction>? transactions,

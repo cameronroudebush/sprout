@@ -15,7 +15,8 @@ class CookieClient extends http.BaseClient {
     // Load cookies from Jar and add to Request
     final cookies = await cookieJar.loadForRequest(request.url);
     if (cookies.isNotEmpty) {
-      request.headers[HttpHeaders.cookieHeader] = cookies.map((c) => '${c.name}=${c.value}').join('; ');
+      request.headers[HttpHeaders.cookieHeader] =
+          cookies.map((c) => '${c.name}=${c.value}').join('; ');
     }
 
     final response = await innerClient.send(request);

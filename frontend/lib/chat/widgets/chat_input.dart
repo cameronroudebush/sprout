@@ -25,7 +25,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   String _lastText = "";
-  ChatRequestDTOTimeframeEnum _selectedTimeframe = ChatRequestDTOTimeframeEnum.threeMonths;
+  ChatRequestDTOTimeframeEnum _selectedTimeframe =
+      ChatRequestDTOTimeframeEnum.threeMonths;
 
   @override
   void initState() {
@@ -44,7 +45,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
       final matches = pattern.allMatches(_lastText);
 
       for (final match in matches) {
-        if (selection.baseOffset > match.start && selection.baseOffset < match.end) {
+        if (selection.baseOffset > match.start &&
+            selection.baseOffset < match.end) {
           final newText = _lastText.replaceRange(match.start, match.end, "");
           _controller.value = TextEditingValue(
             text: newText,
@@ -107,7 +109,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
               ),
               child: Consumer(
                 builder: (context, ref, _) {
-                  final items = ref.watch(accountsProvider).value?.accounts ?? [];
+                  final items =
+                      ref.watch(accountsProvider).value?.accounts ?? [];
                   return ListView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.zero,
@@ -145,11 +148,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
     if (lastAtIndex != -1) {
       final replacement = '@${item.id} ';
-      final newText = text.replaceRange(lastAtIndex, selection.baseOffset, replacement);
+      final newText =
+          text.replaceRange(lastAtIndex, selection.baseOffset, replacement);
 
       _controller.value = TextEditingValue(
         text: newText,
-        selection: TextSelection.collapsed(offset: lastAtIndex + replacement.length),
+        selection:
+            TextSelection.collapsed(offset: lastAtIndex + replacement.length),
       );
     }
     _hideMentionPopup();
@@ -171,7 +176,9 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   void _send() async {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
-      await ref.read(chatProvider.notifier).sendMessage(text, timeframe: _selectedTimeframe);
+      await ref
+          .read(chatProvider.notifier)
+          .sendMessage(text, timeframe: _selectedTimeframe);
       _controller.clear();
       _hideMentionPopup();
     }
@@ -183,9 +190,19 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     if (isDemoMode) return const SizedBox.shrink();
 
     final List<Map<String, String>> suggestions = [
-      {'title': "Spending", 'message': "Analyze my spending patterns for the entire period of data."},
-      {'title': "Net Worth", 'message': "Analyze my net worth trend for the entire period of data."},
-      {'title': "Suggestions", 'message': "Give me some ideas on how to further improve my financial health."},
+      {
+        'title': "Spending",
+        'message': "Analyze my spending patterns for the entire period of data."
+      },
+      {
+        'title': "Net Worth",
+        'message': "Analyze my net worth trend for the entire period of data."
+      },
+      {
+        'title': "Suggestions",
+        'message':
+            "Give me some ideas on how to further improve my financial health."
+      },
     ];
 
     return Padding(
@@ -203,7 +220,9 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                           ? null
                           : () {
                               // Send message utilizing the selected timeframe
-                              ref.read(chatProvider.notifier).sendMessage(s['message']!, timeframe: _selectedTimeframe);
+                              ref.read(chatProvider.notifier).sendMessage(
+                                  s['message']!,
+                                  timeframe: _selectedTimeframe);
                             },
                     ),
                   ))
@@ -247,7 +266,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     decoration: InputDecoration(
                       isDense: true,
                       hintText: "Ask Sprout anything...",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
                     textInputAction: TextInputAction.send,
                     onSubmitted: (_) => _send(),
@@ -307,16 +327,24 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     timeframe.longLabel,
                                     style: TextStyle(
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                      color: isSelected ? theme.colorScheme.primary : null,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? theme.colorScheme.primary
+                                          : null,
                                     ),
                                   ),
-                                  if (isSelected) Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+                                  if (isSelected)
+                                    Icon(Icons.check,
+                                        size: 16,
+                                        color: theme.colorScheme.primary),
                                 ],
                               ),
                               Text(
@@ -332,9 +360,11 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                       }),
                     ],
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 12),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: theme.dividerColor.withValues(alpha: 0.4),
@@ -367,7 +397,10 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     child: FloatingActionButton(
                       onPressed: widget.isLoading ? null : _send,
                       child: widget.isLoading
-                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.send, size: 24),
                     ),
                   )

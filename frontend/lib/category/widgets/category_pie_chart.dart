@@ -20,22 +20,31 @@ class CategoryPieChart extends ConsumerWidget {
   final int? topN;
 
   const CategoryPieChart(this.selectedDate,
-      {super.key, required this.legendPosition, this.view = CashFlowView.monthly, this.topN, this.header});
+      {super.key,
+      required this.legendPosition,
+      this.view = CashFlowView.monthly,
+      this.topN,
+      this.header});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final year = selectedDate.year;
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
-    final statsAsync = ref.watch(categoryStatsProvider(year: year, month: month));
+    final statsAsync =
+        ref.watch(categoryStatsProvider(year: year, month: month));
 
     return statsAsync.whenDefault(
       emptyCondition: (data) => data == null || data.categoryCount.isEmpty,
-      emptyWidget: Center(child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
+      emptyWidget: Center(
+          child: Text(CashFlowViewFormatter.getNoDataText(view, selectedDate))),
       data: (data) {
         final rawData = data!.categoryCount;
-        final filteredEntries = rawData.entries.where((e) => e.value > 0).toList();
-        final sortedEntries = filteredEntries.sortedBy((e) => e.value).reversed.toList();
-        final colorMapping = data.colorMapping.map((a, b) => MapEntry(a, b.toColor));
+        final filteredEntries =
+            rawData.entries.where((e) => e.value > 0).toList();
+        final sortedEntries =
+            filteredEntries.sortedBy((e) => e.value).reversed.toList();
+        final colorMapping =
+            data.colorMapping.map((a, b) => MapEntry(a, b.toColor));
 
         Map<String, num> finalData = {};
 

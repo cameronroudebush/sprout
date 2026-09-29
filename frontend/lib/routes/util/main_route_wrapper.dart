@@ -22,7 +22,7 @@ class SproutRouteWrapper extends ConsumerWidget {
     super.key,
     required this.child,
     this.floatingActionButton,
-    this.padding = const EdgeInsets.fromLTRB(4, 0, 4, 8),
+    this.padding = const EdgeInsets.fromLTRB(4, 0, 4, 0),
     this.size = SproutRouteSize.auto,
   });
 

@@ -65,40 +65,43 @@ class Account {
   Object? extra;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Account &&
-    other.id == id &&
-    other.provider == provider &&
-    other.type == type &&
-    other.subType == subType &&
-    other.interestRate == interestRate &&
-    other.isArchived == isArchived &&
-    other.balance == balance &&
-    other.name == name &&
-    other.institution == institution &&
-    other.extra == extra;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Account &&
+          other.id == id &&
+          other.provider == provider &&
+          other.type == type &&
+          other.subType == subType &&
+          other.interestRate == interestRate &&
+          other.isArchived == isArchived &&
+          other.balance == balance &&
+          other.name == name &&
+          other.institution == institution &&
+          other.extra == extra;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (id.hashCode) +
-    (provider.hashCode) +
-    (type.hashCode) +
-    (subType == null ? 0 : subType!.hashCode) +
-    (interestRate == null ? 0 : interestRate!.hashCode) +
-    (isArchived.hashCode) +
-    (balance.hashCode) +
-    (name.hashCode) +
-    (institution.hashCode) +
-    (extra == null ? 0 : extra!.hashCode);
+      // ignore: unnecessary_parenthesis
+      (id.hashCode) +
+      (provider.hashCode) +
+      (type.hashCode) +
+      (subType == null ? 0 : subType!.hashCode) +
+      (interestRate == null ? 0 : interestRate!.hashCode) +
+      (isArchived.hashCode) +
+      (balance.hashCode) +
+      (name.hashCode) +
+      (institution.hashCode) +
+      (extra == null ? 0 : extra!.hashCode);
 
   @override
-  String toString() => 'Account[id=$id, provider=$provider, type=$type, subType=$subType, interestRate=$interestRate, isArchived=$isArchived, balance=$balance, name=$name, institution=$institution, extra=$extra]';
+  String toString() =>
+      'Account[id=$id, provider=$provider, type=$type, subType=$subType, interestRate=$interestRate, isArchived=$isArchived, balance=$balance, name=$name, institution=$institution, extra=$extra]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'id'] = this.id;
-      json[r'provider'] = this.provider;
-      json[r'type'] = this.type;
+    json[r'id'] = this.id;
+    json[r'provider'] = this.provider;
+    json[r'type'] = this.type;
     if (this.subType != null) {
       json[r'subType'] = this.subType;
     } else {
@@ -109,10 +112,10 @@ class Account {
     } else {
       json[r'interestRate'] = null;
     }
-      json[r'isArchived'] = this.isArchived;
-      json[r'balance'] = this.balance;
-      json[r'name'] = this.name;
-      json[r'institution'] = this.institution;
+    json[r'isArchived'] = this.isArchived;
+    json[r'balance'] = this.balance;
+    json[r'name'] = this.name;
+    json[r'institution'] = this.institution;
     if (this.extra != null) {
       json[r'extra'] = this.extra;
     } else {
@@ -132,18 +135,30 @@ class Account {
       // Note 1: the values aren't checked for validity beyond being non-null.
       // Note 2: this code is stripped in release mode!
       assert(() {
-        assert(json.containsKey(r'id'), 'Required key "Account[id]" is missing from JSON.');
-        assert(json[r'id'] != null, 'Required key "Account[id]" has a null value in JSON.');
-        assert(json.containsKey(r'provider'), 'Required key "Account[provider]" is missing from JSON.');
-        assert(json[r'provider'] != null, 'Required key "Account[provider]" has a null value in JSON.');
-        assert(json.containsKey(r'type'), 'Required key "Account[type]" is missing from JSON.');
-        assert(json[r'type'] != null, 'Required key "Account[type]" has a null value in JSON.');
-        assert(json.containsKey(r'balance'), 'Required key "Account[balance]" is missing from JSON.');
-        assert(json[r'balance'] != null, 'Required key "Account[balance]" has a null value in JSON.');
-        assert(json.containsKey(r'name'), 'Required key "Account[name]" is missing from JSON.');
-        assert(json[r'name'] != null, 'Required key "Account[name]" has a null value in JSON.');
-        assert(json.containsKey(r'institution'), 'Required key "Account[institution]" is missing from JSON.');
-        assert(json[r'institution'] != null, 'Required key "Account[institution]" has a null value in JSON.');
+        assert(json.containsKey(r'id'),
+            'Required key "Account[id]" is missing from JSON.');
+        assert(json[r'id'] != null,
+            'Required key "Account[id]" has a null value in JSON.');
+        assert(json.containsKey(r'provider'),
+            'Required key "Account[provider]" is missing from JSON.');
+        assert(json[r'provider'] != null,
+            'Required key "Account[provider]" has a null value in JSON.');
+        assert(json.containsKey(r'type'),
+            'Required key "Account[type]" is missing from JSON.');
+        assert(json[r'type'] != null,
+            'Required key "Account[type]" has a null value in JSON.');
+        assert(json.containsKey(r'balance'),
+            'Required key "Account[balance]" is missing from JSON.');
+        assert(json[r'balance'] != null,
+            'Required key "Account[balance]" has a null value in JSON.');
+        assert(json.containsKey(r'name'),
+            'Required key "Account[name]" is missing from JSON.');
+        assert(json[r'name'] != null,
+            'Required key "Account[name]" has a null value in JSON.');
+        assert(json.containsKey(r'institution'),
+            'Required key "Account[institution]" is missing from JSON.');
+        assert(json[r'institution'] != null,
+            'Required key "Account[institution]" has a null value in JSON.');
         return true;
       }());
 
@@ -165,7 +180,10 @@ class Account {
     return null;
   }
 
-  static List<Account> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Account> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <Account>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -193,13 +211,19 @@ class Account {
   }
 
   // maps a json object with a list of Account-objects as value to a dart map
-  static Map<String, List<Account>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<Account>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<Account>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Account.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Account.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -215,4 +239,3 @@ class Account {
     'institution',
   };
 }
-

@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-
 class AuthApi {
   AuthApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
@@ -25,7 +24,9 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
-  Future<Response> authControllerLoginWithHttpInfo(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
+  Future<Response> authControllerLoginWithHttpInfo(
+    UsernamePasswordLoginRequest usernamePasswordLoginRequest,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/login';
 
@@ -37,7 +38,6 @@ class AuthApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -57,17 +57,24 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [UsernamePasswordLoginRequest] usernamePasswordLoginRequest (required):
-  Future<User?> authControllerLogin(UsernamePasswordLoginRequest usernamePasswordLoginRequest,) async {
-    final response = await authControllerLoginWithHttpInfo(usernamePasswordLoginRequest,);
+  Future<User?> authControllerLogin(
+    UsernamePasswordLoginRequest usernamePasswordLoginRequest,
+  ) async {
+    final response = await authControllerLoginWithHttpInfo(
+      usernamePasswordLoginRequest,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
     // When a remote server returns no body with a status of 204, we shall not decode it.
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'User',) as User;
-    
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'User',
+      ) as User;
     }
     return null;
   }
@@ -89,7 +96,6 @@ class AuthApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -121,7 +127,9 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [MobileTokenExchangeDto] mobileTokenExchangeDto (required):
-  Future<Response> oIDCControllerExchangeWithHttpInfo(MobileTokenExchangeDto mobileTokenExchangeDto,) async {
+  Future<Response> oIDCControllerExchangeWithHttpInfo(
+    MobileTokenExchangeDto mobileTokenExchangeDto,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/exchange';
 
@@ -133,7 +141,6 @@ class AuthApi {
     final formParams = <String, String>{};
 
     const contentTypes = <String>['application/json'];
-
 
     return apiClient.invokeAPI(
       path,
@@ -153,8 +160,12 @@ class AuthApi {
   /// Parameters:
   ///
   /// * [MobileTokenExchangeDto] mobileTokenExchangeDto (required):
-  Future<void> oIDCControllerExchange(MobileTokenExchangeDto mobileTokenExchangeDto,) async {
-    final response = await oIDCControllerExchangeWithHttpInfo(mobileTokenExchangeDto,);
+  Future<void> oIDCControllerExchange(
+    MobileTokenExchangeDto mobileTokenExchangeDto,
+  ) async {
+    final response = await oIDCControllerExchangeWithHttpInfo(
+      mobileTokenExchangeDto,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -171,7 +182,10 @@ class AuthApi {
   /// * [String] code (required):
   ///
   /// * [String] state (required):
-  Future<Response> oIDCControllerLoginCallbackOIDCWithHttpInfo(String code, String state,) async {
+  Future<Response> oIDCControllerLoginCallbackOIDCWithHttpInfo(
+    String code,
+    String state,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/callback';
 
@@ -182,11 +196,10 @@ class AuthApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'code', code));
-      queryParams.addAll(_queryParams('', 'state', state));
+    queryParams.addAll(_queryParams('', 'code', code));
+    queryParams.addAll(_queryParams('', 'state', state));
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -208,8 +221,14 @@ class AuthApi {
   /// * [String] code (required):
   ///
   /// * [String] state (required):
-  Future<void> oIDCControllerLoginCallbackOIDC(String code, String state,) async {
-    final response = await oIDCControllerLoginCallbackOIDCWithHttpInfo(code, state,);
+  Future<void> oIDCControllerLoginCallbackOIDC(
+    String code,
+    String state,
+  ) async {
+    final response = await oIDCControllerLoginCallbackOIDCWithHttpInfo(
+      code,
+      state,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -228,7 +247,10 @@ class AuthApi {
   ///
   /// * [String] appChallenge:
   ///   A base64url-encoded SHA-256 hash of a secret verifier string generated by the requesting client. Used to cryptographically bind the login request to the final token exchange to prevent interception attacks.
-  Future<Response> oIDCControllerLoginOIDCWithHttpInfo(String targetUrl, { String? appChallenge, }) async {
+  Future<Response> oIDCControllerLoginOIDCWithHttpInfo(
+    String targetUrl, {
+    String? appChallenge,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/auth/oidc/login';
 
@@ -239,13 +261,12 @@ class AuthApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-      queryParams.addAll(_queryParams('', 'target_url', targetUrl));
+    queryParams.addAll(_queryParams('', 'target_url', targetUrl));
     if (appChallenge != null) {
       queryParams.addAll(_queryParams('', 'app_challenge', appChallenge));
     }
 
     const contentTypes = <String>[];
-
 
     return apiClient.invokeAPI(
       path,
@@ -269,8 +290,14 @@ class AuthApi {
   ///
   /// * [String] appChallenge:
   ///   A base64url-encoded SHA-256 hash of a secret verifier string generated by the requesting client. Used to cryptographically bind the login request to the final token exchange to prevent interception attacks.
-  Future<void> oIDCControllerLoginOIDC(String targetUrl, { String? appChallenge, }) async {
-    final response = await oIDCControllerLoginOIDCWithHttpInfo(targetUrl,  appChallenge: appChallenge, );
+  Future<void> oIDCControllerLoginOIDC(
+    String targetUrl, {
+    String? appChallenge,
+  }) async {
+    final response = await oIDCControllerLoginOIDCWithHttpInfo(
+      targetUrl,
+      appChallenge: appChallenge,
+    );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

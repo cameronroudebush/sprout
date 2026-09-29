@@ -11,13 +11,16 @@ class TypingIndicator extends StatefulWidget {
   State<TypingIndicator> createState() => _TypingIndicatorState();
 }
 
-class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProviderStateMixin {
+class _TypingIndicatorState extends State<TypingIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1200))
+      ..repeat();
   }
 
   @override
@@ -39,7 +42,8 @@ class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProv
 
             final double opacity = CurvedAnimation(
               parent: _controller,
-              curve: Interval(begin, end.clamp(0.0, 1.0), curve: Curves.easeInOut),
+              curve:
+                  Interval(begin, end.clamp(0.0, 1.0), curve: Curves.easeInOut),
             ).value;
 
             return Container(
@@ -47,7 +51,8 @@ class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProv
               height: widget.dotSize,
               width: widget.dotSize,
               decoration: BoxDecoration(
-                color: (widget.color ?? Colors.grey).withOpacity(0.3 + (0.7 * opacity)),
+                color: (widget.color ?? Colors.grey)
+                    .withOpacity(0.3 + (0.7 * opacity)),
                 shape: BoxShape.circle,
               ),
             );

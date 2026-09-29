@@ -20,7 +20,11 @@ class UserNetWorthWidget extends ConsumerWidget {
   /// If this should be the mobile design
   final bool mobile;
 
-  const UserNetWorthWidget({super.key, this.title = "Net Worth", this.invert = false, this.mobile = false});
+  const UserNetWorthWidget(
+      {super.key,
+      this.title = "Net Worth",
+      this.invert = false,
+      this.mobile = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,7 +36,8 @@ class UserNetWorthWidget extends ConsumerWidget {
       error: (e, _) => const Center(child: Text("Error loading data")),
       data: (dto) {
         if (dto == null || dto.timeline.isEmpty) {
-          return const Center(child: Text("Start adding accounts to view your net worth"));
+          return const Center(
+              child: Text("Start adding accounts to view your net worth"));
         }
 
         final config = ref.watch(userConfigProvider).value;
@@ -43,8 +48,10 @@ class UserNetWorthWidget extends ConsumerWidget {
         final frame = history.getValueByFrame(selectedRange);
 
         final mappedData = HistoricalDataPointExtensions.toMap(timeline);
-        final filteredHistorical = LineChartDataProcessor.filterHistoricalData(mappedData, selectedRange);
-        final processedChartData = LineChartDataProcessor.prepareChartData(filteredHistorical);
+        final filteredHistorical = LineChartDataProcessor.filterHistoricalData(
+            mappedData, selectedRange);
+        final processedChartData =
+            LineChartDataProcessor.prepareChartData(filteredHistorical);
 
         final List<SproutChartSeries> chartSeriesList = [
           SproutChartSeries(
@@ -55,7 +62,8 @@ class UserNetWorthWidget extends ConsumerWidget {
         ];
 
         if (processedChartData.spots.isNotEmpty && !mobile) {
-          chartSeriesList.add(LineChartDataProcessor.computeAverageData(processedChartData));
+          chartSeriesList.add(
+              LineChartDataProcessor.computeAverageData(processedChartData));
         }
 
         return Column(
@@ -63,7 +71,9 @@ class UserNetWorthWidget extends ConsumerWidget {
           spacing: 0,
           children: [
             Padding(
-                padding: mobile ? EdgeInsetsGeometry.symmetric(horizontal: 4, vertical: 4) : EdgeInsetsGeometry.zero,
+                padding: mobile
+                    ? EdgeInsetsGeometry.symmetric(horizontal: 4, vertical: 4)
+                    : EdgeInsetsGeometry.zero,
                 child: UserNetWorthText(
                   range: selectedRange,
                   frame: frame,
@@ -86,7 +96,8 @@ class UserNetWorthWidget extends ConsumerWidget {
             ),
             if (mobile)
               const Padding(
-                  padding: EdgeInsetsGeometry.symmetric(horizontal: 2, vertical: 4),
+                  padding:
+                      EdgeInsetsGeometry.symmetric(horizontal: 2, vertical: 4),
                   child: ChartRangeSelector(large: true))
           ],
         );

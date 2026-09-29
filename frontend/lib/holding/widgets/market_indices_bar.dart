@@ -18,16 +18,20 @@ class MajorIndicesBarWidget extends ConsumerWidget {
     final indicesAsync = ref.watch(majorIndicesProvider);
 
     return indicesAsync.when(
-      data: (indices) => _buildContent(context, indices, indicesAsync.isRefreshing),
+      data: (indices) =>
+          _buildContent(context, indices, indicesAsync.isRefreshing),
       loading: () => const SproutCard(
-        child: SizedBox(height: 80, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+        child: SizedBox(
+            height: 80,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
       ),
       error: (err, _) => const SizedBox.shrink(),
     );
   }
 
   /// Build the content of the indices to show
-  Widget _buildContent(BuildContext context, List<MarketIndexDto> indices, bool isRefreshing) {
+  Widget _buildContent(
+      BuildContext context, List<MarketIndexDto> indices, bool isRefreshing) {
     if (indices.isEmpty) return const SizedBox.shrink();
 
     return SproutCard(
@@ -42,12 +46,15 @@ class MajorIndicesBarWidget extends ConsumerWidget {
                   // Take the status only from the first index as a global indicator
                   _StatusBadge(state: indices.first.marketState),
                   const VerticalDivider(width: 32, indent: 8, endIndent: 8),
-                  Expanded(child: Row(children: _buildTilesWithSeparators(indices))),
+                  Expanded(
+                      child: Row(children: _buildTilesWithSeparators(indices))),
                 ],
               ),
             ),
           ),
-          if (isRefreshing) const LinearProgressIndicator(minHeight: 2, backgroundColor: Colors.transparent),
+          if (isRefreshing)
+            const LinearProgressIndicator(
+                minHeight: 2, backgroundColor: Colors.transparent),
         ],
       ),
     );
@@ -139,7 +146,13 @@ class _StatusBadge extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                boxShadow: [if (isLive) BoxShadow(color: color.withOpacity(0.5), blurRadius: 4, spreadRadius: 1)],
+                boxShadow: [
+                  if (isLive)
+                    BoxShadow(
+                        color: color.withOpacity(0.5),
+                        blurRadius: 4,
+                        spreadRadius: 1)
+                ],
               ),
             ),
             Text(

@@ -42,9 +42,13 @@ class AccountTypeEnum {
     crypto,
   ];
 
-  static AccountTypeEnum? fromJson(dynamic value) => AccountTypeEnumTypeTransformer().decode(value);
+  static AccountTypeEnum? fromJson(dynamic value) =>
+      AccountTypeEnumTypeTransformer().decode(value);
 
-  static List<AccountTypeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AccountTypeEnum> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <AccountTypeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -61,7 +65,8 @@ class AccountTypeEnum {
 /// Transformation class that can [encode] an instance of [AccountTypeEnum] to String,
 /// and [decode] dynamic data back to [AccountTypeEnum].
 class AccountTypeEnumTypeTransformer {
-  factory AccountTypeEnumTypeTransformer() => _instance ??= const AccountTypeEnumTypeTransformer._();
+  factory AccountTypeEnumTypeTransformer() =>
+      _instance ??= const AccountTypeEnumTypeTransformer._();
 
   const AccountTypeEnumTypeTransformer._();
 
@@ -78,13 +83,20 @@ class AccountTypeEnumTypeTransformer {
   AccountTypeEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'other': return AccountTypeEnum.other;
-        case r'depository': return AccountTypeEnum.depository;
-        case r'credit': return AccountTypeEnum.credit;
-        case r'asset': return AccountTypeEnum.asset;
-        case r'loan': return AccountTypeEnum.loan;
-        case r'investment': return AccountTypeEnum.investment;
-        case r'crypto': return AccountTypeEnum.crypto;
+        case r'other':
+          return AccountTypeEnum.other;
+        case r'depository':
+          return AccountTypeEnum.depository;
+        case r'credit':
+          return AccountTypeEnum.credit;
+        case r'asset':
+          return AccountTypeEnum.asset;
+        case r'loan':
+          return AccountTypeEnum.loan;
+        case r'investment':
+          return AccountTypeEnum.investment;
+        case r'crypto':
+          return AccountTypeEnum.crypto;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -97,4 +109,3 @@ class AccountTypeEnumTypeTransformer {
   /// Singleton [AccountTypeEnumTypeTransformer] instance.
   static AccountTypeEnumTypeTransformer? _instance;
 }
-

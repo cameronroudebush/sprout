@@ -52,14 +52,16 @@ class _SproutPieChartState extends State<SproutPieChart> {
   @override
   void initState() {
     super.initState();
-    _colorResolver = SproutChartColorResolver(colorMapping: widget.colorMapping);
+    _colorResolver =
+        SproutChartColorResolver(colorMapping: widget.colorMapping);
   }
 
   @override
   void didUpdateWidget(covariant SproutPieChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.colorMapping != widget.colorMapping) {
-      _colorResolver = SproutChartColorResolver(colorMapping: widget.colorMapping);
+      _colorResolver =
+          SproutChartColorResolver(colorMapping: widget.colorMapping);
     }
   }
 
@@ -74,9 +76,11 @@ class _SproutPieChartState extends State<SproutPieChart> {
       colorResolver: _colorResolver,
       chartArea: LayoutBuilder(
         builder: (context, constraints) {
-          final shortestSide =
-              constraints.maxWidth < constraints.maxHeight ? constraints.maxWidth : constraints.maxHeight;
-          final chartDimension = shortestSide.isFinite && shortestSide > 0 ? shortestSide : 160.0;
+          final shortestSide = constraints.maxWidth < constraints.maxHeight
+              ? constraints.maxWidth
+              : constraints.maxHeight;
+          final chartDimension =
+              shortestSide.isFinite && shortestSide > 0 ? shortestSide : 160.0;
 
           return Center(
             child: SizedBox(
@@ -89,17 +93,22 @@ class _SproutPieChartState extends State<SproutPieChart> {
                   pieTouchData: PieTouchData(
                     touchCallback: (FlTouchEvent event, pieTouchResponse) {
                       setState(() {
-                        if (!event.isInterestedForInteractions || pieTouchResponse?.touchedSection == null) {
+                        if (!event.isInterestedForInteractions ||
+                            pieTouchResponse?.touchedSection == null) {
                           touchedIndex = -1;
                           return;
                         }
-                        touchedIndex = pieTouchResponse!.touchedSection!.touchedSectionIndex;
+                        touchedIndex = pieTouchResponse!
+                            .touchedSection!.touchedSectionIndex;
                       });
 
-                      if (event is FlTapUpEvent && pieTouchResponse?.touchedSection != null) {
-                        final sortedEntries = chartData.entries.sortedBy((e) => e.value).toList();
+                      if (event is FlTapUpEvent &&
+                          pieTouchResponse?.touchedSection != null) {
+                        final sortedEntries =
+                            chartData.entries.sortedBy((e) => e.value).toList();
                         final entry = sortedEntries[touchedIndex];
-                        widget.onSliceTap?.call(entry.key, entry.value.toDouble());
+                        widget.onSliceTap
+                            ?.call(entry.key, entry.value.toDouble());
                       }
                     },
                   ),
@@ -112,12 +121,17 @@ class _SproutPieChartState extends State<SproutPieChart> {
     );
   }
 
-  List<PieChartSectionData> _generatePieSections(double chartSize, Map<String, num> chartData) {
+  List<PieChartSectionData> _generatePieSections(
+      double chartSize, Map<String, num> chartData) {
     final double baseRadius = chartSize * 0.22;
 
-    return chartData.entries.where((e) => e.value > 0).sortedBy((e) => e.value).mapIndexed((index, entry) {
+    return chartData.entries
+        .where((e) => e.value > 0)
+        .sortedBy((e) => e.value)
+        .mapIndexed((index, entry) {
       final isTouched = index == touchedIndex;
-      final formattedVal = widget.formatValue?.call(entry.value) ?? entry.value.toString();
+      final formattedVal =
+          widget.formatValue?.call(entry.value) ?? entry.value.toString();
 
       return PieChartSectionData(
         color: _colorResolver.resolve(entry.key),
@@ -136,7 +150,8 @@ class _SproutPieChartState extends State<SproutPieChart> {
                 builder: (context) {
                   final theme = Theme.of(context);
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: theme.primaryColorDark,
                       borderRadius: BorderRadius.circular(6),

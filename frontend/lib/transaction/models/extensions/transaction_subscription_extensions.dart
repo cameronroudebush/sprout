@@ -45,13 +45,17 @@ extension TransactionSubscriptionExtensions on TransactionSubscription {
             break;
         }
 
-        final monthsPassed = (checkDate.year * 12 + checkDate.month) - (firstDate.year * 12 + firstDate.month);
+        final monthsPassed = (checkDate.year * 12 + checkDate.month) -
+            (firstDate.year * 12 + firstDate.month);
 
         // Check if the date is on a correct month interval.
         if (monthsPassed < 0 || monthsPassed % monthStep != 0) return false;
 
-        final lastDayOfCheckMonth = DateTime(checkDate.year, checkDate.month + 1, 0).day;
-        final expectedDay = firstDate.day > lastDayOfCheckMonth ? lastDayOfCheckMonth : firstDate.day;
+        final lastDayOfCheckMonth =
+            DateTime(checkDate.year, checkDate.month + 1, 0).day;
+        final expectedDay = firstDate.day > lastDayOfCheckMonth
+            ? lastDayOfCheckMonth
+            : firstDate.day;
 
         return checkDate.day == expectedDay;
 
