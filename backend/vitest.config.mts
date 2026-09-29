@@ -1,8 +1,12 @@
 import swc from "unplugin-swc";
 import { defineConfig } from "vitest/config";
+import path from "node:path";
 
 export default defineConfig({
   resolve: {
+    alias: {
+      "@backend/metadata.js": path.resolve(import.meta.dirname, "src/test/openapi-metadata.mock.ts"),
+    },
     tsconfigPaths: true,
   },
   test: {
@@ -19,7 +23,7 @@ export default defineConfig({
 
     coverage: {
       reportOnFailure: true,
-      include: ["src/**/*.ts"],
+      include: ["src/**/*.ts", "openapi-metadata.plugin.mjs"],
       exclude: ["src/**/migration/**/*.ts", "src/**/*.d.ts", "src/types/**/*.ts", "src/test/**/*"],
       clean: false,
       cleanOnRerun: false,

@@ -646,15 +646,16 @@ export class DemoDataService {
     };
 
     const chats = [
-      new ChatHistory(user, "How much did I spend on food last month?", "user", stepTime(0), false),
+      new ChatHistory(user, "How much did I spend on food last month?", "user", stepTime(0), false, "demo-data"),
       new ChatHistory(
         user,
         "Based on your transaction history, you spent a total of $642.50 on food last month, which is about 12% of your total expenses.",
         "model",
         stepTime(5),
         false,
+        "demo-data",
       ),
-      new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth.", "user", stepTime(60), false),
+      new ChatHistory(user, "Give me the top 2 suggestions to further improve my net worth.", "user", stepTime(60), false, "demo-data"),
       new ChatHistory(
         user,
         `1. Use $20,000 from High-Yield Savings to pay off the personal loan (Car Loan) to eliminate interest expenses and reduce total liabilities.
@@ -663,32 +664,36 @@ export class DemoDataService {
         "model",
         stepTime(5),
         false,
+        "demo-data",
       ),
-      new ChatHistory(user, "What is my largest recurring monthly expense?", "user", stepTime(60), false),
-      new ChatHistory(user, "Your largest recurring expense is your Mortgage payment at $1,800 per month.", "model", stepTime(5), false),
-      new ChatHistory(user, "Did my subscription fees go up this month?", "user", stepTime(60), false),
+      new ChatHistory(user, "What is my largest recurring monthly expense?", "user", stepTime(60), false, "demo-data"),
+      new ChatHistory(user, "Your largest recurring expense is your Mortgage payment at $1,800 per month.", "model", stepTime(5), false, "demo-data"),
+      new ChatHistory(user, "Did my subscription fees go up this month?", "user", stepTime(60), false, "demo-data"),
       new ChatHistory(
         user,
         "Yes, your streaming service bundle increased from $14.99 to $18.99 on the 15th. You also had a yearly domain renewal of $12.00 hit your credit card last Tuesday.",
         "model",
         stepTime(5),
         false,
+        "demo-data",
       ),
-      new ChatHistory(user, "How much do I have left in my entertainment budget for this week?", "user", stepTime(60), false),
+      new ChatHistory(user, "How much do I have left in my entertainment budget for this week?", "user", stepTime(60), false, "demo-data"),
       new ChatHistory(
         user,
         "You have $45.20 remaining of your weekly $150.00 entertainment allowance. You've spent $104.80 so far, primarily at 'Cinemark Theatres' and 'The Daily Grind Coffee'.",
         "model",
         stepTime(5),
         false,
+        "demo-data",
       ),
-      new ChatHistory(user, "Can I afford to buy a $300 bike right now?", "user", stepTime(60), false),
+      new ChatHistory(user, "Can I afford to buy a $300 bike right now?", "user", stepTime(60), false, "demo-data"),
       new ChatHistory(
         user,
         "Your checking account has $1,200, and your upcoming essential bills before your next paycheck total $650. You can comfortably afford the bike using your unallocated cash reserve without dipping into savings.",
         "model",
         stepTime(5),
         false,
+        "demo-data",
       ),
     ];
 
@@ -746,6 +751,7 @@ export class DemoDataService {
 These changes reflect daily account transactions alongside recent balance fluctuations.`,
         ChatOverviewType.accounts,
         fakeDate,
+        "demo-data",
       ),
       new ChatOverview(
         user,
@@ -758,13 +764,14 @@ These changes reflect daily account transactions alongside recent balance fluctu
         - **@${dCheck.id}**: Net shift of ${dCheck.changeStr} (${dCheck.percentStr}).`,
         ChatOverviewType.holdings,
         fakeDate,
+        "demo-data",
       ),
       new ChatOverview(
         user,
         "Your monthly plan includes limits for housing, utilities, transportation, food, subscriptions, shopping, and entertainment. Check category progress to spot spending nearing its target, then adjust limits as your priorities change.",
         ChatOverviewType.budgets,
         fakeDate,
-        "Demo AI",
+        "demo-data",
         currentBudgetYear,
         currentBudgetMonth,
       ),

@@ -17,7 +17,7 @@ import {
   Logger,
   Post,
   Put,
-  RawBodyRequest,
+  type RawBodyRequest,
   Req,
   UnauthorizedException,
 } from "@nestjs/common";

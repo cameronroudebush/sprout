@@ -1,5 +1,6 @@
 import { Configuration } from "@backend/config/core";
 import { getPublicUrl } from "@backend/core/decorator/public.url.decorator";
+import openApiMetadata from "@backend/metadata.js";
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { apiReference } from "@scalar/nestjs-api-reference";
@@ -10,6 +11,13 @@ const { name } = pkg;
 
 const projName = startCase(name);
 const title = `${projName} API`;
+let pluginMetadataLoaded: Promise<void> | undefined;
+
+/** Loads DTO and controller metadata generated from TypeScript types for SWC builds. */
+export function loadOpenApiPluginMetadata() {
+  pluginMetadataLoaded ??= SwaggerModule.loadPluginMetadata(openApiMetadata);
+  return pluginMetadataLoaded;
+}
 
 /**
  * Creates the API document requirements for OpenAPI usage
@@ -58,7 +66,8 @@ export function configureApiDocument(app: INestApplication) {
 }
 
 /** Creates the api endpoints that shows a nice interface for interacting with the API. */
-export function setupOpenApiHelp(app: INestApplication) {
+export async function setupOpenApiHelp(app: INestApplication) {
+  await loadOpenApiPluginMetadata();
   const document = configureApiDocument(app);
   app.use(Configuration.server.basePath, (req: Request, res: Response, next: Function) => {
     if (req.path === "/" || req.path === "") {

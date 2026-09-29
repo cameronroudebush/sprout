@@ -16,6 +16,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Check application status.",
@@ -36,6 +39,9 @@
           },
           "403": {
             "description": "Admin privileges required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -65,6 +71,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -91,6 +100,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Get unsecure app configuration.",
@@ -118,6 +130,9 @@
           },
           "404": {
             "description": "Authentication was given that was found to be valid but no valid user was found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -155,6 +170,9 @@
           },
           "401": {
             "description": "Authentication is required.\n\nUser is not authenticated."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -189,6 +207,9 @@
           },
           "404": {
             "description": "User with the specified Id not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -228,6 +249,9 @@
           },
           "404": {
             "description": "User with the specified Id not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -267,6 +291,9 @@
           },
           "400": {
             "description": "New users are not allowed to be created."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -299,6 +326,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -331,6 +361,9 @@
           },
           "404": {
             "description": "User couldn't be found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -371,6 +404,9 @@
           },
           "404": {
             "description": "User configuration couldn't be found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -403,6 +439,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -435,6 +474,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -470,6 +512,9 @@
           },
           "404": {
             "description": "Provider with the specified name not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -515,6 +560,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -554,6 +602,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -593,6 +644,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -632,6 +686,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -669,6 +726,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -711,6 +771,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -730,6 +793,9 @@
         "responses": {
           "201": {
             "description": ""
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Handle plaid update webhook",
@@ -759,11 +825,11 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
-          },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -782,7 +848,7 @@
         "parameters": [
           {
             "name": "redirectUrl",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
               "type": "string"
@@ -802,6 +868,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -833,6 +902,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -852,6 +924,9 @@
         "responses": {
           "201": {
             "description": ""
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Handle SnapTrade update webhook",
@@ -876,6 +951,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -904,6 +982,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -955,6 +1036,9 @@
           },
           "404": {
             "description": "Transaction with the specified ID not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -967,12 +1051,13 @@
       },
       "delete": {
         "description": "Deletes a transaction by the given ID.",
-        "operationId": "TransactionController_delete",
+        "operationId": "TransactionController__delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "The ID of the transaction to delete.",
             "schema": {
               "type": "string"
             }
@@ -987,6 +1072,9 @@
           },
           "404": {
             "description": "Transaction with the specified ID not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1110,6 +1198,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1142,6 +1233,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1196,6 +1290,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1228,6 +1325,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1260,6 +1360,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1300,6 +1403,9 @@
           },
           "404": {
             "description": "Failed to locate a matching category for this transaction rule based on given content."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1314,12 +1420,13 @@
     "/transaction-rule/{id}": {
       "delete": {
         "description": "Deletes a transaction rule by the given ID then runs a transaction update to re-categorize transactions.",
-        "operationId": "TransactionRuleController_delete",
+        "operationId": "TransactionRuleController__delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "The ID of the transaction rule to delete.",
             "schema": {
               "type": "string"
             }
@@ -1334,6 +1441,9 @@
           },
           "404": {
             "description": "Transaction rule with the specified ID not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1383,6 +1493,9 @@
           },
           "404": {
             "description": "Transaction rule with the specified ID not found, does not belong to the user, or doesn't have a matching category."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1424,6 +1537,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1456,6 +1572,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1478,6 +1597,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1509,6 +1631,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1538,6 +1663,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1576,6 +1704,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1598,6 +1729,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1611,7 +1745,7 @@
     },
     "/chat/new": {
       "post": {
-        "operationId": "ChatController_new",
+        "operationId": "ChatController__new",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1632,6 +1766,9 @@
           },
           "409": {
             "description": "Thrown if the LLM is already running a request for the current user."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1663,6 +1800,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1684,8 +1824,8 @@
             "in": "query",
             "description": "The type of overview to retrieve (defaults to 'accounts').",
             "schema": {
-              "enum": ["accounts", "holdings", "budgets"],
-              "type": "string"
+              "type": "string",
+              "enum": ["accounts", "holdings", "budgets"]
             }
           },
           {
@@ -1720,6 +1860,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1752,6 +1895,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1789,6 +1935,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1837,6 +1986,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1866,6 +2018,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1912,6 +2067,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -1978,6 +2136,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2044,6 +2205,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2110,6 +2274,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2128,7 +2295,7 @@
         "parameters": [
           {
             "name": "months",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
               "type": "number"
@@ -2151,6 +2318,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2169,7 +2339,7 @@
         "parameters": [
           {
             "name": "months",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
               "type": "number"
@@ -2177,7 +2347,7 @@
           },
           {
             "name": "categories",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
               "type": "number"
@@ -2197,6 +2367,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2258,6 +2431,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2303,6 +2479,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2335,6 +2514,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2377,6 +2559,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2419,6 +2604,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2458,6 +2646,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2490,6 +2681,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2522,6 +2716,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2563,6 +2760,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2609,6 +2809,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2638,6 +2841,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2670,6 +2876,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2711,6 +2920,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2750,6 +2962,9 @@
           },
           "401": {
             "description": "Invalid credentials provided."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Login with username and password.",
@@ -2764,6 +2979,9 @@
         "responses": {
           "201": {
             "description": ""
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Logout the user",
@@ -2797,6 +3015,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Authenticates using the OIDC configuration.",
@@ -2828,6 +3049,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Callback handler for the OIDC login.",
@@ -2855,6 +3079,9 @@
           },
           "400": {
             "description": "Invalid token DTO"
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "summary": "Exchange session code for cookies",
@@ -2872,6 +3099,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2894,6 +3124,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2935,6 +3168,9 @@
           },
           "404": {
             "description": "Account with the specified ID not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -2947,12 +3183,13 @@
       },
       "delete": {
         "description": "Deletes an account by the given ID.",
-        "operationId": "AccountController_delete",
+        "operationId": "AccountController__delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "The ID of the account to delete.",
             "schema": {
               "type": "string"
             }
@@ -2967,6 +3204,9 @@
           },
           "404": {
             "description": "Account with the specified ID not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3016,6 +3256,9 @@
           },
           "404": {
             "description": "Account with the specified ID not found or does not belong to the user."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3048,6 +3291,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3099,6 +3345,9 @@
           },
           "404": {
             "description": "One or both accounts not found or do not belong to the user."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3150,6 +3399,9 @@
           },
           "404": {
             "description": "Institution with the specified ID not found or does not belong to the user."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3182,6 +3434,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3222,6 +3477,9 @@
           },
           "409": {
             "description": "A similar category already exists."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3288,6 +3546,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3328,6 +3589,9 @@
           },
           "401": {
             "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3342,12 +3606,13 @@
     "/category/{id}": {
       "delete": {
         "description": "Deletes a category by the given ID and updates references to it to reset them.",
-        "operationId": "CategoryController_delete",
+        "operationId": "CategoryController__delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "The ID of the category to delete.",
             "schema": {
               "type": "string"
             }
@@ -3362,6 +3627,9 @@
           },
           "404": {
             "description": "Category with the specified ID not found."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3411,6 +3679,9 @@
           },
           "404": {
             "description": "Category with the specified ID not found or does not belong to the user."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
           }
         },
         "security": [
@@ -3426,7 +3697,7 @@
   "info": {
     "title": "Sprout API",
     "description": "Welcome to the Sprout API documentation. This document provides a comprehensive guide to all available endpoints. Use the sections below to explore different parts of the API.\n\n  **Note:** If you wish to test the functionality, you must use a login endpoint to properly attach cookies to your browser.",
-    "version": "v0.5.1",
+    "version": "v0.6.0",
     "contact": {}
   },
   "tags": [
@@ -3595,8 +3866,7 @@
       },
       "ThemeStyleEnum": {
         "type": "string",
-        "enum": ["bliss", "absolute", "colored"],
-        "description": "The visual theme style selected by the user"
+        "enum": ["bliss", "absolute", "colored"]
       },
       "CurrencyOptionsEnum": {
         "type": "string",
@@ -3627,7 +3897,6 @@
             ]
           },
           "themeStyle": {
-            "description": "The visual theme style selected by the user",
             "allOf": [
               {
                 "$ref": "#/components/schemas/ThemeStyleEnum"
@@ -3635,7 +3904,6 @@
             ]
           },
           "currency": {
-            "default": "USD",
             "description": "What currency we should display everything in.",
             "allOf": [
               {
@@ -3768,8 +4036,8 @@
             "type": "string"
           },
           "platform": {
-            "enum": ["android", "ios", "web"],
-            "type": "string"
+            "type": "string",
+            "enum": ["android", "ios", "web"]
           },
           "deviceName": {
             "type": "string"
@@ -4240,9 +4508,9 @@
             "description": "The number of these transactions we have counted"
           },
           "period": {
+            "type": "string",
             "description": "How often this is billed",
-            "enum": ["weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "yearly", "unknown"],
-            "type": "string"
+            "enum": ["weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "yearly", "unknown"]
           },
           "startDate": {
             "format": "date-time",

@@ -316,6 +316,15 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.help,
             onTap: () => openDocumentation(),
           ),
+          if (user?.admin == true && backendUrl != null)
+            ActionSettingTile(
+              title: "Admin Dashboard",
+              subtitle: "Open the admin dashboard",
+              icon: Icons.admin_panel_settings_outlined,
+              onTap: () {
+                launchUrl(Uri.parse("$backendUrl/core/admin"));
+              },
+            ),
           ActionSettingTile(
             title: "Connection Url",
             subtitle: "The server Url",

@@ -23,6 +23,6 @@ description: Mobile screenshots.
 | :------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------- |
 | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/subscriptions.png"> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/chat.png"> |
 
-| Reports                                                                                                             |
-| :------------------------------------------------------------------------------------------------------------------ |
-| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/reports.png"> |
+| Reports                                                                                                             | Budget                                                                                                             |
+| :------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------- |
+| <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/reports.png"> | <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/mobile/budget.png"> |

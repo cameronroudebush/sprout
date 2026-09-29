@@ -4,7 +4,7 @@ import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { SnapTradeInstitutionAsset } from "@backend/providers/snap-trade/model/snap-trade.institution.asset.model";
 import { SnapTradeProviderService } from "@backend/providers/snap-trade/snap-trade.provider.service";
-import { BadRequestException, Body, Controller, Headers, Logger, Post, RawBodyRequest, Req, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Headers, Logger, Post, type RawBodyRequest, Req, UnauthorizedException } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import crypto from "crypto";
 

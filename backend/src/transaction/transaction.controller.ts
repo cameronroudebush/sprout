@@ -13,7 +13,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Query } from "@nestjs/common";
-import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { endOfDay, startOfDay } from "date-fns";
 import { Between, FindOptionsWhere, ILike, In, IsNull, Like } from "typeorm";
 
@@ -75,6 +75,7 @@ export class TransactionController {
     summary: "Delete transaction.",
     description: "Deletes a transaction by the given ID.",
   })
+  @ApiParam({ name: "id", description: "The ID of the transaction to delete.", type: String })
   @ApiOkResponse({ description: "Transaction deleted successfully." })
   @ApiNotFoundResponse({ description: "Transaction with the specified ID not found." })
   @EnabledGuard.attachDemoMode()

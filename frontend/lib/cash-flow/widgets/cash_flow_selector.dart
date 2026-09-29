@@ -31,7 +31,8 @@ class CashFlowSelector extends StatelessWidget {
       maxMonth: MonthNavigation.currentMonth(),
     );
     if (pickedMonth != null) {
-      onMonthIncrementChanged(MonthNavigation.differenceInMonths(selectedMonth, pickedMonth));
+      onMonthIncrementChanged(
+          MonthNavigation.differenceInMonths(selectedMonth, pickedMonth));
     }
   }
 
@@ -56,7 +57,9 @@ class CashFlowSelector extends StatelessWidget {
         message: isMonthly ? "Previous Month" : "Previous Year",
         child: IconButton(
           icon: const Icon(Icons.chevron_left),
-          onPressed: () => isMonthly ? onMonthIncrementChanged(-1) : onYearChanged(selectedDate.year - 1),
+          onPressed: () => isMonthly
+              ? onMonthIncrementChanged(-1)
+              : onYearChanged(selectedDate.year - 1),
         ),
       );
       final nextButton = Tooltip(
@@ -64,10 +67,13 @@ class CashFlowSelector extends StatelessWidget {
         child: IconButton(
           icon: const Icon(Icons.chevron_right),
           onPressed: isMonthly
-              ? (MonthNavigation.canAdvance(selectedDate, maxMonth: currentMonth)
+              ? (MonthNavigation.canAdvance(selectedDate,
+                      maxMonth: currentMonth)
                   ? () => onMonthIncrementChanged(1)
                   : null)
-              : (selectedDate.year < now.year ? () => onYearChanged(selectedDate.year + 1) : null),
+              : (selectedDate.year < now.year
+                  ? () => onYearChanged(selectedDate.year + 1)
+                  : null),
         ),
       );
       final currentPeriodButton = Tooltip(
@@ -76,9 +82,13 @@ class CashFlowSelector extends StatelessWidget {
           icon: const Icon(Icons.keyboard_double_arrow_right),
           onPressed: isMonthly
               ? (!MonthNavigation.isSameMonth(selectedDate, currentMonth)
-                  ? () => onMonthIncrementChanged(MonthNavigation.differenceInMonths(selectedDate, currentMonth))
+                  ? () => onMonthIncrementChanged(
+                      MonthNavigation.differenceInMonths(
+                          selectedDate, currentMonth))
                   : null)
-              : (selectedDate.year != now.year ? () => onYearChanged(now.year) : null),
+              : (selectedDate.year != now.year
+                  ? () => onYearChanged(now.year)
+                  : null),
         ),
       );
       final periodTabs = SproutTabSelector<CashFlowView>(
@@ -95,7 +105,8 @@ class CashFlowSelector extends StatelessWidget {
         icon: const Icon(Icons.calendar_month_outlined),
         label: Text(
           isMonthly
-              ? DateFormat(isDesktop ? 'MMMM yyyy' : 'MMM yy').format(selectedDate)
+              ? DateFormat(isDesktop ? 'MMMM yyyy' : 'MMM yy')
+                  .format(selectedDate)
               : selectedDate.year.toString(),
           style: theme.textTheme.titleMedium,
         ),

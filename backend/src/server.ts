@@ -55,7 +55,7 @@ export async function startupServer(projName: string) {
     if (Configuration.server.auth.type === "oidc") Configuration.server.auth.oidc.validate();
 
     // Configure OpenAPI page
-    setupOpenApiHelp(app);
+    await setupOpenApiHelp(app);
 
     // Inform where the log file is
     logger.log(`Config file located at ${app.get(ConfigurationService).configFileLocation}`);

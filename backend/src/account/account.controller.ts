@@ -30,7 +30,7 @@ import {
   Patch,
   Post,
 } from "@nestjs/common";
-import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 
 /**
  * This controller provides the endpoint for all Account related content
@@ -65,6 +65,7 @@ export class AccountController {
     summary: "Delete account by ID.",
     description: "Deletes an account by the given ID.",
   })
+  @ApiParam({ name: "id", description: "The ID of the account to delete.", type: String })
   @ApiOkResponse({ description: "Account deleted successfully." })
   @ApiNotFoundResponse({ description: "Account with the specified ID not found." })
   @EnabledGuard.attachDemoMode()

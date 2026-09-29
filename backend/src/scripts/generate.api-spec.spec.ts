@@ -3,10 +3,9 @@ setupTests();
 
 import { AppModule } from "@backend/app.module";
 import { SproutLogger } from "@backend/core/logger";
-import { configureApiDocument } from "@backend/core/openapi";
+import { configureApiDocument, loadOpenApiPluginMetadata } from "@backend/core/openapi";
 import { generateOpenApiSpec } from "@backend/scripts/generate.api-spec";
 import { NestFactory } from "@nestjs/core";
-import { SwaggerModule } from "@nestjs/swagger";
 import * as fs from "fs";
 import path from "path";
 import prettier from "prettier";
@@ -22,19 +21,9 @@ vi.mock("@nestjs/core", async (importOriginal) => {
   };
 });
 
-vi.mock("@nestjs/swagger", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@nestjs/swagger")>();
-  return {
-    ...actual,
-    SwaggerModule: {
-      ...actual.SwaggerModule,
-      createDocument: vi.fn(),
-    },
-  };
-});
-
 vi.mock("@backend/core/openapi", () => ({
   configureApiDocument: vi.fn(),
+  loadOpenApiPluginMetadata: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("fs", () => ({
@@ -66,7 +55,6 @@ describe("generateOpenApiSpec", () => {
 
     vi.mocked(NestFactory.create).mockResolvedValue(mockApp as any);
     vi.mocked(configureApiDocument).mockReturnValue({} as any);
-    vi.mocked(SwaggerModule.createDocument).mockReturnValue({ openapi: "3.0.0" } as any);
     vi.mocked(prettier.format).mockResolvedValue('{\n  "openapi": "3.0.0"\n}');
   });
 
@@ -86,7 +74,7 @@ describe("generateOpenApiSpec", () => {
       logger: expect.any(SproutLogger),
     });
     expect(configureApiDocument).toHaveBeenCalledWith(mockApp);
-    expect(SwaggerModule.createDocument).toHaveBeenCalledWith(mockApp, {});
+    expect(loadOpenApiPluginMetadata).toHaveBeenCalled();
     expect(fs.statSync).toHaveBeenCalledWith(path.resolve(targetPath));
     expect(prettier.format).toHaveBeenCalled();
     expect(fs.writeFileSync).toHaveBeenCalledWith(path.resolve(targetPath), '{\n  "openapi": "3.0.0"\n}');

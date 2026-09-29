@@ -25,6 +25,7 @@ import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/models/notification.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/shared/widgets/tab_selector.dart';
 import 'package:sprout/theme/helpers.dart';
@@ -51,6 +52,11 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
     with WidgetsBindingObserver {
   /// Track if we sent the user away to fix their institution connection
   bool _expectingReturnFromFix = false;
+
+  double get _mobileTabScrollInset =>
+      MediaQuery.sizeOf(context).width < SproutLayoutBuilder.desktopBreakpoint
+          ? SproutTabbedLayout.mobileNavigationScrollInset
+          : 0;
 
   @override
   void initState() {
@@ -184,14 +190,11 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
         NavigationProvider.queryParameter(context, 'tab') == 'activity' ? 1 : 0;
 
     return SproutTabbedLayout(
-      mobileNavigation: SproutTabSelector<int>(
-        options: tabs,
-        selected: selectedIndex,
-        compact: true,
-        onSelected: (index) => NavigationProvider.updateQueryParameters(
-          context,
-          {'tab': index == 1 ? 'activity' : 'overview'},
-        ),
+      tabs: tabs,
+      selected: selectedIndex,
+      onSelected: (index) => NavigationProvider.updateQueryParameters(
+        context,
+        {'tab': index == 1 ? 'activity' : 'overview'},
       ),
       child: SproutRouteWrapper(
         padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
@@ -330,7 +333,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
     );
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: EdgeInsets.only(bottom: 24 + _mobileTabScrollInset),
       children: [
         // Notifications
         _buildNotifications(theme),
@@ -678,7 +681,10 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
   /// Builds the transactions to display related to this account
   Widget _buildTransactionSection(BuildContext context, WidgetRef ref) {
     return TransactionsPage(
-        accountId: widget.account.id, padding: EdgeInsetsGeometry.zero);
+      accountId: widget.account.id,
+      padding: EdgeInsetsGeometry.zero,
+      bottomScrollPadding: _mobileTabScrollInset,
+    );
   }
 
   /// Returns a badge that displays what type of account this is

@@ -5,12 +5,20 @@ import { Configuration } from "@backend/config/core.js";
 
 const mocks = vi.hoisted(() => ({
   createDocument: vi.fn(),
+  loadPluginMetadata: vi.fn().mockResolvedValue(undefined),
   apiReference: vi.fn().mockReturnValue(vi.fn()),
 }));
 
 vi.mock("@nestjs/swagger", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@nestjs/swagger")>();
-  return { ...actual, SwaggerModule: { ...actual.SwaggerModule, createDocument: mocks.createDocument } };
+  return {
+    ...actual,
+    SwaggerModule: {
+      ...actual.SwaggerModule,
+      createDocument: mocks.createDocument,
+      loadPluginMetadata: mocks.loadPluginMetadata,
+    },
+  };
 });
 vi.mock("@scalar/nestjs-api-reference", () => ({ apiReference: mocks.apiReference }));
 
@@ -36,10 +44,10 @@ describe("OpenAPI setup", () => {
     }
   });
 
-  it("should mount API reference for root and continue for other paths", () => {
+  it("should mount API reference for root and continue for other paths", async () => {
     const use = vi.fn();
     mocks.createDocument.mockReturnValue({ paths: {} });
-    setupOpenApiHelp({ use } as any);
+    await setupOpenApiHelp({ use } as any);
 
     const middleware = use.mock.calls[0]![1];
     const next = vi.fn();
@@ -63,7 +71,7 @@ describe("OpenAPI setup", () => {
     }
   });
 
-  it("should describe the local environment when running a dev build", () => {
+  it("should describe the local environment when running a dev build", async () => {
     const originalDevBuild = Configuration.isDevBuild;
     const originalVersion = Configuration.version;
     Configuration.isDevBuild = true;
@@ -71,7 +79,7 @@ describe("OpenAPI setup", () => {
     mocks.createDocument.mockReturnValue({ paths: {} });
     try {
       const use = vi.fn();
-      setupOpenApiHelp({ use } as any);
+      await setupOpenApiHelp({ use } as any);
 
       const middleware = use.mock.calls[0]![1];
       middleware({ path: "/", protocol: "http", headers: {}, get: () => "localhost" }, {}, vi.fn());

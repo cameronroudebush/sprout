@@ -226,6 +226,7 @@ class WidgetSync extends _$WidgetSync {
 /// to access Sprout's data providers.
 @pragma('vm:entry-point')
 void callbackDispatcher() {
+  WidgetsFlutterBinding.ensureInitialized();
   Workmanager().executeTask((task, inputData) async {
     final (container, user) =
         await BackgroundJobProvider.entry("Widget-Provider");

@@ -23,7 +23,7 @@ import {
   Query,
   RequestTimeoutException,
 } from "@nestjs/common";
-import { ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { CronExpressionParser } from "cron-parser";
 import { startCase } from "lodash-es";
 
@@ -41,6 +41,7 @@ export class ChatController {
 
   @Post("new")
   @ApiOperation({ summary: "Utilizes the LLM prompt engine to help you discuss your finances." })
+  @ApiBody({ type: ChatRequestDTO })
   @ApiOkResponse({ description: "Returns the generated text from the prompt." })
   @ApiConflictResponse({ description: "Thrown if the LLM is already running a request for the current user." })
   @EnabledGuard.attachDemoMode()

@@ -1,10 +1,9 @@
 import { AppModule } from "@backend/app.module";
 import { SproutLogger } from "@backend/core/logger";
-import { configureApiDocument } from "@backend/core/openapi";
+import { configureApiDocument, loadOpenApiPluginMetadata } from "@backend/core/openapi";
 import { PRETTIER_OPTS } from "@backend/scripts/util";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
-import { SwaggerModule } from "@nestjs/swagger";
 import * as fs from "fs";
 import path from "path";
 import prettier from "prettier";
@@ -16,8 +15,8 @@ export async function generateOpenApiSpec(givenPath = process.argv[2] || "./open
   });
   const logger = new Logger("api");
   logger.log("Generating open api spec...");
-  const config = configureApiDocument(app);
-  const document = SwaggerModule.createDocument(app, config);
+  await loadOpenApiPluginMetadata();
+  const document = configureApiDocument(app);
   const outputPath = path.resolve(givenPath);
   logger.log(`Writing to ${outputPath}`);
 

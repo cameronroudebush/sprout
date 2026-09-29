@@ -42,3 +42,7 @@ description: Desktop screenshots.
 ### Chat
 
 <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/chat.png" alt="Chat" />
+
+### Budget
+
+<img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/desktop/budget.png" alt="Budget" />

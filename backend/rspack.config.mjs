@@ -1,9 +1,9 @@
-import { before as swaggerBefore } from "@nestjs/swagger/plugin";
 import { defineConfig } from "@rspack/cli";
 import { rspack } from "@rspack/core";
 import pkg from "git-describe";
 import { glob } from "glob";
 import path from "node:path";
+import { OpenApiMetadataPlugin } from "./openapi-metadata.plugin.mjs";
 
 /** Determines the version of our app via `git-describe` */
 function getVersion() {
@@ -61,23 +61,20 @@ export default defineConfig((options) => {
           exclude: /node_modules/,
           use: [
             {
-              // ts-loader is slow but required so we have proper metadata for nestjs' swagger plugin
-              loader: "ts-loader",
+              loader: "builtin:swc-loader",
               options: {
-                transpileOnly: false,
-                configFile: path.resolve(import.meta.dirname, "tsconfig.build.json"),
-                getCustomTransformers: (program) => ({
-                  before: [
-                    swaggerBefore(
-                      {
-                        dtoFileNameSuffix: [".dto.ts", ".model.ts", ".type.ts"],
-                        introspectComments: true,
-                        esmCompatible: true,
-                      },
-                      program,
-                    ),
-                  ],
-                }),
+                jsc: {
+                  parser: {
+                    syntax: "typescript",
+                    decorators: true,
+                  },
+                  transform: {
+                    legacyDecorator: true,
+                    decoratorMetadata: true,
+                    useDefineForClassFields: false,
+                  },
+                  keepClassNames: true,
+                },
               },
             },
           ],
@@ -137,6 +134,10 @@ export default defineConfig((options) => {
       new rspack.CircularCheckRspackPlugin({
         failOnError: true,
         exclude: /node_modules/,
+      }),
+      new OpenApiMetadataPlugin({
+        sourceRoot: path.resolve(import.meta.dirname, "src"),
+        tsconfigPath: path.resolve(import.meta.dirname, "tsconfig.build.json"),
       }),
       new rspack.BannerPlugin({
         banner: `import { fileURLToPath as __fileURLToPath } from 'node:url';import { dirname as __pathDirname } from 'node:path';const __filename = __fileURLToPath(import.meta.url);const __dirname = __pathDirname(__filename);`,

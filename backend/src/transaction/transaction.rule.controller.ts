@@ -21,7 +21,7 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 /** This controller provides the endpoint for all Transaction rules content */
 @Controller("transaction-rule")
@@ -48,6 +48,7 @@ export class TransactionRuleController {
     summary: "Delete transaction rule by ID.",
     description: "Deletes a transaction rule by the given ID then runs a transaction update to re-categorize transactions.",
   })
+  @ApiParam({ name: "id", description: "The ID of the transaction rule to delete.", type: String })
   @ApiOkResponse({ description: "Transaction rule deleted successfully." })
   @ApiNotFoundResponse({ description: "Transaction rule with the specified ID not found." })
   @EnabledGuard.attachDemoMode()

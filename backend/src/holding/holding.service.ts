@@ -6,7 +6,7 @@ import { EntityHistory } from "@backend/net-worth/model/api/entity.history.dto";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { Cache } from "cache-manager";
+import { type Cache } from "cache-manager";
 import YahooFinance from "yahoo-finance2";
 
 const MAJOR_INDICES: Record<string, { name: string; color: string }> = {

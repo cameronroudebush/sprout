@@ -135,25 +135,16 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
         }
 
         return SproutLayoutBuilder((isDesktop, context, constraints) {
-          final tabSelector = SproutTabSelector<HoldingsTab>(
-            compact: true,
-            options: const [
-              SproutTabOption(
-                value: HoldingsTab.overview,
-                label: 'Overview',
-              ),
-              SproutTabOption(
-                value: HoldingsTab.holdings,
-                label: 'Holdings',
-              ),
-            ],
-            selected: currentTab,
-            onSelected: (tab) {
-              NavigationProvider.updateQueryParameters(
-                  context, {'tab': tab.name});
-              _resetScroll();
-            },
-          );
+          const tabs = [
+            SproutTabOption(
+              value: HoldingsTab.overview,
+              label: 'Overview',
+            ),
+            SproutTabOption(
+              value: HoldingsTab.holdings,
+              label: 'Holdings',
+            ),
+          ];
 
           if (isDesktop) {
             return SproutRouteWrapper(
@@ -252,7 +243,13 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
 
           return SproutRouteWrapper(
             child: SproutTabbedLayout(
-              mobileNavigation: tabSelector,
+              tabs: tabs,
+              selected: currentTab,
+              onSelected: (tab) {
+                NavigationProvider.updateQueryParameters(
+                    context, {'tab': tab.name});
+                _resetScroll();
+              },
               child: Column(
                 children: [
                   const MajorIndicesBarWidget(),
@@ -262,6 +259,9 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
                     child: SingleChildScrollView(
                       controller: _mobileScrollController,
                       key: ValueKey(currentTab),
+                      padding: const EdgeInsets.only(
+                        bottom: SproutTabbedLayout.mobileNavigationScrollInset,
+                      ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [

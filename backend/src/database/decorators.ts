@@ -20,7 +20,15 @@ export class DatabaseDecorators {
    */
   static column(options?: ColumnOptions) {
     return function (target: any, key: string) {
-      return Column({ ...options })(target, key);
+      const mergedOptions = { ...options };
+      // If an enum is defined but no explicit type is provided, default to 'varchar'.
+      if (mergedOptions.enum && !mergedOptions.type) mergedOptions.type = "varchar";
+      // Catch-all fallback for other types SWC might drop (unions, custom aliases)
+      if (!mergedOptions.type) {
+        const designType = Reflect.getMetadata("design:type", target, key);
+        if (!designType || designType === Object) mergedOptions.type = "varchar";
+      }
+      return Column(mergedOptions)(target, key);
     };
   }
 

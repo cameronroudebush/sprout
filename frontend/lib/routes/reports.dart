@@ -83,7 +83,15 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
       child: SproutTabbedLayout(
-        mobileNavigation: _buildMobileReportMenu(context, reportView),
+        tabs: ReportsPage.reportTabs,
+        selected: reportView,
+        dropdownTooltip: 'Select report',
+        dropdownHeading: 'Report Type',
+        dropdownIcon: Icons.bar_chart_rounded,
+        onSelected: (view) => NavigationProvider.updateQueryParameters(
+          context,
+          {'report': view},
+        ),
         child: SproutLayoutBuilder(
           (isDesktop, context, constraints) => SproutCard(
             child: Padding(
@@ -118,11 +126,24 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     const Divider(),
                   ],
                   Expanded(
-                    child: _buildActiveReportView(
-                      reportView,
-                      currentView,
-                      selectedDate,
-                      isDesktop,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.only(
+                          bottom: isDesktop
+                              ? 0
+                              : SproutTabbedLayout.mobileNavigationScrollInset,
+                        ),
+                        child: SizedBox(
+                          height: constraints.maxHeight,
+                          child: _buildActiveReportView(
+                            reportView,
+                            currentView,
+                            selectedDate,
+                            isDesktop,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -137,62 +158,6 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   /// Whether [view] needs monthly/yearly date controls.
   bool _usesPeriod(String view) =>
       view == 'sankey' || view == 'pie' || view == 'spending';
-
-  /// Shows active report in one compact mobile menu instead of listing every view.
-  Widget _buildMobileReportMenu(BuildContext context, String selectedReport) {
-    final theme = Theme.of(context);
-    final selectedTab =
-        ReportsPage.reportTabs.firstWhere((tab) => tab.value == selectedReport);
-
-    return PopupMenuButton<String>(
-      tooltip: 'Select report',
-      position: PopupMenuPosition.over,
-      onSelected: (view) => NavigationProvider.updateQueryParameters(
-        context,
-        {'report': view},
-      ),
-      itemBuilder: (context) => ReportsPage.reportTabs.map((tab) {
-        final isSelected = tab.value == selectedReport;
-        return PopupMenuItem<String>(
-          value: tab.value,
-          child: Row(
-            spacing: 8,
-            children: [
-              Icon(
-                isSelected ? Icons.check : Icons.circle_outlined,
-                size: 16,
-              ),
-              Text(tab.label),
-            ],
-          ),
-        );
-      }).toList(),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          border: Border.all(color: theme.colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          spacing: 8,
-          children: [
-            Icon(Icons.bar_chart, color: theme.colorScheme.primary, size: 18),
-            Expanded(
-              child: Text(
-                selectedTab.label,
-                style: theme.textTheme.labelLarge,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const Icon(Icons.arrow_drop_up),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Builds selected report chart to fill the available content area.
   Widget _buildActiveReportView(

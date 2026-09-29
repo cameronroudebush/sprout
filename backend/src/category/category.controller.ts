@@ -10,7 +10,17 @@ import { SSEService } from "@backend/sse/sse.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
-import { ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from "@nestjs/swagger";
 import { FindOptionsWhere, IsNull } from "typeorm";
 
 /** This controller contains endpoints for {@link Category} models which allow us to group transactions. */
@@ -105,6 +115,7 @@ export class CategoryController {
     summary: "Delete category by ID.",
     description: "Deletes a category by the given ID and updates references to it to reset them.",
   })
+  @ApiParam({ name: "id", description: "The ID of the category to delete.", type: String })
   @ApiOkResponse({ description: "Category deleted successfully." })
   @ApiNotFoundResponse({ description: "Category with the specified ID not found." })
   @EnabledGuard.attachDemoMode()

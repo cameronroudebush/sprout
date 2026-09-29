@@ -214,6 +214,40 @@ describe("BudgetService", () => {
       expect(overview.totalOverBudgetAmount).toBe(0);
     });
 
+    it("should handle missing categories and stats, ignored spending, and tied sort values", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+
+      const uncategorizedBudget = TestEntities.budget;
+      uncategorizedBudget.category = undefined as any;
+      const firstCategory = Category.fromPlain({ id: "category-first", name: "First", excludeFromCashFlow: false });
+      const secondCategory = Category.fromPlain({ id: "category-second", name: "Second", excludeFromCashFlow: false });
+      const excludedCategory = Category.fromPlain({ id: "category-excluded", name: "Excluded", excludeFromCashFlow: true });
+      const emptyCategory = Category.fromPlain({ id: "category-empty", name: "Empty", excludeFromCashFlow: false });
+      const firstBudget = TestEntities.budget;
+      firstBudget.category = firstCategory;
+      firstBudget.amount = 100;
+      const secondBudget = TestEntities.budget;
+      secondBudget.category = secondCategory;
+      secondBudget.amount = 100;
+
+      vi.spyOn(Budget, "find").mockResolvedValue([uncategorizedBudget, firstBudget, secondBudget]);
+      cashFlowService.calculateFlows.mockResolvedValue({
+        categoryStats: new Map([
+          [secondCategory.id, { category: secondCategory, outflow: 20 }],
+          [excludedCategory.id, { category: excludedCategory, outflow: 50 }],
+          [emptyCategory.id, { category: emptyCategory, outflow: 0 }],
+        ]),
+      } as any);
+
+      const overview = await service.getBudgetOverview(user, 2025, 1);
+
+      expect(overview.totalBudgeted).toBe(200);
+      expect(overview.totalSpent).toBe(20);
+      expect(overview.items.map((item) => item.category.id)).toEqual([secondCategory.id, firstCategory.id]);
+      expect(overview.isOverBudget).toBe(false);
+    });
+
     it("should reject future months before calculating cash flow", async () => {
       const user = TestEntities.user;
       user.config.enableBudgeting = true;
@@ -291,6 +325,21 @@ describe("BudgetService", () => {
       expect(cashFlowService.calculateFlows).toHaveBeenNthCalledWith(1, user, 2025, 3);
       expect(cashFlowService.calculateFlows).toHaveBeenNthCalledWith(2, user, 2025, 2);
       expect(cashFlowService.calculateFlows).toHaveBeenNthCalledWith(3, user, 2025, 1);
+    });
+
+    it("should sort history chronologically across year boundaries", async () => {
+      const user = TestEntities.user;
+      user.config.enableBudgeting = true;
+      vi.spyOn(Budget, "find").mockResolvedValue([]);
+      cashFlowService.calculateFlows.mockResolvedValue({ categoryStats: new Map() } as any);
+
+      const result = await service.getBudgetHistory(user, 3, undefined, 2025, 2);
+
+      expect(result.history.map(({ year, month }) => [year, month])).toEqual([
+        [2024, 12],
+        [2025, 1],
+        [2025, 2],
+      ]);
     });
 
     it("should reject incomplete, invalid, or future history periods", async () => {

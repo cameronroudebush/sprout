@@ -61,6 +61,10 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
+            _PayoffSummary(
+              seriesList: seriesList,
+              renderPayment: true,
+            ),
             Expanded(
               child: SproutLineChart(
                 series: chartSeries,
@@ -73,10 +77,6 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
                 formatYAxis: (value) => formatter.format(value, compact: true),
                 formatValue: (value) => formatter.format(value),
               ),
-            ),
-            _PayoffSummary(
-              seriesList: seriesList,
-              renderPayment: true,
             ),
           ],
         );

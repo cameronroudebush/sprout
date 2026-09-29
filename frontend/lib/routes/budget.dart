@@ -90,21 +90,22 @@ class _BudgetPageState extends ConsumerState<BudgetPage> {
         ],
       ),
       body: SproutTabbedLayout(
-        mobileNavigation: SproutTabSelector<BudgetTab>(
-          compact: true,
-          options: const [
-            SproutTabOption(value: BudgetTab.overview, label: 'Overview'),
-            SproutTabOption(value: BudgetTab.history, label: 'History'),
-          ],
-          selected: currentTab,
-          onSelected: (tab) => NavigationProvider.updateQueryParameters(
-            context,
-            {'tab': tab.name},
-          ),
+        tabs: const [
+          SproutTabOption(value: BudgetTab.overview, label: 'Overview'),
+          SproutTabOption(value: BudgetTab.history, label: 'History'),
+        ],
+        selected: currentTab,
+        onSelected: (tab) => NavigationProvider.updateQueryParameters(
+          context,
+          {'tab': tab.name},
         ),
         child: SproutLayoutBuilder(
           (isDesktop, context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.only(
+              bottom: isDesktop
+                  ? 16
+                  : SproutTabbedLayout.mobileNavigationScrollInset,
+            ),
             child: SproutRouteWrapper(
               size: SproutRouteSize.large,
               child: overviewAsync.whenDefault(

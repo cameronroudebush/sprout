@@ -17,6 +17,7 @@ class TransactionsPage extends ConsumerStatefulWidget {
   final bool allowFiltering;
   final bool separateByDate;
   final EdgeInsetsGeometry padding;
+  final double bottomScrollPadding;
 
   const TransactionsPage({
     super.key,
@@ -24,6 +25,7 @@ class TransactionsPage extends ConsumerStatefulWidget {
     this.allowFiltering = true,
     this.separateByDate = true,
     this.padding = const EdgeInsets.symmetric(horizontal: 8),
+    this.bottomScrollPadding = 0,
   });
 
   @override
@@ -270,6 +272,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               ),
             ],
           ),
+        if (widget.bottomScrollPadding > 0)
+          SliverToBoxAdapter(
+            child: SizedBox(height: widget.bottomScrollPadding),
+          ),
       ],
     );
   }
@@ -280,6 +286,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
       child: ListView.separated(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.only(bottom: widget.bottomScrollPadding),
         itemCount: transactions.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) => TransactionRow(transactions[index]),
