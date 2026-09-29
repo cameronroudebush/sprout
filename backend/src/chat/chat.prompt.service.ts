@@ -38,7 +38,7 @@ export class ChatPromptService {
   /** Generates a prompt tailored for a brief 24-hour daily overview of the user's financial activity. */
   async buildDailyOverviewPrompt(user: User, includePendingTransactions = false): Promise<ChatPromptResult> {
     const instructions = [
-      ...this.getSharedSystemInstructions(user),
+      ...this.getSharedSystemInstructions(user, false),
       `Write a warm, natural daily financial summary over the last 24 hours.`,
       `ACCOUNT MOVEMENT RECONCILIATION:
        - Compare the current balance with the most recent prior balance available.
@@ -59,7 +59,7 @@ export class ChatPromptService {
   /** Builds prompt payload focused specifically on investment accounts & market holdings. */
   async buildHoldingsOverviewPrompt(user: User): Promise<ChatPromptResult> {
     const instructions = [
-      ...this.getSharedSystemInstructions(user),
+      ...this.getSharedSystemInstructions(user, false),
       `Write a clear, balanced daily investment performance summary covering the last 24 hours.`,
       `Focus exclusively on investment, retirement, and brokerage accounts (e.g., 401(k), IRA, taxable brokerage, crypto). Ignore standard checking, savings, or credit accounts.`,
       `ACCOUNT MOVEMENT RECONCILIATION:
@@ -95,7 +95,7 @@ export class ChatPromptService {
       })),
     };
     const instructions = [
-      ...this.getSharedSystemInstructions(user),
+      ...this.getSharedSystemInstructions(user, false),
       `Write a concise, supportive overview of the user's budget performance for ${month}.`,
       `Analyze the full budget month, not only the last 24 hours.`,
       `Use only the supplied budget data. Distinguish categories with a spending limit from categories with spending but no limit. Never describe unbudgeted spending as over budget.`,
