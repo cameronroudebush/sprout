@@ -29,15 +29,18 @@ class SproutTabSelector<T extends Object> extends StatelessWidget {
   /// Expands compact segments to fill their available width.
   final bool fill;
 
-  const SproutTabSelector({
-    super.key,
-    required this.options,
-    required this.selected,
-    required this.onSelected,
-    this.expand = true,
-    this.compact = false,
-    this.fill = false,
-  });
+  /// If we should show the border on the segmented buttons if rendered
+  final bool showBorder;
+
+  const SproutTabSelector(
+      {super.key,
+      required this.options,
+      required this.selected,
+      required this.onSelected,
+      this.expand = true,
+      this.compact = false,
+      this.fill = false,
+      this.showBorder = true});
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +65,7 @@ class SproutTabSelector<T extends Object> extends StatelessWidget {
           visualDensity: VisualDensity.compact,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          side: BorderSide.none,
+          side: !showBorder ? BorderSide.none : null,
           shape: fill
               ? const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
@@ -200,6 +203,7 @@ class SproutTabbedLayout<T extends Object> extends StatelessWidget {
         onSelected: onSelected,
         compact: true,
         fill: true,
+        showBorder: false,
       );
     } else {
       final selectedTab = tabs.firstWhere(
@@ -241,9 +245,8 @@ class SproutTabbedLayout<T extends Object> extends StatelessWidget {
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              // color: theme.colorScheme.surfaceContainerLow,
-              borderRadius: const BorderRadius.vertical(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(20),
               ),
             ),
@@ -295,15 +298,19 @@ class SproutTabbedLayout<T extends Object> extends StatelessWidget {
     }
 
     return Center(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * .7,
-        decoration: BoxDecoration(
+        child: Material(
           color: theme.bottomNavigationBarTheme.backgroundColor ??
               theme.colorScheme.surface,
-          border: Border.all(color: theme.dividerColor),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            side: BorderSide(color: theme.dividerColor),
+          ),
+          clipBehavior: Clip
+              .antiAlias, // This forces the hover effect to respect the border radius
+          child: navigation,
         ),
-        child: navigation,
       ),
     );
   }

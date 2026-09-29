@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Notification;
-import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
+import 'package:sprout/shared/models/extensions/date_extensions.dart';
 
 /// A notification widget that displays the given notification in a pretty format
 class NotificationItem extends StatelessWidget {
@@ -154,8 +154,7 @@ class NotificationItem extends StatelessWidget {
                             ),
                           if (showDate)
                             Text(
-                              DateFormat('MM-dd-yyyy')
-                                  .format(notification.createdAt),
+                              notification.createdAt.toShortMonthWithTime,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.outline,
                               ),

@@ -116,16 +116,24 @@ class CashFlowSelector extends StatelessWidget {
       );
 
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.only(top: 4),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            Expanded(child: Center(child: previousButton)),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               spacing: isDesktop ? 8 : 2,
               children: [periodTabs, periodPicker],
             ),
-            Expanded(
+            // Left side control
+            Positioned(
+              left: 0,
+              child: Center(child: previousButton),
+            ),
+            // Right side controls
+            Positioned(
+              right: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [nextButton, currentPeriodButton],

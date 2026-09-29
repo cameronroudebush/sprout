@@ -316,7 +316,7 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.help,
             onTap: () => openDocumentation(),
           ),
-          if (user?.admin == true && backendUrl != null)
+          if (user?.admin == true && backendUrl != null && kIsWeb)
             ActionSettingTile(
               title: "Admin Dashboard",
               subtitle: "Open the admin dashboard",

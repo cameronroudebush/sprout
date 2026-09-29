@@ -93,9 +93,13 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
           {'report': view},
         ),
         child: SproutLayoutBuilder(
-          (isDesktop, context, constraints) => SproutCard(
-            child: Padding(
-              padding: const EdgeInsets.all(0),
+          (isDesktop, context, constraints) => Padding(
+            padding: EdgeInsets.only(
+              bottom: isDesktop
+                  ? 0
+                  : SproutTabbedLayout.mobileNavigationScrollInset,
+            ),
+            child: SproutCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -126,24 +130,11 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     const Divider(),
                   ],
                   Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) => SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.only(
-                          bottom: isDesktop
-                              ? 0
-                              : SproutTabbedLayout.mobileNavigationScrollInset,
-                        ),
-                        child: SizedBox(
-                          height: constraints.maxHeight,
-                          child: _buildActiveReportView(
-                            reportView,
-                            currentView,
-                            selectedDate,
-                            isDesktop,
-                          ),
-                        ),
-                      ),
+                    child: _buildActiveReportView(
+                      reportView,
+                      currentView,
+                      selectedDate,
+                      isDesktop,
                     ),
                   ),
                 ],
