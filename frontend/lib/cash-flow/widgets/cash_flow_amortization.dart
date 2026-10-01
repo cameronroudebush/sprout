@@ -61,6 +61,7 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (header != null) header!,
             _PayoffSummary(
               seriesList: seriesList,
               renderPayment: true,
@@ -69,7 +70,6 @@ class CashFlowLoanAmortizationChart extends ConsumerWidget {
               child: SproutLineChart(
                 series: chartSeries,
                 chartRange: ChartRangeEnum.allTime,
-                header: header,
                 showYAxis: true,
                 showXAxis: true,
                 showGrid: true,
@@ -136,6 +136,7 @@ class _PayoffSummary extends ConsumerWidget {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          spacing: 8,
           children: [
             Container(
               width: 10,
@@ -145,7 +146,6 @@ class _PayoffSummary extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -158,22 +158,18 @@ class _PayoffSummary extends ConsumerWidget {
                   ),
                 ),
                 Row(
-                  spacing: 8,
+                  spacing: 12,
                   children: [
-                    Text(
-                      formattedDate,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                    _PayoffSummaryValue(
+                      label: 'Payoff date',
+                      value: formattedDate,
+                      theme: theme,
                     ),
                     if (renderPayment)
-                      Text(
-                        '$formattedPayment/mo',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      _PayoffSummaryValue(
+                        label: 'Monthly payment',
+                        value: '$formattedPayment/mo',
+                        theme: theme,
                       ),
                   ],
                 ),
@@ -203,6 +199,41 @@ class _PayoffSummary extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _PayoffSummaryValue extends StatelessWidget {
+  final String label;
+  final String value;
+  final ThemeData theme;
+
+  const _PayoffSummaryValue({
+    required this.label,
+    required this.value,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
     );
   }
 }

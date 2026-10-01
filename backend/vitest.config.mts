@@ -1,6 +1,6 @@
+import path from "node:path";
 import swc from "unplugin-swc";
 import { defineConfig } from "vitest/config";
-import path from "node:path";
 
 export default defineConfig({
   resolve: {
@@ -24,7 +24,7 @@ export default defineConfig({
     coverage: {
       reportOnFailure: true,
       include: ["src/**/*.ts", "openapi-metadata.plugin.mjs"],
-      exclude: ["src/**/migration/**/*.ts", "src/**/*.d.ts", "src/types/**/*.ts", "src/test/**/*"],
+      exclude: ["src/**/migration/**/*.ts", "src/**/*.d.ts", "src/types/**/*.ts", "src/test/**/*", "src/**/metadata.ts"],
       clean: false,
       cleanOnRerun: false,
       provider: "v8",

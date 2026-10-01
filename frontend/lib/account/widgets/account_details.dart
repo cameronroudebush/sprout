@@ -198,7 +198,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
       ),
       child: SproutRouteWrapper(
         padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
-        size: SproutRouteSize.large,
         child: IndexedStack(index: selectedIndex, children: tabViews),
       ),
     );

@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/widgets/login_bg.dart';
 import 'package:sprout/auth/widgets/login_form.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/shared/widgets/badge.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/logo.dart';
+import 'package:sprout/user/user_config_provider.dart';
 
 /// A page that displays the login for a user to get into Sprout
 class LoginPage extends ConsumerWidget {
@@ -17,6 +19,22 @@ class LoginPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final config = ref.watch(unsecureConfigProvider).value;
+    final packageInfo = ref.watch(packageInfoProvider).value;
+    final versionInfo = Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        Badge(
+          label: 'Frontend ${packageInfo?.version ?? ""}',
+          variant: BadgeVariant.outline,
+        ),
+        Badge(
+          label: 'Backend ${config?.version ?? ""}',
+          variant: BadgeVariant.outline,
+        ),
+      ],
+    );
 
     return Scaffold(
       body: SproutLayoutBuilder((isDesktop, context, constraints) {
@@ -30,7 +48,7 @@ class LoginPage extends ConsumerWidget {
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 20,
                       offset: const Offset(4, 0),
                     ),
@@ -66,12 +84,7 @@ class LoginPage extends ConsumerWidget {
                           ],
                         ),
                         const Spacer(),
-                        Text(
-                          config?.version ?? "",
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                        versionInfo,
                       ],
                     ),
                   ),
@@ -124,12 +137,7 @@ class LoginPage extends ConsumerWidget {
                               const SizedBox(height: 24),
                               const LoginForm(),
                               const SizedBox(height: 32),
-                              Text(
-                                config?.version ?? "",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
+                              versionInfo,
                             ],
                           ),
                         ),

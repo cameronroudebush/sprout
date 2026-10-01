@@ -1,10 +1,10 @@
 import { Colors } from "@backend/cash-flow/model/colors";
 import { ChatPromptService } from "@backend/chat/chat.prompt.service";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
+import { ChatProviderType } from "@backend/chat/model/chat.config.model";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model";
 import { ChatOverviewPeriod, ChatOverviewType, isFutureChatOverviewPeriod, resolveChatOverviewPeriod } from "@backend/chat/model/chat.overview.type";
-import { ChatProviderType } from "@backend/chat/model/chat.config.model";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
@@ -183,7 +183,7 @@ export abstract class ChatProvider {
   /** Single consolidated overview generator that routes prompt building by type. */
   async generateOverview(overviewType: ChatOverviewType, requestedPeriod?: ChatOverviewPeriod): Promise<ChatOverview> {
     const period = resolveChatOverviewPeriod(overviewType, requestedPeriod);
-    if (period && isFutureChatOverviewPeriod(period)) throw new BadRequestException("Budget overviews cannot be requested for a future month.");
+    if (period && isFutureChatOverviewPeriod(period)) throw new BadRequestException("This overview cannot be requested for a future month.");
     const promptResult = await this.overviewPromptBuilders[overviewType](period);
 
     await this.logTokens(promptResult.contents, `${overviewType} overview`);

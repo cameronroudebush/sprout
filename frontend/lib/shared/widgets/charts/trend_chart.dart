@@ -64,11 +64,16 @@ class _SproutTrendChartState extends State<SproutTrendChart> {
 
     return SproutChartLayoutFrame(
       header: widget.header,
-      data: {},
+      data: const {'Income': 1, 'Spending': 1},
       legendPosition: widget.showLegend
           ? SproutChartLegendPosition.bottom
           : SproutChartLegendPosition.none,
-      colorResolver: const SproutChartColorResolver(colorMapping: {}),
+      colorResolver: SproutChartColorResolver(
+        colorMapping: {
+          'Income': widget.topColor,
+          'Spending': widget.bottomColor,
+        },
+      ),
       chartArea: Stack(
         children: [
           _buildBarChart(theme, maxY, minY),

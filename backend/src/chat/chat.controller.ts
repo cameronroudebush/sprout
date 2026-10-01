@@ -136,7 +136,7 @@ export class ChatController {
       throw new BadRequestException("A valid year and month (1-12) are required for budget overviews.");
     const period = { year, month };
     if (!resolveChatOverviewPeriod(type, period)) throw new BadRequestException(`Overview type ${type} does not support a year or month.`);
-    if (isFutureChatOverviewPeriod(period)) throw new BadRequestException("Budget overviews cannot be requested for a future month.");
+    if (isFutureChatOverviewPeriod(period)) throw new BadRequestException("This overview cannot be requested for a future month.");
     return period;
   }
 }

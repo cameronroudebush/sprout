@@ -8,7 +8,10 @@ import 'package:sprout/routes/settings.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/mobile_more_sheet.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
+import 'package:sprout/routes/util/route.dart';
+import 'package:sprout/routes/util/routes.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
+import 'package:sprout/shared/widgets/breadcrumbs.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/tab_selector.dart';
 
@@ -19,46 +22,59 @@ class SproutDesktopHeader extends ConsumerWidget {
 
   const SproutDesktopHeader({super.key, this.state});
 
-  /// Returns the text to display on the header
-  String _getText(WidgetRef ref) {
-    final currentPath = ref.watch(currentRouteProvider);
-    final user = ref.watch(authProvider).value;
-
-    if (currentPath == "/") {
+  /// Builds breadcrumb labels and locations for the current route.
+  List<SproutBreadcrumbItem> _getBreadcrumbs(WidgetRef ref, Uri uri) {
+    if (uri.path == "/") {
+      final user = ref.watch(authProvider).value;
       final greeting = SproutMoreSheet.getGreeting();
-      return "$greeting ${user?.username}";
+      return [
+        SproutBreadcrumbItem(
+          label: "$greeting ${user?.username}",
+          location: "/",
+        ),
+      ];
     }
 
-    final pathSegments = Uri.parse(currentPath).pathSegments;
-    if (pathSegments.length == 2) {
-      return pathSegments[0].toPrettyCase;
+    final breadcrumbs = <SproutBreadcrumbItem>[];
+    var routes = authenticatedRoutes;
+    var location = "";
+
+    for (final segment in uri.pathSegments) {
+      SproutRoute? route;
+      for (final candidate in routes) {
+        if (_matchesRouteSegment(candidate, segment)) {
+          route = candidate;
+          break;
+        }
+      }
+      location = "$location/$segment";
+      breadcrumbs.add(
+        SproutBreadcrumbItem(
+          label: route?.label ?? segment.toPrettyCase,
+          location: location,
+        ),
+      );
+      routes = route?.routes ?? const [];
     }
 
-    // Default formatting for other paths
-    String cleanedPath =
-        currentPath.startsWith('/') ? currentPath.substring(1) : currentPath;
-    cleanedPath = cleanedPath.replaceAll("/", " ");
-    return cleanedPath.toTitleCase;
+    return breadcrumbs;
+  }
+
+  bool _matchesRouteSegment(SproutRoute route, String segment) {
+    final routeSegments =
+        route.path.split('/').where((part) => part.isNotEmpty);
+    if (routeSegments.length != 1) return false;
+
+    final routeSegment = routeSegments.first;
+    return routeSegment.startsWith(':') || routeSegment == segment;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentPath = ref.watch(currentRouteProvider);
     final theme = Theme.of(context);
     final uri = state?.uri ?? GoRouterState.of(context).uri;
     final pageTabs = _buildPageTabs(context, uri);
-
-    // Calculate parent route fallback in case deep links bypass navigation history
-    final pathSegments = Uri.parse(currentPath).pathSegments;
-    final hasParentRoute = pathSegments.length > 1;
-    final parentPath = hasParentRoute
-        ? '/${pathSegments.take(pathSegments.length - 1).join('/')}'
-        : null;
-
-    // Show back button if GoRouter can pop history OR if we are on a nested sub-route
-    final canPopHistory = context.canPop();
-    final canShowBackButton =
-        (canPopHistory || hasParentRoute) && currentPath != "/";
+    final breadcrumbs = _getBreadcrumbs(ref, uri);
 
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
@@ -67,75 +83,54 @@ class SproutDesktopHeader extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (canShowBackButton) ...[
-                  // Back button
-                  InkWell(
-                    onTap: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else if (parentPath != null) {
-                        NavigationProvider.redirect(parentPath);
-                      }
-                    },
-                    customBorder: const LinearBorder(),
-                    child: Tooltip(
-                      message: "Go back",
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 8),
-                        child: Icon(
-                          Icons.arrow_back,
-                          size: 28,
-                          color: theme.colorScheme.onSurfaceVariant,
+            // Left side (Breadcrumbs) wrapped in Expanded to balance the right side
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: SproutBreadcrumbs(items: breadcrumbs),
+                ),
+              ),
+            ),
+
+            // Centered Tabs (if available)
+            if (pageTabs != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: pageTabs,
+              ),
+
+            // Right side (Actions) wrapped in Expanded to balance the left side
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Help link to documentation
+                    InkWell(
+                      onTap: SettingsPage.openDocumentation,
+                      customBorder: const LinearBorder(),
+                      child: Tooltip(
+                        message: "View Sprout Documentation",
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          child: Icon(
+                            Icons.help,
+                            size: 28,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-                Padding(
-                  padding: EdgeInsets.only(left: canShowBackButton ? 8 : 16),
-                  child: Text(
-                    _getText(ref),
-                    style: theme.textTheme.headlineSmall,
-                  ),
+                    // Notifications
+                    const NotificationBell(),
+                  ],
                 ),
-              ],
+              ),
             ),
-            if (pageTabs != null)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(child: pageTabs),
-                ),
-              )
-            else
-              const Spacer(),
-            Row(
-              children: [
-                // Help link to documentation
-                InkWell(
-                  onTap: SettingsPage.openDocumentation,
-                  customBorder: const LinearBorder(),
-                  child: Tooltip(
-                    message: "View Sprout Documentation",
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      child: Icon(
-                        Icons.help,
-                        size: 28,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
-                // Notifications
-                const NotificationBell(),
-              ],
-            )
           ],
         ),
       ),

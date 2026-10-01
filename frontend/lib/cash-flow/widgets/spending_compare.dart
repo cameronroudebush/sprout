@@ -14,12 +14,15 @@ import 'package:sprout/shared/widgets/charts/util/header.dart';
 class SpendingCompareChart extends ConsumerStatefulWidget {
   final CashFlowView view;
   final DateTime? selectedDate;
+  final bool showFullTitle;
+  final bool showLegend;
 
-  const SpendingCompareChart({
-    super.key,
-    this.view = CashFlowView.monthly,
-    this.selectedDate,
-  });
+  const SpendingCompareChart(
+      {super.key,
+      this.view = CashFlowView.monthly,
+      this.selectedDate,
+      this.showFullTitle = false,
+      this.showLegend = false});
 
   @override
   ConsumerState<SpendingCompareChart> createState() =>
@@ -115,10 +118,12 @@ class _SpendingCompareChartState extends ConsumerState<SpendingCompareChart> {
           showYAxis: true,
           showGrid: true,
           showZeroLine: false,
-          showLegend: false,
+          showLegend: widget.showLegend,
           header: SproutChartHeader(
-            title: "Spending Trend",
-            subheader: subheaderText,
+            title: widget.showFullTitle ? "Spending Comparison" : subheaderText,
+            subheader: widget.showFullTitle
+                ? "${isMonthly ? 'Daily' : 'Monthly'} totals • $subheaderText"
+                : null,
             right: Align(
               alignment: Alignment.centerRight,
               child: PopupMenuButton<DateTime>(

@@ -5,16 +5,19 @@ import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/sankey.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// This renders an interactive Sankey diagram showing cash flow distributions.
 class CashFlowSankeyChart extends ConsumerWidget {
   final DateTime selectedDate;
   final CashFlowView view;
+  final SproutChartHeader? header;
 
   const CashFlowSankeyChart({
     super.key,
     required this.selectedDate,
     required this.view,
+    this.header,
   });
 
   @override
@@ -28,10 +31,11 @@ class CashFlowSankeyChart extends ConsumerWidget {
       emptyCondition: (sankeyData) => sankeyData.nodes.isEmpty,
       data: (sankeyData) {
         return Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           child: SproutSankeyChart(
             data: sankeyData,
             formatter: formatter.format,
+            header: header,
           ),
         );
       },

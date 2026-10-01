@@ -72,7 +72,9 @@ class DashboardPage extends ConsumerWidget {
               const Flexible(
                 flex: 1,
                 child: SproutCard(
-                  child: SpendingCompareChart(),
+                  child: SpendingCompareChart(
+                    showFullTitle: true,
+                  ),
                 ),
               ),
               if (isBudgetEnabled)

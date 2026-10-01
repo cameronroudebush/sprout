@@ -159,18 +159,38 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   ) {
     switch (reportView) {
       case 'trend':
-        return CashFlowTrendChart(barCount: isDesktop ? 10 : 6);
+        return CashFlowTrendChart(
+          barCount: isDesktop ? 10 : 6,
+          header: const SproutChartHeader(
+            title: 'Monthly Cash Flow',
+            subheader:
+                'Each month compares income and spending; the line shows net cash flow.',
+          ),
+        );
       case 'debt':
-        return const CashFlowLoanAmortizationChart();
+        return const CashFlowLoanAmortizationChart(
+          header: SproutChartHeader(
+            title: 'Loan Payoff Projections',
+            subheader:
+                'Payoff dates estimate when each balance reaches zero from recent history; monthly payment shows estimated amount paid.',
+          ),
+        );
       case 'sankey':
         return CashFlowSankeyChart(
           selectedDate: selectedDate,
           view: currentView,
+          header: const SproutChartHeader(
+            title: 'Cash Flow Breakdown',
+            subheader:
+                'Band width shows amount; flows show income, spending, and resulting savings or deficit. Hover or tap for values.',
+          ),
         );
       case 'spending':
         return SpendingCompareChart(
           view: currentView,
           selectedDate: selectedDate,
+          showFullTitle: true,
+          showLegend: true,
         );
       case 'pie':
         final month =

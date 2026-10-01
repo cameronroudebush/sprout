@@ -179,7 +179,7 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (widget.header != null) widget.header!,
-            if (widget.header != null) const SizedBox(height: 16),
+            if (widget.header != null) const SizedBox(height: 12),
             if (hasBoundedHeight)
               Expanded(
                 child: _buildChartArea(theme, calculatedMinHeight),

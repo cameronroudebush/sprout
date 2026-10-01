@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/trend_chart.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// Renders a trend chart for cash flow utilizing the generic SproutTrendChart.
 class CashFlowTrendChart extends ConsumerWidget {
@@ -12,10 +13,14 @@ class CashFlowTrendChart extends ConsumerWidget {
   /// How many bars to show data for from the backend
   final int barCount;
 
+  /// Optional title and explanation shown above the chart.
+  final SproutChartHeader? header;
+
   const CashFlowTrendChart({
     super.key,
     required this.barCount,
     this.showLegend = true,
+    this.header,
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,6 +44,7 @@ class CashFlowTrendChart extends ConsumerWidget {
 
         return SproutTrendChart(
           data: statsList,
+          header: header,
           showLegend: showLegend,
           topColor: Colors.green,
           bottomColor: theme.colorScheme.error,
