@@ -61,21 +61,23 @@ class TotalSummary extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: Container(
-        height: 16,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-        ),
+      child: SizedBox(
+        height: 24,
         child: Row(
           spacing: 2,
-          children: visibleSegments.map((data) {
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: visibleSegments.asMap().entries.map((entry) {
+            final index = entry.key;
+            final data = entry.value;
+
             return _barSegment(
               data.amount,
               total,
               data.entry.value.color,
               data.entry.value.title,
               theme,
+              isFirst: index == 0,
+              isLast: index == visibleSegments.length - 1,
             );
           }).toList(),
         ),
@@ -85,7 +87,8 @@ class TotalSummary extends ConsumerWidget {
 
   /// Constructs an individual segment wrapped in a Tooltip
   Widget _barSegment(
-      num value, num total, Color color, String title, ThemeData theme) {
+      num value, num total, Color color, String title, ThemeData theme,
+      {required bool isFirst, required bool isLast}) {
     const int minFlex = 20;
 
     if (value <= 0 || total <= 0) return const SizedBox.shrink();
@@ -97,33 +100,92 @@ class TotalSummary extends ConsumerWidget {
 
     return Expanded(
       flex: finalFlex,
-      child: Tooltip(
-        message: "$title: $tooltipPercent%",
-        preferBelow: false,
-        verticalOffset: 12,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final bool canFitText =
-                showPercentages && constraints.maxWidth > 28;
+      child: _HoverableBarSegment(
+        color: color,
+        title: title,
+        tooltipPercent: tooltipPercent,
+        percentage: percentage,
+        showPercentages: showPercentages,
+        theme: theme,
+        isFirst: isFirst,
+        isLast: isLast,
+      ),
+    );
+  }
+}
 
-            return Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
+class _HoverableBarSegment extends StatefulWidget {
+  final Color color;
+  final String title;
+  final String tooltipPercent;
+  final double percentage;
+  final bool showPercentages;
+  final ThemeData theme;
+  final bool isFirst;
+  final bool isLast;
+
+  const _HoverableBarSegment({
+    required this.color,
+    required this.title,
+    required this.tooltipPercent,
+    required this.percentage,
+    required this.showPercentages,
+    required this.theme,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  @override
+  State<_HoverableBarSegment> createState() => _HoverableBarSegmentState();
+}
+
+class _HoverableBarSegmentState extends State<_HoverableBarSegment> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: "${widget.title}: ${widget.tooltipPercent}%",
+      waitDuration: const Duration(milliseconds: 10),
+      preferBelow: false,
+      verticalOffset: 16,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: Center(
+          child: AnimatedContainer(
+            width: double.infinity,
+            height: _isHovered ? 22 : 16,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              color: widget.color,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(widget.isFirst ? 8 : 2),
+                bottomLeft: Radius.circular(widget.isFirst ? 8 : 2),
+                topRight: Radius.circular(widget.isLast ? 8 : 2),
+                bottomRight: Radius.circular(widget.isLast ? 8 : 2),
               ),
-              alignment: Alignment.center,
-              child: canFitText
-                  ? Text(
-                      "${percentage.toStringAsFixed(0)}%",
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            );
-          },
+            ),
+            alignment: Alignment.center,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool canFitText =
+                    widget.showPercentages && constraints.maxWidth > 28;
+
+                return canFitText
+                    ? Text(
+                        "${widget.percentage.toStringAsFixed(0)}%",
+                        style: widget.theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : const SizedBox.shrink();
+              },
+            ),
+          ),
         ),
       ),
     );

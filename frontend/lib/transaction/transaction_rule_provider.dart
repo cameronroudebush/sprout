@@ -38,21 +38,23 @@ class TransactionRules extends _$TransactionRules {
   /// Adds a new rule and updates the local state list.
   Future<TransactionRule?> add(TransactionRule rule) async {
     _setRunning(true);
-    final api = await ref.read(transactionRuleApiProvider.future);
-    final addedRule = await api.transactionRuleControllerCreate(rule);
+    try {
+      final api = await ref.read(transactionRuleApiProvider.future);
+      final addedRule = await api.transactionRuleControllerCreate(rule);
 
-    if (addedRule != null && state.value != null) {
-      final newList = [...state.value!.rules, addedRule];
-      state =
-          AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
+      if (addedRule != null && state.value != null) {
+        final newList = [...state.value!.rules, addedRule];
+        state =
+            AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
 
-      ref.read(notificationsProvider.notifier).openFrontendOnly(
-          "Transaction Rule Added",
-          type: NotificationTypeEnum.success);
-    } else {
+        ref.read(notificationsProvider.notifier).openFrontendOnly(
+            "Transaction Rule Added",
+            type: NotificationTypeEnum.success);
+      }
+      return addedRule;
+    } finally {
       _setRunning(false);
     }
-    return addedRule;
   }
 
   /// Deletes a rule from the backend and the local state.
@@ -71,21 +73,24 @@ class TransactionRules extends _$TransactionRules {
   /// Edits an existing rule and updates it in the local list.
   Future<TransactionRule?> edit(TransactionRule rule) async {
     _setRunning(true);
-    final api = await ref.read(transactionRuleApiProvider.future);
-    final updatedRule = await api.transactionRuleControllerEdit(rule.id, rule);
+    try {
+      final api = await ref.read(transactionRuleApiProvider.future);
+      final updatedRule =
+          await api.transactionRuleControllerEdit(rule.id, rule);
 
-    if (updatedRule != null && state.value != null) {
-      final newList = [...state.value!.rules];
-      final index = newList.indexWhere((r) => r.id == updatedRule.id);
-      if (index != -1) {
-        newList[index] = updatedRule;
+      if (updatedRule != null && state.value != null) {
+        final newList = [...state.value!.rules];
+        final index = newList.indexWhere((r) => r.id == updatedRule.id);
+        if (index != -1) {
+          newList[index] = updatedRule;
+        }
+        state =
+            AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
       }
-      state =
-          AsyncData(state.value!.copyWith(rules: newList, isRunning: false));
-    } else {
+      return updatedRule;
+    } finally {
       _setRunning(false);
     }
-    return updatedRule;
   }
 
   /// Triggers the backend to apply transaction rules to existing transactions.

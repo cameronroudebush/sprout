@@ -20,6 +20,14 @@ class CategoryOverviewPage extends ConsumerStatefulWidget {
 }
 
 class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   /// Opens the edit dialog
   void _openEditSheet(Category? category) {
     showSproutPopup(
@@ -40,16 +48,25 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
 
   /// Builds the overall category tree utilizing nesting capabilities
   List<Widget> _buildCategoryTree(
-      Category category, List<Category> all, int depth) {
-    final List<Widget> widgets = [_buildCategoryTile(category, depth)];
+      Category category, List<Category> all, int depth, String searchQuery) {
     final children = all
         .where((c) => c.parentCategoryId == category.id)
         .toList()
       ..sort((a, b) => a.name.compareTo(b.name));
 
+    final List<Widget> widgets = [];
+    final List<Widget> childWidgets = [];
     for (final child in children) {
-      widgets.addAll(_buildCategoryTree(child, all, depth + 1));
+      childWidgets
+          .addAll(_buildCategoryTree(child, all, depth + 1, searchQuery));
     }
+
+    if (searchQuery.isEmpty ||
+        category.name.toLowerCase().contains(searchQuery) ||
+        childWidgets.isNotEmpty) {
+      widgets.add(_buildCategoryTile(category, depth));
+    }
+    widgets.addAll(childWidgets);
     return widgets;
   }
 
@@ -67,7 +84,9 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
         ],
       ),
       body: categoriesAsync.whenDefault(
+        emptyCondition: (_) => false,
         data: (categories) {
+          final searchQuery = _searchController.text.trim().toLowerCase();
           final topLevel = categories
               .where((c) => c.parentCategoryId == null)
               .toList()
@@ -75,42 +94,86 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
 
           final List<Widget> allTiles = [];
           for (final root in topLevel) {
-            allTiles.addAll(_buildCategoryTree(root, categories, 0));
+            allTiles
+                .addAll(_buildCategoryTree(root, categories, 0, searchQuery));
           }
 
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: SproutRouteWrapper(
               child: Column(
-                spacing: 12,
                 children: [
                   SproutCard(
-                    child: const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: Text(
-                          "Manage your categories and spending buckets.",
-                          textAlign: TextAlign.center,
-                        ),
+                    child: const ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text("Organize transactions"),
+                      subtitle: Text(
+                        "Use parent categories for broad groups and subcategories for detail. Assign either to transactions or rules. Category settings can exclude spending from cash flow or adjust recurring-bill detection.",
                       ),
                     ),
                   ),
 
-                  if (allTiles.isNotEmpty)
-                    SproutCard(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
+                  SproutCard(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search categories...',
+                              prefixIcon: const Icon(Icons.search, size: 20),
+                              suffixIcon: searchQuery.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      tooltip: 'Clear search',
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        setState(() {});
+                                      },
+                                    ),
+                              isDense: true,
+                              border: const OutlineInputBorder(),
+                            ),
+                            textInputAction: TextInputAction.search,
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        if (allTiles.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: searchQuery.isEmpty
+                                ? Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    spacing: 12,
+                                    children: [
+                                      const Text(
+                                        'No categories yet. Add one to start organizing transactions.',
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      FilledButton.icon(
+                                        onPressed: () => _openEditSheet(null),
+                                        icon: const Icon(Icons.add),
+                                        label: const Text('Add category'),
+                                      ),
+                                    ],
+                                  )
+                                : const Text(
+                                    'No categories match your search.',
+                                    textAlign: TextAlign.center,
+                                  ),
+                          )
+                        else
                           for (int i = 0; i < allTiles.length; i++) ...[
                             allTiles[i],
-                            // Render a divider line underneath every element except the absolute final item
                             if (i < allTiles.length - 1)
-                              Divider(height: 1, thickness: 1),
+                              const Divider(height: 1, thickness: 1),
                           ],
-                        ],
-                      ),
+                      ],
                     ),
+                  ),
 
                   // Padding for FAB
                   const SizedBox(height: 80),

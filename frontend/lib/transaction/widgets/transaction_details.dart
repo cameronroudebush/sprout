@@ -170,6 +170,8 @@ class _TransactionDetailsViewState
                       setState(() => _description = val),
                 ),
                 TransactionConfigCard(
+                  // Reset DropdownButtonFormField when refreshed category changes.
+                  key: ValueKey(_categoryId),
                   transaction: widget.transaction,
                   categoryId: _categoryId,
                   postedDate: _postedDate,

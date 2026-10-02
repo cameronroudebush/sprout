@@ -136,13 +136,26 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
               CategoryIconDropdown(_selectedIcon, (newValue) {
                 setState(() => _selectedIcon = newValue);
               }),
-              CategoryDropdown(
-                _selectedParentId,
-                (newValue) => setState(() => _selectedParentId = newValue?.id),
-                editingCategoryId: widget.category?.id,
-                label: "Parent Category",
-                displayUnknownCategoryButton: widget.category != null,
-              ),
+              Column(spacing: 2, children: [
+                CategoryDropdown(
+                  _selectedParentId,
+                  (newValue) =>
+                      setState(() => _selectedParentId = newValue?.id),
+                  editingCategoryId: widget.category?.id,
+                  label: "Parent Category",
+                  displayUnknownCategoryButton: widget.category != null,
+                ),
+                Padding(
+                  padding: EdgeInsetsGeometry.only(left: 2),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Set a parent to nest this as a subcategory. Leave it unselected for a top-level category.",
+                      style: helpStyle,
+                    ),
+                  ),
+                ),
+              ]),
 
               // Exclude from cash flow toggle
               Row(
@@ -154,7 +167,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                         Text("Exclude from Cash Flow",
                             style: theme.textTheme.titleMedium),
                         Text(
-                            "If we should exclude this category from cash flow calculations.",
+                            "Keep transactions in this category out of cash flow totals and charts.",
                             style: helpStyle),
                       ],
                     ),
@@ -177,7 +190,7 @@ class _CategoryEditState extends ConsumerState<CategoryEdit> {
                         Text("Increased subscription variance",
                             style: theme.textTheme.titleMedium),
                         Text(
-                            "If this category should allow for a wider variance when trying to auto determine subscriptions. You'll normally want to turn this on for things like utilities.",
+                            "Allow larger month-to-month amount changes when detecting recurring bills, such as utilities.",
                             style: helpStyle),
                       ],
                     ),

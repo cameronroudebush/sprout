@@ -48,9 +48,10 @@ export class ChatPromptService {
        - Distinguish spending from balance movement, especially for credit accounts and transfers.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence quick takeaway (e.g., "Your checking account saw some downward movement today primarily driven by weekend spending.").`,
-      `2. Follow with short key bullet points for accounts with notable activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
+      `2. Follow with short key bullet points ONLY for accounts with notable activity. DO NOT list accounts with no changes or activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
       `3. End with a 1-sentence reassuring context note (e.g., "Overall, just normal day-to-day spending.").`,
       `4. DO NOT include ANY specific numbers, dollar amounts, percentages, or balances in your response. Focus entirely on the narrative, the direction of the changes, and the spending categories.`,
+      `5. If there is no notable activity across any accounts, provide a simple 1-2 sentence summary stating that accounts are steady and OMIT the bulleted list entirely.`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions);

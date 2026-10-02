@@ -6,6 +6,7 @@ import 'package:sprout/api/api.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
 import 'package:sprout/category/widgets/category_edit.dart';
 import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/theme/helpers.dart';
 import 'package:sprout/transaction/transaction_rule_provider.dart';
@@ -33,6 +34,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
   String? _accountId;
   bool _strict = false;
   bool _enabled = true;
+  bool _isSubmitting = false;
 
   /// Tracks whether the user has manually edited the priority field, so we
   /// don't overwrite their input once the rules provider finishes loading.
@@ -110,24 +112,39 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_isSubmitting) return;
+
     final isEdit = widget.rule != null;
     final notifier = ref.read(transactionRulesProvider.notifier);
 
     // Validate the form before proceeding with submission
-    if (_formKey.currentState!.validate()) {
-      final newRule = _getNewRule();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-      if (!_valHasChanged(newRule)) {
-        // Don't submit if no changes, just exit
-      } else if (isEdit) {
-        notifier.edit(newRule);
+    final newRule = _getNewRule();
+    if (!_valHasChanged(newRule)) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    final route = ModalRoute.of(context);
+    setState(() => _isSubmitting = true);
+    try {
+      if (isEdit) {
+        await notifier.edit(newRule);
       } else {
-        notifier.add(newRule);
+        await notifier.add(newRule);
       }
 
-      // Close dialog
-      Navigator.of(context).pop();
+      if (mounted && route?.isCurrent == true) Navigator.of(context).pop();
+    } catch (error) {
+      if (mounted) {
+        ref.read(notificationsProvider.notifier).openWithAPIException(error);
+      }
+    } finally {
+      if (mounted && route?.isCurrent == true) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -180,18 +197,50 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
 
     return SproutBaseDialogWidget(
       isEdit ? "Edit Rule" : "Add Rule",
-      showCloseDialogButton: true,
+      showCloseDialogButton: !_isSubmitting,
       closeButtonText: "Cancel",
       showSubmitButton: !isDemoMode,
+      submitButtonText: _isSubmitting
+          ? "Saving..."
+          : isEdit
+              ? "Save"
+              : "Add Rule",
+      allowSubmitClick: !_isSubmitting,
       onSubmitClick: _submit,
-      extraButtons: !isEdit || isDemoMode
+      extraButtons: !isEdit || isDemoMode || _isSubmitting
           ? null
           : IconButton.filled(
               style: ThemeHelpers.errorButton,
               onPressed: () => _confirmDelete(context),
               icon: Icon(Icons.delete),
             ),
-      child: _getForm(isEdit, theme),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Offstage(
+            offstage: _isSubmitting,
+            child: _getForm(isEdit, theme),
+          ),
+          if (_isSubmitting)
+            SizedBox(
+              height: 120,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 12,
+                  children: [
+                    const SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                    Text(isEdit ? "Saving rule..." : "Adding rule..."),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -212,15 +261,8 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
         valueHintText = "e.g., 'Starbucks' to match 'Starbucks Coffee'";
       }
     } else if (_type == TransactionRuleTypeEnum.amount) {
-      if (_strict) {
-        valueHelpText =
-            "Enter the exact amount to match the transaction's value.";
-        valueHintText = "e.g., '25.50' for an exact match";
-      } else {
-        valueHelpText =
-            "Enter a partial amount to match the transaction's value.";
-        valueHintText = "e.g., '10' to match amounts like 10.50";
-      }
+      valueHelpText = "Amount rules match transactions with this exact amount.";
+      valueHintText = "e.g., '25.50' to match transactions of exactly 25.50";
     }
 
     return Form(
@@ -260,7 +302,7 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                     },
                   ),
                   Text(
-                    "What order this rule should be executed in in the event multiple rules match a transaction.",
+                    "Higher numbers run first. The first matching rule assigns its category, so give more specific rules higher numbers.",
                     style: helpStyle,
                   ),
                 ],
@@ -384,7 +426,9 @@ class _TransactionRuleInfoState extends ConsumerState<TransactionRuleEdit> {
                         Text("Strict Match",
                             style: theme.textTheme.titleMedium),
                         Text(
-                            "Enables an exact match, rather than a partial match.",
+                            _type == TransactionRuleTypeEnum.amount
+                                ? "Amount rules always match exact values; this setting applies to description rules."
+                                : "Match the full description exactly instead of matching text it contains.",
                             style: helpStyle),
                       ],
                     ),

@@ -173,7 +173,59 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 data: (masterState) {
                   if (masterState.transactions.isEmpty &&
                       !masterState.isLoadingMore) {
-                    return const Center(child: Text("No transactions found"));
+                    final hasActiveFilters = filter.search.isNotEmpty ||
+                        (filter.categoryId != null &&
+                            filter.categoryId !=
+                                CategoryDropdown.fakeAllCategory.id) ||
+                        filter.pending != null ||
+                        filter.dateRange != null ||
+                        (filter.accountId != null &&
+                            filter.accountId != widget.accountId);
+
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 8,
+                          children: [
+                            Icon(
+                              hasActiveFilters
+                                  ? Icons.filter_alt_off_outlined
+                                  : Icons.receipt_long_outlined,
+                              size: 40,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            Text(
+                              hasActiveFilters
+                                  ? "No transactions match these filters"
+                                  : "No transactions to show yet",
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            Text(
+                              hasActiveFilters
+                                  ? "Try adjusting or clearing your filters."
+                                  : "Transactions will appear here after your accounts sync.",
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            if (hasActiveFilters)
+                              TextButton.icon(
+                                onPressed: () => _onFilterChanged(
+                                  TransactionFilter(
+                                      accountId: widget.accountId),
+                                  widget.accountId == null,
+                                ),
+                                icon: const Icon(Icons.filter_alt_off),
+                                label: const Text("Clear filters"),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
                   }
 
                   return Stack(

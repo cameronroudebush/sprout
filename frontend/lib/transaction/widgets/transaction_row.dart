@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/category/category_provider.dart';
 import 'package:sprout/category/widgets/category_icon.dart';
@@ -48,9 +49,13 @@ class TransactionRow extends ConsumerWidget {
     );
 
     final websiteUrl = transaction.extra?.website;
-    final Widget effectiveIcon = (websiteUrl != null && websiteUrl.isNotEmpty)
-        ? WebsiteIconWidget(websiteUrl, size: 32)
-        : (icon ?? CategoryIcon(cat, avatarSize: 16));
+    final Widget effectiveIcon = account != null &&
+            (account.type == AccountTypeEnum.crypto ||
+                account.type == AccountTypeEnum.investment)
+        ? AccountIcon(account, size: 32)
+        : (websiteUrl != null && websiteUrl.isNotEmpty)
+            ? WebsiteIconWidget(websiteUrl, size: 32)
+            : (icon ?? CategoryIcon(cat, avatarSize: 16));
 
     return InkWell(
       onTap: !allowDialog
@@ -67,7 +72,7 @@ class TransactionRow extends ConsumerWidget {
           child: Row(
             spacing: 16,
             children: [
-              // Icon (Website -> Override -> Category)
+              // Icon (Account -> Website -> Override -> Category)
               effectiveIcon,
               // Description
               Expanded(

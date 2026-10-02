@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
@@ -160,7 +159,7 @@ Future<List<Transaction>> transactionsForDay(Ref ref, DateTime day) async {
 final selectedCalendarMonthProvider =
     StateProvider<DateTime>((ref) => DateTime.now());
 
-/// Fetches a single transaction by ID, checking existing default provider state first.
+/// Fetches a single transaction by ID.
 @riverpod
 Future<Transaction?> transactionById(Ref ref, String id) async {
   if (id.isEmpty) return null;
@@ -172,14 +171,8 @@ Future<Transaction?> transactionById(Ref ref, String id) async {
     }
   });
 
-  // Check if we already have it loaded in the default filter state
-  final masterState =
-      ref.read(transactionsProvider(TransactionFilter.defaultFilter)).value;
-  final localMatch =
-      masterState?.transactions.firstWhereOrNull((t) => t.id == id);
-  if (localMatch != null) return localMatch;
-
-  // Otherwise, fetch directly from API
+  // Always fetch the detail record so an SSE-triggered refresh cannot return
+  // stale data from a cached transaction list.
   try {
     final api = await ref.watch(transactionApiProvider.future);
     final results = await api.transactionControllerGetByQuery(id: id);
