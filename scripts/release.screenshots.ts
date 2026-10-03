@@ -9,6 +9,7 @@ class ScreenshotRoute {
     public path: string,
     public store?: { title: string; desc: string },
     public outputName = path.substring(1),
+    public highResMobile = false,
   ) {}
 
   /** Where we storing the image output when screen-shotted */
@@ -24,17 +25,17 @@ class ScreenshotRoute {
 /** Overarching config of routes we want screenshots of */
 const routes = [
   new ScreenshotRoute("/", { title: "Overview", desc: "Your Financial Growth at a Glance" }, "home"),
-  new ScreenshotRoute("/accounts"),
+  new ScreenshotRoute("/accounts", undefined, undefined, true),
   new ScreenshotRoute("/accounts/ea5b551f-05fc-482c-8133-8cbadeb4e669", undefined, "account"),
   new ScreenshotRoute("/reports", { title: "Insights", desc: "Visualize your spending patterns" }),
   new ScreenshotRoute("/transactions", { title: "Activity", desc: "Every transaction, categorized instantly" }),
   new ScreenshotRoute("/transactions/1c91e240-5126-4234-a66c-464c1ff05ab0", undefined, "transaction"),
   new ScreenshotRoute("/holdings", { title: "Portfolio", desc: "Track your investments effortlessly" }),
   new ScreenshotRoute("/subscriptions"),
-  new ScreenshotRoute("/chat", { title: "AI Assistant", desc: "Ask questions, get financial answers" }),
+  new ScreenshotRoute("/chat", { title: "AI Assistant", desc: "Ask questions, get financial answers" }, undefined, true),
   new ScreenshotRoute("/categories"),
   new ScreenshotRoute("/rules"),
-  new ScreenshotRoute("/budget"),
+  new ScreenshotRoute("/budget", undefined, undefined, true),
 ];
 
 /** The display sizes we want to take pictures of */
@@ -332,16 +333,18 @@ export async function captureScreenshots() {
     client = await CDP({ target });
     const { Page, Runtime, Emulation } = client;
     await Page.enable();
+    const setViewport = (viewport: (typeof viewports)[number], deviceScaleFactor = 1) =>
+      Emulation.setDeviceMetricsOverride({
+        width: viewport.width,
+        height: viewport.height,
+        deviceScaleFactor,
+        mobile: viewport.mobile,
+      });
 
     // Iterate over every viewport and take a screenshot
     for (const viewport of viewports) {
       console.log(`--- Setting Viewport: ${viewport.name} ---`);
-      await Emulation.setDeviceMetricsOverride({
-        width: viewport.width,
-        height: viewport.height,
-        deviceScaleFactor: 1,
-        mobile: viewport.mobile,
-      });
+      await setViewport(viewport);
 
       // Loop over every route to take a picture of it
       for (const route of routes) {
@@ -366,6 +369,23 @@ export async function captureScreenshots() {
         // Write the file
         if (!fs.existsSync(path.dirname(outputPath))) fs.mkdirSync(path.dirname(outputPath), { recursive: true });
         fs.writeFileSync(outputPath, new Uint8Array(buffer));
+
+        if (viewport.name === "mobile" && route.highResMobile) {
+          await setViewport(viewport, 4);
+          try {
+            // Render at higher pixel density without changing the mobile CSS viewport
+            await new Promise((resolve) => setTimeout(resolve, 250));
+            const { data: highResData } = await Page.captureScreenshot({
+              format: "png",
+              clip: { x: 0, y: 0, width: viewport.width, height: viewport.height, scale: 1 },
+            });
+            const highResOutputPath = route.getImagePathOutput("mobile", "high-res");
+            if (!fs.existsSync(path.dirname(highResOutputPath))) fs.mkdirSync(path.dirname(highResOutputPath), { recursive: true });
+            fs.writeFileSync(highResOutputPath, new Uint8Array(Buffer.from(highResData, "base64")));
+          } finally {
+            await setViewport(viewport);
+          }
+        }
       }
     }
   } catch (err) {
