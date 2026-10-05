@@ -8,6 +8,7 @@ import { CashFlowService } from "@backend/cash-flow/cash.flow.service";
 import { Configuration } from "@backend/config/core";
 import { TestEntities } from "@backend/test/entities";
 import { BadRequestException } from "@nestjs/common";
+import { MoreThanOrEqual } from "typeorm";
 
 describe("EmailService", () => {
   let service: EmailService;
@@ -32,6 +33,7 @@ describe("EmailService", () => {
       calculateFlows: vi.fn().mockResolvedValue({
         totalIncome: 1000,
         totalExpense: 500,
+        transactions: [TestEntities.transaction],
         filteredTransactions: [TestEntities.transaction],
       }),
     } as any;
@@ -68,6 +70,22 @@ describe("EmailService", () => {
       expect(cashFlowService.calculateFlows).toHaveBeenCalled();
       expect(netWorthService.getTotalSummary).toHaveBeenCalledWith(user);
       expect(content).toBeDefined();
+    });
+
+    it("should include the full day at the start of the weekly range", async () => {
+      const now = new Date("2026-10-11T16:00:00.000Z");
+      vi.useFakeTimers();
+      vi.setSystemTime(now);
+
+      try {
+        await service.getWeeklyEmailContent(user);
+
+        const range = cashFlowService.calculateFlows.mock.calls[0]![5];
+        expect(range).toEqual(expect.any(Object));
+        expect((range as ReturnType<typeof MoreThanOrEqual>).value).toEqual(new Date("2026-10-04T04:00:00.000Z"));
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 
