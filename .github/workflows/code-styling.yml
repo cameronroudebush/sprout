@@ -36,6 +36,10 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Install Flutter Dependencies
+        working-directory: ./frontend
+        run: flutter pub get
+
       - name: Check Dart Formatting
         working-directory: ./frontend
         run: dart format --output=none --set-exit-if-changed .
