@@ -4,7 +4,7 @@ ARG ALPINE_VERSION=3.24
 # -------------------------------
 #       Build Frontend
 # -------------------------------
-FROM ghcr.io/adrianjagielak/flutter:3.47.5 AS frontend-build
+FROM ghcr.io/adrianjagielak/flutter:3.47.6 AS frontend-build
 WORKDIR /app
 COPY .git .git
 COPY ./frontend ./
