@@ -35,7 +35,7 @@ jobs:
 
       # Upload the generated report directly to Codecov
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v7.1.0
+        uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./backend/coverage/
@@ -43,7 +43,7 @@ jobs:
 
       # Upload test results for Test Analytics
       - name: Upload test results to Codecov
-        uses: codecov/codecov-action@v7.1.0
+        uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./backend/coverage/
