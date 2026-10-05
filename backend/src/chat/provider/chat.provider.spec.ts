@@ -22,6 +22,7 @@ class TestChatProvider extends ChatProvider {
   contentMock = vi.fn<() => Promise<string>>().mockResolvedValue("Hello Acc_0");
   streamChunks: string[] = [];
   streamError: unknown;
+  streamErrors: unknown[] = [];
 
   constructor(
     sseService: SSEService,
@@ -46,6 +47,8 @@ class TestChatProvider extends ChatProvider {
   }
 
   protected async *generateContentStreamRequest(): AsyncIterable<string> {
+    const nextError = this.streamErrors.shift();
+    if (nextError) throw nextError;
     if (this.streamError) throw this.streamError;
     for (const chunk of this.streamChunks) yield chunk;
   }
@@ -122,6 +125,11 @@ describe("ChatProvider", () => {
   it("should extract messages from the various provider error shapes", () => {
     expect(provider.runExtract({ error: { message: "Direct error" } })).toBe("Direct error");
     expect(provider.runExtract(new Error('{"error":{"message":"API Error Msg"}}'))).toBe("API Error Msg");
+    expect(
+      provider.runExtract({
+        error: { message: '{\n  "error": { "message": "temporarily unavailable", "status": "UNAVAILABLE" }\n}' },
+      }),
+    ).toBe("temporarily unavailable");
     expect(provider.runExtract(new Error("{ invalid json"))).toBeUndefined();
     expect(provider.runExtract(new Error("plain"))).toBeUndefined();
     expect(provider.runExtract(undefined)).toBeUndefined();
@@ -191,7 +199,7 @@ describe("ChatProvider", () => {
     try {
       provider.contentMock.mockRejectedValue({ code: 503, message: "high demand" });
       const promise = provider.runGenerate(contents, new Map());
-      const rejection = expect(promise).rejects.toThrow("Failed to generate content: retry limit reached or invalid configuration.");
+      const rejection = expect(promise).rejects.toThrow("high demand");
       await vi.advanceTimersByTimeAsync(30000);
       await rejection;
     } finally {
@@ -255,6 +263,44 @@ describe("ChatProvider", () => {
     expect(chat.isThinking).toBe(false);
     expect(chat.text).toBe("Stream fail");
     expect(chat.update).toHaveBeenCalled();
+  });
+
+  it("should retry an overloaded stream before sending the response", async () => {
+    vi.useFakeTimers();
+    try {
+      provider.streamErrors = [{ code: 503, message: "high demand" }];
+      provider.streamChunks = ["Recovered"];
+      const chat = new ChatHistory(user, "question", "user");
+      chat.update = vi.fn().mockResolvedValue(chat);
+
+      const promise = provider.generateChatContent(chat, ChatTimeframe.threeMonths, false, true);
+      await vi.advanceTimersByTimeAsync(5000);
+      await expect(promise).resolves.toBe("Recovered");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should send a plain provider message after streamed retries are exhausted", async () => {
+    vi.useFakeTimers();
+    try {
+      provider.streamErrors = [
+        { error: { message: '{"error":{"message":"Model is busy","status":"UNAVAILABLE"}}', code: 503 } },
+        { error: { message: '{"error":{"message":"Model is busy","status":"UNAVAILABLE"}}', code: 503 } },
+        { error: { message: '{"error":{"message":"Model is busy","status":"UNAVAILABLE"}}', code: 503 } },
+      ];
+      const chat = new ChatHistory(user, "question", "user");
+      chat.update = vi.fn().mockResolvedValue(chat);
+
+      const promise = provider.generateChatContent(chat, ChatTimeframe.threeMonths, false, true);
+      const rejection = expect(promise).rejects.toThrow();
+      await vi.advanceTimersByTimeAsync(30000);
+      await rejection;
+      expect(chat.text).toBe("Model is busy");
+      expect(chat.text).not.toContain('{"');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("should create a new overview when none exists", async () => {

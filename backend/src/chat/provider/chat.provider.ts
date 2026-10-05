@@ -83,7 +83,8 @@ export abstract class ChatProvider {
 
   /** Determines if the given error indicates the provider is temporarily overloaded. */
   protected isOverloadedError(error: any): boolean {
-    return Boolean(error?.code === 503 || error?.status === 503 || error?.status === "UNAVAILABLE" || error?.message?.includes("high demand"));
+    const message = this.extractErrorMessage(error) ?? error?.message;
+    return Boolean(error?.code === 503 || error?.status === 503 || error?.status === "UNAVAILABLE" || message?.includes("high demand"));
   }
 
   /** Determines if the given error indicates the caller exceeded their request quota. */
@@ -95,15 +96,33 @@ export abstract class ChatProvider {
 
   /** Extracts a user-facing message from provider specific error shapes when possible. */
   protected extractErrorMessage(error: any): string | undefined {
-    if (error?.error?.message) return error.error.message;
+    if (typeof error?.error?.message === "string") {
+      const message = error.error.message.trim();
+      if (message.startsWith("{")) {
+        try {
+          return this.extractErrorMessage(JSON.parse(message)) ?? error.error.message;
+        } catch {
+          /* Keep the provider message when it is not valid JSON. */
+        }
+      }
+      return error.error.message;
+    }
+    if (error?.error?.message) return String(error.error.message);
     if (typeof error?.message === "string" && error.message.trim().startsWith("{")) {
       try {
-        return JSON.parse(error.message)?.error?.message;
+        return this.extractErrorMessage(JSON.parse(error.message));
       } catch {
-        /* not valid JSON, fall through and rethrow the original error */
+        /* Keep the original error when the message is not valid JSON. */
       }
     }
     return undefined;
+  }
+
+  /** Converts provider-specific failures into a plain user-facing error. */
+  protected toUserError(error: unknown): Error {
+    if (error instanceof Error && !this.extractErrorMessage(error)) return error;
+    const message = this.extractErrorMessage(error) ?? (typeof error === "string" ? error : (error as any)?.message);
+    return new Error(message || "The chat provider failed to generate a response.");
   }
 
   /** Executes a non-streamed generation with overload retries and shared error mapping. */
@@ -126,19 +145,38 @@ export abstract class ChatProvider {
           continue; // Loop again
         }
 
-        // Retries exhausted while the model is still overloaded: fall through to the generic failure below
-        if (isOverloaded) break;
+        // Retries exhausted while the model is still overloaded: expose the provider's plain message.
+        if (isOverloaded) throw this.toUserError(e);
 
         // If it's a quota error, surface a throttling exception to the caller
         if (this.isQuotaError(e)) throw new ThrottlerException("You have exceeded your request quota. Try again later.");
 
-        const message = this.extractErrorMessage(e);
-        if (message) throw message;
-        throw e;
+        throw this.toUserError(e);
       }
     }
 
     throw new InternalServerErrorException("Failed to generate content: retry limit reached or invalid configuration.");
+  }
+
+  /** Executes a streamed generation with the same bounded overload retry policy. */
+  protected async *generateContentStream(contents: ChatPromptContent[], maxRetries = 3): AsyncIterable<string> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        for await (const chunk of this.generateContentStreamRequest(contents)) yield chunk;
+        return;
+      } catch (e: any) {
+        if (this.isOverloadedError(e) && attempt < maxRetries) {
+          const delayMs = attempt * 5000;
+          this.logger.warn(`Model overloaded (503). Retrying attempt ${attempt}/${maxRetries} in ${delayMs}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          continue;
+        }
+
+        if (this.isOverloadedError(e)) throw this.toUserError(e);
+        if (this.isQuotaError(e)) throw new ThrottlerException("You have exceeded your request quota. Try again later.");
+        throw this.toUserError(e);
+      }
+    }
   }
 
   /**
@@ -154,7 +192,7 @@ export abstract class ChatProvider {
       let rawAccumulatedText = "";
       let lastStreamUpdate = 0;
       const streamUpdateIntervalMs = 50;
-      for await (const chunkText of this.generateContentStreamRequest(contents)) {
+      for await (const chunkText of this.generateContentStream(contents)) {
         if (chunkText) {
           rawAccumulatedText += chunkText;
           chat.text = this.transformText(rawAccumulatedText, idMap);
@@ -169,7 +207,7 @@ export abstract class ChatProvider {
       return chat.text;
     } catch (e) {
       chat.isThinking = false;
-      chat.text = (e as Error).message;
+      chat.text = this.toUserError(e).message;
       await chat.update();
       this.sseService.sendToUser(this.user, SSEEventType.CHAT, chat);
       throw e;

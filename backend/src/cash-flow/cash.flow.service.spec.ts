@@ -8,7 +8,7 @@ import { CashFlowService } from "@backend/cash-flow/cash.flow.service.js";
 import { Category } from "@backend/category/model/category.model.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
-import { subDays } from "date-fns";
+import { subDays, subMonths } from "date-fns";
 import { Between } from "typeorm";
 
 describe("CashFlowService", () => {
@@ -346,8 +346,9 @@ describe("CashFlowService", () => {
       });
 
       const now = new Date();
-      const prevMonth = subDays(now, 35);
-      const prevPrevMonth = subDays(now, 65);
+      const prevMonth = subMonths(now, 1);
+      // Keep the oldest snapshot inside the service's two-month history window.
+      const prevPrevMonth = subDays(subMonths(now, 2), -1);
 
       const history1 = AccountHistory.fromPlain({ id: "h1", balance: -16000, time: prevPrevMonth });
       const history2 = AccountHistory.fromPlain({ id: "h2", balance: -15000, time: prevMonth });
