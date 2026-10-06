@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart' hide Notification;
+import 'package:material_ui/material_ui.dart' hide Notification;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/firebase_provider.dart';

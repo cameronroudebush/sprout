@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// An icon that is intended to just display an error if an account has one
 class SproutErrorIcon extends StatefulWidget {

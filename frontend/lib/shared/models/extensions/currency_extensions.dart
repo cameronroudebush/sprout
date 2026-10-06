@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension SproutCurrencyFormatter on num {
   /// Returns the semantic color for a balance (Red for negative, Green for positive)

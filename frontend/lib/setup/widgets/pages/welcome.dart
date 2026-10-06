@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/setup/widgets/pages/wrapper.dart';
 
 /// This page contains the initial page welcoming the user to the app

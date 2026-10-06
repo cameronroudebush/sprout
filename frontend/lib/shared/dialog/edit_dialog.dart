@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 
 /// Represents an individual field definition for [showSproutEditDialog].

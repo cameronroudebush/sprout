@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A reusable widget that allows the height of one widget to match the height of the other, dynamically
 class HeightMatchedRow extends StatefulWidget {

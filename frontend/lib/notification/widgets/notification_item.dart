@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Notification;
+import 'package:material_ui/material_ui.dart' hide Notification;
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/date_extensions.dart';

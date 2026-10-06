@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/widgets/dashboard_accounts_card.dart';
 import 'package:sprout/budget/widgets/dashboard_budget_card.dart';

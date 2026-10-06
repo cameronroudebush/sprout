@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A generic card for use in sprout that utilizes elevation instead of flat borders
 /// for a clean, dimensional aesthetic.

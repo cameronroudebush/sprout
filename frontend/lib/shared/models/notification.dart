@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A class that allows us to display a notification message on the home page
 class SproutNotification {
