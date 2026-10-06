@@ -86,3 +86,4 @@ backups
 site
 coverage
 junit.xml
+/paseo.json
