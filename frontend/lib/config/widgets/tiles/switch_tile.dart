@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A settings tile with a [Switch] toggle.
 class SwitchSettingTile extends StatelessWidget {

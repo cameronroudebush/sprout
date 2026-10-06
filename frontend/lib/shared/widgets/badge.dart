@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Badge;
+import 'package:material_ui/material_ui.dart' hide Badge;
 
 enum BadgeVariant { primary, secondary, outline, destructive }
 

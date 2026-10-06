@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A reusable informational banner card with an icon and contextual text.
 class InfoCard extends StatelessWidget {

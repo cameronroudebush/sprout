@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Badge;
+import 'package:material_ui/material_ui.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/auth/widgets/login_bg.dart';
 import 'package:sprout/auth/widgets/login_form.dart';

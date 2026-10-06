@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Generic chart header to apply to any chart to render header information
 class SproutChartHeader extends StatelessWidget {

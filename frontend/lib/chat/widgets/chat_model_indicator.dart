@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Compact label showing which model generated an AI response.
 class ChatModelIndicator extends StatelessWidget {

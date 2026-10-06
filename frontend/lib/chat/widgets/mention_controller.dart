@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A class that extends text editing to allow us to control using @ACCOUNT to have a more modern display
 class MentionController extends TextEditingController {

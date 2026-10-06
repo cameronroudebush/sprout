@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A widget that provides an indication for when the LLM is thinking
 class TypingIndicator extends StatefulWidget {

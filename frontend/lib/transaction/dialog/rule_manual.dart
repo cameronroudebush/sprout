@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/transaction/transaction_rule_provider.dart';

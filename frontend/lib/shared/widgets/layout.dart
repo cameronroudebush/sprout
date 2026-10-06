@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A class that you can use to wrap your content in a build and determine if this is a mobile or desktop display
 class SproutLayoutBuilder extends StatelessWidget {

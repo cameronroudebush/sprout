@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A reusable color manager that handles strict color mapping
 /// with a structural fallback to deterministic hash-based color generations.
