@@ -82,7 +82,16 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
     if (existingAccounts.length === 0) return [];
 
     const existingAccount = existingAccounts[0]!;
-    const rawAccounts = await this.fetchCoinbaseData(user, "accounts");
+    let rawAccounts: CoinbaseAccount[];
+    try {
+      rawAccounts = await this.fetchCoinbaseData(user, "accounts");
+    } catch (error) {
+      if (existingAccount.institution) {
+        existingAccount.institution.hasError = true;
+        await existingAccount.institution.update();
+      }
+      throw error;
+    }
     const activeAccounts = rawAccounts.filter((acc) => parseFloat(acc.balance?.amount || "0") > 0);
 
     const payload: CoinbaseWalletPayload = {
@@ -93,6 +102,10 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
 
     const authContext = this.getAuthContext(user);
     const institution = existingAccount.institution || new Institution("https://www.coinbase.com", "Coinbase", false, user);
+    if (institution.hasError) {
+      institution.hasError = false;
+      await institution.update();
+    }
     const updatedAccount = await this.mapToSproutAccount(payload, authContext, user, institution);
 
     existingAccount.balance = updatedAccount.balance;
@@ -223,7 +236,7 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
       return results;
     } catch (err) {
       this.logger.error(`Failed to fetch Coinbase ${resource}`, err);
-      return [];
+      throw err;
     }
   }
 

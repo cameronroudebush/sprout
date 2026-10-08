@@ -45,6 +45,7 @@ export class ZillowProviderService extends ProviderBase<void, void, ZillowProper
   override async get(user: User, _accountsOnly: boolean, _triggerType: SyncTriggerType, _institutionId?: string): Promise<ProviderSyncResult[]> {
     const accounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.zillow } });
     const results: ProviderSyncResult[] = [];
+    const failedInstitutions = new Set<string>();
 
     for (const account of accounts) {
       const zpid = account.providerAccountId;
@@ -59,7 +60,17 @@ export class ZillowProviderService extends ProviderBase<void, void, ZillowProper
         account.availableBalance = data.zestimate;
         results.push({ account, providerAccountId: zpid, preventAutoCreation: true });
       } catch (e) {
+        if (account.institution) failedInstitutions.add(account.institution.id);
         this.logger.error(`Failed to update Zillow account ${account.id}`, e);
+      }
+    }
+
+    const institutions = new Map(accounts.filter((account) => account.institution).map((account) => [account.institution.id, account.institution]));
+    for (const [id, institution] of institutions) {
+      const hasError = failedInstitutions.has(id);
+      if (institution.hasError !== hasError) {
+        institution.hasError = hasError;
+        await institution.update();
       }
     }
 

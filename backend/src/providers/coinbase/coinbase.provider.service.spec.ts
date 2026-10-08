@@ -86,6 +86,8 @@ describe("CoinbaseProviderService", () => {
     it("should performSync with existing account and fallback to USD for currency if balance.currency is undefined", async () => {
       const existingAccount = TestEntities.account;
       existingAccount.providerAccountId = "coinbase-primary-wallet";
+      existingAccount.institution.hasError = true;
+      existingAccount.institution.update = vi.fn().mockResolvedValue(existingAccount.institution);
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
 
       vi.spyOn(service as unknown as { fetchCoinbaseData: () => Promise<unknown[]> }, "fetchCoinbaseData").mockResolvedValue([
@@ -135,6 +137,18 @@ describe("CoinbaseProviderService", () => {
       expect(result[0].holdings).toBeUndefined();
       expect(result[0].transactions).toBeUndefined();
     });
+
+    it("should mark the institution when the account API fails", async () => {
+      const existingAccount = TestEntities.account;
+      existingAccount.providerAccountId = "coinbase-primary-wallet";
+      existingAccount.institution.update = vi.fn().mockResolvedValue(existingAccount.institution);
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
+      vi.spyOn(service as any, "fetchCoinbaseData").mockRejectedValue(new Error("API unavailable"));
+
+      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow("API unavailable");
+      expect(existingAccount.institution.hasError).toBe(true);
+      expect(existingAccount.institution.update).toHaveBeenCalled();
+    });
   });
 
   describe("getUsdExchangeRates & fetchCoinbaseData", () => {
@@ -172,7 +186,7 @@ describe("CoinbaseProviderService", () => {
       await expect((service as any).getUsdExchangeRates()).resolves.toEqual({});
     });
 
-    it("should fetchCoinbaseData with pagination and handles errors", async () => {
+    it("should fetchCoinbaseData with pagination and propagates errors", async () => {
       vi.spyOn(axios, "get")
         .mockResolvedValueOnce({
           data: {
@@ -191,8 +205,9 @@ describe("CoinbaseProviderService", () => {
       expect(data.length).toBe(2);
 
       vi.spyOn(axios, "get").mockRejectedValue(new Error("API error"));
-      const errData = await (service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts");
-      expect(errData).toEqual([]);
+      await expect(
+        (service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts"),
+      ).rejects.toThrow("API error");
 
       vi.spyOn(axios, "get").mockResolvedValueOnce({ data: { data: [{ id: "from-data" }] } } as any);
       const dataFallback = await (service as any).fetchCoinbaseData(user, "transactions");

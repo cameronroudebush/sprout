@@ -244,9 +244,10 @@ describe("SimpleFINProviderService", () => {
         balance: 0,
         availableBalance: 0,
         extra: {},
-        institution: { name: "Bank" },
+        institution: { name: "Bank", hasError: false },
       };
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
+      const mapSpy = vi.spyOn(service as any, "mapToSproutAccount");
 
       vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [{ id: "acc_1", name: "Bank Acc", balance: "100", "available-balance": "100", currency: "USD", org: { name: "Bank", url: "url" } }],
@@ -256,6 +257,7 @@ describe("SimpleFINProviderService", () => {
       const resultsAccountsOnly = await (service as any).performSync(mockUser, undefined, true);
       expect(resultsAccountsOnly).toHaveLength(1);
       expect(resultsAccountsOnly[0].account.balance).toBe(100);
+      expect(mapSpy.mock.calls[0]?.[3].hasError).toBe(true);
 
       const resultsFull = await (service as any).performSync(mockUser, undefined, false);
       expect(resultsFull).toHaveLength(1);
