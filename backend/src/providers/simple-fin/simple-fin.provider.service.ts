@@ -101,7 +101,8 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
 
       const existingAccount = existingMap.get(rawAccount.id)!;
       const hasError = data.errors?.some((x) => x.includes(rawAccount.org.name)) ?? false;
-      const institution = existingAccount.institution || new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
+      const institution = new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
+      if (existingAccount.institution) institution.id = existingAccount.institution.id;
 
       const updatedAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
 
