@@ -83,7 +83,8 @@ class CashFlowCalendarWidget extends ConsumerWidget {
                           error: (err, _) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 32),
                             child: Center(
-                                child: Text("Error loading transactions: $err")),
+                                child:
+                                    Text("Error loading transactions: $err")),
                           ),
                           data: (dayTransactions) {
                             if (dayTransactions.isEmpty) {
