@@ -36,7 +36,7 @@ class WelcomeSetupPage extends StatelessWidget {
             Padding(
               padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
               child: Text(
-                "Take control of your financial future.",
+                "Grow your financial future.",
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge
                     ?.copyWith(color: theme.colorScheme.primary),
