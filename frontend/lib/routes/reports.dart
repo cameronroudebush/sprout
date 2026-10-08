@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_amortization.dart';
+import 'package:sprout/cash-flow/widgets/cash_flow_calendar.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_pie_chart.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_sankey.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_selector.dart';
@@ -22,6 +23,7 @@ class ReportsPage extends ConsumerStatefulWidget {
   static const reportTabs = <SproutTabOption<String>>[
     SproutTabOption(value: 'sankey', label: 'Sankey'),
     SproutTabOption(value: 'trend', label: 'Cash Flow'),
+    SproutTabOption(value: 'calendar', label: 'Calendar'),
     SproutTabOption(value: 'debt', label: 'Loan Projections'),
     SproutTabOption(value: 'pie', label: 'Pie'),
     SproutTabOption(value: 'spending', label: 'Spending'),
@@ -158,6 +160,14 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     bool isDesktop,
   ) {
     switch (reportView) {
+      case 'calendar':
+        return const CashFlowCalendarWidget(
+          header: SproutChartHeader(
+            title: 'Cash Flow Calendar',
+            subheader:
+                'Daily net cash flow is shown by date; tap a day to view its transactions.',
+          ),
+        );
       case 'trend':
         return CashFlowTrendChart(
           barCount: isDesktop ? 10 : 6,
