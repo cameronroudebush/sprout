@@ -143,7 +143,9 @@ describe("CoinbaseProviderService", () => {
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
       vi.spyOn(service as any, "fetchCoinbaseData").mockRejectedValue(new Error("API unavailable"));
 
-      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow("API unavailable");
+      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow(
+        "API unavailable",
+      );
       expect(existingAccount.institution.hasError).toBe(true);
       expect(existingAccount.institution.update).toHaveBeenCalled();
     });

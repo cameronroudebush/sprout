@@ -44,7 +44,7 @@ describe("ZillowProviderService", () => {
       const zillowAcc1 = TestEntities.account;
       zillowAcc1.provider = ProviderType.zillow;
       zillowAcc1.providerAccountId = "123456";
-      zillowAcc1.institution.update = vi.fn().mockResolvedValue(zillowAcc1.institution);
+      vi.spyOn(zillowAcc1.institution, "update").mockResolvedValue(zillowAcc1.institution);
 
       const zillowAccNoZpid = TestEntities.account;
       zillowAccNoZpid.provider = ProviderType.zillow;
@@ -82,7 +82,7 @@ describe("ZillowProviderService", () => {
       zillowAcc.provider = ProviderType.zillow;
       zillowAcc.providerAccountId = "123456";
       zillowAcc.institution.hasError = true;
-      zillowAcc.institution.update = vi.fn().mockResolvedValue(zillowAcc.institution);
+      vi.spyOn(zillowAcc.institution, "update").mockResolvedValue(zillowAcc.institution);
 
       vi.spyOn(Account, "find").mockResolvedValue([zillowAcc]);
       vi.spyOn(service, "getInfoByZpid").mockResolvedValue({
