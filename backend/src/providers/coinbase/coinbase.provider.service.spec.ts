@@ -86,6 +86,8 @@ describe("CoinbaseProviderService", () => {
     it("should performSync with existing account and fallback to USD for currency if balance.currency is undefined", async () => {
       const existingAccount = TestEntities.account;
       existingAccount.providerAccountId = "coinbase-primary-wallet";
+      existingAccount.institution.hasError = true;
+      existingAccount.institution.update = vi.fn().mockResolvedValue(existingAccount.institution);
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
 
       vi.spyOn(service as unknown as { fetchCoinbaseData: () => Promise<unknown[]> }, "fetchCoinbaseData").mockResolvedValue([
