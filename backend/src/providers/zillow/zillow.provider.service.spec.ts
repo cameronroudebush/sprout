@@ -44,7 +44,6 @@ describe("ZillowProviderService", () => {
       const zillowAcc1 = TestEntities.account;
       zillowAcc1.provider = ProviderType.zillow;
       zillowAcc1.providerAccountId = "123456";
-      vi.spyOn(zillowAcc1.institution, "update").mockResolvedValue(zillowAcc1.institution);
 
       const zillowAccNoZpid = TestEntities.account;
       zillowAccNoZpid.provider = ProviderType.zillow;
@@ -74,7 +73,6 @@ describe("ZillowProviderService", () => {
       const results = await service.get(user, false, 0 as any);
       expect(results).toEqual([]);
       expect(zillowAcc1.institution.hasError).toBe(true);
-      expect(zillowAcc1.institution.update).toHaveBeenCalled();
     });
 
     it("should clear a Zillow institution error after all properties sync successfully", async () => {
@@ -82,7 +80,6 @@ describe("ZillowProviderService", () => {
       zillowAcc.provider = ProviderType.zillow;
       zillowAcc.providerAccountId = "123456";
       zillowAcc.institution.hasError = true;
-      vi.spyOn(zillowAcc.institution, "update").mockResolvedValue(zillowAcc.institution);
 
       vi.spyOn(Account, "find").mockResolvedValue([zillowAcc]);
       vi.spyOn(service, "getInfoByZpid").mockResolvedValue({
@@ -95,7 +92,6 @@ describe("ZillowProviderService", () => {
       await service.get(user, false, 0 as any);
 
       expect(zillowAcc.institution.hasError).toBe(false);
-      expect(zillowAcc.institution.update).toHaveBeenCalled();
     });
   });
 

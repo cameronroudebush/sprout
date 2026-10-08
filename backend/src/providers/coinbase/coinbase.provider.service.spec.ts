@@ -143,9 +143,7 @@ describe("CoinbaseProviderService", () => {
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
       vi.spyOn(service as any, "fetchCoinbaseData").mockRejectedValue(new Error("API unavailable"));
 
-      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow(
-        "API unavailable",
-      );
+      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow("API unavailable");
       expect(existingAccount.institution.hasError).toBe(true);
       expect(existingAccount.institution.update).toHaveBeenCalled();
     });
@@ -205,9 +203,9 @@ describe("CoinbaseProviderService", () => {
       expect(data.length).toBe(2);
 
       vi.spyOn(axios, "get").mockRejectedValue(new Error("API error"));
-      await expect((service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts")).rejects.toThrow(
-        "API error",
-      );
+      await expect(
+        (service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts"),
+      ).rejects.toThrow("API error");
 
       vi.spyOn(axios, "get").mockResolvedValueOnce({ data: { data: [{ id: "from-data" }] } } as any);
       const dataFallback = await (service as any).fetchCoinbaseData(user, "transactions");
