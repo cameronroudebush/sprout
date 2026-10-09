@@ -271,6 +271,18 @@ describe("SimpleFINProviderService", () => {
       await expect((service as any).performSync(mockUser, undefined, false)).resolves.toEqual([]);
     });
 
+    it("should mark an existing institution when SimpleFIN omits its errored accounts", async () => {
+      const institution = { id: "institution-1", name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) };
+      const existingAccount = { providerAccountId: "missing-account", institution };
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({ accounts: [], errors: ["Bank: login required"] });
+
+      await expect((service as any).performSync(mockUser, undefined, false)).resolves.toEqual([]);
+
+      expect(institution.hasError).toBe(true);
+      expect(institution.update).toHaveBeenCalled();
+    });
+
     it("should create an institution when linked account has none and errors are absent", async () => {
       const existingAccount = {
         id: "acc-no-institution",
