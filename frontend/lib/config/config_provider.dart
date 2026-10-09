@@ -15,7 +15,8 @@ Future<String?> connectionUrl(Ref ref) async {
     return "${kDebugMode && leading.contains("localhost") ? '$leading:8001' : leading}/api";
   } else {
     String? storedUrl = await SecureStorageProvider.getValue(
-        SecureStorageProvider.connectionUrlKey);
+      SecureStorageProvider.connectionUrlKey,
+    );
     return (storedUrl == null || storedUrl.isEmpty) ? null : "$storedUrl/api";
   }
 }
@@ -59,7 +60,9 @@ class UnsecureConfig extends _$UnsecureConfig {
   Future<void> setConnectionUrl(String? url) async {
     // Persist the value for future app launches
     await SecureStorageProvider.saveValue(
-        SecureStorageProvider.connectionUrlKey, url);
+      SecureStorageProvider.connectionUrlKey,
+      url,
+    );
     // Update the provider that holds the URL.
     ref.invalidate(connectionUrlProvider);
     if (url != null) {
@@ -74,11 +77,6 @@ class UnsecureConfig extends _$UnsecureConfig {
 
   bool isDemoMode() {
     return state.value?.demoMode != null;
-  }
-
-  /// Triggers a retry
-  Future<void> retry() async {
-    ref.invalidateSelf();
   }
 }
 

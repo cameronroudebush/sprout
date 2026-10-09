@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -39,13 +39,16 @@ class ConnectionFailurePage extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 "Troubleshooting Steps:",
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               _buildStep(theme, "Ensure that Sprout is running."),
               _buildStep(
-                  theme, "If remote, make sure your URL above is correct."),
+                theme,
+                "If remote, make sure your URL above is correct.",
+              ),
             ],
           ),
         ),
@@ -62,16 +65,18 @@ class ConnectionFailurePage extends ConsumerWidget {
                       .setConnectionUrl(null);
                   NavigationProvider.redirect('/connection/setup');
                 },
-                icon: Icon(Icons.settings,
-                    color: theme.colorScheme.secondaryContainer),
+                icon: Icon(
+                  Icons.settings,
+                  color: theme.colorScheme.secondaryContainer,
+                ),
                 label: const Text("Edit URL"),
                 style: ThemeHelpers.primaryButton,
               ),
             ),
           Expanded(
             child: FilledButton.icon(
-              onPressed: () {
-                ref.invalidate(unsecureConfigProvider);
+              onPressed: () async {
+                final _ = await ref.refresh(unsecureConfigProvider.future);
                 NavigationProvider.redirect('/');
               },
               icon: const Icon(Icons.refresh),
@@ -92,8 +97,9 @@ class ConnectionFailurePage extends ConsumerWidget {
         Flexible(
           child: Text(
             value,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -108,8 +114,11 @@ class ConnectionFailurePage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 8,
         children: [
-          Icon(Icons.check_circle_outline,
-              size: 14, color: theme.colorScheme.primary),
+          Icon(
+            Icons.check_circle_outline,
+            size: 14,
+            color: theme.colorScheme.primary,
+          ),
           Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
         ],
       ),

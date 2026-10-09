@@ -199,10 +199,17 @@ String? _authRedirect(Ref ref, GoRouterState state) {
   final unsecureConfigState = ref.read(unsecureConfigProvider);
   final userConfigState = ref.read(userConfigProvider);
   final isSetupMode = ref.read(authProvider.notifier).isSetupMode;
+  final hasConnectionUrl = connUrlState.value?.isNotEmpty == true;
 
   // Determine if we are still waiting for core providers
-  final isCoreLoading =
-      splashAsync.isLoading || authState.isLoading || connUrlState.isLoading;
+  final isCoreLoading = splashAsync.isLoading ||
+      authState.isLoading ||
+      connUrlState.isLoading ||
+      (hasConnectionUrl &&
+          (unsecureConfigState.isLoading ||
+              unsecureConfigState.isRefreshing ||
+              (!unsecureConfigState.hasValue &&
+                  !unsecureConfigState.hasError)));
 
   // Determine if the user is logged in
   final isLoggedIn = authState.value != null;
