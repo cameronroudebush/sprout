@@ -40,6 +40,8 @@ export interface ExchangeInstitution<AuthContext, RawAccount> {
   institutionUrl?: string;
   /** Provider-specific credentials (e.g., access_token, item_id, authorization_id) */
   authContext: AuthContext;
+  /** Whether the provider reported an error for this institution during exchange */
+  hasError?: boolean;
   /** The raw accounts returned by the remote provider's API */
   rawAccounts: RawAccount[];
 }
@@ -99,6 +101,7 @@ export abstract class ProviderBase<
         results.push(...syncResults);
         await this.setInstitutionError(asset, false);
       } catch (error) {
+        await this.setInstitutionError(asset, true);
         await this.handleSyncError(asset, error);
       }
     }
@@ -164,7 +167,7 @@ export abstract class ProviderBase<
 
         // Handle provider-specific linking data
         await this.upsertInstitutionAsset(institution, instData.authContext);
-        institution.hasError = false;
+        institution.hasError = instData.hasError ?? false;
         await institution.update();
 
         // Process all accounts attached to this institution

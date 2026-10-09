@@ -96,7 +96,8 @@ describe("ProviderBase", () => {
     });
 
     it("should handle sync error per asset gracefully", async () => {
-      const asset = { id: "asset-1" };
+      const institution = { hasError: false, update: vi.fn().mockResolvedValue(undefined) };
+      const asset = { id: "asset-1", institution };
       (provider as any).getInstitutionAssetsForUser.mockResolvedValue([asset]);
       (provider as any).performSync.mockRejectedValue(new Error("Sync crash"));
       vi.spyOn(Account, "find").mockResolvedValue([]);
@@ -105,6 +106,8 @@ describe("ProviderBase", () => {
 
       const results = await provider.get(user, false, SyncTriggerType.MANUAL);
       expect(results).toHaveLength(0);
+      expect(institution.hasError).toBe(true);
+      expect(institution.update).toHaveBeenCalledOnce();
       expect(handleErrSpy).toHaveBeenCalledWith(asset, expect.any(Error));
     });
   });
@@ -116,6 +119,7 @@ describe("ProviderBase", () => {
         institutionName: "New Bank",
         institutionUrl: undefined,
         authContext: { accessToken: "at-123" },
+        hasError: true,
         rawAccounts: [rawAccount],
       };
 
@@ -146,6 +150,7 @@ describe("ProviderBase", () => {
       expect(results).toHaveLength(1);
       expect(results[0]!.account).toBeDefined();
       expect(mockHolding.insert).toHaveBeenCalled();
+      expect(instMock.hasError).toBe(true);
     });
 
     it("should rollback exchange and throw InternalServerErrorException on error", async () => {

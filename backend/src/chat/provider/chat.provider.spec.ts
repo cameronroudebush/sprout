@@ -66,6 +66,9 @@ class TestChatProvider extends ChatProvider {
   public runExtract(error: unknown) {
     return this.extractErrorMessage(error);
   }
+  public runToUserError(error: unknown) {
+    return this.toUserError(error);
+  }
   public runIsOverloaded(error: unknown) {
     return this.isOverloadedError(error);
   }
@@ -130,9 +133,16 @@ describe("ChatProvider", () => {
         error: { message: '{\n  "error": { "message": "temporarily unavailable", "status": "UNAVAILABLE" }\n}' },
       }),
     ).toBe("temporarily unavailable");
+    expect(provider.runExtract({ error: { message: '{"reason":"unknown"}' } })).toBe('{"reason":"unknown"}');
+    expect(provider.runExtract({ error: { message: 123 } })).toBe("123");
     expect(provider.runExtract(new Error("{ invalid json"))).toBeUndefined();
     expect(provider.runExtract(new Error("plain"))).toBeUndefined();
     expect(provider.runExtract(undefined)).toBeUndefined();
+  });
+
+  it("should convert string and empty errors to user-facing errors", () => {
+    expect(provider.runToUserError("provider failure").message).toBe("provider failure");
+    expect(provider.runToUserError({}).message).toBe("The chat provider failed to generate a response.");
   });
 
   it("should transform text and inject chart colors", () => {
@@ -298,6 +308,32 @@ describe("ChatProvider", () => {
       await rejection;
       expect(chat.text).toBe("Model is busy");
       expect(chat.text).not.toContain('{"');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should map exhausted overloaded and quota stream errors", async () => {
+    vi.useFakeTimers();
+    try {
+      provider.streamErrors = [
+        { code: 503, message: "provider busy" },
+        { code: 503, message: "provider busy" },
+        { code: 503, message: "provider busy" },
+      ];
+      const overloadedChat = new ChatHistory(user, "question", "user");
+      overloadedChat.update = vi.fn().mockResolvedValue(overloadedChat);
+
+      const overloadedPromise = provider.generateChatContent(overloadedChat, ChatTimeframe.threeMonths, false, true);
+      const overloadedRejection = expect(overloadedPromise).rejects.toThrow("provider busy");
+      await vi.advanceTimersByTimeAsync(15000);
+      await overloadedRejection;
+
+      provider.streamErrors = [{ status: 429, message: "quota exceeded" }];
+      const quotaChat = new ChatHistory(user, "question", "user");
+      quotaChat.update = vi.fn().mockResolvedValue(quotaChat);
+
+      await expect(provider.generateChatContent(quotaChat, ChatTimeframe.threeMonths, false, true)).rejects.toThrow(ThrottlerException);
     } finally {
       vi.useRealTimers();
     }

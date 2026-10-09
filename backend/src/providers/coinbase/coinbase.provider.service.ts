@@ -82,9 +82,42 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
     if (existingAccounts.length === 0) return [];
 
     const existingAccount = existingAccounts[0]!;
-    let rawAccounts: CoinbaseAccount[];
     try {
-      rawAccounts = await this.fetchCoinbaseData(user, "accounts");
+      const rawAccounts = await this.fetchCoinbaseData(user, "accounts");
+      const activeAccounts = rawAccounts.filter((acc) => parseFloat(acc.balance?.amount || "0") > 0);
+
+      const payload: CoinbaseWalletPayload = {
+        id: existingAccount.providerAccountId,
+        name: existingAccount.name,
+        accounts: activeAccounts,
+      };
+
+      const authContext = this.getAuthContext(user);
+      const institution = existingAccount.institution || new Institution("https://www.coinbase.com", "Coinbase", false, user);
+      const updatedAccount = await this.mapToSproutAccount(payload, authContext, user, institution);
+
+      existingAccount.balance = updatedAccount.balance;
+      existingAccount.availableBalance = updatedAccount.availableBalance;
+      existingAccount.currency = "USD";
+
+      const syncData = accountsOnly
+        ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
+        : await this.fetchInitialSyncData(payload, existingAccount, authContext, user);
+
+      if (institution.hasError) {
+        institution.hasError = false;
+        await institution.update();
+      } else {
+        institution.hasError = false;
+      }
+
+      return [
+        {
+          account: existingAccount,
+          providerAccountId: existingAccount.providerAccountId,
+          ...syncData,
+        },
+      ];
     } catch (error) {
       if (existingAccount.institution) {
         existingAccount.institution.hasError = true;
@@ -92,37 +125,6 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
       }
       throw error;
     }
-    const activeAccounts = rawAccounts.filter((acc) => parseFloat(acc.balance?.amount || "0") > 0);
-
-    const payload: CoinbaseWalletPayload = {
-      id: existingAccount.providerAccountId,
-      name: existingAccount.name,
-      accounts: activeAccounts,
-    };
-
-    const authContext = this.getAuthContext(user);
-    const institution = existingAccount.institution || new Institution("https://www.coinbase.com", "Coinbase", false, user);
-    if (institution.hasError) {
-      institution.hasError = false;
-      await institution.update();
-    }
-    const updatedAccount = await this.mapToSproutAccount(payload, authContext, user, institution);
-
-    existingAccount.balance = updatedAccount.balance;
-    existingAccount.availableBalance = updatedAccount.availableBalance;
-    existingAccount.currency = "USD";
-
-    const syncData = accountsOnly
-      ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
-      : await this.fetchInitialSyncData(payload, existingAccount, authContext, user);
-
-    return [
-      {
-        account: existingAccount,
-        providerAccountId: existingAccount.providerAccountId,
-        ...syncData,
-      },
-    ];
   }
 
   protected override extractProviderAccountId(rawAccount: CoinbaseWalletPayload): string {

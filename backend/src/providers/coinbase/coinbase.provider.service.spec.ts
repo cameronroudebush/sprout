@@ -102,6 +102,8 @@ describe("CoinbaseProviderService", () => {
       ).performSync(user, undefined, false);
       expect(syncRes.length).toBe(1);
       expect(syncRes[0]?.holdings.length).toBe(2);
+      expect(existingAccount.institution.hasError).toBe(false);
+      expect(existingAccount.institution.update).toHaveBeenCalledOnce();
     });
 
     it("should return empty array in performSync if user unavailable or no existing account", async () => {
@@ -138,6 +140,27 @@ describe("CoinbaseProviderService", () => {
       expect(result[0].transactions).toBeUndefined();
     });
 
+    it("should not update a healthy institution after a successful sync", async () => {
+      const existingAccount = TestEntities.account;
+      existingAccount.providerAccountId = "coinbase-primary-wallet";
+      const institution = {
+        hasError: false,
+        update: vi.fn().mockResolvedValue(undefined),
+      };
+      existingAccount.institution = institution as any;
+      expect(existingAccount.institution).toBe(institution);
+      expect(institution.hasError).toBe(false);
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
+      vi.spyOn(service as any, "fetchCoinbaseData").mockResolvedValue([]);
+      const mapSpy = vi.spyOn(service as any, "mapToSproutAccount").mockResolvedValue({ balance: 0, availableBalance: 0 } as Account);
+
+      await expect((service as any).performSync(user, undefined, true)).resolves.toHaveLength(1);
+
+      expect(institution.update).not.toHaveBeenCalled();
+      expect(institution.hasError).toBe(false);
+      expect(mapSpy.mock.calls[0]?.[3]).toBe(institution);
+    });
+
     it("should mark the institution when the account API fails", async () => {
       const existingAccount = TestEntities.account;
       existingAccount.providerAccountId = "coinbase-primary-wallet";
@@ -148,6 +171,31 @@ describe("CoinbaseProviderService", () => {
       await expect((service as any).performSync(user, undefined, true)).rejects.toThrow("API unavailable");
       expect(existingAccount.institution.hasError).toBe(true);
       expect(existingAccount.institution.update).toHaveBeenCalled();
+    });
+
+    it("should propagate sync errors without updating when account has no institution", async () => {
+      const existingAccount = TestEntities.account;
+      existingAccount.providerAccountId = "coinbase-primary-wallet";
+      existingAccount.institution = undefined;
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
+      vi.spyOn(service as any, "fetchCoinbaseData").mockRejectedValue(new Error("API unavailable"));
+
+      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow("API unavailable");
+    });
+
+    it("should mark the institution when mapping account data fails", async () => {
+      const existingAccount = TestEntities.account;
+      existingAccount.providerAccountId = "coinbase-primary-wallet";
+      existingAccount.institution.hasError = false;
+      existingAccount.institution.update = vi.fn().mockResolvedValue(existingAccount.institution);
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount]);
+      vi.spyOn(service as any, "fetchCoinbaseData").mockResolvedValue([]);
+      vi.spyOn(service as any, "mapToSproutAccount").mockRejectedValue(new Error("Mapping failed"));
+
+      await expect((service as any).performSync(user, undefined, true)).rejects.toThrow("Mapping failed");
+
+      expect(existingAccount.institution.hasError).toBe(true);
+      expect(existingAccount.institution.update).toHaveBeenCalledOnce();
     });
   });
 

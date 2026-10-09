@@ -75,6 +75,18 @@ describe("ZillowProviderService", () => {
       expect(zillowAcc1.institution.hasError).toBe(true);
     });
 
+    it("should ignore an account failure when account has no institution", async () => {
+      const account = TestEntities.account;
+      account.provider = ProviderType.zillow;
+      account.providerAccountId = "123456";
+      account.institution = undefined;
+
+      vi.spyOn(Account, "find").mockResolvedValue([account]);
+      vi.spyOn(service, "getInfoByZpid").mockRejectedValue(new Error("Zillow scrape error"));
+
+      await expect(service.get(user, false, 0 as any)).resolves.toEqual([]);
+    });
+
     it("should clear a Zillow institution error after all properties sync successfully", async () => {
       const zillowAcc = TestEntities.account;
       zillowAcc.provider = ProviderType.zillow;
@@ -92,6 +104,33 @@ describe("ZillowProviderService", () => {
       await service.get(user, false, 0 as any);
 
       expect(zillowAcc.institution.hasError).toBe(false);
+    });
+
+    it("should retain institution error when one of multiple properties fails", async () => {
+      const institution = TestEntities.institution;
+      institution.update = vi.fn().mockResolvedValue(institution);
+
+      const successfulAccount = TestEntities.account;
+      successfulAccount.provider = ProviderType.zillow;
+      successfulAccount.providerAccountId = "123456";
+      successfulAccount.institution = institution;
+
+      const failedAccount = TestEntities.account;
+      failedAccount.provider = ProviderType.zillow;
+      failedAccount.providerAccountId = "654321";
+      failedAccount.institution = institution;
+
+      vi.spyOn(Account, "find").mockResolvedValue([successfulAccount, failedAccount]);
+      vi.spyOn(service, "getInfoByZpid").mockImplementation(async (_user, zpid) => {
+        if (zpid === "654321") throw new Error("Zillow scrape error");
+        return { zpid, zestimate: 600000, rentZestimate: 3000, currency: "USD" } as any;
+      });
+
+      const results = await service.get(user, false, 0 as any);
+
+      expect(results).toHaveLength(1);
+      expect(institution.hasError).toBe(true);
+      expect(institution.update).toHaveBeenCalledOnce();
     });
   });
 

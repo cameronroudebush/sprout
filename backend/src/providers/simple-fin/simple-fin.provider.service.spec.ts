@@ -212,6 +212,7 @@ describe("SimpleFINProviderService", () => {
           { id: "acc_2", name: "Chase Savings", org: { name: "Chase", url: "chase.com" } },
           { id: "acc_3", name: "Citi Card", org: { name: "Citi", url: "citi.com" } },
         ],
+        errors: ["Chase: connection failed"],
       });
 
       const result = await (service as any).performExchange(mockUser, ["acc_1", "acc_2", "acc_3"]);
@@ -219,6 +220,7 @@ describe("SimpleFINProviderService", () => {
       expect(result).toHaveLength(2);
       const chaseGroup = result.find((r: any) => r.institutionName === "Chase");
       expect(chaseGroup.rawAccounts).toHaveLength(2);
+      expect(chaseGroup.hasError).toBe(true);
     });
 
     it("should fall back to configured provider URL when institution URL is absent", async () => {
@@ -244,7 +246,7 @@ describe("SimpleFINProviderService", () => {
         balance: 0,
         availableBalance: 0,
         extra: {},
-        institution: { name: "Bank", hasError: false },
+        institution: { id: "institution-1", name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) },
       };
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
       const mapSpy = vi.spyOn(service as any, "mapToSproutAccount");
@@ -258,6 +260,7 @@ describe("SimpleFINProviderService", () => {
       expect(resultsAccountsOnly).toHaveLength(1);
       expect(resultsAccountsOnly[0].account.balance).toBe(100);
       expect(mapSpy.mock.calls[0]?.[3].hasError).toBe(true);
+      expect(resultsAccountsOnly[0].account.institution.hasError).toBe(true);
 
       const resultsFull = await (service as any).performSync(mockUser, undefined, false);
       expect(resultsFull).toHaveLength(1);
@@ -288,6 +291,69 @@ describe("SimpleFINProviderService", () => {
 
       await expect((service as any).performSync(mockUser, undefined, true)).resolves.toHaveLength(1);
       expect(mapSpy).toHaveBeenCalledWith(expect.anything(), mockUser.config.simpleFinToken, mockUser, expect.any(Institution));
+    });
+
+    it("should flag the institution when mapping linked account data fails", async () => {
+      const existingAccount = {
+        id: "acc-1",
+        providerAccountId: "acc-1",
+        institution: { id: "institution-1", name: "Bank", hasError: false },
+      };
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
+        accounts: [{ id: "acc-1", name: "Bank Checking", org: { name: "Bank", url: "url" } }],
+      });
+      const mapSpy = vi.spyOn(service as any, "mapToSproutAccount").mockRejectedValue(new Error("Mapping failed"));
+      const updateSpy = vi.spyOn(Institution.prototype, "update").mockResolvedValue(undefined as any);
+
+      await expect((service as any).performSync(mockUser, undefined, true)).rejects.toThrow("Mapping failed");
+
+      expect(updateSpy).toHaveBeenCalledOnce();
+      expect(mapSpy.mock.calls[0]?.[3].hasError).toBe(true);
+    });
+
+    it("should flag a linked institution when provider reports an error without returning its accounts", async () => {
+      const institution = { id: "institution-1", name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) };
+      vi.spyOn(Account, "find").mockResolvedValue([{ institution } as any]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({ accounts: [], errors: ["Bank: authentication failed"] });
+
+      await expect((service as any).performSync(mockUser, undefined, true)).resolves.toEqual([]);
+
+      expect(institution.hasError).toBe(true);
+      expect(institution.update).toHaveBeenCalledOnce();
+    });
+
+    it("should clear a linked institution error when SimpleFIN reports no errors", async () => {
+      const institution = { id: "institution-1", name: "Bank", hasError: true, update: vi.fn().mockResolvedValue(undefined) };
+      vi.spyOn(Account, "find").mockResolvedValue([{ institution } as any]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({ accounts: [], errors: [] });
+
+      await expect((service as any).performSync(mockUser, undefined, true)).resolves.toEqual([]);
+
+      expect(institution.hasError).toBe(false);
+      expect(institution.update).toHaveBeenCalledOnce();
+    });
+
+    it("should flag linked institutions when the SimpleFIN request fails", async () => {
+      const institution = { id: "institution-1", name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) };
+      vi.spyOn(Account, "find").mockResolvedValue([{ institution } as any]);
+      vi.spyOn(service as any, "fetchData").mockRejectedValue(new Error("Provider unavailable"));
+
+      await expect((service as any).performSync(mockUser, undefined, true)).rejects.toThrow("Provider unavailable");
+
+      expect(institution.hasError).toBe(true);
+      expect(institution.update).toHaveBeenCalledOnce();
+    });
+
+    it("should include provider institution errors when returning unlinked accounts", async () => {
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
+        accounts: [{ id: "acc-2", name: "New", balance: "100", "available-balance": "100", currency: "USD", org: { name: "Bank", url: "url" } }],
+        errors: ["Bank: authentication failed"],
+      });
+
+      const unlinked = await service.getUnlinkedAccounts(mockUser);
+
+      expect(unlinked[0]?.institution.hasError).toBe(true);
     });
   });
 

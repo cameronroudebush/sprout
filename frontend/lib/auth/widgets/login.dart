@@ -1,8 +1,7 @@
-import 'package:material_ui/material_ui.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart' hide Badge;
 import 'package:sprout/auth/widgets/login_bg.dart';
 import 'package:sprout/auth/widgets/login_form.dart';
-import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/widgets/badge.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -18,19 +17,14 @@ class LoginPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final config = ref.watch(unsecureConfigProvider).value;
     final packageInfo = ref.watch(packageInfoProvider).value;
-    final versionInfo = Wrap(
-      alignment: WrapAlignment.center,
+    final versionInfo = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       spacing: 8,
-      runSpacing: 8,
       children: [
         Badge(
-          label: 'Frontend ${packageInfo?.version ?? ""}',
-          variant: BadgeVariant.outline,
-        ),
-        Badge(
-          label: 'Backend ${config?.version ?? ""}',
+          label: packageInfo?.version ?? "",
+          icon: Icons.web,
           variant: BadgeVariant.outline,
         ),
       ],

@@ -57,7 +57,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     const unlinked = data.accounts.filter((raw) => !existingProviderAccountIds.includes(raw.id));
     return await Promise.all(
       unlinked.map(async (raw) => {
-        const institution = new Institution(raw.org.url, raw.org.name, false, user);
+        const institution = new Institution(raw.org.url, raw.org.name, this.institutionHasError(raw.org.name, data.errors), user);
         institution.id = crypto.randomUUID();
         const account = await this.mapToSproutAccount(raw, user.config.simpleFinToken, user, institution);
         account.id = raw.id;
@@ -83,6 +83,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
       institutionName: name,
       institutionUrl: accounts[0]?.org.url || this.config.url,
       authContext: accessToken,
+      hasError: this.institutionHasError(name, data.errors),
       rawAccounts: accounts,
     }));
   }
@@ -90,8 +91,16 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
   protected async performSync(user: User, _asset: undefined, accountsOnly: boolean): Promise<ProviderSyncResult[]> {
     if (!user.config.simpleFinToken) return [];
 
-    const data = await this.fetchData(user.config.simpleFinToken, accountsOnly, user);
     const existingAccounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.simpleFin } });
+    let data: SimpleFINReturn.FinancialData;
+    try {
+      data = await this.fetchData(user.config.simpleFinToken, accountsOnly, user);
+    } catch (error) {
+      await this.updateInstitutionErrors(existingAccounts, () => true);
+      throw error;
+    }
+
+    await this.updateInstitutionErrors(existingAccounts, (name) => this.institutionHasError(name, data.errors));
     const existingMap = new Map(existingAccounts.map((a) => [a.providerAccountId, a]));
 
     const results: ProviderSyncResult[] = [];
@@ -100,26 +109,33 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
       if (!existingMap.has(rawAccount.id)) continue;
 
       const existingAccount = existingMap.get(rawAccount.id)!;
-      const hasError = data.errors?.some((x) => x.includes(rawAccount.org.name)) ?? false;
+      const hasError = this.institutionHasError(rawAccount.org.name, data.errors);
       const institution = new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
       if (existingAccount.institution) institution.id = existingAccount.institution.id;
+      existingAccount.institution = institution;
 
-      const updatedAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
+      try {
+        const updatedAccount = await this.mapToSproutAccount(rawAccount, user.config.simpleFinToken, user, institution);
 
-      existingAccount.balance = updatedAccount.balance;
-      existingAccount.availableBalance = updatedAccount.availableBalance;
-      existingAccount.extra = updatedAccount.extra;
+        existingAccount.balance = updatedAccount.balance;
+        existingAccount.availableBalance = updatedAccount.availableBalance;
+        existingAccount.extra = updatedAccount.extra;
 
-      const syncData = accountsOnly
-        ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
-        : await this.fetchInitialSyncData(rawAccount, existingAccount, user.config.simpleFinToken, user);
+        const syncData = accountsOnly
+          ? { holdings: undefined, transactions: undefined, removedTransactionIds: [] }
+          : await this.fetchInitialSyncData(rawAccount, existingAccount, user.config.simpleFinToken, user);
 
-      results.push({
-        account: existingAccount,
-        providerAccountId: rawAccount.id,
-        preventAutoCreation: true,
-        ...syncData,
-      });
+        results.push({
+          account: existingAccount,
+          providerAccountId: rawAccount.id,
+          preventAutoCreation: true,
+          ...syncData,
+        });
+      } catch (error) {
+        institution.hasError = true;
+        await institution.update();
+        throw error;
+      }
     }
     return results;
   }
@@ -205,5 +221,22 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     await this.rateLimit(user).incrementOrError();
     const result = await fetch(cleanURL, { method: "GET", headers: { Authorization: "Basic " + btoa(`${username}:${pass}`) } });
     return (await result.json()) as SimpleFINReturn.FinancialData;
+  }
+
+  private institutionHasError(institutionName: string, errors?: string[]): boolean {
+    return errors?.some((error) => error.includes(institutionName)) ?? false;
+  }
+
+  private async updateInstitutionErrors(accounts: Account[], hasError: (institutionName: string) => boolean): Promise<void> {
+    const institutions = new Set(accounts.map((account) => account.institution).filter((institution): institution is Institution => !!institution));
+    await Promise.all(
+      Array.from(institutions).map(async (institution) => {
+        const nextHasError = hasError(institution.name);
+        if (institution.hasError !== nextHasError) {
+          institution.hasError = nextHasError;
+          await institution.update();
+        }
+      }),
+    );
   }
 }
