@@ -244,14 +244,14 @@ describe("SimpleFINProviderService", () => {
         balance: 0,
         availableBalance: 0,
         extra: {},
-        institution: { name: "Bank", hasError: false },
+        institution: { name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) },
       };
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
       const mapSpy = vi.spyOn(service as any, "mapToSproutAccount");
 
       vi.spyOn(service as any, "fetchData").mockResolvedValue({
         accounts: [{ id: "acc_1", name: "Bank Acc", balance: "100", "available-balance": "100", currency: "USD", org: { name: "Bank", url: "url" } }],
-        errors: ["Bank"],
+        errors: ["You must reauthenticate."],
       });
 
       const resultsAccountsOnly = await (service as any).performSync(mockUser, undefined, true);
@@ -275,7 +275,22 @@ describe("SimpleFINProviderService", () => {
       const institution = { id: "institution-1", name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) };
       const existingAccount = { providerAccountId: "missing-account", institution };
       vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
-      vi.spyOn(service as any, "fetchData").mockResolvedValue({ accounts: [], errors: ["Bank: login required"] });
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({ accounts: [], errors: ["You must reauthenticate."] });
+
+      await expect((service as any).performSync(mockUser, undefined, false)).resolves.toEqual([]);
+
+      expect(institution.hasError).toBe(true);
+      expect(institution.update).toHaveBeenCalled();
+    });
+
+    it("should mark an institution from structured SimpleFIN connection errors", async () => {
+      const institution = { id: "institution-1", name: "Bank", hasError: false, update: vi.fn().mockResolvedValue(undefined) };
+      const existingAccount = { providerAccountId: "missing-account", institution };
+      vi.spyOn(Account, "find").mockResolvedValue([existingAccount as any]);
+      vi.spyOn(service as any, "fetchData").mockResolvedValue({
+        accounts: [],
+        errlist: [{ code: "con.auth", msg: "Authentication required" }],
+      });
 
       await expect((service as any).performSync(mockUser, undefined, false)).resolves.toEqual([]);
 

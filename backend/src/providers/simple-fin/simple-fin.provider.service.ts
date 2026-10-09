@@ -94,14 +94,23 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     const existingAccounts = await Account.find({ where: { user: { id: user.id }, provider: ProviderType.simpleFin } });
     const existingMap = new Map(existingAccounts.map((a) => [a.providerAccountId, a]));
     const errors = data.errors ?? [];
+    const structuredErrors = data.errlist ?? [];
+    const institutionErrorMessages = [
+      ...errors.filter((error) => /auth|login|credential|reauthenticate/i.test(error)),
+      ...structuredErrors.filter((error) => /^(con|act)\./i.test(error.code)).map((error) => error.msg),
+    ];
 
     for (const error of errors) {
       this.logger.warn(`SimpleFIN reported an institution error: ${error}`);
     }
+    for (const error of structuredErrors) {
+      this.logger.warn(`SimpleFIN reported an institution error: ${error.code}: ${error.msg}`);
+    }
 
     const institutions = new Map(existingAccounts.filter((account) => account.institution).map((account) => [account.institution.id, account.institution]));
     for (const institution of institutions.values()) {
-      if (errors.some((error) => error.includes(institution.name)) && !institution.hasError) {
+      const hasError = institutionErrorMessages.some((error) => error.includes(institution.name)) || institutionErrorMessages.length > 0;
+      if (hasError && !institution.hasError) {
         institution.hasError = true;
         await institution.update();
       }
@@ -113,7 +122,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
       if (!existingMap.has(rawAccount.id)) continue;
 
       const existingAccount = existingMap.get(rawAccount.id)!;
-      const hasError = errors.some((x) => x.includes(rawAccount.org.name));
+      const hasError = institutionErrorMessages.some((error) => error.includes(rawAccount.org.name)) || institutionErrorMessages.length > 0;
       const institution = new Institution(rawAccount.org.url, rawAccount.org.name, hasError, user);
       if (existingAccount.institution) institution.id = existingAccount.institution.id;
 

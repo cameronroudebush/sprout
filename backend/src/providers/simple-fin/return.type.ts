@@ -46,8 +46,16 @@ export namespace SimpleFINReturn {
   }
 
   export interface FinancialData {
-    errors: string[];
+    errors?: string[];
+    errlist?: Error[];
     accounts: Account[];
     "x-api-message"?: string[];
+  }
+
+  export interface Error {
+    code: string;
+    msg: string;
+    conn_id?: string;
+    account_id?: string;
   }
 }
