@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
@@ -76,7 +76,7 @@ class ConnectionFailurePage extends ConsumerWidget {
           Expanded(
             child: FilledButton.icon(
               onPressed: () async {
-                await ref.read(unsecureConfigProvider.notifier).retry();
+                final _ = await ref.refresh(unsecureConfigProvider.future);
                 NavigationProvider.redirect('/');
               },
               icon: const Icon(Icons.refresh),

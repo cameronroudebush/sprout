@@ -78,14 +78,6 @@ class UnsecureConfig extends _$UnsecureConfig {
   bool isDemoMode() {
     return state.value?.demoMode != null;
   }
-
-  /// Triggers a retry
-  Future<void> retry() async {
-    // Await the rebuild so callers do not navigate while dependent providers
-    // are still waiting on the connection check.
-    // ignore: unused_result
-    await ref.refresh(unsecureConfigProvider.future);
-  }
 }
 
 /// Extension upon secure config that allows state management using riverpod
