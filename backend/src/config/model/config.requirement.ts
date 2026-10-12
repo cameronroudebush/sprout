@@ -80,7 +80,8 @@ export const CONFIGURATION_REQUIREMENTS: ConfigurationRequirement[] = [
         !Configuration.transaction.stuckTransactions.enabled &&
         !Configuration.user.deviceCheck.enabled &&
         !Configuration.server.email.enabled &&
-        !Configuration.providers.syncNotifications.enabled
+        !Configuration.providers.syncNotifications.enabled &&
+        !Configuration.providers.postSync.enabled
       );
     },
     fix: (logger) => {
@@ -90,6 +91,7 @@ export const CONFIGURATION_REQUIREMENTS: ConfigurationRequirement[] = [
         "Device Integrity Check": Configuration.user.deviceCheck,
         "Email Notifications": Configuration.server.email,
         "Sync Notifications": Configuration.providers.syncNotifications,
+        "Post-Sync Processing": Configuration.providers.postSync,
       };
 
       for (const [name, config] of Object.entries(features))

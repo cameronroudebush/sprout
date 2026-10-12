@@ -29,7 +29,7 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
     private readonly sseService: SSEService,
     private readonly chatService: ChatService,
   ) {
-    super("provider:post-sync", Configuration.providers.postSyncTime, true);
+    super("provider:post-sync", Configuration.providers.postSyncTime, Configuration.providers.postSync.enabled);
   }
 
   protected async generateTasks() {

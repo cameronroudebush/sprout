@@ -1,5 +1,5 @@
 import { setupTests } from "@backend/test/helpers.js";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 setupTests();
 
@@ -8,6 +8,12 @@ import { Configuration } from "@backend/config/core.js";
 import { BaseProviderConfig } from "@backend/providers/base/config.js";
 
 describe("CONFIGURATION_REQUIREMENTS", () => {
+  const originalPostSyncEnabled = Configuration.providers.postSync.enabled;
+
+  afterEach(() => {
+    Configuration.providers.postSync.enabled = originalPostSyncEnabled;
+  });
+
   it("should validate and execute fix handlers for all configuration requirements", () => {
     const logger = { error: vi.fn(), warn: vi.fn() } as any;
 
@@ -73,6 +79,7 @@ describe("CONFIGURATION_REQUIREMENTS", () => {
     Configuration.user.deviceCheck.enabled = true;
     Configuration.server.email.enabled = true;
     Configuration.providers.syncNotifications.enabled = true;
+    Configuration.providers.postSync.enabled = true;
     expect(jobReq.validate()).toBe(false);
     jobReq.fix(logger);
     expect(Configuration.database.backup.enabled).toBe(false);
@@ -80,6 +87,7 @@ describe("CONFIGURATION_REQUIREMENTS", () => {
     expect(Configuration.user.deviceCheck.enabled).toBe(false);
     expect(Configuration.server.email.enabled).toBe(false);
     expect(Configuration.providers.syncNotifications.enabled).toBe(false);
+    expect(Configuration.providers.postSync.enabled).toBe(false);
   });
 
   it("should pass demo mode job restrictions when every job is disabled", () => {
@@ -91,6 +99,7 @@ describe("CONFIGURATION_REQUIREMENTS", () => {
     Configuration.user.deviceCheck.enabled = false;
     Configuration.server.email.enabled = false;
     Configuration.providers.syncNotifications.enabled = false;
+    Configuration.providers.postSync.enabled = false;
 
     expect(jobReq.validate()).toBe(true);
   });
@@ -105,6 +114,7 @@ describe("CONFIGURATION_REQUIREMENTS", () => {
     Configuration.user.deviceCheck.enabled = false;
     Configuration.server.email.enabled = false;
     Configuration.providers.syncNotifications.enabled = false;
+    Configuration.providers.postSync.enabled = false;
 
     jobReq.fix(logger);
 

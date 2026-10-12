@@ -14,16 +14,22 @@ import { SSEService } from "@backend/sse/sse.service.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { UserDevice } from "@backend/user/model/user.device.model.js";
 import { User } from "@backend/user/model/user.model.js";
-import { Mocked } from "vitest";
+import { afterEach, Mocked } from "vitest";
 
 describe("PostSyncProcessingJob", () => {
   let job: PostSyncProcessingJob;
   let notificationService: Mocked<NotificationService>;
   let sseService: Mocked<SSEService>;
   let chatService: Mocked<ChatService>;
+  const originalPostSyncEnabled = Configuration.providers.postSync.enabled;
+
+  afterEach(() => {
+    Configuration.providers.postSync.enabled = originalPostSyncEnabled;
+  });
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    Configuration.providers.postSync.enabled = true;
 
     notificationService = {
       notifyUser: vi.fn().mockResolvedValue({}),
@@ -38,6 +44,15 @@ describe("PostSyncProcessingJob", () => {
     } as any;
 
     job = new PostSyncProcessingJob(notificationService, sseService, chatService);
+  });
+
+  it("should respect the post-sync enabled configuration", () => {
+    expect(job.enabled).toBe(true);
+    Configuration.providers.postSync.enabled = false;
+
+    const disabledJob = new PostSyncProcessingJob(notificationService, sseService, chatService);
+
+    expect(disabledJob.enabled).toBe(false);
   });
 
   describe("generateTasks", () => {

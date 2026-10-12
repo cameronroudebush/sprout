@@ -13,9 +13,20 @@ export class SyncNotifications {
   enabled: boolean = true;
 }
 
+export class PostSync {
+  @ConfigurationMetadata.assign({
+    comment: "If post-sync processing should run after provider syncs.",
+    externalControlDisabled: true,
+  })
+  enabled: boolean = true;
+}
+
 export class ProvidersConfig {
   @ConfigurationMetadata.assign({ comment: " Controls sending sync notifications for users", externalControlDisabled: true })
   syncNotifications = new SyncNotifications();
+
+  @ConfigurationMetadata.assign({ comment: "Controls post-sync processing" })
+  postSync = new PostSync();
 
   @ConfigurationMetadata.assign({
     comment: "How often we want to handle the post sync job so we can send notifications or generate data with the freshest finance data handled.",

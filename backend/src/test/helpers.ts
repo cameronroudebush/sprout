@@ -106,6 +106,7 @@ vi.mock("@backend/config/core", () => ({
       },
     },
     providers: {
+      postSync: { enabled: true },
       postSyncTime: "0 0 * * *",
       syncNotifications: { enabled: true },
       plaid: {
