@@ -74,7 +74,7 @@ final class ChatProvider
   Chat create() => Chat();
 }
 
-String _$chatHash() => r'6ac4d9de4996df3fedf9fc8dbca9b5ac9e4b82d8';
+String _$chatHash() => r'b22887faa90abd23b5b826103b2cce8f7d211ce9';
 
 /// State for the chat elements
 

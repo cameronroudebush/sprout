@@ -41,8 +41,11 @@ class AccountErrorNotificationWidget extends ConsumerWidget {
         theme.colorScheme.errorContainer,
         theme.colorScheme.onErrorContainer,
         icon: Icons.error_outline,
-        onClick:
-            allowClick ? () => NavigationProvider.redirect("/accounts") : null,
+        onClick: allowClick
+            ? () => brokenAccounts.length == 1
+                ? NavigationProvider.redirectToAccount(brokenAccounts.first)
+                : NavigationProvider.redirect("/accounts")
+            : null,
       ),
     );
   }

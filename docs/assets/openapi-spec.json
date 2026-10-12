@@ -1180,6 +1180,24 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "name": "excludeFromCashFlow",
+            "required": false,
+            "in": "query",
+            "description": "If true, excludes transactions whose category is hidden from cash flow.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "includeAccountTypes",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated account types to include, or \"cash-flow\" for account types included in cash flow. Omit to include all account types.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2463,6 +2481,15 @@
             "in": "query",
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "includePending",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": true,
+              "type": "boolean"
             }
           }
         ],

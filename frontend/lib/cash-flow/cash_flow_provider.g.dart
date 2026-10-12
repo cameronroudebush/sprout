@@ -335,7 +335,7 @@ final class CashFlowTrendProvider extends $FunctionalProvider<
   }
 }
 
-String _$cashFlowTrendHash() => r'9547e9b975af1d60c936a553f2909158144dfb4c';
+String _$cashFlowTrendHash() => r'4bcda03740348c8424aa1cc7fe1559b9f7f6180a';
 
 /// State for cash flow trends
 
@@ -410,7 +410,7 @@ final class MonthlySpendingProvider
   }
 }
 
-String _$monthlySpendingHash() => r'cff2a784406a1b20b2d3f5eca0439b4e7122e7c9';
+String _$monthlySpendingHash() => r'7c07c34194ef33ce7c896a702a8a9b929922605a';
 
 /// Monthly spending state
 
@@ -630,6 +630,7 @@ final class DailySpendingProvider extends $FunctionalProvider<
       required ({
         int month,
         int year,
+        bool includePending,
       })
           super.argument})
       : super(
@@ -661,11 +662,13 @@ final class DailySpendingProvider extends $FunctionalProvider<
     final argument = this.argument as ({
       int month,
       int year,
+      bool includePending,
     });
     return dailySpending(
       ref,
       month: argument.month,
       year: argument.year,
+      includePending: argument.includePending,
     );
   }
 
@@ -680,7 +683,7 @@ final class DailySpendingProvider extends $FunctionalProvider<
   }
 }
 
-String _$dailySpendingHash() => r'2b7fc0a3ae4504359e2083e817ac79d347565fbc';
+String _$dailySpendingHash() => r'802f019fa8019a11af51ce9fe5380db8bec8d7c5';
 
 /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
 
@@ -691,6 +694,7 @@ final class DailySpendingFamily extends $Family
             ({
               int month,
               int year,
+              bool includePending,
             })> {
   DailySpendingFamily._()
       : super(
@@ -706,10 +710,12 @@ final class DailySpendingFamily extends $Family
   DailySpendingProvider call({
     required int month,
     required int year,
+    bool includePending = true,
   }) =>
       DailySpendingProvider._(argument: (
         month: month,
         year: year,
+        includePending: includePending,
       ), from: this);
 
   @override

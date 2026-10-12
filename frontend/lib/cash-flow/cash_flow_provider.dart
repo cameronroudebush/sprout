@@ -52,7 +52,7 @@ Future<CashFlowStats?> cashFlowStats(Ref ref,
 Future<List<CashFlowTrendStats>?> cashFlowTrend(Ref ref, int months) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
-  return await api.cashFlowControllerGetTrend(months: months);
+  return await api.cashFlowControllerGetTrend(months);
 }
 
 /// Monthly spending state
@@ -64,8 +64,7 @@ class MonthlySpending extends _$MonthlySpending {
     final categoryCount = categories ?? (kIsWeb ? 5 : 2);
 
     final api = await ref.watch(cashFlowApiProvider.future);
-    return await api.cashFlowControllerGetSpending(
-        months: months, categories: categoryCount);
+    return await api.cashFlowControllerGetSpending(months, categoryCount);
   }
 
   /// Explicitly trigger a refresh if needed
@@ -96,13 +95,14 @@ class CashFlowComparisonTimeline extends _$CashFlowComparisonTimeline {
 /// Live dynamic provider tracking discrete daily spending aggregates over a given month canvas
 @Riverpod(keepAlive: true)
 Future<Map<int, double>> dailySpending(Ref ref,
-    {required int month, required int year}) async {
+    {required int month, required int year, bool includePending = true}) async {
   ref.refreshOnForceUpdate();
   final api = await ref.watch(cashFlowApiProvider.future);
   final DailySpendingCalendarResponseDTO? response =
       await api.cashFlowControllerGetDailyCalendarSpending(
     year,
     month,
+    includePending: includePending,
   );
   if (response == null || response.spending.isEmpty) return {};
   return {

@@ -85,7 +85,7 @@ export class WeeklyEmailContent {
     this.dailySpendingBars = days.map((d) => ({
       label: d.label,
       amount: d.total,
-      amountText: d.total > 0 ? CurrencyHelper.format(d.total, user) : "",
+      amountText: CurrencyHelper.format(d.total, user),
       // Days with 0 spending yield 0% height (no bar)
       heightPercent: d.total > 0 ? Math.max(Math.round((d.total / maxExpense) * 100), 8) : 0,
     }));

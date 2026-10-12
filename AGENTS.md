@@ -11,6 +11,20 @@ Keep this file focused on agent-specific constraints, workflows, and validation 
 
 - **Flutter layout spacing**: Prefer `Row`/`Column` `spacing` over gap-only `SizedBox` widgets where possible; follow detailed guidance in [UI and design guidelines](docs/developer/design.md#layout-spacing).
 
+## Commit Messages
+
+Use a Conventional Commit type followed by a concise summary, then list the key changes as bullets:
+
+```text
+feat: SUMMARY_OF_CHANGES
+
+- Change 1
+- Change 2
+- Change 3
+```
+
+Choose the type that matches the work, such as `feat`, `fix`, `chore`, `docs`, or `ci`.
+
 ## Backend Data Access
 
 - **User scoping in database queries**: Always scope queries for user-owned data to the associated user wherever possible. In `find`, `findOne`, and QueryBuilder queries, specify `user: { id: user.id }` or `userId: user.id` as supported by the query API.

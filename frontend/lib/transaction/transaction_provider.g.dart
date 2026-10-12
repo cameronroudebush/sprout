@@ -205,7 +205,11 @@ final class TransactionsForDayProvider extends $FunctionalProvider<
   /// A provider that grabs transactions just for the given day
   TransactionsForDayProvider._(
       {required TransactionsForDayFamily super.from,
-      required DateTime super.argument})
+      required (
+        DateTime, {
+        bool? excludeFromCashFlow,
+      })
+          super.argument})
       : super(
           retry: null,
           name: r'transactionsForDayProvider',
@@ -221,7 +225,7 @@ final class TransactionsForDayProvider extends $FunctionalProvider<
   String toString() {
     return r'transactionsForDayProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -232,10 +236,14 @@ final class TransactionsForDayProvider extends $FunctionalProvider<
 
   @override
   FutureOr<List<Transaction>> create(Ref ref) {
-    final argument = this.argument as DateTime;
+    final argument = this.argument as (
+      DateTime, {
+      bool? excludeFromCashFlow,
+    });
     return transactionsForDay(
       ref,
-      argument,
+      argument.$1,
+      excludeFromCashFlow: argument.excludeFromCashFlow,
     );
   }
 
@@ -251,12 +259,18 @@ final class TransactionsForDayProvider extends $FunctionalProvider<
 }
 
 String _$transactionsForDayHash() =>
-    r'08aa786c5ffc6a4519e4a110fbffc72e9b388cf6';
+    r'940cd6fb73f121f381c5cde3bf566c8aee54cf31';
 
 /// A provider that grabs transactions just for the given day
 
 final class TransactionsForDayFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<List<Transaction>>, DateTime> {
+    with
+        $FunctionalFamilyOverride<
+            FutureOr<List<Transaction>>,
+            (
+              DateTime, {
+              bool? excludeFromCashFlow,
+            })> {
   TransactionsForDayFamily._()
       : super(
           retry: null,
@@ -269,25 +283,29 @@ final class TransactionsForDayFamily extends $Family
   /// A provider that grabs transactions just for the given day
 
   TransactionsForDayProvider call(
-    DateTime day,
-  ) =>
-      TransactionsForDayProvider._(argument: day, from: this);
+    DateTime day, {
+    bool? excludeFromCashFlow,
+  }) =>
+      TransactionsForDayProvider._(argument: (
+        day,
+        excludeFromCashFlow: excludeFromCashFlow,
+      ), from: this);
 
   @override
   String toString() => r'transactionsForDayProvider';
 }
 
-/// Fetches a single transaction by ID, checking existing default provider state first.
+/// Fetches a single transaction by ID.
 
 @ProviderFor(transactionById)
 final transactionByIdProvider = TransactionByIdFamily._();
 
-/// Fetches a single transaction by ID, checking existing default provider state first.
+/// Fetches a single transaction by ID.
 
 final class TransactionByIdProvider extends $FunctionalProvider<
         AsyncValue<Transaction?>, Transaction?, FutureOr<Transaction?>>
     with $FutureModifier<Transaction?>, $FutureProvider<Transaction?> {
-  /// Fetches a single transaction by ID, checking existing default provider state first.
+  /// Fetches a single transaction by ID.
   TransactionByIdProvider._(
       {required TransactionByIdFamily super.from,
       required String super.argument})
@@ -335,9 +353,9 @@ final class TransactionByIdProvider extends $FunctionalProvider<
   }
 }
 
-String _$transactionByIdHash() => r'41fb8044a5d78dda922d9fbff6fb205066e76c04';
+String _$transactionByIdHash() => r'b6d665dea55885d59188e9632f53583674c93d5e';
 
-/// Fetches a single transaction by ID, checking existing default provider state first.
+/// Fetches a single transaction by ID.
 
 final class TransactionByIdFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Transaction?>, String> {
@@ -350,7 +368,7 @@ final class TransactionByIdFamily extends $Family
           isAutoDispose: true,
         );
 
-  /// Fetches a single transaction by ID, checking existing default provider state first.
+  /// Fetches a single transaction by ID.
 
   TransactionByIdProvider call(
     String id,

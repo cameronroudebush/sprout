@@ -50,5 +50,6 @@ describe("WeeklyEmailContent", () => {
     const content = new WeeklyEmailContent(user, 5000, 100, 0, 1, [tx as any]);
 
     expect(content.dailySpendingBars.every((bar) => bar.amount === 0)).toBe(true);
+    expect(content.dailySpendingBars.every((bar) => bar.amountText === "$0.00")).toBe(true);
   });
 });

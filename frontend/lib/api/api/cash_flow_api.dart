@@ -167,10 +167,13 @@ class CashFlowApi {
   /// * [num] year (required):
   ///
   /// * [num] month (required):
+  ///
+  /// * [bool] includePending:
   Future<Response> cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(
     num year,
-    num month,
-  ) async {
+    num month, {
+    bool? includePending,
+  }) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/daily-calendar-spending';
 
@@ -183,6 +186,9 @@ class CashFlowApi {
 
     queryParams.addAll(_queryParams('', 'year', year));
     queryParams.addAll(_queryParams('', 'month', month));
+    if (includePending != null) {
+      queryParams.addAll(_queryParams('', 'includePending', includePending));
+    }
 
     const contentTypes = <String>[];
 
@@ -204,15 +210,19 @@ class CashFlowApi {
   /// * [num] year (required):
   ///
   /// * [num] month (required):
+  ///
+  /// * [bool] includePending:
   Future<DailySpendingCalendarResponseDTO?>
       cashFlowControllerGetDailyCalendarSpending(
     num year,
-    num month,
-  ) async {
+    num month, {
+    bool? includePending,
+  }) async {
     final response =
         await cashFlowControllerGetDailyCalendarSpendingWithHttpInfo(
       year,
       month,
+      includePending: includePending,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -342,13 +352,13 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months:
+  /// * [num] months (required):
   ///
-  /// * [num] categories:
-  Future<Response> cashFlowControllerGetSpendingWithHttpInfo({
-    num? months,
-    num? categories,
-  }) async {
+  /// * [num] categories (required):
+  Future<Response> cashFlowControllerGetSpendingWithHttpInfo(
+    num months,
+    num categories,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/spending';
 
@@ -359,12 +369,8 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    if (months != null) {
-      queryParams.addAll(_queryParams('', 'months', months));
-    }
-    if (categories != null) {
-      queryParams.addAll(_queryParams('', 'categories', categories));
-    }
+    queryParams.addAll(_queryParams('', 'months', months));
+    queryParams.addAll(_queryParams('', 'categories', categories));
 
     const contentTypes = <String>[];
 
@@ -385,16 +391,16 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months:
+  /// * [num] months (required):
   ///
-  /// * [num] categories:
-  Future<CashFlowSpending?> cashFlowControllerGetSpending({
-    num? months,
-    num? categories,
-  }) async {
+  /// * [num] categories (required):
+  Future<CashFlowSpending?> cashFlowControllerGetSpending(
+    num months,
+    num categories,
+  ) async {
     final response = await cashFlowControllerGetSpendingWithHttpInfo(
-      months: months,
-      categories: categories,
+      months,
+      categories,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -524,10 +530,10 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months:
-  Future<Response> cashFlowControllerGetTrendWithHttpInfo({
-    num? months,
-  }) async {
+  /// * [num] months (required):
+  Future<Response> cashFlowControllerGetTrendWithHttpInfo(
+    num months,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/cash-flow/trend';
 
@@ -538,9 +544,7 @@ class CashFlowApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    if (months != null) {
-      queryParams.addAll(_queryParams('', 'months', months));
-    }
+    queryParams.addAll(_queryParams('', 'months', months));
 
     const contentTypes = <String>[];
 
@@ -561,12 +565,12 @@ class CashFlowApi {
   ///
   /// Parameters:
   ///
-  /// * [num] months:
-  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend({
-    num? months,
-  }) async {
+  /// * [num] months (required):
+  Future<List<CashFlowTrendStats>?> cashFlowControllerGetTrend(
+    num months,
+  ) async {
     final response = await cashFlowControllerGetTrendWithHttpInfo(
-      months: months,
+      months,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));

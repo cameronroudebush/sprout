@@ -53,28 +53,22 @@
         <div class="section" style="margin-top: 1.5rem;">
           <div class="section-title">Daily Spending</div>
           <div class="chart-container">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="chart-table">
-              <tr>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="chart-list-table">
+              <tbody>
                 <% locals.dailySpendingBars.forEach(function(bar) { %>
-                <td class="chart-amount-cell" width="14%">
-                  <span><%= bar.amountText %></span>
-                </td>
+                <tr>
+                  <td class="chart-day-label"><%= bar.label %></td>
+                  <td class="chart-track">
+                    <div class="chart-track-background">
+                      <% if (bar.heightPercent > 0) { %>
+                        <div class="chart-list-bar" style="width: <%= bar.heightPercent %>%;"></div>
+                      <% } %>
+                    </div>
+                  </td>
+                  <td class="chart-list-amount <%= bar.amount > 0 ? 'expense' : 'income' %>"><%= bar.amountText %></td>
+                </tr>
                 <% }); %>
-              </tr>
-              <tr>
-                <% locals.dailySpendingBars.forEach(function(bar) { %>
-                <td class="chart-bar-cell" width="14%">
-                  <% if (bar.heightPercent > 0) { %>
-                    <div class="chart-bar" style="height: <%= bar.heightPercent %>%;"></div>
-                  <% } %>
-                </td>
-                <% }); %>
-              </tr>
-              <tr>
-                <% locals.dailySpendingBars.forEach(function(bar) { %>
-                <td class="chart-label"><%= bar.label %></td>
-                <% }); %>
-              </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -99,7 +93,7 @@
                       <% if (tx.iconUrl) { %>
                         <img src="<%= tx.iconUrl %>" alt="" width="28" height="28" style="border-radius: 20%; display: block; object-fit: cover; background-color: #1d2127; margin: 0 auto;" />
                       <% } else { %>
-                        <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #1d2127; color: #a0cafd; text-align: center; line-height: 28px; font-weight: bold; font-size: 12px; margin: 0 auto;">
+                        <div style="width: 28px; height: 28px; border-radius: 20%; background-color: #1d2127; color: #a0cafd; text-align: center; line-height: 28px; font-weight: bold; font-size: 12px; margin: 0 auto;">
                           <%= tx.description ? tx.description.charAt(0).toUpperCase() : '$' %>
                         </div>
                       <% } %>

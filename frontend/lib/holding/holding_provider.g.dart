@@ -575,7 +575,7 @@ final class ExpandedHoldingProvider extends $FunctionalProvider<ExpandedHolding,
   }
 }
 
-String _$expandedHoldingHash() => r'7c086d38e80708f8f9912beb72607207a7a6b404';
+String _$expandedHoldingHash() => r'04c6f63389c1658927deca4b0fafbf63656f3b93';
 
 /// Provider that allows us to track the expanded holding values based on current live prices
 

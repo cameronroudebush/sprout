@@ -15,7 +15,7 @@ import 'package:sprout/transaction/widgets/website_icon.dart';
 class TransactionRow extends ConsumerWidget {
   final Transaction transaction;
 
-  /// If we should be allowed to click this row to open the dialog
+  /// Whether tapping the row navigates to transaction details.
   final bool allowDialog;
 
   /// An icon to use instead
@@ -24,8 +24,11 @@ class TransactionRow extends ConsumerWidget {
   /// Content to render below the row
   final Widget? child;
 
+  /// Optional tap action. Overrides the default transaction navigation.
+  final VoidCallback? onTap;
+
   const TransactionRow(this.transaction,
-      {super.key, this.allowDialog = true, this.icon, this.child});
+      {super.key, this.allowDialog = true, this.icon, this.child, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,9 +61,10 @@ class TransactionRow extends ConsumerWidget {
             : (icon ?? CategoryIcon(cat, avatarSize: 16));
 
     return InkWell(
-      onTap: !allowDialog
-          ? null
-          : () => NavigationProvider.redirectToTransaction(transaction),
+      onTap: onTap ??
+          (allowDialog
+              ? () => NavigationProvider.redirectToTransaction(transaction)
+              : null),
       child: Container(
         decoration: BoxDecoration(
           color: transaction.pending

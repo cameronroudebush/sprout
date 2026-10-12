@@ -1,4 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
+import { AccountType, CASH_FLOW_ACCOUNT_TYPES } from "@backend/account/model/account.type";
 import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Category } from "@backend/category/model/category.model";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
@@ -16,6 +17,18 @@ import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, 
 import { ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { endOfDay, startOfDay } from "date-fns";
 import { Between, FindOptionsWhere, ILike, In, IsNull, Like } from "typeorm";
+
+/** Parses account types from the given string. "cash-flow" uses the shared cash-flow account types. */
+function parseIncludedAccountTypes(value?: string | string[]): AccountType[] {
+  const values = (Array.isArray(value) ? value : value == null ? [] : [value])
+    .flatMap((item) => item.split(","))
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (values.length === 1 && values[0]!.toLowerCase() === "cash-flow") return [...CASH_FLOW_ACCOUNT_TYPES];
+  const invalidValues = values.filter((item) => !Object.values(AccountType).includes(item as AccountType));
+  if (invalidValues.length > 0) throw new BadRequestException(`Unsupported account type: ${invalidValues.join(", ")}`);
+  return [...new Set(values as AccountType[])];
+}
 
 /**
  * This controller provides the endpoint for all Transaction related content
@@ -110,6 +123,18 @@ export class TransactionController {
   @ApiQuery({ name: "startDate", required: false, type: String, format: "date" })
   @ApiQuery({ name: "endDate", required: false, type: String, format: "date" })
   @ApiQuery({ name: "pending", required: false, type: Boolean })
+  @ApiQuery({
+    name: "excludeFromCashFlow",
+    required: false,
+    type: Boolean,
+    description: "If true, excludes transactions whose category is hidden from cash flow.",
+  })
+  @ApiQuery({
+    name: "includeAccountTypes",
+    required: false,
+    type: String,
+    description: 'Comma-separated account types to include, or "cash-flow" for account types included in cash flow. Omit to include all account types.',
+  })
   async getByQuery(
     @CurrentUser() user: User,
     @Query("id") id?: string,
@@ -122,14 +147,27 @@ export class TransactionController {
     @Query("startDate") startDate?: string,
     @Query("endDate") endDate?: string,
     @Query("pending") pending?: boolean,
+    @Query("excludeFromCashFlow") excludeFromCashFlow?: boolean,
+    @Query("includeAccountTypes") includeAccountTypes?: string | string[],
   ) {
+    const excludeHiddenTransactions = excludeFromCashFlow === true;
+    const includedAccountTypes = parseIncludedAccountTypes(includeAccountTypes);
+    const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
+    if (includedAccountTypes.length > 0) accountWhere.type = In(includedAccountTypes);
+
     // Direct ID query lookup
     if (id) {
+      const idWhere: FindOptionsWhere<Transaction> = {
+        id,
+        account: accountWhere,
+      };
       return await Transaction.find({
-        where: {
-          id,
-          account: { user: { id: user.id } },
-        },
+        where: excludeHiddenTransactions
+          ? [
+              { ...idWhere, category: IsNull() },
+              { ...idWhere, category: { excludeFromCashFlow: false } },
+            ]
+          : idWhere,
         relations: { category: { parentCategory: true } },
       });
     }
@@ -171,7 +209,7 @@ export class TransactionController {
       dateFilter = Between(startOfDay(new Date(startDate)), endOfDay(new Date(endDate)));
     }
 
-    const account: FindOptionsWhere<Account> = { user: { id: user.id } };
+    const account = { ...accountWhere };
     if (accountId) account.id = accountId;
     const where: FindOptionsWhere<Transaction> = {
       account,
@@ -179,7 +217,21 @@ export class TransactionController {
     if (pending !== undefined) where.pending = pending;
     if (dateFilter) where.posted = dateFilter;
     if (description) where.description = Like(`%${description}%`);
-    if (categoryQuery) where.category = categoryQuery;
+    if (categoryQuery) {
+      if (excludeHiddenTransactions && category?.toLowerCase() !== "unknown") {
+        where.category = { ...categoryQuery, excludeFromCashFlow: false };
+      } else {
+        where.category = categoryQuery;
+      }
+    }
+
+    const whereOptions: FindOptionsWhere<Transaction> | FindOptionsWhere<Transaction>[] =
+      !categoryQuery && excludeHiddenTransactions
+        ? [
+            { ...where, category: IsNull() },
+            { ...where, category: { excludeFromCashFlow: false } },
+          ]
+        : where;
 
     const parsedStart = startIndex !== undefined ? parseInt(String(startIndex)) : undefined;
     const parsedEnd = endIndex !== undefined ? parseInt(String(endIndex)) : undefined;
@@ -198,7 +250,7 @@ export class TransactionController {
     return await Transaction.find({
       skip,
       take,
-      where,
+      where: whereOptions,
       order: { posted: "DESC", pending: "DESC", description: "ASC" },
       relations: { category: { parentCategory: true } },
     });

@@ -14,7 +14,7 @@ class SnapTradeHelper {
       final api = await ref.read(providerApiProvider.future);
 
       final redirectUri = await api.snapTradeProviderControllerGenerateLink(
-        redirectUrl: browserAuth.callbackUrl,
+        browserAuth.callbackUrl,
       );
 
       if (redirectUri == null) throw Exception("No redirect URI returned");

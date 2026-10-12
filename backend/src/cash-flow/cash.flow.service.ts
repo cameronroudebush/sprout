@@ -1,6 +1,6 @@
 import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
-import { AccountType } from "@backend/account/model/account.type";
+import { AccountType, CASH_FLOW_ACCOUNT_TYPES } from "@backend/account/model/account.type";
 import { DailySpendingCalendarResponseDTO, DailySpendingItem } from "@backend/cash-flow/model/api/daily.spending.dto";
 import { LoanAmortizationSeries } from "@backend/cash-flow/model/api/loan.amortization";
 import { Category } from "@backend/category/model/category.model";
@@ -40,15 +40,9 @@ export class CashFlowService {
       between = day == null ? Between(startOfMonth(queryDate), endOfMonth(queryDate)) : Between(startOfDay(queryDate), endOfDay(queryDate));
     }
 
-    // Account types we only track for data flow
-    const validCashFlowTypes = [
-      AccountType.depository, // Checking/Savings
-      AccountType.credit, // Credit Cards
-    ];
-
     const accountWhere: FindOptionsWhere<Account> = {
       user: { id: user.id },
-      type: In(validCashFlowTypes),
+      type: In(CASH_FLOW_ACCOUNT_TYPES),
     };
     if (accountId) accountWhere.id = accountId;
 
@@ -335,7 +329,7 @@ export class CashFlowService {
    * Calculates discrete daily spending totals for a specified month and year.
    * Returns a key-value record mapping the day of the month to its total expenditure.
    */
-  async getDailySpendingMap(user: User, year: number, month: number) {
+  async getDailySpendingMap(user: User, year: number, month: number, includePending = true) {
     const startDate = startOfMonth(new Date(year, month - 1));
     const endDate = endOfMonth(startDate);
 
@@ -343,8 +337,12 @@ export class CashFlowService {
     const totalDaysInMonth = endDate.getDate();
 
     for (let d = 1; d <= totalDaysInMonth; d++) {
-      const { totalExpense, totalIncome } = await this.calculateFlows(user, year, month, d);
-      const netFlow = totalIncome - totalExpense;
+      const { transactions, filteredTransactions } = await this.calculateFlows(user, year, month, d, undefined, undefined, includePending);
+      const categorizedNetFlow = filteredTransactions.reduce((total, transaction) => total + transaction.amount, 0);
+      const uncategorizedPendingNetFlow = includePending
+        ? transactions.reduce((total, transaction) => (transaction.pending && !transaction.category ? total + transaction.amount : total), 0)
+        : 0;
+      const netFlow = categorizedNetFlow + uncategorizedPendingNetFlow;
       if (netFlow !== 0) items.push(new DailySpendingItem(d, netFlow));
     }
     return new DailySpendingCalendarResponseDTO(items);

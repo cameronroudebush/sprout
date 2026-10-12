@@ -3,7 +3,7 @@ import { DailySpendingCalendarResponseDTO } from "@backend/cash-flow/model/api/d
 import { LoanAmortizationSeries } from "@backend/cash-flow/model/api/loan.amortization";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { User } from "@backend/user/model/user.model";
-import { Controller, Get, ParseIntPipe, Query } from "@nestjs/common";
+import { Controller, DefaultValuePipe, Get, ParseBoolPipe, ParseIntPipe, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { format } from "date-fns";
 import { CashFlowService } from "./cash.flow.service";
@@ -156,8 +156,14 @@ export class CashFlowController {
   })
   @ApiQuery({ name: "year", required: true, type: Number })
   @ApiQuery({ name: "month", required: true, type: Number })
-  async getDailyCalendarSpending(@CurrentUser() user: User, @Query("year", ParseIntPipe) year: number, @Query("month", ParseIntPipe) month: number) {
-    return await this.cashFlowService.getDailySpendingMap(user, year, month);
+  @ApiQuery({ name: "includePending", required: false, type: Boolean, default: true })
+  async getDailyCalendarSpending(
+    @CurrentUser() user: User,
+    @Query("year", ParseIntPipe) year: number,
+    @Query("month", ParseIntPipe) month: number,
+    @Query("includePending", new DefaultValuePipe(true), ParseBoolPipe) includePending: boolean = true,
+  ) {
+    return await this.cashFlowService.getDailySpendingMap(user, year, month, includePending);
   }
 
   @Get("amortization")

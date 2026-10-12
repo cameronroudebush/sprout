@@ -17,7 +17,7 @@ class UserConfig {
     required this.netWorthRange,
     this.emailUpdateFrequency = EmailUpdateFrequencyEnum.none,
     required this.themeStyle,
-    this.currency = CurrencyOptionsEnum.USD,
+    required this.currency,
     required this.privateMode,
     required this.secureMode,
     required this.allowWidgets,
@@ -36,7 +36,6 @@ class UserConfig {
   /// How often the user should receive email updates.
   EmailUpdateFrequencyEnum emailUpdateFrequency;
 
-  /// The visual theme style selected by the user
   ThemeStyleEnum themeStyle;
 
   /// What currency we should display everything in.

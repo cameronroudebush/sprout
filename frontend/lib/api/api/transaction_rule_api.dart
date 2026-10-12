@@ -160,6 +160,7 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the transaction rule to delete.
   Future<Response> transactionRuleControllerDeleteWithHttpInfo(
     String id,
   ) async {
@@ -193,6 +194,7 @@ class TransactionRuleApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the transaction rule to delete.
   Future<void> transactionRuleControllerDelete(
     String id,
   ) async {

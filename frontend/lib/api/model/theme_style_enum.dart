@@ -10,7 +10,6 @@
 
 part of openapi.api;
 
-/// The visual theme style selected by the user
 class ThemeStyleEnum {
   /// Instantiate a new enum with the provided [value].
   const ThemeStyleEnum._(this.value);

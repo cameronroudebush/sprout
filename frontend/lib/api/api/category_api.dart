@@ -89,6 +89,7 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the category to delete.
   Future<Response> categoryControllerDeleteWithHttpInfo(
     String id,
   ) async {
@@ -122,6 +123,7 @@ class CategoryApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the category to delete.
   Future<void> categoryControllerDelete(
     String id,
   ) async {

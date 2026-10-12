@@ -25,6 +25,7 @@ class TransactionApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the transaction to delete.
   Future<Response> transactionControllerDeleteWithHttpInfo(
     String id,
   ) async {
@@ -58,6 +59,7 @@ class TransactionApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the transaction to delete.
   Future<void> transactionControllerDelete(
     String id,
   ) async {
@@ -174,6 +176,12 @@ class TransactionApi {
   /// * [DateTime] endDate:
   ///
   /// * [bool] pending:
+  ///
+  /// * [bool] excludeFromCashFlow:
+  ///   If true, excludes transactions whose category is hidden from cash flow.
+  ///
+  /// * [String] includeAccountTypes:
+  ///   Comma-separated account types to include, or "cash-flow" for account types included in cash flow.
   Future<Response> transactionControllerGetByQueryWithHttpInfo({
     String? id,
     num? startIndex,
@@ -185,6 +193,8 @@ class TransactionApi {
     DateTime? startDate,
     DateTime? endDate,
     bool? pending,
+    bool? excludeFromCashFlow,
+    String? includeAccountTypes,
   }) async {
     // ignore: prefer_const_declarations
     final path = r'/transaction';
@@ -225,6 +235,14 @@ class TransactionApi {
     }
     if (pending != null) {
       queryParams.addAll(_queryParams('', 'pending', pending));
+    }
+    if (excludeFromCashFlow != null) {
+      queryParams
+          .addAll(_queryParams('', 'excludeFromCashFlow', excludeFromCashFlow));
+    }
+    if (includeAccountTypes != null) {
+      queryParams
+          .addAll(_queryParams('', 'includeAccountTypes', includeAccountTypes));
     }
 
     const contentTypes = <String>[];
@@ -272,6 +290,12 @@ class TransactionApi {
   /// * [DateTime] endDate:
   ///
   /// * [bool] pending:
+  ///
+  /// * [bool] excludeFromCashFlow:
+  ///   If true, excludes transactions whose category is hidden from cash flow.
+  ///
+  /// * [String] includeAccountTypes:
+  ///   Comma-separated account types to include, or "cash-flow" for account types included in cash flow.
   Future<List<Transaction>?> transactionControllerGetByQuery({
     String? id,
     num? startIndex,
@@ -283,6 +307,8 @@ class TransactionApi {
     DateTime? startDate,
     DateTime? endDate,
     bool? pending,
+    bool? excludeFromCashFlow,
+    String? includeAccountTypes,
   }) async {
     final response = await transactionControllerGetByQueryWithHttpInfo(
       id: id,
@@ -295,6 +321,8 @@ class TransactionApi {
       startDate: startDate,
       endDate: endDate,
       pending: pending,
+      excludeFromCashFlow: excludeFromCashFlow,
+      includeAccountTypes: includeAccountTypes,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));

@@ -119,7 +119,7 @@ describe("CashFlowController", () => {
 
       const res = await controller.getDailyCalendarSpending(user, 2026, 5);
 
-      expect(service.getDailySpendingMap).toHaveBeenCalledWith(user, 2026, 5);
+      expect(service.getDailySpendingMap).toHaveBeenCalledWith(user, 2026, 5, true);
       expect(res).toEqual({ "2026-05-01": 50 });
     });
   });

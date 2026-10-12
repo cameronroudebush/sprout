@@ -2,6 +2,7 @@ import { setupTests } from "@backend/test/helpers.js";
 setupTests();
 
 import { Account } from "@backend/account/model/account.model.js";
+import { AccountType } from "@backend/account/model/account.type.js";
 import { Category } from "@backend/category/model/category.model.js";
 import { NotificationService } from "@backend/notification/notification.service.js";
 import { SSEEventType } from "@backend/sse/model/event.model.js";
@@ -169,6 +170,82 @@ describe("TransactionController", () => {
 
       expect(Transaction.find).toHaveBeenCalled();
       expect(res).toBe(txList);
+    });
+
+    it("should exclude cash-flow-hidden categories when a specific category is selected", async () => {
+      const parentCategory = Category.fromPlain({ id: "cat-parent" });
+      const childCategory = Category.fromPlain({ id: "cat-child" });
+      vi.spyOn(Category, "findOne").mockResolvedValue(parentCategory);
+      vi.spyOn(Category, "find").mockResolvedValueOnce([childCategory]).mockResolvedValueOnce([]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await controller.getByQuery(user, undefined, undefined, undefined, undefined, "cat-parent", undefined, undefined, undefined, undefined, undefined, true);
+
+      const where = (Transaction.find as any).mock.calls[0][0].where;
+      expect(where.category.excludeFromCashFlow).toBe(false);
+      expect(where.category.id.value).toEqual(["cat-parent", "cat-child"]);
+    });
+
+    it("should exclude cash-flow-hidden categories while retaining uncategorized transactions", async () => {
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await controller.getByQuery(user, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, true);
+
+      expect(Transaction.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: [
+            { account: { user: { id: user.id } }, category: expect.anything() },
+            { account: { user: { id: user.id } }, category: { excludeFromCashFlow: false } },
+          ],
+        }),
+      );
+    });
+
+    it("should apply the cash flow exclusion to direct ID lookups", async () => {
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await controller.getByQuery(user, "tx-123", undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, true);
+
+      expect(Transaction.find).toHaveBeenCalledWith({
+        where: [
+          { id: "tx-123", account: { user: { id: user.id } }, category: expect.anything() },
+          { id: "tx-123", account: { user: { id: user.id } }, category: { excludeFromCashFlow: false } },
+        ],
+        relations: { category: { parentCategory: true } },
+      });
+    });
+
+    it("should include only the requested account types when querying transactions", async () => {
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await controller.getByQuery(user, ...Array(11).fill(undefined), "investment,crypto");
+
+      const where = (Transaction.find as any).mock.calls[0][0].where;
+      const accountTypeFilter = where.account.type;
+      expect(accountTypeFilter.type).toBe("in");
+      expect(accountTypeFilter.value).toEqual([AccountType.investment, AccountType.crypto]);
+    });
+
+    it("should support repeated account-type query values", async () => {
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await controller.getByQuery(user, ...Array(11).fill(undefined), ["investment", "crypto"]);
+
+      const where = (Transaction.find as any).mock.calls[0][0].where;
+      expect(where.account.type.value).toEqual([AccountType.investment, AccountType.crypto]);
+    });
+
+    it('should use the cash-flow account types for the "cash-flow" shorthand', async () => {
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await controller.getByQuery(user, ...Array(11).fill(undefined), "cash-flow");
+
+      const where = (Transaction.find as any).mock.calls[0][0].where;
+      expect(where.account.type.value).toEqual([AccountType.depository, AccountType.credit]);
+    });
+
+    it("should reject invalid account types instead of silently ignoring them", async () => {
+      await expect(controller.getByQuery(user, ...Array(11).fill(undefined), "not-an-account-type")).rejects.toThrow("Unsupported account type");
     });
 
     it("should handle single pagination index params (startIndex only or endIndex only)", async () => {

@@ -40,7 +40,13 @@ class CategoryIconDropdown extends StatelessWidget {
       },
       dropdownMenuEntries: sortedIconEntries.map((entry) {
         return DropdownMenuEntry<String>(
-            value: entry.key, label: entry.key, leadingIcon: Icon(entry.value));
+          value: entry.key,
+          label: entry.key,
+          leadingIcon: CategoryIcon(
+            Category(id: "", name: entry.key, icon: entry.key),
+            avatarSize: 14,
+          ),
+        );
       }).toList(),
     );
   }

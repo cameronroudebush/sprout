@@ -423,10 +423,10 @@ class ProviderApi {
   ///
   /// Parameters:
   ///
-  /// * [String] redirectUrl:
-  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo({
-    String? redirectUrl,
-  }) async {
+  /// * [String] redirectUrl (required):
+  Future<Response> snapTradeProviderControllerGenerateLinkWithHttpInfo(
+    String redirectUrl,
+  ) async {
     // ignore: prefer_const_declarations
     final path = r'/provider/snap-trade/link';
 
@@ -437,9 +437,7 @@ class ProviderApi {
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    if (redirectUrl != null) {
-      queryParams.addAll(_queryParams('', 'redirectUrl', redirectUrl));
-    }
+    queryParams.addAll(_queryParams('', 'redirectUrl', redirectUrl));
 
     const contentTypes = <String>[];
 
@@ -460,12 +458,12 @@ class ProviderApi {
   ///
   /// Parameters:
   ///
-  /// * [String] redirectUrl:
-  Future<String?> snapTradeProviderControllerGenerateLink({
-    String? redirectUrl,
-  }) async {
+  /// * [String] redirectUrl (required):
+  Future<String?> snapTradeProviderControllerGenerateLink(
+    String redirectUrl,
+  ) async {
     final response = await snapTradeProviderControllerGenerateLinkWithHttpInfo(
-      redirectUrl: redirectUrl,
+      redirectUrl,
     );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));

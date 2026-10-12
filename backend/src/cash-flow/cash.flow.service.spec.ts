@@ -293,6 +293,45 @@ describe("CashFlowService", () => {
 
       expect(result.spending).toBeDefined();
     });
+
+    it("should include pending transactions by default and allow excluding them", async () => {
+      const calculateFlows = vi.spyOn(service, "calculateFlows").mockResolvedValue({ transactions: [], filteredTransactions: [] } as any);
+
+      await service.getDailySpendingMap(user, 2026, 6);
+      expect(calculateFlows).toHaveBeenCalledWith(user, 2026, 6, 1, undefined, undefined, true);
+
+      calculateFlows.mockClear();
+      await service.getDailySpendingMap(user, 2026, 6, false);
+      expect(calculateFlows).toHaveBeenCalledWith(user, 2026, 6, 1, undefined, undefined, false);
+    });
+
+    it("should include uncategorized pending transactions in the daily total", async () => {
+      const pendingTransaction = TestEntities.transaction;
+      pendingTransaction.amount = -42;
+      pendingTransaction.pending = true;
+      pendingTransaction.category = undefined;
+
+      const uncategorizedPostedTransaction = TestEntities.transaction;
+      uncategorizedPostedTransaction.amount = -90;
+      uncategorizedPostedTransaction.category = undefined;
+
+      const excludedCategoryTransaction = TestEntities.transaction;
+      excludedCategoryTransaction.amount = -18;
+      excludedCategoryTransaction.pending = true;
+      excludedCategoryTransaction.category.excludeFromCashFlow = true;
+
+      vi.spyOn(service, "calculateFlows").mockImplementation(
+        async (_user, _year, _month, day) =>
+          ({
+            transactions: day === 10 ? [pendingTransaction, uncategorizedPostedTransaction, excludedCategoryTransaction] : [],
+            filteredTransactions: [],
+          }) as any,
+      );
+
+      const result = await service.getDailySpendingMap(user, 2026, 6);
+
+      expect(result.spending).toContainEqual(expect.objectContaining({ day: 10, amount: -42 }));
+    });
   });
 
   describe("getLoanAmortizationProjections", () => {

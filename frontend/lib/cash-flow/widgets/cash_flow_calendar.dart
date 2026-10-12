@@ -1,9 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
@@ -17,14 +18,24 @@ class CashFlowCalendarWidget extends ConsumerWidget {
   /// Optional title and explanation shown above the calendar.
   final SproutChartHeader? header;
 
-  const CashFlowCalendarWidget({super.key, this.header});
+  /// Whether to include pending transactions. Defaults to true.
+  final bool includePending;
+
+  const CashFlowCalendarWidget({
+    super.key,
+    this.header,
+    this.includePending = true,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final now = DateTime.now();
-    final dailySpendingAsync =
-        ref.watch(dailySpendingProvider(month: now.month, year: now.year));
+    final dailySpendingAsync = ref.watch(dailySpendingProvider(
+      month: now.month,
+      year: now.year,
+      includePending: includePending,
+    ));
     final formatter = ref.watch(currencyFormatterProvider);
 
     return dailySpendingAsync.whenDefault(
@@ -72,8 +83,9 @@ class CashFlowCalendarWidget extends ConsumerWidget {
                     showSubmitButton: false,
                     child: Consumer(
                       builder: (context, ref, child) {
-                        final dayTransactionsAsync =
-                            ref.watch(transactionsForDayProvider(day));
+                        final dayTransactionsAsync = ref.watch(
+                            transactionsForDayProvider(day,
+                                excludeFromCashFlow: true));
 
                         return dayTransactionsAsync.when(
                           loading: () => const Padding(
@@ -87,7 +99,11 @@ class CashFlowCalendarWidget extends ConsumerWidget {
                                     Text("Error loading transactions: $err")),
                           ),
                           data: (dayTransactions) {
-                            if (dayTransactions.isEmpty) {
+                            final visibleTransactions = dayTransactions
+                                .where((transaction) =>
+                                    (includePending || !transaction.pending))
+                                .toList();
+                            if (visibleTransactions.isEmpty) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 32),
                                 child: Text(
@@ -98,13 +114,19 @@ class CashFlowCalendarWidget extends ConsumerWidget {
                             return ListView.separated(
                               shrinkWrap: true,
                               physics: const ClampingScrollPhysics(),
-                              itemCount: dayTransactions.length,
+                              itemCount: visibleTransactions.length,
                               separatorBuilder: (_, __) =>
                                   const Divider(height: 1),
                               itemBuilder: (context, i) {
+                                final transaction = visibleTransactions[i];
                                 return TransactionRow(
-                                  dayTransactions[i],
-                                  allowDialog: false,
+                                  transaction,
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    NavigationProvider.redirectToTransaction(
+                                      transaction,
+                                    );
+                                  },
                                 );
                               },
                             );

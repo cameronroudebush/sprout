@@ -143,45 +143,45 @@ body {
   box-sizing: border-box;
 }
 
-.chart-table {
+.chart-list-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.chart-amount-cell {
-  text-align: center;
-  height: 18px;
-  vertical-align: bottom;
-  padding-bottom: 2px;
+.chart-list-table td {
+  padding: 0.35rem 0;
+  vertical-align: middle;
 }
 
-.chart-amount-cell span {
-  font-size: 9px;
-  color: #ffabaf;
-  font-weight: 500;
-  display: block;
-}
-
-.chart-bar-cell {
-  vertical-align: bottom;
-  text-align: center;
-  padding: 0 4px;
-  height: 80px;
-}
-
-.chart-bar {
-  background-color: #ffabaf;
-  border-radius: 4px 4px 0 0;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 24px;
-}
-
-.chart-label {
-  font-size: 11px;
+.chart-day-label {
+  width: 40px;
   color: #8a9297;
-  padding-top: 6px;
-  text-align: center;
+  font-size: 11px;
+  text-align: left;
+}
+
+.chart-track {
+  padding: 0 0.75rem !important;
+}
+
+.chart-track-background {
+  width: 100%;
+  height: 8px;
+  background-color: #1d2127;
+  border-radius: 4px;
+}
+
+.chart-list-bar {
+  height: 8px;
+  background-color: #ffabaf;
+  border-radius: 4px;
+}
+
+.chart-list-amount {
+  width: 76px;
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .quote-hero {

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/chat/models/extensions/chat_history_extensions.dart';
 import 'package:sprout/chat/widgets/charts/chat_line_chart.dart';
@@ -125,20 +125,26 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
         String processedText = _displayedText.deIdentifyAccounts(accounts);
         final finalText =
             isPrivate ? processedText.deIdentifyCurrency() : processedText;
-        final effectiveColor = widget.textColor ??
-            theme.textTheme.bodyMedium?.color ??
-            Colors.white;
+        final effectiveColor = widget.textColor ?? theme.colorScheme.onSurface;
         final markdownStyle = TextStyle(color: effectiveColor, fontSize: 14);
+        final markdownTheme = GptMarkdownTheme.of(context);
+        final styledMarkdownTheme = markdownTheme.copyWith(
+          h1: (markdownTheme.h1 ?? theme.textTheme.headlineLarge)
+              ?.copyWith(color: effectiveColor),
+          h2: (markdownTheme.h2 ?? theme.textTheme.headlineMedium)
+              ?.copyWith(color: effectiveColor),
+          h3: (markdownTheme.h3 ?? theme.textTheme.headlineSmall)
+              ?.copyWith(color: effectiveColor),
+          h4: (markdownTheme.h4 ?? theme.textTheme.titleLarge)
+              ?.copyWith(color: effectiveColor),
+          h5: (markdownTheme.h5 ?? theme.textTheme.titleMedium)
+              ?.copyWith(color: effectiveColor),
+          h6: (markdownTheme.h6 ?? theme.textTheme.titleSmall)
+              ?.copyWith(color: effectiveColor),
+        );
 
-        return Theme(
-          data: theme.copyWith(
-            textTheme: theme.textTheme.copyWith(
-              headlineLarge: TextStyle(color: effectiveColor, fontSize: 22),
-              headlineMedium: TextStyle(color: effectiveColor, fontSize: 20),
-              headlineSmall: TextStyle(color: effectiveColor, fontSize: 18),
-              titleLarge: TextStyle(color: effectiveColor, fontSize: 16),
-            ),
-          ),
+        return GptMarkdownTheme(
+          gptThemeData: styledMarkdownTheme,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: _buildContentNodes(finalText, markdownStyle),

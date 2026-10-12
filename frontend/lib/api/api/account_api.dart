@@ -25,6 +25,7 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the account to delete.
   Future<Response> accountControllerDeleteWithHttpInfo(
     String id,
   ) async {
@@ -58,6 +59,7 @@ class AccountApi {
   /// Parameters:
   ///
   /// * [String] id (required):
+  ///   The ID of the account to delete.
   Future<void> accountControllerDelete(
     String id,
   ) async {
