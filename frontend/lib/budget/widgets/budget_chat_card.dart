@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/chat_message_content.dart';
 import 'package:sprout/chat/widgets/chat_model_indicator.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
@@ -17,8 +18,12 @@ class BudgetChatCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
+    final now = DateTime.now();
+    final overviewYear = isDemoMode ? now.year : year;
+    final overviewMonth = isDemoMode ? now.month : month;
     final overviewAsync = ref.watch(
-      budgetChatStatusProvider((year: year, month: month)),
+      budgetChatStatusProvider((year: overviewYear, month: overviewMonth)),
     );
 
     final content = overviewAsync.whenDefault(
@@ -46,7 +51,7 @@ class BudgetChatCard extends ConsumerWidget {
           SproutChartHeader(
             title: 'Budget Overview',
             subheader:
-                'Insights for ${DateFormat('MMMM yyyy').format(DateTime(year, month))}',
+                'Insights for ${DateFormat('MMMM yyyy').format(DateTime(overviewYear, overviewMonth))}',
             left: const Tooltip(
               message: 'Powered by AI',
               child: Icon(Icons.auto_awesome),

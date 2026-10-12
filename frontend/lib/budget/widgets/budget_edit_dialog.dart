@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/budget/provider/budget_provider.dart';
 import 'package:sprout/category/widgets/category_dropdown.dart';
+import 'package:sprout/config/config_provider.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/info_card.dart';
 
@@ -55,20 +57,24 @@ class _BudgetEditDialogWidgetState
   }
 
   Future<void> _submit() async {
+    if (ref.read(unsecureConfigProvider.notifier).isDemoMode()) return;
+
     final amountText = _amountController.text.trim();
     final amount = double.tryParse(amountText);
 
     if (amount == null || amount < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid target amount')),
-      );
+      ref.read(notificationsProvider.notifier).openFrontendOnly(
+            'Please enter a valid target amount',
+            type: NotificationTypeEnum.error,
+          );
       return;
     }
 
     if (widget.item?.budgetId == null && _selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
-      );
+      ref.read(notificationsProvider.notifier).openFrontendOnly(
+            'Please select a category',
+            type: NotificationTypeEnum.error,
+          );
       return;
     }
 
@@ -87,9 +93,7 @@ class _BudgetEditDialogWidgetState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save budget: $e')),
-        );
+        ref.read(notificationsProvider.notifier).openWithAPIException(e);
       }
     } finally {
       if (mounted) {
@@ -99,6 +103,7 @@ class _BudgetEditDialogWidgetState
   }
 
   Future<void> _delete() async {
+    if (ref.read(unsecureConfigProvider.notifier).isDemoMode()) return;
     if (widget.item?.budgetId == null) return;
 
     final confirm = await showDialog<bool>(
@@ -130,9 +135,7 @@ class _BudgetEditDialogWidgetState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete budget: $e')),
-        );
+        ref.read(notificationsProvider.notifier).openWithAPIException(e);
       }
     } finally {
       if (mounted) {
@@ -144,6 +147,7 @@ class _BudgetEditDialogWidgetState
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.item?.budgetId != null;
+    final isDemoMode = ref.watch(unsecureConfigProvider.notifier).isDemoMode();
     final now = DateTime.now();
     final currentMonthOverview = isEditing
         ? null
@@ -181,7 +185,7 @@ class _BudgetEditDialogWidgetState
           CategoryDropdown(
             _selectedCategory?.id,
             (cat) => setState(() => _selectedCategory = cat),
-            enabled: !isEditing && !_isLoading,
+            enabled: !isDemoMode && !isEditing && !_isLoading,
             displayAllCategoryButton: false,
             displayUnknownCategoryButton: false,
             label: "Category",
@@ -190,7 +194,7 @@ class _BudgetEditDialogWidgetState
           TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            enabled: !_isLoading,
+            enabled: !isDemoMode && !_isLoading,
             decoration: const InputDecoration(
               labelText: "Monthly Target Amount (\$)",
               hintText: "e.g. 250.00",
@@ -198,7 +202,7 @@ class _BudgetEditDialogWidgetState
               border: OutlineInputBorder(),
             ),
           ),
-          if (suggestedSpending != null)
+          if (!isDemoMode && suggestedSpending != null)
             Padding(
                 padding: EdgeInsetsGeometry.symmetric(vertical: 4),
                 child: Align(
@@ -217,7 +221,7 @@ class _BudgetEditDialogWidgetState
                 )),
           Row(
             children: [
-              if (isEditing) ...[
+              if (isEditing && !isDemoMode) ...[
                 IconButton.outlined(
                   onPressed: _isLoading ? null : _delete,
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -232,20 +236,22 @@ class _BudgetEditDialogWidgetState
                   child: const Text("Cancel"),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : Text(isEditing ? "Update" : "Save"),
+              if (!isDemoMode) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _isLoading ? null : _submit,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(isEditing ? "Update" : "Save"),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ],
