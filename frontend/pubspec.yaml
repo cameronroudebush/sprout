@@ -25,7 +25,7 @@ dependencies:
   timeago: ^3.7.1
   url_launcher: ^6.3.2
   package_info_plus: ^10.1.0
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   collection: ^1.19.1
   flutter_launcher_icons: ^0.14.4
   logger: ^2.6.1
@@ -45,7 +45,7 @@ dependencies:
   plaid_flutter: ^5.1.1
   cookie_jar: ^4.0.9
   crypto: ^3.0.7
-  google_fonts: ^8.1.0
+  google_fonts: ^9.0.0
   path_drawing: ^1.0.1
   maplibre: 0.3.6
 
