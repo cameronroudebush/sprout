@@ -1,0 +1,536 @@
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<style type="text/tailwindcss">
+  @font-face {
+    font-family: "Sprout";
+    src: url("https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/assets/sprout.ttf") format("truetype");
+    font-display: swap;
+  }
+
+  @theme {
+    --color-sprout-bg: #111418;
+    --color-sprout-surface: #191c20;
+    --color-sprout-primary: #6b9ac4;
+    --color-sprout-secondary: #116383;
+    --color-sprout-primary-container: #001e2c;
+    --color-sprout-secondary-container: #c2e8ff;
+    --color-sprout-tertiary: #d6bee4;
+    --color-sprout-error: #ba1a1a;
+    --color-sprout-light-surface: #f5f8fc;
+    --color-sprout-text: #f5f5f5;
+    --color-sprout-muted: #aeb8be;
+    --font-sprout: "Sprout", sans-serif;
+    --font-sans: Roboto, "Segoe UI", sans-serif;
+  }
+
+  @keyframes landing-drift {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(24px, 18px, 0) scale(1.08);
+    }
+  }
+
+  @keyframes landing-enter {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .landing-hero > [data-enter] {
+    animation: landing-enter 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .landing-hero > [data-enter]:nth-child(1) {
+    animation-delay: 80ms;
+  }
+
+  .landing-hero > [data-enter]:nth-child(2) {
+    animation-delay: 170ms;
+  }
+
+  .landing-hero > [data-enter]:nth-child(3) {
+    animation-delay: 260ms;
+  }
+
+  .landing-hero > [data-enter]:nth-child(4) {
+    animation-delay: 350ms;
+  }
+
+  .landing-hero > [data-enter]:nth-child(5) {
+    animation-delay: 440ms;
+  }
+
+  .landing-hero > [data-enter]:nth-child(6) {
+    animation-delay: 530ms;
+  }
+
+  .landing-glow {
+    animation: landing-drift 12s ease-in-out infinite alternate;
+  }
+
+  .landing-glow-delayed {
+    animation-delay: -6s;
+    animation-duration: 15s;
+  }
+
+  #features .feature-cards {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  #features .feature-cards > article {
+    min-width: 0;
+  }
+
+  @media (min-width: 64rem) {
+    #features .feature-cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-hero > [data-enter] {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .landing-glow,
+    .landing-glow-delayed {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const initializeMotion = () => {
+      const page = document.querySelector(".sprout-landing");
+      if (!page || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const revealing = [...page.querySelectorAll("[data-reveal]")];
+      const revealImages = [...page.querySelectorAll("[data-reveal-image]")];
+
+      revealing.forEach((element) => element.classList.add("opacity-0", "translate-y-6", "transition-all", "duration-700", "ease-out"));
+      revealImages.forEach((element) => element.classList.add("opacity-0", "scale-105", "transition-all", "duration-1000", "ease-out"));
+
+      const observer = new IntersectionObserver(
+        (entries, currentObserver) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.remove("opacity-0", "translate-y-6", "scale-105");
+            entry.target.classList.add("opacity-100", "translate-y-0", "scale-100");
+            currentObserver.unobserve(entry.target);
+          });
+        },
+        { rootMargin: "0px 0px -32px 0px", threshold: 0.12 },
+      );
+
+      [...revealing, ...revealImages].forEach((element) => observer.observe(element));
+    };
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initializeMotion, { once: true });
+    else initializeMotion();
+  })();
+</script>
+
+<div class="sprout-landing relative -mt-[8.8px] min-h-screen w-full overflow-hidden bg-sprout-bg font-sans leading-relaxed text-sprout-text">
+  <div class="landing-glow pointer-events-none absolute -right-48 -top-56 h-[36rem] w-[36rem] rounded-full bg-sprout-secondary/25 blur-[110px]"></div>
+  <div
+    class="landing-glow landing-glow-delayed pointer-events-none absolute left-[-18rem] top-[18rem] h-[28rem] w-[28rem] rounded-full bg-sprout-primary/10 blur-[110px]"
+  ></div>
+
+  <header class="relative mx-auto flex min-h-[68px] w-full max-w-6xl px-4 md:px-6 items-center justify-between border-b border-sprout-secondary/30">
+    <a class="inline-flex items-center gap-2 !text-sprout-text hover:!text-sprout-text" href="/" aria-label="Sprout home">
+      <img class="h-7 w-7" src="/assets/favicon-bg.svg" alt="" />
+      <span class="font-sprout text-xl">Sprout</span>
+    </a>
+    <nav class="flex items-center gap-4 md:gap-8 text-[13px] text-sprout-muted" aria-label="Main navigation">
+      <a class="transition-colors hover:text-sprout-secondary-container hidden md:inline-block" href="#features">Features</a>
+      <a class="transition-colors hover:text-sprout-secondary-container hidden md:inline-block" href="#privacy">Privacy</a>
+      <a class="transition-colors hover:text-sprout-secondary-container hidden md:inline-block" href="/getting-started/">Docs</a>
+      <a
+        class="inline-flex min-h-8 items-center gap-2 rounded-xl border border-sprout-primary/40 bg-sprout-surface/80 px-4 md:px-5 text-sm font-semibold !text-sprout-text transition duration-200 hover:border-sprout-primary hover:bg-sprout-primary/15 hover:!text-sprout-text"
+        href="https://github.com/cameronroudebush/sprout"
+      >
+        <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.09-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.467-2.38 1.235-3.22-.124-.303-.535-1.523.117-3.176 0 0 1.008-.323 3.3 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.29-1.553 3.295-1.23 3.295-1.23.655 1.653.244 2.873.12 3.176.77.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.9-.015 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+          />
+        </svg>
+        View on GitHub
+      </a>
+    </nav>
+  </header>
+
+  <section class="landing-hero relative mx-auto w-full max-w-6xl px-4 md:px-6 pt-12 md:pt-16 text-center">
+    <h1
+      class="!block !text-[44px] sm:!text-[60px] lg:!text-[76px] !font-semibold !leading-[0.99] !tracking-[-0.07em] !text-sprout-text mx-auto max-w-4xl [text-wrap:balance] mb-2!"
+      data-enter
+    >
+      Know your money.<br /><span class="text-sprout-primary">Grow with intention.</span>
+    </h1>
+    <p class="mx-auto mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-sprout-muted" data-enter>
+      Bring accounts, investments, budgets, and spending into one thoughtful dashboard. Understand where you are today and make your next move with confidence.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-4" data-enter>
+      <a
+        class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-sprout-secondary-container px-6 text-sm font-bold !text-black shadow-lg shadow-sprout-primary/15 transition duration-200 hover:-translate-y-1 hover:bg-white hover:!text-black hover:shadow-xl hover:shadow-sprout-primary/25"
+        href="https://demo.sprout.croudebush.net"
+      >
+        <svg
+          class="h-5 w-5 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4M10 8l5 3-5 3z" />
+        </svg>
+        Explore the live demo <span aria-hidden="true"></span>
+      </a>
+      <a
+        class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-sprout-primary/50 bg-sprout-surface/80 px-6 text-sm font-bold !text-sprout-text transition duration-200 hover:-translate-y-1 hover:border-sprout-primary hover:bg-sprout-primary/15 hover:!text-sprout-text"
+        href="/getting-started/installation/"
+      >
+        <svg
+          class="h-5 w-5 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6M8 13h8M8 17h8" />
+        </svg>
+        Get started
+      </a>
+    </div>
+    <p class="mt-4 text-xs text-sprout-muted" data-enter>Open source and hosted on your own terms.</p>
+    <div
+      class="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm font-semibold text-sprout-text"
+      data-enter
+      aria-label="Supported platforms"
+    >
+      <span class="inline-flex items-center gap-2">
+        <span
+          class="grid h-8 w-8 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="13" rx="2" />
+            <path d="M8 21h8M12 17v4M7 8h10M7 12h6" />
+          </svg>
+        </span>
+        Web
+      </span>
+      <span class="inline-flex items-center gap-2">
+        <span
+          class="grid h-8 w-8 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="2" width="12" height="20" rx="2" />
+            <path d="M11 18h2" />
+          </svg>
+        </span>
+        Mobile
+      </span>
+    </div>
+
+    <div
+      class="mt-10 md:mt-12 overflow-hidden rounded-t-2xl border border-sprout-primary/30 bg-sprout-surface p-2 md:p-3 pb-0 shadow-[0_-25px_90px_rgba(17,99,131,0.18)]"
+      data-enter
+      id="product-preview"
+    >
+      <img
+        class="w-full rounded-t-lg border border-white/10 object-cover object-top"
+        src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/desktop/home.png"
+        alt="Sprout dashboard showing net worth, spending trends, budgets, assets, and recent transactions"
+      />
+    </div>
+  </section>
+
+  <div class="border-y border-sprout-secondary/25 bg-sprout-surface/40">
+    <div
+      class="mx-auto flex min-h-[92px] w-full max-w-6xl px-4 md:px-6 py-4 flex-wrap items-center justify-center gap-x-6 gap-y-4 text-xs md:text-sm font-semibold tracking-wide text-sprout-text"
+      data-reveal
+    >
+      <span class="inline-flex items-center gap-3">
+        <span
+          class="grid h-10 w-10 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19V5M4 19h16M7 15l4-4 3 3 6-7M16 7h4v4" />
+          </svg>
+        </span>
+        Net worth
+      </span>
+      <span class="inline-flex items-center gap-3">
+        <span
+          class="grid h-10 w-10 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 7h12l-3-3M17 17H5l3 3" />
+          </svg>
+        </span>
+        Cash flow
+      </span>
+      <span class="inline-flex items-center gap-3">
+        <span
+          class="grid h-10 w-10 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="15" rx="2" />
+            <path d="M3 9h18M7 15h4" />
+          </svg>
+        </span>
+        Budgets
+      </span>
+      <span class="inline-flex items-center gap-3">
+        <span
+          class="grid h-10 w-10 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19V5M4 19h16M7 15l4-4 3 3 6-7" />
+          </svg>
+        </span>
+        Investments
+      </span>
+      <span class="inline-flex items-center gap-3">
+        <span
+          class="grid h-10 w-10 place-items-center rounded-xl border border-sprout-primary/25 bg-sprout-primary/10 text-sprout-secondary-container"
+          aria-hidden="true"
+        >
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3" />
+          </svg>
+        </span>
+        Transactions
+      </span>
+    </div>
+  </div>
+
+  <section class="mx-auto w-full max-w-6xl px-4 md:px-6 py-12 md:py-16" id="features">
+    <div class="mb-8 text-center" data-reveal>
+      <h2 class="!block !text-3xl md:!text-4xl lg:!text-5xl !font-semibold !leading-[0.99] !tracking-[-0.06em] !text-sprout-text [text-wrap:balance]">
+        Less financial guesswork.<br /><span class="text-sprout-primary">More room to grow.</span>
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-sprout-muted">
+        Sprout brings everyday money details together, so patterns are easier to spot and decisions feel more grounded.
+      </p>
+    </div>
+
+    <div class="feature-cards gap-6">
+      <article
+        class="group flex flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl"
+        data-reveal
+      >
+        <div class="aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
+          <div class="relative h-[115%] w-full -top-[15%]">
+            <img
+              class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/high-res/accounts.png"
+              alt="Sprout accounts view showing balances across cash, investments, credit cards, and loans"
+              loading="lazy"
+              data-reveal-image
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1 p-3">
+          <h3 class="text-lg font-semibold tracking-tight text-sprout-text mt-1!">Every account, in one place</h3>
+          <p class="text-sm leading-relaxed text-sprout-muted">Review cash, investments, credit cards, and loans together without jumping between apps.</p>
+        </div>
+      </article>
+
+      <article
+        class="group flex flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl delay-100"
+        data-reveal
+      >
+        <div class="aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
+          <div class="relative h-[115%] w-full -top-[15%]">
+            <img
+              class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/high-res/budget.png"
+              alt="Sprout budget view showing category limits, monthly progress, and historical spending"
+              loading="lazy"
+              data-reveal-image
+              style="object-position: center 23%"
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1 p-3">
+          <h3 class="text-lg font-semibold tracking-tight text-sprout-text mt-1!">A budget that fits your life</h3>
+          <p class="text-sm leading-relaxed text-sprout-muted">Set category limits, track progress through the month, and compare spending over time.</p>
+        </div>
+      </article>
+
+      <article
+        class="group flex flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl delay-200"
+        data-reveal
+      >
+        <div class="aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
+          <div class="relative h-[115%] w-full -top-[40%]">
+            <img
+              class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/high-res/chat.png"
+              alt="Sprout AI assistant answering a question about personal finances"
+              loading="lazy"
+              data-reveal-image
+              style="object-position: center 36%"
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1 p-3">
+          <h3 class="text-lg font-semibold tracking-tight text-sprout-text mt-1!">Get answers in plain language</h3>
+          <p class="text-sm leading-relaxed text-sprout-muted">When AI chat is enabled, ask natural-language questions about your spending and accounts.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="mt-8 flex flex-wrap justify-center gap-4" data-enter>
+      <a
+        class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-sprout-primary/50 bg-sprout-surface/80 px-6 text-sm font-bold !text-sprout-text transition duration-200 hover:-translate-y-1 hover:border-sprout-primary hover:bg-sprout-primary/15 hover:!text-sprout-text"
+        href="/features/"
+        >Discover all features</a
+      >
+    </div>
+
+    <div class="mt-8 flex justify-center" data-reveal></div>
+  </section>
+
+  <section class="mx-auto w-full max-w-6xl px-4 md:px-6 pt-12 pb-6 md:pt-16 md:pb-8" id="privacy">
+    <div
+      class="grid w-full grid-cols-1 gap-8 overflow-hidden rounded-2xl border border-sprout-primary/30 bg-sprout-primary-container p-6 shadow-xl shadow-sprout-secondary/10 md:grid-cols-[0.92fr_1.08fr] md:gap-10 md:p-6 pt-0!"
+    >
+      <div class="flex flex-col justify-center md:-translate-y-2" data-reveal>
+        <h2 class="!block !text-3xl md:!text-4xl lg:!text-5xl !font-semibold !leading-[1.02] !tracking-[-0.06em] !text-sprout-text [text-wrap:balance]">
+          <span class="text-sprout-text">Your money.</span><br /><span class="text-sprout-text">Your server.</span><br /><span class="text-sprout-primary"
+            >Your call.</span
+          >
+        </h2>
+        <p class="mt-4 max-w-md text-sm leading-relaxed text-sprout-muted">
+          Sprout is designed for people who want useful financial insights without handing complete control of their data to another hosted service.
+        </p>
+        <a class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sprout-secondary-container hover:text-sprout-primary" href="/privacy-policy/">
+          Read our privacy policy <span aria-hidden="true">→</span>
+        </a>
+      </div>
+      <ul class="!m-0 !flex !flex-col !items-center !justify-center !list-none !gap-y-3 !p-0" data-reveal>
+        <li
+          class="!m-0 w-full max-w-xl flex items-center gap-3 rounded-xl border border-sprout-primary/20 bg-sprout-bg/45 p-2! text-sm leading-relaxed text-sprout-text"
+        >
+          <span
+            class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-sprout-primary/15 text-xs font-semibold text-sprout-secondary-container"
+            aria-hidden="true"
+            >✓</span
+          >
+          <span>Self-host Sprout and keep your financial data in your environment.</span>
+        </li>
+        <li
+          class="!m-0 w-full max-w-xl flex items-center gap-3 rounded-xl border border-sprout-primary/20 bg-sprout-bg/45 p-2! text-sm leading-relaxed text-sprout-text"
+        >
+          <span
+            class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-sprout-primary/15 text-xs font-semibold text-sprout-secondary-container"
+            aria-hidden="true"
+            >✓</span
+          >
+          <span>Bank account authentication credentials are not stored by Sprout.</span>
+        </li>
+        <li
+          class="!m-0 w-full max-w-xl flex items-center gap-3 rounded-xl border border-sprout-primary/20 bg-sprout-bg/45 p-2! text-sm leading-relaxed text-sprout-text"
+        >
+          <span
+            class="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-sprout-primary/15 text-xs font-semibold text-sprout-secondary-container"
+            aria-hidden="true"
+            >✓</span
+          >
+          <span>Inspect, run, and contribute to the open-source project.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="mx-auto w-full max-w-6xl px-4 md:px-6 pt-4 pb-8 md:pt-6 md:pb-10 text-center pb-24!">
+    <h2 class="!block !text-3xl md:!text-4xl lg:!text-5xl !font-semibold !leading-[0.99] !tracking-[-0.06em] !text-sprout-text [text-wrap:balance]" data-reveal>
+      Grow your<span class="text-sprout-primary"> financial future.</span>
+    </h2>
+    <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-sprout-muted" data-reveal>
+      Take a look around the demo, or follow the setup guide to run Sprout yourself.
+    </p>
+    <div class="mt-6 flex flex-wrap justify-center gap-4" data-reveal>
+      <a
+        class="inline-flex min-h-12 items-center gap-2 rounded-xl bg-sprout-secondary-container px-6 text-sm font-bold !text-black shadow-lg shadow-sprout-primary/15 transition duration-200 hover:-translate-y-1 hover:bg-white hover:!text-black hover:shadow-xl hover:shadow-sprout-primary/25"
+        href="https://demo.sprout.croudebush.net"
+      >
+        <svg
+          class="h-5 w-5 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4M10 8l5 3-5 3z" />
+        </svg>
+        Try the demo</a
+      >
+      <a
+        class="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sprout-primary/50 bg-sprout-surface/80 px-6 text-sm font-bold !text-sprout-text transition duration-200 hover:-translate-y-1 hover:border-sprout-primary hover:bg-sprout-primary/15 hover:!text-sprout-text"
+        href="/getting-started/installation/"
+      >
+        <svg
+          class="h-5 w-5 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6M8 13h8M8 17h8" />
+        </svg>
+        Read the installation guide</a
+      >
+    </div>
+  </section>
+
+  <footer class="border-t border-sprout-secondary/30 bg-sprout-surface/50">
+    <div class="mx-auto flex min-h-24 w-full max-w-6xl px-4 md:px-6 py-6 flex-wrap items-center justify-between gap-5 text-sm text-sprout-muted">
+      <a class="inline-flex items-center gap-2 !text-sprout-text hover:!text-sprout-text" href="/" aria-label="Sprout home"
+        ><img class="h-7 w-7" src="/assets/favicon-bg.svg" alt="" /><span class="font-sprout text-lg">Sprout</span></a
+      >
+      <div class="flex flex-wrap gap-x-6 gap-y-3">
+        <a class="transition-colors hover:text-sprout-secondary-container" href="/features/">Features</a>
+        <a class="transition-colors hover:text-sprout-secondary-container" href="/getting-started/">Documentation</a>
+        <a class="transition-colors hover:text-sprout-secondary-container" href="/privacy-policy/">Privacy</a>
+        <a class="transition-colors hover:text-sprout-secondary-container" href="https://github.com/cameronroudebush/sprout">GitHub</a>
+      </div>
+      <span class="font-sprout text-[13px]">Grow your financial future.</span>
+    </div>
+  </footer>
+</div>
