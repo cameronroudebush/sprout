@@ -20,6 +20,7 @@ describe("PlaidProviderController", () => {
     plaidService = {
       generateLinkToken: vi.fn(),
       exchangeAndCreateAccounts: vi.fn(),
+      cleanupUntrackedItem: vi.fn(),
     } as any;
 
     sseService = {
@@ -66,6 +67,14 @@ describe("PlaidProviderController", () => {
       plaidService.exchangeAndCreateAccounts.mockRejectedValue(new Error("Exchange failed"));
 
       await expect(controller.exchangeAndLink(user, { publicToken: "bad-tok", metadata: {} as any })).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe("cleanupUntrackedItem", () => {
+    it("should pass the access token to the provider service", async () => {
+      await controller.cleanupUntrackedItem(user, "access-token");
+
+      expect(plaidService.cleanupUntrackedItem).toHaveBeenCalledWith(user, "access-token");
     });
   });
 });

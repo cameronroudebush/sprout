@@ -785,6 +785,47 @@
         "tags": ["Provider"]
       }
     },
+    "/provider/plaid/cleanup": {
+      "post": {
+        "description": "Remove an untracked Plaid item given the access token. Intended to clean up lost tokens. Only works in dev mode.",
+        "operationId": "PlaidProviderController_cleanupUntrackedItem",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accessToken": {
+                    "type": "string"
+                  }
+                },
+                "required": ["accessToken"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an untracked Plaid item.",
+        "tags": ["Provider"]
+      }
+    },
     "/webhooks/plaid": {
       "post": {
         "description": "Used to listen for responses from plaid to trigger automatic account syncs. This allows out-of-band syncing, not requiring a job to perform the update.",

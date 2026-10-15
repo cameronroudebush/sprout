@@ -62,4 +62,15 @@ export class PlaidProviderController {
       throw new InternalServerErrorException("An error occurred while linking your accounts.");
     }
   }
+
+  @Post("cleanup")
+  @EnabledGuard.attach(Configuration.isDevBuild)
+  @ApiOperation({
+    summary: "Remove an untracked Plaid item.",
+    description: "Remove an untracked Plaid item given the access token. Intended to clean up lost tokens. Only works in dev mode.",
+  })
+  @ApiBody({ schema: { type: "object", properties: { accessToken: { type: "string" } }, required: ["accessToken"] } })
+  async cleanupUntrackedItem(@CurrentUser() user: User, @Body("accessToken") accessToken: string): Promise<void> {
+    await this.plaidProviderService.cleanupUntrackedItem(user, accessToken);
+  }
 }

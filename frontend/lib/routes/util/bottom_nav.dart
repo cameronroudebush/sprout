@@ -75,7 +75,12 @@ class SproutBottomNav extends ConsumerWidget {
 
     // If no primary match, check if it's a "More" route to highlight the Menu (last index)
     if (!hasMatch) {
-      final isOverflowRoute = filteredRoutes.any(
+      final isOverflowRoute = getFilteredRoutes(
+        unsecureConfig,
+        apiConfig,
+        userConfig,
+        restrictToSidebar: false,
+      ).any(
         (r) => !visibleRoutes.contains(r) && isRouteMatch(r.path, currentPath),
       );
       if (isOverflowRoute) {

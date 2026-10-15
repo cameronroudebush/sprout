@@ -12,7 +12,7 @@ import { PlaidAuthContext, PlaidProviderService, PlaidSyncMetadata } from "@back
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { User } from "@backend/user/model/user.model.js";
-import { InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { format } from "date-fns";
 import { AccountBase as PlaidAccount, AccountType as PlaidAccountType } from "plaid";
 
@@ -69,6 +69,64 @@ describe("PlaidProviderService", () => {
         Configuration.providers.plaid.clientId = originalClientId;
         Configuration.providers.plaid.secret = originalSecret;
       }
+    });
+  });
+
+  describe("cleanupUntrackedItem", () => {
+    it("should reject an empty access token", async () => {
+      const findSpy = vi.spyOn(PlaidInstitutionAsset, "find");
+
+      await expect(service.cleanupUntrackedItem(user, " ")).rejects.toThrow(BadRequestException);
+      expect(findSpy).not.toHaveBeenCalled();
+    });
+
+    it("should remove an item when its access token is not stored", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([]);
+
+      await service.cleanupUntrackedItem(user, "untracked-token");
+
+      expect(service.plaidClient.itemRemove).toHaveBeenCalledWith({ access_token: "untracked-token" });
+    });
+
+    it("should not remove an item when its access token is stored", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([{ accessToken: "stored-token" }] as PlaidInstitutionAsset[]);
+
+      await expect(service.cleanupUntrackedItem(user, "stored-token")).rejects.toThrow(BadRequestException);
+      expect(service.plaidClient.itemRemove).not.toHaveBeenCalled();
+    });
+
+    it("should translate Plaid client errors into a concise bad request", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([]);
+      service.plaidClient.itemRemove = vi.fn().mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 400, data: { error_code: "INVALID_ACCESS_TOKEN", error_message: "Detailed Plaid error response" } },
+      });
+
+      await expect(service.cleanupUntrackedItem(user, "invalid-token")).rejects.toThrow("Plaid rejected request (INVALID_ACCESS_TOKEN).");
+    });
+
+    it("should handle Plaid 400 errors without an error code", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([]);
+      service.plaidClient.itemRemove = vi.fn().mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 400, data: { error_message: "Detailed Plaid error response" } },
+      });
+
+      await expect(service.cleanupUntrackedItem(user, "invalid-token")).rejects.toThrow("Plaid rejected the request.");
+    });
+
+    it("should preserve HTTP exceptions raised during removal", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([]);
+      vi.spyOn(ProviderRateLimit.prototype, "incrementOrError").mockRejectedValue(new BadRequestException("Rate limit exceeded"));
+
+      await expect(service.cleanupUntrackedItem(user, "token")).rejects.toThrow("Rate limit exceeded");
+    });
+
+    it("should translate unexpected Plaid errors into a concise internal error", async () => {
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([]);
+      service.plaidClient.itemRemove = vi.fn().mockRejectedValue(new Error("Detailed internal error"));
+
+      await expect(service.cleanupUntrackedItem(user, "token")).rejects.toThrow("Failed to remove Plaid item.");
     });
   });
 

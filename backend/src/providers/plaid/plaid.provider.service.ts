@@ -12,7 +12,7 @@ import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, HttpException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { AxiosError } from "axios";
 import { format, isToday, parseISO, set, subDays } from "date-fns";
 import {
@@ -259,8 +259,12 @@ export class PlaidProviderService extends ProviderBase<
   }
 
   protected override async performUnlink(user: User, asset: PlaidInstitutionAsset): Promise<void> {
+    await this.removePlaidItem(user, asset.accessToken);
+  }
+
+  private async removePlaidItem(user: User, accessToken: string): Promise<void> {
     await this.rateLimit(user).incrementOrError();
-    await this.plaidClient.itemRemove({ access_token: asset.accessToken });
+    await this.plaidClient.itemRemove({ access_token: accessToken });
   }
 
   protected override async handleSyncError(asset: PlaidInstitutionAsset, error: unknown): Promise<void> {
@@ -490,5 +494,30 @@ export class PlaidProviderService extends ProviderBase<
     }
 
     return { successCount, failureCount };
+  }
+
+  /** Removes a Plaid item only when its access token is not tracked in Sprout. */
+  async cleanupUntrackedItem(user: User, accessToken: string): Promise<void> {
+    if (typeof accessToken !== "string" || !accessToken.trim()) throw new BadRequestException("A valid Plaid access token is required.");
+    this.checkPlaidClient();
+
+    const assets = await PlaidInstitutionAsset.find({ select: { accessToken: true } });
+    if (assets.some((asset) => asset.accessToken === accessToken)) {
+      throw new BadRequestException("Cannot remove a Plaid item that is linked in Sprout.");
+    }
+
+    try {
+      await this.removePlaidItem(user, accessToken);
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      const axiosError = error as AxiosError | null;
+      const plaidError = axiosError?.response?.data as PlaidError | undefined;
+      if (axiosError?.isAxiosError && axiosError.response?.status === 400) {
+        throw new BadRequestException(plaidError?.error_code ? `Plaid rejected request (${plaidError.error_code}).` : "Plaid rejected the request.");
+      }
+
+      throw new InternalServerErrorException("Failed to remove Plaid item.");
+    }
   }
 }
