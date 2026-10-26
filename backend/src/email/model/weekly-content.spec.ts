@@ -20,12 +20,21 @@ describe("WeeklyEmailContent", () => {
 
     const content = new WeeklyEmailContent(user, 10000, 200, 1500, 1, [tx]);
 
-    expect(content.user).toBe(user.username);
+    expect(content.user).toBe(user.firstName);
     expect(content.totalNetWorthText).toBe("$10,000.00");
     expect(content.transactions).toHaveLength(1);
     expect(content.transactions[0]!.amountText).toBe("-$50.00");
     expect(content.transactions[0]!.description).toBe("Very long ...");
     expect(content.transactions[0]!.category).toBe("Food");
+  });
+
+  it("should fall back to the username when the first name is unavailable", () => {
+    const userWithoutFirstName = TestEntities.user;
+    userWithoutFirstName.firstName = undefined;
+
+    const content = new WeeklyEmailContent(userWithoutFirstName, 5000, 100, 0, 0, []);
+
+    expect(content.user).toBe(userWithoutFirstName.username);
   });
 
   it("should handle transactions without description or category", () => {

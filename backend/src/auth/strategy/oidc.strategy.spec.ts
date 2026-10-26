@@ -93,6 +93,37 @@ describe("OIDCStrategy", () => {
       expect(result).toBe(mockDbUser);
     });
 
+    it("should synchronize names from the OIDC profile for an existing user", async () => {
+      const mockProfileIntrospect = {
+        issuer: "https://identity.provider.local",
+        authorizedParty: "app-client-id",
+        isExpired: false,
+        checkIssuedState: vi.fn(),
+      } as any;
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+
+      authService.getCookie.mockReturnValue("valid-cookie-access-token");
+      cacheManager.get.mockResolvedValue({
+        sub: "user-uuid",
+        preferred_username: "john_doe",
+        email: "john@domain.local",
+        given_name: "John",
+        family_name: "Doe",
+      });
+
+      const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe" });
+      vi.spyOn(mockDbUser, "update").mockResolvedValue(mockDbUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
+
+      await strategy.validate(mockRequest as Request, tokenPayload);
+
+      expect(mockDbUser.firstName).toBe("John");
+      expect(mockDbUser.lastName).toBe("Doe");
+      expect(mockDbUser.update).toHaveBeenCalled();
+      expect(mockRequest.setupUser.firstName).toBe("John");
+      expect(mockRequest.setupUser.lastName).toBe("Doe");
+    });
+
     it("should invoke refresh orchestration when token reports expired and successfully recover with updated access credentials", async () => {
       const mockProfileIntrospect = {
         issuer: "https://identity.provider.local",

@@ -51,7 +51,7 @@ export class WeeklyEmailContent {
   transactions: Array<{ description: string; category: string; amount: number; amountText: string; iconUrl?: string | null; pending?: boolean }>;
 
   constructor(user: User, totalNetWorth: number, weeklyExpenses: number, weeklyIncome: number, transactionCount: number, transactions: Array<Transaction>) {
-    this.user = user.username;
+    this.user = user.firstName?.trim() || user.username;
     this.totalNetWorth = totalNetWorth;
     this.totalNetWorthText = CurrencyHelper.format(totalNetWorth, user);
     this.weeklyExpenses = CurrencyHelper.format(weeklyExpenses, user);

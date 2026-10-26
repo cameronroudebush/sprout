@@ -16,7 +16,15 @@ import { firstValueFrom } from "rxjs";
 
 export const OIDCStrategyName = "oidc";
 
-type ProfileData = { sub: string; preferred_username: string; email: string };
+type ProfileData = {
+  sub: string;
+  preferred_username: string;
+  email: string;
+  given_name?: string;
+  family_name?: string;
+  firstName?: string;
+  lastName?: string;
+};
 
 @Injectable()
 export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
@@ -74,10 +82,19 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
     if (!profileData?.preferred_username) throw new UnauthorizedException("Could not determine username from token.");
     // Find user based on our profile data
     const user = await User.findOne({ where: { id: profileData.sub } });
+    const firstName = profileData.given_name ?? profileData.firstName;
+    const lastName = profileData.family_name ?? profileData.lastName;
     // Set request context for any data we have for setup of new users
-    (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username, profileData.email);
+    (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username, profileData.email, firstName, lastName);
     // No user? Probably should fail then
     if (!user) throw new UnauthorizedException(`User ${profileData.preferred_username} not found`);
+
+    // Keep the local profile synchronized with the identity provider.
+    if (user.firstName !== firstName || user.lastName !== lastName) {
+      user.firstName = firstName;
+      user.lastName = lastName;
+      await user.update();
+    }
     return user;
   }
 

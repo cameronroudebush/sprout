@@ -41,7 +41,7 @@ class SproutMoreSheet extends ConsumerWidget {
     final moreRoutes = candidateRoutes.skip(3).toList();
 
     return SproutBaseDialogWidget(
-      "${getGreeting()} ${user?.username ?? 'User'}!",
+      "${getGreeting()} ${user?.firstName?.trim().isNotEmpty == true ? user!.firstName : user?.username ?? 'User'}!",
       titleStyle: theme.textTheme.headlineSmall,
       child: Column(
         mainAxisSize: MainAxisSize.min,
