@@ -108,8 +108,7 @@ class WidgetSync extends _$WidgetSync {
     if (userConfig != null && userConfig.allowWidgets) {
       try {
         final netWorth = ref.read(totalNetWorthProvider).value;
-        final transactions =
-            ref
+        final transactions = ref
                 .read(transactionsProvider(TransactionFilter.defaultFilter))
                 .value
                 ?.transactions ??
@@ -154,8 +153,8 @@ class WidgetSync extends _$WidgetSync {
             }
             final fallbackIconData =
                 CategoryIcon.iconLibrary[category?.iconName] ??
-                CategoryIcon.iconLibrary[category?.icon] ??
-                Icons.question_mark_rounded;
+                    CategoryIcon.iconLibrary[category?.icon] ??
+                    Icons.question_mark_rounded;
             final iconBase64 = await WidgetImageUtility.getSquircleBase64(
               imageUrl: resolvedIconUrl,
               fallbackIcon: fallbackIconData,
@@ -214,15 +213,14 @@ class WidgetSync extends _$WidgetSync {
         "bgColor": theme.appBarTheme.backgroundColor!.toHex(),
         "cardColor": theme.cardColor.toHex(),
         "txtColor": (theme.textTheme.bodyLarge?.color ?? Colors.white).toHex(),
-        "txtColorMuted": (theme.textTheme.bodySmall?.color ?? Colors.grey)
-            .toHex(),
+        "txtColorMuted":
+            (theme.textTheme.bodySmall?.color ?? Colors.grey).toHex(),
         "primaryColor": theme.primaryColor.toHex(),
         "accentColor": theme.colorScheme.secondary.toHex(),
-        "statusColor":
-            (pastNetWorthChange != null && pastNetWorthChange >= 0
-                    ? Colors.greenAccent
-                    : theme.colorScheme.error)
-                .toHex(),
+        "statusColor": (pastNetWorthChange != null && pastNetWorthChange >= 0
+                ? Colors.greenAccent
+                : theme.colorScheme.error)
+            .toHex(),
         "dividerColor": theme.dividerColor.toHex(),
       },
     };
