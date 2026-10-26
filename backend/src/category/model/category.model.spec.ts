@@ -3,6 +3,7 @@ setupTests();
 
 import { Category } from "@backend/category/model/category.model.js";
 import { TestEntities } from "@backend/test/entities.js";
+import { instanceToPlain } from "class-transformer";
 
 describe("Category Model", () => {
   const user = TestEntities.user;
@@ -23,6 +24,13 @@ describe("Category Model", () => {
     expect(categories.length).toBeGreaterThan(0);
     expect(categories[0].name).toBe("Food & Drink");
     expect(categories[1].name).toBe("Groceries");
+  });
+
+  it("should resolve the icon name only when serialized for the API", () => {
+    const category = new Category(user, "Food & Drink", undefined, "food_drink");
+
+    expect(category.iconName).toBeUndefined();
+    expect(instanceToPlain(category)).toMatchObject({ iconName: "food_drink" });
   });
 
   it("should get unknown category", async () => {

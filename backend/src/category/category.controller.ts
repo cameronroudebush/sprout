@@ -107,7 +107,8 @@ export class CategoryController {
     });
     if (similarCategories.length > 0) throw new ConflictException("A similar category already exists.");
     category.name = category.name.trim();
-    return await category.insert();
+    await category.insert();
+    return category;
   }
 
   @Delete(":id")

@@ -1,4 +1,5 @@
 import { Configuration } from "@backend/config/core";
+import { CategoryIcon } from "@backend/category/model/category-icon";
 import { TimeZone } from "@backend/config/model/tz";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Utility } from "@backend/core/model/utility/utility";
@@ -102,7 +103,7 @@ export class WeeklyEmailContent {
         category: x.category?.name ?? "",
         amount: x.amount,
         amountText: CurrencyHelper.format(x.amount, user),
-        iconUrl: Configuration.server.brandFetch.getWebsiteIconUrl(x.extra?.website),
+        iconUrl: Configuration.server.brandFetch.getWebsiteIconUrl(x.extra?.website) ?? CategoryIcon.getUrl(x.category?.icon),
       };
     });
   }

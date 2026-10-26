@@ -166,12 +166,16 @@ class CategoryIcon extends LogoBaseWidget<Category?> {
 
   /// Attempts to load the icon from the library, else defaults to the question mark icon
   IconData _getIconForCategory(Category? category) {
-    return iconLibrary[category?.icon] ?? Icons.question_mark_rounded;
+    return iconLibrary[category?.iconName] ?? iconLibrary[category?.icon] ??
+        Icons.question_mark_rounded;
   }
 
   @override
   ProviderListenable<AsyncValue<List<String>>> getProvider(
-      BuildContext context, Category? data, double size) {
+    BuildContext context,
+    Category? data,
+    double size,
+  ) {
     // Categories do not fetch remote network URLs; return an empty list data provider
     return Provider((_) => const AsyncValue.data([]));
   }

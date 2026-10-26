@@ -17,6 +17,7 @@ class Category {
     required this.name,
     this.parentCategoryId,
     this.icon,
+    this.iconName,
     this.excludeFromCashFlow = false,
     this.increasedSubVariance = false,
   });
@@ -43,6 +44,9 @@ class Category {
   ///
   String? icon;
 
+  /// The resolved category icon key for this category.
+  String? iconName;
+
   /// If true, drops this category from the cash flow calculation engine entirely. Use this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.
   bool excludeFromCashFlow;
 
@@ -57,6 +61,7 @@ class Category {
           other.name == name &&
           other.parentCategoryId == parentCategoryId &&
           other.icon == icon &&
+          other.iconName == iconName &&
           other.excludeFromCashFlow == excludeFromCashFlow &&
           other.increasedSubVariance == increasedSubVariance;
 
@@ -67,12 +72,13 @@ class Category {
       (name.hashCode) +
       (parentCategoryId == null ? 0 : parentCategoryId!.hashCode) +
       (icon == null ? 0 : icon!.hashCode) +
+      (iconName == null ? 0 : iconName!.hashCode) +
       (excludeFromCashFlow.hashCode) +
       (increasedSubVariance.hashCode);
 
   @override
   String toString() =>
-      'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, excludeFromCashFlow=$excludeFromCashFlow, increasedSubVariance=$increasedSubVariance]';
+      'Category[id=$id, name=$name, parentCategoryId=$parentCategoryId, icon=$icon, iconName=$iconName, excludeFromCashFlow=$excludeFromCashFlow, increasedSubVariance=$increasedSubVariance]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -87,6 +93,11 @@ class Category {
       json[r'icon'] = this.icon;
     } else {
       json[r'icon'] = null;
+    }
+    if (this.iconName != null) {
+      json[r'iconName'] = this.iconName;
+    } else {
+      json[r'iconName'] = null;
     }
     json[r'excludeFromCashFlow'] = this.excludeFromCashFlow;
     json[r'increasedSubVariance'] = this.increasedSubVariance;
@@ -128,6 +139,7 @@ class Category {
         name: mapValueOfType<String>(json, r'name')!,
         parentCategoryId: mapValueOfType<String>(json, r'parentCategoryId'),
         icon: mapValueOfType<String>(json, r'icon'),
+        iconName: mapValueOfType<String>(json, r'iconName'),
         excludeFromCashFlow:
             mapValueOfType<bool>(json, r'excludeFromCashFlow')!,
         increasedSubVariance:

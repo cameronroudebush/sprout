@@ -1,8 +1,9 @@
+import { CategoryIcon } from "@backend/category/model/category-icon";
 import { DatabaseDecorators } from "@backend/database/decorators";
 import { DatabaseBase } from "@backend/database/model/database.base";
 import type { User } from "@backend/user/model/user.model";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { Exclude } from "class-transformer";
+import { Exclude, Transform } from "class-transformer";
 import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { startCase } from "lodash-es";
 import { JoinColumn, ManyToOne } from "typeorm";
@@ -65,6 +66,11 @@ export class Category extends DatabaseBase {
   @IsOptional()
   @ApiProperty({ required: false })
   parentCategoryId!: string;
+
+  /** The canonical category icon key clients can use to render this category consistently. */
+  @ApiProperty({ readOnly: true, description: "The resolved category icon key for this category." })
+  @Transform(({ obj }) => CategoryIcon.getKey(obj.icon), { toPlainOnly: true })
+  iconName?: string;
 
   constructor(user: User, name: string, parentCategory?: Category, icon?: string, excludeFromCashFlow = false, increasedSubVariance = false) {
     super();
