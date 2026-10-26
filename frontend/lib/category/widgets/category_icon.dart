@@ -166,7 +166,8 @@ class CategoryIcon extends LogoBaseWidget<Category?> {
 
   /// Attempts to load the icon from the library, else defaults to the question mark icon
   IconData _getIconForCategory(Category? category) {
-    return iconLibrary[category?.iconName] ?? iconLibrary[category?.icon] ??
+    return iconLibrary[category?.iconName] ??
+        iconLibrary[category?.icon] ??
         Icons.question_mark_rounded;
   }
 
