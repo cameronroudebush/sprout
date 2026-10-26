@@ -127,15 +127,11 @@ class TransactionsRemoteViewsFactory(private val context: Context) :
     override fun onDestroy() {}
 
     override fun getItemId(position: Int): Long {
-        val item = transactions.optJSONObject(position)
-        val id = item?.optString("id")
-        return if (!id.isNullOrEmpty()) {
-            id.hashCode().toLong()
-        } else {
-            position.toLong()
-        }
+        return position.toLong()
     }
     
-    override fun hasStableIds(): Boolean = true
+    // Row contents, including icons, can change while the transaction remains
+    // the same item. Force launchers to rebuild rows after a dataset refresh.
+    override fun hasStableIds(): Boolean = false
     override fun getLoadingView(): RemoteViews? = null
 }
